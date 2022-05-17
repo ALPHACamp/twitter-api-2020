@@ -7,17 +7,24 @@ const imgurFileHandler = require('../helpers/file-helper')
 const userController = {
   register: async (req, res, next) => {
     try {
-      if (req.body.password !== req.body.checkPassword) throw new Error('密碼與確認密碼不符。')
+      const {name, account, email, password, checkPassword} = req.body
+      if (!name.trim() ||
+          !account.trim() ||
+          !email.trim() ||
+          !password.trim() ||
+          !checkPassword.trim()) throw new Error('所有欄位必填。')
+
+      if (req.body.password.trim() !== req.body.checkPassword.trim()) throw new Error('密碼與確認密碼不符。')
       if (
         await User.findOne({ where: { account: req.body.account }})||
         await User.findOne({ where: { email: req.body.email } })
         ) throw new Error('帳號或 email 已經註冊。')
         
       await User.create({
-        account: req.body.account,
-        name: req.body.name,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10)
+        account,
+        name,
+        email,
+        password: bcrypt.hashSync(password, 10)
       })
       res.status(200).json('註冊成功')
     } catch (err) {
@@ -176,12 +183,13 @@ const userController = {
       const logUser = getUser(req)
 
       const { name, introduction } = req.body
-      let avatar = req.files.avatar || null
-      let coverImage = req.files.cover_image || null
+      let avatar = req.files?.avatar || null
+      let coverImage = req.files?.cover_image || null
 
-      if (!name || !introduction) throw new Error('名字和自我介紹欄位必填。')
-      if (introduction.length > 50) throw new Error('自我介紹字數不可超過 50 字。')
-      
+      if (!name.trim() || !introduction.trim()) throw new Error('名字和自我介紹欄不可為空。')
+      if (introduction.length > 160) throw new Error('自我介紹字數不可超過 50 字。')
+      if (name.length > 50) throw new Error('名字字數不可超過 50 字。')
+
       if (avatar) avatar = await imgurFileHandler(avatar[0])
       if (coverImage) coverImage = await imgurFileHandler(coverImage[0])
 
@@ -201,6 +209,14 @@ const userController = {
     try {
       const { name, account, email, password, checkPassword } = req.body
       const user = getUser(req)
+
+      if (!name.trim() ||
+        !account.trim() ||
+        !email.trim() ||
+        !password.trim() ||
+        !checkPassword.trim()) throw new Error('所有欄位必填。')
+
+      if (req.body.password.trim() !== req.body.checkPassword.trim()) throw new Error('密碼與確認密碼不符。')
 
       if (!account) throw new Error('帳號不可空白。')
       if (await User.findOne({ where:{ account } })) throw new Error('此帳號已經存在。')
