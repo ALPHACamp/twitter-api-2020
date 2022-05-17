@@ -135,7 +135,7 @@ const tweetController = {
           TweetId
         })
       })
-      .then(() => res.status(200).json({ message: '已成功Like這篇推文！' }))
+      .then(like => res.status(200).json({ message: '已成功Like這篇推文！', like }))
       .catch(err => next(err))
   },
 
