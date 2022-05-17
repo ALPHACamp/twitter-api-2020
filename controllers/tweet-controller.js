@@ -16,8 +16,9 @@ const tweetController = {
     try {
       const user = helpers.getUser(req)
       const description = req.body.description
+      const blank = (new Set(description))
       if (description.length > 140) throw new Error('字數超過 140')
-      if (new Set(description) === ' ') throw new Error('推文內容不可空白')
+      if (blank.has(' ') || !description.length) throw new Error('推文內容不可空白')
       await Tweet.create({
         UserId: user.id,
         description

@@ -9,9 +9,8 @@ const replyController = {
       const user = helpers.getUser(req)
       const tweetId = req.params.tweet_id
       const comment = req.body.comment
-      if (comment.length) throw new Error('回覆內容不可空白')
-      if (new Set(comment) === ' ') throw new Error('回覆內容不可空白')
-
+      const blank = new Set(comment)
+      if (!comment.length || blank.has(' ')) throw new Error('回覆內容不可空白')
       await Reply.create({
         comment,
         UserId: user.id,
