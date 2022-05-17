@@ -52,7 +52,7 @@ const tweetController = {
       // catch tweet's author
       const tweetData = await Tweet.findByPk(tweetId, {
         attributes: [
-          'id', 'description', 'UserId',
+          'id', 'description', 'UserId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
             'likeCount'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
@@ -88,7 +88,7 @@ const tweetController = {
       const userId = helpers.getUser(req).id
       const description = req.body.description
 
-      if (!description) throw new Error('不可以提交空白的推文。')
+      if (!description.trim()) throw new Error('不可以提交空白的推文。')
       if (description.length > 140) throw new Error('不可以提交字數過長的推文。')
 
       const rawTweets = await Tweet.create({
@@ -186,7 +186,7 @@ const tweetController = {
       const tweetId = req.params.id
       const comment = req.body.comment
 
-      if (!comment) throw new Error('不可以提交空白的留言。')
+      if (!comment.trim()) throw new Error('不可以提交空白的留言。')
 
       const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) throw new Error('想要回覆的推文不存在。')
@@ -204,7 +204,7 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
-  }
+  },
 }
 
 module.exports = tweetController

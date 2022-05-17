@@ -5,7 +5,7 @@ const adminController = {
     try {
       const user = await User.findAll({
         attributes: [
-          'name', 'account', 'avatar',
+          'name', 'account', 'avatar', 'cover_image',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Tweets WHERE Tweets.User_id = User.id)'),
             'tweetCount'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.User_id = User.id)'),
@@ -32,7 +32,9 @@ const adminController = {
         attributes: [
           'id', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
-            'likeCount']
+            'likeCount'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
+            'replyCount']
         ],
         include: [
           {
