@@ -4,21 +4,25 @@ const replyLikeService = require('../services/replyLikes')
 const sequelize = require('sequelize')
 
 const replyController = {
-  create: async (req, res) => {
+  create: async (req, res, next) => {
     try {
       const user = helpers.getUser(req)
       const tweetId = req.params.tweet_id
+      const comment = req.body.comment
+      if (comment.length) throw new Error('回覆內容不可空白')
+      if (new Set(comment) === ' ') throw new Error('回覆內容不可空白')
+
       await Reply.create({
-        comment: req.body.comment,
+        comment,
         UserId: user.id,
         TweetId: tweetId
       })
       res.sendStatus(200)
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   },
-  getAll: async (req, res) => {
+  getAll: async (req, res, next) => {
     try {
       const TweetId = req.params.tweet_id
       const rawReply = await Reply.findAll({
@@ -38,6 +42,9 @@ const replyController = {
         nest: true,
         raw: true
       })
+
+      if (!rawReply) throw new Error('該推文沒有回覆')
+
       const replies = rawReply.map(element => ({
         id: element.id,
         comment: element.comment,
@@ -50,10 +57,10 @@ const replyController = {
       }))
       res.status(200).json(replies)
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   },
-  add: async (req, res) => {
+  add: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
       const ReplyId = Number(req.params.id)
@@ -71,10 +78,10 @@ const replyController = {
       const replyLikesNum = await replyLikeService.count(ReplyId)
       res.status(200).json(replyLikesNum)
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   },
-  remove: async (req, res) => {
+  remove: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
       const ReplyId = Number(req.params.id)
@@ -94,7 +101,7 @@ const replyController = {
       const replyLikesNum = await replyLikeService.count(ReplyId)
       res.status(200).json(replyLikesNum)
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   }
 }

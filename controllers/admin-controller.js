@@ -19,7 +19,7 @@ const adminController = {
       next(err)
     }
   },
-  tweets: async (req, res) => {
+  tweets: async (req, res, next) => {
     try {
       const tweets = await tweetServices.getAll()
       if (!(tweets.length)) throw new Error('推文不存在')
@@ -32,10 +32,10 @@ const adminController = {
         data: tweets
       })
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   },
-  users: async (req, res) => {
+  users: async (req, res, next) => {
     try {
       const users = await User.findAll({
         attributes: {
@@ -152,10 +152,10 @@ const adminController = {
       res.status(200)
         .json(users)
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   },
-  deleteTweet: async (req, res) => {
+  deleteTweet: async (req, res, next) => {
     try {
       const TweetId = req.params.id
       await Like.destroy({
@@ -177,7 +177,7 @@ const adminController = {
         status: 'success'
       })
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   }
 }

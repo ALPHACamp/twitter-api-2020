@@ -23,7 +23,6 @@ module.exports = {
       })
       usedPair.push([followerId, followingId])
     }
-    console.log(data)
     await queryInterface.bulkInsert('Followships', data, {})
   },
 
