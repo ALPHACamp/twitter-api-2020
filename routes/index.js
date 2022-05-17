@@ -32,11 +32,8 @@ router.get('/users/:id/likes', authenticated, authenticatedUser, userController.
 // 修改目前登入的使用者設定
 router.put('/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
 
-// 可供目前登入使用者上傳多張圖片的路由
-router.put('/users/:id', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUser)
-
 // 修改目前登入的使用者個人頁面
-router.put('/users/:id', authenticated, authenticatedUser, userController.putUser)
+router.put('/users/:id', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUser)
 
 // 取得指定使用者追隨中的所有使用者 & 取得追隨指定使用者的所有使用者
 router.get('/users/:id/followings', userController.getFollowings)

@@ -176,14 +176,26 @@ const userController = {
 
   putUser: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)
+      const { name, introduction } = req.body
+      const UserId = req.params.id
+      const { files } = req
       const user = await User.findByPk(UserId)
-      const userUpdate = await user.update(req.body)
-      res.status(200).json(userUpdate)
+      const avatarPath = await imgurFileHandler(files?.avatar[0])
+      const coverPath = await imgurFileHandler(files?.cover[0])
+      if (!user) throw new Error('使用者不存在！')
+
+      const updatedUser = await user.update({
+        name,
+        introduction,
+        avatar: avatarPath || user.avatar,
+        cover: coverPath || user.cover
+      })
+      const data = updatedUser.toJSON()
+      delete data.password
+      return res.status(200).json({ message: '成功編輯使用者資料！', updatedUser })
     } catch (err) {
       next(err)
     }
-    res.status(200).json()
   },
 
   getUsersTweets: (req, res, next) => {
