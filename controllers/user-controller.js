@@ -276,7 +276,7 @@ const userController = {
       next(err)
     }
   },
-  getTopUsers: (req, res, next) => {
+  getTopUsers: (req, res, next) => { // 重寫
     try {
       User.findAll({
         include: [{ model: User, as: 'Followers' }],

@@ -49,23 +49,22 @@ const adminController = {
       const tweets = await Tweet.count({
         group: ['User_id']
       })
-
       if (!tweets.length) {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
           users[userIndex].totalTweetCount = 0
         }
-      }
-
-      for (let tweetsIndex = 0; tweetsIndex < tweets.length; tweetsIndex++) {
-        for (let userIndex = 0; userIndex < users.length; userIndex++) {
-          if (users[userIndex].id === tweets[tweetsIndex].User_id) {
-            users[userIndex].totalTweetCount = tweets[tweetsIndex].count
-          } else {
-            if (users[userIndex].totalTweetCount === undefined) users[userIndex].totalTweetCount = 0
+      } else {
+        for (let tweetsIndex = 0; tweetsIndex < tweets.length; tweetsIndex++) {
+          for (let userIndex = 0; userIndex < users.length; userIndex++) {
+            if (users[userIndex].id === tweets[tweetsIndex].User_id) {
+              users[userIndex].totalTweetCount = tweets[tweetsIndex].count
+            } else {
+              if (users[userIndex].totalTweetCount === undefined) users[userIndex].totalTweetCount = 0
+            }
           }
         }
       }
-
+      console.log(users)
       // 使用者 like 總數
       const likes = await Like.count({
         group: ['User_id']
@@ -75,18 +74,17 @@ const adminController = {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
           users[userIndex].totalLikeCount = 0
         }
-      }
-
-      for (let likesIndex = 0; likesIndex < likes.length; likesIndex++) {
-        for (let userIndex = 0; userIndex < likes.length; userIndex++) {
-          if (users[userIndex].id === likes[likesIndex].User_id) {
-            users[userIndex].totalLikeCount = likes[likesIndex].count
-          } else {
-            if (users[userIndex].totalLikeCount === undefined) users[userIndex].totalLikeCount = 0
+      } else {
+        for (let likesIndex = 0; likesIndex < likes.length; likesIndex++) {
+          for (let userIndex = 0; userIndex < likes.length; userIndex++) {
+            if (users[userIndex].id === likes[likesIndex].User_id) {
+              users[userIndex].totalLikeCount = likes[likesIndex].count
+            } else {
+              if (users[userIndex].totalLikeCount === undefined) users[userIndex].totalLikeCount = 0
+            }
           }
         }
       }
-
       // 使用者的跟隨者總數
       const followers = await Followship.count({
         group: ['followerId'],
@@ -97,18 +95,17 @@ const adminController = {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
           users[userIndex].followersCount = 0
         }
-      }
-
-      for (let followerIndex = 0; followerIndex < followers.length; followerIndex++) {
-        for (let userIndex = 0; userIndex < users.length; userIndex++) {
-          if (users[userIndex].id === followers[followerIndex].followerId) {
-            users[userIndex].followersCount = followers[followerIndex].count
-          } else {
-            if (users[userIndex].followersCount === undefined) users[userIndex].followersCount = 0
+      } else {
+        for (let followerIndex = 0; followerIndex < followers.length; followerIndex++) {
+          for (let userIndex = 0; userIndex < users.length; userIndex++) {
+            if (users[userIndex].id === followers[followerIndex].followerId) {
+              users[userIndex].followersCount = followers[followerIndex].count
+            } else {
+              if (users[userIndex].followersCount === undefined) users[userIndex].followersCount = 0
+            }
           }
         }
       }
-
       // 使用者追隨者總數
       const followings = await Followship.count({
         group: ['followingId'],
@@ -119,36 +116,36 @@ const adminController = {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
           users[userIndex].followingsCount = 0
         }
-      }
-
-      for (let followingIndex = 0; followingIndex < followings.length; followingIndex++) {
-        for (let userIndex = 0; userIndex < users.length; userIndex++) {
-          if (users[userIndex].id === followings[followingIndex].followingId) {
-            users[userIndex].followingsCount = followings[followingIndex].count
-          } else {
-            if (users[userIndex].followingsCount === undefined) users[userIndex].followingsCount = 0
-          }
-        }
-      }
-
-      const selectionSort = (arr) => {
-        const length = arr.length
-        for (let index = 0; index < length; index++) {
-          let min = arr[index].totalTweetCount
-          let minIndex = index
-          let secIndex = index
-          for (secIndex; secIndex < length; secIndex++) {
-            if (arr[secIndex].totalTweetCount < min) {
-              min = arr[secIndex].totalTweetCount
-              minIndex = secIndex
+      } else {
+        for (let followingIndex = 0; followingIndex < followings.length; followingIndex++) {
+          for (let userIndex = 0; userIndex < users.length; userIndex++) {
+            if (users[userIndex].id === followings[followingIndex].followingId) {
+              users[userIndex].followingsCount = followings[followingIndex].count
+            } else {
+              if (users[userIndex].followingsCount === undefined) users[userIndex].followingsCount = 0
             }
           }
-          [arr[minIndex], arr[index]] = [arr[secIndex], arr[minIndex]]
         }
-        return arr
       }
-      selectionSort(users).reverse()
-
+      // const selectionSort = (arr) => {
+      //   const length = arr.length
+      //   for (let index = 0; index < length; index++) {
+      //     let min = arr[index].totalTweetCount
+      //     let minIndex = index
+      //     let secIndex = index
+      //     for (secIndex; secIndex < length; secIndex++) {
+      //       if (arr[secIndex].totalTweetCount < min) {
+      //         min = arr[secIndex].totalTweetCount
+      //         minIndex = secIndex
+      //       }
+      //     }
+      //     [arr[minIndex], arr[index]] = [arr[secIndex], arr[minIndex]]
+      //   }
+      //   return arr
+      // }
+      // console.log(users)
+      // selectionSort(users).reverse()
+      console.log(users)
       res.status(200)
         .json(users)
     } catch (err) {

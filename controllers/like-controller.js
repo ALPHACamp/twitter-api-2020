@@ -19,7 +19,10 @@ const likeControler = {
         TweetId
       })
       const likeNum = await likeService.count(TweetId)
-      res.status(200).json(likeNum)
+      const data = {
+        total: likeNum
+      }
+      res.status(200).json(data)
     } catch (err) {
       next(err)
     }
@@ -42,7 +45,10 @@ const likeControler = {
         }
       })
       const likeNum = await likeService.count(TweetId)
-      res.status(200).json(likeNum)
+      const data  = {
+        total: likeNum
+      }
+      res.status(200).json(data)
     } catch (err) {
       next(err)
     }

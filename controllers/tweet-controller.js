@@ -5,7 +5,8 @@ const helpers = require('../_helpers')
 const tweetController = {
   getAll: async (req, res, next) => {
     try {
-      const tweets = await tweetServices.getAll()
+      const UserId = helpers.getUser(req).id
+      const tweets = await tweetServices.getAll(UserId)
       if (!tweets.length) throw new Error('現在沒有推文')
       res.status(200).json(tweets)
     } catch (err) {

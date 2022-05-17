@@ -2,7 +2,7 @@ const { Tweet, User, Like, Reply } = require('../models')
 const sequelize = require('sequelize')
 
 const tweets = {
-  getAll: async () => {
+  getAll: async (UserId) => {
     try {
       const rawTweets = await Tweet.findAll({
         attributes: {
@@ -30,6 +30,30 @@ const tweets = {
         raw: true
       })
 
+      if (UserId) {
+        const userLikesTweet = await Like.findAll({
+          attributes: [
+            'TweetId'
+          ],
+          where: {
+            UserId
+          },
+          raw: true
+        })
+
+        if (!userLikesTweet.length) {
+          rawTweets.forEach(element => {
+            element.userLikesTweet = 0
+          })
+        }
+        userLikesTweet.forEach(likeTweets => {
+          rawTweets.forEach(tweet => {
+            likeTweets.TweetId === tweet.id
+              ? tweet.isLike = true
+              : tweet.isLike = false
+          })
+        })
+      }
       const replies = await Reply.count({
         group: ['Tweet_id'],
         raw: true
@@ -53,7 +77,8 @@ const tweets = {
         description: element.description,
         createdAt: element.createdAt,
         likeCount: element.Likes.likeCounts,
-        replyCount: element.replyCounts
+        replyCount: element.replyCounts,
+        userLikesTweet: element.userLikesTweet
       }))
       return tweets
     } catch (err) {
