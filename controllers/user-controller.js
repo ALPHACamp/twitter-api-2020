@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 
 const { User, Tweet, Followship, Reply, Like } = require('../models')
 
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
@@ -72,7 +72,6 @@ const userController = {
 
   getUser: (req, res, next) => {
     const userId = Number(req.params.id)
-    const reqUserId = getUser(req).id
     return User.findByPk(userId, {
       include: [
         { model: Tweet },
@@ -83,7 +82,6 @@ const userController = {
       .then(user => {
         if (!user || user.role === 'admin') throw new Error('帳號不存在！')
         const { id, account, name, email, introduction, avatar, cover, createdAt } = user
-        const isFollowing = user.Followers.map(f => f.id === reqUserId)
         return res.status(200).json({
           message: '成功取得使用者資料！',
           id,
@@ -96,8 +94,7 @@ const userController = {
           createdAt,
           tweetCount: user.Tweets.length,
           followingCount: user.Followings.length,
-          followerCount: user.Followers.length,
-          isFollowing
+          followerCount: user.Followers.length
         })
       })
       .catch(err => next(err))
@@ -105,7 +102,7 @@ const userController = {
 
   getCurrentUser: (req, res, next) => {
     try {
-      const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(getUser(req))
+      const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(helpers.getUser(req))
       return res.status(200).json({ message: '成功取得目前登入的使用者資料！', userData })
     } catch (err) {
       next(err)
@@ -114,7 +111,7 @@ const userController = {
 
   getTopUsers: (req, res, next) => {
     const userId = Number(req.params.id)
-    const reqUserId = getUser(req).id
+    const reqUserId = helpers.getUser(req).id
     return User.findAll({
       include: { model: User, as: 'Followers' },
       attributes: ['id', 'account', 'name', 'avatar', 'createdAt'],
@@ -143,7 +140,7 @@ const userController = {
   putUserSetting: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     const userId = Number(req.params.id)
-    const reqUserId = getUser(req).id
+    const reqUserId = helpers.getUser(req).id
 
     if (userId !== reqUserId) throw new Error('使用者只能修改自己的資料！')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不符！')
@@ -179,7 +176,7 @@ const userController = {
   putUser: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      const reqUser = getUser(req)
+      const reqUser = helpers.getUser(req).id
 
       const { name, introduction } = req.body
       const { files } = req
@@ -225,7 +222,7 @@ const userController = {
         userOnChecked.update({
           tweetCount: tweets.count
         })
-        const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(l => l.id) : []
+        const likedTweetId = helpers.getUser(req)?.LikedTweets ? helpers.getUser(req).LikedTweets.map(l => l.id) : []
         const tweetList = tweets.rows.map(data => ({
           ...data,
           isLiked: likedTweetId.some(item => item === data.id)
@@ -285,7 +282,7 @@ const userController = {
         userOnChecked.update({
           likeCount: likes.count
         })
-        const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(l => l.id) : []
+        const likedTweetId = helpers.getUser(req)?.LikedTweets ? helpers.getUser(req).LikedTweets.map(l => l.id) : []
         const likeList = likes.rows.map(data => ({
           ...data,
           isLiked: likedTweetId.some(item => item === data.Tweet.id)
@@ -297,7 +294,7 @@ const userController = {
 
   getFollowings: (req, res, next) => {
     const UserId = Number(req.params.id)
-    const reqUserId = Number(getUser(req))
+    const reqUserId = helpers.getUser(req)
     return Promise.all([
       User.findByPk(UserId, {
         include: { model: User, as: 'Followings' }
@@ -329,7 +326,7 @@ const userController = {
 
   getFollowers: (req, res, next) => {
     const UserId = Number(req.params.id)
-    const reqUserId = Number(getUser(req))
+    const reqUserId = helpers.getUser(req)
     return Promise.all([
       User.findByPk(UserId, {
         include: { model: User, as: 'Followers' }
@@ -358,9 +355,10 @@ const userController = {
       })
       .catch(err => next(err))
   },
+
   addFollowing: (req, res, next) => {
     const followingId = Number(req.body.id)
-    const followerId = getUser(req).id
+    const followerId = helpers.getUser(req).id
 
     if (followingId === followerId) throw new Error('不能追蹤自己!')
     return Promise.all([
@@ -388,7 +386,7 @@ const userController = {
 
   removeFollowing: (req, res, next) => {
     const followingId = Number(req.params.id)
-    const followerId = getUser(req).id
+    const followerId = helpers.getUser(req).id
     if (followingId === followerId) throw new Error('不能取消追蹤自己!')
     return Promise.all([
       User.findByPk(followingId),
