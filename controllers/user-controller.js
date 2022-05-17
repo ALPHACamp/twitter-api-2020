@@ -144,15 +144,19 @@ const userController = {
           'followingId', 'createdAt',
           [sequelize.literal(`(SELECT avatar FROM Users WHERE id = following_id)`), 'avatar'],
           [sequelize.literal(`(SELECT name FROM Users WHERE id = following_id)`), 'name'],
-          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = following_id)`), 'introduction'],
-          [sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN true ELSE false END)`), 'isFollowing']
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = following_id)`), 'introduction']
         ],
-        order: [['createdAt', 'DESC'], ['id', 'DESC']],
-        raw: true,
-        nest: true
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!followings.length) throw new Error('沒有追隨者名單。')
-      res.status(200).json(followings)
+      const user = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followings' }]
+      })
+      const result = followings.map(following => ({
+        ...following.toJSON(),
+        isFollowing: user.Followings.some(f => f.id === following.followingId)
+      }))
+      res.status(200).json(result)
     } catch (err) {
       next(err)
     }
@@ -165,15 +169,19 @@ const userController = {
           'followerId', 'createdAt',
           [sequelize.literal(`(SELECT avatar FROM Users WHERE id = follower_id)`), 'avatar'],
           [sequelize.literal(`(SELECT name FROM Users WHERE id = follower_id)`), 'name'],
-          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = follower_id)`), 'introduction'],
-          [sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN true ELSE false END)`), 'isFollowing']
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = follower_id)`), 'introduction']
         ],
-        order: [['createdAt', 'DESC'], ['id', 'DESC']],
-        raw: true,
-        nest: true
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!followers.length) throw new Error('沒有粉絲名單。')
-      res.status(200).json(followers)
+      const user = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followings' }]
+      })
+      const result = followers.map(follower => ({
+        ...follower.toJSON(),
+        isFollowing: user.Followings.some(f => f.id === follower.followingId)
+      }))
+      res.status(200).json(result)
     } catch (err) {
       next(err)
     }
@@ -257,7 +265,7 @@ const userController = {
         limit: 10,
         order: [[sequelize.col('followerCount'), 'DESC']]
       })
-      if (!topUsers) throw new Error('查無資料。')
+      if (!topUsers.length) throw new Error('查無資料。')
 
       const result = topUsers.map(user => ({
         ...user.toJSON(),
