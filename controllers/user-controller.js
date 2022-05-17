@@ -14,8 +14,7 @@ const userController = {
 
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) throw new Error('帳號不存在！')
-        if (user.role === 'admin') throw new Error('帳號不存在！管理者權限無法登入前台！')
+        if (!user || user.role === 'admin') throw new Error('帳號不存在！')
         if (!bcrypt.compareSync(password, user.password)) { throw new Error('密碼錯誤！') }
         const userData = user.toJSON()
         delete userData.password
@@ -23,6 +22,7 @@ const userController = {
           expiresIn: '30d'
         })
         return res.status(200).json({
+          message: '成功登入！',
           token,
           user: userData
         })
@@ -62,6 +62,7 @@ const userController = {
           expiresIn: '30d'
         })
         return res.status(200).json({
+          message: '成功註冊！',
           token,
           user: userData
         })
@@ -80,10 +81,11 @@ const userController = {
       ]
     })
       .then(user => {
-        if (!user || user.role === 'admin') throw new Error('帳號不存在！管理者權限無法登入前台！')
+        if (!user || user.role === 'admin') throw new Error('帳號不存在！')
         const { id, account, name, email, introduction, avatar, cover, createdAt } = user
         const isFollowing = user.Followers.map(f => f.id === reqUserId)
         return res.status(200).json({
+          message: '成功取得使用者資料！',
           id,
           account,
           name,
@@ -103,8 +105,8 @@ const userController = {
 
   getCurrentUser: (req, res, next) => {
     try {
-      const userData = (({ id, account, name, email, avatar, cover, introduction, role }) => ({ id, account, name, email, avatar, cover, introduction, role }))(getUser(req))
-      return res.status(200).json(userData)
+      const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(getUser(req))
+      return res.status(200).json({ message: '成功取得目前登入的使用者資料！', userData })
     } catch (err) {
       next(err)
     }
@@ -133,7 +135,7 @@ const userController = {
           delete r.Followers
         })
 
-        return res.status(200).json(result)
+        return res.status(200).json({ message: '成功取得前十位最多追蹤者的使用者資料！', result })
       })
       .catch(err => next(err))
   },
@@ -170,29 +172,34 @@ const userController = {
           password: hash
         })
       })
-      .then(updatedUser => res.status(200).json({ user: updatedUser }))
+      .then(updatedUser => res.status(200).json({ message: '成功編輯使用者個人資料！', user: updatedUser }))
       .catch(err => next(err))
   },
 
   putUser: async (req, res, next) => {
     try {
-      const { name, introduction } = req.body
       const UserId = req.params.id
-      const { files } = req
-      const user = await User.findByPk(UserId)
-      const avatarPath = await imgurFileHandler(files?.avatar[0])
-      const coverPath = await imgurFileHandler(files?.cover[0])
-      if (!user) throw new Error('使用者不存在！')
+      const reqUser = getUser(req)
 
-      const updatedUser = await user.update({
+      const { name, introduction } = req.body
+      const { files } = req
+      if (!name || !introduction) throw new Error('名字和自介欄位不可空白！')
+      if (name.length > 50) throw new Error('名稱欄位字數上限為 50 個字！')
+      if (introduction.length > 160) throw new Error('自介欄位字數上限為 160 個字！')
+
+      let avatar = files?.avatar || null
+      let cover = files?.cover || null
+      if (avatar) avatar = await imgurFileHandler(avatar[0])
+      if (cover) cover = await imgurFileHandler(cover[0])
+
+      const user = await User.findByPk(UserId)
+      const data = await user.update({
         name,
         introduction,
-        avatar: avatarPath || user.avatar,
-        cover: coverPath || user.cover
+        avatar: avatar || reqUser.avatar,
+        cover: cover || reqUser.cover
       })
-      const data = updatedUser.toJSON()
-      delete data.password
-      return res.status(200).json({ message: '成功編輯使用者資料！', updatedUser })
+      res.status(200).json({ message: '成功編輯使用者資料！', data })
     } catch (err) {
       next(err)
     }
