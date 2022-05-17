@@ -48,7 +48,7 @@ const tweetController = {
       nest: true
     })
       .then(tweet => {
-        if (!tweet) throw new Error('推文不存在！')
+        if (!tweet) throw new Error('這篇推文不存在！')
 
         const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(t => t.id) : []
 
