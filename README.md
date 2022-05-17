@@ -112,5 +112,5 @@ https://pacific-mountain-24114.herokuapp.com/api
 
 ## 開發人員
 
-* Nathan(https://github.com/naivelove0822)
-* Hitomi(https://github.com/HitomiHuang)
+* [Nathan](https://github.com/naivelove0822)
+* [Hitomi](https://github.com/HitomiHuang)
