@@ -13,14 +13,22 @@ module.exports = {
     const likes = []
 
     for (let i = 0; i < users.length; i++) {
-      for (let j = 0; j < 20; j++) {
+      const isLike = []
+      for (let j = 0; j < 20;) {
+        const tweetId = tweets[Math.floor(Math.random() * tweets.length)].id
+        if (isLike.includes(tweetId)) {
+          continue
+        }
+        isLike.push(tweetId)
+
         const like = {
           like_unlike: true,
           created_at: new Date(),
           updated_at: new Date(),
           user_id: users[i].id,
-          tweet_id: tweets[Math.floor(Math.random() * tweets.length)].id
+          tweet_id: tweetId
         }
+        j++
         if (i === 0 || like.tweet_id !== likes[i - 1].tweet_id) likes.push(like)
       }
     }
