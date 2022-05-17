@@ -5,7 +5,7 @@ const followshipController = {
   addFollowing: async (req, res, next) => {
     try {
       // want to follow
-      const followingId = req.body.followingId
+      const followingId = req.body.followerId
       // login user
       const followerId = helpers.getUser(req).id
 
