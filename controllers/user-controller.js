@@ -285,6 +285,17 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  putUserPage: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(getUser(req).id, {
+        attributes: ['id', 'name', 'introduction', 'avatar', 'cover_image']
+      })
+      if (!user) throw new Error('查無使用者')
+      res.status(200).json({ message: '登入中的使用者資料', user })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = userController
