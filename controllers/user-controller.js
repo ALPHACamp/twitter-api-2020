@@ -2,7 +2,6 @@ const createToken = require('../helpers/token')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const { imgurCoverHandler, imgurAvatarHandler } = require('../helpers/file-helpers')
-const tweets = require('../services/tweets')
 
 const userController = {
   login: async (req, res, next) => {
@@ -150,7 +149,7 @@ const userController = {
         nest: true,
         raw: true
       })
-
+      if (!rawUserLikes.length) throw new Error('使用者沒有喜歡的推文')
       const likeTweetId = []
 
       for (let index = 0; index < rawUserLikes.length; index++) {
