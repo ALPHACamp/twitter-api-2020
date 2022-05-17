@@ -10,7 +10,7 @@
       "url": "http://localhost:3000/"
     },
     {
-      "url": "https://localhost:3000/"
+      "url": "https://damp-wave-52946.herokuapp.com/"
     }
   ],
   "tags": [
@@ -61,21 +61,21 @@
                 "type": "object",
                 "properties": {
                   "account": {
-                    "example": "any"
+                    "example": "userAccount"
                   },
                   "email": {
-                    "example": "any"
+                    "example": "userEmail@example.com"
                   },
                   "name": {
-                    "example": "any"
+                    "example": "userName"
                   },
                   "password": {
                     "type": "string",
-                    "example": "any"
+                    "example": "12345678"
                   },
                   "checkPassword": {
                     "type": "string",
-                    "example": "any"
+                    "example": "12345678"
                   }
                 }
               }
