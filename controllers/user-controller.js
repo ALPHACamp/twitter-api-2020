@@ -183,12 +183,13 @@ const userController = {
       const logUser = getUser(req)
 
       const { name, introduction } = req.body
-      let avatar = req.files.avatar || null
-      let coverImage = req.files.cover_image || null
+      let avatar = req.files?.avatar || null
+      let coverImage = req.files?.cover_image || null
 
-      if (!name || !introduction) throw new Error('名字和自我介紹欄位必填。')
-      if (introduction.length > 50) throw new Error('自我介紹字數不可超過 50 字。')
-      
+      if (!name.trim() || !introduction.trim()) throw new Error('名字和自我介紹欄不可為空。')
+      if (introduction.length > 160) throw new Error('自我介紹字數不可超過 50 字。')
+      if (name.length > 50) throw new Error('名字字數不可超過 50 字。')
+
       if (avatar) avatar = await imgurFileHandler(avatar[0])
       if (coverImage) coverImage = await imgurFileHandler(coverImage[0])
 
