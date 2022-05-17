@@ -8,9 +8,7 @@ const helpers = require('../../_helpers')
 const userController = {
   signIn: async (req, res, next) => {
     try {
-      // 登入資料錯誤希望有回傳訊息
       const userData = helpers.getUser(req)?.toJSON()
-
       if (userData.Identity.id === 'admin') {
         userData.is_admin = true
       } else {
@@ -30,6 +28,7 @@ const userController = {
         }
       })
     } catch (err) {
+      if (req.xhr) { return res.json(err) }
       next(err)
     }
   },
@@ -51,8 +50,8 @@ const userController = {
       const token = jwt.sign(registeredUser.toJSON(), process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
-      const rawUserData = await User.findByPk(registeredUser.id)
-      const userData = rawUserData.toJSON()
+      let userData = await User.findByPk(registeredUser.id)
+      userData = userData.toJSON()
       userData.is_admin = false
       delete userData.password
 
@@ -95,29 +94,29 @@ const userController = {
     try {
       const me = helpers.getUser(req)
       if (!me) return new Error('未存取到登入資料')
-      const my = await User.findAll({
+      let my = await User.findAll({
         where: { id: me.id },
         attributes: ['id', 'account', 'name'],
         include: [
           { model: User, as: 'Follower', attributes: ['id'] }
         ]
       })
-      const myData = JSON.parse(JSON.stringify(my))
+      my = JSON.parse(JSON.stringify(my))
 
-      const user = await User.findAll({
+      let user = await User.findAll({
         where: { id: req.params.id },
         attributes: ['id', 'account', 'name', 'email', 'role', 'coverImg', 'avatarImg', 'introduction'],
         include: [
-          { model: User, as: 'Follower', attributes: ['id', 'name', 'account', 'avatarImg', 'introduction'] },
-          { model: User, as: 'Following', attributes: ['id', 'name', 'account', 'avatarImg', 'introduction'] }
+          { model: User, as: 'Follower', attributes: ['id', 'name', 'account', 'role', 'avatarImg', 'introduction'] },
+          { model: User, as: 'Following', attributes: ['id', 'name', 'account', 'role', 'avatarImg', 'introduction'] }
         ],
         nest: true
       })
       if (!user.length) throw new Error('使用者不存在')
 
-      const userData = JSON.parse(JSON.stringify(user))
+      user = JSON.parse(JSON.stringify(user))
 
-      userData[0].is_following = Boolean(
+      user[0].is_following = Boolean(
         await Followship.findOne({
           where: {
             follower_id: me.id,
@@ -126,23 +125,23 @@ const userController = {
         })
       )
 
-      userData[0].Follower = userData[0].Follower.map(record => {
-        const isFollowing = Boolean(myData[0].Follower.find(following => following.id === record.id))
+      user[0].Follower = user[0].Follower.map(record => {
+        const isFollowing = Boolean(my[0].Follower.find(following => following.id === record.id))
         return {
           ...record,
           is_following: isFollowing
         }
       })
 
-      userData[0].Following = userData[0].Following.map(record => {
-        const isFollowing = Boolean(myData[0].Follower.find(following => following.id === record.id))
+      user[0].Following = user[0].Following.map(record => {
+        const isFollowing = Boolean(my[0].Follower.find(following => following.id === record.id))
         return {
           ...record,
           is_following: isFollowing
         }
       })
 
-      return res.status(200).json(...userData)
+      return res.status(200).json(...user)
     } catch (err) {
       next(err)
     }
@@ -156,7 +155,7 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name', 'avatarImg']
+            attributes: ['id', 'account', 'name', 'avatarImg', 'role']
           },
           {
             model: Reply,
@@ -196,7 +195,7 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name', 'avatarImg']
+            attributes: ['id', 'account', 'name', 'avatarImg', 'role']
           },
           {
             model: Tweet,
@@ -204,7 +203,7 @@ const userController = {
             include: [
               {
                 model: User,
-                attributes: ['id', 'account', 'name', 'avatarImg']
+                attributes: ['id', 'account', 'name', 'avatarImg', 'role']
               }
             ]
           }
@@ -228,7 +227,7 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'name', 'account', 'avatar_img', 'cover_img']
+            attributes: ['id', 'name', 'account', 'role', 'avatar_img', 'cover_img']
           },
           {
             model: Tweet,
@@ -236,7 +235,7 @@ const userController = {
             include: [
               {
                 model: User,
-                attributes: ['id', 'name', 'account', 'avatar_img']
+                attributes: ['id', 'name', 'role', 'account', 'avatar_img']
               },
               {
                 model: Reply,
@@ -333,17 +332,18 @@ const userController = {
   editUser: async (req, res, next) => {
     try {
       const { name, introduction } = req.body
-      const { files } = req
       const user = await User.findByPk(req.params.id)
-      const avatarImgUrl = await helpers.imgurFileHandler(files?.avatar_img[0])
-      const coverImgUrl = await helpers.imgurFileHandler(files?.cover_img[0])
       if (!user) throw new Error('沒有找到相關的使用者資料')
+
+      const { files } = req
+      const avatarImg = await helpers.imgurFileHandler(files?.avatar_img?.[0]) || user.avatarImg
+      const coverImg = await helpers.imgurFileHandler(files?.cover_img?.[0]) || user.coverImg
 
       const updatedUser = await user.update({
         name,
         introduction,
-        avatarImg: avatarImgUrl || '',
-        coverImg: coverImgUrl || ''
+        avatarImg,
+        coverImg
       })
       const data = updatedUser.toJSON()
       delete data.password
@@ -382,6 +382,25 @@ const userController = {
         }
       })
       users = users.sort((a, b) => b.follower_count - a.follower_count).slice(0, limit)
+
+      const me = helpers.getUser(req)
+      if (!me) return new Error('未存取到登入資料')
+      const my = await User.findAll({
+        where: { id: me.id },
+        attributes: ['id', 'account', 'name'],
+        include: [
+          { model: User, as: 'Follower', attributes: ['id'] }
+        ]
+      })
+      const myFollowing = JSON.parse(JSON.stringify(my))[0].Follower
+
+      users = users.map(user => {
+        const isFollowing = Boolean(myFollowing.find(following => following.id === user.id))
+        return {
+          ...user,
+          is_following: isFollowing
+        }
+      })
 
       return res.status(200).json(users)
     } catch (err) {

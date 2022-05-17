@@ -1,8 +1,6 @@
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
-// const authenticated = passport.authenticate('jwt', { session: false })
-
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
