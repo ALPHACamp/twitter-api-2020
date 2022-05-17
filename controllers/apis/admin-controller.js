@@ -1,4 +1,4 @@
-const { Identity, User, Tweet, Reply, Like, Followship } = require('../../models')
+const { User, Tweet, Reply, Like, Followship } = require('../../models')
 // const { Sequelize } = require('sequelize')
 // const sequelize = new Sequelize('sqlite::memory:')
 
@@ -6,12 +6,11 @@ const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
-        attributes: ['id', 'account', 'name', 'cover_img', 'avatar_img'],
+        attributes: ['id', 'account', 'name', 'role', 'coverImg', 'avatarImg'],
         where: { role: 'user' },
         raw: true,
         nest: true
       })
-      console.log('===== test =====', users)
 
       for (const user of users) {
         Promise.all([
