@@ -5,6 +5,7 @@ const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 
 router.get('/top', userController.getTopUsers)
+router.get('/setting', userController.getUserSetting)
 router.get('/:id/tweets', userController.getTweets)
 router.get('/:id/replied_tweets', userController.getRepliedTweets)
 router.get('/:id/likes', userController.getLikes)

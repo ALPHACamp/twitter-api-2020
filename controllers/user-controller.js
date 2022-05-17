@@ -187,7 +187,7 @@ const userController = {
       let coverImage = req.files?.cover_image || null
 
       if (!name.trim() || !introduction.trim()) throw new Error('名字和自我介紹欄不可為空。')
-      if (introduction.length > 160) throw new Error('自我介紹字數不可超過 50 字。')
+      if (introduction.length > 160) throw new Error('自我介紹字數不可超過 160 字。')
       if (name.length > 50) throw new Error('名字字數不可超過 50 字。')
 
       if (avatar) avatar = await imgurFileHandler(avatar[0])
@@ -205,20 +205,29 @@ const userController = {
       next(err)
     }
   },
+  getUserSetting: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(getUser(req).id, {
+        attributes: ['id', 'account', 'name', 'email']
+      })
+      if (!user) throw new Error('查無使用者')
+      res.status(200).json({ message: '登入中的使用者資料', user })
+    } catch (err) {
+      next(err)
+    }
+  },
   putUserSetting: async (req, res, next) => {
     try {
       const { name, account, email, password, checkPassword } = req.body
       const user = getUser(req)
 
       if (!name.trim() ||
-        !account.trim() ||
-        !email.trim() ||
-        !password.trim() ||
-        !checkPassword.trim()) throw new Error('所有欄位必填。')
+          !account.trim() ||
+          !email.trim() ||
+          !password.trim()) throw new Error('不可提交空白字元')
 
       if (req.body.password.trim() !== req.body.checkPassword.trim()) throw new Error('密碼與確認密碼不符。')
 
-      if (!account) throw new Error('帳號不可空白。')
       if (await User.findOne({ where:{ account } })) throw new Error('此帳號已經存在。')
       if (await User.findOne({ where: { email } })) throw new Error('此email已經存在。')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不相符。')
@@ -249,12 +258,12 @@ const userController = {
         order: [[sequelize.col('followerCount'), 'DESC']]
       })
       if (!topUsers) throw new Error('查無資料。')
-      
+
       const result = topUsers.map(user => ({
         ...user.toJSON(),
         isFollowing: req.user.Followings.some(f => f.id === user.id)
       }))
-      
+
       res.status(200).json({ message: '前十人氣王', result })
     } catch (err) {
       next(err)
