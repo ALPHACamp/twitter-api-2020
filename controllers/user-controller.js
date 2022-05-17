@@ -158,9 +158,7 @@ const userController = {
         order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!followings.length) throw new Error('沒有追隨者名單。')
-      const user = await User.findByPk(req.params.id, {
-        include: [{ model: User, as: 'Followings' }]
-      })
+      const user = getUser(req)
       const result = followings.map(following => ({
         ...following.toJSON(),
         isFollowing: user.Followings.some(f => f.id === following.followingId)
@@ -183,9 +181,7 @@ const userController = {
         order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!followers.length) throw new Error('沒有粉絲名單。')
-      const user = await User.findByPk(req.params.id, {
-        include: [{ model: User, as: 'Followings' }]
-      })
+      const user = getUser(req)
       const result = followers.map(follower => ({
         ...follower.toJSON(),
         isFollowing: user.Followings.some(f => f.id === follower.followerId)
