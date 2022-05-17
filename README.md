@@ -20,7 +20,8 @@
 
 # How to Install API
 
-###　需先安裝
+### 需先安裝
+
 * Git
 * Node.js
 * MySQL
