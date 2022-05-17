@@ -79,8 +79,7 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Reply.findAll({
         where: { UserId: req.params.id },
-        include:[{model: Tweet, include: User}],
-        order: [['createdAt', 'DESC']]
+        include:[{model: Tweet, include: User}]
       })
     ])
       .then(([user, replies]) => {
@@ -89,8 +88,12 @@ const userServices = {
           ...r.Tweet.toJSON(),
           User: r.Tweet.User.name, 
           userAvatar: r.Tweet.User.avatar,
-          comment: r.comment
+          comment: r.comment,
+          replyCreatedAt: r.createdAt,
+          replyUpdatedAt: r.updatedAt
         }))
+          .sort((a, b) => b.replyCreatedAt - a.replyCreatedAt)
+        console.log(repliedTweets)
         return cb(null, repliedTweets)
       })
       .catch(err => cb(err))
