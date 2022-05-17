@@ -32,11 +32,13 @@ const adminController = {
           }))
         ])
       }
+
       return res.status(200).json(users)
     } catch (err) {
       next(err)
     }
   },
+
   deleteTweet: async (req, res, next) => {
     try {
       const tweetId = req.params.id
