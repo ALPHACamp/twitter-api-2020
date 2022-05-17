@@ -79,7 +79,8 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Reply.findAll({
         where: { UserId: req.params.id },
-        include:[{model: Tweet, include: User}]
+        include:[{model: Tweet, include: User}],
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, replies]) => {
@@ -92,7 +93,6 @@ const userServices = {
           replyCreatedAt: r.createdAt,
           replyUpdatedAt: r.updatedAt
         }))
-          .sort((a, b) => b.replyCreatedAt - a.replyCreatedAt)
         console.log(repliedTweets)
         return cb(null, repliedTweets)
       })
