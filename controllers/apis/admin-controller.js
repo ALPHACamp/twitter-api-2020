@@ -1,4 +1,4 @@
-const { User, Tweet, Identity, Like, Followship } = require('../../models')
+const { Identity, User, Tweet, Reply, Like, Followship } = require('../../models')
 // const { Sequelize } = require('sequelize')
 // const sequelize = new Sequelize('sqlite::memory:')
 
@@ -6,17 +6,13 @@ const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
-        attributes: ['id', 'account', 'name', 'coverImg', 'avatarImg'],
-        include: [
-          {
-            model: Identity,
-            where: { id: 'user' },
-            attributes: []
-          }
-        ],
+        attributes: ['id', 'account', 'name', 'cover_img', 'avatar_img'],
+        where: { role: 'user' },
         raw: true,
         nest: true
       })
+      console.log('===== test =====', users)
+
       for (const user of users) {
         Promise.all([
           (user.tweetAmount = await Tweet.findAndCountAll({
@@ -45,9 +41,14 @@ const adminController = {
 
   deleteTweet: async (req, res, next) => {
     try {
-      const deletedTweet = await Tweet.findByPk(req.params.id)
+      const tweetId = req.params.id
+      const deletedTweet = await Tweet.findByPk(tweetId)
       if (!deletedTweet) throw new Error('找不到相關推文')
-      await deletedTweet.destroy()
+
+      await Reply.destroy({ where: { tweet_id: tweetId } })
+      await Like.destroy({ where: { tweet_id: tweetId } })
+      await Tweet.destroy({ where: { id: tweetId } })
+
       return res.status(200).json({
         deletedTweet
       })

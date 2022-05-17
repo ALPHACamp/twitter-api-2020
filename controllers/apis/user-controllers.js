@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Identity, Tweet, Followship, Reply, Like } = require('../../models')
+const { User, Tweet, Followship, Reply, Like } = require('../../models')
 const helpers = require('../../_helpers')
+// const { Sequelize } = require('sequelize')
+// const sequelize = new Sequelize('sqlite::memory:')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -34,24 +36,16 @@ const userController = {
 
   signUp: async (req, res, next) => {
     try {
-      if (req.body.password !== req.body.passwordCheck) {
-        throw new Error('驗證密碼不正確')
-      }
       const user = await User.findOne({ where: { account: req.body.account } })
       if (user) throw new Error('使用者已經存在')
 
-      const userIdentity = await Identity.findOne({
-        where: { id: 'user' },
-        attributes: ['id']
-      })
-      const { id } = userIdentity.toJSON()
-
+      const password = await bcrypt.hash(req.body.password, 10)
       const registeredUser = await User.create({
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
-        password: await bcrypt.hash(req.body.password, 10),
-        role: id
+        password: password,
+        role: 'user'
       })
 
       const token = jwt.sign(registeredUser.toJSON(), process.env.JWT_SECRET, {
@@ -85,8 +79,8 @@ const userController = {
       }
       delete userData.password
       delete userData.Identity
-      res.json({
-        status: 'success',
+
+      return res.status(200).json({
         data: {
           token,
           user: userData
@@ -148,7 +142,7 @@ const userController = {
         }
       })
 
-      res.json(...userData)
+      return res.status(200).json(...userData)
     } catch (err) {
       next(err)
     }
@@ -331,6 +325,65 @@ const userController = {
         }
       })
       return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  editUser: async (req, res, next) => {
+    try {
+      const { name, introduction } = req.body
+      const { files } = req
+      const user = await User.findByPk(req.params.id)
+      const avatarImgUrl = await helpers.imgurFileHandler(files?.avatar_img[0])
+      const coverImgUrl = await helpers.imgurFileHandler(files?.cover_img[0])
+      if (!user) throw new Error('沒有找到相關的使用者資料')
+
+      const updatedUser = await user.update({
+        name,
+        introduction,
+        avatarImg: avatarImgUrl || '',
+        coverImg: coverImgUrl || ''
+      })
+      const data = updatedUser.toJSON()
+      delete data.password
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getTopUser: async (req, res, next) => {
+    try {
+      let users = await (User.findAll({
+        nest: true,
+        where: { role: 'user' },
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar_img'
+          // [sequelize.fn('COUNT', sequelize.col('User.id')), 'follower_count']
+        ],
+        include: {
+          model: User,
+          as: 'Following',
+          attributes: [
+            'id'
+          ]
+        }
+      }))
+      const limit = Number(req.query.limit) || users.length
+      users = users.map(user => {
+        const followerCount = user.Following.length
+        return {
+          ...user.toJSON(),
+          follower_count: followerCount
+        }
+      })
+      users = users.sort((a, b) => b.follower_count - a.follower_count).slice(0, limit)
+
+      return res.status(200).json(users)
     } catch (err) {
       next(err)
     }

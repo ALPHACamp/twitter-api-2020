@@ -12,8 +12,8 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  const idAdmin = helpers.getUser(req).toJSON().Identity.identity
-  if (helpers.getUser(req) && idAdmin) return next()
+  const identity = helpers.getUser(req).toJSON().Identity.id
+  if (helpers.getUser(req) && identity === 'admin') return next()
   return res.status(403).json({ status: 'error', message: '不允許訪問' })
 }
 
