@@ -1,8 +1,10 @@
-# Twitter API
+# **Twitter API**
 本服務為 Twitter 專案之後端 API，提供本專案之前端使用。  
-前端 repo：https://github.com/Yanhuabcd820/twitter2022
+[前端 repo](https://github.com/Yanhuabcd820/twitter2022)  
+[後端 API](https://damp-wave-52946.herokuapp.com/api-doc)  
+[Twitter Demo](https://bunreal.github.io/Twitter2022/#/logIn)
 
-## Getting Started
+## <span style="color: red">**Getting Started**<span>
 ### 1. 將專案 clone 到本機
 ```bash
 git clone https://github.com/GallonShih/twitter-api-2020.git
@@ -35,18 +37,18 @@ nodemon app.js
 ```bash
 App is listening on port 3000!
 ```
-### 6. 於網址輸入 localhost:3000/api
+### 6. 於網址輸入 localhost:3000/api-doc
 ### 7. 若要暫停使用
 ```bash
 ctrl + c
 ```
 
-## Authors
+## <span style="color: red">**Authors**<span>
 
-* **Gallon Shih** 
-* **maximeri** :  https://github.com/maximeri
+* **Gallon Shih**
+* **[maximeri](https://github.com/maximeri)**
 
-## Development Tools
+## <span style="color: red">**Development Tools**<span>
 
 * Node.js 14.16.0
 * Express 4.16.4
