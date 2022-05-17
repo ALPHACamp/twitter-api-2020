@@ -1,9 +1,9 @@
 # Simple Twitter API
----
+
 前後端分離開發的Simple Twitter專案中使用的後端Restful API，使用Node.js, Express, MySQL開發。 
 
 # Base URL
----
+
 ```
 https://pacific-mountain-24114.herokuapp.com/api
 
@@ -21,7 +21,7 @@ https://pacific-mountain-24114.herokuapp.com/api
 ```
 
 # How to Install API
----
+
 ###　需先安裝
 * Git
 * Node.js
@@ -91,7 +91,7 @@ https://pacific-mountain-24114.herokuapp.com/api
 代表運行成功
 
 # 開發工具
----
+
 * bcryptjs 2.4.3
 * cors 2.8.5
 * cross-env 7.0.3
@@ -111,6 +111,6 @@ https://pacific-mountain-24114.herokuapp.com/api
 * sequelize-cli 5.5.0
 
 ## 開發人員
----
+
 * Nathan(https://github.com/naivelove0822)
 * Hitomi(https://github.com/HitomiHuang)
