@@ -5,46 +5,34 @@ const { User, Tweet, Reply, Like, Followship } = require('../../models')
 const adminController = {
   getUsers: async (req, res, next) => {
     try {
-    //   const users = await User.findAll({
-    //     attributes: ['id', 'account', 'name', 'coverImg', 'avatarImg'],
-    //     where: { role: 'user' },
-    //     raw: true,
-    //     nest: true
-    //   })
-    //   console.log('===== test =====', users)
-
-      //   for (const user of users) {
-      //     Promise.all([
-      //       (user.tweetAmount = await Tweet.findAndCountAll({
-      //         where: { UserId: user.id },
-      //         attributes: ['id']
-      //       })),
-      //       (user.likeAmount = await Like.findAndCountAll({
-      //         where: { UserId: user.id },
-      //         attributes: ['id']
-      //       })),
-      //       (user.followingAmount = await Followship.findAndCountAll({
-      //         where: { follower_id: user.id },
-      //         attributes: ['id']
-      //       })),
-      //       (user.followedAmount = await Followship.findAndCountAll({
-      //         where: { following_id: user.id },
-      //         attributes: ['id']
-      //       }))
-      //     ])
-      //   }
-      //   return res.status(200).json(users)
-
-      await User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1', role: 'admin' })
-      await User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
       const users = await User.findAll({
-        // attributes: ['id', 'account', 'name', 'coverImg', 'avatarImg'],
-        where: { role: 'admin' },
-        // raw: true
-        // nest: true
+        attributes: ['id', 'account', 'name', 'role', 'coverImg', 'avatarImg'],
+        where: { role: 'user' },
+        raw: true,
+        nest: true
       })
-      console.log('===== test =====', users)
-      return res.send('test')
+
+      for (const user of users) {
+        Promise.all([
+          (user.tweetAmount = await Tweet.findAndCountAll({
+            where: { UserId: user.id },
+            attributes: ['id']
+          })),
+          (user.likeAmount = await Like.findAndCountAll({
+            where: { UserId: user.id },
+            attributes: ['id']
+          })),
+          (user.followingAmount = await Followship.findAndCountAll({
+            where: { follower_id: user.id },
+            attributes: ['id']
+          })),
+          (user.followedAmount = await Followship.findAndCountAll({
+            where: { following_id: user.id },
+            attributes: ['id']
+          }))
+        ])
+      }
+      return res.status(200).json(users)
     } catch (err) {
       next(err)
     }
