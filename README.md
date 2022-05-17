@@ -19,7 +19,7 @@
 ```
 ### API文件
 
-  [API文件](https://flashy-chimpanzee-c1f.notion.site/Twitter-API-fd9fb9a86e074eb8b714f14c2749a971)
+  [https://flashy-chimpanzee-c1f.notion.site/Twitter-API-fd9fb9a86e074eb8b714f14c2749a971](https://flashy-chimpanzee-c1f.notion.site/Twitter-API-fd9fb9a86e074eb8b714f14c2749a971)
 
 # How to Install API
 
