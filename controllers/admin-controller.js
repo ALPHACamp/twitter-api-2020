@@ -1,28 +1,36 @@
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcryptjs')
-const { User, Tweet, Followship, Like } = require('../models')
-const { getFollowers } = require('./user-controller')
+const { User, Tweet, Like } = require('../models')
 
 const adminController = {
+  signIn: (req, res, next) => {
+    if (req.user.role === 'user') throw new Error("User doen't have permission!") //   一般 user 不能登入
+    try {
+      const userData = req.user.toJSON()
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      res.json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
   getUsers: (req, res, next) => {
     return User.findAll({
-      raw: true,
-      nest: true,
-      include: [Tweet]
+      include: [Tweet, Like, { model: User, as: 'Followers', attributes: ['id'] },
+        { model: User, as: 'Followings', attributes: ['id'] }]
     })
       .then(users => {
-        const Tweets = req.user?.Tweets ? req.user.Tweets.map(tweet => tweet.length) : []
-        const Likes = req.user?.LikedTweets ? req.user.LikedTweets.map(lt => lt.length) : []
-        const Replies = req.user?.LikedReplies ? req.user.LikedReplies.map(lr => lr.length) : []
-        const Followers = req.user?.Followers ? req.user.Followers.map(fr => fr.length) : []
-        const Followings = req.user?.Followings ? req.user.Followings.map(fg => fg.length) : []
         const data = users.map(user => ({
-          ...user,
-          Tweets,
-          Likes,
-          Replies,
-          Followers,
-          Followings
+          ...user.toJSON(),
+          Tweets: user.Tweets.length,
+          Likes: user.Likes.length,
+          Followers: user.Followers.length,
+          Followings: user.Followings.length
         })
         )
         return data
@@ -34,7 +42,7 @@ const adminController = {
           data: {
             data
           },
-          message: 'Tweet deleted!'
+          message: 'All users found!'
         })
       })
       .catch(err => next(err))
