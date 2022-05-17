@@ -15,7 +15,7 @@ const userController = {
     User.findOne({ where: { account } })
       .then(user => {
         if (!user) throw new Error('帳號不存在！')
-        if (user.role === 'admin') throw new Error('帳號不存在！')
+        if (user.role === 'admin') throw new Error('帳號不存在！管理者無法登入前台！')
         if (!bcrypt.compareSync(password, user.password)) { throw new Error('密碼錯誤！') }
         const userData = user.toJSON()
         delete userData.password
@@ -80,7 +80,7 @@ const userController = {
       ]
     })
       .then(user => {
-        if (!user || user.role === 'admin') throw new Error('帳號不存在！')
+        if (!user || user.role === 'admin') throw new Error('帳號不存在！管理者無法登入前台')
         const { id, account, name, email, introduction, avatar, cover, createdAt } = user
         const isFollowing = user.Followers.map(f => f.id === reqUserId)
         return res.status(200).json({
@@ -143,7 +143,7 @@ const userController = {
     const userId = Number(req.params.id)
     const reqUserId = getUser(req).id
 
-    if (userId !== reqUserId) throw new Error('Permission denied')
+    if (userId !== reqUserId) throw new Error('使用者只能修改自己的資料！')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不符！')
     if (!account) throw new Error('帳號欄位不可空白！')
     if (!name) throw new Error('名稱欄位不可空白！')
@@ -174,28 +174,23 @@ const userController = {
       .catch(err => next(err))
   },
 
-  putUser: async (req, res, next) => {
-    try {
-      const { name, introduction } = req.body
-      const { avatar, coverImage } = req.files
-      if (!name || !introduction) throw new Error('所有欄位必填。')
-      if (introduction.length > 50) throw new Error('自我介紹字數不可超過 50 字。')
-      // 上傳兩張圖片
-      const avatarPath = await imgurFileHandler(avatar[0])
-      const coverImagePath = await imgurFileHandler(coverImage[0])
+  putUser: (req, res, next) => {
+    const { name, introduction, avatar, cover } = req.body
+    const UserId = req.params.id
+    const reqUserId = getUser(req).id
 
-      const user = await User.findByPk(req.params.id)
-      const userUpdate = await user.update({
-        name,
-        introduction,
-        avatar: avatarPath || user.avatar,
-        cover_image: coverImagePath || user.cover_image
+    if (UserId !== reqUserId) throw new Error('使用者只能修改自己的資料！')
+    if (!name) throw new Error('名稱欄位不可空白！')
+    if (name && name.length > 50) throw new Error('名稱字數上限為 50 個字！')
+    if (introduction && introduction.length > 160) throw new Error('自介字數上限為 160 個字！')
+    return User.findByPk(UserId)
+      .then(user => {
+        if (!user) throw new Error('帳號不存在！')
+        if (!user || user.role === 'admin') throw new Error('帳號不存在！管理者無法登入前台')
+        return user.upd
       })
-      res.status(200).json(userUpdate)
-    } catch (err) {
-      next(err)
-    }
-    res.status(200).json()
+
+    const { files } = req
   },
 
   getUsersTweets: (req, res, next) => {
@@ -349,6 +344,60 @@ const userController = {
         }))
         return res.status(200).json(data)
       })
+      .catch(err => next(err))
+  },
+  addFollowing: (req, res, next) => {
+    const followingId = Number(req.body.id)
+    const followerId = getUser(req).id
+
+    if (followingId === followerId) throw new Error('不能追蹤自己!')
+    return Promise.all([
+      User.findByPk(followingId),
+      Followship.findOne({
+        where: {
+          followingId,
+          followerId
+        }
+      })
+    ])
+      .then(([user, isFollowed]) => {
+        if (!user) throw new Error('使用者不存在!')
+        if (isFollowed) throw new Error('你已經追蹤該使用者！')
+        return Followship.create({
+          followingId,
+          followerId
+        })
+      })
+      .then(getFollowing => {
+        res.status(200).json({ message: '成功追蹤使用者！', getFollowing })
+      })
+      .catch(err => next(err))
+  },
+
+  removeFollowing: (req, res, next) => {
+    const followingId = Number(req.params.id)
+    const followerId = getUser(req).id
+    if (followingId === followerId) throw new Error('不能取消追蹤自己!')
+    return Promise.all([
+      User.findByPk(followingId),
+      Followship.findOne({
+        where: {
+          followingId,
+          followerId
+        }
+      })
+    ])
+      .then(([user, isFollowed]) => {
+        if (!user) throw new Error('無法取消追蹤不存在的使用者!')
+        if (!isFollowed) throw new Error('你尚未追蹤該名使用者！')
+        return Followship.destroy({
+          where: {
+            followingId,
+            followerId
+          }
+        })
+      })
+      .then(removeFollowing => res.status(200).json({ message: '成功取消追蹤該名使用者！', removeFollowing }))
       .catch(err => next(err))
   }
 }
