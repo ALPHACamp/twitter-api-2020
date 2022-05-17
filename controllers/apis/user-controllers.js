@@ -223,9 +223,8 @@ const userController = {
 
   getUserLikes: async (req, res, next) => {
     try {
-      const likes = await Like.findAll({
+      let likes = await Like.findAll({
         where: { user_id: req.params.id },
-        raw: true,
         include: [
           {
             model: User,
@@ -254,6 +253,7 @@ const userController = {
         nest: true
       })
 
+      likes = JSON.parse(JSON.stringify(likes))
       if (!likes.length) throw new Error('沒有找到相關資料')
 
       const data = likes.map(like => {
