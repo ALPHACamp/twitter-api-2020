@@ -2,6 +2,7 @@ const { User, Reply, Tweet, Like, Followship, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../_helpers')
+const { isLikedTweet } = require('../helpers/tweet')
 const imgurFileHandler = require('../helpers/file-helper')
 
 const userController = {
@@ -73,12 +74,16 @@ const userController = {
             'id', 'avatar', 'name', 'account'
           ]
         }],
-        order: [['createdAt', 'DESC'], ['id', 'DESC']],
-        raw: true,
-        nest: true
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!tweets.length) throw new Error('沒有任何推文。')
-      res.status(200).json(tweets)
+
+      const isLikedId = await isLikedTweet(req.params.id)
+      const result = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        isLiked: isLikedId.some(tId => tId === tweet.id)
+      }))
+      res.status(200).json(result)
     } catch (err) {
       next(err)
     }
@@ -126,12 +131,16 @@ const userController = {
              Where: { id: Tweet.userId }
           }]
         }],
-        order: [['createdAt', 'DESC'], ['id', 'DESC']],
-        raw: true,
-        nest: true
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!likes.length) throw new Error('沒有喜歡的推文。')
-      res.status(200).json(likes)
+
+      const isLikedId = await isLikedTweet(req.params.id)
+      const result = likes.map(like => ({
+        ...like.toJSON(),
+        isLiked: isLikedId.some(tId => tId === like.TweetId)
+      }))
+      res.status(200).json(result)
     } catch (err) {
       next(err)
     }
