@@ -4,8 +4,8 @@ const passport = require('../config/passport')
 
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
-const followshipController = require('../controllers/followship-controller')
-// const upload = require('../middleware/multer')
+
+const upload = require('../middleware/multer')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 const { authenticated, authenticatedUser } = require('../middleware/auth')
@@ -32,11 +32,8 @@ router.get('/users/:id/likes', authenticated, authenticatedUser, userController.
 // 修改目前登入的使用者設定
 router.put('/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
 
-// 目前登入使用者資料的上傳單張圖片路由
-// router.put('/users/:id', upload.single('image'), userController.putUserSetting)
-
 // 修改目前登入的使用者個人頁面
-router.put('/users/:id', authenticated, authenticatedUser, userController.putUser)
+router.put('/users/:id', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUser)
 
 // 取得指定使用者追隨中的所有使用者 & 取得追隨指定使用者的所有使用者
 router.get('/users/:id/followings', userController.getFollowings)
@@ -56,8 +53,8 @@ router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweet
 router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
 // Followship APIs
-router.post('/followships', authenticated, followshipController.addFollowing)
-router.delete('/followships/:id', authenticated, followshipController.removeFollowing)
+router.post('/followships', authenticated, userController.addFollowing)
+router.delete('/followships/:id', authenticated, userController.removeFollowing)
 
 router.use('/', apiErrorHandler)
 
