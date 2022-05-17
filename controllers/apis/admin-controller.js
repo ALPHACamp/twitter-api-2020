@@ -32,6 +32,8 @@ const adminController = {
           }))
         ])
       }
+
+      console.log('===== test =====', users)
       return res.status(200).json(users)
     } catch (err) {
       next(err)
