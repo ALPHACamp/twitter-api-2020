@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const Sequelize = require('sequelize')
 
 const { User, Tweet, Followship, Reply, Like } = require('../models')
 
@@ -188,9 +189,14 @@ const userController = {
   getUsersTweets: (req, res, next) => {
     const UserId = Number(req.params.id)
     Promise.all([
-      Tweet.findAndCountAll({
+      Tweet.findAll({
         where: { UserId },
-        attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Tweet.id = Replies.Tweet_id )'), 'replyCount'],
+            [Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Tweet.id = Likes.Tweet_id)'), 'likeCount']
+          ]
+        },
         include: [
           { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] }
         ],
@@ -200,13 +206,11 @@ const userController = {
       }),
       User.findByPk(UserId)
     ])
-      .then(([tweets, userOnChecked]) => {
-        // update user tweetCount
-        userOnChecked.update({
-          tweetCount: tweets.count
-        })
+      .then(([tweets, user]) => {
+        if (!user) throw new Error('使用者不存在！')
+        if (tweets.length <= 0) throw new Error('該使用者沒有推文！')
         const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(l => l.id) : []
-        const tweetList = tweets.rows.map(data => ({
+        const tweetList = tweets.map(data => ({
           ...data,
           isLiked: likedTweetId.some(item => item === data.id)
         }))
