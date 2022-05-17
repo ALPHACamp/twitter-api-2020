@@ -106,7 +106,7 @@ const userController = {
 
       const user = await User.findAll({
         where: { id: req.params.id },
-        attributes: ['id', 'account', 'name', 'email', 'coverImg', 'avatarImg', 'introduction'],
+        attributes: ['id', 'account', 'name', 'email', 'role', 'coverImg', 'avatarImg', 'introduction'],
         include: [
           { model: User, as: 'Follower', attributes: ['id', 'name', 'account', 'avatarImg', 'introduction'] },
           { model: User, as: 'Following', attributes: ['id', 'name', 'account', 'avatarImg', 'introduction'] }
