@@ -76,16 +76,16 @@ const tweets = {
         avatar: element.User.avatar,
         description: element.description,
         createdAt: element.createdAt,
-        likeCount: element.Likes.likeCounts,
-        replyCount: element.replyCounts,
-        userLikesTweet: element.userLikesTweet
+        likeNum: element.Likes.likeCounts,
+        replyNum: element.replyCounts,
+        isLike: element.isLike
       }))
       return tweets
     } catch (err) {
       console.log(err)
     }
   },
-  getOne: async (tweetId) => {
+  getOne: async (tweetId, UserId) => {
     try {
       const rawTweet = await Tweet.findByPk(tweetId, {
         attributes: {
@@ -123,6 +123,20 @@ const tweets = {
         rawTweet.replyCounts = replies[0].count
       }
 
+      if (UserId) {
+        const userLikesTweet = await Like.findOne({
+          attributes: [
+            'TweetId'
+          ],
+          where: {
+            UserId
+          },
+          raw: true
+        })
+        userLikesTweet.TweetId === rawTweet.id
+          ? rawTweet.isLike = true
+          : rawTweet.isLike = false
+      }
       const tweet = {
         id: rawTweet.id,
         name: rawTweet.User.name,
@@ -130,8 +144,9 @@ const tweets = {
         avatar: rawTweet.User.avatar,
         description: rawTweet.description,
         createdAt: rawTweet.createdAt,
-        likeCount: rawTweet.Likes.likeCounts,
-        replyCount: rawTweet.replyCounts
+        likeNum: rawTweet.Likes.likeCounts,
+        replyNum: rawTweet.replyCounts,
+        isLike: rawTweet.isLike
       }
       return tweet
     } catch (err) {
