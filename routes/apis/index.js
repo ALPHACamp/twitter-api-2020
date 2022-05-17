@@ -16,7 +16,7 @@ const {
 
 router.post(
   '/signin',
-  passport.authenticate('local', { session: false }),
+  passport.authenticate('local', { session: false, failWithError: true }),
   userController.signIn
 )
 router.get('/current_user', authenticated, userController.getCurrentUser)
