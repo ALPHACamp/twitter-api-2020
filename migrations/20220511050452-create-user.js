@@ -29,11 +29,11 @@ module.exports = {
       avatar_img: {
         type: Sequelize.TEXT
       },
-      bio: {
+      introduction: {
         type: Sequelize.TEXT
       },
-      identity_id: {
-        type: Sequelize.INTEGER
+      role: {
+        type: Sequelize.STRING
       },
       created_at: {
         allowNull: false,

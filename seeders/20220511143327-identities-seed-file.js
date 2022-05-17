@@ -4,12 +4,12 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const identities = [
       {
-        identity: 'admin',
+        id: 'admin',
         created_at: new Date(),
         updated_at: new Date()
       },
       {
-        identity: 'user',
+        id: 'user',
         created_at: new Date(),
         updated_at: new Date()
       }

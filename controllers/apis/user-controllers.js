@@ -8,7 +8,8 @@ const userController = {
     try {
       // 登入資料錯誤希望有回傳訊息
       const userData = helpers.getUser(req)?.toJSON()
-      if (userData.Identity.identity === 'admin') {
+
+      if (userData.Identity.id === 'admin') {
         userData.is_admin = true
       } else {
         userData.is_admin = false
@@ -40,7 +41,7 @@ const userController = {
       if (user) throw new Error('使用者已經存在')
 
       const userIdentity = await Identity.findOne({
-        where: { identity: 'user' },
+        where: { id: 'user' },
         attributes: ['id']
       })
       const { id } = userIdentity.toJSON()
@@ -50,7 +51,7 @@ const userController = {
         name: req.body.name,
         email: req.body.email,
         password: await bcrypt.hash(req.body.password, 10),
-        identityId: id
+        role: id
       })
 
       const token = jwt.sign(registeredUser.toJSON(), process.env.JWT_SECRET, {
@@ -77,7 +78,7 @@ const userController = {
     try {
       const userData = helpers.getUser(req)?.toJSON()
       const { token } = req.session
-      if (userData.Identity.identity === 'admin') {
+      if (userData.Identity.id === 'admin') {
         userData.is_admin = true
       } else {
         userData.is_admin = false
@@ -111,10 +112,10 @@ const userController = {
 
       const user = await User.findAll({
         where: { id: req.params.id },
-        attributes: ['id', 'account', 'name', 'email', 'coverImg', 'avatarImg', 'bio'],
+        attributes: ['id', 'account', 'name', 'email', 'coverImg', 'avatarImg', 'introduction'],
         include: [
-          { model: User, as: 'Follower', attributes: ['id', 'name', 'account', 'avatarImg', 'bio'] },
-          { model: User, as: 'Following', attributes: ['id', 'name', 'account', 'avatarImg', 'bio'] }
+          { model: User, as: 'Follower', attributes: ['id', 'name', 'account', 'avatarImg', 'introduction'] },
+          { model: User, as: 'Following', attributes: ['id', 'name', 'account', 'avatarImg', 'introduction'] }
         ],
         nest: true
       })
@@ -161,7 +162,7 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name']
+            attributes: ['id', 'account', 'name', 'avatarImg']
           },
           {
             model: Reply,
@@ -201,11 +202,17 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name']
+            attributes: ['id', 'account', 'name', 'avatarImg']
           },
           {
             model: Tweet,
-            attributes: ['id', 'description', 'user_id']
+            attributes: ['id', 'description', 'user_id'],
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'account', 'name', 'avatarImg']
+              }
+            ]
           }
         ],
         order: [['created_at', 'DESC']],
