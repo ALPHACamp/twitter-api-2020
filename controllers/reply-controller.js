@@ -4,6 +4,10 @@ const { Reply, LikedReply } = require('../models')
 const replyController = {
   likeReply: (req, res, next) => {
     /*
+    #swagger.tags = ['Replies']
+    #swagger.security = [{
+            'bearerAuth': []
+    }]
     :param id: ReplyId
     This api would create a like relation between user and reply, and return a json
     */
@@ -41,6 +45,10 @@ const replyController = {
   },
   unlikeReply: (req, res, next) => {
     /*
+    #swagger.tags = ['Replies']
+    #swagger.security = [{
+            'bearerAuth': []
+    }]
     :param id: ReplyId
     This api would destroy a like relation between user and reply, and return a json
     */
@@ -71,6 +79,10 @@ const replyController = {
   },
   putReply: async (req, res, next) => {
     /*
+    #swagger.tags = ['Replies']
+    #swagger.security = [{
+            'bearerAuth': []
+    }]
     :param id: ReplyId
     :body comment: reply's content
     This api would edit a reply record and return a json
@@ -101,6 +113,10 @@ const replyController = {
   },
   deleteReply: async (req, res, next) => {
     /*
+    #swagger.tags = ['Replies']
+    #swagger.security = [{
+            'bearerAuth': []
+    }]
     :param id: ReplyId
     This api would delete a reply record and its related likeReplies record, and return a json
     */
