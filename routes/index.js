@@ -4,8 +4,8 @@ const passport = require('../config/passport')
 
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
-const followshipController = require('../controllers/followship-controller')
-// const upload = require('../middleware/multer')
+
+const upload = require('../middleware/multer')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 const { authenticated, authenticatedUser } = require('../middleware/auth')
@@ -32,8 +32,8 @@ router.get('/users/:id/likes', authenticated, authenticatedUser, userController.
 // 修改目前登入的使用者設定
 router.put('/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
 
-// 目前登入使用者資料的上傳單張圖片路由
-// router.put('/users/:id', upload.single('image'), userController.putUserSetting)
+// 可供目前登入使用者上傳多張圖片的路由
+router.put('/users/:id', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUser)
 
 // 修改目前登入的使用者個人頁面
 router.put('/users/:id', authenticated, authenticatedUser, userController.putUser)

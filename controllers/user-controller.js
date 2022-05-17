@@ -15,7 +15,7 @@ const userController = {
     User.findOne({ where: { account } })
       .then(user => {
         if (!user) throw new Error('帳號不存在！')
-        if (user.role === 'admin') throw new Error('帳號不存在！管理者無法登入前台！')
+        if (user.role === 'admin') throw new Error('帳號不存在！管理者權限無法登入前台！')
         if (!bcrypt.compareSync(password, user.password)) { throw new Error('密碼錯誤！') }
         const userData = user.toJSON()
         delete userData.password
@@ -80,7 +80,7 @@ const userController = {
       ]
     })
       .then(user => {
-        if (!user || user.role === 'admin') throw new Error('帳號不存在！管理者無法登入前台')
+        if (!user || user.role === 'admin') throw new Error('帳號不存在！管理者權限無法登入前台！')
         const { id, account, name, email, introduction, avatar, cover, createdAt } = user
         const isFollowing = user.Followers.map(f => f.id === reqUserId)
         return res.status(200).json({
@@ -174,23 +174,16 @@ const userController = {
       .catch(err => next(err))
   },
 
-  putUser: (req, res, next) => {
-    const { name, introduction, avatar, cover } = req.body
-    const UserId = req.params.id
-    const reqUserId = getUser(req).id
-
-    if (UserId !== reqUserId) throw new Error('使用者只能修改自己的資料！')
-    if (!name) throw new Error('名稱欄位不可空白！')
-    if (name && name.length > 50) throw new Error('名稱字數上限為 50 個字！')
-    if (introduction && introduction.length > 160) throw new Error('自介字數上限為 160 個字！')
-    return User.findByPk(UserId)
-      .then(user => {
-        if (!user) throw new Error('帳號不存在！')
-        if (!user || user.role === 'admin') throw new Error('帳號不存在！管理者無法登入前台')
-        return user.upd
-      })
-
-    const { files } = req
+  putUser: async (req, res, next) => {
+    try {
+      const UserId = Number(req.params.id)
+      const user = await User.findByPk(UserId)
+      const userUpdate = await user.update(req.body)
+      res.status(200).json(userUpdate)
+    } catch (err) {
+      next(err)
+    }
+    res.status(200).json()
   },
 
   getUsersTweets: (req, res, next) => {
