@@ -5,13 +5,13 @@ const { User, Tweet, Reply, Like, Followship } = require('../../models')
 const adminController = {
   getUsers: async (req, res, next) => {
     try {
+      const roleIs = req.query.roleIs
       const users = await User.findAll({
         attributes: ['id', 'account', 'name', 'role', 'coverImg', 'avatarImg'],
-        where: { role: 'user' },
+        where: roleIs ? { role: roleIs } : null,
         raw: true,
         nest: true
       })
-
       for (const user of users) {
         Promise.all([
           (user.tweetAmount = await Tweet.findAndCountAll({
@@ -33,7 +33,6 @@ const adminController = {
         ])
       }
 
-      console.log('===== test =====', users)
       return res.status(200).json(users)
     } catch (err) {
       next(err)
