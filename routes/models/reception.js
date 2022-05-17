@@ -35,6 +35,5 @@ router.get('/users/:id/followers', userController.userFollowers)
 router.get('/users/topFollowedUser', userController.getTopUsers)
 router.get('/users/:id', userController.getUser)
 router.put('/users/:id', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUser)
-router.post('/users', userController.signUp)
 
 module.exports = router

@@ -7,7 +7,7 @@ const userController = {
   login: async (req, res, next) => {
     try {
       const userData = req.user.toJSON()
-      if (userData.role !== 'user') return res.status(403).json({ status: 'error', message: '非使用者' })
+      if (userData.role !== 'user') throw new Error('非使用者')
       const token = await createToken(userData)
       res.json({
         status: 'success',
@@ -21,11 +21,11 @@ const userController = {
     }
   },
   signUp: (req, res, next) => {
-    if (req.body.password !== req.body.checkPassword) res.status(403).json({ status: 'error', message: '密碼與確認密碼不符，請重新輸入' })
+    if (req.body.password !== req.body.checkPassword) throw new Error('密碼與確認密碼不符，請重新輸入')
     try {
       User.findOne({ where: { email: req.body.email } })
         .then(user => {
-          if (user) res.status(403).json({ status: 'error', message: '此Email已被註冊！' })
+          if (user) throw new Error('此Email已被註冊！')
           return bcrypt.hash(req.body.password, 10)
         })
         .then(hash => User.create({
@@ -53,7 +53,7 @@ const userController = {
         ]
       })
         .then(user => {
-          if (!user) res.status(403).json({ status: 'error', message: '找不到使用者！' })
+          if (!user) throw new Error('找不到使用者！')
           user = user.toJSON()
           res.json({
             status: 'success',
@@ -73,16 +73,14 @@ const userController = {
 
       Tweet.findAll({
         where: { UserId },
+        order: [['createdAt', 'DESC']],
         include: User,
         raw: true,
         nest: true
       })
         .then(tweet => {
-          if (!tweet) {
-            res.status(403).json({ status: 'error', message: '找不到使用者的推文！' })
-          } else {
-            res.json(tweet)
-          }
+          if (!tweet) throw new Error('找不到使用者的推文！')
+          res.json(tweet)
         })
     } catch (err) {
       next(err)
@@ -252,18 +250,28 @@ const userController = {
   putUser: (req, res, next) => {
     try {
       const userId = req.params.id
-      const { name, introduction } = req.body
+      const { name, account, email, password, checkPassword, introduction } = req.body
       const { files } = req
       if (!name) throw new Error('請輸入使用者姓名！')
+      if (!checkPassword) throw new Error('請再輸入一次密碼')
+      if (password !== checkPassword) throw new Error('確認密碼有誤，請重新輸入一次')
       return Promise.all([
         User.findByPk(userId),
+        User.findOne({ where: { account } }),
+        User.findOne({ where: { email } }),
         imgurCoverHandler(files),
         imgurAvatarHandler(files)
       ])
-        .then(([user, coverUrl, avatarUrl]) => {
+        .then(([user, account, email, coverUrl, avatarUrl]) => {
           if (!user) throw new Error('使用者不存在！')
+          if (account) throw new Error('此帳戶已經有人使用')
+          if (email) throw new Error('此信箱已經有人使用，請更換其他信箱')
+          const newPassword = bcrypt.hashSync(password, 10)
           return user.update({
             name,
+            account: account || user.account,
+            email: email || user.email,
+            password: newPassword,
             introduction: introduction || user.introduction,
             cover: coverUrl || user.cover,
             avatar: avatarUrl || user.avatar
