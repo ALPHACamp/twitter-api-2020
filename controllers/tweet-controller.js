@@ -73,17 +73,26 @@ const tweetController = {
   },
 
   getTweetReplies: (req, res, next) => {
-    Reply.findAll({
-      where: {
-        tweetId: req.params.tweet_id
-      },
-      attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
-      include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-      ],
-      order: [['createdAt', 'DESC']]
-    })
-      .then(replies => res.status(200).json(replies))
+    const TweetId = Number(req.params.tweet_id)
+
+    Promise.all([
+      Tweet.findByPk(TweetId),
+      Reply.findAll({
+        where: {
+          TweetId
+        },
+        attributes: ['id', 'UserId', 'comment', 'createdAt', 'updatedAt'],
+        include: [
+          { model: User, as: 'ReplyUser', attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([tweet, replies]) => {
+        if (!tweet) throw new Error('這篇推文不存在！')
+        if (replies.length <= 0) throw new Error('這篇推文沒有回覆！')
+        return res.status(200).json(replies)
+      })
       .catch(err => next(err))
   },
 
