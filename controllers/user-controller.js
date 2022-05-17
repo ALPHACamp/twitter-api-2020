@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs')
 const { User, Tweet, Followship, Reply, Like } = require('../models')
 
 const { getUser } = require('../_helpers')
-const Sequelize = require('sequelize')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -74,14 +73,29 @@ const userController = {
     const reqUserId = getUser(req).id
     return User.findByPk(userId, {
       include: [
+        { model: Tweet },
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
       ]
     })
       .then(user => {
         if (!user || user.role === 'admin') throw new Error('帳號不存在！')
-        user.dataValues.isFollowed = user.Followers.map(u => u.id).includes(reqUserId)
-        return res.status(200).json(user)
+        const { id, account, name, email, introduction, avatar, cover, createdAt } = user
+        const isFollowing = user.Followers.map(f => f.id === reqUserId)
+        return res.status(200).json({
+          id,
+          account,
+          name,
+          email,
+          introduction,
+          avatar,
+          cover,
+          createdAt,
+          tweetCount: user.Tweets.length,
+          followingCount: user.Followings.length,
+          followerCount: user.Followers.length,
+          isFollowing
+        })
       })
       .catch(err => next(err))
   },
@@ -263,41 +277,65 @@ const userController = {
 
   getFollowings: (req, res, next) => {
     const UserId = Number(req.params.id)
-    Followship.findAll({
-      where: { followerId: UserId },
-      attributes: [
-        'followingId', 'createdAt',
-        [Sequelize.literal('(SELECT account FROM Users WHERE id = following_id)'), 'account'],
-        [Sequelize.literal('(SELECT name FROM Users WHERE id = following_id)'), 'name'],
-        [Sequelize.literal('(SELECT avatar FROM Users WHERE id = following_id)'), 'avatar'],
-        [Sequelize.literal('(SELECT introduction FROM Users WHERE id = following_id)'), 'introduction'],
-        [Sequelize.literal(`(CASE WHEN following_id = ${UserId} THEN true ELSE false END)`), 'isFollowing']
-      ],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(followers => res.status(200).json(followers))
+    const reqUserId = Number(getUser(req))
+    return Promise.all([
+      User.findByPk(UserId, {
+        include: { model: User, as: 'Followings' }
+      }),
+      Followship.findAll({
+        where: { followerId: reqUserId },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, following]) => {
+        if (!user.Followings.length) throw new Error('沒有追隨者名單！')
+
+        const currentUserFollowing = following.map(f => f.followingId)
+        const data = user.Followings.map(f => ({
+          followingId: f.id,
+          account: f.account,
+          name: f.name,
+          avatar: f.avatar,
+          introduction: f.introduction,
+          createdAt: f.createdAt,
+          isFollowed: currentUserFollowing.some(id => id === f.id)
+        }))
+        return res.status(200).json(data)
+      })
       .catch(err => next(err))
   },
 
   getFollowers: (req, res, next) => {
     const UserId = Number(req.params.id)
-    Followship.findAll({
-      where: { followingId: UserId },
-      attributes: [
-        'followerId', 'createdAt',
-        [Sequelize.literal('(SELECT account FROM Users WHERE id = follower_id)'), 'account'],
-        [Sequelize.literal('(SELECT name FROM Users WHERE id = follower_id)'), 'name'],
-        [Sequelize.literal('(SELECT avatar FROM Users WHERE id = follower_id)'), 'avatar'],
-        [Sequelize.literal('(SELECT introduction FROM Users WHERE id = follower_id)'), 'introduction'],
-        [Sequelize.literal(`(CASE WHEN follower_id = ${UserId} THEN true ELSE false END)`), 'isFollowing']
-      ],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(followers => res.status(200).json(followers))
+    const reqUserId = Number(getUser(req))
+    return Promise.all([
+      User.findByPk(UserId, {
+        include: { model: User, as: 'Followers' }
+      }),
+      Followship.findAll({
+        where: { followingId: reqUserId },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, follower]) => {
+        if (!user.Followers.length) throw new Error('沒有粉絲名單！')
+
+        const currentUserFollowing = follower.map(f => f.followingId)
+        const data = user.Followers.map(f => ({
+          followerId: f.id,
+          account: f.account,
+          name: f.name,
+          avatar: f.avatar,
+          introduction: f.introduction,
+          createdAt: f.createdAt,
+          isFollowed: currentUserFollowing.some(id => id === f.id)
+        }))
+        return res.status(200).json(data)
+      })
       .catch(err => next(err))
   }
 }
