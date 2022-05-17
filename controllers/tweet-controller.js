@@ -21,6 +21,7 @@ const tweetController = {
       nest: true
     })
       .then(tweets => {
+        if (!tweets) throw new Error('沒有推文資料！')
         const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(t => t.id) : []
         const data = tweets.map(tweet => ({
           ...tweet,
