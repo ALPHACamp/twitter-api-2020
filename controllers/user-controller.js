@@ -229,11 +229,7 @@ const userController = {
           { model: User, as: 'ReplyUser', attributes: ['id', 'name', 'account', 'avatar'] },
           {
             model: Tweet,
-            attributes: [
-              [Sequelize.literal('(SELECT id FROM Users WHERE Tweet.User_Id = Users.id)'), 'UserId'],
-              [Sequelize.literal('(SELECT name FROM Users WHERE Tweet.User_Id = Users.id)'), 'UserName'],
-              [Sequelize.literal('(SELECT account FROM Users WHERE Tweet.User_Id = Users.id)'), 'UserAccount']
-            ]
+            include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }]
           }
         ],
         order: [['createdAt', 'DESC']],
@@ -245,7 +241,12 @@ const userController = {
       .then(([replies, user]) => {
         if (!user) throw new Error('使用者不存在！')
         if (replies.length <= 0) throw new Error('該使用者沒有回覆！')
-        return res.status(200).json(replies)
+        const replyList = replies.map(data => ({
+          ...data,
+          Tweet: { id: data.Tweet.id },
+          TweetUser: data.Tweet.TweetUser
+        }))
+        return res.status(200).json(replyList)
       })
       .catch(err => next(err))
   },
@@ -254,13 +255,18 @@ const userController = {
     const UserId = Number(req.params.id)
 
     Promise.all([
-      Like.findAndCountAll({
+      Like.findAll({
         where: { UserId },
-        attributes: ['id', 'createdAt', 'TweetId', 'UserId'],
+        attributes: ['id', 'UserId', 'TweetId'],
         include: [
           {
             model: Tweet,
-            attributes: ['id', 'description', 'likeCount', 'replyCount'],
+            attributes: [
+              'id',
+              'description',
+              [Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Tweet.id = Replies.Tweet_id )'), 'replyCount'],
+              [Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Tweet.id = Likes.Tweet_id)'), 'likeCount']
+            ],
             include: [
               {
                 model: User,
@@ -276,13 +282,19 @@ const userController = {
       }),
       User.findByPk(UserId)
     ])
-      .then(([likes, userOnChecked]) => {
-        userOnChecked.update({
-          likeCount: likes.count
-        })
+      .then(([likes, user]) => {
+        if (!user) throw new Error('使用者不存在！')
+        if (likes.length <= 0) throw new Error('該使用者沒有Like任何推文!')
         const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(l => l.id) : []
-        const likeList = likes.rows.map(data => ({
+        const likeList = likes.map(data => ({
           ...data,
+          Tweet: {
+            id: data.Tweet.id,
+            description: data.Tweet.description,
+            likeCount: data.Tweet.likeCount,
+            replyCount: data.Tweet.replyCount
+          },
+          TweetUser: data.Tweet.TweetUser,
           isLiked: likedTweetId.some(item => item === data.Tweet.id)
         }))
         res.status(200).json(likeList)
