@@ -16,7 +16,6 @@ module.exports = {
       const randomFollowerId = users[Math.floor(Math.random() * users.length)].id
       const randomFollowingId = users[Math.floor(Math.random() * users.length)].id
 
-      // no duplicate
       if (!followships.some(follow => follow.followerId === randomFollowerId && follow.followingId === randomFollowingId)) {
         // 不能 follow 自己以及 admin
         if (randomFollowerId !== randomFollowingId && !adminId.some(a => a.id === randomFollowerId || a.id === randomFollowingId)) {

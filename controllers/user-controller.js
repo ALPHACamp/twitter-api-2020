@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs')
 const { User, Tweet, Followship, Reply, Like } = require('../models')
 
 const { getUser } = require('../_helpers')
-const Sequelize = require('sequelize')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -81,15 +80,17 @@ const userController = {
     })
       .then(user => {
         if (!user || user.role === 'admin') throw new Error('帳號不存在！')
-        const { account, name, email, introduction, avatar, cover } = user
-        const isFollowing = user.Followers.some(f => f.id === reqUserId)
+        const { id, account, name, email, introduction, avatar, cover, createdAt } = user
+        const isFollowing = user.Followers.map(f => f.id === reqUserId)
         return res.status(200).json({
+          id,
           account,
           name,
           email,
           introduction,
           avatar,
           cover,
+          createdAt,
           tweetCount: user.Tweets.length,
           followingCount: user.Followings.length,
           followerCount: user.Followers.length,
