@@ -7,6 +7,7 @@ const likeController = require('../../controllers/apis/like-controller')
 const replyController = require('../../controllers/apis/reply-controller')
 const adminController = require('../../controllers/apis/admin-controller')
 const { apiErrorHandler } = require('../../middleware/error-handler')
+const upload = require('../../middleware/multer')
 const {
   authenticated,
   authenticatedAdmin
@@ -27,7 +28,10 @@ router.get('/users/:id/followings', authenticated, userController.getUserFollowi
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
 
 router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id', authenticated, userController.editUser)
+router.put('/users/:id', authenticated, upload.fields([
+  { name: 'avatar_img', maxCount: 1 },
+  { name: 'cover_img', maxCount: 1 }
+]), userController.editUser)
 router.post('/users', userController.signUp)
 
 router.get('/tweets/:tId/replies', authenticated, replyController.getReply)

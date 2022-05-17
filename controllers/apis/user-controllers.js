@@ -40,9 +40,9 @@ const userController = {
 
       const userIdentity = await Identity.findOne({
         where: { identity: 'user' },
-        attributes: ['id']
+        attributes: ['identity']
       })
-      const { id } = userIdentity.toJSON()
+      const { identity } = userIdentity.toJSON()
       const password = await bcrypt.hash(req.body.password, 10)
 
       const registeredUser = await User.create({
@@ -50,8 +50,9 @@ const userController = {
         name: req.body.name,
         email: req.body.email,
         password,
-        identityId: id
+        role: identity
       })
+
       const token = jwt.sign(registeredUser.toJSON(), process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
@@ -110,10 +111,10 @@ const userController = {
 
       const user = await User.findAll({
         where: { id: req.params.id },
-        attributes: ['id', 'account', 'name', 'email', 'coverImg', 'avatarImg', 'bio'],
+        attributes: ['id', 'account', 'name', 'email', 'coverImg', 'avatarImg', 'introduction'],
         include: [
-          { model: User, as: 'Follower', attributes: ['id', 'name', 'account', 'avatarImg', 'bio'] },
-          { model: User, as: 'Following', attributes: ['id', 'name', 'account', 'avatarImg', 'bio'] }
+          { model: User, as: 'Follower', attributes: ['id', 'name', 'account', 'avatarImg', 'introduction'] },
+          { model: User, as: 'Following', attributes: ['id', 'name', 'account', 'avatarImg', 'introduction'] }
         ],
         nest: true
       })
@@ -200,7 +201,7 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name']
+            attributes: ['id', 'account', 'name', 'avatar_img']
           },
           {
             model: Tweet,
@@ -330,20 +331,23 @@ const userController = {
 
   editUser: async (req, res, next) => {
     try {
-      const { name, introduction } = req.body
-      const { avatarImg, coverImg } = req.files
+      const { name, bio } = req.body
+      const { files } = req
+      const avatarImg = files.avatar_img
+      const coverImg = files.cover_img
       const user = await User.findByPk(req.params.id)
-      const avatarImgUrl = await helpers.imgurFileHandler(avatarImg)
-      const coverImgUrl = await helpers.imgurFileHandler(coverImg)
+      const avatarImgUrl = await helpers.imgurFileHandler(avatarImg[0])
+      const coverImgUrl = await helpers.imgurFileHandler(coverImg[0])
       if (!user) throw new Error('沒有找到相關的使用者資料')
 
       const updatedUser = await user.update({
         name,
-        introduction,
-        avatar_img: avatarImgUrl || '',
-        cover_img: coverImgUrl || ''
+        bio,
+        avatarImg: avatarImgUrl || '',
+        coverImg: coverImgUrl || ''
       })
       const data = updatedUser.toJSON()
+      delete data.password
       return res.status(200).json(data)
     } catch (err) {
       next(err)
@@ -352,14 +356,13 @@ const userController = {
 
   getTopUser: async (req, res, next) => {
     try {
-      const identityId = (await Identity.findOne({
-        where: { identity: 'user' },
-        attributes: ['id']
-      })).id
+      const userIdentity = (await Identity.findOne({
+        where: { role: 'user' }
+      }))
 
       let users = await (User.findAll({
         nest: true,
-        where: { identity_id: identityId },
+        where: { role: userIdentity },
         attributes: [
           'id',
           'name',

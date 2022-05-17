@@ -1,4 +1,4 @@
-const { User, Tweet, Identity, Like, Followship } = require('../../models')
+const { Identity, User, Tweet, Reply, Like, Followship } = require('../../models')
 // const { Sequelize } = require('sequelize')
 // const sequelize = new Sequelize('sqlite::memory:')
 
@@ -10,7 +10,7 @@ const adminController = {
         include: [
           {
             model: Identity,
-            where: { identity: 'user' },
+            where: { role: 'user' },
             attributes: []
           }
         ],
@@ -46,9 +46,14 @@ const adminController = {
 
   deleteTweet: async (req, res, next) => {
     try {
-      const deletedTweet = await Tweet.findByPk(req.params.id)
+      const TweetId = req.params.ud
+      const deletedTweet = await Tweet.findByPk(TweetId)
       if (!deletedTweet) throw new Error('找不到相關推文')
-      await deletedTweet.destroy()
+
+      await Reply.destroy({ where: { TweetId } })
+      await Like.destroy({ where: { TweetId } })
+      await Tweet.destroy({ where: { TweetId } })
+
       return res.status(200).json({
         deletedTweet
       })
