@@ -74,9 +74,8 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  getCurrentUser: (req, res, next) => { // #todo need more info
-    const currentUser = res.locals.user
-    return currentUser
+  getCurrentUser: (req, res, next) => {
+    return res.json(req.user)
   },
   putUser: (req, res, next) => {
     if (Number(req.params.id) !== Number(req.user.id)) {
@@ -115,7 +114,7 @@ const userController = {
   },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      where: { userId: req.params.id },
+      where: { UserId: req.params.id },
       include: [{
         model: Reply,
         as: 'Replies',
@@ -140,11 +139,11 @@ const userController = {
   },
   getRepliedTweets: (req, res, next) => {
     return Reply.findAll({
-      where: { userId: req.params.id },
+      where: { UserId: req.params.id },
       include: [{
         model: Tweet,
         as: 'Tweet',
-        attributes: ['userId'],
+        attributes: ['UserId'],
         include: [{
           model: User,
           as: 'LikedUsers',
@@ -166,7 +165,7 @@ const userController = {
   },
   getLikes: (req, res, next) => {
     return Like.findAll({
-      where: { userId: req.params.id },
+      where: { UserId: req.params.id },
       include: [{
         model: Tweet,
         as: 'Tweet',
@@ -223,7 +222,8 @@ const userController = {
       ],
       order: [['createdAt', 'DESC']]
     }).then(followers => {
-      const resultFollowers = followers.map(f => ({ ...f.toJSON() }))
+      const FollowersId = req.user?.Followers ? req.user.Followers.map(Follower => Follower.id) : []
+      const resultFollowers = followers.map(f => ({ ...f.toJSON(), isFollowing: FollowersId.includes(f.id) }))
       delete resultFollowers[0].password
       return res.json({
         status: 'success',
