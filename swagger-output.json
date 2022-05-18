@@ -735,6 +735,22 @@
           "403": {
             "description": "Forbidden"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "example": "2"
+                    
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },

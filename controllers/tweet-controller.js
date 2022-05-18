@@ -61,7 +61,8 @@ const tweetController = {
     return Tweet.findByPk(req.params.id, {
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: User, as: 'LikedUsers', attributes: ['id', 'account', 'name', 'avatar'] }
+        { model: User, as: 'LikedUsers', attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Reply, attributes: ['id'] }
       ]
     })
       .then(tweet => {
@@ -69,6 +70,8 @@ const tweetController = {
         const isLiked = tweet.LikedUsers.some(l => l.id === req.user.id)
         const resultTweet = tweet.toJSON()
         resultTweet.isLiked = isLiked
+        resultTweet.totalLikes = resultTweet.LikedUsers ? resultTweet.LikedUsers.length : 0
+        resultTweet.totalReplies = resultTweet.Replies ? resultTweet.Replies.length : 0
         return res.json({
           status: 'Success',
           statusCode: 200,
