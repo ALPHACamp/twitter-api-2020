@@ -75,7 +75,10 @@ const replyController = {
         ReplyId
       })
       const replyLikesNum = await replyLikeService.count(ReplyId)
-      res.status(200).json(replyLikesNum)
+      const data = {
+        replyLikeNum: Number(replyLikesNum[0])
+      }
+      res.status(200).json(data)
     } catch (err) {
       next(err)
     }
@@ -98,7 +101,10 @@ const replyController = {
         }
       })
       const replyLikesNum = await replyLikeService.count(ReplyId)
-      res.status(200).json(replyLikesNum)
+      const data = {
+        replyLikeNum: Number(replyLikesNum[0])
+      }
+      res.status(200).json(data)
     } catch (err) {
       next(err)
     }
