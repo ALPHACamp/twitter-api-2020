@@ -57,7 +57,8 @@ const userServices = {
       Tweet.findAll(
         {
         where: { UserId: req.params.id },
-          include: [{model: User},{ model: Reply }, { model: Like}]
+        include: [{model: User},{ model: Reply }, { model: Like}],
+        order: [['createdAT', 'DESC']]
       })
     ])
       .then(([user, tweets]) => {
@@ -150,7 +151,8 @@ const userServices = {
           followingName: f.name,
           followingAccount: f.account,
           followingAvatar: f.avatar,
-          followingIntroduction: f.introduction
+          followingIntroduction: f.introduction,
+          isFollowed: helpers.getUser(req).Followings.some(follow => follow.id === f.id)
         }))
         if (!user) throw new Error("User didn't exists!")
         return cb(null, userFollowings)
@@ -168,7 +170,8 @@ const userServices = {
         followerName: f.name,
         followerAccount: f.account,
         followerAvatar: f.avatar,
-        followerIntroduction: f.introduction
+        followerIntroduction: f.introduction,
+        isFollowed: helpers.getUser(req).Followings.some(follow => follow.Followship.followerId === f.id)
       }))
       if (!user) throw new Error("User didn't exists!")
       return cb(null, userFollowers)
