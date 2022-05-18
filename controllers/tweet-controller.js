@@ -43,7 +43,6 @@ const tweetController = {
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'], as: 'TweetUser' }
       ],
-      order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
     })
@@ -62,7 +61,7 @@ const tweetController = {
     const UserId = Number(getUser(req).id)
     const { description } = req.body
     if (!description) throw new Error('推文內容不可空白！')
-    if (description.trim().length > 140) throw new Error('推文字數不可超過140字！')
+    if (description.length > 140) throw new Error('推文字數不可超過140字！')
 
     return Tweet.create({
       UserId,
