@@ -40,7 +40,7 @@ const userController = {
           [Op.or]: [{ account: req.body.account }, { email: req.body.email }]
         }
       })
-      if (user) throw new Error('使用者已經存在')
+      if (user.length) throw new Error('使用者已經存在')
 
       const password = await bcrypt.hash(req.body.password, 10)
       const registeredUser = await User.create({
@@ -363,7 +363,7 @@ const userController = {
           [Op.or]: [{ account: req.body.account }, { email: req.body.email }]
         }
       })
-      if (existedUser) throw new Error('使用者已經存在')
+      if (existedUser.length) throw new Error('使用者已經存在')
 
       const user = await User.findByPk(req.params.id)
       if (!user) throw new Error('沒有找到相關的使用者資料')
