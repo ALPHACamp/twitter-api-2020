@@ -4,7 +4,7 @@ const helpers = require('../_helpers')
 const userServices = {
   signUp: (req, cb) => {
     let { account, name, email, password, checkPassword } = req.body
-    if (!account || !password || !checkPassword || !email || !name ) throw new Error('Please fill required fields!')
+    if (!account || !password || !checkPassword || !email || !name) throw new Error('Please fill required fields!')
 
     account = account.trim()
     name = name.trim()
@@ -68,7 +68,7 @@ const userServices = {
           userAccount: t.User.account,
           userAvatar: t.User.avatar,
           User: t.User.name,
-          Replies:t.Replies.length,
+          Replies: t.Replies.length,
           Likes: t.Likes.length,
           isLiked: t.Likes.some(l => l.UserId = helpers.getUser(req).id)
         }))
@@ -81,7 +81,7 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Reply.findAll({
         where: { UserId: req.params.id },
-        include:[{model: Tweet, include: User}, {model: User}],
+        include: [{ model: Tweet, include: User }, { model: User }],
         order: [['createdAt', 'DESC']]
       })
     ])
@@ -98,7 +98,7 @@ const userServices = {
           userAvatar: r.User.avatar,
           comment: r.comment,
           replyUserId: r.Tweet.UserId,
-          replyName: r.Tweet.User.name, 
+          replyName: r.Tweet.User.name,
           replyAccount: r.Tweet.User.account,
           replyAvatar: r.Tweet.User.avatar,
           replyCreatedAt: r.createdAt,
@@ -118,25 +118,25 @@ const userServices = {
         include: [{ model: Tweet, include: [{ model: User }, { model: Reply }, { model: Like }] }]
       })
     ])
-    .then(([user, likes]) => {
-      if (!user) throw new Error("User didn't exists!")
+      .then(([user, likes]) => {
+        if (!user) throw new Error("User didn't exists!")
 
-      const userLikes = likes.map(l => ({
-        UserId: l.UserId,
-        tweetName: l.Tweet.User.name,
-        tweetAccount: l.Tweet.User.account,
-        tweetAvatar: l.Tweet.User.avatar,
-        TweetId: l.TweetId,
-        tweetDescription: l.Tweet.description,
-        tweetLikesCount: l.Tweet.Likes.length,
-        tweetRepliesCount: l.Tweet.Replies.length,
-        isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id),
-        createdAt: l.createdAt,
-        updatedAt: l.updatedAt
-      }))
-      return cb(null, userLikes)
-    })
-    .catch(err => cb(err))
+        const userLikes = likes.map(l => ({
+          UserId: l.UserId,
+          tweetName: l.Tweet.User.name,
+          tweetAccount: l.Tweet.User.account,
+          tweetAvatar: l.Tweet.User.avatar,
+          TweetId: l.TweetId,
+          tweetDescription: l.Tweet.description,
+          tweetLikesCount: l.Tweet.Likes.length,
+          tweetRepliesCount: l.Tweet.Replies.length,
+          isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id),
+          createdAt: l.createdAt,
+          updatedAt: l.updatedAt
+        }))
+        return cb(null, userLikes)
+      })
+      .catch(err => cb(err))
   },
   getUserFollowings: (req, cb) => {
     return User.findByPk(req.params.id, {
@@ -161,20 +161,21 @@ const userServices = {
   getUserFollowers: (req, cb) => {
     return User.findByPk(req.params.id, {
       include: [
-        {model: User, as: 'Followers'}
-      ]})
-    .then((user) => {
-      const userFollowers = user.Followers.map(f => ({
-        followerId: f.id,
-        followerName: f.name,
-        followerAccount: f.account,
-        followerAvatar: f.avatar,
-        followerIntroduction: f.introduction,
-        isFollowed: helpers.getUser(req).Followings.some(follow => follow.Followship.followerId === f.id)
-      }))
-      if (!user) throw new Error("User didn't exists!")
-      return cb(null, userFollowers)
+        { model: User, as: 'Followers' }
+      ]
     })
+      .then((user) => {
+        const userFollowers = user.Followers.map(f => ({
+          followerId: f.id,
+          followerName: f.name,
+          followerAccount: f.account,
+          followerAvatar: f.avatar,
+          followerIntroduction: f.introduction,
+          isFollowed: helpers.getUser(req).Followings.some(follow => follow.Followship.followerId === f.id)
+        }))
+        if (!user) throw new Error("User didn't exists!")
+        return cb(null, userFollowers)
+      })
       .then((user) => {
         const userFollowers = user.Followers.map(f => ({
           followerId: f.id,
@@ -229,7 +230,7 @@ const userServices = {
       helpers.imgurFileHandler(avatar),
       helpers.imgurFileHandler(cover)
     ])
-      .then(async([user, avatarImg, coverImg]) => {
+      .then(async ([user, avatarImg, coverImg]) => {
         if (!user) throw new Error("User didn't exists!")
         if (password) {
           password = await bcrypt.hash(password, 10)
@@ -284,6 +285,21 @@ const userServices = {
         return followship.destroy()
       })
       .then(removefollowship => cb(null, removefollowship))
+      .catch(err => cb(err))
+  },
+  getTopUsers: (req, cb) => {
+    return User.findAll({
+      include: [{ model: User, as: 'Followers' }]
+    })
+      .then(users => {
+        const result = users.map(user => ({
+          ...user.toJSON(),
+          followerCount: user.Followers.length,
+          isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
+        }))
+          .sort((a, b) => b.followerCount - a.followerCount)
+        return cb(null, result)
+      })
       .catch(err => cb(err))
   }
 }
