@@ -27,7 +27,7 @@ const userController = {
         email,
         password: bcrypt.hashSync(password, 10)
       })
-      res.status(200).json('註冊成功')
+      res.status(200).json({ message: '註冊成功' })
     } catch (err) {
       next(err)
     }
