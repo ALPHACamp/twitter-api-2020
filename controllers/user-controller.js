@@ -336,7 +336,7 @@ const userController = {
       })
     ])
       .then(([user, following]) => {
-        if (!user.Followings.length) throw new Error('沒有追隨者名單！')
+        if (!user.Followings.length) { res.status(200).json({ message: '沒有追隨者名單！' }) }
 
         const currentUserFollowing = following.map(f => f.followingId)
         const data = user.Followings.map(f => ({
@@ -346,7 +346,7 @@ const userController = {
           avatar: f.avatar,
           introduction: f.introduction,
           createdAt: f.createdAt,
-          isFollowed: currentUserFollowing.some(id => id === f.id)
+          isFollowed: currentUserFollowing.some(u => u.id === reqUserId)
         }))
         return res.status(200).json(data)
       })
@@ -368,7 +368,7 @@ const userController = {
       })
     ])
       .then(([user, follower]) => {
-        if (!user.Followers.length) throw new Error('沒有粉絲名單！')
+        if (!user.Followers.length) { res.status(200).json({ message: '沒有粉絲名單！' }) }
 
         const currentUserFollowing = follower.map(f => f.followingId)
         const data = user.Followers.map(f => ({
@@ -378,7 +378,7 @@ const userController = {
           avatar: f.avatar,
           introduction: f.introduction,
           createdAt: f.createdAt,
-          isFollowed: currentUserFollowing.some(id => id === f.id)
+          isFollowed: currentUserFollowing.some(u => u.id === reqUserId)
         }))
         return res.status(200).json(data)
       })
@@ -406,6 +406,12 @@ const userController = {
           followingId,
           followerId
         })
+        // .then(followship => {
+        //   Promise.all([
+        //     User.findByPk(+followerId).then(currentUser => currentUser.increment({ followingCount: 1 })),
+        //     User.findByPk(+followingId).then(followingUser => followingUser.increment({ followerCount: 1 }))
+        //   ])
+        // })
       })
       .then(getFollowing => {
         res.status(200).json({ message: '成功追蹤使用者！', getFollowing })
