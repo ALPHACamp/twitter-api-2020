@@ -118,6 +118,7 @@ const tweetController = {
         if (!tweet) throw new Error("Tweet didn't exist!")
         const repliesData = replies.map(r => ({
           ...r.toJSON(),
+          userAccount: r.User.account,
           userName: r.User.name,
           userAvatar: r.User.avatar,
           replyUserId: r.Tweet.User.id,

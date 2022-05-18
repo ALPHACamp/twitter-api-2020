@@ -175,6 +175,17 @@ const userServices = {
       if (!user) throw new Error("User didn't exists!")
       return cb(null, userFollowers)
     })
+      .then((user) => {
+        const userFollowers = user.Followers.map(f => ({
+          followerId: f.id,
+          followerName: f.name,
+          followerAccount: f.account,
+          followerAvatar: f.avatar,
+          followerIntroduction: f.introduction
+        }))
+        if (!user) throw new Error("User didn't exists!")
+        return cb(null, userFollowers)
+      })
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
