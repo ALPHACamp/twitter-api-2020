@@ -67,18 +67,6 @@ module.exports = {
         created_at: new Date(),
         updated_at: new Date()
       },
-      {
-        account: 'user5',
-        name: 'user5',
-        email: 'user5@example.com',
-        role: 'user',
-        avatar: 'https://loremflickr.com/280/280/admin',
-        cover_image: 'https://loremflickr.com/1280/400/landscape',
-        introduction: faker.lorem.sentence(4),
-        password: bcrypt.hashSync('12345678', 10),
-        created_at: new Date(),
-        updated_at: new Date()
-      },
       // other users
       {
         account: 'austin',
