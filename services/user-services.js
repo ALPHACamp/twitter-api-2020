@@ -194,34 +194,36 @@ const userServices = {
     let avatar = null
     let cover = null
 
-    if (account) {
+    if(account) {
       account = account.trim()
     }
     if (name) {
       name = name.trim()
+      if (name.length > 50) throw new Error('Length of the name is too long!')
     }
     if (email) {
       email = email.trim()
     }
     if (password) {
       password = password.trim()
+      if (!checkPassword) throw new Error('Please enter checkPassword!')
     }
     if (checkPassword) {
       checkPassword = checkPassword.trim()
+      if (password != checkPassword) throw new Error('Password do not match!')
     }
     if (introduction) {
       introduction = introduction.trim()
+      if (introduction.length > 160) throw new Error('Length of the introduction is too long!')
     }
-    if (req.files['avatar']) {
-      avatar = req.files['avatar'][0]
+    if (req.files) {
+      if (req.files['avatar']) {
+        avatar = req.files['avatar'][0]
+      }
+      if (req.files['cover']) {
+        cover = req.files['cover'][0]
+      }
     }
-    if (req.files['cover']) {
-      cover = req.files['cover'][0]
-    }
-
-    if (password != checkPassword) throw new Error('Password do not match!')
-    if (name.length > 50) throw new Error('Length of the name is too long!')
-    if (introduction.length > 160) throw new Error('Length of the introduction is too long!')
 
     return Promise.all([
       User.findByPk(req.params.id),
