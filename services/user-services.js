@@ -229,11 +229,14 @@ const userServices = {
     ])
       .then(async([user, avatarImg, coverImg]) => {
         if (!user) throw new Error("User didn't exists!")
+        if (password) {
+          password = await bcrypt.hash(password, 10)
+        }
         return user.update({
           name: name || user.name,
           account: account || user.account,
           email: email || user.email,
-          password: await bcrypt.hash(password, 10) || user.password,
+          password: password || user.password,
           introduction: introduction || user.introduction,
           avatar: avatarImg || user.avatar,
           cover: coverImg || user.cover
