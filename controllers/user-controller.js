@@ -23,7 +23,6 @@ const userController = {
           expiresIn: '30d'
         })
         return res.status(200).json({
-          message: '成功登入！',
           token,
           user: userData
         })
@@ -63,7 +62,7 @@ const userController = {
           expiresIn: '30d'
         })
         return res.status(200).json({
-          message: '成功註冊！',
+
           token,
           user: userData
         })
@@ -72,19 +71,23 @@ const userController = {
   },
 
   getUser: (req, res, next) => {
-    const userId = Number(req.params.id)
-    return User.findByPk(userId, {
+    const UserId = Number(req.params.id)
+    const reqUserId = helpers.getUser(req).id
+    return User.findByPk(UserId, {
       include: [
         { model: Tweet },
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
       ]
     })
-      .then(user => {
-        if (!user || user.role === 'admin') throw new Error('帳號不存在！')
-        const { id, account, name, email, introduction, avatar, cover, createdAt } = user
+      .then(updatedUser => {
+        if (!updatedUser || updatedUser.role === 'admin') throw new Error('帳號不存在！')
+        const { id, account, name, email, introduction, avatar, cover, createdAt } = updatedUser
+        updatedUser.owner = reqUserId === UserId || false
+        const isFollowed = req.user.Followings.some(
+          f => f.id === updatedUser.id
+        )
         return res.status(200).json({
-          message: '成功取得使用者資料！',
           id,
           account,
           name,
@@ -93,9 +96,11 @@ const userController = {
           avatar,
           cover,
           createdAt,
-          tweetCount: user.Tweets.length,
-          followingCount: user.Followings.length,
-          followerCount: user.Followers.length
+          tweetCount: updatedUser.Tweets.length,
+          followingCount: updatedUser.Followings.length,
+          followerCount: updatedUser.Followers.length,
+          owner: updatedUser.owner,
+          isFollowed
         })
       })
       .catch(err => next(err))
@@ -104,7 +109,7 @@ const userController = {
   getCurrentUser: (req, res, next) => {
     try {
       const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(helpers.getUser(req))
-      return res.status(200).json({ message: '成功取得目前登入的使用者資料！', userData })
+      return res.status(200).json(userData)
     } catch (err) {
       next(err)
     }
@@ -133,7 +138,7 @@ const userController = {
           delete r.Followers
         })
 
-        return res.status(200).json({ message: '成功取得前十位最多追蹤者的使用者資料！', result })
+        return res.status(200).json(result)
       })
       .catch(err => next(err))
   },
@@ -170,7 +175,7 @@ const userController = {
           password: hash
         })
       })
-      .then(updatedUser => res.status(200).json({ message: '成功編輯使用者個人資料！', user: updatedUser }))
+      .then(updatedUser => res.status(200).json(updatedUser))
       .catch(err => next(err))
   },
 
@@ -197,7 +202,7 @@ const userController = {
         avatar: avatar || reqUser.avatar,
         cover: cover || reqUser.cover
       })
-      res.status(200).json({ message: '成功編輯使用者資料！', data })
+      res.status(200).json(data)
     } catch (err) {
       next(err)
     }
@@ -336,7 +341,9 @@ const userController = {
       })
     ])
       .then(([user, following]) => {
-        if (!user.Followings.length) throw new Error('沒有追隨者名單！')
+        if (!user) throw new Error('使用者不存在！')
+        if (user.role === 'admin') throw new Error('管理者無法追蹤其他使用者！')
+        if (!user.Followings.length) { res.status(200).json({ message: '沒有追隨者名單！' }) }
 
         const currentUserFollowing = following.map(f => f.followingId)
         const data = user.Followings.map(f => ({
@@ -368,7 +375,9 @@ const userController = {
       })
     ])
       .then(([user, follower]) => {
-        if (!user.Followers.length) throw new Error('沒有粉絲名單！')
+        if (!user) throw new Error('使用者不存在！')
+        if (user.role === 'admin') throw new Error('管理者無法被追蹤！')
+        if (!user.Followers.length) { res.status(200).json({ message: '沒有粉絲名單！' }) }
 
         const currentUserFollowing = follower.map(f => f.followingId)
         const data = user.Followers.map(f => ({
@@ -401,14 +410,14 @@ const userController = {
     ])
       .then(([user, isFollowed]) => {
         if (!user) throw new Error('使用者不存在!')
-        if (isFollowed) throw new Error('你已經追蹤該使用者！')
+        if (isFollowed) throw new Error('你已經追蹤該名使用者，不能重複追蹤！')
         return Followship.create({
           followingId,
           followerId
         })
       })
       .then(getFollowing => {
-        res.status(200).json({ message: '成功追蹤使用者！', getFollowing })
+        res.status(200).json(getFollowing)
       })
       .catch(err => next(err))
   },
@@ -428,7 +437,7 @@ const userController = {
     ])
       .then(([user, isFollowed]) => {
         if (!user) throw new Error('無法取消追蹤不存在的使用者!')
-        if (!isFollowed) throw new Error('你尚未追蹤該名使用者！')
+        if (!isFollowed) throw new Error('你尚未追蹤該名使用者，不能取消追蹤！')
         return Followship.destroy({
           where: {
             followingId,
@@ -436,7 +445,7 @@ const userController = {
           }
         })
       })
-      .then(removeFollowing => res.status(200).json({ message: '成功取消追蹤該名使用者！', removeFollowing }))
+      .then(removeFollowing => res.status(200).json(removeFollowing))
       .catch(err => next(err))
   }
 }
