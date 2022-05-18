@@ -4,6 +4,7 @@ const helpers = require('../_helpers')
 const userServices = {
   signUp: (req, cb) => {
     let { account, name, email, password, checkPassword } = req.body
+    if (!account || !password || !checkPassword || !email || !name ) throw new Error('Please fill required fields!')
 
     account = account.trim()
     name = name.trim()
@@ -12,7 +13,6 @@ const userServices = {
     checkPassword = checkPassword.trim()
 
     if (password != checkPassword) throw new Error('Password do not match!')
-    if (!account || !password || !checkPassword || !email) throw new Error('Please fill required fields!')
     if (name.length > 50) throw new Error('Length of the name is too long!')
 
     return Promise.all([
@@ -189,30 +189,45 @@ const userServices = {
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
-    let { name, introduction } = req.body
-
-    const avatar = req.files ? req.files['avatar'][0] : null
-    const cover = req.files ? req.files['cover'][0] : null
-
+    let { account, name, email, password, checkPassword, introduction } = req.body
+    
+    if(account) {
+      account = account.trim()
+    }
     if (name) {
       name = name.trim()
-      if (name.length > 50) throw new Error('Length of the name is too long!')
     }
+    if (email) {
+      email = email.trim()
+    }
+    if(password) {
+      password = password.trim()
+      checkPassword = checkPassword.trim()
+    }
+    
+    if (password != checkPassword) throw new Error('Password do not match!')
+    if (name.length > 50) throw new Error('Length of the name is too long!')
     if (introduction) {
       introduction = introduction.trim()
       if (introduction.length > 160) throw new Error('Length of the introduction is too long!')
     }
+
+    const avatar = req.files ? req.files['avatar'][0] : null
+    const cover = req.files ? req.files['cover'][0] : null
 
     return Promise.all([
       User.findByPk(req.params.id),
       helpers.imgurFileHandler(avatar),
       helpers.imgurFileHandler(cover)
     ])
-      .then(([user, avatarImg, coverImg]) => {
+      .then(async([user, avatarImg, coverImg]) => {
         if (!user) throw new Error("User didn't exists!")
         return user.update({
-          name,
-          introduction,
+          name: name || user.name,
+          account: account || user.account,
+          email: email || user.email,
+          password: await bcrypt.hash(password, 10) || user.password,
+          introduction: introduction || user.introduction,
           avatar: avatarImg || user.avatar,
           cover: coverImg || user.cover
         })
