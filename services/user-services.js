@@ -16,8 +16,8 @@ const userServices = {
     if (name.length > 50) throw new Error('Length of the name is too long!')
 
     return Promise.all([
-      User.findOne({ where: { account }}),
-      User.findOne({ where: { email }})
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
     ])
       .then(([accountCheck, emailCheck]) => {
         if (accountCheck) throw new Error('Account already exists!')
@@ -37,12 +37,12 @@ const userServices = {
     return User.findByPk(req.params.id, {
       nest: true,
       include: [
-        { model: User, as: 'Followers'},
-        { model: User, as: 'Followings'}
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
       ]
     })
       .then(user => {
-        if (!user) throw new Error("User didn't exists!")      
+        if (!user) throw new Error("User didn't exists!")
         const userData = user.toJSON()
         delete userData.password
         userData.Followers = userData.Followers.length
@@ -115,7 +115,7 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Like.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet, include: [{model: User}, {model: Reply}, {model: Like}]}]
+        include: [{ model: Tweet, include: [{ model: User }, { model: Reply }, { model: Like }] }]
       })
     ])
     .then(([user, likes]) => {
@@ -175,16 +175,27 @@ const userServices = {
       if (!user) throw new Error("User didn't exists!")
       return cb(null, userFollowers)
     })
-    .catch(err => cb(err))
+      .then((user) => {
+        const userFollowers = user.Followers.map(f => ({
+          followerId: f.id,
+          followerName: f.name,
+          followerAccount: f.account,
+          followerAvatar: f.avatar,
+          followerIntroduction: f.introduction
+        }))
+        if (!user) throw new Error("User didn't exists!")
+        return cb(null, userFollowers)
+      })
+      .catch(err => cb(err))
   },
   putUser: (req, cb) => {
     let { name, introduction } = req.body
-  
+
     const avatar = req.files ? req.files['avatar'][0] : null
     const cover = req.files ? req.files['cover'][0] : null
-  
+
     if (name) {
-      name =  name.trim()
+      name = name.trim()
       if (name.length > 50) throw new Error('Length of the name is too long!')
     }
     if (introduction) {
