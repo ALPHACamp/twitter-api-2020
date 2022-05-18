@@ -77,14 +77,17 @@ const userController = {
   getCurrentUser: (req, res, next) => {
     return res.json(req.user)
   },
+  getTopUsers: (req, res, next) => {
+    User.findAll({ include: User }, { group: 'Followers' },{order})
+  },
   putUser: (req, res, next) => {
     if (Number(req.params.id) !== Number(req.user.id)) {
       throw new Error("User doen't have permission!")
     }
     const { account, name, password, email, introduction } = req.body
     const hash = bcrypt.hashSync(password, 10)
-    const { avatar } = req.file
-    const { cover } = req.file
+    const { avatar } = req.files
+    const { cover } = req.files
     if (!name) throw new Error('User name is required!')
     if (!account) throw new Error('Account is required!')
     if (!password) throw new Error('Password is required!')
