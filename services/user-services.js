@@ -200,17 +200,20 @@ const userServices = {
     if (email) {
       email = email.trim()
     }
-    if(password) {
+    if (password) {
       password = password.trim()
+    }
+    if (checkPassword) {
       checkPassword = checkPassword.trim()
+    }
+
+    if (introduction) {
+      introduction = introduction.trim()
     }
     
     if (password != checkPassword) throw new Error('Password do not match!')
     if (name.length > 50) throw new Error('Length of the name is too long!')
-    if (introduction) {
-      introduction = introduction.trim()
-      if (introduction.length > 160) throw new Error('Length of the introduction is too long!')
-    }
+    if (introduction.length > 160) throw new Error('Length of the introduction is too long!')
 
     const avatar = req.files ? req.files['avatar'][0] : null
     const cover = req.files ? req.files['cover'][0] : null
