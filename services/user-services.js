@@ -58,7 +58,7 @@ const userServices = {
         {
         where: { UserId: req.params.id },
         include: [{model: User},{ model: Reply }, { model: Like}],
-        order: [['createdAT', 'DESC']]
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, tweets]) => {
