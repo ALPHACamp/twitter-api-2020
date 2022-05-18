@@ -138,6 +138,12 @@ const adminController = {
   deleteTweet: async (req, res, next) => {
     try {
       const TweetId = req.params.id
+      const tweet = await Tweet.findOne({
+        where: {
+          id: TweetId
+        }
+      })
+      if (!tweet) throw new Error('貼文不存在')
       await Like.destroy({
         where: {
           TweetId
@@ -153,9 +159,14 @@ const adminController = {
           id: TweetId
         }
       })
-      res.json({
-        status: 'success'
+      const tweets = await tweetServices.getAll()
+      if (!(tweets.length)) throw new Error('推文不存在')
+
+      tweets.forEach(element => {
+        element.description = element.description.substring(0, 51)
       })
+      res.status(200)
+        .json(tweets)
     } catch (err) {
       next(err)
     }
