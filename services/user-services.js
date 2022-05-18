@@ -208,20 +208,22 @@ const userServices = {
     }
     if (checkPassword) {
       checkPassword = checkPassword.trim()
+      if (password != checkPassword) throw new Error('Password do not match!')
     }
     if (introduction) {
       introduction = introduction.trim()
+      if (introduction.length > 160) throw new Error('Length of the introduction is too long!')
     }
     if (req.files['avatar']) {
       avatar = req.files['avatar'][0]
     }
     if (req.files['cover']) {
       cover = req.files['cover'][0]
-      if (introduction.length > 160) throw new Error('Length of the introduction is too long!')
+      
     }
     
-    if (password != checkPassword) throw new Error('Password do not match!')
-   
+    
+  
     return Promise.all([
       User.findByPk(req.params.id),
       helpers.imgurFileHandler(avatar),
