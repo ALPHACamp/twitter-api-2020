@@ -13,7 +13,7 @@ const tweetController = {
       next(err)
     }
   },
-  create: async (req, res, next) => {
+  create: async (req, res, next) => { // 補 islike
     try {
       const user = helpers.getUser(req)
       const description = req.body.description
@@ -24,7 +24,7 @@ const tweetController = {
         UserId: user.id,
         description
       })
-      const tweets = await tweetServices.getAll()
+      const tweets = await tweetServices.getAll(user.id)
       return res.status(200).json(tweets)
     } catch (err) {
       next(err)
