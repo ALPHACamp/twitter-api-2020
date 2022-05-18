@@ -35,7 +35,7 @@ const userController = {
 
   signUp: async (req, res, next) => {
     try {
-      const user = await User.findOne({
+      const user = await User.findAll({
         where: {
           [Op.or]: [{ account: req.body.account }, { email: req.body.email }]
         }
@@ -358,7 +358,7 @@ const userController = {
   editUserAccount: async (req, res, next) => {
     try {
       const { account, name, email } = req.body
-      const existedUser = await User.findOne({
+      const existedUser = await User.findAll({
         where: {
           [Op.or]: [{ account: req.body.account }, { email: req.body.email }]
         }
