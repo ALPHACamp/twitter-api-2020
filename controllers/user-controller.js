@@ -96,8 +96,8 @@ const userController = {
         order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!tweets.length) throw new Error('沒有任何推文。')
-
-      const isLikedId = await isLikedTweet(req.params.id)
+      
+      const isLikedId = await isLikedTweet(getUser(req).id)
       const result = tweets.map(tweet => ({
         ...tweet.toJSON(),
         isLiked: isLikedId.some(tId => tId === tweet.id)
@@ -154,7 +154,7 @@ const userController = {
       })
       if (!likes.length) throw new Error('沒有喜歡的推文。')
 
-      const isLikedId = await isLikedTweet(req.params.id)
+      const isLikedId = await isLikedTweet(getUser(req).id)
       const result = likes.map(like => ({
         ...like.toJSON(),
         isLiked: isLikedId.some(tId => tId === like.TweetId)
