@@ -288,7 +288,8 @@ const userServices = {
   },
   getTopUsers: (req, cb) => {
     return User.findAll({
-      include: [{ model: User, as: 'Followers' }]
+      include: [{ model: User, as: 'Followers' }],
+      limit: 10
     })
       .then(users => {
         const result = users.map(user => ({
