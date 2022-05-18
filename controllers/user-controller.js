@@ -227,7 +227,7 @@ const userController = {
       .then(([tweets, user]) => {
         if (!user) throw new Error('使用者不存在！')
         if (tweets.length <= 0) throw new Error('該使用者沒有推文！')
-        const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(l => l.id) : []
+        const likedTweetId = helpers.getUser(req)?.LikedTweets ? helpers.getUser(req).LikedTweets.map(l => l.id) : []
         const tweetList = tweets.map(data => ({
           ...data,
           isLiked: likedTweetId.some(item => item === data.id)
@@ -304,7 +304,7 @@ const userController = {
       .then(([likes, user]) => {
         if (!user) throw new Error('使用者不存在！')
         if (likes.length <= 0) throw new Error('該使用者沒有Like任何推文!')
-        const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(l => l.id) : []
+        const likedTweetId = helpers.getUser(req)?.LikedTweets ? helpers.getUser(req).LikedTweets.map(l => l.id) : []
         const likeList = likes.map(data => ({
           ...data,
           Tweet: {
