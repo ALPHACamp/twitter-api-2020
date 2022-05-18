@@ -56,10 +56,10 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Tweet.findAll(
         {
-        where: { UserId: req.params.id },
-        include: [{model: User},{ model: Reply }, { model: Like}],
-        order: [['createdAt', 'DESC']]
-      })
+          where: { UserId: req.params.id },
+          include: [{ model: User }, { model: Reply }, { model: Like }],
+          order: [['createdAt', 'DESC']]
+        })
     ])
       .then(([user, tweets]) => {
         if (!user) throw new Error("User didn't exists!")
