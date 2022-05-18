@@ -358,6 +358,13 @@ const userController = {
   editUserAccount: async (req, res, next) => {
     try {
       const { account, name, email } = req.body
+      const existedUser = await User.findOne({
+        where: {
+          [Op.or]: [{ account: req.body.account }, { email: req.body.email }]
+        }
+      })
+      if (existedUser) throw new Error('使用者已經存在')
+
       const user = await User.findByPk(req.params.id)
       if (!user) throw new Error('沒有找到相關的使用者資料')
 
