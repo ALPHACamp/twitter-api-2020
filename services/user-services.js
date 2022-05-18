@@ -103,7 +103,6 @@ const userServices = {
           replyUpdatedAt: r.updatedAt,
           User,
         }))
-        console.log(repliedTweets)
         return cb(null, repliedTweets)
       })
       .catch(err => cb(err))
