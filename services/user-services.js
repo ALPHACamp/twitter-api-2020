@@ -57,7 +57,8 @@ const userServices = {
       Tweet.findAll(
         {
         where: { UserId: req.params.id },
-          include: [{model: User},{ model: Reply }, { model: Like}]
+        include: [{model: User},{ model: Reply }, { model: Like}],
+        order: [['createdAT', 'DESC']]
       })
     ])
       .then(([user, tweets]) => {
@@ -68,7 +69,8 @@ const userServices = {
           userAvatar: t.User.avatar,
           User: t.User.name,
           Replies:t.Replies.length,
-          Likes: t.Likes.length
+          Likes: t.Likes.length,
+          isLiked: t.Likes.some(l => l.UserId = helpers.getUser(req).id)
         }))
         return cb(null, tweetsData)
       })
@@ -79,21 +81,30 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Reply.findAll({
         where: { UserId: req.params.id },
-        include:[{model: Tweet, include: User}],
+        include:[{model: Tweet, include: User}, {model: User}],
         order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, replies]) => {
         if (!user) throw new Error("User didn't exists!")
         const repliedTweets = replies.map(r => ({
-          ...r.Tweet.toJSON(),
-          User: r.Tweet.User.name, 
-          userAvatar: r.Tweet.User.avatar,
+          TweetId: r.Tweet.id,
+          description: r.Tweet.description,
+          createdAt: r.Tweet.createdAt,
+          updatedAt: r.Tweet.updatedAt,
+          userId: r.User.id,
+          userName: r.User.name,
+          userAccount: r.User.account,
+          userAvatar: r.User.avatar,
           comment: r.comment,
+          replyUserId: r.Tweet.UserId,
+          replyName: r.Tweet.User.name, 
+          replyAccount: r.Tweet.User.account,
+          replyAvatar: r.Tweet.User.avatar,
           replyCreatedAt: r.createdAt,
-          replyUpdatedAt: r.updatedAt
+          replyUpdatedAt: r.updatedAt,
+          User,
         }))
-        console.log(repliedTweets)
         return cb(null, repliedTweets)
       })
       .catch(err => cb(err))
@@ -109,6 +120,7 @@ const userServices = {
     ])
     .then(([user, likes]) => {
       if (!user) throw new Error("User didn't exists!")
+
       const userLikes = likes.map(l => ({
         UserId: l.UserId,
         tweetName: l.Tweet.User.name,
@@ -118,6 +130,7 @@ const userServices = {
         tweetDescription: l.Tweet.description,
         tweetLikesCount: l.Tweet.Likes.length,
         tweetRepliesCount: l.Tweet.Replies.length,
+        isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id),
         createdAt: l.createdAt,
         updatedAt: l.updatedAt
       }))
@@ -137,7 +150,8 @@ const userServices = {
           followingName: f.name,
           followingAccount: f.account,
           followingAvatar: f.avatar,
-          followingIntroduction: f.introduction
+          followingIntroduction: f.introduction,
+          isFollowed: helpers.getUser(req).Followings.some(follow => follow.id === f.id)
         }))
         if (!user) throw new Error("User didn't exists!")
         return cb(null, userFollowings)
@@ -155,7 +169,8 @@ const userServices = {
         followerName: f.name,
         followerAccount: f.account,
         followerAvatar: f.avatar,
-        followerIntroduction: f.introduction
+        followerIntroduction: f.introduction,
+        isFollowed: helpers.getUser(req).Followings.some(follow => follow.Followship.followerId === f.id)
       }))
       if (!user) throw new Error("User didn't exists!")
       return cb(null, userFollowers)
