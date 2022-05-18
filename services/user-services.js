@@ -79,19 +79,29 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Reply.findAll({
         where: { UserId: req.params.id },
-        include:[{model: Tweet, include: User}],
+        include:[{model: Tweet, include: User}, {model: User}],
         order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, replies]) => {
         if (!user) throw new Error("User didn't exists!")
         const repliedTweets = replies.map(r => ({
-          ...r.Tweet.toJSON(),
-          User: r.Tweet.User.name, 
-          userAvatar: r.Tweet.User.avatar,
+          TweetId: r.Tweet.id,
+          description: r.Tweet.description,
+          createdAt: r.Tweet.createdAt,
+          updatedAt: r.Tweet.updatedAt,
+          userId: r.User.id,
+          userName: r.User.name,
+          userAccount: r.User.account,
+          userAvatar: r.User.avatar,
           comment: r.comment,
+          replyUserId: r.Tweet.UserId,
+          replyName: r.Tweet.User.name, 
+          replyAccount: r.Tweet.User.account,
+          replyAvatar: r.Tweet.User.avatar,
           replyCreatedAt: r.createdAt,
-          replyUpdatedAt: r.updatedAt
+          replyUpdatedAt: r.updatedAt,
+          User,
         }))
         console.log(repliedTweets)
         return cb(null, repliedTweets)
