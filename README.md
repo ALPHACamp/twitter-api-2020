@@ -2,12 +2,12 @@
 
 前後端分離開發的Simple Twitter專案中使用的後端Restful API，使用Node.js, Express, MySQL開發。 
 
-# Base URL
+### Base URL
 
 [https://pacific-mountain-24114.herokuapp.com/api](https://pacific-mountain-24114.herokuapp.com/api)
 
 
-種子帳戶資料
+### 種子帳戶資料
 ```
   Admin
   Account: root
@@ -17,6 +17,9 @@
   Account: user1
   Password: 12345678
 ```
+### API文件
+
+  [https://flashy-chimpanzee-c1f.notion.site/Twitter-API-fd9fb9a86e074eb8b714f14c2749a971](https://flashy-chimpanzee-c1f.notion.site/Twitter-API-fd9fb9a86e074eb8b714f14c2749a971)
 
 # How to Install API
 
@@ -89,7 +92,7 @@
 出現此行文字 App listening on port 3000! 
 代表運行成功
 
-# 開發工具
+## 開發工具
 
 * bcryptjs 2.4.3
 * cors 2.8.5
