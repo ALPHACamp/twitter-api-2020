@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Followship, Reply, Like } = require('../../models')
 const helpers = require('../../_helpers')
-// const { Sequelize } = require('sequelize')
+const { Sequelize, Op } = require('sequelize')
 // const sequelize = new Sequelize('sqlite::memory:')
 
 const userController = {
@@ -35,7 +35,11 @@ const userController = {
 
   signUp: async (req, res, next) => {
     try {
-      const user = await User.findOne({ where: { account: req.body.account } })
+      const user = await User.findOne({
+        where: {
+          [Op.or]: [{ account: req.body.account }, { email: req.body.email }]
+        }
+      })
       if (user) throw new Error('使用者已經存在')
 
       const password = await bcrypt.hash(req.body.password, 10)
@@ -43,8 +47,7 @@ const userController = {
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
-        password: password,
-        role: 'user'
+        password: password
       })
 
       const token = jwt.sign(registeredUser.toJSON(), process.env.JWT_SECRET, {
@@ -93,7 +96,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const me = helpers.getUser(req)
-      if (!me) return new Error('未存取到登入資料')
+      if (!me) throw new Error('未存取到登入資料')
       let my = await User.findAll({
         where: { id: me.id },
         attributes: ['id', 'account', 'name'],
@@ -113,7 +116,6 @@ const userController = {
         nest: true
       })
       if (!user.length) throw new Error('使用者不存在')
-
       user = JSON.parse(JSON.stringify(user))
 
       user[0].is_following = Boolean(
@@ -278,7 +280,7 @@ const userController = {
       if (!followings) throw new Error('沒有找到相關資料')
 
       const myId = helpers.getUser(req)?.id
-      if (!myId) return new Error('未存取到登入資料')
+      if (!myId) throw new Error('未存取到登入資料')
 
       const myFollowing = await Followship.findAll({
         where: { follower_id: myId },
@@ -308,7 +310,7 @@ const userController = {
       if (!followers) throw new Error('沒有找到相關資料')
 
       const myId = helpers.getUser(req)?.id
-      if (!myId) return new Error('未存取到登入資料')
+      if (!myId) throw new Error('未存取到登入資料')
 
       const myFollowing = await Followship.findAll({
         where: { follower_id: myId },
@@ -384,7 +386,7 @@ const userController = {
       users = users.sort((a, b) => b.follower_count - a.follower_count).slice(0, limit)
 
       const me = helpers.getUser(req)
-      if (!me) return new Error('未存取到登入資料')
+      if (!me) throw new Error('未存取到登入資料')
       const my = await User.findAll({
         where: { id: me.id },
         attributes: ['id', 'account', 'name'],
