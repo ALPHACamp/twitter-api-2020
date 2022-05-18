@@ -49,11 +49,9 @@ const tweets = {
         }
         userLikesTweet.forEach(likeTweets => {
           rawTweets.forEach(tweet => {
-            console.log(likeTweets.TweetId)
-            console.log(tweet.id)
-            likeTweets.TweetId === tweet.id
-              ? tweet.isLike = true
-              : tweet.isLike = false
+            if (likeTweets.TweetId === tweet.id) {
+              tweet.isLike = true
+            } else if (!tweet.isLike) { tweet.isLike = false }
           })
         })
       }
