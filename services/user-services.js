@@ -4,7 +4,7 @@ const helpers = require('../_helpers')
 const userServices = {
   signUp: (req, cb) => {
     let { account, name, email, password, checkPassword } = req.body
-    if (!account || !password || !checkPassword || !email || !name ) throw new Error('Please fill required fields!')
+    if (!account || !password || !checkPassword || !email || !name) throw new Error('Please fill required fields!')
 
     account = account.trim()
     name = name.trim()
@@ -194,7 +194,7 @@ const userServices = {
     let avatar = null
     let cover = null
 
-    if(account) {
+    if (account) {
       account = account.trim()
     }
     if (name) {
@@ -224,13 +224,12 @@ const userServices = {
         cover = req.files['cover'][0]
       }
     }
-
     return Promise.all([
       User.findByPk(req.params.id),
       helpers.imgurFileHandler(avatar),
       helpers.imgurFileHandler(cover)
     ])
-      .then(async([user, avatarImg, coverImg]) => {
+      .then(async ([user, avatarImg, coverImg]) => {
         if (!user) throw new Error("User didn't exists!")
         if (password) {
           password = await bcrypt.hash(password, 10)
@@ -285,6 +284,21 @@ const userServices = {
         return followship.destroy()
       })
       .then(removefollowship => cb(null, removefollowship))
+      .catch(err => cb(err))
+  },
+  getTopUsers: (req, cb) => {
+    return User.findAll({
+      include: [{ model: User, as: 'Followers' }]
+    })
+      .then(users => {
+        const result = users.map(user => ({
+          ...user.toJSON(),
+          followerCount: user.Followers.length,
+          isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
+        }))
+          .sort((a, b) => b.followerCount - a.followerCount)
+        return cb(null, result)
+      })
       .catch(err => cb(err))
   }
 }
