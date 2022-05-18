@@ -8,7 +8,7 @@ module.exports = {
     )
     const data = []
     const usedPair = []
-    const howManyFollowshipData = 10
+    const howManyFollowshipData = 40
     while (data.length < howManyFollowshipData) {
       const followerId = users[Math.floor(Math.random() * (users.length - 1)) + 1].id
       const followingId = users[Math.floor(Math.random() * (users.length - 1)) + 1].id

@@ -283,24 +283,19 @@ const userController = {
   },
   getTopUsers: (req, res, next) => {
     try {
-      return Promise.all([
-        User.findAll({
-          attributes: { exclude: ['password'] },
-          include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
-          nest: true
-        }),
-        Followship.findAll({ where: { followerId: req.user.dataValues.id }, raw: true })
-      ])
-        .then(([user, followship]) => {
-          // console.log(user)
-          // console.log('uuuuu', user)
-          // console.log('ffffffff', followship)
-
-          const newData = []
+      User.findAll({
+        attributes: { exclude: ['password'] },
+        include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
+        nest: true
+      })
+        .then(user => {
+          let newData = []
           // eslint-disable-next-line array-callback-return
           user.map(user => {
             user = user.toJSON()
-            if (user.Followers.some(follower =>
+            if (user.role === 'admin' || user.id === req.user.dataValues.id) {
+              return false
+            } else if (user.Followers.some(follower =>
               follower.Followship.followerId === req.user.dataValues.id)) {
               return newData.push({ ...user, isFollowed: true })
             } else {
@@ -308,6 +303,9 @@ const userController = {
             }
           })
           newData.sort((a, b) => b.Followers.length - a.Followers.length)
+          if (newData.length > 10) {
+            newData = newData.slice(0, 10)
+          }
           res.json({
             data: newData
           })
