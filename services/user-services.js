@@ -198,6 +198,7 @@ const userServices = {
     }
     if (name) {
       name = name.trim()
+      if (name.length > 50) throw new Error('Length of the name is too long!')
     }
     if (email) {
       email = email.trim()
@@ -216,12 +217,11 @@ const userServices = {
     }
     if (req.files['cover']) {
       cover = req.files['cover'][0]
+      if (introduction.length > 160) throw new Error('Length of the introduction is too long!')
     }
     
     if (password != checkPassword) throw new Error('Password do not match!')
-    if (name.length > 50) throw new Error('Length of the name is too long!')
-    if (introduction.length > 160) throw new Error('Length of the introduction is too long!')
-
+   
     return Promise.all([
       User.findByPk(req.params.id),
       helpers.imgurFileHandler(avatar),
