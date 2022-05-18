@@ -159,14 +159,7 @@ const adminController = {
           id: TweetId
         }
       })
-      const tweets = await tweetServices.getAll()
-      if (!(tweets.length)) throw new Error('推文不存在')
-
-      tweets.forEach(element => {
-        element.description = element.description.substring(0, 51)
-      })
-      res.status(200)
-        .json(tweets)
+      res.sendStatus(200)
     } catch (err) {
       next(err)
     }
