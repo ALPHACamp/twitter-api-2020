@@ -161,48 +161,49 @@ const userController = {
         include: [
           { model: User }
         ],
+        order: [['created_at', 'DESC']],
         nest: true,
         raw: true
       })
-
       // 推文 like 總數
       const likes = await Like.count({
         group: ['Tweet_id']
       })
 
-      if (!likes) {
-        for (let index = 0; index < likeTweets.length; index++) {
-          likeTweets[index].totalLikeCount = 0
-        }
-      }
-
-      for (let likesIndex = 0; likesIndex < likes.length; likesIndex++) {
-        for (let tweetIndex = 0; tweetIndex < likeTweets.length; tweetIndex++) {
-          if (likeTweets[tweetIndex].id === likes[likesIndex].Tweet_id) {
-            likeTweets[tweetIndex].totalLikeCount = likes[likesIndex].count
-          } else {
-            if (likeTweets[tweetIndex].totalLikeCount === undefined) likeTweets[tweetIndex].totalLikeCount = 0
-          }
-        }
+      if (likes) {
+        likeTweets.forEach(tweet => {
+          likes.forEach(element => {
+            if (tweet.id === element.Tweet_id) {
+              tweet.totalLikeCount = element.count
+            } else {
+              if (tweet.totalLikeCount === undefined) tweet.totalLikeCount = 0
+            }
+          })
+        })
+      } else {
+        likeTweets.forEach(element => {
+          element.totalLikeCount = 0
+        })
       }
       // 推文 reply 總數
       const replies = await Reply.count({
         group: ['Tweet_id']
       })
 
-      if (!replies) {
-        for (let index = 0; index < likeTweets.length; index++) {
-          likeTweets[index].totalReplyCount = 0
-        }
-      }
-      for (let replyIndex = 0; replyIndex < replies.length; replyIndex++) {
-        for (let tweetIndex = 0; tweetIndex < likeTweets.length; tweetIndex++) {
-          if (likeTweets[tweetIndex].id === replies[replyIndex].Tweet_id) {
-            likeTweets[tweetIndex].totalReplyCount = replies[replyIndex].count
-          } else {
-            if (likeTweets[tweetIndex].totalReplyCount === undefined) likeTweets[tweetIndex].totalReplyCount = 0
-          }
-        }
+      if (replies) {
+        likeTweets.forEach(tweet => {
+          replies.forEach(element => {
+            if (tweet.id === element.Tweet_id) {
+              tweet.totalReplyCount = element.count
+            } else {
+              if (tweet.totalReplyCount === undefined) tweet.totalReplyCount = 0
+            }
+          })
+        })
+      } else {
+        likeTweets.forEach(element => {
+          element.totalReplyCount = 0
+        })
       }
       const data = likeTweets.map(element => ({
         TweetId: element.id,
@@ -211,8 +212,8 @@ const userController = {
         name: element.User.name,
         account: element.User.account,
         avatar: element.User.avatar,
-        totalLikeCount: element.totalLikeCount,
-        totalReplyCount: element.totalReplyCount
+        totalLikeNum: element.totalLikeCount,
+        totalReplyNum: element.totalReplyCount
       }))
       res.status(200).json(data)
     } catch (err) {
