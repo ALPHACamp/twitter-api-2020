@@ -37,13 +37,13 @@ const replyController = {
             ]
           }
         ],
+        order: [['created_at', 'DESC']],
         group: ['id'],
         nest: true,
         raw: true
       })
 
       if (!rawReply) throw new Error('該推文沒有回覆')
-
       const replies = rawReply.map(element => ({
         id: element.id,
         comment: element.comment,
@@ -52,7 +52,8 @@ const replyController = {
         name: element.User.name,
         avatar: element.User.avatar,
         account: element.User.account,
-        likeCount: element.ReplyLikes.likeCounts
+        likeCount: element.ReplyLikes.likeCounts,
+        createdAt: element.createdAt
       }))
       res.status(200).json(replies)
     } catch (err) {
