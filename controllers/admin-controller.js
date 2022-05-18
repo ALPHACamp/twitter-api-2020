@@ -1,5 +1,8 @@
 const jwt = require('jsonwebtoken')
+const Sequelize = require('sequelize')
+
 const { User, Tweet } = require('../models')
+
 const { getUser } = require('../_helpers')
 
 const adminController = {
@@ -54,12 +57,22 @@ const adminController = {
   },
 
   getUsers: (req, res, next) => {
-    // 若篩選時排除admin帳號，則無法通過測試檔，所以不做role條件篩選。
+    // 若篩選時排除admin帳號，則無法通過測試檔，所以沒有做role條件篩選。
     User.findAll({
-      attributes: ['id', 'account', 'name', 'avatar', 'cover', 'role', 'tweetCount', 'likeCount', 'followingCount', 'followerCount'],
-      order: [['tweetCount', 'DESC']]
+      attributes: ['id', 'account', 'name', 'avatar', 'cover', 'role',
+        [Sequelize.literal('(SELECT COUNT(*) id FROM Tweets WHERE User.id = Tweets.User_id)'), 'tweetCount'],
+        [Sequelize.literal('(SELECT COUNT(*) User_id FROM Likes RIGHT JOIN Tweets ON Tweets.id = Likes.Tweet_id WHERE User.id = Tweets.User_id)'), 'likeCount'],
+        [Sequelize.literal('(SELECT COUNT(*) follower_id FROM Followships WHERE User.id = Followships.following_id)'), 'followerCount'],
+        [Sequelize.literal('(SELECT COUNT(*) following_id FROM Followships WHERE User.id = Followships.follower_id)'), 'followingCount']
+      ],
+      raw: true
     })
-      .then(tweets => res.status(200).json(tweets))
+      .then(tweets => {
+        if (tweets.length <= 0) return res.status(200).json({ message: '沒有使用者資料！' })
+        tweets.sort((a, b) => b.tweetCount - a.tweetCount)
+        return res.status(200).json(tweets)
+      }
+      )
       .catch(err => next(err))
   }
 
