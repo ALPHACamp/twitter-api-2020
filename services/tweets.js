@@ -44,7 +44,6 @@ const tweets = {
           }
         }
       }
-
       const tweets = rawTweets.map(element => ({
         id: element.id,
         name: element.User.name,

@@ -92,15 +92,9 @@ const userController = {
       Reply.findAll({
         where: { UserId },
         include: [
-          {
-            model: Tweet,
-            include: [
-              {
-                model: User
-              }
-            ]
-          },
-          User],
+          { model: Tweet, include: User, attributes: { exclude: ['password'] } },
+          { model: User, attributes: { exclude: ['password'] } }
+        ],
         raw: true,
         nest: true
       })
@@ -119,10 +113,13 @@ const userController = {
               return false
             }
           })
+          console.log(rawData)
           const data = rawData.map(element => ({
-            id: element.id,
+            userName: element.User.name,
+            userAccount: element.User.account,
+            tweetAccount: element.Tweet.User.account,
+            replyId: element.id,
             comment: element.comment,
-            replyAccount: element.Tweet.User.account,
             createAt: element.createdAt
           }))
           res.json(data)
@@ -286,20 +283,33 @@ const userController = {
   },
   getTopUsers: (req, res, next) => {
     try {
-      User.findAll({
-        include: [{ model: User, as: 'Followers' }],
-        nest: true
-      })
-        .then(user => {
+      return Promise.all([
+        User.findAll({
+          attributes: { exclude: ['password'] },
+          include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
+          nest: true
+        }),
+        Followship.findAll({ where: { followerId: req.user.dataValues.id }, raw: true })
+      ])
+        .then(([user, followship]) => {
+          // console.log(user)
+          // console.log('uuuuu', user)
+          // console.log('ffffffff', followship)
+
           const newData = []
           // eslint-disable-next-line array-callback-return
           user.map(user => {
             user = user.toJSON()
-            delete user.password
-            newData.push(user)
+            if (user.Followers.some(follower =>
+              follower.Followship.followerId === req.user.dataValues.id)) {
+              return newData.push({ ...user, isFollowed: true })
+            } else {
+              return newData.push({ ...user, isFollowed: false })
+            }
           })
+          newData.sort((a, b) => b.Followers.length - a.Followers.length)
           res.json({
-            newData
+            data: newData
           })
         })
     } catch (err) {
