@@ -83,8 +83,8 @@ const userController = {
     }
     const { account, name, password, email, introduction } = req.body
     const hash = bcrypt.hashSync(password, 10)
-    const { avatar } = req
-    const { cover } = req
+    const { avatar } = req.file
+    const { cover } = req.file
     if (!name) throw new Error('User name is required!')
     if (!account) throw new Error('Account is required!')
     if (!password) throw new Error('Password is required!')
@@ -93,7 +93,6 @@ const userController = {
       .then(([findEmail, findAccount, user]) => {
         if (findEmail && findEmail.id !== req.user.id) throw new Error('Email has already been taken.')
         if (findAccount && findAccount.id !== req.user.id) throw new Error('Account has already been taken.')
-        console.log(findEmail)
         imgurFileHandler(avatar)
         imgurFileHandler(cover)
         return user.update({
