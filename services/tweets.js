@@ -86,9 +86,9 @@ const tweets = {
       console.log(err)
     }
   },
-  getOne: async (tweetId, UserId) => {
+  getOne: async (TweetId, UserId) => {
     try {
-      const rawTweet = await Tweet.findByPk(tweetId, {
+      const rawTweet = await Tweet.findByPk(TweetId, {
         attributes: {
           exclude: ['updatedAt']
         },
@@ -104,7 +104,7 @@ const tweets = {
           {
             model: Like,
             attributes: [
-              [sequelize.fn('COUNT', sequelize.col('Likes.Tweet_id')), 'likeCounts']
+              [sequelize.fn('COUNT', sequelize.col('Likes.Tweet_id')), 'likeNum']
             ]
           }
         ],
@@ -114,29 +114,30 @@ const tweets = {
         raw: true
       })
       const replies = await Reply.count({
+        where: {
+          TweetId
+        },
         group: ['Tweet_id'],
         raw: true
       })
-
-      if (replies !== undefined) {
-        rawTweet.replyCounts = 0
+      if (!replies.length) {
+        rawTweet.replyNum = 0
       } else {
-        rawTweet.replyCounts = replies[0].count
+        rawTweet.replyNum = replies[0].count
       }
-
       if (UserId) {
         const userLikesTweet = await Like.findOne({
           attributes: [
             'TweetId'
           ],
           where: {
-            UserId
+            UserId,
+            Tweet_id: TweetId
           },
           raw: true
         })
-        userLikesTweet.TweetId === rawTweet.id
-          ? rawTweet.isLike = true
-          : rawTweet.isLike = false
+        if (userLikesTweet) rawTweet.isLike = true
+        else rawTweet.isLike = false
       }
       const tweet = {
         id: rawTweet.id,
@@ -145,8 +146,8 @@ const tweets = {
         avatar: rawTweet.User.avatar,
         description: rawTweet.description,
         createdAt: rawTweet.createdAt,
-        likeNum: rawTweet.Likes.likeCounts,
-        replyNum: rawTweet.replyCounts,
+        likeNum: rawTweet.Likes.likeNum,
+        replyNum: rawTweet.replyNum,
         isLike: rawTweet.isLike
       }
       return tweet

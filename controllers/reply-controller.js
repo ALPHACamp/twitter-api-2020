@@ -1,4 +1,4 @@
-const { Reply, User, ReplyLike } = require('../models')
+const { Reply, User, ReplyLike, Tweet } = require('../models')
 const helpers = require('../_helpers')
 const replyLikeService = require('../services/replyLikes')
 const sequelize = require('sequelize')
@@ -29,6 +29,15 @@ const replyController = {
           TweetId
         },
         include: [
+          {
+            model: Tweet,
+            include: {
+              model: User,
+              attributes: [
+                'name'
+              ]
+            }
+          },
           { model: User },
           {
             model: ReplyLike,
@@ -42,7 +51,6 @@ const replyController = {
         nest: true,
         raw: true
       })
-
       if (!rawReply) throw new Error('該推文沒有回覆')
       const replies = rawReply.map(element => ({
         id: element.id,
@@ -50,6 +58,7 @@ const replyController = {
         tweetId: element.TweetId,
         userId: element.UserId,
         name: element.User.name,
+        tweetUser: element.Tweet.User.name,
         avatar: element.User.avatar,
         account: element.User.account,
         likeCount: element.ReplyLikes.likeCounts,

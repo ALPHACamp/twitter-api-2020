@@ -18,7 +18,7 @@ const likeControler = {
         UserId,
         TweetId
       })
-      const data = await tweetService.getAll(UserId)
+      const data = await tweetService.getOne(TweetId, UserId)
       res.status(200).json(data)
     } catch (err) {
       next(err)
@@ -41,7 +41,7 @@ const likeControler = {
           TweetId
         }
       })
-      const data = await tweetService.getAll(UserId)
+      const data = await tweetService.getOne(TweetId, UserId)
       res.status(200).json(data)
     } catch (err) {
       next(err)

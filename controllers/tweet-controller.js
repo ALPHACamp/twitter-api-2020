@@ -32,7 +32,7 @@ const tweetController = {
   },
   getOne: async (req, res) => {
     try {
-      const tweetId = req.params.id
+      const tweetId = Number(req.params.id)
       const UserId = helpers.getUser(req).id
       const tweet = await tweetServices.getOne(tweetId, UserId)
       if (!tweet) throw new Error('沒有這篇推文')
