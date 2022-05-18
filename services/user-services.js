@@ -63,7 +63,6 @@ const userServices = {
     ])
       .then(([user, tweets]) => {
         if (!user) throw new Error("User didn't exists!")
-        console.log(helpers.getUser(req).id)
         const tweetsData = tweets.map(t => ({
           ...t.toJSON(),
           userAccount: t.User.account,
