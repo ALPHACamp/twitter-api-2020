@@ -1,9 +1,11 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const Sequelize = require('sequelize')
 
 const { User, Tweet, Followship, Reply, Like } = require('../models')
 
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -13,8 +15,7 @@ const userController = {
 
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) throw new Error('帳號不存在！')
-        if (user.role === 'admin') throw new Error('帳號不存在！')
+        if (!user || user.role === 'admin') throw new Error('帳號不存在！')
         if (!bcrypt.compareSync(password, user.password)) { throw new Error('密碼錯誤！') }
         const userData = user.toJSON()
         delete userData.password
@@ -22,6 +23,7 @@ const userController = {
           expiresIn: '30d'
         })
         return res.status(200).json({
+          message: '成功登入！',
           token,
           user: userData
         })
@@ -61,6 +63,7 @@ const userController = {
           expiresIn: '30d'
         })
         return res.status(200).json({
+          message: '成功註冊！',
           token,
           user: userData
         })
@@ -70,7 +73,6 @@ const userController = {
 
   getUser: (req, res, next) => {
     const userId = Number(req.params.id)
-    const reqUserId = getUser(req).id
     return User.findByPk(userId, {
       include: [
         { model: Tweet },
@@ -81,8 +83,8 @@ const userController = {
       .then(user => {
         if (!user || user.role === 'admin') throw new Error('帳號不存在！')
         const { id, account, name, email, introduction, avatar, cover, createdAt } = user
-        const isFollowing = user.Followers.map(f => f.id === reqUserId)
         return res.status(200).json({
+          message: '成功取得使用者資料！',
           id,
           account,
           name,
@@ -93,8 +95,7 @@ const userController = {
           createdAt,
           tweetCount: user.Tweets.length,
           followingCount: user.Followings.length,
-          followerCount: user.Followers.length,
-          isFollowing
+          followerCount: user.Followers.length
         })
       })
       .catch(err => next(err))
@@ -102,8 +103,8 @@ const userController = {
 
   getCurrentUser: (req, res, next) => {
     try {
-      const userData = (({ id, account, name, email, avatar, cover, introduction, role }) => ({ id, account, name, email, avatar, cover, introduction, role }))(getUser(req))
-      return res.status(200).json(userData)
+      const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(helpers.getUser(req))
+      return res.status(200).json({ message: '成功取得目前登入的使用者資料！', userData })
     } catch (err) {
       next(err)
     }
@@ -111,7 +112,7 @@ const userController = {
 
   getTopUsers: (req, res, next) => {
     const userId = Number(req.params.id)
-    const reqUserId = getUser(req).id
+    const reqUserId = helpers.getUser(req).id
     return User.findAll({
       include: { model: User, as: 'Followers' },
       attributes: ['id', 'account', 'name', 'avatar', 'createdAt'],
@@ -132,7 +133,7 @@ const userController = {
           delete r.Followers
         })
 
-        return res.status(200).json(result)
+        return res.status(200).json({ message: '成功取得前十位最多追蹤者的使用者資料！', result })
       })
       .catch(err => next(err))
   },
@@ -140,9 +141,9 @@ const userController = {
   putUserSetting: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     const userId = Number(req.params.id)
-    const reqUserId = getUser(req).id
+    const reqUserId = helpers.getUser(req).id
 
-    if (userId !== reqUserId) throw new Error('Permission denied')
+    if (userId !== reqUserId) throw new Error('使用者只能修改自己的資料！')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不符！')
     if (!account) throw new Error('帳號欄位不可空白！')
     if (!name) throw new Error('名稱欄位不可空白！')
@@ -169,28 +170,50 @@ const userController = {
           password: hash
         })
       })
-      .then(updatedUser => res.status(200).json({ user: updatedUser }))
+      .then(updatedUser => res.status(200).json({ message: '成功編輯使用者個人資料！', user: updatedUser }))
       .catch(err => next(err))
   },
 
   putUser: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)
+      const UserId = req.params.id
+      const reqUser = helpers.getUser(req).id
+
+      const { name, introduction } = req.body
+      const { files } = req
+      if (!name || !introduction) throw new Error('名字和自介欄位不可空白！')
+      if (name.length > 50) throw new Error('名稱欄位字數上限為 50 個字！')
+      if (introduction.length > 160) throw new Error('自介欄位字數上限為 160 個字！')
+
+      let avatar = files?.avatar || null
+      let cover = files?.cover || null
+      if (avatar) avatar = await imgurFileHandler(avatar[0])
+      if (cover) cover = await imgurFileHandler(cover[0])
+
       const user = await User.findByPk(UserId)
-      const userUpdate = await user.update(req.body)
-      res.status(200).json(userUpdate)
+      const data = await user.update({
+        name,
+        introduction,
+        avatar: avatar || reqUser.avatar,
+        cover: cover || reqUser.cover
+      })
+      res.status(200).json({ message: '成功編輯使用者資料！', data })
     } catch (err) {
       next(err)
     }
-    res.status(200).json()
   },
 
   getUsersTweets: (req, res, next) => {
     const UserId = Number(req.params.id)
     Promise.all([
-      Tweet.findAndCountAll({
+      Tweet.findAll({
         where: { UserId },
-        attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Tweet.id = Replies.Tweet_id )'), 'replyCount'],
+            [Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Tweet.id = Likes.Tweet_id)'), 'likeCount']
+          ]
+        },
         include: [
           { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] }
         ],
@@ -200,13 +223,12 @@ const userController = {
       }),
       User.findByPk(UserId)
     ])
-      .then(([tweets, userOnChecked]) => {
-        // update user tweetCount
-        userOnChecked.update({
-          tweetCount: tweets.count
-        })
+
+      .then(([tweets, user]) => {
+        if (!user) throw new Error('使用者不存在！')
+        if (tweets.length <= 0) throw new Error('該使用者沒有推文！')
         const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(l => l.id) : []
-        const tweetList = tweets.rows.map(data => ({
+        const tweetList = tweets.map(data => ({
           ...data,
           isLiked: likedTweetId.some(item => item === data.id)
         }))
@@ -217,21 +239,33 @@ const userController = {
 
   getUsersReplies: (req, res, next) => {
     const UserId = Number(req.params.id)
-
-    Reply.findAll({
-      where: { UserId },
-      attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
-      include: [
-        { model: User, as: 'ReplyUser', attributes: ['id', 'name', 'account', 'avatar'] },
-        {
-          model: Tweet,
-          attributes: ['id'],
-          include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }]
-        }
-      ],
-      order: [['createdAt', 'DESC']]
-    })
-      .then(replies => res.status(200).json(replies))
+    Promise.all([
+      Reply.findAll({
+        where: { UserId },
+        attributes: ['id', 'UserId', 'TweetId', 'comment', 'createdAt', 'updatedAt'],
+        include: [
+          { model: User, as: 'ReplyUser', attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Tweet,
+            include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }]
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      }),
+      User.findByPk(UserId)
+    ])
+      .then(([replies, user]) => {
+        if (!user) throw new Error('使用者不存在！')
+        if (replies.length <= 0) throw new Error('該使用者沒有回覆！')
+        const replyList = replies.map(data => ({
+          ...data,
+          Tweet: { id: data.Tweet.id },
+          TweetUser: data.Tweet.TweetUser
+        }))
+        return res.status(200).json(replyList)
+      })
       .catch(err => next(err))
   },
 
@@ -239,13 +273,18 @@ const userController = {
     const UserId = Number(req.params.id)
 
     Promise.all([
-      Like.findAndCountAll({
+      Like.findAll({
         where: { UserId },
-        attributes: ['id', 'createdAt', 'TweetId', 'UserId'],
+        attributes: ['id', 'UserId', 'TweetId'],
         include: [
           {
             model: Tweet,
-            attributes: ['id', 'description', 'likeCount', 'replyCount'],
+            attributes: [
+              'id',
+              'description',
+              [Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Tweet.id = Replies.Tweet_id )'), 'replyCount'],
+              [Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Tweet.id = Likes.Tweet_id)'), 'likeCount']
+            ],
             include: [
               {
                 model: User,
@@ -261,13 +300,20 @@ const userController = {
       }),
       User.findByPk(UserId)
     ])
-      .then(([likes, userOnChecked]) => {
-        userOnChecked.update({
-          likeCount: likes.count
-        })
+
+      .then(([likes, user]) => {
+        if (!user) throw new Error('使用者不存在！')
+        if (likes.length <= 0) throw new Error('該使用者沒有Like任何推文!')
         const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(l => l.id) : []
-        const likeList = likes.rows.map(data => ({
+        const likeList = likes.map(data => ({
           ...data,
+          Tweet: {
+            id: data.Tweet.id,
+            description: data.Tweet.description,
+            likeCount: data.Tweet.likeCount,
+            replyCount: data.Tweet.replyCount
+          },
+          TweetUser: data.Tweet.TweetUser,
           isLiked: likedTweetId.some(item => item === data.Tweet.id)
         }))
         res.status(200).json(likeList)
@@ -277,7 +323,7 @@ const userController = {
 
   getFollowings: (req, res, next) => {
     const UserId = Number(req.params.id)
-    const reqUserId = Number(getUser(req))
+    const reqUserId = helpers.getUser(req)
     return Promise.all([
       User.findByPk(UserId, {
         include: { model: User, as: 'Followings' }
@@ -309,7 +355,7 @@ const userController = {
 
   getFollowers: (req, res, next) => {
     const UserId = Number(req.params.id)
-    const reqUserId = Number(getUser(req))
+    const reqUserId = helpers.getUser(req)
     return Promise.all([
       User.findByPk(UserId, {
         include: { model: User, as: 'Followers' }
@@ -336,6 +382,61 @@ const userController = {
         }))
         return res.status(200).json(data)
       })
+      .catch(err => next(err))
+  },
+
+  addFollowing: (req, res, next) => {
+    const followingId = Number(req.body.id)
+    const followerId = helpers.getUser(req).id
+
+    if (followingId === followerId) throw new Error('不能追蹤自己!')
+    return Promise.all([
+      User.findByPk(followingId),
+      Followship.findOne({
+        where: {
+          followingId,
+          followerId
+        }
+      })
+    ])
+      .then(([user, isFollowed]) => {
+        if (!user) throw new Error('使用者不存在!')
+        if (isFollowed) throw new Error('你已經追蹤該使用者！')
+        return Followship.create({
+          followingId,
+          followerId
+        })
+      })
+      .then(getFollowing => {
+        res.status(200).json({ message: '成功追蹤使用者！', getFollowing })
+      })
+      .catch(err => next(err))
+  },
+
+  removeFollowing: (req, res, next) => {
+    const followingId = Number(req.params.id)
+    const followerId = helpers.getUser(req).id
+    if (followingId === followerId) throw new Error('不能取消追蹤自己!')
+    return Promise.all([
+      User.findByPk(followingId),
+      Followship.findOne({
+        where: {
+          followingId,
+          followerId
+        }
+      })
+    ])
+      .then(([user, isFollowed]) => {
+        if (!user) throw new Error('無法取消追蹤不存在的使用者!')
+        if (!isFollowed) throw new Error('你尚未追蹤該名使用者！')
+        return Followship.destroy({
+          where: {
+            followingId,
+            followerId
+          }
+        })
+      })
+      .then(removeFollowing => res.status(200).json({ message: '成功取消追蹤該名使用者！', removeFollowing }))
       .catch(err => next(err))
   }
 }
