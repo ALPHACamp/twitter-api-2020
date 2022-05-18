@@ -28,7 +28,7 @@ const followshipController = {
   },
   removeFollowing: (req, res, next) => {
     const followerId = getUser(req).id // 使用者的 id
-    const followingId = req.body.id // 要取消追蹤的人的 id （在form上）
+    const followingId = req.params.followingId // 要取消追蹤的人的 id （在form上）
     if (followerId === Number(followingId)) throw new Error('You cannot unfollow yourself!')
     Followship.findOne({
       where: {
