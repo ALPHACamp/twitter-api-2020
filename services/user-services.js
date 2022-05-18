@@ -192,7 +192,7 @@ const userServices = {
     let { account, name, email, password, checkPassword, introduction } = req.body
     let avatar = null
     let cover = null
-    
+
     if(account) {
       account = account.trim()
     }
@@ -205,6 +205,7 @@ const userServices = {
     }
     if (password) {
       password = password.trim()
+      if (!checkPassword) throw new Error('Please enter checkPassword!')
     }
     if (checkPassword) {
       checkPassword = checkPassword.trim()
@@ -214,16 +215,15 @@ const userServices = {
       introduction = introduction.trim()
       if (introduction.length > 160) throw new Error('Length of the introduction is too long!')
     }
-    if (req.files['avatar']) {
-      avatar = req.files['avatar'][0]
+    if (req.files) {
+      if (req.files['avatar']) {
+        avatar = req.files['avatar'][0]
+      }
+      if (req.files['cover']) {
+        cover = req.files['cover'][0]
+      }
     }
-    if (req.files['cover']) {
-      cover = req.files['cover'][0]
-      
-    }
-    
-    
-  
+
     return Promise.all([
       User.findByPk(req.params.id),
       helpers.imgurFileHandler(avatar),
