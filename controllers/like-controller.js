@@ -1,6 +1,6 @@
 const { Like } = require('../models')
 const helpers = require('../_helpers')
-const likeService = require('../services/likes')
+const tweetService = require('../services/tweets')
 
 const likeControler = {
   add: async (req, res, next) => {
@@ -18,10 +18,7 @@ const likeControler = {
         UserId,
         TweetId
       })
-      const likeNum = await likeService.count(TweetId)
-      const data = {
-        likeNum: Number(likeNum[0])
-      }
+      const data = await tweetService.getAll(UserId)
       res.status(200).json(data)
     } catch (err) {
       next(err)
@@ -44,10 +41,7 @@ const likeControler = {
           TweetId
         }
       })
-      const likeNum = await likeService.count(TweetId)
-      const data = {
-        likeNum: Number(likeNum[0])
-      }
+      const data = await tweetService.getAll(UserId)
       res.status(200).json(data)
     } catch (err) {
       next(err)
