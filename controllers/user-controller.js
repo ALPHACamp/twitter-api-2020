@@ -226,7 +226,7 @@ const userController = {
 
       .then(([tweets, user]) => {
         if (!user) throw new Error('使用者不存在！')
-        if (tweets.length <= 0) throw new Error('該使用者沒有推文！')
+        if (tweets.length <= 0) return res.status(200).json({ message: '該使用者沒有推文！' })
         const likedTweetId = helpers.getUser(req)?.LikedTweets ? helpers.getUser(req).LikedTweets.map(l => l.id) : []
         const tweetList = tweets.map(data => ({
           ...data,
@@ -258,7 +258,7 @@ const userController = {
     ])
       .then(([replies, user]) => {
         if (!user) throw new Error('使用者不存在！')
-        if (replies.length <= 0) throw new Error('該使用者沒有回覆！')
+        if (replies.length <= 0) return res.status(200).json({ message: '該使用者沒有回覆！' })
         const replyList = replies.map(data => ({
           ...data,
           Tweet: { id: data.Tweet.id },
@@ -303,7 +303,7 @@ const userController = {
 
       .then(([likes, user]) => {
         if (!user) throw new Error('使用者不存在！')
-        if (likes.length <= 0) throw new Error('該使用者沒有Like任何推文!')
+        if (likes.length <= 0) return res.status(200).json({ message: '該使用者沒有Like任何推文!' })
         const likedTweetId = helpers.getUser(req)?.LikedTweets ? helpers.getUser(req).LikedTweets.map(l => l.id) : []
         const likeList = likes.map(data => ({
           ...data,
