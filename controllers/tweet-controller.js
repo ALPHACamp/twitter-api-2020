@@ -41,7 +41,7 @@ const tweetController = {
         ]
       },
       include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar'], as: 'TweetUser' }
+        { model: User, as: 'TweetUser', attributes: ['id', 'account', 'name', 'avatar'] }
       ],
       raw: true,
       nest: true
@@ -61,7 +61,7 @@ const tweetController = {
     const UserId = Number(getUser(req).id)
     const { description } = req.body
     if (!description.trim()) throw new Error('推文內容不可空白！')
-    if (description.length > 140) throw new Error('推文字數不可超過140字！')
+    if (description.length > 140) throw new Error('推文不可超過140字！')
 
     return Tweet.create({
       UserId,
@@ -111,8 +111,8 @@ const tweetController = {
     const UserId = Number(getUser(req).id)
     const TweetId = Number(req.params.tweet_id)
     const { comment } = req.body
-    if (comment.length > 140) throw new Error('回覆字數不可超過140字！')
     if (!comment.trim()) throw new Error('回覆內容不可空白！')
+    if (comment.length > 140) throw new Error('回覆不可超過140字！')
 
     return Tweet.findByPk(TweetId)
       .then(tweet => {
