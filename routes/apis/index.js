@@ -29,6 +29,7 @@ router.get('/users/:id/followings', authenticated, userController.getUserFollowi
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
 
 router.get('/users/:id', authenticated, userController.getUser)
+router.put('/users/:id/account', authenticated, userController.editUserAccount)
 router.put('/users/:id', authenticated, upload.fields([
   { name: 'avatar_img', maxCount: 1 },
   { name: 'cover_img', maxCount: 1 }

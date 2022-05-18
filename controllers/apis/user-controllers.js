@@ -355,6 +355,27 @@ const userController = {
     }
   },
 
+  editUserAccount: async (req, res, next) => {
+    try {
+      const { account, name, email } = req.body
+      const user = await User.findByPk(req.params.id)
+      if (!user) throw new Error('沒有找到相關的使用者資料')
+
+      const password = await bcrypt.hash(req.body.password, 10) || user.password
+      const updatedUser = await user.update({
+        account,
+        name,
+        email,
+        password
+      })
+      const data = updatedUser.toJSON()
+      delete data.password
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+
   getTopUser: async (req, res, next) => {
     try {
       let users = await (User.findAll({
