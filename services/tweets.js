@@ -30,14 +30,13 @@ const tweets = {
         nest: true,
         raw: true
       })
-
       if (UserId) {
         const userLikesTweet = await Like.findAll({
           attributes: [
             'TweetId'
           ],
           where: {
-            UserId
+            User_id: UserId
           },
           raw: true
         })
@@ -45,10 +44,13 @@ const tweets = {
         if (!userLikesTweet.length) {
           rawTweets.forEach(element => {
             element.userLikesTweet = 0
+            element.isLike = false
           })
         }
         userLikesTweet.forEach(likeTweets => {
           rawTweets.forEach(tweet => {
+            console.log(likeTweets.TweetId)
+            console.log(tweet.id)
             likeTweets.TweetId === tweet.id
               ? tweet.isLike = true
               : tweet.isLike = false
@@ -59,15 +61,20 @@ const tweets = {
         group: ['Tweet_id'],
         raw: true
       })
-
-      for (let replyIndex = 0; replyIndex < replies.length; replyIndex++) {
-        for (let tweetIndex = 0; tweetIndex < rawTweets.length; tweetIndex++) {
-          if (rawTweets[tweetIndex].id === replies[replyIndex].Tweet_id) {
-            rawTweets[tweetIndex].replyCounts = replies[replyIndex].count
-          } else {
-            if (rawTweets[tweetIndex].replyCounts === undefined) rawTweets[tweetIndex].replyCounts = 0
-          }
-        }
+      if (!replies.length) {
+        rawTweets.forEach(element => {
+          element.replyNum = 0
+        })
+      } else {
+        replies.forEach(replyElement => {
+          rawTweets.forEach(element => {
+            if (element.id === replyElement.Tweet_id) {
+              element.replyCounts = replyElement.count
+            } else {
+              if (element.replyCounts === undefined) element.replyCounts = 0
+            }
+          })
+        })
       }
       const tweets = rawTweets.map(element => ({
         id: element.id,
