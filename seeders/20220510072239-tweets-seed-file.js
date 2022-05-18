@@ -10,7 +10,7 @@ module.exports = {
     for (let i = 1; i < users.length; i++) {
       for (let j = 0; j < eachUserTweets; j++) {
         data.push({
-          description: 'faker.lorem.text()',
+          description: 'I don\'t know. I don\'t know. I don\'t know. I don\'t know. I don\'t know. I don\'t know. I don\'t know. I don\'t know. I don\'t know. I don\'t know. I don\'t know. I don\'t know.',
           user_id: Number(users[i].id),
           created_at: new Date(),
           updated_at: new Date()
