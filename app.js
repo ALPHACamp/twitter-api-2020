@@ -22,17 +22,17 @@ app.use((req, res, next) => {
   res.locals.user = getUser(req)
   next()
 })
-// const corsOptions = {
-//   origin: [
-//     'https://irene289.github.io',
-//     'http://localhost:8080'
-//   ],
-//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-//   allowedHeaders: ['Content-Type', 'Authorization']
-// }
+const corsOptions = {
+  origin: [
+    'https://irene289.github.io',
+    'http://localhost:8080'
+  ],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
 
-// app.use(cors(corsOptions))
-app.use(cors())
+app.use(cors(corsOptions))
+// app.use(cors())
 
 app.use('/api', apis)
 app.get('/', (req, res) => res.send('Hello World!'))
