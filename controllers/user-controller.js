@@ -59,6 +59,25 @@ const userController = {
       next(err)
     }
   },
+  getLoginUser: async (req, res, next) => {
+    try {
+      const loginUser = getUser(req)
+      const user = await User.findByPk(loginUser.id, {
+        attributes: [
+          'id', 'avatar', 'name', 'account', 'cover_image', 'introduction',
+          [sequelize.literal('(SELECT COUNT(following_id) FROM Followships WHERE  following_id = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(follower_id) FROM Followships WHERE  follower_id = User.id)'), 'folloingCount'],
+          [sequelize.literal(`(SELECT COUNT(DISTINCT Tweets.id) FROM Tweets WHERE User.id)`), 'tweetCount'],
+        ],
+        raw: true,
+        nest: true
+      })
+      if (!user) throw new Error('無此使用者。')
+      res.status(200).json({ message:'登入中使用者的資料', user })
+    } catch (err) {
+      next(err)
+    }
+  },
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
