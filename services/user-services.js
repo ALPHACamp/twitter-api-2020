@@ -62,13 +62,15 @@ const userServices = {
     ])
       .then(([user, tweets]) => {
         if (!user) throw new Error("User didn't exists!")
+        console.log(helpers.getUser(req).id)
         const tweetsData = tweets.map(t => ({
           ...t.toJSON(),
           userAccount: t.User.account,
           userAvatar: t.User.avatar,
           User: t.User.name,
           Replies:t.Replies.length,
-          Likes: t.Likes.length
+          Likes: t.Likes.length,
+          isLiked: t.Likes.some(l => l.UserId = helpers.getUser(req).id)
         }))
         return cb(null, tweetsData)
       })
@@ -128,7 +130,7 @@ const userServices = {
         tweetDescription: l.Tweet.description,
         tweetLikesCount: l.Tweet.Likes.length,
         tweetRepliesCount: l.Tweet.Replies.length,
-        isLiked: (l.UserId === helpers.getUser(req).id),
+        isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id),
         createdAt: l.createdAt,
         updatedAt: l.updatedAt
       }))
