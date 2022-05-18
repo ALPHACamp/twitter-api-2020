@@ -146,12 +146,12 @@ const adminController = {
       if (!tweet) throw new Error('貼文不存在')
       await Like.destroy({
         where: {
-          TweetId
+          Tweet_id: TweetId
         }
       })
       await Reply.destroy({
         where: {
-          TweetId
+          Tweet_id: TweetId
         }
       })
       await Tweet.destroy({
