@@ -12,6 +12,7 @@ const tweets = {
           {
             model: User,
             attributes: [
+              'id',
               'name',
               'account',
               'avatar'
@@ -74,6 +75,7 @@ const tweets = {
         name: element.User.name,
         account: element.User.account,
         avatar: element.User.avatar,
+        userId: element.User.id,
         description: element.description,
         createdAt: element.createdAt,
         likeNum: element.Likes.likeCounts,
