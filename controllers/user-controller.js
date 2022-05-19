@@ -327,69 +327,44 @@ const userController = {
   },
 
   getFollowings: (req, res, next) => {
-    const UserId = Number(req.params.id)
-    const reqUserId = helpers.getUser(req)
-    return Promise.all([
-      User.findByPk(UserId, {
-        include: { model: User, as: 'Followings' }
-      }),
-      Followship.findAll({
-        where: { followerId: reqUserId },
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
-      })
-    ])
-      .then(([user, following]) => {
-        if (!user) throw new Error('使用者不存在！')
-        if (user.role === 'admin') throw new Error('管理者無法追蹤其他使用者！')
-        if (!user.Followings.length) { res.status(200).json({ message: '沒有追隨者名單！' }) }
-
-        const currentUserFollowing = following.map(f => f.followingId)
-        const data = user.Followings.map(f => ({
-          followingId: f.id,
-          account: f.account,
-          name: f.name,
-          avatar: f.avatar,
-          introduction: f.introduction,
-          createdAt: f.createdAt,
-          isFollowed: currentUserFollowing.some(id => id === f.id)
-        }))
-        return res.status(200).json(data)
+    Followship.findAll({
+      where: { followerId: req.params.id },
+      attributes: [
+        'followingId', 'createdAt',
+        [Sequelize.literal('(SELECT account FROM Users WHERE id = following_id)'), 'account'],
+        [Sequelize.literal('(SELECT name FROM Users WHERE id = following_id)'), 'name'],
+        [Sequelize.literal('(SELECT avatar FROM Users WHERE id = following_id)'), 'avatar'],
+        [Sequelize.literal('(SELECT introduction FROM Users WHERE id = following_id)'), 'introduction'],
+        [Sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN 1 ELSE 0 END)`), 'isFollowed']
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(followings => {
+        if (!followings.length) throw new Error('該名使用者沒有追蹤任何人！')
+        return res.status(200).json(followings)
       })
       .catch(err => next(err))
   },
-
   getFollowers: (req, res, next) => {
-    const UserId = Number(req.params.id)
-    const reqUserId = helpers.getUser(req)
-    return Promise.all([
-      User.findByPk(UserId, {
-        include: { model: User, as: 'Followers' }
-      }),
-      Followship.findAll({
-        where: { followingId: reqUserId },
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
-      })
-    ])
-      .then(([user, follower]) => {
-        if (!user) throw new Error('使用者不存在！')
-        if (user.role === 'admin') throw new Error('管理者無法被追蹤！')
-        if (!user.Followers.length) { res.status(200).json({ message: '沒有粉絲名單！' }) }
-
-        const currentUserFollowing = follower.map(f => f.followingId)
-        const data = user.Followers.map(f => ({
-          followerId: f.id,
-          account: f.account,
-          name: f.name,
-          avatar: f.avatar,
-          introduction: f.introduction,
-          createdAt: f.createdAt,
-          isFollowed: currentUserFollowing.some(id => id === f.id)
-        }))
-        return res.status(200).json(data)
+    Followship.findAll({
+      where: { followingId: req.params.id },
+      attributes: [
+        'followerId', 'createdAt',
+        [Sequelize.literal('(SELECT account FROM Users WHERE id = follower_id)'), 'account'],
+        [Sequelize.literal('(SELECT name FROM Users WHERE id = follower_id)'), 'name'],
+        [Sequelize.literal('(SELECT avatar FROM Users WHERE id = following_id)'), 'avatar'],
+        [Sequelize.literal('(SELECT introduction FROM Users WHERE id = follower_id)'), 'introduction'],
+        [Sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN 1 ELSE 0 END)`), 'isFollowed']
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(followers => {
+        if (!followers.length) throw new Error('該名使用者沒有被任何人追蹤！')
+        res.status(200).json(followers)
       })
       .catch(err => next(err))
   },
