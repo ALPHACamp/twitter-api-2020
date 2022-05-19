@@ -64,6 +64,7 @@ const tweetController = {
       .then(tweet => {
         const likeCount = tweet.map(r => ({
           ...r.toJSON(),
+          description: r.description.substring(0, 50),
           Likes: r.Likes.length ? r.Likes.length : 0,
           Replies: r.Replies.length ? r.Replies.length : 0,
           isLiked: r.Likes.some(like => like.UserId === helpers.getUser(req).id)
