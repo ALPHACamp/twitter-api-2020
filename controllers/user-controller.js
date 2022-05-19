@@ -101,18 +101,19 @@ const userController = {
     }
     const { account, name, password, email, introduction } = req.body
     const hash = bcrypt.hashSync(password, 10)
-    const { avatar } = req.files
-    const { cover } = req.files
+    let avatar = req.files?.avatar || null
+    let cover = req.files?.cover || null
     if (!name) throw new Error('User name is required!')
     if (!account) throw new Error('Account is required!')
     if (!password) throw new Error('Password is required!')
     if (!email) throw new Error('Email is required!')
+    console.log(avatar)
     Promise.all([User.findOne({ where: { email } }, { raw: true, nest: true }), User.findOne({ where: { account } }, { raw: true }), User.findByPk(req.params.id)])
       .then(([findEmail, findAccount, user]) => {
         if (findEmail && findEmail.id !== req.user.id) throw new Error('Email has already been taken.')
         if (findAccount && findAccount.id !== req.user.id) throw new Error('Account has already been taken.')
-        imgurFileHandler(avatar)
-        imgurFileHandler(cover)
+        if (avatar) avatar = imgurFileHandler(avatar[0])
+        if (cover) cover = imgurFileHandler(cover[0])
         return user.update({
           name, account, email, password: hash, avatar: avatar || null, cover: cover || null, introduction
         })

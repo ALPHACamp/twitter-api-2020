@@ -9,7 +9,7 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') return next()
+  if (req.user && req.user.name === 'root') return next()
   return res.status(403).json({ status: 'error', message: 'admin permission denied' })
 }
 
