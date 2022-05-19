@@ -75,7 +75,10 @@ const userController = {
       .catch(err => next(err))
   },
   getCurrentUser: (req, res, next) => {
-    return res.json(req.user)
+    delete req.user.password
+    const currentUser = res.json(req.user)
+    console.log(currentUser)
+    return currentUser
   },
   getTopUsers: (req, res, next) => {
     return User.findAll({
@@ -107,7 +110,6 @@ const userController = {
     if (!account) throw new Error('Account is required!')
     if (!password) throw new Error('Password is required!')
     if (!email) throw new Error('Email is required!')
-    console.log(avatar)
     Promise.all([User.findOne({ where: { email } }, { raw: true, nest: true }), User.findOne({ where: { account } }, { raw: true }), User.findByPk(req.params.id)])
       .then(([findEmail, findAccount, user]) => {
         if (findEmail && findEmail.id !== req.user.id) throw new Error('Email has already been taken.')
