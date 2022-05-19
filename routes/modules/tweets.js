@@ -6,9 +6,7 @@ router.post('/:tweet_id/replies', tweetController.addReply)
 router.get('/:tweet_id/replies', tweetController.viewReplies)
 router.post('/:id/like', tweetController.addLike)
 router.post('/:id/unlike', tweetController.removeLike)
-
 router.get('/:tweet_id', tweetController.getTweet)
-router.get('/', tweetController.getTweets)
 router.post('/', tweetController.postTweet)
 
 module.exports = router
