@@ -27,6 +27,9 @@ const tweetController = {
   },
   getTweets: async (req, res, next) => {
     try {
+      const UserId = helpers.getUser(req)?.id
+      if (!UserId) throw new Error('沒有 UserId')
+
       const limit = Number(req.query.limit) || null
       const tweets = await Tweet.findAll({
         attributes: ['id', 'description', 'createdAt', 'updatedAt'],
@@ -41,7 +44,7 @@ const tweetController = {
           },
           {
             model: Like,
-            attributes: ['likeUnlike']
+            attributes: ['likeUnlike', 'UserId']
           }
         ],
         order: [['created_at', 'DESC']],
@@ -52,10 +55,17 @@ const tweetController = {
       const data = tweets.map(t => {
         const replyTotal = t.Replies.length
         const likeTotal = t.Likes.filter(item => item.likeUnlike).length
+        const isLike = t.toJSON().Likes.find(item => item.UserId === UserId)?.likeUnlike
+        console.log(isLike)
         return {
           ...t.toJSON(),
-          Replies: replyTotal,
-          Likes: likeTotal
+          Replies: {
+            replyTotal
+          },
+          Likes: {
+            isLike: isLike || false,
+            likeTotal
+          }
         }
       })
       return res.status(200).json(
@@ -67,6 +77,9 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
+      const UserId = helpers.getUser(req)?.id
+      if (!UserId) throw new Error('沒有 UserId')
+
       const tweet = await Tweet.findByPk(req.params.tId, {
         attributes: ['id', 'description', 'createdAt', 'updatedAt'],
         include: [
@@ -84,7 +97,7 @@ const tweetController = {
           },
           {
             model: Like,
-            attributes: ['id', 'likeUnlike'],
+            attributes: ['id', 'likeUnlike', 'UserId'],
             include: {
               model: User,
               attributes: ['id', 'account', 'name', 'avatarImg', 'createdAt', 'updatedAt']
@@ -93,11 +106,12 @@ const tweetController = {
         ],
         nest: true
       })
-      if (!tweet) throw new Error('The user could not be found')
+      if (!tweet) throw new Error('The tweet could not be found')
       const data = {
         ...tweet.toJSON(),
         replyTotal: tweet.Replies.length,
-        likeTotal: tweet.Likes.filter(l => l.likeUnlike).length
+        likeTotal: tweet.Likes.filter(l => l.likeUnlike).length,
+        isLike: tweet.Likes.find(item => item.UserId === UserId)?.likeUnlike || false
       }
       return res.status(200).json(
         data
