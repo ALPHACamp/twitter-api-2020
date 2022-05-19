@@ -281,10 +281,9 @@ describe('# user requests', () => {
           .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
-
             expect(res.body.data.user).to.be.an('array');
             //回傳資料中是否有跟隨中的人的 id = 2
-            res.body.data.user[0].followingId.should.equal(2);
+            res.body.data.user[0].Followings[0].id.should.equal(2);
 
             return done();
           })
@@ -336,7 +335,7 @@ describe('# user requests', () => {
 
             expect(res.body.data.user).to.be.an('array');
             // 有跟隨者的 followerId = 1
-            res.body.data.user[0].followerId.should.equal(1);
+            res.body.data.user[0].Followers[0].id.should.equal(1);
 
             return done();
           })

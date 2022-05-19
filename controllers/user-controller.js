@@ -81,7 +81,8 @@ const userController = {
     return User.findAll({
       include: [{
         model: User, as: 'Followers'
-      }]
+      }],
+      where: { role: 'user' }
     })
       .then(users => {
         users = users.map(u => ({
