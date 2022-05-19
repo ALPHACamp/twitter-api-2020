@@ -89,7 +89,7 @@ const userController = {
         users = users.map(u => ({
           ...u.dataValues,
           followerCount: u.Followers.length,
-          isFollowing: req.user && req.user.Followers.map(f => f.id).includes(u.id)
+          isFollowed: req.user && req.user.Followings.map(f => f.id).includes(u.id)
         }))
         users.sort((a, b) => b.followerCount - a.followerCount)
         users = users.slice(0, 10)
