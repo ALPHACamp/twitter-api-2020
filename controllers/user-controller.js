@@ -1,5 +1,5 @@
 const createToken = require('../helpers/token')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const { imgurCoverHandler, imgurAvatarHandler } = require('../helpers/file-helpers')
 
@@ -25,18 +25,18 @@ const userController = {
     try {
       User.findOne({ where: { email: req.body.email } })
         .then(user => {
-          if (user) throw new Error('此Email已被註冊！')
+          if (user) return res.status(403).json({ status: 'error', message: '此Email已被註冊！！' })
           return bcrypt.hash(req.body.password, 10)
-        })
-        .then(hash => User.create({
-          name: req.body.name,
-          account: req.body.account,
-          email: req.body.email,
-          password: hash,
-          role: 'user'
-        }))
-        .then(user => {
-          res.json({ status: 'success', user })
+            .then(hash => User.create({
+              name: req.body.name,
+              account: req.body.account,
+              email: req.body.email,
+              password: hash,
+              role: 'user'
+            }))
+            .then(user => {
+              res.json({ status: 'success', user })
+            })
         })
     } catch (err) {
       next(err)
@@ -219,13 +219,25 @@ const userController = {
   },
   userFollowings: (req, res, next) => {
     try {
-      const followerId = req.params.id
-      Followship.findAll({
-        where: { followerId },
-        raw: true
+      const id = req.params.id
+      User.findAll({
+        attributes: { exclude: ['password'] },
+        where: { id },
+        include: [{ model: User, as: 'Followings', include: [Tweet], attributes: ['id', 'account', 'name', 'avatar'] }],
+        nest: true
       })
-        .then(followings => {
-          res.json(followings)
+        .then(followingUsers => {
+          followingUsers = followingUsers[0].toJSON()
+          const newData = []
+          // eslint-disable-next-line array-callback-return
+          followingUsers.Followings.map(user => {
+            if (Number(user.Followship.followerId) === Number(id)) {
+              newData.push({ ...user, isFollowed: true })
+            } else {
+              newData.push({ ...user, isFollowed: false })
+            }
+          })
+          res.json({ data: newData })
         })
     } catch (err) {
       next(err)
@@ -233,13 +245,25 @@ const userController = {
   },
   userFollowers: (req, res, next) => {
     try {
-      const followingId = req.params.id
-      Followship.findAll({
-        where: { followingId },
-        raw: true
+      const id = req.params.id
+      User.findAll({
+        where: { id },
+        attributes: { exclude: ['password'] },
+        include: [{ model: User, as: 'Followers', include: [Tweet], attributes: ['id', 'account', 'name', 'avatar'] }, { model: User, as: 'Followings', attributes: ['id', 'account'] }],
+        nest: true
       })
         .then(followings => {
-          res.json(followings)
+          const newData = []
+          const followingsJsonData = followings[0].toJSON()
+          // eslint-disable-next-line array-callback-return
+          followingsJsonData.Followers.map(follower => {
+            if (followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)) {
+              newData.push({ ...follower, isFollowed: true })
+            } else {
+              newData.push({ ...follower, isFollowed: false })
+            }
+          })
+          res.json({ data: newData })
         })
     } catch (err) {
       next(err)
@@ -247,37 +271,52 @@ const userController = {
   },
   putUser: (req, res, next) => {
     try {
-      const userId = req.params.id
+      const UserId = req.params.id
       const { name, account, email, password, checkPassword, introduction } = req.body
-      const { files } = req
-      if (!name) throw new Error('請輸入使用者姓名！')
-      if (!checkPassword) throw new Error('請再輸入一次密碼')
-      if (password !== checkPassword) throw new Error('確認密碼有誤，請重新輸入一次')
-      return Promise.all([
-        User.findByPk(userId),
-        User.findOne({ where: { account } }),
-        User.findOne({ where: { email } }),
-        imgurCoverHandler(files),
-        imgurAvatarHandler(files)
-      ])
-        .then(([user, account, email, coverUrl, avatarUrl]) => {
-          if (!user) throw new Error('使用者不存在！')
-          if (account) throw new Error('此帳戶已經有人使用')
-          if (email) throw new Error('此信箱已經有人使用，請更換其他信箱')
-          const newPassword = bcrypt.hashSync(password, 10)
-          return user.update({
+      // 個人資料修改頁面
+      if (password || account || email) {
+        if (!name) throw new Error('請輸入使用者姓名！')
+        if (!account) throw new Error('此欄位為必填欄位')
+        if (!checkPassword) throw new Error('請輸入確認密碼')
+        if (password !== checkPassword) throw new Error('確認密碼有誤，請重新輸入一次')
+        return Promise.all([
+          User.findByPk(UserId),
+          User.findOne({ where: { account } }),
+          User.findOne({ where: { email } })
+        ])
+          .then(([user, accountUser, emailUser]) => {
+            if (!user) res.status(403).json({ status: 'error', message: '使用者不存在！' })
+            if (accountUser && Number(accountUser.dataValues.id) !== Number(UserId)) return res.status(403).json({ status: 'error', message: '此帳戶已經有人使用' })
+            if (emailUser && Number(emailUser.dataValues.id) !== Number(UserId)) return res.status(403).json({ status: 'error', message: '此信箱已經有人使用，請更換其他信箱' })
+            const newPassword = bcrypt.hashSync(password, 10)
+            return user.update({
+              name,
+              account: account || user.dataValues.account,
+              email: email || user.dataValues.email,
+              password: newPassword || user.dataValues.password
+            })
+              .then(user => {
+                res.json({ status: '更新成功', user })
+              })
+          })
+      } else {
+        // 有多個圖檔那頁
+        const { files } = req
+        return Promise.all([
+          User.findByPk(UserId),
+          imgurCoverHandler(files),
+          imgurAvatarHandler(files)
+        ])
+          .then(([user, coverUrl, avatarUrl]) => user.update({
             name,
-            account: account || user.account,
-            email: email || user.email,
-            password: newPassword,
-            introduction: introduction || user.introduction,
+            introduction: introduction || user.dataValues.introduction,
             cover: coverUrl || user.cover,
             avatar: avatarUrl || user.avatar
+          }))
+          .then(user => {
+            res.json({ status: '更新成功', user })
           })
-        })
-        .then(user => {
-          res.json(user)
-        })
+      }
     } catch (err) {
       next(err)
     }
