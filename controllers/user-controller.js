@@ -2,6 +2,7 @@ const { User, Reply, Tweet, Like, Followship, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../_helpers')
+const { isLikedTweet } = require('../helpers/tweet')
 const imgurFileHandler = require('../helpers/file-helper')
 
 const userController = {
@@ -45,8 +46,8 @@ const userController = {
       const user = await User.findByPk(req.params.id, {
         attributes: [
           'id', 'avatar', 'name', 'account', 'cover_image', 'introduction',
-          [sequelize.literal('(SELECT COUNT(DISTINCT following_id) FROM Followships WHERE  following_id = User.id)'), 'followerCount'],
-          [sequelize.literal('(SELECT COUNT(DISTINCT follower_id) FROM Followships WHERE  follower_id = User.id)'), 'folloingCount'],
+          [sequelize.literal('(SELECT COUNT(following_id) FROM Followships WHERE  following_id = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(follower_id) FROM Followships WHERE  follower_id = User.id)'), 'folloingCount'],
           [sequelize.literal(`(SELECT COUNT(DISTINCT Tweets.id) FROM Tweets WHERE ${req.params.id} = User.id)`), 'tweetCount'],
         ],
         raw: true,
@@ -58,14 +59,33 @@ const userController = {
       next(err)
     }
   },
+  getLoginUser: async (req, res, next) => {
+    try {
+      const loginUser = getUser(req)
+      const user = await User.findByPk(loginUser.id, {
+        attributes: [
+          'id', 'avatar', 'name', 'account', 'cover_image', 'introduction',
+          [sequelize.literal('(SELECT COUNT(following_id) FROM Followships WHERE  following_id = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(follower_id) FROM Followships WHERE  follower_id = User.id)'), 'folloingCount'],
+          [sequelize.literal(`(SELECT COUNT(DISTINCT Tweets.id) FROM Tweets WHERE User.id)`), 'tweetCount'],
+        ],
+        raw: true,
+        nest: true
+      })
+      if (!user) throw new Error('無此使用者。')
+      res.status(200).json({ message:'登入中使用者的資料', user })
+    } catch (err) {
+      next(err)
+    }
+  },
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         attributes: [
           'id','description', 'createdAt',
-          [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Likes WHERE tweet_id = Tweet.id)'), 'likeCount']
+          [sequelize.literal('(SELECT COUNT(tweet_id) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(tweet_id) FROM Likes WHERE tweet_id = Tweet.id)'), 'likeCount']
         ],
         include: [{
           model: User,
@@ -73,12 +93,16 @@ const userController = {
             'id', 'avatar', 'name', 'account'
           ]
         }],
-        order: [['createdAt', 'DESC'], ['id', 'DESC']],
-        raw: true,
-        nest: true
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!tweets.length) throw new Error('沒有任何推文。')
-      res.status(200).json(tweets)
+      
+      const isLikedId = await isLikedTweet(getUser(req).id)
+      const result = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        isLiked: isLikedId.some(tId => tId === tweet.id)
+      }))
+      res.status(200).json(result)
     } catch (err) {
       next(err)
     }
@@ -115,7 +139,7 @@ const userController = {
         where: { UserId: req.params.id },
         attributes: [
           'TweetId', 'createdAt',
-          [sequelize.literal('(SELECT COUNT(tweet_id) FROM Likes WHERE tweet_id)'), 'likeCount'],
+          [sequelize.literal('(SELECT COUNT(tweet_id) FROM Likes WHERE TweetId = tweet_id)'), 'likeCount'],
           [sequelize.literal('(SELECT COUNT(Replies.tweet_id) FROM Replies WHERE Replies.tweet_id = Like.tweet_id)'), 'replyCount'],
         ],
         include: [{
@@ -126,12 +150,16 @@ const userController = {
              Where: { id: Tweet.userId }
           }]
         }],
-        order: [['createdAt', 'DESC'], ['id', 'DESC']],
-        raw: true,
-        nest: true
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!likes.length) throw new Error('沒有喜歡的推文。')
-      res.status(200).json(likes)
+
+      const isLikedId = await isLikedTweet(getUser(req).id)
+      const result = likes.map(like => ({
+        ...like.toJSON(),
+        isLiked: isLikedId.some(tId => tId === like.TweetId)
+      }))
+      res.status(200).json(result)
     } catch (err) {
       next(err)
     }
@@ -144,15 +172,17 @@ const userController = {
           'followingId', 'createdAt',
           [sequelize.literal(`(SELECT avatar FROM Users WHERE id = following_id)`), 'avatar'],
           [sequelize.literal(`(SELECT name FROM Users WHERE id = following_id)`), 'name'],
-          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = following_id)`), 'introduction'],
-          [sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN true ELSE false END)`), 'isFollowing']
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = following_id)`), 'introduction']
         ],
-        order: [['createdAt', 'DESC'], ['id', 'DESC']],
-        raw: true,
-        nest: true
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!followings.length) throw new Error('沒有追隨者名單。')
-      res.status(200).json(followings)
+      const user = getUser(req)
+      const result = followings.map(following => ({
+        ...following.toJSON(),
+        isFollowing: user.Followings.some(f => f.id === following.followingId)
+      }))
+      res.status(200).json(result)
     } catch (err) {
       next(err)
     }
@@ -165,15 +195,17 @@ const userController = {
           'followerId', 'createdAt',
           [sequelize.literal(`(SELECT avatar FROM Users WHERE id = follower_id)`), 'avatar'],
           [sequelize.literal(`(SELECT name FROM Users WHERE id = follower_id)`), 'name'],
-          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = follower_id)`), 'introduction'],
-          [sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN true ELSE false END)`), 'isFollowing']
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = follower_id)`), 'introduction']
         ],
-        order: [['createdAt', 'DESC'], ['id', 'DESC']],
-        raw: true,
-        nest: true
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!followers.length) throw new Error('沒有粉絲名單。')
-      res.status(200).json(followers)
+      const user = getUser(req)
+      const result = followers.map(follower => ({
+        ...follower.toJSON(),
+        isFollowing: user.Followings.some(f => f.id === follower.followerId)
+      }))
+      res.status(200).json(result)
     } catch (err) {
       next(err)
     }
@@ -187,13 +219,13 @@ const userController = {
       let coverImage = req.files?.cover_image || null
 
       if (!name.trim() || !introduction.trim()) throw new Error('名字和自我介紹欄不可為空。')
-      if (introduction.length > 160) throw new Error('自我介紹字數不可超過 50 字。')
+      if (introduction.length > 160) throw new Error('自我介紹字數不可超過 160 字。')
       if (name.length > 50) throw new Error('名字字數不可超過 50 字。')
 
       if (avatar) avatar = await imgurFileHandler(avatar[0])
       if (coverImage) coverImage = await imgurFileHandler(coverImage[0])
 
-      const user = await User.findByPk(req.params.id)
+      const user = await User.findByPk(getUser(req).id)
       const userUpdate = await user.update({
         name,
         introduction,
@@ -205,20 +237,29 @@ const userController = {
       next(err)
     }
   },
+  getUserSetting: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(getUser(req).id, {
+        attributes: ['id', 'account', 'name', 'email']
+      })
+      if (!user) throw new Error('查無使用者')
+      res.status(200).json({ message: '登入中的使用者資料', user })
+    } catch (err) {
+      next(err)
+    }
+  },
   putUserSetting: async (req, res, next) => {
     try {
       const { name, account, email, password, checkPassword } = req.body
       const user = getUser(req)
 
       if (!name.trim() ||
-        !account.trim() ||
-        !email.trim() ||
-        !password.trim() ||
-        !checkPassword.trim()) throw new Error('所有欄位必填。')
+          !account.trim() ||
+          !email.trim() ||
+          !password.trim()) throw new Error('不可提交空白字元')
 
       if (req.body.password.trim() !== req.body.checkPassword.trim()) throw new Error('密碼與確認密碼不符。')
 
-      if (!account) throw new Error('帳號不可空白。')
       if (await User.findOne({ where:{ account } })) throw new Error('此帳號已經存在。')
       if (await User.findOne({ where: { email } })) throw new Error('此email已經存在。')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不相符。')
@@ -236,26 +277,34 @@ const userController = {
   },
   getTopUsers: async (req, res, next) => {
     try {
-      const topUsers = await Followship.findAll({
-        attributes: [
-          ['following_id', 'id'],
-          [sequelize.literal(`(SELECT account FROM Users WHERE id = following_id)`), 'account'],
-          [sequelize.literal(`(SELECT name FROM Users WHERE id = following_id)`), 'name'],
-          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = following_id)`), 'avatar'],
-          [sequelize.literal(`(COUNT(follower_id))`), 'followerCount'],
+      const users = await User.findAll({
+        attributes: ['id', 'account', 'name', 'avatar'],
+        include: [
+          { model: User, as: 'Followers', attributes: ['id'], through: { attributes: [] }}
         ],
-        group: 'following_id',
-        limit: 10,
-        order: [[sequelize.col('followerCount'), 'DESC']]
       })
-      if (!topUsers) throw new Error('查無資料。')
-      
-      const result = topUsers.map(user => ({
-        ...user.toJSON(),
-        isFollowing: req.user.Followings.some(f => f.id === user.id)
-      }))
-      
-      res.status(200).json({ message: '前十人氣王', result })
+
+      if (!users.length) throw new Error('無任何使用者')
+
+      const topUsers = users.map(user => ({
+        followerCount: user.Followers.length,
+        isFollowing: req.user.Followings.some(f => f.id === user.id),
+        ...user.toJSON()
+      })).sort((a, b) => b.followerCount - a.followerCount)
+         .slice(0, 10)
+
+      res.status(200).json({ message: '前十人氣王', topUsers })
+    } catch (err) {
+      next(err)
+    }
+  },
+  putUserPage: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(getUser(req).id, {
+        attributes: ['id', 'name', 'introduction', 'avatar', 'cover_image']
+      })
+      if (!user) throw new Error('查無使用者')
+      res.status(200).json({ message: '登入中的使用者資料', user })
     } catch (err) {
       next(err)
     }
