@@ -77,7 +77,6 @@ const userController = {
   getCurrentUser: (req, res, next) => {
     delete req.user.password
     const currentUser = res.json(req.user)
-    console.log(currentUser)
     return currentUser
   },
   getTopUsers: (req, res, next) => {
@@ -102,14 +101,14 @@ const userController = {
     if (Number(req.params.id) !== Number(req.user.id)) {
       throw new Error("User doen't have permission!")
     }
-    const { account, name, password, email, introduction } = req.body
+    const { introduction } = req.body
+    const password = req.body.password || req.user.password
+    const name = req.body.name || req.user.name
+    const account = req.body.account || req.user.account
+    const email = req.body.email || req.user.email
     const hash = bcrypt.hashSync(password, 10)
     let avatar = req.files?.avatar || null
     let cover = req.files?.cover || null
-    if (!name) throw new Error('User name is required!')
-    if (!account) throw new Error('Account is required!')
-    if (!password) throw new Error('Password is required!')
-    if (!email) throw new Error('Email is required!')
     Promise.all([User.findOne({ where: { email } }, { raw: true, nest: true }), User.findOne({ where: { account } }, { raw: true }), User.findByPk(req.params.id)])
       .then(([findEmail, findAccount, user]) => {
         if (findEmail && findEmail.id !== req.user.id) throw new Error('Email has already been taken.')
