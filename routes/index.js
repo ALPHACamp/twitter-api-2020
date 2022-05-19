@@ -18,7 +18,6 @@ const reception = require('./models/reception')
 // 登入相關路由
 router.post('/api/login', passport.authenticate('local', { session: false }), userController.login)
 router.post('/api/admin/login', passport.authenticate('local', { session: false }), adminController.login)
-// 註冊路由
 router.post('/api/users', userController.signUp)
 
 // 導入後台

@@ -2,7 +2,7 @@ const { Tweet, User, Like, Reply } = require('../models')
 const sequelize = require('sequelize')
 
 const tweets = {
-  getAll: async () => {
+  getAll: async (UserId) => {
     try {
       const rawTweets = await Tweet.findAll({
         attributes: {
@@ -12,6 +12,7 @@ const tweets = {
           {
             model: User,
             attributes: [
+              'id',
               'name',
               'account',
               'avatar'
@@ -29,39 +30,70 @@ const tweets = {
         nest: true,
         raw: true
       })
+      if (UserId) {
+        const userLikesTweet = await Like.findAll({
+          attributes: [
+            'TweetId'
+          ],
+          where: {
+            User_id: UserId
+          },
+          raw: true
+        })
 
+        if (!userLikesTweet.length) {
+          rawTweets.forEach(element => {
+            element.userLikesTweet = 0
+            element.isLike = false
+          })
+        }
+        userLikesTweet.forEach(likeTweets => {
+          rawTweets.forEach(tweet => {
+            if (likeTweets.TweetId === tweet.id) {
+              tweet.isLike = true
+            } else if (!tweet.isLike) { tweet.isLike = false }
+          })
+        })
+      }
       const replies = await Reply.count({
         group: ['Tweet_id'],
         raw: true
       })
-
-      for (let replyIndex = 0; replyIndex < replies.length; replyIndex++) {
-        for (let tweetIndex = 0; tweetIndex < rawTweets.length; tweetIndex++) {
-          if (rawTweets[tweetIndex].id === replies[replyIndex].Tweet_id) {
-            rawTweets[tweetIndex].replyCounts = replies[replyIndex].count
-          } else {
-            if (rawTweets[tweetIndex].replyCounts === undefined) rawTweets[tweetIndex].replyCounts = 0
-          }
-        }
+      if (!replies.length) {
+        rawTweets.forEach(element => {
+          element.replyNum = 0
+        })
+      } else {
+        replies.forEach(replyElement => {
+          rawTweets.forEach(element => {
+            if (element.id === replyElement.Tweet_id) {
+              element.replyCounts = replyElement.count
+            } else {
+              if (element.replyCounts === undefined) element.replyCounts = 0
+            }
+          })
+        })
       }
       const tweets = rawTweets.map(element => ({
         id: element.id,
         name: element.User.name,
         account: element.User.account,
         avatar: element.User.avatar,
+        userId: element.User.id,
         description: element.description,
         createdAt: element.createdAt,
-        likeCount: element.Likes.likeCounts,
-        replyCount: element.replyCounts
+        likeNum: element.Likes.likeCounts,
+        replyNum: element.replyCounts,
+        isLike: element.isLike
       }))
       return tweets
     } catch (err) {
       console.log(err)
     }
   },
-  getOne: async (tweetId) => {
+  getOne: async (TweetId, UserId) => {
     try {
-      const rawTweet = await Tweet.findByPk(tweetId, {
+      const rawTweet = await Tweet.findByPk(TweetId, {
         attributes: {
           exclude: ['updatedAt']
         },
@@ -77,7 +109,7 @@ const tweets = {
           {
             model: Like,
             attributes: [
-              [sequelize.fn('COUNT', sequelize.col('Likes.Tweet_id')), 'likeCounts']
+              [sequelize.fn('COUNT', sequelize.col('Likes.Tweet_id')), 'likeNum']
             ]
           }
         ],
@@ -87,16 +119,31 @@ const tweets = {
         raw: true
       })
       const replies = await Reply.count({
+        where: {
+          TweetId
+        },
         group: ['Tweet_id'],
         raw: true
       })
-
-      if (replies !== undefined) {
-        rawTweet.replyCounts = 0
+      if (!replies.length) {
+        rawTweet.replyNum = 0
       } else {
-        rawTweet.replyCounts = replies[0].count
+        rawTweet.replyNum = replies[0].count
       }
-
+      if (UserId) {
+        const userLikesTweet = await Like.findOne({
+          attributes: [
+            'TweetId'
+          ],
+          where: {
+            UserId,
+            Tweet_id: TweetId
+          },
+          raw: true
+        })
+        if (userLikesTweet) rawTweet.isLike = true
+        else rawTweet.isLike = false
+      }
       const tweet = {
         id: rawTweet.id,
         name: rawTweet.User.name,
@@ -104,8 +151,9 @@ const tweets = {
         avatar: rawTweet.User.avatar,
         description: rawTweet.description,
         createdAt: rawTweet.createdAt,
-        likeCount: rawTweet.Likes.likeCounts,
-        replyCount: rawTweet.replyCounts
+        likeNum: rawTweet.Likes.likeNum,
+        replyNum: rawTweet.replyNum,
+        isLike: rawTweet.isLike
       }
       return tweet
     } catch (err) {

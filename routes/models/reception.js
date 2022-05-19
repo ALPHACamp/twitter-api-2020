@@ -17,10 +17,10 @@ router.get('/tweets', tweetController.getAll)
 router.post('/tweets', tweetController.create)
 
 // 回覆相關路由
-router.get('/tweets/:tweet_id/replies', replyController.getAll)
 router.post('/tweets/:tweet_id/replies', replyController.create)
-router.post('/replies/:id/like', replyController.add)
-router.post('/replies/:id/unlike', replyController.remove)
+router.get('/tweets/:tweet_id/replies', replyController.getAll)
+router.post('/replies/:id/like/:tweetId', replyController.add)
+router.post('/replies/:id/unlike/:tweetId', replyController.remove)
 
 // 追蹤相關路由
 router.delete('/followships/:followingId', followshipController.deleteFollowship)
