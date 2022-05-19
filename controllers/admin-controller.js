@@ -27,10 +27,7 @@ const adminController = {
       tweets.forEach(element => {
         element.description = element.description.substring(0, 51)
       })
-      res.json({
-        status: 'success',
-        data: tweets
-      })
+      res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }

@@ -13,7 +13,7 @@ const tweetController = {
       next(err)
     }
   },
-  create: async (req, res, next) => { // 補 islike
+  create: async (req, res, next) => {
     try {
       const user = helpers.getUser(req)
       const description = req.body.description

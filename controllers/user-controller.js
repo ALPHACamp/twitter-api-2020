@@ -1,7 +1,9 @@
 const createToken = require('../helpers/token')
 const { User, Tweet, Reply, Like } = require('../models')
+const helpers = require('../_helpers')
 const bcrypt = require('bcryptjs')
 const { imgurCoverHandler, imgurAvatarHandler } = require('../helpers/file-helpers')
+const tweetServices = require('../services/tweets')
 
 const userController = {
   login: async (req, res, next) => {
@@ -76,37 +78,15 @@ const userController = {
       next(err)
     }
   },
-  getUserTweet: (req, res, next) => {
+  getUserTweet: async (req, res, next) => {
     try {
-      const UserId = req.params.id
-
-      Tweet.findAll({
-        where: { UserId },
-        order: [['createdAt', 'DESC']],
-        include: [User, { model: Like, attributes: ['id'] }, { model: Reply, attributes: ['id'] }],
-        nest: true
-      })
-        .then(tweets => {
-          if (!tweets) throw new Error('找不到使用者的推文！')
-          const newData = []
-          // eslint-disable-next-line array-callback-return
-          tweets = tweets.map(tweet => {
-            const tweetsJSON = tweet.toJSON()
-            newData.push({
-              tweetId: tweetsJSON.id,
-              description: tweetsJSON.description,
-              userId: tweetsJSON.UserId,
-              userName: tweetsJSON.User.name,
-              userAvatar: tweetsJSON.User.avatar,
-              userEmail: tweetsJSON.User.email,
-              likeCount: tweetsJSON.Likes.length,
-              replyCount: tweetsJSON.Replies.length,
-              tweetCreateAt: tweetsJSON.createdAt,
-              tweetUpdatedAt: tweetsJSON.updatedAt
-            })
-          })
-          res.json(newData)
-        })
+      const userId = Number(req.params.id)
+      const loginUserId = helpers.getUser(req).id
+      const totaltweets = await tweetServices.getAll(loginUserId)
+      if (!totaltweets) throw new Error('沒有推文！')
+      const tweets = totaltweets.filter(element => element.UserId === userId)
+      if (!tweets.length) throw new Error('使用者沒有推文！')
+      res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
@@ -170,73 +150,12 @@ const userController = {
       })
       if (!rawUserLikes.length) return res.status(200).json(rawUserLikes)
       const likeTweetId = []
-
-      for (let index = 0; index < rawUserLikes.length; index++) {
-        likeTweetId.push(rawUserLikes[index].Tweet.id)
-      }
-
-      const likeTweets = await Tweet.findAll({
-        where: {
-          id: likeTweetId
-        },
-        include: [
-          { model: User }
-        ],
-        order: [['created_at', 'DESC']],
-        nest: true,
-        raw: true
+      rawUserLikes.forEach(element => {
+        likeTweetId.push(element.Tweet.id)
       })
-      // 推文 like 總數
-      const likes = await Like.count({
-        group: ['Tweet_id']
-      })
-
-      if (likes) {
-        likeTweets.forEach(tweet => {
-          likes.forEach(element => {
-            if (tweet.id === element.Tweet_id) {
-              tweet.totalLikeCount = element.count
-            } else {
-              if (tweet.totalLikeCount === undefined) tweet.totalLikeCount = 0
-            }
-          })
-        })
-      } else {
-        likeTweets.forEach(element => {
-          element.totalLikeCount = 0
-        })
-      }
-      // 推文 reply 總數
-      const replies = await Reply.count({
-        group: ['Tweet_id']
-      })
-
-      if (replies) {
-        likeTweets.forEach(tweet => {
-          replies.forEach(element => {
-            if (tweet.id === element.Tweet_id) {
-              tweet.totalReplyCount = element.count
-            } else {
-              if (tweet.totalReplyCount === undefined) tweet.totalReplyCount = 0
-            }
-          })
-        })
-      } else {
-        likeTweets.forEach(element => {
-          element.totalReplyCount = 0
-        })
-      }
-      const data = likeTweets.map(element => ({
-        TweetId: element.id,
-        description: element.description,
-        createdAt: element.createAt,
-        name: element.User.name,
-        account: element.User.account,
-        avatar: element.User.avatar,
-        totalLikeNum: element.totalLikeCount,
-        totalReplyNum: element.totalReplyCount
-      }))
-      res.status(200).json(data)
+      const totaltweets = await tweetServices.getAll(helpers.getUser(req).id)
+      const tweets = totaltweets.filter(element => likeTweetId.some(likeTweet => likeTweet === element.TweetId))
+      res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
