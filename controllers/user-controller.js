@@ -285,7 +285,7 @@ const userController = {
           User.findOne({ where: { email } })
         ])
           .then(([user, accountUser, emailUser]) => {
-            if (!user) res.status(403).json({ status: 'error', message: '使用者不存在！' })
+            if (!user) return res.status(403).json({ status: 'error', message: '使用者不存在！' })
             if (accountUser && Number(accountUser.dataValues.id) !== Number(UserId)) return res.status(403).json({ status: 'error', message: '此帳戶已經有人使用' })
             if (emailUser && Number(emailUser.dataValues.id) !== Number(UserId)) return res.status(403).json({ status: 'error', message: '此信箱已經有人使用，請更換其他信箱' })
             const newPassword = bcrypt.hashSync(password, 10)
