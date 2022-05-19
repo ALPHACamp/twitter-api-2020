@@ -133,7 +133,10 @@ const userController = {
         nest: true
       })
         .then(reply => {
-          if (!reply) res.status(403).json({ status: 'error', message: '找不到使用者的回覆！' })
+
+          if (!reply) {
+            return res.status(403).json({ status: 'error', message: '找不到使用者的回覆！' })
+          }
           const repeatDataId = []
           const rawData = []
           // eslint-disable-next-line array-callback-return
@@ -181,7 +184,7 @@ const userController = {
         nest: true,
         raw: true
       })
-      // if (!rawUserLikes.length) throw new Error('使用者沒有喜歡的推文')
+
       if (!rawUserLikes.length) return res.status(204).json({ status: 'error', data: [], message: '使用者沒有喜歡的推文' })
       const likeTweetId = []
 
@@ -198,47 +201,48 @@ const userController = {
           { model: Like, attributes: ['id'] },
           { model: Reply, attributes: ['id'] }
         ],
+        order: [['created_at', 'DESC']],
         nest: true
       })
-
       // 推文 like 總數
       const likes = await Like.count({
         group: ['Tweet_id']
       })
 
-      if (!likes) {
-        for (let index = 0; index < likeTweets.length; index++) {
-          likeTweets[index].totalLikeCount = 0
-        }
-      }
-
-      for (let likesIndex = 0; likesIndex < likes.length; likesIndex++) {
-        for (let tweetIndex = 0; tweetIndex < likeTweets.length; tweetIndex++) {
-          if (likeTweets[tweetIndex].id === likes[likesIndex].Tweet_id) {
-            likeTweets[tweetIndex].totalLikeCount = likes[likesIndex].count
-          } else {
-            if (likeTweets[tweetIndex].totalLikeCount === undefined) likeTweets[tweetIndex].totalLikeCount = 0
-          }
-        }
+      if (likes) {
+        likeTweets.forEach(tweet => {
+          likes.forEach(element => {
+            if (tweet.id === element.Tweet_id) {
+              tweet.totalLikeCount = element.count
+            } else {
+              if (tweet.totalLikeCount === undefined) tweet.totalLikeCount = 0
+            }
+          })
+        })
+      } else {
+        likeTweets.forEach(element => {
+          element.totalLikeCount = 0
+        })
       }
       // 推文 reply 總數
       const replies = await Reply.count({
         group: ['Tweet_id']
       })
 
-      if (!replies) {
-        for (let index = 0; index < likeTweets.length; index++) {
-          likeTweets[index].totalReplyCount = 0
-        }
-      }
-      for (let replyIndex = 0; replyIndex < replies.length; replyIndex++) {
-        for (let tweetIndex = 0; tweetIndex < likeTweets.length; tweetIndex++) {
-          if (likeTweets[tweetIndex].id === replies[replyIndex].Tweet_id) {
-            likeTweets[tweetIndex].totalReplyCount = replies[replyIndex].count
-          } else {
-            if (likeTweets[tweetIndex].totalReplyCount === undefined) likeTweets[tweetIndex].totalReplyCount = 0
-          }
-        }
+      if (replies) {
+        likeTweets.forEach(tweet => {
+          replies.forEach(element => {
+            if (tweet.id === element.Tweet_id) {
+              tweet.totalReplyCount = element.count
+            } else {
+              if (tweet.totalReplyCount === undefined) tweet.totalReplyCount = 0
+            }
+          })
+        })
+      } else {
+        likeTweets.forEach(element => {
+          element.totalReplyCount = 0
+        })
       }
       const data = likeTweets.map(element => ({
         TweetId: element.id,
@@ -344,7 +348,7 @@ const userController = {
           User.findOne({ where: { email } })
         ])
           .then(([user, accountUser, emailUser]) => {
-            if (!user) res.status(403).json({ status: 'error', message: '使用者不存在！' })
+            if (!user) return res.status(403).json({ status: 'error', message: '使用者不存在！' })
             if (accountUser && Number(accountUser.dataValues.id) !== Number(UserId)) return res.status(403).json({ status: 'error', message: '此帳戶已經有人使用' })
             if (emailUser && Number(emailUser.dataValues.id) !== Number(UserId)) return res.status(403).json({ status: 'error', message: '此信箱已經有人使用，請更換其他信箱' })
             const newPassword = bcrypt.hashSync(password, 10)

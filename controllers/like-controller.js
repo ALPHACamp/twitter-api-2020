@@ -1,12 +1,14 @@
-const { Like } = require('../models')
+const { Like, Tweet } = require('../models')
 const helpers = require('../_helpers')
-const likeService = require('../services/likes')
+const tweetService = require('../services/tweets')
 
 const likeControler = {
   add: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
       const TweetId = Number(req.params.id)
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) throw new Error('沒有該推文')
       const like = await Like.findOne({
         where: {
           UserId,
@@ -18,8 +20,8 @@ const likeControler = {
         UserId,
         TweetId
       })
-      const likeNum = await likeService.count(TweetId)
-      res.status(200).json(likeNum)
+      const data = await tweetService.getOne(TweetId, UserId)
+      res.status(200).json(data)
     } catch (err) {
       next(err)
     }
@@ -28,6 +30,8 @@ const likeControler = {
     try {
       const UserId = helpers.getUser(req).id
       const TweetId = Number(req.params.id)
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) throw new Error('沒有該推文')
       const like = await Like.findOne({
         where: {
           UserId,
@@ -41,8 +45,8 @@ const likeControler = {
           TweetId
         }
       })
-      const likeNum = await likeService.count(TweetId)
-      res.status(200).json(likeNum)
+      const data = await tweetService.getOne(TweetId, UserId)
+      res.status(200).json(data)
     } catch (err) {
       next(err)
     }
