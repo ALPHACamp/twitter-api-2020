@@ -282,7 +282,7 @@ const userController = {
       next(err)
     }
   },
-  getTopUsers: (req, res, next) => { // 重寫
+  getTopUsers: (req, res, next) => {
     try {
       User.findAll({
         attributes: { exclude: ['password'] },
