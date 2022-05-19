@@ -191,7 +191,7 @@ const tweetController = {
       const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) throw new Error('想要回覆的推文不存在。')
 
-      const reply = await Reply.create({
+      await Reply.create({
         comment,
         UserId: userId,
         TweetId: tweetId

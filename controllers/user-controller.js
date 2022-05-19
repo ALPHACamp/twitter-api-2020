@@ -15,18 +15,18 @@ const userController = {
           !password.trim() ||
           !checkPassword.trim()) throw new Error('所有欄位必填。')
 
-      if (req.body.password.trim() !== req.body.checkPassword.trim()) throw new Error('密碼與確認密碼不符。')
-      if (
-        await User.findOne({ where: { account: req.body.account }})||
-        await User.findOne({ where: { email: req.body.email } })
-        ) throw new Error('帳號或 email 已經註冊。')
-        
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不符。')
+
+      if (await User.findOne({ where: { account }})) throw new Error('帳號已經註冊。')
+      if (await User.findOne({ where: { email } })) throw new Error('Email 已經註冊。')
+
       await User.create({
         account,
         name,
         email,
         password: bcrypt.hashSync(password, 10)
       })
+
       res.status(200).json({ message: '註冊成功' })
     } catch (err) {
       next(err)
@@ -263,13 +263,13 @@ const userController = {
       if (!name.trim() ||
           !account.trim() ||
           !email.trim() ||
-          !password.trim()) throw new Error('不可提交空白字元')
+          !password.trim() ||
+        !checkPassword.trim()) throw new Error('不可提交空白字元')
 
-      if (req.body.password.trim() !== req.body.checkPassword.trim()) throw new Error('密碼與確認密碼不符。')
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不符。')
 
       if (await User.findOne({ where:{ account } })) throw new Error('此帳號已經存在。')
       if (await User.findOne({ where: { email } })) throw new Error('此email已經存在。')
-      if (password !== checkPassword) throw new Error('密碼與確認密碼不相符。')
 
       const userUpdate = await user.update({
         name,
