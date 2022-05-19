@@ -186,6 +186,7 @@ const userController = {
 
       const { name, introduction } = req.body
       const { files } = req
+      if (!name || !introduction) throw new Error('名字和自介欄位不可空白！')
       if (name.length > 50) throw new Error('名稱欄位字數上限為 50 個字！')
       if (introduction.length > 160) throw new Error('自介欄位字數上限為 160 個字！')
 
@@ -331,7 +332,6 @@ const userController = {
       User.findAll({
         where: { id: UserId },
         include: { model: User, as: 'Followings' },
-        attributes: [['id', 'followingId'], 'name', 'avatar', 'introduction', 'cover', 'avatar', 'createdAt'],
         order: [['createdAt', 'DESC']]
       })
         .then(followings => {
@@ -363,7 +363,6 @@ const userController = {
               })
             }
           })
-          console.log(data)
           res.status(200).json(data)
         })
     } catch (err) {
@@ -375,7 +374,6 @@ const userController = {
       const UserId = req.params.id
       User.findAll({
         where: { id: UserId },
-        attributes: { exclude: ['password'] },
         include: [{
           model: User,
           as: 'Followers',
