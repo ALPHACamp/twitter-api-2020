@@ -16,7 +16,7 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           role: 'admin',
           avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          cover: 'https://cdn.pixabay.com/photo/2020/04/19/21/25/field-5065671__340.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
@@ -29,7 +29,7 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           role: '',
           avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          cover: 'https://cdn.pixabay.com/photo/2017/04/11/15/55/animals-2222007__480.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
@@ -41,7 +41,7 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           role: '',
           avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          cover: 'https://cdn.pixabay.com/photo/2020/07/23/10/51/field-5431007__480.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
@@ -53,7 +53,7 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           role: '',
           avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          cover: 'https://cdn.pixabay.com/photo/2017/10/03/17/53/nature-2813487__480.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
@@ -65,7 +65,7 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           role: '',
           avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          cover: 'https://cdn.pixabay.com/photo/2017/07/23/16/01/nature-2531761__480.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
@@ -77,7 +77,7 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           role: '',
           avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          cover: 'https://cdn.pixabay.com/photo/2019/05/03/18/36/nature-4176575__480.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
