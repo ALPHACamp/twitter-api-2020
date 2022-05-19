@@ -75,7 +75,9 @@ const userController = {
       .catch(err => next(err))
   },
   getCurrentUser: (req, res, next) => {
-    return res.json(req.user)
+    delete req.user.password
+    const currentUser = res.json(req.user)
+    return currentUser
   },
   getTopUsers: (req, res, next) => {
     return User.findAll({
@@ -100,20 +102,21 @@ const userController = {
     if (Number(req.params.id) !== Number(req.user.id)) {
       throw new Error("User doen't have permission!")
     }
-    const { account, name, password, email, introduction } = req.body
+    const introduction = req.body.introduction || req.user.introduction || ''
+    const password = req.body.password || req.user.password || '12345678'
+    const name = req.body.name || req.user.name || 'name'
+    const account = req.body.account || req.user.account || 'account'
+    const email = req.body.email || req.user.email || 'email@email.com'
     const hash = bcrypt.hashSync(password, 10)
-    const { avatar } = req.files
-    const { cover } = req.files
-    if (!name) throw new Error('User name is required!')
-    if (!account) throw new Error('Account is required!')
-    if (!password) throw new Error('Password is required!')
-    if (!email) throw new Error('Email is required!')
+    let avatar = req.files?.avatar || null
+    let cover = req.files?.cover || null
+    console.log(req.body.introduction, req.user.introduction)
     Promise.all([User.findOne({ where: { email } }, { raw: true, nest: true }), User.findOne({ where: { account } }, { raw: true }), User.findByPk(req.params.id)])
       .then(([findEmail, findAccount, user]) => {
         if (findEmail && findEmail.id !== req.user.id) throw new Error('Email has already been taken.')
         if (findAccount && findAccount.id !== req.user.id) throw new Error('Account has already been taken.')
-        imgurFileHandler(avatar)
-        imgurFileHandler(cover)
+        if (avatar) avatar = imgurFileHandler(avatar[0])
+        if (cover) cover = imgurFileHandler(cover[0])
         return user.update({
           name, account, email, password: hash, avatar: avatar || null, cover: cover || null, introduction
         })
@@ -240,8 +243,7 @@ const userController = {
       ],
       order: [['createdAt', 'DESC']]
     }).then(followers => {
-      const FollowersId = req.user?.Followers ? req.user.Followers.map(Follower => Follower.id) : []
-      const resultFollowers = followers.map(f => ({ ...f.toJSON(), isFollowing: FollowersId.includes(f.id) }))
+      const resultFollowers = followers.map(f => ({ ...f.toJSON() }))
       delete resultFollowers[0].password
       return res.json({
         status: 'success',
