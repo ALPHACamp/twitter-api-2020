@@ -47,7 +47,8 @@ const userController = {
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
-        password: password
+        password: password,
+        role: 'user'
       })
 
       const token = jwt.sign(registeredUser.toJSON(), process.env.JWT_SECRET, {
@@ -357,27 +358,45 @@ const userController = {
 
   editUserAccount: async (req, res, next) => {
     try {
-      const { account, name, email } = req.body
-      const existedUser = await User.findAll({
-        where: {
-          [Op.or]: [{ account: req.body.account }, { email: req.body.email }]
-        }
-      })
-      if (existedUser.length) throw new Error('使用者已經存在')
+      console.log(req.body)
+      return res.es.status(200).json('ok')
+      // const me = helpers.getUser(req)
+      // if (!me) throw new Error('未存取到登入資料')
 
-      const user = await User.findByPk(req.params.id)
-      if (!user) throw new Error('沒有找到相關的使用者資料')
+      // let my = await User.findOne({
+      //   where: { id: me.id },
+      //   attributes: ['id', 'account', 'name', 'email']
+      // })
+      // my = JSON.parse(JSON.stringify(my))
+      // if (my.id !== Number(req.params.id)) throw new Error('沒有編輯權限')
+      // console.log('===== test authorization =====', Boolean(my.id !== Number(req.params.id)))
 
-      const password = await bcrypt.hash(req.body.password, 10) || user.password
-      const updatedUser = await user.update({
-        account,
-        name,
-        email,
-        password
-      })
-      const data = updatedUser.toJSON()
-      delete data.password
-      return res.status(200).json(data)
+      // const { account, name, email } = req.body
+      // console.log('===== req.body =====', req.body)
+      // const existedUser = await User.findAll({
+      //   where: {
+      //     [Op.and]: [
+      //       { id: { [Op.ne]: my.id } },
+      //       { [Op.or]: [{ account: req.body.account }, { email: req.body.email }] }
+      //     ]
+      //   }
+      // })
+      // console.log('===== test existedUser =====', existedUser.toJSON())
+      // if (existedUser.length) throw new Error('使用者已經存在')
+
+      // const user = await User.findByPk(req.params.id)
+      // if (!user) throw new Error('沒有找到相關的使用者資料')
+
+      // const password = await bcrypt.hash(req.body.password, 10) || user.password
+      // const updatedUser = await user.update({
+      //   account,
+      //   name,
+      //   email,
+      //   password
+      // })
+      // const data = updatedUser.toJSON()
+      // delete data.password
+      // return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
