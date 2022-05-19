@@ -134,9 +134,9 @@ const userController = {
           .sort((a, b) => b.followerCount - a.followerCount || b.createdAt - a.createdAt)
           .slice(0, 10)
 
-        result.forEach(r => {
-          delete r.Followers
-        })
+        // result.forEach(r => {
+        //   delete r.Followers
+        // })
 
         return res.status(200).json(result)
       })
@@ -186,7 +186,6 @@ const userController = {
 
       const { name, introduction } = req.body
       const { files } = req
-      if (!name || !introduction) throw new Error('名字和自介欄位不可空白！')
       if (name.length > 50) throw new Error('名稱欄位字數上限為 50 個字！')
       if (introduction.length > 160) throw new Error('自介欄位字數上限為 160 個字！')
 
@@ -356,7 +355,7 @@ const userController = {
         [Sequelize.literal('(SELECT name FROM Users WHERE id = follower_id)'), 'name'],
         [Sequelize.literal('(SELECT avatar FROM Users WHERE id = following_id)'), 'avatar'],
         [Sequelize.literal('(SELECT introduction FROM Users WHERE id = follower_id)'), 'introduction'],
-        [Sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN 1 ELSE 0 END)`), 'isFollowed']
+        [Sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN ENUM(1) ELSE ENUM(0) END)`), 'isFollowed']
       ],
       order: [['createdAt', 'DESC']],
       raw: true,

@@ -76,7 +76,7 @@ module.exports = {
           email: 'user5@example.com',
           password: await bcrypt.hash('12345678', 10),
           role: '',
-          avatar: 'https://ichef.bbci.co.uk/images/ic/640x360/p03c84wz.jpg',
+          avatar: '',
           cover: 'https://cdn.pixabay.com/photo/2019/05/03/18/36/nature-4176575__480.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
