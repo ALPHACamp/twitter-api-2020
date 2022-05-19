@@ -286,14 +286,14 @@ const userController = {
 
       if (!users.length) throw new Error('無任何使用者')
 
-      const topUsers = users.map(user => ({
+      const result = users.map(user => ({
         followerCount: user.Followers.length,
         isFollowing: req.user.Followings.some(f => f.id === user.id),
         ...user.toJSON()
       })).sort((a, b) => b.followerCount - a.followerCount)
          .slice(0, 10)
 
-      res.status(200).json({ message: '前十人氣王', topUsers })
+      res.status(200).json({ message: '前十人氣王', result })
     } catch (err) {
       next(err)
     }
