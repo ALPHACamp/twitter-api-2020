@@ -101,7 +101,7 @@ const userController = {
     if (Number(req.params.id) !== Number(req.user.id)) {
       throw new Error("User doen't have permission!")
     }
-    const { introduction } = req.body
+    const introduction = req.body.introduction || req.user.introduction
     const password = req.body.password || req.user.password
     const name = req.body.name || req.user.name
     const account = req.body.account || req.user.account
@@ -109,6 +109,7 @@ const userController = {
     const hash = bcrypt.hashSync(password, 10)
     let avatar = req.files?.avatar || null
     let cover = req.files?.cover || null
+    console.log(req.body.introduction, req.user.introduction)
     Promise.all([User.findOne({ where: { email } }, { raw: true, nest: true }), User.findOne({ where: { account } }, { raw: true }), User.findByPk(req.params.id)])
       .then(([findEmail, findAccount, user]) => {
         if (findEmail && findEmail.id !== req.user.id) throw new Error('Email has already been taken.')
@@ -241,8 +242,7 @@ const userController = {
       ],
       order: [['createdAt', 'DESC']]
     }).then(followers => {
-      const FollowersId = req.user?.Followers ? req.user.Followers.map(Follower => Follower.id) : []
-      const resultFollowers = followers.map(f => ({ ...f.toJSON(), isFollowing: FollowersId.includes(f.id) }))
+      const resultFollowers = followers.map(f => ({ ...f.toJSON() }))
       delete resultFollowers[0].password
       return res.json({
         status: 'success',
