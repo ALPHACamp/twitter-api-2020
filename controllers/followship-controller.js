@@ -6,8 +6,7 @@ const followshipController = {
     try {
       // want to follow
       const followingId = req.body.id
-      console.log('req.body.id: ', followingId)
-      console.log('req.body: ', req.body)
+
       // login user
       const followerId = helpers.getUser(req).id
 
