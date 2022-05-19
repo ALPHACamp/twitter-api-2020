@@ -225,7 +225,7 @@ const userController = {
       if (avatar) avatar = await imgurFileHandler(avatar[0])
       if (coverImage) coverImage = await imgurFileHandler(coverImage[0])
 
-      const user = await User.findByPk(req.params.id)
+      const user = await User.findByPk(getUser(req).id)
       const userUpdate = await user.update({
         name,
         introduction,
