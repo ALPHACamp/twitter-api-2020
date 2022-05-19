@@ -277,26 +277,23 @@ const userController = {
   },
   getTopUsers: async (req, res, next) => {
     try {
-      const topUsers = await Followship.findAll({
-        attributes: [
-          ['following_id', 'id'],
-          [sequelize.literal(`(SELECT account FROM Users WHERE id = following_id)`), 'account'],
-          [sequelize.literal(`(SELECT name FROM Users WHERE id = following_id)`), 'name'],
-          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = following_id)`), 'avatar'],
-          [sequelize.literal(`(COUNT(follower_id))`), 'followerCount'],
+      const users = await User.findAll({
+        attributes: ['id', 'account', 'name', 'avatar'],
+        include: [
+          { model: User, as: 'Followers', attributes: ['id'], through: { attributes: [] }}
         ],
-        group: 'following_id',
-        limit: 10,
-        order: [[sequelize.col('followerCount'), 'DESC']]
       })
-      if (!topUsers.length) throw new Error('查無資料。')
 
-      const result = topUsers.map(user => ({
-        ...user.toJSON(),
-        isFollowing: req.user.Followings.some(f => f.id === user.id)
-      }))
+      if (!users.length) throw new Error('無任何使用者')
 
-      res.status(200).json({ message: '前十人氣王', result })
+      const topUsers = users.map(user => ({
+        followerCount: user.Followers.length,
+        isFollowing: req.user.Followings.some(f => f.id === user.id),
+        ...user.toJSON()
+      })).sort((a, b) => b.followerCount - a.followerCount)
+         .slice(0, 10)
+
+      res.status(200).json({ message: '前十人氣王', topUsers })
     } catch (err) {
       next(err)
     }
