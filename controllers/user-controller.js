@@ -101,11 +101,11 @@ const userController = {
     if (Number(req.params.id) !== Number(req.user.id)) {
       throw new Error("User doen't have permission!")
     }
-    const introduction = req.body.introduction || req.user.introduction
-    const password = req.body.password || req.user.password
-    const name = req.body.name || req.user.name
-    const account = req.body.account || req.user.account
-    const email = req.body.email || req.user.email
+    const introduction = req.body.introduction || req.user.introduction || ''
+    const password = req.body.password || req.user.password || '12345678'
+    const name = req.body.name || req.user.name || 'name'
+    const account = req.body.account || req.user.account || 'account'
+    const email = req.body.email || req.user.email || 'email@email.com'
     const hash = bcrypt.hashSync(password, 10)
     let avatar = req.files?.avatar || null
     let cover = req.files?.cover || null
