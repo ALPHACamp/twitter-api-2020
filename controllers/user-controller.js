@@ -144,7 +144,7 @@ const userController = {
         nest: true,
         raw: true
       })
-      if (!rawUserLikes.length) throw new Error('使用者沒有喜歡的推文')
+      if (!rawUserLikes.length) return res.status(200).json(rawUserLikes)
       const likeTweetId = []
 
       for (let index = 0; index < rawUserLikes.length; index++) {
