@@ -11,6 +11,9 @@ const passport = require('./config/passport')
 const apis = require('./routes')
 const { getUser } = require('./_helpers')
 
+const bodyParser = require('body-parser')
+app.use(bodyParser.json())
+
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(
