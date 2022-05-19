@@ -59,7 +59,7 @@ const tweetController = {
   getTweets: (req, cb) => {
     return Tweet.findAll({
       order: [['createdAt', 'DESC']],
-      include: [Like, Reply]
+      include: [Like, Reply, User]
     })
       .then(tweet => {
         const likeCount = tweet.map(r => ({
