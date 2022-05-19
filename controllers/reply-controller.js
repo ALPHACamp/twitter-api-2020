@@ -1,7 +1,6 @@
-const { Reply, User, ReplyLike, Tweet } = require('../models')
+const { Reply, ReplyLike } = require('../models')
 const helpers = require('../_helpers')
-const replyLikeService = require('../services/replyLikes')
-const sequelize = require('sequelize')
+const replyService = require('../services/replies')
 
 const replyController = {
   create: async (req, res, next) => {
@@ -23,47 +22,10 @@ const replyController = {
   },
   getAll: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
-      const rawReply = await Reply.findAll({
-        where: {
-          TweetId
-        },
-        include: [
-          {
-            model: Tweet,
-            include: {
-              model: User,
-              attributes: [
-                'name'
-              ]
-            }
-          },
-          { model: User },
-          {
-            model: ReplyLike,
-            attributes: [
-              [sequelize.fn('COUNT', sequelize.col('ReplyLikes.Reply_id')), 'likeCounts']
-            ]
-          }
-        ],
-        order: [['created_at', 'DESC']],
-        group: ['id'],
-        nest: true,
-        raw: true
-      })
-      if (!rawReply) throw new Error('該推文沒有回覆')
-      const replies = rawReply.map(element => ({
-        id: element.id,
-        comment: element.comment,
-        tweetId: element.TweetId,
-        userId: element.UserId,
-        name: element.User.name,
-        tweetUser: element.Tweet.User.name,
-        avatar: element.User.avatar,
-        account: element.User.account,
-        likeCount: element.ReplyLikes.likeCounts,
-        createdAt: element.createdAt
-      }))
+      const TweetId = Number(req.params.tweet_id)
+      const UserId = helpers.getUser(req).id
+      const replies = await replyService.getAll(TweetId, UserId)
+      if (!replies) throw new Error('該推文沒有回覆')
       res.status(200).json(replies)
     } catch (err) {
       next(err)
@@ -73,6 +35,7 @@ const replyController = {
     try {
       const UserId = helpers.getUser(req).id
       const ReplyId = Number(req.params.id)
+      const TweetId = Number(req.params.tweetId)
       const replyLike = await ReplyLike.findOne({
         where: {
           UserId,
@@ -84,11 +47,9 @@ const replyController = {
         UserId,
         ReplyId
       })
-      const replyLikesNum = await replyLikeService.count(ReplyId)
-      const data = {
-        replyLikeNum: Number(replyLikesNum[0])
-      }
-      res.status(200).json(data)
+      const replies = await replyService.getAll(TweetId, UserId)
+      if (!replies.length) throw new Error('該推文沒有回覆')
+      res.status(200).json(replies)
     } catch (err) {
       next(err)
     }
@@ -97,6 +58,7 @@ const replyController = {
     try {
       const UserId = helpers.getUser(req).id
       const ReplyId = Number(req.params.id)
+      const TweetId = Number(req.params.tweetId)
       const replyLike = await ReplyLike.findOne({
         where: {
           User_id: UserId,
@@ -110,11 +72,9 @@ const replyController = {
           ReplyId
         }
       })
-      const replyLikesNum = await replyLikeService.count(ReplyId)
-      const data = {
-        replyLikeNum: Number(replyLikesNum[0])
-      }
-      res.status(200).json(data)
+      const replies = await replyService.getAll(TweetId, UserId)
+      if (!replies.length) throw new Error('該推文沒有回覆')
+      res.status(200).json(replies)
     } catch (err) {
       next(err)
     }
