@@ -41,7 +41,7 @@ const adminController = {
           ...t,
           description: t.description.substring(0, 50)
         }))
-        res.status(200).json(tweetList)
+        return res.status(200).json(tweetList)
       })
       .catch(err => next(err))
   },
@@ -61,16 +61,16 @@ const adminController = {
     User.findAll({
       attributes: ['id', 'account', 'name', 'avatar', 'cover', 'role',
         [Sequelize.literal('(SELECT COUNT(*) id FROM Tweets WHERE User.id = Tweets.User_id)'), 'tweetCount'],
-        [Sequelize.literal('(SELECT COUNT(*) User_id FROM Likes RIGHT JOIN Tweets ON Tweets.id = Likes.Tweet_id WHERE User.id = Tweets.User_id)'), 'likeCount'],
+        [Sequelize.literal('(SELECT COUNT(*) User_id FROM Likes LEFT JOIN Tweets ON Tweets.id = Likes.Tweet_id WHERE User.id = Tweets.User_id)'), 'likeCount'],
         [Sequelize.literal('(SELECT COUNT(*) follower_id FROM Followships WHERE User.id = Followships.following_id)'), 'followerCount'],
         [Sequelize.literal('(SELECT COUNT(*) following_id FROM Followships WHERE User.id = Followships.follower_id)'), 'followingCount']
       ],
       raw: true
     })
-      .then(tweets => {
-        if (tweets.length <= 0) return res.status(200).json({ message: '沒有使用者資料！' })
-        tweets.sort((a, b) => b.tweetCount - a.tweetCount)
-        return res.status(200).json(tweets)
+      .then(users => {
+        if (users.length <= 0) return res.status(200).json({ message: '沒有使用者資料！' })
+        users.sort((a, b) => b.tweetCount - a.tweetCount)
+        return res.status(200).json(users)
       }
       )
       .catch(err => next(err))
