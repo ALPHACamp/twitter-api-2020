@@ -355,7 +355,7 @@ const userController = {
         [Sequelize.literal('(SELECT name FROM Users WHERE id = follower_id)'), 'name'],
         [Sequelize.literal('(SELECT avatar FROM Users WHERE id = following_id)'), 'avatar'],
         [Sequelize.literal('(SELECT introduction FROM Users WHERE id = follower_id)'), 'introduction'],
-        [Sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN ENUM(1) ELSE ENUM(0) END)`), 'isFollowed']
+        [Sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN 1 ELSE 0 END)`), 'isFollowed']
       ],
       order: [['createdAt', 'DESC']],
       raw: true,
