@@ -256,12 +256,22 @@ const userController = {
           // eslint-disable-next-line array-callback-return
           followingUsers.Followings.map(user => {
             if (Number(user.Followship.followerId) === Number(id)) {
-              newData.push({ ...user, isFollowed: true })
+              newData.push({
+                ...user,
+                followingId: user.Followship.followingId,
+                followerId: user.Followship.followerId,
+                isFollowed: true
+              })
             } else {
-              newData.push({ ...user, isFollowed: false })
+              newData.push({
+                ...user,
+                followingId: user.Followship.followingId,
+                followerId: user.Followship.followerId,
+                isFollowed: false
+              })
             }
           })
-          res.json({ data: newData })
+          res.json(newData)
         })
     } catch (err) {
       next(err)
@@ -282,12 +292,22 @@ const userController = {
           // eslint-disable-next-line array-callback-return
           followingsJsonData.Followers.map(follower => {
             if (followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)) {
-              newData.push({ ...follower, isFollowed: true })
+              newData.push({
+                ...follower,
+                followingId: follower.Followship.followingId,
+                followerId: follower.Followship.followerId,
+                isFollowed: true
+              })
             } else {
-              newData.push({ ...follower, isFollowed: false })
+              newData.push({
+                ...follower,
+                followingId: follower.Followship.followingId,
+                followerId: follower.Followship.followerId,
+                isFollowed: false
+              })
             }
           })
-          res.json({ data: newData })
+          res.json(newData)
         })
     } catch (err) {
       next(err)
