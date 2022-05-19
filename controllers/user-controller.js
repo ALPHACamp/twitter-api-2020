@@ -33,7 +33,7 @@ const userController = {
         User.findOne({ where: { account: req.body.account } })
       ])
         .then(user => {
-          if (user) return res.status(403).json({ status: 'error', message: '此Email已被註冊！！' })
+          if (!user) return res.status(403).json({ status: 'error', message: '此Email已被註冊！！' })
           // if (user) throw new Error('此Email已被註冊！！')
           return bcrypt.hash(req.body.password, 10)
             .then(hash => User.create({
