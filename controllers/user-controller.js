@@ -53,7 +53,6 @@ const userController = {
         ]
       })
         .then(user => {
-          console.log(user)
           if (!user) throw new Error('找不到使用者！')
           user = user.toJSON()
           res.json({

@@ -1,4 +1,4 @@
-const { Like } = require('../models')
+const { Like, Tweet } = require('../models')
 const helpers = require('../_helpers')
 const tweetService = require('../services/tweets')
 
@@ -7,6 +7,8 @@ const likeControler = {
     try {
       const UserId = helpers.getUser(req).id
       const TweetId = Number(req.params.id)
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) throw new Error('沒有該推文')
       const like = await Like.findOne({
         where: {
           UserId,
@@ -28,6 +30,8 @@ const likeControler = {
     try {
       const UserId = helpers.getUser(req).id
       const TweetId = Number(req.params.id)
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) throw new Error('沒有該推文')
       const like = await Like.findOne({
         where: {
           UserId,
