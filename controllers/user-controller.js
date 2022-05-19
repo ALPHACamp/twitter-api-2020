@@ -1,9 +1,9 @@
 const { User, Reply, Tweet, Like, Followship, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { getUser } = require('../_helpers')
 const { isLikedTweet } = require('../helpers/tweet')
 const imgurFileHandler = require('../helpers/file-helper')
+const helpers = require('../_helpers')
 
 const userController = {
   register: async (req, res, next) => {
@@ -34,7 +34,7 @@ const userController = {
   },
   login: async (req, res, next) => {
     try {
-      const user = getUser(req)
+      const user = helpers.getUser(req)
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.status(200).json({ token, user })
     } catch (err) {
@@ -61,7 +61,7 @@ const userController = {
   },
   getLoginUser: async (req, res, next) => {
     try {
-      const loginUser = getUser(req)
+      const loginUser = helpers.getUser(req)
       const user = await User.findByPk(loginUser.id, {
         attributes: [
           'id', 'avatar', 'name', 'account', 'cover_image', 'introduction',
@@ -80,6 +80,7 @@ const userController = {
   },
   getTweets: async (req, res, next) => {
     try {
+      const userId = helpers.getUser(req).id
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         attributes: [
@@ -97,18 +98,19 @@ const userController = {
       })
       if (!tweets.length) throw new Error('沒有任何推文。')
       
-      const isLikedId = await isLikedTweet(getUser(req).id)
+      const isLikedId = await isLikedTweet(userId)
       const result = tweets.map(tweet => ({
         ...tweet.toJSON(),
         isLiked: isLikedId.some(tId => tId === tweet.id)
       }))
+      
       res.status(200).json(result)
     } catch (err) {
       next(err)
     }
   },
   getRepliedTweets: async (req, res, next) => {
-    try {
+    try {      
       const replies = await Reply.findAll({
         where: { UserId: req.params.id },
         attributes: ['id', 'comment', 'createdAt'],
@@ -135,6 +137,7 @@ const userController = {
   },
   getLikes: async (req, res, next) => {
     try {
+      const userId = helpers.getUser(req)
       const likes = await Like.findAll({
         where: { UserId: req.params.id },
         attributes: [
@@ -154,7 +157,7 @@ const userController = {
       })
       if (!likes.length) throw new Error('沒有喜歡的推文。')
 
-      const isLikedId = await isLikedTweet(getUser(req).id)
+      const isLikedId = await isLikedTweet(userId)
       const result = likes.map(like => ({
         ...like.toJSON(),
         isLiked: isLikedId.some(tId => tId === like.TweetId)
@@ -166,6 +169,8 @@ const userController = {
   },
   getFollowings: async (req, res, next) => {
     try {
+      const user = helpers.getUser(req)
+
       const followings = await Followship.findAll({
         where: { followerId: req.params.id },
         attributes: [
@@ -177,7 +182,7 @@ const userController = {
         order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!followings.length) throw new Error('沒有追隨者名單。')
-      const user = getUser(req)
+
       const result = followings.map(following => ({
         ...following.toJSON(),
         isFollowing: user.Followings.some(f => f.id === following.followingId)
@@ -189,6 +194,8 @@ const userController = {
   },
   getFollowers: async (req, res, next) => {
     try {
+      const user = helpers.getUser(req)
+
       const followers = await Followship.findAll({
         where: { followingId: req.params.id },
         attributes: [
@@ -200,7 +207,7 @@ const userController = {
         order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!followers.length) throw new Error('沒有粉絲名單。')
-      const user = getUser(req)
+
       const result = followers.map(follower => ({
         ...follower.toJSON(),
         isFollowing: user.Followings.some(f => f.id === follower.followerId)
@@ -212,7 +219,7 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      const logUser = getUser(req)
+      const logUser = helpers.getUser(req)
 
       const { name, introduction } = req.body
       let avatar = req.files?.avatar || null
@@ -225,7 +232,7 @@ const userController = {
       if (avatar) avatar = await imgurFileHandler(avatar[0])
       if (coverImage) coverImage = await imgurFileHandler(coverImage[0])
 
-      const user = await User.findByPk(getUser(req).id)
+      const user = await User.findByPk(logUser.id)
       const userUpdate = await user.update({
         name,
         introduction,
