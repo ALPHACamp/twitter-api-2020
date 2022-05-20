@@ -1,6 +1,6 @@
 # Simple Twitter API
 
-An API server built on Express.js framework in Node.js and MySQL database for Simple Twitter.
+An API server built on Express.js framework in Node.js and MySQL database for Simple Twitter. Authenticated by token-based with passport-JWT.
 
 You could click [this link](https://limecorner.github.io/simple-twitter) and through following accounts and passwords to login to enjoy all features.
 
@@ -22,6 +22,7 @@ More details of API, please refer this [API document]((https://documenter.getpos
 * [MySQL](https://dev.mysql.com/downloads/mysql/)
 * [MySQL Workbench](https://dev.mysql.com/downloads/workbench/)
 * [Imgur](https://api.imgur.com/oauth2/addclient)
+* [Multer](https://www.npmjs.com/package/multer)
 
 ### **Installation**
 
@@ -105,6 +106,14 @@ $ npx sequelize db:migrate
 $ export NODE_ENV=development
 $ npx sequelize db:migrate
 ```
+### **Test**
+
+To make sure all features are working properly, use the following commands. If you encounter test errors, make sure you have set up as above.
+
+```
+$ export NODE_ENV=test
+$ npm run test
+``` 
 
 ### **Usage**
 
