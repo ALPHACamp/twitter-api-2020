@@ -334,7 +334,7 @@ const userController = {
 
   editUser: async (req, res, next) => {
     try {
-      if (!req.query) {
+      if (req.query.page !== 'account') {
         const { name, introduction } = req.body
         const user = await User.findByPk(req.params.id)
         if (!user) throw new Error('沒有找到相關的使用者資料')
