@@ -128,7 +128,7 @@ const userController = {
           .map(user => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowed: req.user.Followings.some(f => f.id === user.id),
+            isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id),
             owner: reqUserId !== userId
           }))
           .sort((a, b) => b.followerCount - a.followerCount || b.createdAt - a.createdAt)
@@ -330,12 +330,10 @@ const userController = {
     return Promise.all([
       User.findByPk(req.params.id, {
         include: { model: User, as: 'Followings' },
-        order: [['createdAt', 'DESC']]
+        order: [['Followings', Followship, 'createdAt', 'DESC']]
       }),
       Followship.findAll({
-        where: { followerId: helpers.getUser(req).id },
-        order: [['createdAt', 'DESC']],
-        raw: true
+        where: { followerId: helpers.getUser(req).id }
       })
     ])
       .then(([user, following]) => {
@@ -358,12 +356,12 @@ const userController = {
     return Promise.all([
       User.findByPk(req.params.id, {
         include: { model: User, as: 'Followers' },
-        order: [['createdAt', 'DESC']]
+        order: [['Followers', Followship, 'createdAt', 'DESC']]
       }),
       Followship.findAll({
         where: { followerId: helpers.getUser(req).id },
-        order: [['createdAt', 'DESC']],
-        raw: true
+        raw: true,
+        nest: true
       })
     ])
       .then(([user, following]) => {
