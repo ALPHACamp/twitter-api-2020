@@ -36,8 +36,8 @@ router.put('/users/:id/setting', authenticated, authenticatedUser, userControlle
 router.put('/users/:id', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUser)
 
 // 取得指定使用者追隨中的所有使用者 & 取得追隨指定使用者的所有使用者
-router.get('/users/:id/followings', userController.getFollowings)
-router.get('/users/:id/followers', userController.getFollowers)
+router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getFollowings)
+router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getFollowers)
 
 // 取得指定使用者資料 （往後放到最後囉）
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
