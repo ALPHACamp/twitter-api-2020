@@ -90,6 +90,7 @@ const userController = {
             followersCount: user.Followers.length
           })
         })
+        .catch(err => next(err))
     } catch (err) {
       next(err)
     }
@@ -202,7 +203,7 @@ const userController = {
         nest: true
       })
         .then(followingUsers => {
-          if (!followingUsers[0]) return res.status(403).json({ status: 'error', message: '沒有跟隨中的使用者' })
+          if (!followingUsers[0]) throw new Error('沒有跟隨中的使用者')
           followingUsers = followingUsers[0].toJSON()
           const newData = []
           // eslint-disable-next-line array-callback-return
@@ -225,6 +226,7 @@ const userController = {
           })
           res.json(newData)
         })
+        .catch(err => next(err))
     } catch (err) {
       next(err)
     }
@@ -239,7 +241,7 @@ const userController = {
         nest: true
       })
         .then(followerUsers => {
-          if (!followerUsers[0]) return res.status(403).json({ status: 'error', message: '沒有追隨中的使用者' })
+          if (!followerUsers[0]) throw new Error('沒有追隨中的使用者')
           const newData = []
           const followingsJsonData = followerUsers[0].toJSON()
           console.log(followingsJsonData)
@@ -263,6 +265,7 @@ const userController = {
           })
           res.json(newData)
         })
+        .catch(err => next(err))
     } catch (err) {
       next(err)
     }
@@ -283,9 +286,9 @@ const userController = {
           User.findOne({ where: { email } })
         ])
           .then(([user, accountUser, emailUser]) => {
-            if (!user) return res.status(403).json({ status: 'error', message: '使用者不存在！' })
-            if (accountUser && Number(accountUser.dataValues.id) !== Number(UserId)) return res.status(403).json({ status: 'error', message: '此帳戶已經有人使用' })
-            if (emailUser && Number(emailUser.dataValues.id) !== Number(UserId)) return res.status(403).json({ status: 'error', message: '此信箱已經有人使用，請更換其他信箱' })
+            if (!user) throw new Error('使用者不存在！')
+            if (accountUser && Number(accountUser.dataValues.id) !== Number(UserId)) throw new Error('此帳戶已經有人使用')
+            if (emailUser && Number(emailUser.dataValues.id) !== Number(UserId)) throw new Error('此信箱已經有人使用，請更換其他信箱')
             const newPassword = bcrypt.hashSync(password, 10)
             return user.update({
               name,
@@ -296,7 +299,9 @@ const userController = {
               .then(user => {
                 res.json({ status: '更新成功', user })
               })
+              .catch(err => next(err))
           })
+          .catch(err => next(err))
       } else {
         // 有多個圖檔那頁
         const { files } = req
