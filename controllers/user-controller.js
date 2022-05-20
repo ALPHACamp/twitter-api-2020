@@ -103,22 +103,18 @@ const userController = {
       throw new Error("User doen't have permission!")
     }
     const introduction = req.body.introduction || req.user.introduction || ''
-    const password = req.body.password || req.user.password || '12345678'
+    const password = req.body.password ? bcrypt.hashSync(req.body.password, 10) : req.user.password || '12345678'
     const name = req.body.name || req.user.name || 'name'
     const account = req.body.account || req.user.account || 'account'
     const email = req.body.email || req.user.email || 'email@email.com'
-    const hash = bcrypt.hashSync(password, 10)
-    let avatar = req.files?.avatar || null
-    let cover = req.files?.cover || null
-    console.log(req.body.introduction, req.user.introduction)
-    Promise.all([User.findOne({ where: { email } }, { raw: true, nest: true }), User.findOne({ where: { account } }, { raw: true }), User.findByPk(req.params.id)])
-      .then(([findEmail, findAccount, user]) => {
+    const avatar = req.files?.avatar || null
+    const cover = req.files?.cover || null
+    Promise.all([User.findOne({ where: { email } }), User.findOne({ where: { account } }), User.findByPk(req.params.id), imgurFileHandler(avatar[0]), imgurFileHandler(cover[0])])
+      .then(([findEmail, findAccount, user, avatarFilePath, coverFilePath]) => {
         if (findEmail && findEmail.id !== req.user.id) throw new Error('Email has already been taken.')
         if (findAccount && findAccount.id !== req.user.id) throw new Error('Account has already been taken.')
-        if (avatar) avatar = imgurFileHandler(avatar[0])
-        if (cover) cover = imgurFileHandler(cover[0])
         return user.update({
-          name, account, email, password: hash, avatar: avatar || null, cover: cover || null, introduction
+          name, account, email, password, avatar: avatarFilePath || null, cover: coverFilePath || null, introduction
         })
       })
       .then(user => {
