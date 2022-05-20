@@ -33,7 +33,17 @@ const adminController = {
         ])
       }
 
-      return res.status(200).json(users)
+      const data = users.sort((a, b) => {
+        if (a.tweetAmount.count < b.tweetAmount.count) return 1
+        if (a.tweetAmount.count > b.tweetAmount.count) return -1
+
+        if (a.likeAmount.count < b.likeAmount.count) return 1
+        if (a.likeAmount.count > b.likeAmount.count) return -1
+
+        return 0
+      })
+
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
