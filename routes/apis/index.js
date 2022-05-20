@@ -28,12 +28,11 @@ router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
 
-router.put('/users/:id/account', authenticated, userController.editUserAccount)
-router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, upload.fields([
   { name: 'avatar_img', maxCount: 1 },
   { name: 'cover_img', maxCount: 1 }
 ]), userController.editUser)
+router.get('/users/:id', authenticated, userController.getUser)
 router.post('/users', userController.signUp)
 
 router.delete('/followships/:fId', authenticated, followshipController.deleteFollowship)

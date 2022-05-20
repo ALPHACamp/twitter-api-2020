@@ -36,7 +36,7 @@ const tweetController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name', 'avatarImg']
+            attributes: ['id', 'account', 'name', 'avatarImg', 'role']
           },
           {
             model: Reply,
@@ -56,7 +56,6 @@ const tweetController = {
         const replyTotal = t.Replies.length
         const likeTotal = t.Likes.filter(item => item.likeUnlike).length
         const isLike = t.toJSON().Likes.find(item => item.UserId === UserId)?.likeUnlike
-        console.log(isLike)
         return {
           ...t.toJSON(),
           Replies: {

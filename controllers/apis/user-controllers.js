@@ -334,69 +334,60 @@ const userController = {
 
   editUser: async (req, res, next) => {
     try {
-      const { name, introduction } = req.body
-      const user = await User.findByPk(req.params.id)
-      if (!user) throw new Error('沒有找到相關的使用者資料')
+      if (req.query.page !== 'account') {
+        const { name, introduction } = req.body
+        const user = await User.findByPk(req.params.id)
+        if (!user) throw new Error('沒有找到相關的使用者資料')
 
-      const { files } = req
-      const avatarImg = await helpers.imgurFileHandler(files?.avatar_img?.[0]) || user.avatarImg
-      const coverImg = await helpers.imgurFileHandler(files?.cover_img?.[0]) || user.coverImg
+        const { files } = req
+        const avatarImg = await helpers.imgurFileHandler(files?.avatar_img?.[0]) || user.avatarImg
+        const coverImg = await helpers.imgurFileHandler(files?.cover_img?.[0]) || user.coverImg
 
-      const updatedUser = await user.update({
-        name,
-        introduction,
-        avatarImg,
-        coverImg
-      })
-      const data = updatedUser.toJSON()
-      delete data.password
-      return res.status(200).json(data)
-    } catch (err) {
-      next(err)
-    }
-  },
+        const updatedUser = await user.update({
+          name,
+          introduction,
+          avatarImg,
+          coverImg
+        })
+        const data = updatedUser.toJSON()
+        delete data.password
+        return res.status(200).json(data)
+      } else {
+        const me = helpers.getUser(req)
+        if (!me) throw new Error('未存取到登入資料')
 
-  editUserAccount: async (req, res, next) => {
-    try {
-      // console.log(req.body)
-      // return res.es.status(200).json('ok')
-      const me = helpers.getUser(req)
-      if (!me) throw new Error('未存取到登入資料')
+        let my = await User.findOne({
+          where: { id: me.id },
+          attributes: ['id', 'account', 'name', 'email']
+        })
+        my = JSON.parse(JSON.stringify(my))
+        if (my.id !== Number(req.params.id)) throw new Error('沒有編輯權限')
 
-      let my = await User.findOne({
-        where: { id: me.id },
-        attributes: ['id', 'account', 'name', 'email']
-      })
-      my = JSON.parse(JSON.stringify(my))
-      if (my.id !== Number(req.params.id)) throw new Error('沒有編輯權限')
-      console.log('===== test authorization =====', Boolean(my.id !== Number(req.params.id)))
+        const { account, name, email } = req.body
+        const existedUser = await User.findAll({
+          where: {
+            [Op.and]: [
+              { id: { [Op.ne]: my.id } },
+              { [Op.or]: [{ account: req.body.account }, { email: req.body.email }] }
+            ]
+          }
+        })
+        if (existedUser.length) throw new Error('使用者已經存在')
 
-      const { account, name, email } = req.body
-      console.log('===== req.body =====', req.body)
-      const existedUser = await User.findAll({
-        where: {
-          [Op.and]: [
-            { id: { [Op.ne]: my.id } },
-            { [Op.or]: [{ account: req.body.account }, { email: req.body.email }] }
-          ]
-        }
-      })
-      console.log('===== test existedUser =====', existedUser.toJSON())
-      if (existedUser.length) throw new Error('使用者已經存在')
+        const user = await User.findByPk(req.params.id)
+        if (!user) throw new Error('沒有找到相關的使用者資料')
 
-      const user = await User.findByPk(req.params.id)
-      if (!user) throw new Error('沒有找到相關的使用者資料')
-
-      const password = await bcrypt.hash(req.body.password, 10) || user.password
-      const updatedUser = await user.update({
-        account,
-        name,
-        email,
-        password
-      })
-      const data = updatedUser.toJSON()
-      delete data.password
-      return res.status(200).json(data)
+        const password = await bcrypt.hash(req.body.password, 10) || user.password
+        const updatedUser = await user.update({
+          account,
+          name,
+          email,
+          password
+        })
+        const data = updatedUser.toJSON()
+        delete data.password
+        return res.status(200).json(data)
+      }
     } catch (err) {
       next(err)
     }
