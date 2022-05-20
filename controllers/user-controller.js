@@ -327,94 +327,88 @@ const userController = {
   },
 
   getFollowings: (req, res, next) => {
-    try {
-      const UserId = req.params.id
-      User.findAll({
-        where: { id: UserId },
-        include: { model: User, as: 'Followings' },
-        order: [['createdAt', 'DESC']]
-      })
-        .then(followings => {
-          followings = followings[0].toJSON()
-          const data = []
-          // eslint-disable-next-line array-callback-return
-          followings.Followings.map(f => {
-            if (Number(f.Followship.followerId) === Number(UserId)) {
-              data.push({
-                id: f.id,
-                account: f.account,
-                name: f.name,
-                avatar: f.avatar,
-                introduction: f.introduction,
-                followingId: f.Followship.followingId,
-                followerId: f.Followship.followerId,
-                isFollowed: true
-              })
-            } else {
-              data.push({
-                id: f.id,
-                account: f.account,
-                name: f.name,
-                avatar: f.avatar,
-                introduction: f.introduction,
-                followingId: f.Followship.followingId,
-                followerId: f.Followship.followerId,
-                isFollowed: false
-              })
-            }
-          })
-          res.status(200).json(data)
+    const UserId = req.params.id
+    User.findAll({
+      where: { id: UserId },
+      include: { model: User, as: 'Followings' },
+      order: [['createdAt', 'DESC']]
+    })
+      .then(followings => {
+        followings = followings[0].toJSON()
+        const data = []
+        // eslint-disable-next-line array-callback-return
+        followings.Followings.map(f => {
+          if (Number(f.Followship.followerId) === Number(UserId)) {
+            data.push({
+              id: f.id,
+              account: f.account,
+              name: f.name,
+              avatar: f.avatar,
+              introduction: f.introduction,
+              followingId: f.Followship.followingId,
+              followerId: f.Followship.followerId,
+              isFollowed: true
+            })
+          } else {
+            data.push({
+              id: f.id,
+              account: f.account,
+              name: f.name,
+              avatar: f.avatar,
+              introduction: f.introduction,
+              followingId: f.Followship.followingId,
+              followerId: f.Followship.followerId,
+              isFollowed: false
+            })
+          }
         })
-    } catch (err) {
-      next(err)
-    }
+        res.status(200).json(data)
+      })
+      .catch(err => next(err))
   },
   getFollowers: (req, res, next) => {
-    try {
-      const UserId = req.params.id
-      User.findAll({
-        where: { id: UserId },
-        include: [{
-          model: User,
-          as: 'Followers',
-          attributes: ['id', 'account', 'name', 'avatar']
-        }, { model: User, as: 'Followings', attributes: ['id', 'account'] }],
-        nest: true
-      })
-        .then(followers => {
-          const data = []
-          const followersData = followers[0].toJSON()
-          // eslint-disable-next-line array-callback-return
-          followersData.Followers.map(f => {
-            if (followersData.Followings.some(d => d.Followship.followingId === f.Followship.followerId)) {
-              data.push({
-                id: f.id,
-                account: f.account,
-                name: f.name,
-                avatar: f.avatar,
-                introduction: f.introduction,
-                followingId: f.Followship.followingId,
-                followerId: f.Followship.followerId,
-                isFollowed: true
-              })
-            } else {
-              data.push({
-                id: f.id,
-                account: f.account,
-                name: f.name,
-                avatar: f.avatar,
-                introduction: f.introduction,
-                followingId: f.Followship.followingId,
-                followerId: f.Followship.followerId,
-                isFollowed: false
-              })
-            }
-          })
-          res.status(200).json(data)
+    const UserId = req.params.id
+    User.findAll({
+      where: { id: UserId },
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: ['id', 'account', 'name', 'avatar']
+      }, { model: User, as: 'Followings', attributes: ['id', 'account'] }],
+      nest: true
+    })
+      .then(followers => {
+        const data = []
+        const followersData = followers[0].toJSON()
+        // eslint-disable-next-line array-callback-return
+        followersData.Followers.map(f => {
+          if (followersData.Followings.some(d => d.Followship.followingId === f.Followship.followerId)) {
+            data.push({
+              id: f.id,
+              account: f.account,
+              name: f.name,
+              avatar: f.avatar,
+              introduction: f.introduction,
+              followingId: f.Followship.followingId,
+              followerId: f.Followship.followerId,
+              isFollowed: true
+            })
+          } else {
+            data.push({
+              id: f.id,
+              account: f.account,
+              name: f.name,
+              avatar: f.avatar,
+              introduction: f.introduction,
+              followingId: f.Followship.followingId,
+              followerId: f.Followship.followerId,
+              isFollowed: false
+            })
+          }
         })
-    } catch (err) {
-      next(err)
-    }
+        res.status(200).json(data)
+      })
+      .catch(err => next(err))
   },
 
   addFollowing: (req, res, next) => {
