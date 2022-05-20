@@ -66,9 +66,6 @@ const userServices = {
         if (!user) throw new Error("User didn't exists!")
         const tweetsData = tweets.map(t => ({
           ...t.toJSON(),
-          userAccount: t.User.account,
-          userAvatar: t.User.avatar,
-          User: t.User.name,
           Replies: t.Replies.length,
           Likes: t.Likes.length,
           isLiked: t.Likes.some(l => l.UserId = helpers.getUser(req).id)
@@ -116,24 +113,17 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Like.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet, include: [{ model: User }, { model: Reply }, { model: Like }] }]
+        include: [{ model: Tweet, include: [{ model: Reply }, { model: Like }] }, { model: User }]
       })
     ])
       .then(([user, likes]) => {
         if (!user) throw new Error("User didn't exists!")
 
         const userLikes = likes.map(l => ({
-          UserId: l.UserId,
-          tweetName: l.Tweet.User.name,
-          tweetAccount: l.Tweet.User.account,
-          tweetAvatar: l.Tweet.User.avatar,
-          TweetId: l.TweetId,
-          tweetDescription: l.Tweet.description,
+          ...l.toJSON(),
           tweetLikesCount: l.Tweet.Likes.length,
           tweetRepliesCount: l.Tweet.Replies.length,
-          isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id),
-          createdAt: l.createdAt,
-          updatedAt: l.updatedAt
+          isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
         }))
         return cb(null, userLikes)
       })
