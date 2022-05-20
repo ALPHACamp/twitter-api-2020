@@ -187,6 +187,7 @@ const tweetController = {
       const comment = req.body.comment
 
       if (!comment.trim()) throw new Error('不可以提交空白的留言。')
+      if (comment.length > 140) throw new Error('不可以提交字數過長的回覆。')
 
       const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) throw new Error('想要回覆的推文不存在。')
