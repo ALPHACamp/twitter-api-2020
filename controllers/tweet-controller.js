@@ -30,7 +30,7 @@ const tweetController = {
       next(err)
     }
   },
-  getOne: async (req, res) => {
+  getOne: async (req, res, next) => {
     try {
       const tweetId = Number(req.params.id)
       const UserId = helpers.getUser(req).id
@@ -38,7 +38,7 @@ const tweetController = {
       if (!tweet) throw new Error('沒有這篇推文')
       res.status(200).json(tweet)
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   }
 }

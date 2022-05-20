@@ -127,7 +127,6 @@ const userController = {
         nest: true
       })
         .then(reply => {
-          // console.log('reeeeee', reply)
           if (!reply) {
             return res.status(403).json({ status: 'error', message: '找不到使用者的回覆！' })
           }
@@ -241,9 +240,7 @@ const userController = {
           if (!followerUsers[0]) return res.status(403).json({ status: 'error', message: '沒有追隨中的使用者' })
           const newData = []
           const followingsJsonData = followerUsers[0].toJSON()
-          console.log(followingsJsonData)
-          // eslint-disable-next-line array-callback-return
-          followingsJsonData.Followers.map(follower => {
+          followingsJsonData.Followers.forEach(follower => {
             if (followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)) {
               newData.push({
                 ...follower,
