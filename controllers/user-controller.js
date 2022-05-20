@@ -329,10 +329,12 @@ const userController = {
   getFollowings: (req, res, next) => {
     return Promise.all([
       User.findByPk(req.params.id, {
-        include: { model: User, as: 'Followings' }
+        include: { model: User, as: 'Followings' },
+        order: [['createdAt', 'DESC']]
       }),
       Followship.findAll({
         where: { followerId: helpers.getUser(req).id },
+        order: [['createdAt', 'DESC']],
         raw: true
       })
     ])
@@ -355,10 +357,12 @@ const userController = {
   getFollowers: (req, res, next) => {
     return Promise.all([
       User.findByPk(req.params.id, {
-        include: { model: User, as: 'Followers' }
+        include: { model: User, as: 'Followers' },
+        order: [['createdAt', 'DESC']]
       }),
       Followship.findAll({
         where: { followerId: helpers.getUser(req).id },
+        order: [['createdAt', 'DESC']],
         raw: true
       })
     ])
