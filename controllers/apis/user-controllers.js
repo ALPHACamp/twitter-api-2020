@@ -267,11 +267,21 @@ const userController = {
       likes = JSON.parse(JSON.stringify(likes))
       if (!likes.length) throw new Error('沒有找到相關資料')
 
+      const myId = helpers.getUser(req)?.id
+      if (!myId) throw new Error('未存取到登入資料')
+
+      const myLike = await Like.findAll({
+        where: { user_id: myId },
+        raw: true
+      })
+      const myLikeId = myLike.map(l => l.TweetId)
+
       const data = likes.map(like => {
         const replyCount = like.Tweet.Replies.length
         like.Tweet.replyCount = replyCount
         const likeCount = like.Tweet.Likes.length
         like.Tweet.likeCount = likeCount
+        like.is_like = Boolean(myLikeId.find(m => m === like.TweetId))
         return like
       })
 
