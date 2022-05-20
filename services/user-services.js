@@ -99,7 +99,7 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Like.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, Reply , Like] }]
+        include: [{ model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Reply }, { model: Like }] }]
       })
     ])
       .then(([user, likes]) => {
@@ -107,8 +107,6 @@ const userServices = {
 
         const userLikes = likes.map(l => ({
           ...l.toJSON(),
-          UserId: l.UserId,
-          TweetId: l.TweetId,
           tweetLikesCount: l.Tweet.Likes.length,
           tweetRepliesCount: l.Tweet.Replies.length,
           isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
