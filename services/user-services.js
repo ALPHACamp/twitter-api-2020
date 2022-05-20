@@ -99,21 +99,18 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Like.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Reply }, { model: Like }] }]
+        include: [{ model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, Reply , Like] }]
       })
     ])
       .then(([user, likes]) => {
         if (!user) throw new Error("User didn't exists!")
 
         const userLikes = likes.map(l => ({
+          ...l.toJSON(),
           UserId: l.UserId,
-          User: l.Tweet.User,
           TweetId: l.TweetId,
-          tweetDescription: l.Tweet.description,
           tweetLikesCount: l.Tweet.Likes.length,
           tweetRepliesCount: l.Tweet.Replies.length,
-          createdAt: l.Tweet.createdAt,
-          updatedAt: l.Tweet.updatedAt,
           isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
         }))
         return cb(null, userLikes)
