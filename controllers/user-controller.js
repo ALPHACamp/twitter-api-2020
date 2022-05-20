@@ -35,8 +35,9 @@ const userController = {
         .then(([email, account]) => {
           if (email) return res.status(403).json({ status: 'error', message: '此Email已被註冊！！' })
           if (account) return res.status(403).json({ status: 'error', message: '此Account已被註冊！！' })
-          // if (email) throw new Error('此Email已被註冊！！')會導致crush
-          // if (account) throw new Error('此Email已被註冊！！')會導致crush
+          // 會導致crush
+          // if (email) throw new Error('此Email已被註冊！！')
+          // if (account) throw new Error('此Email已被註冊！！')
           return bcrypt.hash(req.body.password, 10)
             .then(hash => User.create({
               name: req.body.name,
@@ -100,11 +101,10 @@ const userController = {
               UserId: tweetsJSON.UserId,
               name: tweetsJSON.User.name,
               avatar: tweetsJSON.User.avatar,
-              email: tweetsJSON.User.email,
               totalLikeCount: tweetsJSON.Likes.length,
               totalReplyCount: tweetsJSON.Replies.length,
-              createAt: tweetsJSON.createdAt,
-              updatedAt: tweetsJSON.updatedAt
+              tweetCreateAt: tweetsJSON.createdAt,
+              tweetUpdatedAt: tweetsJSON.updatedAt
             })
           })
           res.json(newData)
@@ -133,7 +133,6 @@ const userController = {
         nest: true
       })
         .then(reply => {
-
           if (!reply) {
             return res.status(403).json({ status: 'error', message: '找不到使用者的回覆！' })
           }
@@ -149,18 +148,20 @@ const userController = {
               return false
             }
           })
+          console.log('rawData', rawData)
           const data = rawData.map(element => ({
+            replyId: element.id,
             UserId: element.Tweet.UserId,
-            name: element.Tweet.User.name,
-            account: element.Tweet.User.account,
+            userName: element.Tweet.User.name,
+            userAccount: element.Tweet.User.account,
             avatar: element.Tweet.User.avatar,
             TweetId: element.TweetId,
             description: element.Tweet.description,
             comment: element.comment,
             totalLikeCount: element.Tweet.Likes.length,
             totalReplyCount: element.Tweet.Replies.length,
-            createAt: element.createdAt,
-            updateAt: element.updateAt
+            replyCreateAt: element.createdAt,
+            replyUpdateAt: element.updatedAt
           }))
           res.json(data)
         })
@@ -171,31 +172,8 @@ const userController = {
   userLikes: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      const rawUserLikes = await Like.findAll({
-        where: {
-          UserId
-        },
-        include: [{
-          model: Tweet,
-          attributes: [
-            'id'
-          ]
-        }],
-        nest: true,
-        raw: true
-      })
-
-      if (!rawUserLikes.length) return res.status(204).json({ status: 'error', data: [], message: '使用者沒有喜歡的推文' })
-      const likeTweetId = []
-
-      for (let index = 0; index < rawUserLikes.length; index++) {
-        likeTweetId.push(rawUserLikes[index].Tweet.id)
-      }
-
-      const likeTweets = await Tweet.findAll({
-        where: {
-          id: likeTweetId
-        },
+      Tweet.findAll({
+        where: { UserId },
         include: [
           { model: User },
           { model: Like, attributes: ['id'] },
@@ -204,58 +182,24 @@ const userController = {
         order: [['created_at', 'DESC']],
         nest: true
       })
-      // 推文 like 總數
-      const likes = await Like.count({
-        group: ['Tweet_id']
-      })
-
-      if (likes) {
-        likeTweets.forEach(tweet => {
-          likes.forEach(element => {
-            if (tweet.id === element.Tweet_id) {
-              tweet.totalLikeCount = element.count
-            } else {
-              if (tweet.totalLikeCount === undefined) tweet.totalLikeCount = 0
-            }
+        .then(tweets => {
+          const data = []
+          tweets.map(element => {
+            element = element.toJSON()
+            data.push({
+              TweetId: element.id,
+              description: element.description,
+              tweetCreatedAt: element.createdAt,
+              UserId: element.User.id,
+              name: element.User.name,
+              account: element.User.account,
+              avatar: element.User.avatar,
+              totalLikeCount: element.Likes.length,
+              totalReplyCount: element.Replies.length
+            })
           })
+          res.status(200).json(data)
         })
-      } else {
-        likeTweets.forEach(element => {
-          element.totalLikeCount = 0
-        })
-      }
-      // 推文 reply 總數
-      const replies = await Reply.count({
-        group: ['Tweet_id']
-      })
-
-      if (replies) {
-        likeTweets.forEach(tweet => {
-          replies.forEach(element => {
-            if (tweet.id === element.Tweet_id) {
-              tweet.totalReplyCount = element.count
-            } else {
-              if (tweet.totalReplyCount === undefined) tweet.totalReplyCount = 0
-            }
-          })
-        })
-      } else {
-        likeTweets.forEach(element => {
-          element.totalReplyCount = 0
-        })
-      }
-      const data = likeTweets.map(element => ({
-        TweetId: element.id,
-        description: element.description,
-        createdAt: element.createdAt,
-        UserId: element.User.id,
-        name: element.User.name,
-        account: element.User.account,
-        avatar: element.User.avatar,
-        totalLikeCount: element.Likes.length,
-        totalReplyCount: element.Replies.length
-      }))
-      res.status(200).json(data)
     } catch (err) {
       next(err)
     }
@@ -266,10 +210,11 @@ const userController = {
       User.findAll({
         attributes: { exclude: ['password'] },
         where: { id },
-        include: [{ model: User, as: 'Followings', include: [Tweet], attributes: ['id', 'account', 'name', 'avatar'] }],
+        include: [{ model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }],
         nest: true
       })
         .then(followingUsers => {
+          if (!followingUsers[0]) return res.status(403).json({ status: 'error', message: '沒有跟隨中的使用者' })
           followingUsers = followingUsers[0].toJSON()
           const newData = []
           // eslint-disable-next-line array-callback-return
@@ -302,12 +247,14 @@ const userController = {
       User.findAll({
         where: { id },
         attributes: { exclude: ['password'] },
-        include: [{ model: User, as: 'Followers', include: [Tweet], attributes: ['id', 'account', 'name', 'avatar'] }, { model: User, as: 'Followings', attributes: ['id', 'account'] }],
+        include: [{ model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }, { model: User, as: 'Followings', attributes: ['id', 'account'] }],
         nest: true
       })
-        .then(followings => {
+        .then(followerUsers => {
+          if (!followerUsers[0]) return res.status(403).json({ status: 'error', message: '沒有追隨中的使用者' })
           const newData = []
-          const followingsJsonData = followings[0].toJSON()
+          const followingsJsonData = followerUsers[0].toJSON()
+          console.log(followingsJsonData)
           // eslint-disable-next-line array-callback-return
           followingsJsonData.Followers.map(follower => {
             if (followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)) {
