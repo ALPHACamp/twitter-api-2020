@@ -107,14 +107,14 @@ const userController = {
     const name = req.body.name || req.user.name || 'name'
     const account = req.body.account || req.user.account || 'account'
     const email = req.body.email || req.user.email || 'email@email.com'
-    const avatar = req.files?.avatar || null
-    const cover = req.files?.cover || null
-    Promise.all([User.findOne({ where: { email } }), User.findOne({ where: { account } }), User.findByPk(req.params.id), imgurFileHandler(avatar[0]), imgurFileHandler(cover[0])])
+    const avatar = req.files.avatar ? req.files.avatar[0] : null
+    const cover = req.files.cover ? req.files.cover[0] : null
+    Promise.all([User.findOne({ where: { email } }), User.findOne({ where: { account } }), User.findByPk(req.params.id), imgurFileHandler(avatar), imgurFileHandler(cover)])
       .then(([findEmail, findAccount, user, avatarFilePath, coverFilePath]) => {
         if (findEmail && findEmail.id !== req.user.id) throw new Error('Email has already been taken.')
         if (findAccount && findAccount.id !== req.user.id) throw new Error('Account has already been taken.')
         return user.update({
-          name, account, email, password, avatar: avatarFilePath || null, cover: coverFilePath || null, introduction
+          name, account, email, password, avatar: avatarFilePath, cover: coverFilePath, introduction
         })
       })
       .then(user => {
