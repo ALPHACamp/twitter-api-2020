@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -43,6 +43,36 @@ const adminController = {
             data
           },
           message: 'All users found!'
+        })
+      })
+      .catch(err => next(err))
+  },
+  getTweets: (req, res, next) => {
+    const DEFAULT_DESCRIPTION_LIMIT = 140
+    return Tweet.findAndCountAll({
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: User, as: 'LikedUsers', attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Reply, attributes: ['id'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => {
+        const likedTweetId = req.user?.LikedTweets ? req.user.LikedTweets.map(likeTweet => likeTweet.id) : []
+        const resultTweets = tweets.rows.map(r => ({
+          ...r.toJSON(),
+          description: r.description.substring(0, DEFAULT_DESCRIPTION_LIMIT),
+          Likes: r.LikedUsers ? r.LikedUsers.length : 0,
+          Replies: r.Replies ? r.Replies.length : 0,
+          isLiked: likedTweetId.includes(r.id)
+        }))
+        return res.json({
+          status: 'Success',
+          statusCode: 200,
+          data: {
+            tweets: resultTweets
+          },
+          message: ''
         })
       })
       .catch(err => next(err))
