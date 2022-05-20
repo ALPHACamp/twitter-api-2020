@@ -47,6 +47,7 @@ const userServices = {
         delete userData.password
         userData.Followers = userData.Followers.length
         userData.Followings = userData.Followings.length
+        userData.isFollowed = helpers.getUser(req).Followings.some(f => f.id === userData.id)
         return cb(null, userData)
       })
       .catch(err => cb(err))
