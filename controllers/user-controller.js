@@ -327,90 +327,57 @@ const userController = {
   },
 
   getFollowings: (req, res, next) => {
-    const UserId = req.params.id
-    User.findAll({
-      where: { id: UserId },
-      include: { model: User, as: 'Followings' },
-      order: [['createdAt', 'DESC']]
-    })
-      .then(followings => {
-        followings = followings[0].toJSON()
-        const data = []
-        // eslint-disable-next-line array-callback-return
-        followings.Followings.map(f => {
-          if (Number(f.Followship.followerId) === Number(UserId)) {
-            data.push({
-              id: f.id,
-              account: f.account,
-              name: f.name,
-              avatar: f.avatar,
-              introduction: f.introduction,
-              followingId: f.Followship.followingId,
-              followerId: f.Followship.followerId,
-              isFollowed: true
-            })
-          } else {
-            data.push({
-              id: f.id,
-              account: f.account,
-              name: f.name,
-              avatar: f.avatar,
-              introduction: f.introduction,
-              followingId: f.Followship.followingId,
-              followerId: f.Followship.followerId,
-              isFollowed: false
-            })
-          }
-        })
-        res.status(200).json(data)
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: { model: User, as: 'Followings' }
+      }),
+      Followship.findAll({
+        where: { followerId: helpers.getUser(req).id },
+        raw: true
+      })
+    ])
+      .then(([user, following]) => {
+        if (!user.Followings.length) throw new Error('使用者不存在！')
+
+        const isFollowed = following.map(f => f.followingId)
+        const data = user.Followings.map(f => ({
+          followingId: f.id,
+          account: f.account,
+          name: f.name,
+          avatar: f.avatar,
+          introduction: f.introduction,
+          isFollowed: isFollowed.some(id => id === f.id)
+        }))
+        return res.status(200).json(data)
       })
       .catch(err => next(err))
   },
   getFollowers: (req, res, next) => {
-    const UserId = req.params.id
-    User.findAll({
-      where: { id: UserId },
-      include: [{
-        model: User,
-        as: 'Followers',
-        attributes: ['id', 'account', 'name', 'avatar']
-      }, { model: User, as: 'Followings', attributes: ['id', 'account'] }],
-      nest: true
-    })
-      .then(followers => {
-        const data = []
-        const followersData = followers[0].toJSON()
-        // eslint-disable-next-line array-callback-return
-        followersData.Followers.map(f => {
-          if (followersData.Followings.some(d => d.Followship.followingId === f.Followship.followerId)) {
-            data.push({
-              id: f.id,
-              account: f.account,
-              name: f.name,
-              avatar: f.avatar,
-              introduction: f.introduction,
-              followingId: f.Followship.followingId,
-              followerId: f.Followship.followerId,
-              isFollowed: true
-            })
-          } else {
-            data.push({
-              id: f.id,
-              account: f.account,
-              name: f.name,
-              avatar: f.avatar,
-              introduction: f.introduction,
-              followingId: f.Followship.followingId,
-              followerId: f.Followship.followerId,
-              isFollowed: false
-            })
-          }
-        })
-        res.status(200).json(data)
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: { model: User, as: 'Followers' }
+      }),
+      Followship.findAll({
+        where: { followerId: helpers.getUser(req).id },
+        raw: true
+      })
+    ])
+      .then(([user, following]) => {
+        if (!user.Followers.length) throw new Error('使用者不存在！')
+
+        const isFollowed = following.map(f => f.followingId)
+        const data = user.Followers.map(f => ({
+          followerId: f.id,
+          account: f.account,
+          name: f.name,
+          avatar: f.avatar,
+          introduction: f.introduction,
+          isfollowed: isFollowed.some(id => id === f.id)
+        }))
+        return res.status(200).json(data)
       })
       .catch(err => next(err))
   },
-
   addFollowing: (req, res, next) => {
     const followingId = Number(req.body.id)
     const followerId = helpers.getUser(req).id
