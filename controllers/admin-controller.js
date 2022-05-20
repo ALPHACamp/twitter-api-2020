@@ -1,13 +1,9 @@
 const { User, Tweet, sequelize } = require('../models')
-const { Op } = require("sequelize")
 
 const adminController = {
   getAllUsers: async (req, res, next) => {
     try {
       const user = await User.findAll({
-        where: {
-          [Op.not]: [{ role: 'admin' }]
-        },
         attributes: [
           'name', 'account', 'avatar', 'cover_image',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Tweets WHERE Tweets.User_id = User.id)'),

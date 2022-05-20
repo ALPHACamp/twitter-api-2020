@@ -246,7 +246,8 @@ const userController = {
   },
   getUserSetting: async (req, res, next) => {
     try {
-      const user = await User.findByPk(getUser(req).id, {
+      const userId = helpers.getUser(req).id
+      const user = await User.findByPk(userId, {
         attributes: ['id', 'account', 'name', 'email']
       })
       if (!user) throw new Error('查無使用者')
@@ -258,18 +259,20 @@ const userController = {
   putUserSetting: async (req, res, next) => {
     try {
       const { name, account, email, password, checkPassword } = req.body
-      const user = getUser(req)
+      const user = helpers.getUser(req)
 
       if (!name.trim() ||
           !account.trim() ||
-          !email.trim() ||
-          !password.trim() ||
-        !checkPassword.trim()) throw new Error('不可提交空白字元')
+          !email.trim()) throw new Error('不可提交空白字元')
 
-      if (password !== checkPassword) throw new Error('密碼與確認密碼不符。')
+      if (password) {
+        if (password.trim() !== checkPassword.trim()) throw new Error('密碼與確認密碼不符。')
+      }
 
-      if (await User.findOne({ where:{ account } })) throw new Error('此帳號已經存在。')
-      if (await User.findOne({ where: { email } })) throw new Error('此email已經存在。')
+      if (user.account !== account || user.email !== email) {
+        if (await User.findOne({ where: { account } })) throw new Error('此帳號已經存在。')
+        if (await User.findOne({ where: { email } })) throw new Error('此email已經存在。')
+      }
 
       const userUpdate = await user.update({
         name,
@@ -277,7 +280,15 @@ const userController = {
         email,
         password: password ? bcrypt.hashSync(password, 10) : user.password,
       })
-      res.status(200).json({ message: '成功修改個人資料', userUpdate })
+
+      res.status(200).json({ 
+        message: '成功修改個人資料',
+        userUpdate: {
+          name: userUpdate.name,
+          account: userUpdate.account,
+          email: userUpdate.email
+        }
+      })
     } catch (err) {
       next(err)
     }
@@ -286,11 +297,11 @@ const userController = {
     try {
       const users = await User.findAll({
         attributes: ['id', 'account', 'name', 'avatar'],
+        where: { role: 'user' },
         include: [
           { model: User, as: 'Followers', attributes: ['id'], through: { attributes: [] }}
         ],
       })
-
       if (!users.length) throw new Error('無任何使用者')
 
       const result = users.map(user => ({
