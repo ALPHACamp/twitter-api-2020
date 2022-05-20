@@ -127,6 +127,7 @@ const userController = {
         nest: true
       })
         .then(reply => {
+          // console.log('reeeeee', reply)
           if (!reply) {
             return res.status(403).json({ status: 'error', message: '找不到使用者的回覆！' })
           }
@@ -142,19 +143,18 @@ const userController = {
               return false
             }
           })
+
           const data = rawData.map(element => ({
-            replyId: element.id,
-            UserId: element.Tweet.UserId,
-            userName: element.Tweet.User.name,
-            userAccount: element.Tweet.User.account,
             avatar: element.Tweet.User.avatar,
-            TweetId: element.TweetId,
-            description: element.Tweet.description,
+            userName: element.User.name,
+            userAccount: element.User.account,
+            replyCreateAt: element.createdAt,
+            replyAccount: element.Tweet.User.account,
             comment: element.comment,
             totalLikeCount: element.Tweet.Likes.length,
             totalReplyCount: element.Tweet.Replies.length,
-            replyCreateAt: element.createdAt,
-            replyUpdateAt: element.updatedAt
+            UserId: element.User.id,
+            replyId: element.id
           }))
           res.json(data)
         })
