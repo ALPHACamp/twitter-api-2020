@@ -86,8 +86,22 @@ const userServices = {
       .then(([user, replies]) => {
         if (!user) throw new Error("User didn't exists!")
         const repliedTweets = replies.map(r => ({
-          ...r.toJSON(),
-          comment: r.comment
+          TweetId: r.Tweet.id,
+          description: r.Tweet.description,
+          createdAt: r.Tweet.createdAt,
+          updatedAt: r.Tweet.updatedAt,
+          userId: r.User.id,
+          userName: r.User.name,
+          userAccount: r.User.account,
+          userAvatar: r.User.avatar,
+          comment: r.comment,
+          replyUserId: r.Tweet.UserId,
+          replyName: r.Tweet.User.name,
+          replyAccount: r.Tweet.User.account,
+          replyAvatar: r.Tweet.User.avatar,
+          replyCreatedAt: r.createdAt,
+          replyUpdatedAt: r.updatedAt,
+          User,
         }))
         return cb(null, repliedTweets)
       })
@@ -104,14 +118,16 @@ const userServices = {
     ])
       .then(([user, likes]) => {
         if (!user) throw new Error("User didn't exists!")
-        if (!likes) {
-          const userLikes = []
-          return userLikes
-        }
+
         const userLikes = likes.map(l => ({
-          ...l.toJSON(),
+          UserId: l.UserId,
+          User: l.Tweet.User,
+          TweetId: l.TweetId,
+          tweetDescription: l.Tweet.description,
           tweetLikesCount: l.Tweet.Likes.length,
           tweetRepliesCount: l.Tweet.Replies.length,
+          createdAt: l.Tweet.createdAt,
+          updatedAt: l.Tweet.updatedAt,
           isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
         }))
         return cb(null, userLikes)
