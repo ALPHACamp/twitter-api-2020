@@ -142,7 +142,6 @@ const userController = {
               return false
             }
           })
-          console.log('rawData', rawData)
           const data = rawData.map(element => ({
             replyId: element.id,
             UserId: element.Tweet.UserId,
