@@ -152,6 +152,9 @@ const userController = {
 
   getUserTweets: async (req, res, next) => {
     try {
+      const UserId = helpers.getUser(req)?.id
+      if (!UserId) throw new Error('沒有 UserId')
+
       const tweets = await Tweet.findAll({
         where: { user_id: req.params.id },
         attributes: ['id', 'description', 'user_id', 'created_at', 'updated_at'],
@@ -166,7 +169,7 @@ const userController = {
           },
           {
             model: Like,
-            attributes: ['likeUnlike']
+            attributes: ['likeUnlike', 'UserId']
           }
         ],
         order: [['created_at', 'DESC']],
@@ -178,10 +181,16 @@ const userController = {
       const data = tweets.map(tweet => {
         const replyTotal = tweet.Replies.length
         const likeTotal = tweet.Likes.filter(item => item.likeUnlike).length
+        const isLike = tweet.toJSON().Likes.find(item => item.UserId === UserId)?.likeUnlike
         return {
           ...tweet.toJSON(),
-          Replies: replyTotal,
-          Likes: likeTotal
+          Replies: {
+            replyTotal
+          },
+          Likes: {
+            isLike: isLike || false,
+            likeTotal
+          }
         }
       })
       return res.status(200).json(data)
