@@ -126,6 +126,8 @@ const userServices = {
           tweetDescription: l.Tweet.description,
           tweetLikesCount: l.Tweet.Likes.length,
           tweetRepliesCount: l.Tweet.Replies.length,
+          createdAt: l.Tweet.createdAt,
+          updatedAt: l.Tweet.updatedAt,
           isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
         }))
         return cb(null, userLikes)
