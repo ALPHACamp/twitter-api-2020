@@ -122,6 +122,8 @@ const userServices = {
       ]
     })
       .then((user) => {
+        if (!user) throw new Error("User didn't exists!")
+        
         const userFollowings = user.Followings.map(f => ({
           followingId: f.id,
           followingName: f.name,
@@ -130,7 +132,6 @@ const userServices = {
           followingIntroduction: f.introduction,
           isFollowed: helpers.getUser(req).Followings.some(follow => follow.id === f.id)
         }))
-        if (!user) throw new Error("User didn't exists!")
         return cb(null, userFollowings)
       })
       .catch(err => cb(err))
