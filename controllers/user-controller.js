@@ -337,7 +337,7 @@ const userController = {
       })
     ])
       .then(([user, following]) => {
-        if (!user.Followings.length) throw new Error('使用者不存在！')
+        if (!user.Followings.length) res.status(200).json([])
 
         const isFollowed = following.map(f => f.followingId)
         const data = user.Followings.map(f => ({
@@ -363,7 +363,7 @@ const userController = {
       })
     ])
       .then(([user, following]) => {
-        if (!user.Followers.length) throw new Error('使用者不存在！')
+        if (!user.Followers.length) res.status(200).json([])
 
         const isFollowed = following.map(f => f.followingId)
         const data = user.Followers.map(f => ({
