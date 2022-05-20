@@ -27,8 +27,8 @@ process.on('unhandledRejection', (reason, promise) => {
     host: 'smtp.gmail.com',
     port: 587,
     auth: {
-      user: 'eruc11111@gmail.com',
-      pass: 'dvwywxgnazcauspa'
+      user: 'xxxxxxx',
+      pass: 'XXXXXXX'
     }
   })
   transporter.verify().then(console.log).catch(console.error)
