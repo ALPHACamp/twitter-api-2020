@@ -104,7 +104,10 @@ const userServices = {
     ])
       .then(([user, likes]) => {
         if (!user) throw new Error("User didn't exists!")
-
+        if (!likes) {
+          const userLikes = []
+          return userLikes
+        }
         const userLikes = likes.map(l => ({
           ...l.toJSON(),
           tweetLikesCount: l.Tweet.Likes.length,
