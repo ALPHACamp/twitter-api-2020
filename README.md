@@ -11,7 +11,7 @@ User | user1 | 12345678
 
 ## API Document
 
-More details of API, please refer this [API document]((https://documenter.getpostman.com/view/20220901/UyxjF5qH#intro)) created through postman.
+More details of API, please refer this [API document](https://documenter.getpostman.com/view/20220901/UyxjF5qH#intro) created through postman.
 
 ## Getting Start
 
