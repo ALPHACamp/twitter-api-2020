@@ -123,7 +123,7 @@ const userServices = {
     })
       .then((user) => {
         if (!user) throw new Error("User didn't exists!")
-        
+
         const userFollowings = user.Followings.map(f => ({
           followingId: f.id,
           followingName: f.name,
