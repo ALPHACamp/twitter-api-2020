@@ -219,7 +219,9 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
+      const queryId = Number(req.params.id)
       const logUser = helpers.getUser(req)
+      if (queryId !== logUser.id) throw new Error('不可更改他人資料。')
 
       const { name, introduction } = req.body
       let avatar = req.files?.avatar || null
@@ -239,7 +241,7 @@ const userController = {
         avatar: avatar || logUser.avatar,
         cover_image: coverImage || logUser.cover_image
       })
-      res.status(200).json(userUpdate)
+      res.status(200).json({ message: '資料更改成功。', userUpdate })
     } catch (err) {
       next(err)
     }
@@ -318,7 +320,8 @@ const userController = {
   },
   putUserPage: async (req, res, next) => {
     try {
-      const user = await User.findByPk(getUser(req).id, {
+      const userId = helpers.getUser(req).id
+      const user = await User.findByPk(userId, {
         attributes: ['id', 'name', 'introduction', 'avatar', 'cover_image']
       })
       if (!user) throw new Error('查無使用者')
