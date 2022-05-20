@@ -346,39 +346,6 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  },
-  signUpErr: (req, res, next) => {
-    const { name, account, email, password, checkPassword } = req.body
-    if (!name) throw new Error('請輸入名字')
-    if (!account) throw new Error('請輸入帳號')
-    if (!email) throw new Error('請輸入信箱')
-    if (!password) throw new Error('請輸入密碼')
-    if (password !== checkPassword) throw new Error('密碼與確認密碼不符，請重新輸入')
-    try {
-      return Promise.all([
-        User.findOne({ where: { email: req.body.email } }),
-        User.findOne({ where: { account: req.body.account } })
-      ])
-        .then(([email, account]) => {
-          if (email) return res.status(403).json({ status: 'error', message: '此Email已被註冊！！' })
-          if (account) return res.status(403).json({ status: 'error', message: '此Account已被註冊！！' })
-          // if (email) throw new Error('此Email已被註冊！！')會導致crush
-          // if (account) throw new Error('此Email已被註冊！！')會導致crush
-          return bcrypt.hash(req.body.password, 10)
-            .then(hash => User.create({
-              name: req.body.name,
-              account: req.body.account,
-              email: req.body.email,
-              password: hash,
-              role: 'user'
-            }))
-            .then(user => {
-              res.json({ status: 'success', user })
-            })
-        })
-    } catch (err) {
-      next(err)
-    }
   }
 }
 
