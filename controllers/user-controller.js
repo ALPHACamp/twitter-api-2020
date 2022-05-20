@@ -127,6 +127,7 @@ const userController = {
         nest: true
       })
         .then(reply => {
+          // console.log('reeeeee', reply)
           if (!reply) {
             return res.status(403).json({ status: 'error', message: '找不到使用者的回覆！' })
           }
@@ -142,18 +143,18 @@ const userController = {
               return false
             }
           })
+
           const data = rawData.map(element => ({
-            UserId: element.Tweet.UserId,
-            name: element.Tweet.User.name,
-            account: element.Tweet.User.account,
             avatar: element.Tweet.User.avatar,
-            TweetId: element.TweetId,
-            description: element.Tweet.description,
+            userName: element.User.name,
+            userAccount: element.User.account,
+            replyCreateAt: element.createdAt,
+            replyAccount: element.Tweet.User.account,
             comment: element.comment,
             totalLikeCount: element.Tweet.Likes.length,
             totalReplyCount: element.Tweet.Replies.length,
-            createAt: element.createdAt,
-            updateAt: element.updateAt
+            UserId: element.User.id,
+            replyId: element.id
           }))
           res.json(data)
         })
@@ -196,10 +197,11 @@ const userController = {
       User.findAll({
         attributes: { exclude: ['password'] },
         where: { id },
-        include: [{ model: User, as: 'Followings', include: [Tweet], attributes: ['id', 'account', 'name', 'avatar'] }],
+        include: [{ model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }],
         nest: true
       })
         .then(followingUsers => {
+          if (!followingUsers[0]) return res.status(403).json({ status: 'error', message: '沒有跟隨中的使用者' })
           followingUsers = followingUsers[0].toJSON()
           const newData = []
           // eslint-disable-next-line array-callback-return
@@ -232,12 +234,14 @@ const userController = {
       User.findAll({
         where: { id },
         attributes: { exclude: ['password'] },
-        include: [{ model: User, as: 'Followers', include: [Tweet], attributes: ['id', 'account', 'name', 'avatar'] }, { model: User, as: 'Followings', attributes: ['id', 'account'] }],
+        include: [{ model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }, { model: User, as: 'Followings', attributes: ['id', 'account'] }],
         nest: true
       })
-        .then(followings => {
+        .then(followerUsers => {
+          if (!followerUsers[0]) return res.status(403).json({ status: 'error', message: '沒有追隨中的使用者' })
           const newData = []
-          const followingsJsonData = followings[0].toJSON()
+          const followingsJsonData = followerUsers[0].toJSON()
+          console.log(followingsJsonData)
           // eslint-disable-next-line array-callback-return
           followingsJsonData.Followers.map(follower => {
             if (followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)) {
