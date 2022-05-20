@@ -127,9 +127,9 @@ const userController = {
         nest: true
       })
         .then(reply => {
-          // console.log('reeeeee', reply)
-          if (!reply) {
-            return res.status(403).json({ status: 'error', message: '找不到使用者的回覆！' })
+          if (!reply[0]) {
+            // return res.status(403).json({ status: 'error', message: '找不到使用者的回覆！' })
+            throw new Error('找不到使用者的回覆！')
           }
           const repeatDataId = []
           const rawData = []
@@ -158,6 +158,7 @@ const userController = {
           }))
           res.json(data)
         })
+        .catch(err => next(err))
     } catch (err) {
       next(err)
     }
@@ -322,7 +323,7 @@ const userController = {
     try {
       User.findAll({
         attributes: { exclude: ['password'] },
-        include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
+        include: [{ model: User, as: 'Followers', attributes: ['id'] }],
         nest: true
       })
         .then(user => {
@@ -334,12 +335,24 @@ const userController = {
               return false
             } else if (user.Followers.some(follower =>
               follower.Followship.followerId === req.user.dataValues.id)) {
-              return newData.push({ ...user, isFollowed: true })
+              return newData.push({
+                id: user.id,
+                account: user.account,
+                avatar: user.avatar,
+                totalFollowerCount: user.Followers.length,
+                isFollowed: true
+              })
             } else {
-              return newData.push({ ...user, isFollowed: false })
+              return newData.push({
+                id: user.id,
+                account: user.account,
+                avatar: user.avatar,
+                totalFollowerCount: user.Followers.length,
+                isFollowed: false
+              })
             }
           })
-          newData.sort((a, b) => b.Followers.length - a.Followers.length)
+          newData.sort((a, b) => b.totalFollowerCount - a.totalFollowerCount)
           if (newData.length > 10) {
             newData = newData.slice(0, 10)
           }
@@ -347,6 +360,7 @@ const userController = {
             data: newData
           })
         })
+        .catch(err => next(err))
     } catch (err) {
       next(err)
     }
