@@ -14,7 +14,7 @@ const replies = {
             include: {
               model: User,
               attributes: [
-                'name'
+                'account'
               ]
             }
           },
@@ -57,17 +57,18 @@ const replies = {
       }
 
       const replies = rawReply.map(element => ({
-        id: element.id,
-        comment: element.comment,
-        tweetId: element.TweetId,
-        userId: element.UserId,
-        name: element.User.name,
-        tweetUser: element.Tweet.User.name,
         avatar: element.User.avatar,
-        account: element.User.account,
-        likeCount: element.ReplyLikes.likeNum,
+        userName: element.User.name,
+        userAccount: element.User.account,
+        replyCreatedAt: element.createdAt,
+        replyAccount: element.Tweet.User.account,
+        comment: element.comment,
+        totalLikeCount: element.ReplyLikes.likeNum,
+        totalReplyCount: Math.floor(Math.random() * 100),
+        UserId: element.UserId,
+        replyId: element.id,
         islike: element.isLike,
-        createdAt: element.createdAt
+        tweetId: element.TweetId
       }))
       return replies
     } catch (err) {

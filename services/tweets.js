@@ -75,15 +75,15 @@ const tweets = {
         })
       }
       const tweets = rawTweets.map(element => ({
-        TweetId: element.id,
+        avatar: element.User.avatar,
         name: element.User.name,
         account: element.User.account,
-        avatar: element.User.avatar,
-        UserId: element.User.id,
-        description: element.description,
         tweetCreatedAt: element.createdAt,
+        description: element.description,
         totalLikeCount: element.Likes.likeCounts,
         totalReplyCount: element.replyCounts,
+        UserId: element.User.id,
+        TweetId: element.id,
         isLike: element.isLike
       }))
       return tweets
@@ -146,15 +146,15 @@ const tweets = {
         else rawTweet.isLike = false
       }
       const tweet = {
-        TweetId: rawTweet.id,
-        UserId: rawTweet.User.id,
+        avatar: rawTweet.User.avatar,
         name: rawTweet.User.name,
         account: rawTweet.User.account,
-        avatar: rawTweet.User.avatar,
-        description: rawTweet.description,
         tweetCreatedAt: rawTweet.createdAt,
+        description: rawTweet.description,
         totalLikeCount: rawTweet.Likes.likeNum,
         totalReplyCount: rawTweet.replyNum,
+        UserId: rawTweet.User.id,
+        TweetId: rawTweet.id,
         isLike: rawTweet.isLike
       }
       return tweet
