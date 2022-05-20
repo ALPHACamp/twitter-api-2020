@@ -1,3 +1,4 @@
+/* eslint-disable no-fallthrough */
 const createToken = require('../helpers/token')
 const { User, Tweet, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
@@ -25,27 +26,43 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const { name, account, email, password, checkPassword } = req.body
-      if (!name) throw new Error('請輸入名字')
-      if (!account) throw new Error('請輸入帳號')
-      if (!email) throw new Error('請輸入信箱')
-      if (!password) throw new Error('請輸入密碼')
+      const errorMsg = []
+      if (!name) errorMsg.push('名字')
+      if (!account) errorMsg.push('帳號')
+      if (!email) errorMsg.push('信箱')
+      if (!password) errorMsg.push('密碼')
+      if (errorMsg.length) {
+        let message = `請輸入${errorMsg[0]}`
+        for (let index = 1; index < errorMsg.length; index++) {
+          if (index < errorMsg.length - 1) {
+            message += `、${errorMsg[index]}`
+          } else {
+            message += `及${errorMsg[index]}`
+          }
+        }
+        throw new Error(message)
+      }
       if (password !== checkPassword) throw new Error('密碼與確認密碼不符，請重新輸入')
       const emailCheck = await User.findOne({ where: { email: req.body.email } })
       const accountCheck = await User.findOne({ where: { account: req.body.account } })
       if (emailCheck) throw new Error('此Email已被註冊！！')
-      if (accountCheck) throw new Error('此Email已被註冊！！')
+      if (accountCheck) throw new Error('此帳號已被註冊！！')
       const hash = await bcrypt.hash(req.body.password, 10)
       await User.create({
-        name: req.body.name,
-        account: req.body.account,
-        email: req.body.email,
+        name,
+        account,
+        email,
         password: hash,
         role: 'user'
       })
       const user = await User.findOne({
+        attributes: {
+          exclude: ['password']
+        },
         where: {
           account
-        }
+        },
+        raw: true
       })
       res.status(200).json(user)
     } catch (err) {
