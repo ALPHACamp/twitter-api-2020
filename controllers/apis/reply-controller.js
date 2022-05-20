@@ -41,7 +41,8 @@ const replyController = {
             model: User,
             attributes: ['id', 'account', 'name', 'avatarImg']
           }
-        ]
+        ],
+        order: [['created_at', 'DESC']]
       })
 
       return res.status(200).json(
