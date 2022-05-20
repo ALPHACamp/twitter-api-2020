@@ -86,22 +86,8 @@ const userServices = {
       .then(([user, replies]) => {
         if (!user) throw new Error("User didn't exists!")
         const repliedTweets = replies.map(r => ({
-          TweetId: r.Tweet.id,
-          description: r.Tweet.description,
-          createdAt: r.Tweet.createdAt,
-          updatedAt: r.Tweet.updatedAt,
-          userId: r.User.id,
-          userName: r.User.name,
-          userAccount: r.User.account,
-          userAvatar: r.User.avatar,
-          comment: r.comment,
-          replyUserId: r.Tweet.UserId,
-          replyName: r.Tweet.User.name,
-          replyAccount: r.Tweet.User.account,
-          replyAvatar: r.Tweet.User.avatar,
-          replyCreatedAt: r.createdAt,
-          replyUpdatedAt: r.updatedAt,
-          User,
+          ...r.toJSON(),
+          comment: r.comment
         }))
         return cb(null, repliedTweets)
       })
