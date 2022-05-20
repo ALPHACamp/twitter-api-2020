@@ -376,7 +376,7 @@ const userController = {
           name: f.name,
           avatar: f.avatar,
           introduction: f.introduction,
-          isfollowed: isFollowed.some(id => id === f.id)
+          isFollowed: isFollowed.some(id => id === f.id)
         }))
         return res.status(200).json(data)
       })
