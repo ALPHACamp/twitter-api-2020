@@ -248,7 +248,7 @@ const userController = {
       ],
       order: [['createdAt', 'DESC']]
     }).then(followers => {
-      const resultFollowers = followers.map(f => ({ ...f.toJSON(), isFollowed: req.user && req.user.Followings.map(f => f.id).includes(followers.id) }))
+      const resultFollowers = followers.map(f => ({ ...f.toJSON() }))
       delete resultFollowers[0].password
       return res.json({
         status: 'success',
