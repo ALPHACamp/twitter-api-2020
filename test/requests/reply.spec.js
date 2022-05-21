@@ -101,8 +101,8 @@ describe('# reply requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查是否有成功取得留言
-            expect(res.body.data.replies).to.be.an('array');
-            res.body.data.replies[0].comment.should.equal('Tweet1 的 comment');
+            expect(res.body).to.be.an('array');
+            res.body[0].comment.should.equal('Tweet1 的 comment');
             return done();
           })
       });

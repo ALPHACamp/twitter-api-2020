@@ -5,7 +5,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Followship extends Model {
     static associate (models) {
-
+      Followship.belongsTo(models.User, { foreignKey: 'followerId' })
+      Followship.belongsTo(models.User, { foreignKey: 'followingId' })
     }
   };
   Followship.init({

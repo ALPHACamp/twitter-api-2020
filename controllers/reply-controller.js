@@ -4,10 +4,6 @@ const { Reply, LikedReply } = require('../models')
 const replyController = {
   likeReply: (req, res, next) => {
     /*
-    #swagger.tags = ['Replies']
-    #swagger.security = [{
-            'bearerAuth': []
-    }]
     :param id: ReplyId
     This api would create a like relation between user and reply, and return a json
     */
@@ -32,23 +28,12 @@ const replyController = {
         })
       })
       .then(likedReply => {
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            likedReply
-          },
-          message: ''
-        })
+        return res.json(likedReply)
       })
       .catch(err => next(err))
   },
   unlikeReply: (req, res, next) => {
     /*
-    #swagger.tags = ['Replies']
-    #swagger.security = [{
-            'bearerAuth': []
-    }]
     :param id: ReplyId
     This api would destroy a like relation between user and reply, and return a json
     */
@@ -65,24 +50,13 @@ const replyController = {
 
         return likedReply.destroy()
       })
-      .then(likedReply => {
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            likedReply
-          },
-          message: ''
-        })
+      .then(unlikedReply => {
+        return res.json(unlikedReply)
       })
       .catch(err => next(err))
   },
   putReply: async (req, res, next) => {
     /*
-    #swagger.tags = ['Replies']
-    #swagger.security = [{
-            'bearerAuth': []
-    }]
     :param id: ReplyId
     :body comment: reply's content
     This api would edit a reply record and return a json
@@ -99,24 +73,13 @@ const replyController = {
       const updatedReply = await reply.update({
         comment
       })
-      res.json({
-        status: 'Success',
-        statusCode: 200,
-        data: {
-          reply: updatedReply
-        },
-        message: ''
-      })
+      res.json(updatedReply)
     } catch (err) {
       next(err)
     }
   },
   deleteReply: async (req, res, next) => {
     /*
-    #swagger.tags = ['Replies']
-    #swagger.security = [{
-            'bearerAuth': []
-    }]
     :param id: ReplyId
     This api would delete a reply record and its related likeReplies record, and return a json
     */
@@ -131,14 +94,7 @@ const replyController = {
       await LikedReply.destroy({
         where: { ReplyId }
       })
-      res.json({
-        status: 'Success',
-        statusCode: 200,
-        data: {
-          reply: destroyedReply
-        },
-        message: ''
-      })
+      res.json(destroyedReply)
     } catch (err) {
       next(err)
     }

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
@@ -22,12 +22,7 @@ const userController = {
       .then(user => {
         user = user.toJSON()
         delete user.password
-        res.json({
-          status: 'success',
-          data: {
-            user
-          }
-        })
+        res.json(user)
       })
       .catch(err => next(err))
   },
@@ -38,11 +33,8 @@ const userController = {
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
-        status: 'success',
-        data: {
-          token,
-          user: userData
-        }
+        token,
+        user: userData
       })
     } catch (err) {
       next(err)
@@ -62,17 +54,10 @@ const userController = {
         if (!user) throw new Error("User doen't have permission!")
         user = user.toJSON()
         delete user.password
-        return res.json({
-          status: 'success',
-          statusCode: 200,
-          data: {
-            user,
-            followerCount: user.Followers.length,
-            followingCount: user.Followings.length,
-            Tweets: user.Tweets.length
-          },
-          message: ''
-        })
+        user.followerCount = user.Followers.length
+        user.followingCount = user.Followings.length
+        user.tweetsCount = user.Tweets.length
+        return res.json(user)
       })
       .catch(err => next(err))
   },
@@ -142,12 +127,7 @@ const userController = {
       .then(user => {
         user = user.toJSON()
         delete user.password
-        return res.json({
-          status: 'success',
-          data: {
-            user
-          }
-        })
+        return res.json(user)
       })
       .catch(err => next(err))
   },
@@ -169,12 +149,7 @@ const userController = {
         if (!tweets) throw new Error('This account does not exist.')
         const likedTweetId = req.user?.LikedTweets ? req.user.LikedTweets.map(likeTweet => likeTweet.id) : []
         const resultTweets = tweets.map(t => ({ ...t.toJSON(), Replies: t.Replies.length, Likes: t.Likes.length, isLiked: likedTweetId.includes(t.id) }))
-        return res.json({
-          status: 'success',
-          data: {
-            tweets: resultTweets
-          }
-        })
+        return res.json(resultTweets)
       }).catch(err => next(err))
   },
   getRepliedTweets: (req, res, next) => {
@@ -193,12 +168,7 @@ const userController = {
       .then(replies => {
         if (!replies) throw new Error('This account does not exist.')
         const resultReplies = replies.map(r => ({ ...r.toJSON() }))
-        return res.json({
-          status: 'success',
-          data: {
-            replies: resultReplies
-          }
-        })
+        return res.json(resultReplies)
       }).catch(err => next(err))
   },
   getLikes: (req, res, next) => {
@@ -227,49 +197,54 @@ const userController = {
         if (!user) throw new Error('This account does not exist.')
         if (!likes) throw new Error('This account does not exist.')
         const tweets = likes.map(l => ({ ...l.toJSON(), ReplyCount: l.Tweet.Replies.length, LikeCount: l.Tweet.Likes.length, isLiked: true }))
-        return res.json({
-          status: 'success',
-          data: {
-            tweets
-          }
-        })
+        return res.json(tweets)
       }).catch(err => next(err))
   },
   getFollowings: (req, res, next) => {
-    return User.findAll({
-      where: { id: req.params.id },
+    return Followship.findAll({
+      where: { followerId: req.params.id },
       include: [
-        { model: User, as: 'Followings', attributes: ['id', 'account', 'avatar', 'name', 'introduction'] }
+        {
+          model: User,
+          attributes: ['id', 'account', 'avatar', 'name', 'introduction'],
+          include: [
+            {
+              model: Followship,
+              attributes: ['id', 'followerId', 'followingId']
+            }
+          ]
+        }
       ],
       order: [['createdAt', 'DESC']]
-    }).then(followings => {
-      const resultFollowings = followings.map(f => ({ ...f.toJSON() }))
-      delete resultFollowings[0].password
-      return res.json({
-        status: 'success',
-        data: {
-          user: resultFollowings
-        }
+    })
+      .then(followings => {
+        const resultFollowings = followings.map(f => ({ ...f.toJSON() }))
+        return res.json(resultFollowings)
       })
-    }).catch(err => next(err))
+      .catch(err => next(err))
   },
   getFollowers: (req, res, next) => {
-    return User.findAll({
-      where: { id: req.params.id },
+    return Followship.findAll({
+      where: { followingId: req.params.id },
       include: [
-        { model: User, as: 'Followers', attributes: ['id', 'account', 'avatar', 'name', 'introduction'] }
+        {
+          model: User,
+          attributes: ['id', 'account', 'avatar', 'name', 'introduction'],
+          include: [
+            {
+              model: Followship,
+              attributes: ['id', 'followerId', 'followingId']
+            }
+          ]
+        }
       ],
       order: [['createdAt', 'DESC']]
-    }).then(followers => {
-      const resultFollowers = followers.map(f => ({ ...f.toJSON(), isFollowed: req.user && req.user.Followings.map(f => f.id).includes([...f[0].Followers][0].Followship.followerId) }))
-      delete resultFollowers[0].password
-      return res.json({
-        status: 'success',
-        data: {
-          user: resultFollowers
-        }
+    })
+      .then(followers => {
+        const resultFollowers = followers.map(f => ({ ...f.toJSON() }))
+        return res.json(resultFollowers)
       })
-    }).catch(err => next(err))
+      .catch(err => next(err))
   }
 }
 
