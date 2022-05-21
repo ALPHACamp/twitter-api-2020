@@ -41,17 +41,4 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
   }
 }))
 
-passport.serializeUser((user, cb) => {
-  cb(null, user.id)
-})
-
-passport.deserializeUser(async (id, cb) => {
-  try {
-    const user = await User.findByPk(id)
-    cb(null, user.toJSON())
-  } catch (err) {
-    cb(err)
-  }
-})
-
 module.exports = passport
