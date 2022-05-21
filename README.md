@@ -66,7 +66,7 @@ npm install
 npm run build
 npm run serve
 ```
-10. 前端伺服器終端機若是出現下列指令表示運行成功
+10. 前端終端機若是出現下列指令表示運行成功
 ```
 App running at:
   - Local:   http://localhost:8080/ 
