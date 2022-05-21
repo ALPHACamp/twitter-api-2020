@@ -209,11 +209,11 @@ const userController = {
     }), User.findByPk(req.params.id)])
       .then(([likes, user]) => {
         if (!user) throw new Error('This account does not exist.')
-        const likedTweets = likes.map(l => ({ ...l.toJSON(), ReplyCount: l.Tweet.Replies.length, LikeCount: l.Tweet.Likes.length, isLiked: true }))
+        const tweets = likes.map(l => ({ ...l.toJSON(), ReplyCount: l.Tweet.Replies.length, LikeCount: l.Tweet.Likes.length, isLiked: true }))
         return res.json({
           status: 'success',
           data: {
-            likedTweets
+            tweets
           }
         })
       }).catch(err => next(err))
