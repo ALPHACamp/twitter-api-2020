@@ -105,15 +105,12 @@ const userServices = {
         where: { UserId: req.params.id },
         include: [{
           model: Tweet,
-          as: 'Tweet',
           attributes: ['description'],
           include: [{
             model: Reply,
-            as: 'Replies',
             attributes: ['id']
           }, {
             model: Like,
-            as: 'Likes',
             attributes: ['id']
           }, {
             model: User,
@@ -130,6 +127,7 @@ const userServices = {
           tweetRepliesCount: l.Tweet.Replies.length,
           isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
         }))
+        console.log(userLikes)
         return cb(null, userLikes)
       })
       .catch(err => cb(err))
