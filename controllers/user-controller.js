@@ -213,8 +213,7 @@ const userController = {
       .then(([likes, user]) => {
         if (!user) throw new Error('This account does not exist.')
         if (!likes) throw new Error('This account does not exist.')
-        const likedTweetId = req.user?.LikedTweets ? req.user.LikedTweets.map(likeTweet => likeTweet.id) : []
-        const tweets = likes.map(l => ({ ...l.toJSON(), ReplyCount: l.Tweet.Replies.length, LikeCount: l.Tweet.Likes.length, isLiked: likedTweetId.includes(l.TweetId) }))
+        const tweets = likes.map(l => ({ ...l.toJSON(), ReplyCount: l.Tweet.Replies.length, LikeCount: l.Tweet.Likes.length, isLiked: true }))
         return res.json({
           status: 'success',
           data: {
