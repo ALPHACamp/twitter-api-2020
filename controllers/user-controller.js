@@ -71,12 +71,18 @@ const userController = {
   },
   getTopUsers: (req, res, next) => {
     return User.findAll({
+      attributes: { exclude: ['password'] },
       include: [{
         model: User, as: 'Followers'
       }],
       where: { role: 'user' }
     })
       .then(users => {
+        for (let i = 0; i < users.length; i++) {
+          if (users[i].id === req.user.id) {
+            users.splice(i, 1)
+          }
+        }
         users = users.map(u => ({
           ...u.dataValues,
           followerCount: u.Followers.length,
