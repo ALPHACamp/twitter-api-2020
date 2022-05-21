@@ -150,7 +150,7 @@ const userController = {
             avatar: element.Tweet.User.avatar,
             userName: element.User.name,
             userAccount: element.User.account,
-            replyCreateAt: element.createdAt,
+            replyCreatedAt: element.createdAt,
             replyAccount: element.Tweet.User.account,
             comment: element.comment,
             totalLikeCount: element.Tweet.Likes.length,
@@ -312,6 +312,7 @@ const userController = {
   getTopUsers: (req, res, next) => {
     try {
       Followship.findAll({
+        where: { role: 'user' },
         attributes: [
           'followerId',
           [sequelize.fn('COUNT', sequelize.col('follower_id')), 'followerCounts']
@@ -323,6 +324,7 @@ const userController = {
         raw: true
       })
         .then(top11FollowerId => {
+          console.log(top11FollowerId)
           const usersId = []
           top11FollowerId.forEach(follower => {
             if (follower.followerId !== req.user.dataValues.id && usersId.length !== 10) usersId.push(follower.followerId)
