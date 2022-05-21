@@ -73,7 +73,7 @@ npm run dev
 ```
 Example app listening on http://localhost:3000
 ```
-9. 開啟另一個終端機分頁，複製專案前端程式
+9. 開啟另一個終端機分頁，複製專案前端程式至本地
 ```
 git clone https://github.com/Irene289/twitter-front-end-vue.git
 ```
