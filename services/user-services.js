@@ -110,7 +110,6 @@ const userServices = {
         if (!user) throw new Error("User didn't exists!")
         const userLikes = likes.map(l => ({
           ...l.toJSON(),
-          TweetId: l.Tweet.id,
           tweetLikesCount: l.Tweet.Likes.length,
           tweetRepliesCount: l.Tweet.Replies.length,
           isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
