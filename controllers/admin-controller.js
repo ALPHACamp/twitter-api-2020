@@ -45,7 +45,6 @@ const adminController = {
       const tweets = await Tweet.count({
         group: ['User_id']
       })
-      console.log(tweets)
       if (tweets.length) {
         users.forEach(userElement => {
           tweets.forEach(element => {
@@ -61,17 +60,15 @@ const adminController = {
       // 使用者 like 總數
       const totalTweets = await tweetServices.getAll()
       const totalTweetLikes = totalTweets.map(element => ({
-        userId: element.userId,
-        likeNum: element.likeNum
+        userId: element.UserId,
+        totalLikeCount: element.totalLikeCount
       }))
-
       users.forEach(userElement => {
-        if (userElement.totalLikeNum === undefined) userElement.totalLikeNum = 0
+        userElement.totalLikeCount = 0
       })
-      console.log()
       users.forEach(userElement => {
         totalTweetLikes.forEach(element => {
-          if (userElement.id === element.userId) userElement.totalLikeNum += element.likeNum
+          if (userElement.id === element.userId) userElement.totalLikeCount += element.totalLikeCount
         })
       })
 
