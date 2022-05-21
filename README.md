@@ -30,7 +30,7 @@
 ## 本地專案安裝流程
 
 1. 請確認電腦已經安裝 Node.js、npm 與 Mysql workbench
-2. 打開終端機，輸入以下指令可將此專案 lone 到本地
+2. 打開終端機，輸入以下指令可將此專案 clone 到本地
 ```
 git clone https://github.com/Kate-Chu/twitter-api-2020
 ```
