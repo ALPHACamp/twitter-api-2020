@@ -59,7 +59,7 @@ const userServices = {
       Tweet.findAll(
         {
           where: { UserId: req.params.id },
-          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar']}, { model: Reply }, { model: Like }],
+          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Reply }, { model: Like }],
           order: [['createdAt', 'DESC']]
         })
     ])
@@ -81,7 +81,7 @@ const userServices = {
       Reply.findAll({
         where: { UserId: req.params.id },
         include: [
-          { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }] }, 
+          { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }] },
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         ],
         order: [['createdAt', 'DESC']]
@@ -103,13 +103,14 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Like.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Reply}, { model: Like }] }]
+        include: [{ model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Reply }, { model: Like }] }]
       })
     ])
       .then(([user, likes]) => {
         if (!user) throw new Error("User didn't exists!")
         const userLikes = likes.map(l => ({
           ...l.toJSON(),
+          TweetId: l.Tweet.id,
           tweetLikesCount: l.Tweet.Likes.length,
           tweetRepliesCount: l.Tweet.Replies.length,
           isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
