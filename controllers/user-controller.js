@@ -53,7 +53,8 @@ const userController = {
       where: { id: req.params.id, role: 'user' },
       include: [
         { model: User, as: 'Followers', attributes: ['id', 'account', 'avatar', 'name'] },
-        { model: User, as: 'Followings', attributes: ['id', 'account', 'avatar', 'name'] }
+        { model: User, as: 'Followings', attributes: ['id', 'account', 'avatar', 'name'] },
+        { model: Tweet }
       ],
       order: [['createdAt', 'DESC']]
     })
@@ -67,7 +68,8 @@ const userController = {
           data: {
             user,
             followerCount: user.Followers.length,
-            followingCount: user.Followings.length
+            followingCount: user.Followings.length,
+            Tweets: user.Tweets.length
           },
           message: ''
         })
@@ -259,7 +261,7 @@ const userController = {
       ],
       order: [['createdAt', 'DESC']]
     }).then(followers => {
-      const resultFollowers = followers.map(f => ({ ...f.toJSON() }))
+      const resultFollowers = followers.map(f => ({ ...f.toJSON(), isFollowed: req.user && req.user.Followings.map(f => f.id).includes([...f[0].Followers][0].Followship.followerId) }))
       delete resultFollowers[0].password
       return res.json({
         status: 'success',
@@ -270,4 +272,5 @@ const userController = {
     }).catch(err => next(err))
   }
 }
+
 module.exports = userController
