@@ -108,7 +108,6 @@ const userServices = {
       })
     ])
       .then(([user, likes]) => {
-        console.log('likes', likes)
         if (!user) throw new Error("User didn't exists!")
         const userLikes = likes.map(l => ({
           ...l.toJSON(),
