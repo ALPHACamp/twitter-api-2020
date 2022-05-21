@@ -11,8 +11,6 @@ const passport = require('./config/passport')
 const apis = require('./routes')
 const { getUser } = require('./_helpers')
 
-// const bodyParser = require('body-parser') // test
-// app.use(bodyParser.json()) // test
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
@@ -27,7 +25,7 @@ app.use((req, res, next) => {
 })
 const corsOptions = {
   origin: [
-    'https://irene289.github.io',
+    process.env.GITHUB_PAGE,
     'http://localhost:8080'
   ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
