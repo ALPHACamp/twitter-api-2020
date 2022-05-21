@@ -43,37 +43,47 @@ npm install
 ```
 CREATE DATABASE ac_twitter_workspace;
 ```
-5. 安裝完畢後，在終端機依序輸入以下內容，建立相關資料表以及種子資料
+5. 打開 config 資料夾內的 config.js 檔案，確認 development 資料庫環境設定與本機資料相符
+```
+{
+  "development": {
+    "username": "資料庫使用者帳號",
+    "password": "資料庫密碼",
+    "database": "ac_twitter_workspace",
+    // ...
+  },
+```
+6. ，在終端機依序輸入以下內容，建立相關資料表以及種子資料
 ```
 npx sequelize db:migrate
 npx sequelize db:seed:all
 ```
-6. 當種子資料建立完畢後，請繼續輸入以下內容，開始運行後端伺服器
+7. 當種子資料建立完畢後，請繼續輸入以下內容，開始運行後端伺服器
 ```
 npm run dev
 ```
-7. 若是跑出 "Example app listening on http://localhost:3000" 代表伺服器已經成功運行了
+8. 若是跑出 "Example app listening on http://localhost:3000" 代表伺服器已經成功運行了
 ```
 http:/localhost:3000
 ```
-8. 開啟另一個終端機分頁，複製前端程式
+9. 開啟另一個終端機分頁，複製專案前端程式
 ```
 git clone https://github.com/Irene289/twitter-front-end-vue.git
 ```
-9. 終端機 cd 至專案資料夾，輸入指令安專套件、建立 Vue Page 以及運行前端伺服器
+10. 終端機 cd 至專案資料夾，輸入指令安專套件、建立 Vue Page 以及運行前端伺服器
 ```
 cd 專案資料夾
 npm install
 npm run build
 npm run serve
 ```
-10. 前端終端機若是出現下列指令表示運行成功
+11. 前端終端機若是出現下列指令表示運行成功
 ```
 App running at:
   - Local:   http://localhost:8080/ 
   - Network: http://172.20.10.2:8080/
 ```
-11. 確認已經使用兩個終端機頁面分別運行前端伺服器以及後端伺服器，可以使用以下模擬帳號登入並開始體驗網站
+12. 確認已經使用兩個終端機頁面分別運行前端伺服器以及後端伺服器，即能使用以下模擬帳號登入並開始體驗網站
 ```
 一般帳號 user1@example.com
 密碼 12345678
@@ -82,8 +92,8 @@ App running at:
 管理員帳號 root@example.com
 密碼 12345678
 ```
-12. 要結束運行請分別在兩個終端機頁面按下 ctrl + c 即可終止程式。
-13. 若要刪除資料庫，可在終端機輸入以下指令，即可刪除。
+13. 要結束運行請分別在兩個終端機頁面按下 ctrl + c 即可終止程式。
+14. 若要刪除資料庫，可在終端機輸入以下指令，即可刪除相關資料。
 ```
 npx sequelize db:drop
 ```
