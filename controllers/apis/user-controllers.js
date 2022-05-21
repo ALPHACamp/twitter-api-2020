@@ -261,7 +261,8 @@ const userController = {
             order: [['created_at', 'DESC']]
           }
         ],
-        nest: true
+        nest: true,
+        order: [['created_at', 'DESC']]
       })
 
       likes = JSON.parse(JSON.stringify(likes))
