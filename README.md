@@ -39,7 +39,7 @@ git clone https://github.com/Kate-Chu/twitter-api-2020
 cd 專案資料夾
 npm install
 ```
-4. 安裝完畢後，請開啟 Mysql Workbench，進入 root 資料庫後，輸入以下指令建立資料庫
+4. 安裝完畢後，請開啟 Mysql Workbench，進入資料庫後，輸入以下指令建立資料庫
 ```
 CREATE DATABASE ac_twitter_workspace;
 ```
