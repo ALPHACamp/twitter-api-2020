@@ -108,12 +108,8 @@ const userServices = {
     ])
       .then(([user, likes]) => {
         if (!user) throw new Error("User didn't exists!")
-        likes.forEach(l => {
-
-        })
         const userLikes = likes.map(l => ({
-          ...l.Tweet.toJSON(),
-          TweetId: l.Tweet.id,
+          ...l.toJSON(),
           tweetLikesCount: l.Tweet.Likes.length,
           tweetRepliesCount: l.Tweet.Replies.length,
           isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
@@ -156,7 +152,8 @@ const userServices = {
           followerName: f.name,
           followerAccount: f.account,
           followerAvatar: f.avatar,
-          followerIntroduction: f.introduction
+          followerIntroduction: f.introduction,
+          isFollowed: helpers.getUser(req).Followings.some(follow => follow.id === f.id)
         }))
         return cb(null, userFollowers)
       })
