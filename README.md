@@ -16,7 +16,7 @@
 
 ## 雲端部署
 > [完整專案](https://irene289.github.io/twitter-front-end-vue/#/signin)<br>
-> 前端部署於 Github Page
+> 前端部署於 Github Page <br>
 > 後端伺服器部署於 Heroku ，雲端資料庫則使用 Cleardb 儲存
 
 ## 專案後端開發人員
