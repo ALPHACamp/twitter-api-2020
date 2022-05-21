@@ -8,16 +8,16 @@ const helpers = require('../_helpers')
 const userController = {
   register: async (req, res, next) => {
     try {
-      const {name, account, email, password, checkPassword} = req.body
+      const { name, account, email, password, checkPassword } = req.body
       if (!name.trim() ||
-          !account.trim() ||
-          !email.trim() ||
-          !password.trim() ||
-          !checkPassword.trim()) throw new Error('所有欄位必填。')
+        !account.trim() ||
+        !email.trim() ||
+        !password.trim() ||
+        !checkPassword.trim()) throw new Error('所有欄位必填。')
 
       if (password !== checkPassword) throw new Error('密碼與確認密碼不符。')
 
-      if (await User.findOne({ where: { account }})) throw new Error('帳號已經註冊。')
+      if (await User.findOne({ where: { account } })) throw new Error('帳號已經註冊。')
       if (await User.findOne({ where: { email } })) throw new Error('Email 已經註冊。')
 
       await User.create({
@@ -73,7 +73,7 @@ const userController = {
         nest: true
       })
       if (!user) throw new Error('無此使用者。')
-      res.status(200).json({ message:'登入中使用者的資料', user })
+      res.status(200).json({ message: '登入中使用者的資料', user })
     } catch (err) {
       next(err)
     }
@@ -84,7 +84,7 @@ const userController = {
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         attributes: [
-          'id','description', 'createdAt',
+          'id', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(tweet_id) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
           [sequelize.literal('(SELECT COUNT(tweet_id) FROM Likes WHERE tweet_id = Tweet.id)'), 'likeCount']
         ],
@@ -97,20 +97,20 @@ const userController = {
         order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       if (!tweets.length) throw new Error('沒有任何推文。')
-      
+
       const isLikedId = await isLikedTweet(userId)
       const result = tweets.map(tweet => ({
         ...tweet.toJSON(),
         isLiked: isLikedId.some(tId => tId === tweet.id)
       }))
-      
+
       res.status(200).json(result)
     } catch (err) {
       next(err)
     }
   },
   getRepliedTweets: async (req, res, next) => {
-    try {      
+    try {
       const replies = await Reply.findAll({
         where: { UserId: req.params.id },
         attributes: ['id', 'comment', 'createdAt'],
@@ -119,10 +119,10 @@ const userController = {
           attributes: ['name', 'account']
         }, {
           model: Tweet,
-          attributes: [], include: [{ 
-              model: User,
-              attributes: ['id', 'avatar', 'account']
-            }
+          attributes: [], include: [{
+            model: User,
+            attributes: ['id', 'avatar', 'account']
+          }
           ]
         }],
         order: [['createdAt', 'DESC'], ['id', 'DESC']],
@@ -148,9 +148,9 @@ const userController = {
         include: [{
           model: Tweet, attributes: ['description'],
           include: [{
-             model: User,
-             attributes: ['id', 'avatar', 'name', 'account'],
-             Where: { id: Tweet.userId }
+            model: User,
+            attributes: ['id', 'avatar', 'name', 'account'],
+            Where: { id: Tweet.userId }
           }]
         }],
         order: [['createdAt', 'DESC'], ['id', 'DESC']]
@@ -264,8 +264,8 @@ const userController = {
       const user = helpers.getUser(req)
 
       if (!name.trim() ||
-          !account.trim() ||
-          !email.trim()) throw new Error('不可提交空白字元')
+        !account.trim() ||
+        !email.trim()) throw new Error('不可提交空白字元')
 
       if (password) {
         if (password.trim() !== checkPassword.trim()) throw new Error('密碼與確認密碼不符。')
@@ -283,7 +283,7 @@ const userController = {
         password: password ? bcrypt.hashSync(password, 10) : user.password,
       })
 
-      res.status(200).json({ 
+      res.status(200).json({
         message: '成功修改個人資料',
         userUpdate: {
           name: userUpdate.name,
@@ -297,23 +297,25 @@ const userController = {
   },
   getTopUsers: async (req, res, next) => {
     try {
+      const userId = helpers.getUser(req).id
+          
       const users = await User.findAll({
-        attributes: ['id', 'account', 'name', 'avatar'],
-        where: { role: 'user' },
-        include: [
-          { model: User, as: 'Followers', attributes: ['id'], through: { attributes: [] }}
+        attributes: [
+          'id', 'account', 'name', 'avatar',
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.Following_id = User.id)'), 'followerCount'],
+          [sequelize.literal(`EXISTS (SELECT Follower_id FROM Followships WHERE Followships.Following_id = User.id AND Followships.Follower_id  = ${userId})`), 'isFollowed']
         ],
+        where: { role: 'user' },
+        order: [[sequelize.col('followerCount'), 'DESC']],
+        limit: 10,
+        nest: true,
+        raw: true
       })
+
       if (!users.length) throw new Error('無任何使用者')
 
-      const result = users.map(user => ({
-        followerCount: user.Followers.length,
-        isFollowing: req.user.Followings.some(f => f.id === user.id),
-        ...user.toJSON()
-      })).sort((a, b) => b.followerCount - a.followerCount)
-         .slice(0, 10)
 
-      res.status(200).json({ message: '前十人氣王', result })
+      res.status(200).json({ message: '前十人氣王', users })
     } catch (err) {
       next(err)
     }
