@@ -2,7 +2,7 @@
 在 Alphitter 上認識各式各樣的人，
 為自己的生活留下足跡，與其他人互動、留言、按讚，拓展自己的社交圈吧！
 
-## API文件
+## API 文件
 [api文件](https://immediate-drifter-dfc.notion.site/API-51e9e3d8b43b47259127a719f9d6c011)
 
 ## 產品功能
@@ -13,6 +13,10 @@
 5. 使用者可以瀏覽其他使用者個人介紹頁面，瀏覽對方的歷史推文、留言、按讚的內容、追蹤中的使用者及追蹤該名使用者的清單。
 6. 後台管理者可以瀏覽所有使用者以及所有發布的推文，並且管理者能夠刪除推文。
 7. 所有使用者的帳戶密碼經過雜湊處理存入資料庫，以提高安全性。
+
+## 雲端部署
+> [前端網頁](https://irene289.github.io/twitter-front-end-vue/#/signin)<br>
+> 後端伺服器部署於 Heroku ，雲端資料庫則使用 Cleardb 儲存
 
 ## 專案後端開發人員
 > [Kate-Chu](https://github.com/Kate-Chu)<br>
