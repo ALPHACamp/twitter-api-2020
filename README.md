@@ -125,7 +125,7 @@ npx sequelize db:drop
 12. express: v4.16.4
 13. express-handlebars: v6.0.5
 14. express-session: v1.15.6
-15. faker": "4.1.0
+15. faker: v4.1.0
 16. imgur: v1.0.2
 17. jsonwebtoken: v8.5.1
 18. mocha: v6.0.2
