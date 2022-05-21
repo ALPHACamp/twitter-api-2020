@@ -15,7 +15,8 @@
 7. 所有使用者的帳戶密碼經過雜湊處理存入資料庫，以提高安全性。
 
 ## 雲端部署
-> [前端網頁](https://irene289.github.io/twitter-front-end-vue/#/signin)<br>
+> [完整專案](https://irene289.github.io/twitter-front-end-vue/#/signin)<br>
+> 前端部署於 Github Page
 > 後端伺服器部署於 Heroku ，雲端資料庫則使用 Cleardb 儲存
 
 ## 專案後端開發人員
