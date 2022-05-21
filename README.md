@@ -3,7 +3,7 @@
 為自己的生活留下足跡，與其他人互動、留言、按讚，拓展自己的社交圈吧！
 
 ## API 文件
-[api文件](https://immediate-drifter-dfc.notion.site/API-51e9e3d8b43b47259127a719f9d6c011)
+[api 文件](https://immediate-drifter-dfc.notion.site/API-51e9e3d8b43b47259127a719f9d6c011)
 
 ## 產品功能
 1. 使用者可以註冊個人帳號，並使用個人帳號登入，編輯個人名稱、帳號、email、介紹、個人顯示圖片及背景圖片。
