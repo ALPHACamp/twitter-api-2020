@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const helpers = require('../_helpers')
+const jwt = require('jsonwebtoken')
+const JWTSECRET = process.env.JWT_SECRET || 'alphacamp'
 const userServices = {
   signUp: (req, cb) => {
     let { account, name, email, password, checkPassword } = req.body
@@ -106,9 +108,12 @@ const userServices = {
     ])
       .then(([user, likes]) => {
         if (!user) throw new Error("User didn't exists!")
+        likes.forEach(l => {
 
+        })
         const userLikes = likes.map(l => ({
-          ...l.toJSON(),
+          ...l.Tweet.toJSON(),
+          TweetId: l.Tweet.id,
           tweetLikesCount: l.Tweet.Likes.length,
           tweetRepliesCount: l.Tweet.Replies.length,
           isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
@@ -215,7 +220,8 @@ const userServices = {
       .then(putUser => {
         const editUser = putUser.toJSON()
         delete editUser.password
-        return cb(null, editUser)
+        const token = jwt.sign(editUser, JWTSECRET, { expiresIn: '30d' })
+        return cb(null, { status: 'success', token, editUser })
       })
       .catch(err => cb(err))
   },
