@@ -62,9 +62,9 @@ npx sequelize db:seed:all
 ```
 npm run dev
 ```
-8. 若是跑出 "Example app listening on http://localhost:3000" 代表伺服器已經成功運行了
+8. 若是跑出以下內容，代表伺服器已經成功運行了
 ```
-http:/localhost:3000
+Example app listening on http://localhost:3000
 ```
 9. 開啟另一個終端機分頁，複製專案前端程式
 ```
