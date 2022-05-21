@@ -75,9 +75,12 @@ const userController = {
       .catch(err => next(err))
   },
   getCurrentUser: (req, res, next) => {
-    delete req.user.password
-    const currentUser = res.json(req.user)
-    return currentUser
+    const currentUser = req.user
+    delete currentUser.password
+    return res.json({
+      currentUser,
+      tweetCount: currentUser.Tweets.length
+    })
   },
   getTopUsers: (req, res, next) => {
     return User.findAll({
@@ -104,17 +107,12 @@ const userController = {
     }
     const introduction = req.body.introduction || req.user.introduction || ''
     const password = req.body.password ? bcrypt.hashSync(req.body.password, 10) : req.user.password || bcrypt.hashSync('12345678', 10)
-    const name = req.body?.name || req.user.name || 'name'
-    const account = req.body?.account || req.user.account || 'account'
-    const email = req.body?.email || req.user.email || 'email@email.com'
-    const avatar = req.files?.avatar ? req.files.avatar[0] : null
-    const cover = req.files?.cover ? req.files.cover[0] : null
-    Promise.all([
-      User.findOne({ where: { email } }),
-      User.findOne({ where: { account } }),
-      User.findByPk(req.params.id),
-      imgurFileHandler(avatar),
-      imgurFileHandler(cover)])
+    const name = req.body.name || req.user.name || 'name'
+    const account = req.body.account || req.user.account || 'account'
+    const email = req.body.email || req.user.email || 'email@email.com'
+    const avatar = req.files.avatar ? req.files.avatar[0] : null
+    const cover = req.files.cover ? req.files.cover[0] : null
+    Promise.all([User.findOne({ where: { email } }), User.findOne({ where: { account } }), User.findByPk(req.params.id), imgurFileHandler(avatar), imgurFileHandler(cover)])
       .then(([
         findEmail,
         findAccount,
@@ -125,13 +123,7 @@ const userController = {
         if (findEmail && findEmail.id !== req.user.id) throw new Error('Email has already been taken.')
         if (findAccount && findAccount.id !== req.user.id) throw new Error('Account has already been taken.')
         return user.update({
-          name,
-          account,
-          email,
-          password,
-          avatar: avatarFilePath || user.avatar,
-          cover: coverFilePath || user.cover,
-          introduction
+          name, account, email, password, avatar: avatarFilePath, cover: coverFilePath, introduction
         })
       })
       .then(user => {
@@ -178,9 +170,11 @@ const userController = {
       include: [{
         model: Tweet,
         as: 'Tweet',
-        attributes: ['id'],
+        attributes: ['UserId'],
         include: [{
-          model: User
+          model: User,
+          as: 'LikedUsers',
+          attributes: ['account']
         }]
       }],
       order: [['createdAt', 'DESC']]
@@ -197,7 +191,7 @@ const userController = {
       }).catch(err => next(err))
   },
   getLikes: (req, res, next) => {
-    Promise.all([Like.findAll({
+    return Like.findAll({
       where: { UserId: req.params.id },
       include: [{
         model: Tweet,
@@ -217,14 +211,15 @@ const userController = {
         }]
       }],
       order: [['createdAt', 'DESC']]
-    }), User.findByPk(req.params.id)])
-      .then(([likes, user]) => {
-        if (!user) throw new Error('This account does not exist.')
-        const tweets = likes.map(l => ({ ...l.toJSON(), ReplyCount: l.Tweet.Replies.length, LikeCount: l.Tweet.Likes.length, isLiked: true }))
+    })
+      .then(likes => {
+        if (!likes) throw new Error('This account does not exist.')
+        const likedTweetId = req.user?.LikedTweets ? req.user.LikedTweets.map(likeTweet => likeTweet.id) : []
+        const likedTweets = likes.map(l => ({ ...l.toJSON(), ReplyCount: l.Tweet.Replies.length, LikeCount: l.Tweet.Likes.length, isLiked: likedTweetId.includes(l.TweetId) }))
         return res.json({
           status: 'success',
           data: {
-            tweets
+            likedTweets
           }
         })
       }).catch(err => next(err))
