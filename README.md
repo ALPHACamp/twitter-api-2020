@@ -34,7 +34,7 @@
 ```
 git clone https://github.com/Kate-Chu/twitter-api-2020
 ```
-3. 終端機 cd 至專案資料夾，輸入指令安專套件
+3. 終端機 cd 至專案資料夾，輸入指令安裝套件
 ```
 cd 專案資料夾
 npm install
