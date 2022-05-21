@@ -241,7 +241,7 @@ const userController = {
       order: [['createdAt', 'DESC']]
     })
       .then(followers => {
-        const resultFollowers = followers.map(f => ({ ...f.toJSON() }))
+        const resultFollowers = followers.map(f => ({ ...f.toJSON(), isFollowed: req.user && req.user.Followings.map(ff => ff.id).includes(f.id) }))
         return res.json(resultFollowers)
       })
       .catch(err => next(err))
