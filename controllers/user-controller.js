@@ -351,13 +351,35 @@ const userController = {
           User.findAll({
             where: { id: [...usersId] },
             attributes: ['id', 'account', 'name', 'avatar'],
-            order: sequelize.literal(`Field(id,${usersId})`),
-            nest: true,
-            raw: true
+            include: [
+              { model: User, as: 'Followers', attributes: ['id'] }
+            ],
+            order: sequelize.literal(`Field(User.id,${usersId})`),
+            nest: true
           })
             .then(top10Users => {
-              console.log(top10Users)
-              res.json(top10Users)
+              const newData = []
+              top10Users.map(user => {
+                user = user.toJSON()
+                if (user.Followers.some(followers => followers.Followship.followerId === req.user.dataValues.id)) {
+                  newData.push({
+                    id: user.id,
+                    account: user.account,
+                    name: user.name,
+                    avatar: user.avatar,
+                    isFollowed: true
+                  })
+                } else {
+                  newData.push({
+                    id: user.id,
+                    account: user.account,
+                    name: user.name,
+                    avatar: user.avatar,
+                    isFollowed: false
+                  })
+                }
+              })
+              res.json(newData)
             })
             .catch(err => next(err))
         })
