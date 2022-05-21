@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
@@ -201,30 +201,50 @@ const userController = {
       }).catch(err => next(err))
   },
   getFollowings: (req, res, next) => {
-    return User.findAll({
-      where: { id: req.params.id },
+    return Followship.findAll({
+      where: { followerId: req.params.id },
       include: [
-        { model: User, as: 'Followings', attributes: ['id', 'account', 'avatar', 'name', 'introduction'] }
+        {
+          model: User,
+          attributes: ['id', 'account', 'avatar', 'name', 'introduction'],
+          include: [
+            {
+              model: Followship,
+              attributes: ['id', 'followerId', 'followingId']
+            }
+          ]
+        }
       ],
       order: [['createdAt', 'DESC']]
-    }).then(followings => {
-      const resultFollowings = followings.map(f => ({ ...f.toJSON() }))
-      delete resultFollowings[0].password
-      return res.json(resultFollowings)
-    }).catch(err => next(err))
+    })
+      .then(followings => {
+        const resultFollowings = followings.map(f => ({ ...f.toJSON() }))
+        return res.json(resultFollowings)
+      })
+      .catch(err => next(err))
   },
   getFollowers: (req, res, next) => {
-    return User.findAll({
-      where: { id: req.params.id },
+    return Followship.findAll({
+      where: { followingId: req.params.id },
       include: [
-        { model: User, as: 'Followers', attributes: ['id', 'account', 'avatar', 'name', 'introduction'] }
+        {
+          model: User,
+          attributes: ['id', 'account', 'avatar', 'name', 'introduction'],
+          include: [
+            {
+              model: Followship,
+              attributes: ['id', 'followerId', 'followingId']
+            }
+          ]
+        }
       ],
       order: [['createdAt', 'DESC']]
-    }).then(followers => {
-      const resultFollowers = followers.map(f => ({ ...f.toJSON(), isFollowed: req.user && req.user.Followings.map(f => f.id).includes([...f[0].Followers][0].Followship.followerId) }))
-      delete resultFollowers[0].password
-      return res.json(resultFollowers)
-    }).catch(err => next(err))
+    })
+      .then(followers => {
+        const resultFollowers = followers.map(f => ({ ...f.toJSON() }))
+        return res.json(resultFollowers)
+      })
+      .catch(err => next(err))
   }
 }
 
