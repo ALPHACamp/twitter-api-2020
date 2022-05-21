@@ -42,7 +42,7 @@
 ```
 git clone https://github.com/Kate-Chu/twitter-api-2020
 ```
-3. 終端機 cd 至專案資料夾，輸入指令安裝套件
+3. 終端機移動至專案資料夾，輸入指令安裝套件
 ```
 cd 專案資料夾
 npm install
@@ -77,7 +77,7 @@ Example app listening on http://localhost:3000
 ```
 git clone https://github.com/Irene289/twitter-front-end-vue.git
 ```
-10. 終端機 cd 至專案資料夾，輸入指令安裝套件、建立 Vue Page 以及運行前端伺服器
+10. 終端機移動至專案資料夾，輸入指令安裝套件、建立 Vue Page 以及運行前端伺服器
 ```
 cd 專案資料夾
 npm install
