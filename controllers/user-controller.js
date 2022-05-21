@@ -136,7 +136,7 @@ const userController = {
           const repeatDataId = []
           const rawData = []
           // eslint-disable-next-line array-callback-return
-          reply.map(reply => {
+          reply.forEach(reply => {
             reply = reply.toJSON()
             if (!repeatDataId.includes(reply.TweetId)) {
               repeatDataId.push(reply.TweetId)
@@ -196,7 +196,7 @@ const userController = {
   },
   userFollowings: (req, res, next) => {
     try {
-      const id = req.params.id
+      const id = Number(req.params.id)
       User.findAll({
         attributes: { exclude: ['password'] },
         where: { id },
@@ -207,23 +207,13 @@ const userController = {
           if (!followingUsers[0]) throw new Error('沒有跟隨中的使用者')
           followingUsers = followingUsers[0].toJSON()
           const newData = []
-          // eslint-disable-next-line array-callback-return
-          followingUsers.Followings.map(user => {
-            if (Number(user.Followship.followerId) === Number(id)) {
-              newData.push({
-                ...user,
-                followingId: user.Followship.followingId,
-                followerId: user.Followship.followerId,
-                isFollowed: true
-              })
-            } else {
-              newData.push({
-                ...user,
-                followingId: user.Followship.followingId,
-                followerId: user.Followship.followerId,
-                isFollowed: false
-              })
-            }
+          followingUsers.Followings.forEach(user => {
+            newData.push({
+              ...user,
+              followingId: user.Followship.followingId,
+              followerId: user.Followship.followerId,
+              isFollowed: user.Followship.followerId === id
+            })
           })
           res.json(newData)
         })
@@ -250,22 +240,13 @@ const userController = {
           const followingsJsonData = followerUsers[0].toJSON()
           console.log(followingsJsonData)
           // eslint-disable-next-line array-callback-return
-          followingsJsonData.Followers.map(follower => {
-            if (followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)) {
-              newData.push({
-                ...follower,
-                followingId: follower.Followship.followingId,
-                followerId: follower.Followship.followerId,
-                isFollowed: true
-              })
-            } else {
-              newData.push({
-                ...follower,
-                followingId: follower.Followship.followingId,
-                followerId: follower.Followship.followerId,
-                isFollowed: false
-              })
-            }
+          followingsJsonData.Followers.forEach(follower => {
+            newData.push({
+              ...follower,
+              followingId: follower.Followship.followingId,
+              followerId: follower.Followship.followerId,
+              isFollowed: followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)
+            })
           })
           res.json(newData)
         })
@@ -343,11 +324,9 @@ const userController = {
       })
         .then(top11FollowerId => {
           const usersId = []
-          // eslint-disable-next-line array-callback-return
-          top11FollowerId.map(follower => {
+          top11FollowerId.forEach(follower => {
             if (follower.followerId !== req.user.dataValues.id && usersId.length !== 10) usersId.push(follower.followerId)
           })
-          console.log(usersId)
           User.findAll({
             where: { id: [...usersId] },
             attributes: ['id', 'account', 'name', 'avatar'],
@@ -358,26 +337,15 @@ const userController = {
             nest: true
           })
             .then(top10Users => {
-              const newData = []
-              top10Users.map(user => {
+              const newData = top10Users.map(user => {
                 user = user.toJSON()
-                if (user.Followers.some(followers => followers.Followship.followerId === req.user.dataValues.id)) {
-                  newData.push({
-                    id: user.id,
-                    account: user.account,
-                    name: user.name,
-                    avatar: user.avatar,
-                    isFollowed: true
-                  })
-                } else {
-                  newData.push({
-                    id: user.id,
-                    account: user.account,
-                    name: user.name,
-                    avatar: user.avatar,
-                    isFollowed: false
-                  })
-                }
+                return ({
+                  id: user.id,
+                  account: user.account,
+                  name: user.name,
+                  avatar: user.avatar,
+                  isFollowed: user.Followers.some(followers => followers.Followship.followerId === req.user.dataValues.id)
+                })
               })
               res.json(newData)
             })
