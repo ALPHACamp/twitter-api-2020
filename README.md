@@ -27,7 +27,7 @@
 > [SeijoHuang](https://github.com/SeijoHuang)<br>
 > [IreneLIU](https://github.com/Irene289)
 
-## 專案安裝流程
+## 本地專案安裝流程
 
 1. 請先確認電腦已經安裝 Node.js、npm 與 Mysql workbench
 2. 打開終端機，輸入以下指令可將此專案 lone 到本地
