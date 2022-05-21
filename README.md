@@ -53,7 +53,6 @@ CREATE DATABASE ac_twitter_workspace;
 ```
 5. 打開 config 資料夾內的 config.json 檔案，確認 development 資料庫環境設定與本機資料相符
 ```
-{
   "development": {
     "username": "資料庫使用者帳號",
     "password": "資料庫密碼",
