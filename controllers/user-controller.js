@@ -150,7 +150,7 @@ const userController = {
             avatar: element.Tweet.User.avatar,
             userName: element.User.name,
             userAccount: element.User.account,
-            replyCreateAt: element.createdAt,
+            replyCreatedAt: element.createdAt,
             replyAccount: element.Tweet.User.account,
             comment: element.comment,
             totalLikeCount: element.Tweet.Likes.length,
