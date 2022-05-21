@@ -21,6 +21,7 @@ const tweetController = {
       nest: true
     })
       .then(tweets => {
+        if (tweets.length <= 0) return res.status(200).json({ message: '沒有推文資料！' })
         const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(t => t.id) : []
         const data = tweets.map(tweet => ({
           ...tweet,
@@ -40,9 +41,8 @@ const tweetController = {
         ]
       },
       include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar'], as: 'TweetUser' }
+        { model: User, as: 'TweetUser', attributes: ['id', 'account', 'name', 'avatar'] }
       ],
-      order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
     })
@@ -60,8 +60,8 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const UserId = Number(getUser(req).id)
     const { description } = req.body
-    if (!description) throw new Error('推文內容不可空白！')
-    if (description.trim().length > 140) throw new Error('推文字數不可超過140字！')
+    if (!description.trim()) throw new Error('推文內容不可空白！')
+    if (description.length > 140) throw new Error('推文不可超過140字！')
 
     return Tweet.create({
       UserId,
@@ -72,33 +72,59 @@ const tweetController = {
   },
 
   getTweetReplies: (req, res, next) => {
-    Reply.findAll({
-      where: {
-        tweetId: req.params.tweet_id
-      },
-      attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
-      include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-      ],
-      order: [['createdAt', 'DESC']]
-    })
-      .then(replies => res.status(200).json(replies))
+    const TweetId = Number(req.params.tweet_id)
+
+    Promise.all([
+      Tweet.findByPk(TweetId, {
+        include: [
+          { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }
+        ],
+        raw: true,
+        nest: true
+      }),
+      Reply.findAll({
+        where: {
+          TweetId
+        },
+        attributes: ['id', 'UserId', 'comment', 'createdAt', 'updatedAt'],
+        include: [
+          { model: User, as: 'ReplyUser', attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([tweet, replies]) => {
+        if (!tweet) throw new Error('這篇回覆的推文不存在！')
+        if (replies.length <= 0) return res.status(200).json({ message: '這篇推文沒有回覆！' })
+        const replyList = replies.map(r => ({
+          ...r,
+          TweetUser: tweet.TweetUser
+        }))
+        return res.status(200).json(replyList)
+      })
       .catch(err => next(err))
   },
 
-  // 尚未通過測試
   postTweetReply: (req, res, next) => {
     const UserId = Number(getUser(req).id)
     const TweetId = Number(req.params.tweet_id)
     const { comment } = req.body
-    if (comment.length > 140) throw new Error('回覆字數不可超過140字！')
-    if (!comment) throw new Error('回覆內容不可空白！')
-    return Reply.create({
-      TweetId,
-      comment,
-      UserId
-    })
-      .then(reply => res.status(200).json(reply))
+    if (!comment.trim()) throw new Error('回覆內容不可空白！')
+    if (comment.length > 140) throw new Error('回覆不可超過140字！')
+
+    return Tweet.findByPk(TweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error('要回覆的篇推文不存在！')
+
+        return Reply.create({
+          TweetId,
+          comment,
+          UserId
+        })
+      })
+      .then(reply => res.status(200).json({ message: '回覆已成功送出！', reply }))
       .catch(err => next(err))
   },
 
@@ -120,7 +146,7 @@ const tweetController = {
           TweetId
         })
       })
-      .then(() => res.status(200).json({ message: '已成功Like這篇推文！' }))
+      .then(like => res.status(200).json({ message: '已成功Like這篇推文！', like }))
       .catch(err => next(err))
   },
 
@@ -141,7 +167,7 @@ const tweetController = {
 
         return like.destroy()
       })
-      .then(() => res.status(200).json({ message: '已取消Like這篇推文！' }))
+      .then(unlike => res.status(200).json({ message: '已取消Like這篇推文！', unlike }))
       .catch(err => next(err))
   }
 

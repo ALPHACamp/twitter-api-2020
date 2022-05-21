@@ -9,14 +9,14 @@ module.exports = {
       'Users',
       [
         {
-          // 新增Admin資料
+          // 新增 Admin 資料
           account: 'root',
           name: 'root',
           email: 'root@example.com',
           password: await bcrypt.hash('12345678', 10),
           role: 'admin',
-          avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          avatar: 'https://i.pinimg.com/564x/16/85/b6/1685b6e6dd61477e744e02ea663b275e.jpg',
+          cover: 'https://cdn.pixabay.com/photo/2020/04/19/21/25/field-5065671__340.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
@@ -28,8 +28,8 @@ module.exports = {
           email: 'user1@example.com',
           password: await bcrypt.hash('12345678', 10),
           role: '',
-          avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          avatar: 'https://pbs.twimg.com/profile_images/1490735661409832963/MdjPf5jL_400x400.jpg',
+          cover: 'https://cdn.pixabay.com/photo/2017/04/11/15/55/animals-2222007__480.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
@@ -40,8 +40,8 @@ module.exports = {
           email: 'user2@example.com',
           password: await bcrypt.hash('12345678', 10),
           role: '',
-          avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          avatar: 'https://pbs.twimg.com/profile_images/1133109643734130688/BwioAwkz_400x400.jpg',
+          cover: 'https://cdn.pixabay.com/photo/2020/07/23/10/51/field-5431007__480.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
@@ -52,8 +52,8 @@ module.exports = {
           email: 'user3@example.com',
           password: await bcrypt.hash('12345678', 10),
           role: '',
-          avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          avatar: 'https://pbs.twimg.com/profile_images/1519464543189098496/cs7M4CiQ_400x400.jpg',
+          cover: 'https://cdn.pixabay.com/photo/2017/10/03/17/53/nature-2813487__480.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
@@ -64,8 +64,8 @@ module.exports = {
           email: 'user4@example.com',
           password: await bcrypt.hash('12345678', 10),
           role: '',
-          avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          avatar: 'https://pbs.twimg.com/profile_images/1383196364792680448/N8CdupEu_400x400.jpg',
+          cover: 'https://cdn.pixabay.com/photo/2017/07/23/16/01/nature-2531761__480.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
@@ -76,8 +76,8 @@ module.exports = {
           email: 'user5@example.com',
           password: await bcrypt.hash('12345678', 10),
           role: '',
-          avatar: 'https://i.imgur.com/q6bwDGO.png',
-          cover: 'https://source.unsplash.com/1000x200/?nature',
+          avatar: 'https://i.pinimg.com/564x/ac/44/37/ac4437b90bac3628fa9e0406c660a36a.jpg',
+          cover: 'https://cdn.pixabay.com/photo/2019/05/03/18/36/nature-4176575__480.jpg',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()

@@ -1,17 +1,22 @@
 const jwt = require('jsonwebtoken')
+const Sequelize = require('sequelize')
+
 const { User, Tweet } = require('../models')
+
 const { getUser } = require('../_helpers')
 
 const adminController = {
 
   adminSignIn: (req, res, next) => {
     const { account, password } = req.body
-    if (!account || !password) throw new Error('號和密碼為必填！')
+    if (!account || !password) throw new Error('帳號和密碼為必填！')
     try {
       const user = getUser(req)
+      if (user.role !== 'admin') throw new Error('只有管理者帳號可以登入後台！')
       delete user.password
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.status(200).json({
+        message: '管理者帳號登入成功',
         token,
         user
       })
@@ -21,17 +26,23 @@ const adminController = {
   },
 
   getTweets: (req, res, next) => {
-    // 不用幫前端切資料(description限制顯示50字)
     return Tweet.findAll({
-      attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
+      attributes: ['id', 'description', 'createdAt', 'updatedAt'],
       include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        { model: User, as: 'TweetUser', attributes: ['id', 'account', 'name', 'avatar'] }
       ],
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
     })
-      .then(tweets => res.status(200).json(tweets))
+      .then(tweets => {
+        if (tweets.length <= 0) return res.status(200).json({ message: '沒有推文資料！' })
+        const tweetList = tweets.map(t => ({
+          ...t,
+          description: t.description.substring(0, 50)
+        }))
+        return res.status(200).json(tweetList)
+      })
       .catch(err => next(err))
   },
 
@@ -41,17 +52,27 @@ const adminController = {
         if (!tweet) throw new Error('推文不存在！')
         return tweet.destroy()
       })
-      .then(deletedTweet => res.status(200).json(deletedTweet))
+      .then(deletedTweet => res.status(200).json({ message: '該推文已刪除！', deletedTweet }))
       .catch(err => next(err))
   },
 
   getUsers: (req, res, next) => {
-    // 若篩選時排除admin帳號，則無法通過測試檔，所以不做role條件篩選。
+    // 若篩選時排除admin帳號，則無法通過測試檔，所以沒有做role條件篩選。
     User.findAll({
-      attributes: ['id', 'account', 'name', 'avatar', 'cover', 'role', 'tweetCount', 'likeCount', 'followingCount', 'followerCount'],
-      order: [['tweetCount', 'DESC']]
+      attributes: ['id', 'account', 'name', 'avatar', 'cover', 'role',
+        [Sequelize.literal('(SELECT COUNT(*) id FROM Tweets WHERE User.id = Tweets.User_id)'), 'tweetCount'],
+        [Sequelize.literal('(SELECT COUNT(*) User_id FROM Likes LEFT JOIN Tweets ON Tweets.id = Likes.Tweet_id WHERE User.id = Tweets.User_id)'), 'likeCount'],
+        [Sequelize.literal('(SELECT COUNT(*) follower_id FROM Followships WHERE User.id = Followships.following_id)'), 'followerCount'],
+        [Sequelize.literal('(SELECT COUNT(*) following_id FROM Followships WHERE User.id = Followships.follower_id)'), 'followingCount']
+      ],
+      raw: true
     })
-      .then(tweets => res.status(200).json(tweets))
+      .then(users => {
+        if (users.length <= 0) return res.status(200).json({ message: '沒有使用者資料！' })
+        users.sort((a, b) => b.tweetCount - a.tweetCount)
+        return res.status(200).json(users)
+      }
+      )
       .catch(err => next(err))
   }
 
