@@ -104,12 +104,17 @@ const userController = {
     }
     const introduction = req.body.introduction || req.user.introduction || ''
     const password = req.body.password ? bcrypt.hashSync(req.body.password, 10) : req.user.password || bcrypt.hashSync('12345678', 10)
-    const name = req.body.name || req.user.name || 'name'
-    const account = req.body.account || req.user.account || 'account'
-    const email = req.body.email || req.user.email || 'email@email.com'
-    const avatar = req.files.avatar ? req.files.avatar[0] : null
-    const cover = req.files.cover ? req.files.cover[0] : null
-    Promise.all([User.findOne({ where: { email } }), User.findOne({ where: { account } }), User.findByPk(req.params.id), imgurFileHandler(avatar), imgurFileHandler(cover)])
+    const name = req.body?.name || req.user.name || 'name'
+    const account = req.body?.account || req.user.account || 'account'
+    const email = req.body?.email || req.user.email || 'email@email.com'
+    const avatar = req.files?.avatar ? req.files.avatar[0] : null
+    const cover = req.files?.cover ? req.files.cover[0] : null
+    Promise.all([
+      User.findOne({ where: { email } }),
+      User.findOne({ where: { account } }),
+      User.findByPk(req.params.id),
+      imgurFileHandler(avatar),
+      imgurFileHandler(cover)])
       .then(([
         findEmail,
         findAccount,
