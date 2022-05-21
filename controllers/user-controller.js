@@ -136,7 +136,7 @@ const userController = {
           const repeatDataId = []
           const rawData = []
           // eslint-disable-next-line array-callback-return
-          reply.map(reply => {
+          reply.forEach(reply => {
             reply = reply.toJSON()
             if (!repeatDataId.includes(reply.TweetId)) {
               repeatDataId.push(reply.TweetId)
@@ -150,7 +150,7 @@ const userController = {
             avatar: element.Tweet.User.avatar,
             userName: element.User.name,
             userAccount: element.User.account,
-            replyCreateAt: element.createdAt,
+            replyCreatedAt: element.createdAt,
             replyAccount: element.Tweet.User.account,
             comment: element.comment,
             totalLikeCount: element.Tweet.Likes.length,
@@ -196,7 +196,7 @@ const userController = {
   },
   userFollowings: (req, res, next) => {
     try {
-      const id = req.params.id
+      const id = Number(req.params.id)
       User.findAll({
         attributes: { exclude: ['password'] },
         where: { id },
@@ -207,23 +207,13 @@ const userController = {
           if (!followingUsers[0]) throw new Error('沒有跟隨中的使用者')
           followingUsers = followingUsers[0].toJSON()
           const newData = []
-          // eslint-disable-next-line array-callback-return
-          followingUsers.Followings.map(user => {
-            if (Number(user.Followship.followerId) === Number(id)) {
-              newData.push({
-                ...user,
-                followingId: user.Followship.followingId,
-                followerId: user.Followship.followerId,
-                isFollowed: true
-              })
-            } else {
-              newData.push({
-                ...user,
-                followingId: user.Followship.followingId,
-                followerId: user.Followship.followerId,
-                isFollowed: false
-              })
-            }
+          followingUsers.Followings.forEach(user => {
+            newData.push({
+              ...user,
+              followingId: user.Followship.followingId,
+              followerId: user.Followship.followerId,
+              isFollowed: user.Followship.followerId === id
+            })
           })
           res.json(newData)
         })
@@ -250,22 +240,13 @@ const userController = {
           const followingsJsonData = followerUsers[0].toJSON()
           console.log(followingsJsonData)
           // eslint-disable-next-line array-callback-return
-          followingsJsonData.Followers.map(follower => {
-            if (followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)) {
-              newData.push({
-                ...follower,
-                followingId: follower.Followship.followingId,
-                followerId: follower.Followship.followerId,
-                isFollowed: true
-              })
-            } else {
-              newData.push({
-                ...follower,
-                followingId: follower.Followship.followingId,
-                followerId: follower.Followship.followerId,
-                isFollowed: false
-              })
-            }
+          followingsJsonData.Followers.forEach(follower => {
+            newData.push({
+              ...follower,
+              followingId: follower.Followship.followingId,
+              followerId: follower.Followship.followerId,
+              isFollowed: followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)
+            })
           })
           res.json(newData)
         })
@@ -314,15 +295,19 @@ const userController = {
           imgurCoverHandler(files),
           imgurAvatarHandler(files)
         ])
-          .then(([user, coverUrl, avatarUrl]) => user.update({
-            name,
-            introduction: introduction || user.dataValues.introduction,
-            cover: coverUrl || user.cover,
-            avatar: avatarUrl || user.avatar
-          }))
+          .then(([user, coverUrl, avatarUrl]) => {
+            if (!user) throw new Error('使用者不存在！')
+            return user.update({
+              name,
+              introduction: introduction || user.dataValues.introduction,
+              cover: coverUrl || user.dataValues.cover,
+              avatar: avatarUrl || user.dataValues.avatar
+            })
+          })
           .then(user => {
             res.json({ status: '更新成功', user })
           })
+          .catch(err => next(err))
       }
     } catch (err) {
       next(err)
@@ -331,6 +316,7 @@ const userController = {
   getTopUsers: (req, res, next) => {
     try {
       Followship.findAll({
+        where: { role: 'user' },
         attributes: [
           'followerId',
           [sequelize.fn('COUNT', sequelize.col('follower_id')), 'followerCounts']
@@ -342,12 +328,11 @@ const userController = {
         raw: true
       })
         .then(top11FollowerId => {
+          console.log(top11FollowerId)
           const usersId = []
-          // eslint-disable-next-line array-callback-return
-          top11FollowerId.map(follower => {
+          top11FollowerId.forEach(follower => {
             if (follower.followerId !== req.user.dataValues.id && usersId.length !== 10) usersId.push(follower.followerId)
           })
-          console.log(usersId)
           User.findAll({
             where: { id: [...usersId] },
             attributes: ['id', 'account', 'name', 'avatar'],
@@ -358,26 +343,15 @@ const userController = {
             nest: true
           })
             .then(top10Users => {
-              const newData = []
-              top10Users.map(user => {
+              const newData = top10Users.map(user => {
                 user = user.toJSON()
-                if (user.Followers.some(followers => followers.Followship.followerId === req.user.dataValues.id)) {
-                  newData.push({
-                    id: user.id,
-                    account: user.account,
-                    name: user.name,
-                    avatar: user.avatar,
-                    isFollowed: true
-                  })
-                } else {
-                  newData.push({
-                    id: user.id,
-                    account: user.account,
-                    name: user.name,
-                    avatar: user.avatar,
-                    isFollowed: false
-                  })
-                }
+                return ({
+                  id: user.id,
+                  account: user.account,
+                  name: user.name,
+                  avatar: user.avatar,
+                  isFollowed: user.Followers.some(followers => followers.Followship.followerId === req.user.dataValues.id)
+                })
               })
               res.json(newData)
             })
