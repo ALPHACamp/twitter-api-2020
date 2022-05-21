@@ -7,7 +7,7 @@
 ![image](https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/signin.png)
 ### 一般使用者首頁
 ![image](https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/index.png)
-### 一般使用者個人 Profile 頁
+### 一般使用者 Profile 頁
 ![image](https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/profile.png)
 
 ## API 文件
