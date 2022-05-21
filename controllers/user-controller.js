@@ -295,15 +295,19 @@ const userController = {
           imgurCoverHandler(files),
           imgurAvatarHandler(files)
         ])
-          .then(([user, coverUrl, avatarUrl]) => user.update({
-            name,
-            introduction: introduction || user.dataValues.introduction,
-            cover: coverUrl || user.cover,
-            avatar: avatarUrl || user.avatar
-          }))
+          .then(([user, coverUrl, avatarUrl]) => {
+            if (!user) throw new Error('使用者不存在！')
+            return user.update({
+              name,
+              introduction: introduction || user.dataValues.introduction,
+              cover: coverUrl || user.dataValues.cover,
+              avatar: avatarUrl || user.dataValues.avatar
+            })
+          })
           .then(user => {
             res.json({ status: '更新成功', user })
           })
+          .catch(err => next(err))
       }
     } catch (err) {
       next(err)
