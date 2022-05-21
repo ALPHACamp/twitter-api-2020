@@ -51,7 +51,7 @@ npm run dev
 ```
 http:/localhost:3000
 ```
-8. 開啟另一個專端機分頁，複製前端程式
+8. 開啟另一個終端機分頁，複製前端程式
 ```
 git clone https://github.com/Irene289/twitter-front-end-vue.git
 ```
