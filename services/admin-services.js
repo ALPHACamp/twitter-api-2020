@@ -1,10 +1,15 @@
-const { Tweet, User, Like } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 
 const adminController = {
   deleteTweet: (req, cb) => {
+    const TweetId = req.params.id
     return Tweet.findByPk(req.params.id)
       .then(tweet => {
         if (!tweet) throw new Error('Tweet did not exist!')
+        Promise.all([
+          Reply.destroy({ where: { TweetId } }),
+          Like.destroy({ where: { TweetId } })
+        ])
         return tweet.destroy()
       })
       .then(tweet => cb(null, tweet))
