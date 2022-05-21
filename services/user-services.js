@@ -153,7 +153,8 @@ const userServices = {
           followerName: f.name,
           followerAccount: f.account,
           followerAvatar: f.avatar,
-          followerIntroduction: f.introduction
+          followerIntroduction: f.introduction,
+          isFollowed: helpers.getUser(req).Followings.some(follow => follow.id === f.id)
         }))
         return cb(null, userFollowers)
       })
