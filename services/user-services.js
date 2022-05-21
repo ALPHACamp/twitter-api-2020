@@ -86,22 +86,8 @@ const userServices = {
       .then(([user, replies]) => {
         if (!user) throw new Error("User didn't exists!")
         const repliedTweets = replies.map(r => ({
-          TweetId: r.Tweet.id,
-          description: r.Tweet.description,
-          createdAt: r.Tweet.createdAt,
-          updatedAt: r.Tweet.updatedAt,
-          userId: r.User.id,
-          userName: r.User.name,
-          userAccount: r.User.account,
-          userAvatar: r.User.avatar,
-          comment: r.comment,
-          replyUserId: r.Tweet.UserId,
-          replyName: r.Tweet.User.name,
-          replyAccount: r.Tweet.User.account,
-          replyAvatar: r.Tweet.User.avatar,
-          replyCreatedAt: r.createdAt,
-          replyUpdatedAt: r.updatedAt,
-          User,
+          ...r.toJSON(),
+          comment: r.comment
         }))
         return cb(null, repliedTweets)
       })
@@ -120,14 +106,9 @@ const userServices = {
         if (!user) throw new Error("User didn't exists!")
 
         const userLikes = likes.map(l => ({
-          UserId: l.UserId,
-          User: l.Tweet.User,
-          TweetId: l.TweetId,
-          tweetDescription: l.Tweet.description,
+          ...l.toJSON(),
           tweetLikesCount: l.Tweet.Likes.length,
           tweetRepliesCount: l.Tweet.Replies.length,
-          createdAt: l.Tweet.createdAt,
-          updatedAt: l.Tweet.updatedAt,
           isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
         }))
         return cb(null, userLikes)
@@ -142,7 +123,7 @@ const userServices = {
     })
       .then((user) => {
         if (!user) throw new Error("User didn't exists!")
-        
+
         const userFollowings = user.Followings.map(f => ({
           followingId: f.id,
           followingName: f.name,
@@ -162,6 +143,7 @@ const userServices = {
       ]
     })
       .then((user) => {
+        if (!user) throw new Error("User didn't exists!")
         const userFollowers = user.Followers.map(f => ({
           followerId: f.id,
           followerName: f.name,
@@ -170,10 +152,11 @@ const userServices = {
           followerIntroduction: f.introduction,
           isFollowed: helpers.getUser(req).Followings.some(follow => follow.Followship.followerId === f.id)
         }))
-        if (!user) throw new Error("User didn't exists!")
+        
         return cb(null, userFollowers)
       })
       .then((user) => {
+        if (!user) throw new Error("User didn't exists!")
         const userFollowers = user.Followers.map(f => ({
           followerId: f.id,
           followerName: f.name,
@@ -181,7 +164,6 @@ const userServices = {
           followerAvatar: f.avatar,
           followerIntroduction: f.introduction
         }))
-        if (!user) throw new Error("User didn't exists!")
         return cb(null, userFollowers)
       })
       .catch(err => cb(err))
