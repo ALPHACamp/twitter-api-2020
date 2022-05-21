@@ -3,6 +3,7 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 const JWTSECRET = process.env.JWT_SECRET || 'alphacamp'
+const Sequelize = require('sequelize')
 const userServices = {
   signUp: (req, cb) => {
     let { account, name, email, password, checkPassword } = req.body
@@ -103,23 +104,11 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Like.findAll({
         where: { UserId: req.params.id },
-        include: [{
-          model: Tweet,
-          attributes: ['description'],
-          include: [{
-            model: Reply,
-            attributes: ['id']
-          }, {
-            model: Like,
-            attributes: ['id']
-          }, {
-            model: User,
-            attributes: ['id', 'account', 'name', 'avatar']
-          }]
-        }]
+        include: [{ model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Reply }, { model: Like }] }]
       })
     ])
       .then(([user, likes]) => {
+        console.log('likes', likes)
         if (!user) throw new Error("User didn't exists!")
         const userLikes = likes.map(l => ({
           ...l.toJSON(),
@@ -127,7 +116,6 @@ const userServices = {
           tweetRepliesCount: l.Tweet.Replies.length,
           isLiked: l.Tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
         }))
-        console.log(userLikes)
         return cb(null, userLikes)
       })
       .catch(err => cb(err))
