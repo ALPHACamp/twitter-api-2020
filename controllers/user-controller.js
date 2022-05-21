@@ -212,19 +212,18 @@ const userController = {
       include: [
         {
           model: User,
-          attributes: ['id', 'account', 'avatar', 'name', 'introduction'],
-          include: [
-            {
-              model: Followship,
-              attributes: ['id', 'followerId', 'followingId']
-            }
-          ]
+          as: 'followingUser',
+          attributes: ['id', 'account', 'avatar', 'name', 'introduction']
         }
       ],
       order: [['createdAt', 'DESC']]
     })
       .then(followings => {
-        const resultFollowings = followings.map(f => ({ ...f.toJSON() }))
+        const followedIds = req.user?.Followings ? req.user.Followings.map(ff => ff.id) : []
+        const resultFollowings = followings.map(f => ({
+          ...f.toJSON(),
+          isFollowed: followedIds.includes(f.followingId)
+        }))
         return res.json(resultFollowings)
       })
       .catch(err => next(err))
@@ -235,19 +234,18 @@ const userController = {
       include: [
         {
           model: User,
-          attributes: ['id', 'account', 'avatar', 'name', 'introduction'],
-          include: [
-            {
-              model: Followship,
-              attributes: ['id', 'followerId', 'followingId']
-            }
-          ]
+          as: 'followerUser',
+          attributes: ['id', 'account', 'avatar', 'name', 'introduction']
         }
       ],
       order: [['createdAt', 'DESC']]
     })
       .then(followers => {
-        const resultFollowers = followers.map(f => ({ ...f.toJSON() }))
+        const followedIds = req.user?.Followings ? req.user.Followings.map(ff => ff.id) : []
+        const resultFollowers = followers.map(f => ({
+          ...f.toJSON(),
+          isFollowed: followedIds.includes(f.followerId)
+        }))
         return res.json(resultFollowers)
       })
       .catch(err => next(err))
