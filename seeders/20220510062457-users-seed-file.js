@@ -4,9 +4,9 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const data = []
-    const userCount = 10
+    const userCount = 11
     const randomNum = Math.floor(Math.random() * 100)
-    for (let i = 0; i < userCount; i++) {
+    for (let i = 1; i < userCount; i++) {
       const avatorNum = Math.floor(Math.random() * 100)
       const coverNum = Math.floor(Math.random() * 100)
       data.push({
