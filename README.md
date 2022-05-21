@@ -4,11 +4,11 @@
 
 ## 圖片範例
 ### 登入頁
-https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/signin.png
+![image](https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/signin.png)
 ### 一般使用者首頁
-https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/index.png
+![image](https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/index.png)
 ### 一般使用者個人 Profile 頁
-https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/profile.png
+![image](https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/profile.png)
 
 ## API 文件
 [api 文件](https://immediate-drifter-dfc.notion.site/API-51e9e3d8b43b47259127a719f9d6c011)
