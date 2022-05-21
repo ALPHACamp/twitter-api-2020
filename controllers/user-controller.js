@@ -1,10 +1,11 @@
 /* eslint-disable no-fallthrough */
 const createToken = require('../helpers/token')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const helpers = require('../_helpers')
 const bcrypt = require('bcryptjs')
 const { imgurCoverHandler, imgurAvatarHandler } = require('../helpers/file-helpers')
 const tweetServices = require('../services/tweets')
+const sequelize = require('sequelize')
 
 const userController = {
   login: async (req, res, next) => {
@@ -237,7 +238,10 @@ const userController = {
       User.findAll({
         where: { id },
         attributes: { exclude: ['password'] },
-        include: [{ model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }, { model: User, as: 'Followings', attributes: ['id', 'account'] }],
+        include: [
+          { model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] },
+          { model: User, as: 'Followings', attributes: ['id', 'account'] }
+        ],
         nest: true
       })
         .then(followerUsers => {
@@ -326,44 +330,36 @@ const userController = {
   },
   getTopUsers: (req, res, next) => {
     try {
-      User.findAll({
-        attributes: { exclude: ['password'] },
-        include: [{ model: User, as: 'Followers', attributes: ['id'] }],
-        nest: true
+      Followship.findAll({
+        attributes: [
+          'followerId',
+          [sequelize.fn('COUNT', sequelize.col('follower_id')), 'followerCounts']
+        ],
+        group: ['follower_id'],
+        order: [[sequelize.literal('followerCounts'), 'DESC']],
+        limit: 11,
+        nest: true,
+        raw: true
       })
-        .then(user => {
-          let newData = []
+        .then(top11FollowerId => {
+          const usersId = []
           // eslint-disable-next-line array-callback-return
-          user.map(user => {
-            user = user.toJSON()
-            if (user.role === 'admin' || user.id === req.user.dataValues.id) {
-              return false
-            } else if (user.Followers.some(follower =>
-              follower.Followship.followerId === req.user.dataValues.id)) {
-              return newData.push({
-                id: user.id,
-                account: user.account,
-                avatar: user.avatar,
-                totalFollowerCount: user.Followers.length,
-                isFollowed: true
-              })
-            } else {
-              return newData.push({
-                id: user.id,
-                account: user.account,
-                avatar: user.avatar,
-                totalFollowerCount: user.Followers.length,
-                isFollowed: false
-              })
-            }
+          top11FollowerId.map(follower => {
+            if (follower.followerId !== req.user.dataValues.id && usersId.length !== 10) usersId.push(follower.followerId)
           })
-          newData.sort((a, b) => b.totalFollowerCount - a.totalFollowerCount)
-          if (newData.length > 10) {
-            newData = newData.slice(0, 10)
-          }
-          res.json({
-            data: newData
+          console.log(usersId)
+          User.findAll({
+            where: { id: [...usersId] },
+            attributes: ['id', 'account', 'name', 'avatar'],
+            order: sequelize.literal(`Field(id,${usersId})`),
+            nest: true,
+            raw: true
           })
+            .then(top10Users => {
+              console.log(top10Users)
+              res.json(top10Users)
+            })
+            .catch(err => next(err))
         })
         .catch(err => next(err))
     } catch (err) {
