@@ -120,7 +120,13 @@ const userController = {
         if (findEmail && findEmail.id !== req.user.id) throw new Error('Email has already been taken.')
         if (findAccount && findAccount.id !== req.user.id) throw new Error('Account has already been taken.')
         return user.update({
-          name, account, email, password, avatar: avatarFilePath, cover: coverFilePath, introduction
+          name,
+          account,
+          email,
+          password,
+          avatar: avatarFilePath || user.avatar,
+          cover: coverFilePath || user.cover,
+          introduction
         })
       })
       .then(user => {
