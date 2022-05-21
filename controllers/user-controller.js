@@ -280,7 +280,7 @@ const userController = {
     Promise.all([
       Like.findAll({
         where: { UserId },
-        attributes: ['id', 'UserId', 'TweetId'],
+        attributes: ['id', 'UserId', 'TweetId', 'createdAt', 'updatedAt'],
         include: [
           {
             model: Tweet,
