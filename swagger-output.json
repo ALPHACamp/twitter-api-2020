@@ -236,7 +236,7 @@
         }
       }
     },
-    "/api/users/{id}/top10": {
+    "/api/users/top10": {
       "get": {
         "tags": [
           "Users"
@@ -247,16 +247,6 @@
           }
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
