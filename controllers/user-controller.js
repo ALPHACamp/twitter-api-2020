@@ -167,11 +167,9 @@ const userController = {
       include: [{
         model: Tweet,
         as: 'Tweet',
-        attributes: ['UserId'],
+        attributes: ['id'],
         include: [{
-          model: User,
-          as: 'LikedUsers',
-          attributes: ['account']
+          model: User
         }]
       }],
       order: [['createdAt', 'DESC']]
