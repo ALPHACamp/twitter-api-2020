@@ -342,10 +342,9 @@ const userController = {
         .then(top11FollowerId => {
           const usersId = []
           // eslint-disable-next-line array-callback-return
-          top11FollowerId.map(follower => {
+          top11FollowerId.forEach(follower => {
             if (follower.followerId !== req.user.dataValues.id && usersId.length !== 10) usersId.push(follower.followerId)
           })
-          console.log(usersId)
           User.findAll({
             where: { id: [...usersId] },
             attributes: ['id', 'account', 'name', 'avatar'],
