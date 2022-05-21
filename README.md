@@ -60,7 +60,7 @@ CREATE DATABASE ac_twitter_workspace;
     // ...
   },
 ```
-6. ，在終端機依序輸入以下內容，建立相關資料表以及種子資料
+6. 在終端機依序輸入以下內容，建立相關資料表以及種子資料
 ```
 npx sequelize db:migrate
 npx sequelize db:seed:all
