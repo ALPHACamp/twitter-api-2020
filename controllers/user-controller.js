@@ -188,7 +188,7 @@ const userController = {
       }).catch(err => next(err))
   },
   getLikes: (req, res, next) => {
-    return Like.findAll({
+    Promise.all([Like.findAll({
       where: { UserId: req.params.id },
       include: [{
         model: Tweet,
@@ -208,9 +208,9 @@ const userController = {
         }]
       }],
       order: [['createdAt', 'DESC']]
-    })
-      .then(likes => {
-        if (!likes) throw new Error('This account does not exist.')
+    }), User.findByPk(req.params.id)])
+      .then(([likes, user]) => {
+        if (!user) throw new Error('This account does not exist.')
         const likedTweetId = req.user?.LikedTweets ? req.user.LikedTweets.map(likeTweet => likeTweet.id) : []
         const likedTweets = likes.map(l => ({ ...l.toJSON(), ReplyCount: l.Tweet.Replies.length, LikeCount: l.Tweet.Likes.length, isLiked: likedTweetId.includes(l.TweetId) }))
         return res.json({
