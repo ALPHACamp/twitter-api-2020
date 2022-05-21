@@ -34,7 +34,7 @@ const userController = {
     userServices.getUserFollowers(req, ((err, userFollowers) => err ? next(err) : res.json(userFollowers)))
   },
   putUser: (req, res, next) => {
-    userServices.putUser(req, ((err, user) => err ? next(err) : res.json({ status: 'success', user })))
+    userServices.putUser(req, ((err, user) => err ? next(err) : res.json(user)))
   },
   addFollowing: (req, res, next) => {
     userServices.addFollowing(req, (err, addfollowing) => err ? next(err) : res.json(addfollowing))
