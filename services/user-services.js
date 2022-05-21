@@ -35,7 +35,7 @@ const userServices = {
   },
   getUser: (req, cb) => {
     return User.findByPk(req.params.id, {
-      nest: true,
+      attributes: { exclude: ['password'] },
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
@@ -44,7 +44,6 @@ const userServices = {
       .then(user => {
         if (!user) throw new Error("User didn't exists!")
         const userData = user.toJSON()
-        delete userData.password
         userData.Followers = userData.Followers.length
         userData.Followings = userData.Followings.length
         userData.isFollowed = helpers.getUser(req).Followings.some(f => f.id === userData.id)
@@ -58,7 +57,7 @@ const userServices = {
       Tweet.findAll(
         {
           where: { UserId: req.params.id },
-          include: [{ model: User }, { model: Reply }, { model: Like }],
+          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar']}, { model: Reply }, { model: Like }],
           order: [['createdAt', 'DESC']]
         })
     ])
@@ -79,7 +78,10 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Reply.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet, include: User }, { model: User }],
+        include: [
+          { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }] }, 
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
         order: [['createdAt', 'DESC']]
       })
     ])
@@ -99,7 +101,7 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Like.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Reply }, { model: Like }] }]
+        include: [{ model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Reply}, { model: Like }] }]
       })
     ])
       .then(([user, likes]) => {
@@ -143,18 +145,7 @@ const userServices = {
       ]
     })
       .then((user) => {
-        const userFollowers = user.Followers.map(f => ({
-          followerId: f.id,
-          followerName: f.name,
-          followerAccount: f.account,
-          followerAvatar: f.avatar,
-          followerIntroduction: f.introduction,
-          isFollowed: helpers.getUser(req).Followings.some(follow => follow.Followship.followerId === f.id)
-        }))
         if (!user) throw new Error("User didn't exists!")
-        return cb(null, userFollowers)
-      })
-      .then((user) => {
         const userFollowers = user.Followers.map(f => ({
           followerId: f.id,
           followerName: f.name,
@@ -162,7 +153,6 @@ const userServices = {
           followerAvatar: f.avatar,
           followerIntroduction: f.introduction
         }))
-        if (!user) throw new Error("User didn't exists!")
         return cb(null, userFollowers)
       })
       .catch(err => cb(err))
@@ -266,7 +256,8 @@ const userServices = {
   },
   getTopUsers: (req, cb) => {
     return User.findAll({
-      include: [{ model: User, as: 'Followers' }],
+      attributes: ['id', 'name', 'account', 'avatar'],
+      include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'avatar'] }],
       limit: 10
     })
       .then(users => {
