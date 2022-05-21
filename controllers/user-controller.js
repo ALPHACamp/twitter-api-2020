@@ -316,7 +316,6 @@ const userController = {
   getTopUsers: (req, res, next) => {
     try {
       Followship.findAll({
-        where: { role: 'user' },
         attributes: [
           'followerId',
           [sequelize.fn('COUNT', sequelize.col('follower_id')), 'followerCounts']
