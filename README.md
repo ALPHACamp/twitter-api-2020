@@ -82,7 +82,12 @@ http:/localhost:3000
 ```
 8. 要結束運行請按下 ctrl + c
 
-## 專案開發人員
+## 專案後端開發人員
 > [Kate-Chu](https://github.com/Kate-Chu)<br>
 > [yanpin0524](https://github.com/yanpin0524)
+
+## 專案前端開發人員
+> [SeijoHuang](https://github.com/SeijoHuang)<br>
+> [IreneLIU](https://github.com/Irene289)
+
 
