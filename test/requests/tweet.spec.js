@@ -93,9 +93,9 @@ describe('# tweet requests', () => {
           .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
-            expect(res.body.data.tweets).to.be.an('array');
+            expect(res.body).to.be.an('array');
             // 檢查是否回傳資料有 User1 的 Tweet1
-            res.body.data.tweets[0].description.should.equal('User1 的 Tweet1');
+            res.body[0].description.should.equal('User1 的 Tweet1');
             return done();
           })
       });
@@ -108,9 +108,9 @@ describe('# tweet requests', () => {
           .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
-            expect(res.body.data.tweet).to.be.an('object');
-            // 檢查是否回傳資料有 User1 的 Tweet1
-            res.body.data.tweet.description.should.equal('User1 的 Tweet1');
+            expect(res.body).to.be.an('object');
+            // 檢查是否回傳資料有 User1 的 Tweet1 
+            res.body.description.should.equal('User1 的 Tweet1');
             return done();
           })
       });

@@ -1,19 +1,15 @@
 const { User, Tweet, Reply, Like } = require('../models')
-const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const { getOffset } = require('../helpers/pagination-helper')
 
 // setting tweet-related controller
 const tweetController = {
   getTweets: (req, res, next) => {
     /*
-    #swagger.tags = ['Tweets']
-    #swagger.security = [{
-            'bearerAuth': []
-    }]
     :query page: specific slice of all tweets
     :query limit: limit return number of tweets
     This api would return a json that concluding tweets with specific page & limit, pagination information
     */
-    const DEFAULT_LIMIT = 10
+    const DEFAULT_LIMIT = 100
     const DEFAULT_DESCRIPTION_LIMIT = 140
     const page = Number(req.query.page) || 1
     const limit = Number(req.query.limit) || DEFAULT_LIMIT
@@ -37,25 +33,12 @@ const tweetController = {
           totalLikes: r.LikedUsers ? r.LikedUsers.length : 0,
           totalReplies: r.Replies ? r.Replies.length : 0
         }))
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            tweets: resultTweets,
-            pagination: getPagination(limit, page, tweets.count)
-          },
-          message: ''
-        })
+        return res.json(resultTweets)
       })
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
     /*
-    #swagger.tags = ['Tweets']
-    #swagger.security = [{
-            'bearerAuth': []
-    }]
-    :param id: TweetId
     This api would return a json that concluding a specific tweet information
     */
     return Tweet.findByPk(req.params.id, {
@@ -72,23 +55,12 @@ const tweetController = {
         resultTweet.isLiked = isLiked
         resultTweet.totalLikes = resultTweet.LikedUsers ? resultTweet.LikedUsers.length : 0
         resultTweet.totalReplies = resultTweet.Replies ? resultTweet.Replies.length : 0
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            tweet: resultTweet
-          },
-          message: ''
-        })
+        return res.json(resultTweet)
       })
       .catch(err => next(err))
   },
   postTweet: (req, res, next) => {
     /*
-    #swagger.tags = ['Tweets']
-    #swagger.security = [{
-            'bearerAuth': []
-    }]
     :body description: tweet's content
     This api would create a tweet record and return a json
     */
@@ -99,23 +71,12 @@ const tweetController = {
       description
     })
       .then(tweet => {
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            tweet
-          },
-          message: ''
-        })
+        return res.json(tweet)
       })
       .catch(err => next(err))
   },
   getReplies: (req, res, next) => {
     /*
-    #swagger.tags = ['Tweets']
-    #swagger.security = [{
-            'bearerAuth': []
-    }]
     :param id: TweetId
     This api would return a json that including all replies of a specific tweet
     */
@@ -136,23 +97,12 @@ const tweetController = {
           comment: r.comment.substring(0, DEFAULT_DESCRIPTION_LIMIT),
           isLiked: likedReplyId.includes(r.id)
         }))
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            replies: resultReplies
-          },
-          message: ''
-        })
+        return res.json(resultReplies)
       })
       .catch(err => next(err))
   },
   postReply: (req, res, next) => {
     /*
-    #swagger.tags = ['Tweets']
-    #swagger.security = [{
-      'bearerAuth': []
-    }]
     :param id: TweetId
     :body comment: reply's content
     This api would create a reply of specific tweet and return a json
@@ -175,23 +125,12 @@ const tweetController = {
         })
       })
       .then(reply => {
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            reply
-          },
-          message: ''
-        })
+        return res.json(reply)
       })
       .catch(err => next(err))
   },
   likeTweet: (req, res, next) => {
     /*
-    #swagger.tags = ['Tweets']
-    #swagger.security = [{
-            'bearerAuth': []
-    }]
     :param id: TweetId
     This api would create a like relation between user and tweet, and return a json
     */
@@ -216,23 +155,12 @@ const tweetController = {
         })
       })
       .then(like => {
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            like
-          },
-          message: ''
-        })
+        return res.json(like)
       })
       .catch(err => next(err))
   },
   unlikeTweet: (req, res, next) => {
     /*
-    #swagger.tags = ['Tweets']
-    #swagger.security = [{
-            'bearerAuth': []
-    }]
     :param id: TweetId
     This api would destroy a like relation between user and tweet, and return a json
     */
@@ -249,24 +177,13 @@ const tweetController = {
 
         return like.destroy()
       })
-      .then(like => {
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            like
-          },
-          message: ''
-        })
+      .then(unlike => {
+        return res.json(unlike)
       })
       .catch(err => next(err))
   },
   putTweet: async (req, res, next) => {
     /*
-    #swagger.tags = ['Tweets']
-    #swagger.security = [{
-            'bearerAuth': []
-    }]
     :param id: TweetId
     :body description: tweet's content
     This api would edit a tweet record and return a json
@@ -283,14 +200,7 @@ const tweetController = {
       const updatedTweet = await tweet.update({
         description
       })
-      res.json({
-        status: 'Success',
-        statusCode: 200,
-        data: {
-          tweet: updatedTweet
-        },
-        message: ''
-      })
+      res.json(updatedTweet)
     } catch (err) {
       next(err)
     }

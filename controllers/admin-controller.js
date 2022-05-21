@@ -9,11 +9,8 @@ const adminController = {
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
-        status: 'success',
-        data: {
-          token,
-          user: userData
-        }
+        token,
+        user: userData
       })
     } catch (err) {
       next(err)
@@ -36,14 +33,7 @@ const adminController = {
         return data
       })
       .then(data => {
-        res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            data
-          },
-          message: 'All users found!'
-        })
+        res.json(data)
       })
       .catch(err => next(err))
   },
@@ -66,14 +56,7 @@ const adminController = {
           Replies: r.Replies ? r.Replies.length : 0,
           isLiked: likedTweetId.includes(r.id)
         }))
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            tweets: resultTweets
-          },
-          message: ''
-        })
+        return res.json(resultTweets)
       })
       .catch(err => next(err))
   },
@@ -84,11 +67,7 @@ const adminController = {
         if (!tweet) throw new Error("Tweet didn't exist!")
         return tweet.destroy()
       })
-      .then(() => res.json({
-        status: 'Success',
-        statusCode: 200,
-        message: 'Tweet deleted!'
-      }))
+      .then(tweet => res.json(tweet))
       .catch(err => next(err))
   }
 }

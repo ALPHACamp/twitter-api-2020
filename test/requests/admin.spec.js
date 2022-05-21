@@ -43,9 +43,9 @@ describe('# admin requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查回傳資料是否是陣列類型
-            expect(res.body.data.data).to.be.an('array');
+            expect(res.body).to.be.an('array');
             // 檢查回傳資料是否有 3 筆使用者資料
-            res.body.data.data.length.should.equal(3);
+            res.body.length.should.equal(3);
             return done();
           })
       });

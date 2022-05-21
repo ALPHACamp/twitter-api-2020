@@ -32,14 +32,7 @@ const replyController = {
         })
       })
       .then(likedReply => {
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            likedReply
-          },
-          message: ''
-        })
+        return res.json(likedReply)
       })
       .catch(err => next(err))
   },
@@ -65,15 +58,8 @@ const replyController = {
 
         return likedReply.destroy()
       })
-      .then(likedReply => {
-        return res.json({
-          status: 'Success',
-          statusCode: 200,
-          data: {
-            likedReply
-          },
-          message: ''
-        })
+      .then(unlikedReply => {
+        return res.json(unlikedReply)
       })
       .catch(err => next(err))
   },
@@ -99,14 +85,7 @@ const replyController = {
       const updatedReply = await reply.update({
         comment
       })
-      res.json({
-        status: 'Success',
-        statusCode: 200,
-        data: {
-          reply: updatedReply
-        },
-        message: ''
-      })
+      res.json(updatedReply)
     } catch (err) {
       next(err)
     }
@@ -131,14 +110,7 @@ const replyController = {
       await LikedReply.destroy({
         where: { ReplyId }
       })
-      res.json({
-        status: 'Success',
-        statusCode: 200,
-        data: {
-          reply: destroyedReply
-        },
-        message: ''
-      })
+      res.json(destroyedReply)
     } catch (err) {
       next(err)
     }
