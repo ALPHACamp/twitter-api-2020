@@ -196,121 +196,120 @@ const userController = {
     }
   },
   userFollowings: (req, res, next) => {
-    try {
-      const id = Number(req.params.id)
-      User.findAll({
-        attributes: { exclude: ['password'] },
-        where: { id },
-        include: [{ model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }],
-        nest: true
-      })
-        .then(followingUsers => {
-          if (!followingUsers[0]) throw new Error('沒有跟隨中的使用者')
-          followingUsers = followingUsers[0].toJSON()
-          const newData = []
-          followingUsers.Followings.forEach(user => {
+    const id = req.params.id
+    User.findAll({
+      attributes: { exclude: ['password'] },
+      where: { id },
+      include: [{ model: User, as: 'Followings', include: [Tweet], attributes: ['id', 'account', 'name', 'avatar'] }],
+      nest: true
+    })
+      .then(followingUsers => {
+        followingUsers = followingUsers[0].toJSON()
+        const newData = []
+        // eslint-disable-next-line array-callback-return
+        followingUsers.Followings.map(user => {
+          if (Number(user.Followship.followerId) === Number(id)) {
             newData.push({
               ...user,
               followingId: user.Followship.followingId,
               followerId: user.Followship.followerId,
-              isFollowed: user.Followship.followerId === id
+              isFollowed: true
             })
-          })
-          res.json(newData)
+          } else {
+            newData.push({
+              ...user,
+              followingId: user.Followship.followingId,
+              followerId: user.Followship.followerId,
+              isFollowed: false
+            })
+          }
         })
-        .catch(err => next(err))
-    } catch (err) {
-      next(err)
-    }
+        res.json(newData)
+      })
+      .catch(err => next(err))
   },
   userFollowers: (req, res, next) => {
-    try {
-      const id = req.params.id
-      User.findAll({
-        where: { id },
-        attributes: { exclude: ['password'] },
-        include: [
-          { model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] },
-          { model: User, as: 'Followings', attributes: ['id', 'account'] }
-        ],
-        nest: true
-      })
-        .then(followerUsers => {
-          if (!followerUsers[0]) throw new Error('沒有追隨中的使用者')
-          const newData = []
-          const followingsJsonData = followerUsers[0].toJSON()
-          // eslint-disable-next-line array-callback-return
-          followingsJsonData.Followers.forEach(follower => {
-            newData.push({
-              ...follower,
-              followingId: follower.Followship.followingId,
-              followerId: follower.Followship.followerId,
-              isFollowed: followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)
-            })
+    const id = req.params.id
+    User.findAll({
+      where: { id },
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: User,
+          as: 'Followers',
+          attributes: ['id', 'account', 'name', 'avatar', 'introduction'],
+          include: [{ model: User, as: 'Followers', attributes: ['id'] }]
+        }
+      ],
+      nest: true
+    })
+      .then(followerUsers => {
+        if (!followerUsers[0]) throw new Error('沒有追隨中的使用者')
+        const newData = []
+        const followingsJsonData = followerUsers[0].toJSON()
+        followingsJsonData.Followers.forEach(follower => {
+          newData.push({
+            id: follower.id,
+            account: follower.account,
+            name: follower.name,
+            avatar: follower.avatar,
+            followingId: follower.Followship.followingId,
+            followerId: follower.Followship.followerId,
+            isFollowed: follower.Followers.some(follower => follower.Followship.followerId === req.user.dataValues.id)
           })
-          res.json(newData)
         })
-        .catch(err => next(err))
-    } catch (err) {
-      next(err)
-    }
+        res.json(newData)
+      })
+      .catch(err => next(err))
   },
   putUser: (req, res, next) => {
-    try {
-      const UserId = req.params.id
-      const { name, account, email, password, checkPassword, introduction } = req.body
-      // 個人資料修改頁面
-      if (password || account || email) {
-        if (!name) throw new Error('請輸入使用者姓名！')
-        if (!account) throw new Error('此欄位為必填欄位')
-        if (!checkPassword) throw new Error('請輸入確認密碼')
-        if (password !== checkPassword) throw new Error('確認密碼有誤，請重新輸入一次')
-        return Promise.all([
-          User.findByPk(UserId),
-          User.findOne({ where: { account } }),
-          User.findOne({ where: { email } })
-        ])
-          .then(([user, accountUser, emailUser]) => {
-            if (!user) throw new Error('使用者不存在！')
-            if (accountUser && Number(accountUser.dataValues.id) !== Number(UserId)) throw new Error('此帳戶已經有人使用')
-            if (emailUser && Number(emailUser.dataValues.id) !== Number(UserId)) throw new Error('此信箱已經有人使用，請更換其他信箱')
-            const newPassword = bcrypt.hashSync(password, 10)
-            return user.update({
-              name,
-              account: account || user.dataValues.account,
-              email: email || user.dataValues.email,
-              password: newPassword || user.dataValues.password
+    const UserId = req.params.id
+    const { name, account, email, password, checkPassword, introduction } = req.body
+    // 個人資料修改頁面
+    if (password || account || email) {
+      if (!name) throw new Error('請輸入使用者姓名！')
+      if (!account) throw new Error('此欄位為必填欄位')
+      if (!checkPassword) throw new Error('請輸入確認密碼')
+      if (password !== checkPassword) throw new Error('確認密碼有誤，請重新輸入一次')
+      return Promise.all([
+        User.findByPk(UserId),
+        User.findOne({ where: { account } }),
+        User.findOne({ where: { email } })
+      ])
+        .then(([user, accountUser, emailUser]) => {
+          if (!user) res.status(403).json({ status: 'error', message: '使用者不存在！' })
+          if (accountUser && Number(accountUser.dataValues.id) !== Number(UserId)) return res.status(403).json({ status: 'error', message: '此帳戶已經有人使用' })
+          if (emailUser && Number(emailUser.dataValues.id) !== Number(UserId)) return res.status(403).json({ status: 'error', message: '此信箱已經有人使用，請更換其他信箱' })
+          const newPassword = bcrypt.hashSync(password, 10)
+          return user.update({
+            name,
+            account: account || user.dataValues.account,
+            email: email || user.dataValues.email,
+            password: newPassword || user.dataValues.password
+          })
+            .then(user => {
+              res.json({ status: '更新成功', user })
             })
-              .then(user => {
-                res.json({ status: '更新成功', user })
-              })
-              .catch(err => next(err))
-          })
-          .catch(err => next(err))
-      } else {
-        // 有多個圖檔那頁
-        const { files } = req
-        return Promise.all([
-          User.findByPk(UserId),
-          imgurCoverHandler(files),
-          imgurAvatarHandler(files)
-        ])
-          .then(([user, coverUrl, avatarUrl]) => {
-            if (!user) throw new Error('使用者不存在！')
-            return user.update({
-              name,
-              introduction: introduction || user.dataValues.introduction,
-              cover: coverUrl || user.dataValues.cover,
-              avatar: avatarUrl || user.dataValues.avatar
-            })
-          })
-          .then(user => {
-            res.json({ status: '更新成功', user })
-          })
-          .catch(err => next(err))
-      }
-    } catch (err) {
-      next(err)
+            .catch(err => next(err))
+        })
+    } else {
+      // 有多個圖檔那頁
+      const { files } = req
+      return Promise.all([
+        User.findByPk(UserId),
+        imgurCoverHandler(files),
+        imgurAvatarHandler(files)
+      ])
+        .then(([user, coverUrl, avatarUrl]) => user.update({
+          name,
+          introduction: introduction || user.dataValues.introduction,
+          cover: coverUrl || user.cover,
+          avatar: avatarUrl || user.avatar
+        }))
+        .then(user => {
+          res.json({ status: '更新成功', user })
+        })
+        .catch(err => next(err))
     }
   },
   getTopUsers: (req, res, next) => {
