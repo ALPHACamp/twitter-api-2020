@@ -230,8 +230,12 @@ const userController = {
         where: { id },
         attributes: { exclude: ['password'] },
         include: [
-          { model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] },
-          { model: User, as: 'Followings', attributes: ['id', 'account'] }
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction'],
+            include: [{ model: User, as: 'Followers', attributes: ['id'] }]
+          }
         ],
         nest: true
       })
@@ -242,10 +246,13 @@ const userController = {
           // eslint-disable-next-line array-callback-return
           followingsJsonData.Followers.forEach(follower => {
             newData.push({
-              ...follower,
+              id: follower.id,
+              account: follower.account,
+              name: follower.name,
+              avatar: follower.avatar,
               followingId: follower.Followship.followingId,
               followerId: follower.Followship.followerId,
-              isFollowed: followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)
+              isFollowed: follower.Followers.some(follower => follower.Followship.followerId === req.user.dataValues.id)
             })
           })
           res.json(newData)
