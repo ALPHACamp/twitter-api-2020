@@ -241,10 +241,7 @@ const userController = {
         if (!followerUsers[0]) throw new Error('沒有追隨中的使用者')
         const newData = []
         const followingsJsonData = followerUsers[0].toJSON()
-<<<<<<< HEAD
-=======
         // eslint-disable-next-line array-callback-return
->>>>>>> f8829ddb60b2f9d2055368d3a7314da8a6a39382
         followingsJsonData.Followers.forEach(follower => {
           newData.push({
             id: follower.id,
