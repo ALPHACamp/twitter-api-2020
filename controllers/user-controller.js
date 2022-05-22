@@ -215,10 +215,10 @@ const userController = {
             introduction: user.introduction,
             followingId: user.Followship.followingId,
             followerId: user.Followship.followerId,
-            isFollowed: user.Followers.some(follower => follower.Followship.followerId === req.user.dataValues.id)
+            isFollowed: user.Followers.some(follower => follower.Followship.followerId === helpers.getUser(req).id)
           })
         })
-        res.json(newData)
+        res.status(200).json(newData)
       })
       .catch(err => next(err))
   },
@@ -251,7 +251,7 @@ const userController = {
             introduction: follower.introduction,
             followingId: follower.Followship.followingId,
             followerId: follower.Followship.followerId,
-            isFollowed: follower.Followers.some(follower => follower.Followship.followerId === req.user.dataValues.id)
+            isFollowed: follower.Followers.some(follower => follower.Followship.followerId === helpers.getUser(req).id)
           })
         })
         res.json(newData)
@@ -327,7 +327,7 @@ const userController = {
       .then(top11FollowerId => {
         const usersId = []
         top11FollowerId.forEach(follower => {
-          if (follower.followerId !== req.user.dataValues.id && usersId.length !== 10) usersId.push(follower.followerId)
+          if (follower.followerId !== helpers.getUser(req).id && usersId.length !== 10) usersId.push(follower.followerId)
         })
         User.findAll({
           where: { id: [...usersId] },
@@ -346,7 +346,7 @@ const userController = {
                 account: user.account,
                 name: user.name,
                 avatar: user.avatar,
-                isFollowed: user.Followers.some(followers => followers.Followship.followerId === req.user.dataValues.id)
+                isFollowed: user.Followers.some(followers => followers.Followship.followerId === helpers.getUser(req).id)
               })
             })
             res.json(newData)
