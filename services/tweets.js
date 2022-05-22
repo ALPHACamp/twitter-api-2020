@@ -43,7 +43,6 @@ const tweets = {
 
         if (!userLikesTweet.length) {
           rawTweets.forEach(element => {
-            element.userLikesTweet = 0
             element.isLike = false
           })
         }

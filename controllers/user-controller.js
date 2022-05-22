@@ -83,6 +83,7 @@ const userController = {
         .then(user => {
           if (!user) throw new Error('找不到使用者！')
           user = user.toJSON()
+          delete user.password
           res.json({
             status: 'success',
             ...user,
@@ -238,7 +239,6 @@ const userController = {
           if (!followerUsers[0]) throw new Error('沒有追隨中的使用者')
           const newData = []
           const followingsJsonData = followerUsers[0].toJSON()
-          console.log(followingsJsonData)
           // eslint-disable-next-line array-callback-return
           followingsJsonData.Followers.forEach(follower => {
             newData.push({
@@ -327,7 +327,6 @@ const userController = {
         raw: true
       })
         .then(top11FollowerId => {
-          console.log(top11FollowerId)
           const usersId = []
           top11FollowerId.forEach(follower => {
             if (follower.followerId !== req.user.dataValues.id && usersId.length !== 10) usersId.push(follower.followerId)

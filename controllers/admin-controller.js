@@ -6,6 +6,7 @@ const adminController = {
   login: async (req, res, next) => {
     try {
       const userData = req.user.toJSON()
+      delete userData.password
       if (userData.role !== 'admin') throw new Error('非管理者')
       const token = await createToken(userData)
       res.json({
@@ -48,7 +49,7 @@ const adminController = {
       if (tweets.length) {
         users.forEach(userElement => {
           tweets.forEach(element => {
-            if (userElement.id === element.followerId) userElement.totalTweetNum = element.count
+            if (userElement.id === element.User_id) userElement.totalTweetNum = element.count
             else if (userElement.totalTweetNum === undefined) userElement.totalTweetNum = 0
           })
         })
@@ -60,17 +61,15 @@ const adminController = {
       // 使用者 like 總數
       const totalTweets = await tweetServices.getAll()
       const totalTweetLikes = totalTweets.map(element => ({
-        userId: element.userId,
-        likeNum: element.likeNum
+        userId: element.UserId,
+        totalLikeCount: element.totalLikeCount
       }))
-
       users.forEach(userElement => {
-        if (userElement.totalLikeNum === undefined) userElement.totalLikeNum = 0
+        userElement.totalLikeCount = 0
       })
-
       users.forEach(userElement => {
         totalTweetLikes.forEach(element => {
-          if (userElement.id === element.userId) userElement.totalLikeNum += element.likeNum
+          if (userElement.id === element.userId) userElement.totalLikeCount += element.totalLikeCount
         })
       })
 
