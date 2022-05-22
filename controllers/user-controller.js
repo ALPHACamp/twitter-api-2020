@@ -327,7 +327,6 @@ const userController = {
         raw: true
       })
         .then(top11FollowerId => {
-          console.log(top11FollowerId)
           const usersId = []
           top11FollowerId.forEach(follower => {
             if (follower.followerId !== req.user.dataValues.id && usersId.length !== 10) usersId.push(follower.followerId)
