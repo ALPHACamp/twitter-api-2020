@@ -51,7 +51,7 @@ const userController = {
         role: 'user'
       })
 
-      const token = jwt.sign(registeredUser.toJSON(), process.env.JWT_SECRET, {
+      const token = jwt.sign(registeredUser.toJSON(), 'SILK', {
         expiresIn: '30d'
       })
       let userData = await User.findByPk(registeredUser.id)
