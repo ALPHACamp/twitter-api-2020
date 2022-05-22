@@ -70,7 +70,7 @@ const userServices = {
           ...t.toJSON(),
           Replies: t.Replies.length,
           Likes: t.Likes.length,
-          isLiked: t.Likes.some(l => l.UserId = helpers.getUser(req).id)
+          isLiked: t.Likes.some(l => l.UserId === helpers.getUser(req).id)
         }))
         return cb(null, tweetsData)
       })
