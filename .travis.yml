@@ -7,11 +7,10 @@ services:
 
 # 設定參數(Travis CI 會按照參數分別執行)
 env:
-  - NODE_ENV=travis
-  - SESSION_SECRET=SILK
-  - JWT_SECRET=SILK
-  - IMGUR_CLIENT_ID=6b10942ff729213
-  - GITHUB_PAGE=https://irene289.github.io
+  global:
+    - NODE_ENV=travis
+    - SESSION_SECRET=SILK
+    - JWT_SECRET=SILK
 
 # 在 install 前執行的指令
 before_install:
