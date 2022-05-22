@@ -174,12 +174,12 @@ const userServices = {
     if (account) {
       account = account.trim()
     }
+    if (email) {
+      email = email.trim()
+    }
     if (name) {
       name = name.trim()
       if (name.length > 50) throw new Error('Length of the name is too long!')
-    }
-    if (email) {
-      email = email.trim()
     }
     if (password) {
       password = password.trim()
@@ -208,6 +208,12 @@ const userServices = {
     ])
       .then(async ([user, avatarImg, coverImg]) => {
         if (!user) throw new Error("User didn't exists!")
+        if (account) {
+          if (await User.findOne({ where: { account } })) throw new Error("Account Exists!")
+        }
+        if (email) {
+          if (await User.findOne({ where: { email } })) throw new Error("Email Exists!")
+        }
         if (password) {
           password = await bcrypt.hash(password, 10)
         }
