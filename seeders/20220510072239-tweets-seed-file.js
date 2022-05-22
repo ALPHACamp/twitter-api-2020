@@ -9,8 +9,9 @@ module.exports = {
     const eachUserTweets = 10
     for (let i = 1; i < users.length; i++) {
       for (let j = 0; j < eachUserTweets; j++) {
+        const description = faker.lorem.text()
         data.push({
-          description: faker.lorem.text(),
+          description: (description.substring(0, 160)),
           User_id: Number(users[i].id),
           created_at: new Date(),
           updated_at: new Date()
