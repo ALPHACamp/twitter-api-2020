@@ -5,7 +5,7 @@
 [Twitter Demo](https://bunreal.github.io/Twitter2022/#/logIn)
 
 ### **測試帳號**
-- | 帳號 | 密碼
+登入位置 | 帳號 | 密碼
 --- | --- | ---
 後台 | root | 12345678
 前台 | user1 | 12345678
