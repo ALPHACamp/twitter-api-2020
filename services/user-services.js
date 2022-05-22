@@ -208,10 +208,10 @@ const userServices = {
     ])
       .then(async ([user, avatarImg, coverImg]) => {
         if (!user) throw new Error("User didn't exists!")
-        if (account) {
+        if (account && account !== user.account) {
           if (await User.findOne({ where: { account } })) throw new Error("Account Exists!")
         }
-        if (email) {
+        if (email && email !== user.email) {
           if (await User.findOne({ where: { email } })) throw new Error("Email Exists!")
         }
         if (password) {
