@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 app.use(
-  session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
+  session({ secret: 'SILK', resave: false, saveUninitialized: false })
 )
 app.use(passport.initialize())
 app.use(passport.session())
