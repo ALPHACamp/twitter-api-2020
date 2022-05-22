@@ -109,7 +109,7 @@ http://localhost:8080/
 npx sequelize db:drop
 ```
 
-## 開發工具
+## 後端開發工具
 
 1. bcryptjs: v2.4.3
 2. body-parser: v1.18.3
