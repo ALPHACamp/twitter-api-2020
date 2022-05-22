@@ -9,13 +9,14 @@ module.exports = {
     for (let i = 1; i < userCount; i++) {
       const avatorNum = Math.floor(Math.random() * 100)
       const coverNum = Math.floor(Math.random() * 100)
+      const introduction = faker.lorem.text()
       data.push({
         account: `user${i}`,
         name: `user${i}`,
         email: `user${i}@example.com`,
         password: await bcrypt.hash('12345678', 10),
         avatar: `https://loremflickr.com/250/250/paradise/?random=${avatorNum}`,
-        introduction: faker.lorem.text(),
+        introduction: (introduction.substring(0, 160)),
         cover: `https://loremflickr.com/800/350/selfie/?random=${coverNum}`,
         role: 'user',
         created_at: new Date(),
