@@ -104,7 +104,8 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Like.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Reply }, { model: Like }] }]
+        include: [{ model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Reply }, { model: Like }] }],
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, likes]) => {
@@ -120,7 +121,7 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUserFollowings: (req, cb) => {
-    return User.findByPk(req.params.id, {
+      return User.findByPk(req.params.id, {
       include: [
         { model: User, as: 'Followings' }
       ]
@@ -134,18 +135,21 @@ const userServices = {
           followingAccount: f.account,
           followingAvatar: f.avatar,
           followingIntroduction: f.introduction,
-          isFollowed: helpers.getUser(req).Followings.some(follow => follow.id === f.id)
+          isFollowed: helpers.getUser(req).Followings.some(follow => follow.id === f.id),
+          createdAt: f.Followship.createdAt
         }))
+          .sort((a, b) => b.createdAt - a.createdAt)
         return cb(null, userFollowings)
       })
       .catch(err => cb(err))
   },
   getUserFollowers: (req, cb) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        { model: User, as: 'Followers' }
-      ]
-    })
+      return User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followers' }
+        ]
+      })
+    
       .then((user) => {
         if (!user) throw new Error("User didn't exists!")
         const userFollowers = user.Followers.map(f => ({
@@ -154,8 +158,10 @@ const userServices = {
           followerAccount: f.account,
           followerAvatar: f.avatar,
           followerIntroduction: f.introduction,
-          isFollowed: helpers.getUser(req).Followings.some(follow => follow.id === f.id)
+          isFollowed: helpers.getUser(req).Followings.some(follow => follow.id === f.id),
+          createdAt: f.Followship.createdAt
         }))
+          .sort((a, b) => b.createdAt - a.createdAt)
         return cb(null, userFollowers)
       })
       .catch(err => cb(err))
