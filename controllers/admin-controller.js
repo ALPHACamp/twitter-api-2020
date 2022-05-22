@@ -6,6 +6,7 @@ const adminController = {
   login: async (req, res, next) => {
     try {
       const userData = req.user.toJSON()
+      delete userData.password
       if (userData.role !== 'admin') throw new Error('非管理者')
       const token = await createToken(userData)
       res.json({

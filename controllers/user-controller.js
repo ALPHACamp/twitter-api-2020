@@ -83,6 +83,7 @@ const userController = {
         .then(user => {
           if (!user) throw new Error('找不到使用者！')
           user = user.toJSON()
+          delete user.password
           res.json({
             status: 'success',
             ...user,
