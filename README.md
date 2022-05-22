@@ -6,9 +6,9 @@
 ### 登入頁
 ![image](https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/signin.png)
 ### 一般使用者首頁
-![image](https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/index.png)
+![image](https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/index_new.png)
 ### 一般使用者 Profile 頁
-![image](https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/profile.png)
+![image](https://github.com/Kate-Chu/twitter-api-2020/blob/master/public/profile_new.png)
 
 ## API 文件
 [api 文件](https://immediate-drifter-dfc.notion.site/API-51e9e3d8b43b47259127a719f9d6c011)
