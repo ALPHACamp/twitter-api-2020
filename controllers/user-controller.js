@@ -298,32 +298,34 @@ const userController = {
       User.findAll({
         where: { id },
         attributes: { exclude: ['password'] },
-        include: [{ model: User, as: 'Followers', include: [Tweet], attributes: ['id', 'account', 'name', 'avatar'] }, { model: User, as: 'Followings', attributes: ['id', 'account'] }],
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction'],
+            include: [{ model: User, as: 'Followers', attributes: ['id'] }]
+          }
+        ],
         nest: true
       })
-        .then(followings => {
+        .then(followerUsers => {
+          if (!followerUsers[0]) throw new Error('沒有追隨中的使用者')
           const newData = []
-          const followingsJsonData = followings[0].toJSON()
-          // eslint-disable-next-line array-callback-return
-          followingsJsonData.Followers.map(follower => {
-            if (followingsJsonData.Followings.some(data => data.Followship.followingId === follower.Followship.followerId)) {
-              newData.push({
-                ...follower,
-                followingId: follower.Followship.followingId,
-                followerId: follower.Followship.followerId,
-                isFollowed: true
-              })
-            } else {
-              newData.push({
-                ...follower,
-                followingId: follower.Followship.followingId,
-                followerId: follower.Followship.followerId,
-                isFollowed: false
-              })
-            }
+          const followingsJsonData = followerUsers[0].toJSON()
+          followingsJsonData.Followers.forEach(follower => {
+            newData.push({
+              id: follower.id,
+              account: follower.account,
+              name: follower.name,
+              avatar: follower.avatar,
+              followingId: follower.Followship.followingId,
+              followerId: follower.Followship.followerId,
+              isFollowed: follower.Followers.some(follower => follower.Followship.followerId === req.user.dataValues.id)
+            })
           })
           res.json(newData)
         })
+        .catch(err => next(err))
     } catch (err) {
       next(err)
     }
