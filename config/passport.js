@@ -36,7 +36,7 @@ passport.deserializeUser(async (id, cb) => {
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: 'SILK'
 }
 
 passport.use(
