@@ -1,8 +1,10 @@
 ## 介紹
-以 twitter 規格發想的簡易 simple twitter 專案，<br>
-分別以 Vue.js 打造前端使用者介面，後端使用 Node.js 搭配 Express 框架建構，使用關連式資料庫 mysql 作為 database，<br>
-讓使用者可以在專案中發布推文、留言、按讚、追蹤使用者，管理者則能夠在後台管理所有使用者以及留言。<br>
-本 repository 為專案後端 repository。
+<ul>
+  <li>以 twitter 規格發想的簡易 simple twitter 專案</li>
+<li>分別以 Vue.js 打造前端使用者介面，後端使用 Node.js 搭配 Express 框架建構，使用關連式資料庫 mysql 作為 database</li>
+<li>使用者可以在專案中發布推文、留言、按讚、追蹤使用者，管理者則能夠在後台管理所有使用者以及留言。</li>
+<li>本 repository 為專案後端 repository</li>
+</ul>
 
 ## 圖片範例
 ### 登入頁
@@ -72,7 +74,7 @@ npx sequelize db:seed:all
 SESSION_SECRET=自訂加密salt
 JWT_SECRET=自訂加密salt
 IMGUR_CLIENT_ID=可使用的 Imgur id
-GITHUB_PAGE=前端頁面網址
+GITHUB_PAGE=前端頁面網址（如果使用本地 Vue page，則不需加入此項）
 ```
 8. 當種子資料建立完畢後，請繼續輸入以下內容，開始運行後端伺服器
 ```
