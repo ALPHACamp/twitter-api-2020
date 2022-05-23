@@ -5,7 +5,6 @@
 * MySQL 8.0.28  
   <br />
 ### 本地安裝方式
-  <br />
 
 #### node.js
 至[官網下載](https://nodejs.org/en/)
@@ -14,35 +13,46 @@
 至[官網下載](https://dev.mysql.com/)
   <br />
 
-
 ## 安裝步驟
-下載專案  <br />
+1. 下載專案  <br />
 ```git clone https://github.com/eruc1117/twitter-api-2020.git```
 
-移動至專案資料夾  <br />
+2. 移動至專案資料夾  <br />
 ```cd twitter-api-2020```
 
-套件下載  <br />
+3. 套件下載  <br />
 ```npm install```
 
-補上環境變數 .env <br />
+4. 補上環境變數 .env <br />
 
-JWT_SECRET=自行設定  <br />
-IMGUR_CLIENT_ID=自己在[imgur](https://api.imgur.com/)的ID
+* JWT_SECRET=自行設定  <br />
+* IMGUR_CLIENT_ID=自己在[imgur](https://api.imgur.com/)的ID
 
-伺服器運行  <br />
+5. 執行MySQL，並新增一個MYSQL Connections，並填入以下訊息：
+* Title: Local instance 3306
+* Hostname: localhost
+* Port: 3306
+* Username: root
+* Password: password
+
+6. 回到專案，在專案Terminal上建立資料庫 <br />
+```npx sequelize db:migrate```
+7. 在專案Terminal上建立種子資料 <br />
+```npx sequelize seed:all```
+
+8. 伺服器運行  <br />
 ```npm run dev```
 
 這個專案是前後端分離之專案。 <br />
 前端 [Github 連結](https://github.com/DaisyLIEN/twitter-front-end-vue.js)  <br />
-[入口網站](https://peggyhung.github.io/Demo-of-Twitter/#/signin)
+專案 [入口網站](https://peggyhung.github.io/Demo-of-Twitter/#/signin)
 
-#### 測試用帳號
-##### 後台帳號
+### 測試用帳號
+#### 後台帳號
 帳號: root  <br />
 密碼: 12345678
 
-##### 前台帳號
+#### 前台帳號
 帳號: user1  <br />
 密碼: 12345678
 
