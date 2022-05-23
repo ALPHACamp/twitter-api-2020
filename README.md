@@ -33,7 +33,7 @@ IMGUR_CLIENT_ID=自己在[imgur](https://api.imgur.com/)的ID
 伺服器運行  <br />
 ```npm run dev```
 
-這個專案是前後端分離之專案。
+這個專案是前後端分離之專案。 <br />
 前端 [Github 連結](https://github.com/DaisyLIEN/twitter-front-end-vue.js)  <br />
 [入口網站](https://peggyhung.github.io/Demo-of-Twitter/#/signin)
 
@@ -49,7 +49,7 @@ IMGUR_CLIENT_ID=自己在[imgur](https://api.imgur.com/)的ID
 ***
 ## API 文件  
 
-前端連接時依照後端伺服器設置位置俄決定
+前端連接時依照後端伺服器設置位置決定
 `{{baseUrl}}` <br />
 本地 `http://localhost:3000` <br />
 雲端範例 `https://still-savannah-82085.herokuapp.com`
