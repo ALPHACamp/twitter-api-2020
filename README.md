@@ -37,7 +37,7 @@
 > [SeijoHuang](https://github.com/SeijoHuang)<br>
 > [IreneLIU](https://github.com/Irene289)
 
-## 本地安裝流程
+## 完整專案本地安裝流程
 
 1. 請確認電腦已經安裝 Node.js、npm 與 Mysql workbench
 2. 打開終端機，輸入以下指令將此專案 clone 到本地
@@ -67,32 +67,39 @@ CREATE DATABASE ac_twitter_workspace;
 npx sequelize db:migrate
 npx sequelize db:seed:all
 ```
-7. 當種子資料建立完畢後，請繼續輸入以下內容，開始運行後端伺服器
+7. 新增 .env 檔案，根據 .env.example 補足所需變數設定
+```
+SESSION_SECRET=自訂加密salt
+JWT_SECRET=自訂加密salt
+IMGUR_CLIENT_ID=可使用的 Imgur id
+GITHUB_PAGE=前端頁面網址
+```
+8. 當種子資料建立完畢後，請繼續輸入以下內容，開始運行後端伺服器
 ```
 npm run dev
 ```
-8. 若是跑出以下內容，代表伺服器已經成功運行了
+9. 若是跑出以下內容，代表伺服器已經成功運行了
 ```
 Example app listening on http://localhost:3000
 ```
-9. 開啟另一個終端機分頁，複製專案前端程式至本地
+10. 開啟另一個終端機分頁，複製專案前端程式至本地
 ```
 git clone https://github.com/Irene289/twitter-front-end-vue.git
 ```
-10. 終端機移動至專案資料夾，輸入指令安裝套件、建立 Vue Page 以及運行前端伺服器
+11. 終端機移動至專案資料夾，輸入指令安裝套件、建立 Vue Page 以及運行前端伺服器
 ```
 cd 專案資料夾
 npm install
 npm run build
 npm run serve
 ```
-11. 前端終端機若是出現下列指令表示運行成功
+12. 前端終端機若是出現下列指令表示運行成功
 ```
 App running at:
   - Local:   http://localhost:8080/ 
   - Network: http://172.20.10.2:8080/
 ```
-12. 確認已經使用兩個終端機頁面分別運行前端伺服器以及後端伺服器，即能使用下列網址進入專案介面，<br>
+13. 確認已經使用兩個終端機頁面分別運行前端伺服器以及後端伺服器，即能使用下列網址進入專案介面，<br>
     並能使用以下模擬帳號登入及體驗網站
 ```
 http://localhost:8080/ 
@@ -105,8 +112,8 @@ http://localhost:8080/
 管理員帳號 root@example.com
 密碼 12345678
 ```
-13. 要結束運行請分別在兩個終端機頁面按下 ctrl + c 即可終止程式。
-14. 若要刪除資料庫，可在後端終端機輸入以下指令，即可刪除相關資料。
+14. 要結束運行請分別在兩個終端機頁面按下 ctrl + c 即可終止程式。
+15. 若要刪除資料庫，可在後端終端機輸入以下指令，即可刪除相關資料。
 ```
 npx sequelize db:drop
 ```
