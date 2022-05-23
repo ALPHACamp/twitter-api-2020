@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class Followship extends Model {
+  class TweetHashtag extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,14 +13,14 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  Followship.init({
-    followerId: DataTypes.INTEGER,
-    followingId: DataTypes.INTEGER
+  TweetHashtag.init({
+    hashtagId: DataTypes.INTEGER,
+    tweetId: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Followship',
-    tableName: 'Followships',
+    modelName: 'TweetHashtag',
+    tableName: 'TweetHashtags',
     underscored: true
   })
-  return Followship
+  return TweetHashtag
 }
