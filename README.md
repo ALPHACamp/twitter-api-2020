@@ -138,7 +138,7 @@ IMGUR_CLIENT_ID=自己在[imgur](https://api.imgur.com/)的ID
 `DELETE /api/admin/tweets/:id` <br />
 id => 推文 id
   <br />
-回傳
+回傳成功
 
 ### 前台相關
   <br />
