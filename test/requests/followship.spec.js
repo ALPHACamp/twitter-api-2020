@@ -29,7 +29,7 @@ describe('# followship requests', () => {
         });
         this.getUser = sinon.stub(
             helpers, 'getUser'
-        ).returns({id: 1, Followings: []});
+        ).returns({id: 1, Followings: [], role: 'user'});
         // 在測試資料庫中，新增 mock 資料
         await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
         await db.User.create({account: 'User2', name: 'User2', email: 'User2', password: 'User2'})
@@ -83,7 +83,7 @@ describe('# followship requests', () => {
         });
         this.getUser = sinon.stub(
             helpers, 'getUser'
-        ).returns({id: 1, Followings: []});
+        ).returns({id: 1, Followings: [], role: 'user'});
         // 在測試資料庫中，新增 mock 資料
         await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})        
         await db.User.create({account: 'User2', name: 'User2', email: 'User2', password: 'User2'})        
