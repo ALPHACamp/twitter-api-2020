@@ -1,6 +1,6 @@
-var chai = require('chai');
-var sinon = require('sinon');
-var proxyquire = require('proxyquire');
+const chai = require('chai');
+const sinon = require('sinon');
+const proxyquire = require('proxyquire');
 chai.use(require('sinon-chai'));
 
 const { expect } = require('chai')
