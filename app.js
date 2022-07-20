@@ -13,3 +13,7 @@ app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
+
+const router = require('./routes')
+router(app)
+module.exports = app
