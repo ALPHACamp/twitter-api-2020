@@ -2,7 +2,7 @@ const { StatusCodes } = require('http-status-codes')
 const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 
-const userController = {
+const adminController = {
   signin: async (req, res, next) => {
     try {
       const { account, password } = req.body
@@ -21,11 +21,11 @@ const userController = {
             message: '使用者不存在'
           })
       }
-      if (user.role !== 'user') {
+      if (user.role !== 'admin') {
         return res.status(StatusCodes.FORBIDDEN)
           .json({
             status: 'error',
-            message: '無使用者權限'
+            message: '無管理員權限'
           })
       }
       const payload = {
@@ -47,4 +47,4 @@ const userController = {
   }
 }
 
-module.exports = userController
+module.exports = adminController
