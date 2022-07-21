@@ -1,6 +1,5 @@
 const passport = require('../config/passport')
 const { StatusCodes } = require('http-status-codes')
-const helpers = require('../_helpers')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (error, user) => {
@@ -17,11 +16,20 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (helpers.ensureAuthenticated(req)) {
-    if (helpers.getUser(req) && helpers.getUser(req).role === 'admin') return next()
-  } else {
-    return res.status(403).json({ status: 'error', message: 'Permission denied!' })
-  } return res.status(403).json({ status: 'error', message: 'Permission denied!' })
+  if (!req.user) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      status: 'error',
+      message: '帳號不存在'
+    })
+  }
+
+  if (!req.user.role !== 'admin') {
+    return res.status(StatusCodes.FORBIDDEN).json({
+      status: 'error',
+      message: '權限不足'
+    })
+  }
+  next()
 }
 
 module.exports = {
