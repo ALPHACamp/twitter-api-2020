@@ -7,20 +7,20 @@ const userController = {
   signin: async (req, res) => {
     try {
       try {
-        const { email, password } = req.body
-        if (!email || !password) {
+        const { account, password } = req.body
+        if (!account || !password) {
           return res.status(StatusCodes.NOT_ACCEPTABLE)
             .json({
               status: 'error',
               message: '必填欄位不可空白'
             })
         }
-        const user = await User.findOne({ where: { email } })
+        const user = await User.findOne({ where: { account } })
         if (!user) {
           return res.status(StatusCodes.UNAUTHORIZED)
             .json({
               status: 'error',
-              message: 'Email或密碼錯誤'
+              message: '帳號或密碼錯誤'
             })
         }
         const isPasseordMatched = await bcrypt.compare(password, user.password)
@@ -29,14 +29,8 @@ const userController = {
           return res.status(StatusCodes.UNAUTHORIZED)
             .json({
               status: 'error',
-              message: 'Email或密碼錯誤'
+              message: '帳號或密碼錯誤'
             })
-        }
-        if (!user.verified) {
-          return res.status(StatusCodes.UNAUTHORIZED).json({
-            status: 'error',
-            message: '請先驗證你的Email'
-          })
         }
 
         const payload = {
