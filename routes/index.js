@@ -8,12 +8,9 @@ const adminController = require('../controllers/admin-controller')
 
 router.post('/admin/signin', adminController.signin)
 router.post('/signin', userController.signin)
+router.post('/users', userController.signUp)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
-
-router.get('/', (req, res) => {
-  res.json({ data: 'hello' })
-})
 
 router.use('/', errorHandler)
 
