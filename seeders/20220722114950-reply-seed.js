@@ -8,13 +8,19 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
 
+    const tweets = await queryInterface.sequelize.query(
+      'SELECT id FROM Tweets;',
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
+
     users.shift()
 
-    await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: users.length * 10 }).map((_, index) =>
+    await queryInterface.bulkInsert('Replies',
+      Array.from({ length: tweets.length * 3 }).map((_, index) =>
         ({
-          UserId: users[Math.floor(index / 10)].id,
-          description: faker.lorem.text().substring(0, 50),
+          UserId: users[Math.floor(Math.random() * (users.length - 1))].id,
+          TweetId: tweets[Math.floor((index / 3))].id,
+          comment: faker.lorem.text().substring(0, 30),
           createdAt: new Date(),
           updatedAt: new Date()
         })
