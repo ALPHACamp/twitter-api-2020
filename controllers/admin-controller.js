@@ -37,11 +37,7 @@ const adminController = {
     try {
       let users = await User.findAll()
       users = await users.map(user => ({ ...user.toJSON() }))
-      return res.status(StatusCodes.OK).json({
-        status: 'success',
-        message: '成功取得使用者資料',
-        data: users
-      })
+      return res.status(StatusCodes.OK).json(users)
     } catch (error) {
       next(error)
     }

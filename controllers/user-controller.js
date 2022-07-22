@@ -1,8 +1,9 @@
 const { StatusCodes } = require('http-status-codes')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { Op } = require('sequelize')
 const bcrypt = require('bcryptjs')
+const helpers = require('../_helpers')
 
 const userController = {
   signin: async (req, res, next) => {
@@ -94,6 +95,30 @@ const userController = {
       return res.status(StatusCodes.OK).json({
         status: 'success',
         message: '成功創建'
+      })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(helpers.getUser(req).id, {
+        include: [
+          { model: Tweet },
+          { model: Reply },
+          { model: Like }
+        ]
+      })
+      if (!user) {
+        return res.status(StatusCodes.NotFound).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      return res.status(StatusCodes.OK).json({
+        status: 'success',
+        message: '成功取得現在的使用者',
+        data: user
       })
     } catch (error) {
       next(error)
