@@ -5,22 +5,11 @@ const { User } = require('../models')
 const adminController = {
   signin: async (req, res, next) => {
     try {
-      const { account, password } = req.body
-      if (!account || !password) {
+      if (req.user.error) {
         return res.status(StatusCodes.NOT_ACCEPTABLE)
-          .json({
-            status: 'error',
-            message: '必欄欄位不可為空'
-          })
+          .json(req.user.error)
       }
-      let user = await User.findOne({ where: { account } })
-      if (!user) {
-        return res.status(StatusCodes.NOT_ACCEPTABLE)
-          .json({
-            status: 'error',
-            message: '使用者不存在'
-          })
-      }
+      const user = req.user.toJSON()
       if (user.role !== 'admin') {
         return res.status(StatusCodes.FORBIDDEN)
           .json({
@@ -32,7 +21,6 @@ const adminController = {
         id: user.id
       }
       const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' })
-      user = await user.toJSON()
       delete user.password
       return res.status(StatusCodes.OK)
         .json({
@@ -43,6 +31,19 @@ const adminController = {
         })
     } catch (err) {
       next(err)
+    }
+  },
+  getUsers: async (req, res, next) => {
+    try {
+      let users = await User.findAll()
+      users = await users.map(user => ({ ...user.toJSON() }))
+      return res.status(StatusCodes.OK).json({
+        status: 'success',
+        message: '成功取得使用者資料',
+        data: users
+      })
+    } catch (error) {
+      next(error)
     }
   }
 }
