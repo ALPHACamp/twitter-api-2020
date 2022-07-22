@@ -1,11 +1,15 @@
 'use strict'
+const {
+  Model
+} = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  const Like = sequelize.define('Like', {
-    id: {
-      primaryKey: true,
-      autoIncrement: true,
-      type: DataTypes.INTEGER
-    },
+  class Like extends Model {
+    static associate (models) {
+      Like.belongsTo(models.User, { foreignKey: 'UserId' })
+      Like.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
+    }
+  }
+  Like.init({
     UserId: DataTypes.INTEGER,
     TweetId: DataTypes.INTEGER
   }, {
@@ -13,9 +17,5 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'Like',
     tableName: 'Likes'
   })
-  Like.associate = function (models) {
-    Like.belongsTo(models.User, { foreignKey: 'UserId' })
-    Like.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
-  }
   return Like
 }
