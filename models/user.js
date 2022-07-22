@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Users'
   })
   User.associate = function (models) {
+    User.hasMany(models.Tweet, { foreignKey: 'UserId' })
   }
   return User
 }
