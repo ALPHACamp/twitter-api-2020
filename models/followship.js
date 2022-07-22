@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate (models) {}
   }
   Followship.init({
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     followerId: DataTypes.INTEGER,
     followingId: DataTypes.INTEGER
   }, {

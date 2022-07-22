@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Tweet.init({
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     UserId: DataTypes.INTEGER,
     description: DataTypes.TEXT
   }, {
