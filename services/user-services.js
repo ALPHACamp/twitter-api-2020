@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const userServices = {
   signUp: (req, cb) => {
@@ -94,6 +94,53 @@ const userServices = {
       return cb(null, results)
     } catch (err) {
       cb(err)
+    }
+  },
+  addFollowing: async (req, cb) => {
+    try {
+      const followerId = req.user.id
+      const followingId = Number(req.params.followingId)
+      const [user, followship] = await Promise.all([
+        User.findByPk(followingId),
+        Followship.findOne({
+          where: {
+            followerId,
+            followingId
+          }
+        })
+      ])
+
+      if (!user) throw new Error("User didn't exist!")
+      if (followship) throw new Error('You are already following this user!')
+
+      await Followship.create({
+        followerId,
+        followingId
+      })
+
+      return cb(null, { followerId, followingId })
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  getUserFollowings: async (req, cb) => {
+    try {
+      const followings = await Followship.findAll(
+        { where: { followerId: req.params.id } }
+      )
+      return cb(null, { followings })
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  getUserFollowers: async (req, cb) => {
+    try {
+      const followers = await Followship.findAll(
+        { where: { followingId: req.params.id } }
+      )
+      return cb(null, { followers })
+    } catch (err) {
+      return cb(err)
     }
   }
 }
