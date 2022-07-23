@@ -115,13 +115,40 @@ const userController = {
           message: '使用者不存在'
         })
       }
-      return res.status(StatusCodes.OK).json({
-        status: 'success',
-        message: '成功取得現在的使用者',
-        data: user
-      })
+      return res.status(StatusCodes.OK).json({ user })
     } catch (error) {
       next(error)
+    }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      let user = await User.findByPk(userId, {
+        include: [
+          { model: Tweet },
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ]
+      })
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      user = await user.toJSON()
+      const isBeingFollowed = user.Followers.some(followers => followers.id === req.user.id)
+      delete user.password
+      return res.status(StatusCodes.OK).json(
+        {
+          ...user,
+          tweetsCounts: user.Tweets.length,
+          followingsCounts: user.Followings.length,
+          isBeingFollowed
+        }
+      )
+    } catch (err) {
+      next(err)
     }
   }
 }

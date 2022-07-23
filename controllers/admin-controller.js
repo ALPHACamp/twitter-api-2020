@@ -94,11 +94,7 @@ const adminController = {
           liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
         }
       })
-      return res.json({
-        status: 'success',
-        message: '成功取得所有tweets',
-        data: tweets
-      })
+      return res.json(tweets)
     } catch (error) {
       next(error)
     }
@@ -114,11 +110,7 @@ const adminController = {
         })
       }
       await tweet.destroy()
-      return res.status(StatusCodes.OK).json({
-        status: 'success',
-        message: '成功刪除Tweet',
-        data: tweet
-      })
+      return res.status(StatusCodes.OK).json(tweet)
     } catch (error) {
       next(error)
     }
