@@ -37,6 +37,17 @@ const userServices = {
     } catch (err) {
       return cb(err)
     }
+  },
+  getUser: (req, cb) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) throw new Error("User didn't exist!")
+
+        const userData = user.toJSON()
+        delete userData.password
+        return cb(null, { user: userData })
+      })
+      .catch(err => cb(err))
   }
 }
 
