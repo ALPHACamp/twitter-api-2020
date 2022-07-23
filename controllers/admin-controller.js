@@ -42,6 +42,12 @@ const adminController = {
           { model: User, as: 'Followers' }
         ]
       })
+      if (!users) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: 'Tweets不存在'
+        })
+      }
       users = await users.map(user => ({ ...user.toJSON() }))
       users.forEach(user => {
         user.tweetsCounts = user.Tweets.length
