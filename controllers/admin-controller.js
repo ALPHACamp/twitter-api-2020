@@ -1,6 +1,6 @@
 const { StatusCodes } = require('http-status-codes')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 
 const adminController = {
   signin: async (req, res, next) => {
@@ -45,7 +45,7 @@ const adminController = {
       if (!users) {
         return res.status(StatusCodes.NOT_FOUND).json({
           status: 'error',
-          message: 'Tweets不存在'
+          message: 'Users不存在'
         })
       }
       users = await users.map(user => ({ ...user.toJSON() }))
@@ -64,6 +64,41 @@ const adminController = {
         return (b.tweetsCounts - a.tweetsCounts)
       })
       return res.status(StatusCodes.OK).json(users)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      let tweets = await Tweet.findAll({
+        order: [['createdAt', 'DESC']],
+        include: [
+          { model: User },
+          { model: Reply },
+          { model: Like }
+        ]
+      })
+      if (!tweets) {
+        return res.json({
+          status: 'error',
+          message: 'Tweets不存在'
+        })
+      }
+      tweets = await tweets.map(tweet => tweet.toJSON())
+      tweets = tweets.map(tweet => {
+        return {
+          ...tweet,
+          description: tweet.description.substring(0, 50) + '...',
+          repliedCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length,
+          liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
+        }
+      })
+      return res.json({
+        status: 'success',
+        message: '成功取得所有tweets',
+        data: tweets
+      })
     } catch (error) {
       next(error)
     }
