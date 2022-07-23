@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 
 const userServices = {
   signUp: (req, cb) => {
@@ -70,6 +70,31 @@ const userServices = {
     })
       .then(replies => cb(null, replies))
       .catch(err => cb(err))
+  },
+  getUserLikes: async (req, cb) => {
+    const UserId = req.params.id
+    try {
+      const likedTweets = await Like.findAll({
+        where: { UserId },
+        include: [{ model: Tweet, include: [{ model: User }] }],
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
+      })
+
+      const results = []
+      await Promise.all(
+        likedTweets.map(async tweet => {
+          const TweetId = tweet.TweetId
+          const likeCount = await Like.count({ where: TweetId })
+          const replyCount = await Reply.count({ where: TweetId })
+          results.push({ ...tweet, Tweet: { ...tweet.Tweet, likeCount, replyCount } })
+        })
+      )
+      return cb(null, results)
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 

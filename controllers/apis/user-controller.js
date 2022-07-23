@@ -15,6 +15,9 @@ const userController = {
   },
   getUserReplies: (req, res, next) => {
     userServices.getUserReplies(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getUserLikes: (req, res, next) => {
+    userServices.getUserLikes(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 
