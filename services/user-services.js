@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 
 const userServices = {
   signUp: (req, cb) => {
@@ -59,8 +59,18 @@ const userServices = {
     })
       .then(tweets => cb(null, tweets))
       .catch(err => cb(err))
+  },
+  getUserReplies: (req, cb) => {
+    const UserId = req.params.id
+    Reply.findAll({
+      where: { UserId },
+      include: [{ model: User }, { model: Tweet, include: [{ model: User }] }],
+      nest: true,
+      raw: true
+    })
+      .then(replies => cb(null, replies))
+      .catch(err => cb(err))
   }
-
 }
 
 module.exports = userServices
