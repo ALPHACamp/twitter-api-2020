@@ -1,6 +1,6 @@
 const { StatusCodes } = require('http-status-codes')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet, Like } = require('../models')
 
 const adminController = {
   signin: async (req, res, next) => {
@@ -35,8 +35,28 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      let users = await User.findAll()
+      let users = await User.findAll({
+        include: [
+          { model: Tweet, include: { model: Like } },
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ]
+      })
       users = await users.map(user => ({ ...user.toJSON() }))
+      users.forEach(user => {
+        user.tweetsCounts = user.Tweets.length
+        user.followingsCounts = user.Followings.length
+        user.followersCounts = user.Followers.length
+        user.likedTweetsCounts = user.Tweets.reduce((prev, next) => prev + next.Likes.length, 0)
+        delete user.password
+        delete user.Tweets
+        delete user.Followings
+        delete user.Followers
+      })
+      users.sort((a, b) => {
+        if (a.tweetsCounts === b.tweetsCounts) return (a.id - b.id)
+        return (b.tweetsCounts - a.tweetsCounts)
+      })
       return res.status(StatusCodes.OK).json(users)
     } catch (error) {
       next(error)
