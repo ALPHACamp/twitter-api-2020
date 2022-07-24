@@ -74,22 +74,41 @@ const userServices = {
       return cb(err)
     }
   },
-  getUserTweets: (req, cb) => {
+  getUserTweets: async (req, cb) => {
     const UserId = req.params.id
-    Tweet.findAll({
-      where: { UserId },
-      include: [User],
-      nest: true,
-      raw: true
-    })
-      .then(tweets => cb(null, tweets))
-      .catch(err => cb(err))
+    try {
+      const tweets = await Tweet.findAll({
+        where: { UserId },
+        include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
+      })
+
+      const results = []
+      await Promise.all(tweets.map(async tweet => {
+        const TweetId = tweet.TweetId
+        const likeCount = await Like.count({ where: TweetId })
+        const replyCount = await Reply.count({ where: TweetId })
+        results.push(
+          {
+            ...tweet,
+            likeCount,
+            replyCount
+          })
+      }))
+      return cb(null, results)
+    } catch (err) {
+      cb(err)
+    }
   },
   getUserReplies: (req, cb) => {
     const UserId = req.params.id
     Reply.findAll({
       where: { UserId },
-      include: [{ model: User }, { model: Tweet, include: [{ model: User }] }],
+      include: [{ model: User, attributes: ['account', 'name', 'avatar'] },
+        { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account'] }] }],
+      order: [['createdAt', 'DESC']],
       nest: true,
       raw: true
     })
@@ -101,7 +120,7 @@ const userServices = {
     try {
       const likedTweets = await Like.findAll({
         where: { UserId },
-        include: [{ model: Tweet, include: [{ model: User }] }],
+        include: [{ model: Tweet, include: [{ model: User, attributes: ['account', 'name', 'avatar'] }] }],
         order: [['createdAt', 'DESC']],
         nest: true,
         raw: true
@@ -109,16 +128,16 @@ const userServices = {
 
       const results = []
       await Promise.all(
-        likedTweets.map(async tweet => {
-          const TweetId = tweet.TweetId
+        likedTweets.map(async like => {
+          const TweetId = like.TweetId
           const likeCount = await Like.count({ where: TweetId })
           const replyCount = await Reply.count({ where: TweetId })
-          results.push({ ...tweet, Tweet: { ...tweet.Tweet, likeCount, replyCount } })
+          results.push({ ...like, Tweet: { ...like.Tweet, likeCount, replyCount } })
         })
       )
       return cb(null, results)
     } catch (err) {
-      cb(err)
+      return cb(err)
     }
   },
   addFollowing: async (req, cb) => {
