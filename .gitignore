@@ -1,6 +1,8 @@
 .DS_Store
 *.DS_Store
-
+# Helper
+upload/
+temp/
 # Logs
 logs
 *.log
@@ -85,3 +87,6 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# System_doc
+System_doc
