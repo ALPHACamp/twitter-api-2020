@@ -8,5 +8,6 @@ router.get('/current_user', userController.getCurrentUser)
 router.put('/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.editUser)
 router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id/replied_tweets', userController.getUserReliedTweets)
+router.get('/:id/likes', userController.getUserLikes)
 
 module.exports = router

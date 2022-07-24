@@ -185,14 +185,23 @@ const userController = {
           message: '自我介紹不能超過150字'
         })
       }
-      const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
-      const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
+      if (files) {
+        const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
+        const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
+        await user.update({
+          ...user,
+          name,
+          introduction,
+          avatar: avatar || user.avatar,
+          cover: cover || user.cover
+        })
+      }
       await user.update({
         ...user,
         name,
         introduction,
-        avatar: avatar || user.avatar,
-        cover: cover || user.cover
+        avatar: user.avatar,
+        cover: user.cover
       })
       return res.status(StatusCodes.OK).json({ status: 'success' })
     } catch (error) {
@@ -268,6 +277,48 @@ const userController = {
         }
       })
       return res.status(StatusCodes.OK).json(replies)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      let likes = await Like.findAll({
+        where: { UserId: userId },
+        order: [
+          ['createdAt', 'DESC']
+        ],
+        include: [
+          { model: Tweet, include: [User, Like, Reply] }
+        ]
+      })
+
+      likes = await likes.map(like => like.toJSON())
+      likes.map(like => {
+        const likedTweet = like.Tweet
+        return {
+          likeCreatedAt: like.createdAt,
+          TweetId: likedTweet.id,
+          description: likedTweet.description,
+          createdAt: likedTweet.createdAt,
+          userOflikedTweet: likedTweet.User.id,
+          userNameOflikedTweet: likedTweet.User.name,
+          userAccountOflikedTweet: likedTweet.User.account,
+          userAvatarOflikedTweet: likedTweet.User.avatar,
+          repliedCounts: likedTweet.Replies.length,
+          likesCounts: likedTweet.Likes.length,
+          isBeingLiked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === like.Tweet.id) : false
+        }
+      })
+      return res.status(StatusCodes.OK).json(likes)
     } catch (error) {
       next(error)
     }
