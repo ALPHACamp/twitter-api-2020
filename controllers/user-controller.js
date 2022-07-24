@@ -217,10 +217,7 @@ const userController = {
       const tweets = await user.Tweets.map(tweet => {
         return {
           ...tweet,
-          userOfTweet: user.id,
-          userAccountOfTweet: user.account,
-          userNameOfTweet: user.name,
-          userAvatarOfTweet: user.avatar,
+          userOfTweet: user,
           repliedCounts: tweet.Replies.length,
           likesCounts: tweet.Likes.length,
           isBeingliked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === tweet.id) : false
@@ -228,6 +225,49 @@ const userController = {
       })
       tweets.sort((a, b) => b.createdAt - a.createdAt)
       return res.status(StatusCodes.OK).json(tweets)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserReliedTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      let replies = await Reply.findAll({
+        where: { UserId: userId },
+        order: [['createdAt', 'DESC']],
+        include: [
+          { model: Tweet, include: User }
+        ]
+      })
+      replies = await replies.map(reply => reply.toJSON())
+      replies = replies.map(reply => {
+        const repliedTweet = reply.Tweet
+        return {
+          replyId: reply.id,
+          comment: reply.comment,
+          repliedTweet: repliedTweet.id,
+          repliedTweetDescription: repliedTweet.description,
+          userOfRepliedTweet: repliedTweet.User.id,
+          userAccountOfRepliedTweet: repliedTweet.User.account,
+          userNameOfRepliedTweet: repliedTweet.User.name,
+          userAvatarOfRepliedTweet: repliedTweet.User.avatar,
+          repliedTweetCreatedAt: repliedTweet.createdAt,
+          isBeingliked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === repliedTweet.id) : false,
+          userOfReply: user.id,
+          userAccountOfReply: user.account,
+          userNameOfReply: user.name,
+          userAvatarOfReply: user.avatar,
+          timeOfReply: reply.createdAt
+        }
+      })
+      return res.status(StatusCodes.OK).json(replies)
     } catch (error) {
       next(error)
     }
