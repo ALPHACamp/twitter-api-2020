@@ -44,7 +44,7 @@ const userController = {
       const checkPassword = req.body.checkPassword.trim()
       const name = req.body.name.trim()
       const email = req.body.email.trim()
-      // const emailRegex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/ //eslint-disable-line
+      const emailRegex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/ //eslint-disable-line
       if (!account || !password || !checkPassword || !name || !email) {
         return res.status(StatusCodes.NOT_ACCEPTABLE).json(
           {
@@ -59,13 +59,13 @@ const userController = {
             message: '密碼與確認密碼不相符'
           })
       }
-      // if (!emailRegex.test(email)) {
-      //   return res.status(StatusCodes.NOT_ACCEPTABLE)
-      //     .json({
-      //       status: 'error',
-      //       message: '信箱格式不符合'
-      //     })
-      // }
+      if (!emailRegex.test(email)) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE)
+          .json({
+            status: 'error',
+            message: '信箱格式不符合'
+          })
+      }
       const user = await User.findAll({
         where: {
           [Op.or]: [
@@ -194,7 +194,40 @@ const userController = {
         avatar: avatar || user.avatar,
         cover: cover || user.cover
       })
-      return res.json({ status: 'success' })
+      return res.status(StatusCodes.OK).json({ status: 'success' })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      let user = await User.findByPk(userId, {
+        include: [
+          { model: Tweet, include: [Reply, Like] }
+        ]
+      })
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      user = await user.toJSON()
+      const tweets = await user.Tweets.map(tweet => {
+        return {
+          ...tweet,
+          userOfTweet: user.id,
+          userAccountOfTweet: user.account,
+          userNameOfTweet: user.name,
+          userAvatarOfTweet: user.avatar,
+          repliedCounts: tweet.Replies.length,
+          likesCounts: tweet.Likes.length,
+          isBeingliked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === tweet.id) : false
+        }
+      })
+      tweets.sort((a, b) => b.createdAt - a.createdAt)
+      return res.status(StatusCodes.OK).json(tweets)
     } catch (error) {
       next(error)
     }
