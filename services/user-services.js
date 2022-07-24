@@ -49,6 +49,31 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
+  putUser: async (req, cb) => {
+    try {
+      if (req.body.password !== req.body.checkPassword) {
+        return cb(Error('Passwords do not match!'))
+      }
+
+      const user = await User.findByPk(req.params.id)
+      const hash = await bcrypt.hash(req.body.password, 10)
+
+      const updateData = {}
+      req.body.account && (updateData.account = req.body.account)
+      req.body.name === undefined || (updateData.name = req.body.name)
+      req.body.email && (updateData.email = req.body.email)
+      req.body.password === undefined || (updateData.password = hash)
+      req.body.introduction === undefined || (updateData.introduction = req.body.introduction)
+
+      await user.update(updateData)
+
+      const userData = user.toJSON()
+      delete userData.password
+      return cb(null, userData)
+    } catch (err) {
+      return cb(err)
+    }
+  },
   getUserTweets: (req, cb) => {
     const UserId = req.params.id
     Tweet.findAll({
