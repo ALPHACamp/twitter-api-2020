@@ -42,7 +42,12 @@ const jwtOptions = {
 
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id)
-    .then(user => cb(null, user))
+    .then(user => {
+      if (user) {
+        return cb(null, user)
+      }
+      return cb(null, false)
+    })
     .catch(err => cb(err))
 }))
 

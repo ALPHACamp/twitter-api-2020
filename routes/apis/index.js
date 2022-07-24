@@ -4,10 +4,11 @@ const router = express.Router()
 const passport = require('../../config/passport')
 const userController = require('../../controllers/apis/user-controller')
 
-const { authenticated } = require('../../middleware/api-auth')
+const { authenticated, authenticatedOwner } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 
 router.get('/users/:id', authenticated, userController.getUser)
+router.put('/users/:id', authenticatedOwner, userController.putUser)
 router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)

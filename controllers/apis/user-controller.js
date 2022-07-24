@@ -10,6 +10,9 @@ const userController = {
   getUser: (req, res, next) => {
     userServices.getUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', ...data.user }))
   },
+  putUser: (req, res, next) => {
+    userServices.putUser(req, (err, data) => err ? next(err) : res.json(data))
+  },
   getUserTweets: (req, res, next) => {
     userServices.getUserTweets(req, (err, data) => err ? next(err) : res.json(data))
   },
