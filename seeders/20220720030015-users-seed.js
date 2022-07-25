@@ -23,17 +23,17 @@ module.exports = {
     // 新增 admin 種子資料
     await queryInterface.bulkInsert('Users',
       [{
-        name: 'root',
-        email: 'root@example.com',
-        password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+        name: SEED_USER.name,
+        email: SEED_USER.email,
+        password: bcrypt.hashSync(SEED_USER.password, bcrypt.genSaltSync(10)),
         role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date(),
       }]
       , {})
-    // 新增 user 種子資料
+    // 新增 5 個一般使用者 種子資料
     await queryInterface.bulkInsert('Users',
-      Array.from({ length: 3 }).map((item, index) => {
+      Array.from({ length: 5 }).map((item, index) => {
         let name = faker.name.firstName()
         return ({
           name: name,
@@ -46,6 +46,33 @@ module.exports = {
       }
       )
       , {})
+    // 新增每個使用者有 10 篇 post 種子資料
+    await queryInterface.bulkInsert('Tweets',
+      Array.from({ length: 50 }).map((item, index) => {
+        let UserId = Math.floor(index / 10) + 2
+        let UserTweetsIndex = index % 10 + 1
+        return ({
+          UserId: UserId,
+          description: `User: ${UserId} 的第 ${UserTweetsIndex} 篇推文`,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+      })
+    )
+    // 新增每篇 post 有隨機 3 個留言者，每個人有 1 則留言 種子資料
+    await queryInterface.bulkInsert('Replies',
+      Array.from({ length: 150 }).map((item, index) => {
+        let UserId = Math.floor(Math.random() * 5) + 2
+        let TweetId = Math.floor(index / 3) + 1
+        return ({
+          UserId: UserId,
+          TweetId: TweetId,
+          comment: `User: ${UserId} 對第 ${TweetId} 篇推文的回覆`,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+      })
+    )
   },
 
   async down(queryInterface, Sequelize) {
@@ -57,5 +84,7 @@ module.exports = {
       return queryInterface.bulkDelete('People', null, {});
     */
     await queryInterface.bulkDelete('Users', null, {})
+    await queryInterface.bulkDelete('Tweets', null, {})
+    await queryInterface.bulkDelete('Replies', null, {})
   }
 };
