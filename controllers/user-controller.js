@@ -100,7 +100,7 @@ const userController = {
   },
   getCurrentUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(helpers.getUser(req).id, {
+      let user = await User.findByPk(helpers.getUser(req).id, {
         include: [
           { model: Tweet },
           { model: Reply },
@@ -113,6 +113,10 @@ const userController = {
           message: '使用者不存在'
         })
       }
+      user = await user.toJSON()
+      delete user.password
+      delete user.isAdmin
+      delete user.role
       return res.status(StatusCodes.OK).json({ user })
     } catch (error) {
       next(error)
