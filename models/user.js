@@ -21,16 +21,19 @@ module.exports = (sequelize, DataTypes) => {
     password: DataTypes.STRING,
     name: DataTypes.STRING,
     avatar: DataTypes.STRING,
+    cover: DataTypes.STRING,
     introduction: DataTypes.TEXT,
     role: DataTypes.STRING
   }, {
     hooks: {
       beforeCreate: user => {
-        if (!user.account) {
-          user.account = (Math.floor(Math.random() * 9999999999) + 1000000000).toString()
-        }
-        if (!user.email) {
-          user.email = 'mail@' + user.account + '.me'
+        if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+          if (!user.account) {
+            user.account = (Math.floor(Math.random() * 9999999999) + 1000000000).toString()
+          }
+          if (!user.email) {
+            user.email = 'mail@' + user.account + '.me'
+          }
         }
       }
     },
