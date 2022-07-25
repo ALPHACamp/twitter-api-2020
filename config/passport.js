@@ -35,7 +35,7 @@ const options = {
 
 passport.use(new JWTStrategy(options, async (payload, done) => {
   try {
-    const user = await User.findByPk(payload.id, {
+    let user = await User.findByPk(payload.id, {
       include: [
         { model: User, as: 'Followings' },
         { model: User, as: 'Followers' },
@@ -43,6 +43,7 @@ passport.use(new JWTStrategy(options, async (payload, done) => {
       ]
     })
     if (!user) return done(null, false)
+    user = await user.toJSON()
     return done(null, user)
   } catch (error) {
     done(error, false)
