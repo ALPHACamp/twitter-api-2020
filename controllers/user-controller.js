@@ -322,6 +322,91 @@ const userController = {
     } catch (error) {
       next(error)
     }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      let user = await User.findByPk(userId, {
+        include: [{ model: User, as: 'Followings' }]
+      })
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      user = await user.toJSON()
+      let followingsOfUser = user.Followings.map(following => {
+        return {
+          userOfFollowing: following.id,
+          userNameOfFollowing: following.name,
+          userAccountOfFollowing: following.account,
+          userAvatarOfFollowing: following.avatar,
+          createdAt: following.createdAt,
+          isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false
+        }
+      })
+      followingsOfUser = followingsOfUser.sort((a, b) => b.createdAt - a.createdAt)
+
+      return res.status(StatusCodes.OK).json(followingsOfUser)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      let user = await User.findByPk(userId,
+        {
+          include: [{ model: User, as: 'Followers' }]
+        })
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      user = await user.toJSON()
+      let followersOfUser = user.Followers.map(follower => {
+        return {
+          followerId: follower.id,
+          userNameOfFollower: follower.name,
+          userAccountOfFollower: follower.account,
+          userAvatarOfFollower: follower.avatar,
+          createdAt: follower.createdAt,
+          isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === follower.id) : false
+        }
+      })
+      followersOfUser = followersOfUser.sort((a, b) => b.createdAt - a.createdAt)
+
+      return res.status(StatusCodes.OK).json(followersOfUser)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getTop10Users: async (req, res, next) => {
+    try {
+      let users = await User.findAll({
+        include: {
+          model: User, as: 'Followers'
+        }
+      })
+      users = await users.map(user => user.toJSON())
+      let top10Users = users
+        .map(user => ({
+          id: user.id,
+          name: user.name,
+          account: user.account,
+          avatar: user.avatar,
+          followersCounts: user.Followers.length,
+          isFollowing: req.user.Followings.some(following => following.id === user.id)
+        }))
+      top10Users = top10Users.sort((a, b) => b.followersCounts - a.followersCounts).slice(0, 10)
+
+      return res.status(StatusCodes.OK).json(top10Users)
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
