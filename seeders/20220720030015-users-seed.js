@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 
 const SEED_USER = {
   name: 'root',
+  account: 'root',
   email: 'root@example.com',
   password: '12345678'
 }
@@ -24,6 +25,7 @@ module.exports = {
     await queryInterface.bulkInsert('Users',
       [{
         name: SEED_USER.name,
+        account: SEED_USER.account, 
         email: SEED_USER.email,
         password: bcrypt.hashSync(SEED_USER.password, bcrypt.genSaltSync(10)),
         role: 'admin',
@@ -37,6 +39,7 @@ module.exports = {
         let name = faker.name.firstName()
         return ({
           name: name,
+          account: name,
           email: name + '@aa.com',
           password: bcrypt.hashSync(name, bcrypt.genSaltSync(10)),
           role: 'user',

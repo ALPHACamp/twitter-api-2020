@@ -1,7 +1,8 @@
-const adminController = require('../controllers/admin')
+const adminController = require('../controllers/adminController')
+const userController = require('../controllers/userController')
 
 module.exports = (app) => {
-  app.post('/api/users')
+  app.post('/api/users', userController.signUp)
   app.put('/api/users/:id')
   app.get('/api/users/:id/tweets')
   app.get('/api/users/:id/replied_tweets')
