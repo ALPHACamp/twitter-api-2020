@@ -44,7 +44,7 @@ const userController = {
       const checkPassword = req.body.checkPassword.trim()
       const name = req.body.name.trim()
       const email = req.body.email.trim()
-      // const emailRegex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/ //eslint-disable-line
+      const emailRegex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/ //eslint-disable-line
       if (!account || !password || !checkPassword || !name || !email) {
         return res.status(StatusCodes.NOT_ACCEPTABLE).json(
           {
@@ -59,13 +59,13 @@ const userController = {
             message: '密碼與確認密碼不相符'
           })
       }
-      // if (!emailRegex.test(email)) {
-      //   return res.status(StatusCodes.NOT_ACCEPTABLE)
-      //     .json({
-      //       status: 'error',
-      //       message: '信箱格式不符合'
-      //     })
-      // }
+      if (!emailRegex.test(email)) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE)
+          .json({
+            status: 'error',
+            message: '信箱格式不符合'
+          })
+      }
       const user = await User.findAll({
         where: {
           [Op.or]: [
@@ -185,16 +185,140 @@ const userController = {
           message: '自我介紹不能超過150字'
         })
       }
-      const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
-      const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
+      if (files) {
+        const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
+        const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
+        await user.update({
+          ...user,
+          name,
+          introduction,
+          avatar: avatar || user.avatar,
+          cover: cover || user.cover
+        })
+      }
       await user.update({
         ...user,
         name,
         introduction,
-        avatar: avatar || user.avatar,
-        cover: cover || user.cover
+        avatar: user.avatar,
+        cover: user.cover
       })
-      return res.json({ status: 'success' })
+      return res.status(StatusCodes.OK).json({ status: 'success' })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      let user = await User.findByPk(userId, {
+        include: [
+          { model: Tweet, include: [Reply, Like] }
+        ]
+      })
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      user = await user.toJSON()
+      const tweets = await user.Tweets.map(tweet => {
+        return {
+          ...tweet,
+          userOfTweet: user,
+          repliedCounts: tweet.Replies.length,
+          likesCounts: tweet.Likes.length,
+          isBeingliked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === tweet.id) : false
+        }
+      })
+      tweets.sort((a, b) => b.createdAt - a.createdAt)
+      return res.status(StatusCodes.OK).json(tweets)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserReliedTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      let replies = await Reply.findAll({
+        where: { UserId: userId },
+        order: [['createdAt', 'DESC']],
+        include: [
+          { model: Tweet, include: User }
+        ]
+      })
+      replies = await replies.map(reply => reply.toJSON())
+      replies = replies.map(reply => {
+        const repliedTweet = reply.Tweet
+        return {
+          replyId: reply.id,
+          comment: reply.comment,
+          repliedTweet: repliedTweet.id,
+          repliedTweetDescription: repliedTweet.description,
+          userOfRepliedTweet: repliedTweet.User.id,
+          userAccountOfRepliedTweet: repliedTweet.User.account,
+          userNameOfRepliedTweet: repliedTweet.User.name,
+          userAvatarOfRepliedTweet: repliedTweet.User.avatar,
+          repliedTweetCreatedAt: repliedTweet.createdAt,
+          isBeingliked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === repliedTweet.id) : false,
+          userOfReply: user.id,
+          userAccountOfReply: user.account,
+          userNameOfReply: user.name,
+          userAvatarOfReply: user.avatar,
+          timeOfReply: reply.createdAt
+        }
+      })
+      return res.status(StatusCodes.OK).json(replies)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      let likes = await Like.findAll({
+        where: { UserId: userId },
+        order: [
+          ['createdAt', 'DESC']
+        ],
+        include: [
+          { model: Tweet, include: [User, Like, Reply] }
+        ]
+      })
+
+      likes = await likes.map(like => like.toJSON())
+      likes.map(like => {
+        const likedTweet = like.Tweet
+        return {
+          likeCreatedAt: like.createdAt,
+          TweetId: likedTweet.id,
+          description: likedTweet.description,
+          createdAt: likedTweet.createdAt,
+          userOflikedTweet: likedTweet.User.id,
+          userNameOflikedTweet: likedTweet.User.name,
+          userAccountOflikedTweet: likedTweet.User.account,
+          userAvatarOflikedTweet: likedTweet.User.avatar,
+          repliedCounts: likedTweet.Replies.length,
+          likesCounts: likedTweet.Likes.length,
+          isBeingLiked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === like.Tweet.id) : false
+        }
+      })
+      return res.status(StatusCodes.OK).json(likes)
     } catch (error) {
       next(error)
     }

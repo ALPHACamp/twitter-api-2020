@@ -94,7 +94,7 @@ const adminController = {
           liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
         }
       })
-      return res.json(tweets)
+      return res.status(StatusCodes.OK).json(tweets)
     } catch (error) {
       next(error)
     }
