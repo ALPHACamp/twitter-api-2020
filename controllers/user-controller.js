@@ -218,8 +218,8 @@ const userController = {
         return {
           ...tweet,
           userOfTweet: user.id,
-          userAccountOfTweet: user.account,
           userNameOfTweet: user.name,
+          userAccountOfTweet: user.account,
           userAvatarOfTweet: user.avatar,
           repliedCounts: tweet.Replies.length,
           likesCounts: tweet.Likes.length,
