@@ -379,7 +379,7 @@ const userController = {
       })
       followersOfUser = followersOfUser.sort((a, b) => b.createdAt - a.createdAt)
 
-      return res.json(followersOfUser)
+      return res.status(StatusCodes.OK).json(followersOfUser)
     } catch (error) {
       next(error)
     }
