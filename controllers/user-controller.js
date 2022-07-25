@@ -302,7 +302,7 @@ const userController = {
       })
 
       likes = await likes.map(like => like.toJSON())
-      likes.map(like => {
+      likes = likes.map(like => {
         const likedTweet = like.Tweet
         return {
           likeCreatedAt: like.createdAt,
@@ -315,7 +315,7 @@ const userController = {
           userAvatarOflikedTweet: likedTweet.User.avatar,
           repliedCounts: likedTweet.Replies.length,
           likesCounts: likedTweet.Likes.length,
-          isBeingLiked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === like.Tweet.id) : false
+          isBeingLiked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === likedTweet.id) : false
         }
       })
       return res.status(StatusCodes.OK).json(likes)
