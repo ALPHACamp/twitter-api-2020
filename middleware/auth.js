@@ -8,7 +8,7 @@ const authenticated = passport.authenticate('jwt', {
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req)?.role === 'admin') return next()
   return res.json({
-    status: 'success',
+    status: 'error',
     message: 'permission denied'
   })
 }
