@@ -383,6 +383,30 @@ const userController = {
     } catch (error) {
       next(error)
     }
+  },
+  getTop10Users: async (req, res, next) => {
+    try {
+      let users = await User.findAll({
+        include: {
+          model: User, as: 'Followers'
+        }
+      })
+      users = await users.map(user => user.toJSON())
+      let top10Users = users
+        .map(user => ({
+          id: user.id,
+          name: user.name,
+          account: user.account,
+          avatar: user.avatar,
+          followersCounts: user.Followers.length,
+          isFollowing: req.user.Followings.some(following => following.id === user.id)
+        }))
+      top10Users = top10Users.sort((a, b) => b.followersCounts - a.followersCounts).slice(0, 10)
+
+      return res.status(StatusCodes.OK).json(top10Users)
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
