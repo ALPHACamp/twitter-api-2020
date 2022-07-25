@@ -1,5 +1,4 @@
-const db = require('../models')
-const User = db.User
+const adminController = require('../controllers/admin')
 
 module.exports = (app) => {
   app.post('/api/users')
@@ -11,7 +10,7 @@ module.exports = (app) => {
   app.get('/api/users/:id/followers')
   app.get('/api/users/:id')
 
-  app.pots('/api/followships')
+  app.post('/api/followships')
   app.delete('/api/followships/:id')
 
   app.get('/api/tweets')
@@ -22,6 +21,6 @@ module.exports = (app) => {
   app.post('/api/tweets/:id/replies')
   app.get('/api/tweets/:id')
 
-  app.get('/api/admin/users')
-  app.delete('/api/admin/tweets/:id')
+  app.get('/api/admin/users', adminController.getUsers)
+  app.delete('/api/admin/tweets/:id', adminController.deleteTweet)
 }
