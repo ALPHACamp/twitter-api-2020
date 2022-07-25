@@ -2,11 +2,11 @@
   "name": "test",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "NODE_ENV=development node app.js",
     "dev": "set \"NODE_ENV=development\" && nodemon app.js",
-    "test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000",
+    "test": "mocha test --exit --recursive --timeout 5000",
     "resetdb": "npx sequelize db:seed:undo:all && npx sequelize db:migrate:undo:all && npx sequelize db:migrate && npx sequelize db:seed:all",
     "lint": "eslint \"**/*.js\" --fix"
   },
@@ -27,7 +27,7 @@
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
     "mocha": "^6.0.2",
-    "multer": "^1.4.3",
+    "multer": "^1.4.4",
     "mysql2": "^1.6.4",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",

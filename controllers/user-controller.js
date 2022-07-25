@@ -185,14 +185,23 @@ const userController = {
           message: '自我介紹不能超過150字'
         })
       }
-      const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
-      const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
+      if (files) {
+        const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
+        const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
+        await user.update({
+          ...user,
+          name,
+          introduction,
+          avatar: avatar || user.avatar,
+          cover: cover || user.cover
+        })
+      }
       await user.update({
         ...user,
         name,
         introduction,
-        avatar: avatar || user.avatar,
-        cover: cover || user.cover
+        avatar: user.avatar,
+        cover: user.cover
       })
       return res.status(StatusCodes.OK).json({ status: 'success' })
     } catch (error) {
@@ -229,6 +238,176 @@ const userController = {
 
       tweets.sort((a, b) => b.createdAt - a.createdAt)
       return res.status(StatusCodes.OK).json(tweets)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserReliedTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      let replies = await Reply.findAll({
+        where: { UserId: userId },
+        order: [['createdAt', 'DESC']],
+        include: [
+          { model: Tweet, include: User }
+        ]
+      })
+      replies = await replies.map(reply => reply.toJSON())
+      replies = replies.map(reply => {
+        const repliedTweet = reply.Tweet
+        return {
+          replyId: reply.id,
+          comment: reply.comment,
+          repliedTweet: repliedTweet.id,
+          repliedTweetDescription: repliedTweet.description,
+          userOfRepliedTweet: repliedTweet.User.id,
+          userAccountOfRepliedTweet: repliedTweet.User.account,
+          userNameOfRepliedTweet: repliedTweet.User.name,
+          userAvatarOfRepliedTweet: repliedTweet.User.avatar,
+          repliedTweetCreatedAt: repliedTweet.createdAt,
+          isBeingliked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === repliedTweet.id) : false,
+          userOfReply: user.id,
+          userAccountOfReply: user.account,
+          userNameOfReply: user.name,
+          userAvatarOfReply: user.avatar,
+          timeOfReply: reply.createdAt
+        }
+      })
+      return res.status(StatusCodes.OK).json(replies)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      let likes = await Like.findAll({
+        where: { UserId: userId },
+        order: [
+          ['createdAt', 'DESC']
+        ],
+        include: [
+          { model: Tweet, include: [User, Like, Reply] }
+        ]
+      })
+
+      likes = await likes.map(like => like.toJSON())
+      likes.map(like => {
+        const likedTweet = like.Tweet
+        return {
+          likeCreatedAt: like.createdAt,
+          TweetId: likedTweet.id,
+          description: likedTweet.description,
+          createdAt: likedTweet.createdAt,
+          userOflikedTweet: likedTweet.User.id,
+          userNameOflikedTweet: likedTweet.User.name,
+          userAccountOflikedTweet: likedTweet.User.account,
+          userAvatarOflikedTweet: likedTweet.User.avatar,
+          repliedCounts: likedTweet.Replies.length,
+          likesCounts: likedTweet.Likes.length,
+          isBeingLiked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === like.Tweet.id) : false
+        }
+      })
+      return res.status(StatusCodes.OK).json(likes)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      let user = await User.findByPk(userId, {
+        include: [{ model: User, as: 'Followings' }]
+      })
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      user = await user.toJSON()
+      let followingsOfUser = user.Followings.map(following => {
+        return {
+          userOfFollowing: following.id,
+          userNameOfFollowing: following.name,
+          userAccountOfFollowing: following.account,
+          userAvatarOfFollowing: following.avatar,
+          createdAt: following.createdAt,
+          isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false
+        }
+      })
+      followingsOfUser = followingsOfUser.sort((a, b) => b.createdAt - a.createdAt)
+
+      return res.status(StatusCodes.OK).json(followingsOfUser)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      let user = await User.findByPk(userId,
+        {
+          include: [{ model: User, as: 'Followers' }]
+        })
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      user = await user.toJSON()
+      let followersOfUser = user.Followers.map(follower => {
+        return {
+          followerId: follower.id,
+          userNameOfFollower: follower.name,
+          userAccountOfFollower: follower.account,
+          userAvatarOfFollower: follower.avatar,
+          createdAt: follower.createdAt,
+          isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === follower.id) : false
+        }
+      })
+      followersOfUser = followersOfUser.sort((a, b) => b.createdAt - a.createdAt)
+
+      return res.status(StatusCodes.OK).json(followersOfUser)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getTop10Users: async (req, res, next) => {
+    try {
+      let users = await User.findAll({
+        include: {
+          model: User, as: 'Followers'
+        }
+      })
+      users = await users.map(user => user.toJSON())
+      let top10Users = users
+        .map(user => ({
+          id: user.id,
+          name: user.name,
+          account: user.account,
+          avatar: user.avatar,
+          followersCounts: user.Followers.length,
+          isFollowing: req.user.Followings.some(following => following.id === user.id)
+        }))
+      top10Users = top10Users.sort((a, b) => b.followersCounts - a.followersCounts).slice(0, 10)
+
+      return res.status(StatusCodes.OK).json(top10Users)
     } catch (error) {
       next(error)
     }

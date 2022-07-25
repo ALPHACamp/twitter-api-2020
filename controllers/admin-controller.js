@@ -13,6 +13,7 @@ const adminController = {
       if (user.role !== 'admin') {
         return res.status(StatusCodes.FORBIDDEN)
           .json({
+            
             status: 'error',
             message: '無管理員權限'
           })
