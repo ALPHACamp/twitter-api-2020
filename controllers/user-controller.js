@@ -322,6 +322,36 @@ const userController = {
     } catch (error) {
       next(error)
     }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      let user = await User.findByPk(userId, {
+        include: [{ model: User, as: 'Followings' }]
+      })
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      user = await user.toJSON()
+      let followingsOfUser = user.Followings.map(following => {
+        return {
+          userOfFollowing: following.id,
+          userNameOfFollowing: following.name,
+          userAccountOfFollowing: following.account,
+          userAvatarOfFollowing: following.avatar,
+          createdAt: following.createdAt,
+          isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false
+        }
+      })
+      followingsOfUser = followingsOfUser.sort((a, b) => b.createdAt - a.createdAt)
+
+      return res.status(StatusCodes.OK).json(followingsOfUser)
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
