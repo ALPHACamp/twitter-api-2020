@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const admin = require('./modules/admin')
 const users = require('./modules/user')
+const tweets = require('./modules/tweet')
 const passport = require('../config/passport')
 const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 const { errorHandler } = require('../middleware/error-handler')
@@ -14,6 +15,7 @@ router.post('/users', userController.signUp)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/users', authenticated, users)
+router.use('/tweets', authenticated, tweets)
 
 router.use('/', errorHandler)
 

@@ -2,11 +2,11 @@
   "name": "test",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "NODE_ENV=development node app.js",
     "dev": "set \"NODE_ENV=development\" && nodemon app.js",
-    "test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000",
+    "test": "mocha test --exit --recursive --timeout 5000",
     "resetdb": "npx sequelize db:seed:undo:all && npx sequelize db:migrate:undo:all && npx sequelize db:migrate && npx sequelize db:seed:all",
     "lint": "eslint \"**/*.js\" --fix"
   },
