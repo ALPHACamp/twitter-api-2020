@@ -9,5 +9,6 @@ router.put('/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cove
 router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id/replied_tweets', userController.getUserReliedTweets)
 router.get('/:id/likes', userController.getUserLikes)
+router.get('/:id/followings', userController.getUserFollowings)
 
 module.exports = router
