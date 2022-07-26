@@ -345,7 +345,7 @@ const userController = {
       user = await user.toJSON()
       let followingsOfUser = user.Followings.map(following => {
         return {
-          userOfFollowing: following.id,
+          followingId: following.id,
           userNameOfFollowing: following.name,
           userAccountOfFollowing: following.account,
           userAvatarOfFollowing: following.avatar,
