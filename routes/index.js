@@ -1,5 +1,6 @@
 const adminController = require('../controllers/adminController')
 const userController = require('../controllers/userController')
+const followshipController = require('../controllers/followshipController')
 
 module.exports = (app) => {
   app.post('/api/users', userController.signUp)
@@ -11,8 +12,8 @@ module.exports = (app) => {
   app.get('/api/users/:id/followers', userController.getUserFollowers)
   app.get('/api/users/:id', userController.getUser)
 
-  app.post('/api/followships')
-  app.delete('/api/followships/:id')
+  app.post('/api/followships', followshipController.postFollowship)
+  app.delete('/api/followships/:id', followshipController.deleteFollowship)
 
   app.get('/api/tweets')
   app.post('/api/tweets')
