@@ -23,9 +23,11 @@ router.put('/users/:id',
 router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
-router.post('/followships/:followingId', authenticated, userController.addFollowing)
+router.post('/followships', authenticated, userController.addFollowing)
+
 router.post('/tweets/:id/like', authenticated, userController.addLike)
 router.post('/tweets/:id/unlike', authenticated, userController.unLike)
+
 router.use('/', apiErrorHandler)
 
 module.exports = router
