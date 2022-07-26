@@ -4,6 +4,7 @@ const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
 
+    delete user.password
     req.user = user || null
     next()
   })(req, res, next)
