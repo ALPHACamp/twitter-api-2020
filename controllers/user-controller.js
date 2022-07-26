@@ -64,6 +64,14 @@ const userController = {
           message: 'All fields required.'
         })
       }
+
+      if (name?.length > 50) {
+        return res.status(400).json({
+          status: 'error',
+          message: "Field 'name' should be limited within 50 characters."
+        })
+      }
+
       if (password !== passwordCheck) {
         return res.status(401).json({
           status: 'error',
