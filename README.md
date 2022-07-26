@@ -10,15 +10,21 @@ This is back-end REST-API app for AC Simple Twitter Project
 
 1. Open you terminal and clone this repo to your local machine
 
-`git clone https://github.com/PaulChen79/PaulChen-twitter-api-2020.git`
+```
+git clone https://github.com/PaulChen79/PaulChen-twitter-api-2020.git
+```
 
 2. Get into the folder you cloned
 
-`cd PaulChen-twitter-api-2020`
+```
+cd PaulChen-twitter-api-2020
+```
 
 3. Install all dependencies
 
-`npm install`
+```
+npm install
+```
 
 4. Add new .env file and add envirement variables with following
 
@@ -63,26 +69,35 @@ npx sequelize db:seed:all
 
 8. Run the server and you can test APIs with the host: localhost:3000/api/
 
-`npm run start`
+```
+npm run start
+```
 
 ### Run test
 
 For running test you have to set your NODE_ENV to test
 
-`$env:NODE_ENV="test"`
+```
+$env:NODE_ENV="test"
+```
 
 If it is first time you run the test, make sure your migrate the DB to your test DB
 
-`npx seqeulize db:migrate`
+```
+npx seqeulize db:migrate
+```
 
 Then run the test
 
-`npm run test`
+```
+npm run test
+```
 
 After you finished your test, make sure you change NODE_ENV back to development
 
-`$env:NODE_ENV="development"`
-
+```
+$env:NODE_ENV="development"
+```
 ## Features
 
 - User can register and login as user
@@ -99,4 +114,4 @@ After you finished your test, make sure you change NODE_ENV back to development
 ## Contributors
 
 [PaulChen79](https://github.com/PaulChen79/)
-[cincinfish](https://github.com/cincinfish)]
+[cincinfish](https://github.com/cincinfish)
