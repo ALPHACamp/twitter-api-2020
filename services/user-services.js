@@ -196,6 +196,49 @@ const userServices = {
     } catch (err) {
       return cb(err)
     }
+  },
+  addLike: async (req, cb) => {
+    const user = req.user.dataValues
+    const TweetId = req.params.id
+    try {
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(TweetId, { raw: true }),
+        Like.findOne({
+          where: {
+            TweetId,
+            UserId: user.id
+          },
+          raw: true
+        })
+      ])
+      if (!tweet) throw new Error('Tweet does not exist')
+      if (like) throw new Error('You have already liked this tweet')
+      const createdLike = await Like.create({
+        UserId: user.id,
+        TweetId
+      })
+      return cb(null, { createdLike: createdLike.toJSON() })
+    } catch (err) {
+      console.log(err)
+      return cb(err)
+    }
+  },
+  unLike: async (req, cb) => {
+    const UserId = req.user.dataValues.id
+    try {
+      const like = await Like.findOne({
+        where: {
+          UserId,
+          TweetId: req.params.id
+        }
+      })
+      if (!like) throw new Error("You haven't liked this user!")
+      const unLikeRecord = await like.destroy()
+      return cb(null, unLikeRecord.toJSON())
+    } catch (err) {
+      console.log(err)
+      return cb(err)
+    }
   }
 }
 

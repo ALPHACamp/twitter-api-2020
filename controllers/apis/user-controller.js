@@ -30,6 +30,12 @@ const userController = {
   },
   getUserFollowers: (req, res, next) => {
     userServices.getUserFollowers(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  addLike: (req, res, next) => {
+    userServices.addLike(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  unLike: (req, res, next) => {
+    userServices.unLike(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 
