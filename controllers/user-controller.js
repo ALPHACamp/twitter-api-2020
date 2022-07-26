@@ -9,30 +9,30 @@ const userController = {
     const { account, password } = req.body
 
     // Check if any field remains blank
-    if (!account || !password) {
+    if (!account.trim() || !password.trim()) {
       return res.status(400).json({
         status: 'error',
         message: 'All fields are required.'
       })
     }
 
-    // Check if user exists & password correct
-    const user = await User.findOne({ where: { account } })
+    // Find user
+    const user = await User.findOne({
+      where: {
+        account,
+        role: 'user'
+      }
+    })
 
-    if (!user) {
+    // Check if admin exists and password correct
+    if (!user || !bcrypt.compareSync(password, user.password)) {
       return res.status(401).json({
         status: 'error',
         message: 'Account or password incorrect.'
       })
     }
 
-    if (!bcrypt.compareSync(password, user.password)) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Account or password incorrect.'
-      })
-    }
-
+    // Generate token
     const payload = { id: user.id }
     const token = jwt.sign(payload, process.env.JWT_SECRET)
 
