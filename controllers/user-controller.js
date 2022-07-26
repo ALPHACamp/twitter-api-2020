@@ -108,7 +108,7 @@ const userController = {
         ]
       })
       if (!user) {
-        return res.status(StatusCodes.NotFound).json({
+        return res.status(StatusCodes.NOT_FOUND).json({
           status: 'error',
           message: '使用者不存在'
         })
