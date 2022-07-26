@@ -78,16 +78,7 @@ const tweetController = {
           message: '沒有此則tweet'
         })
       }
-      tweet = await tweet.map(tweet => tweet.toJSON())
-      tweet = tweet.map(tweet => {
-        return {
-          ...tweet,
-          description: tweet.description,
-          repliedCount: tweet.Replies.length,
-          likeCount: tweet.LikedUsers.length,
-          liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
-        }
-      })
+      tweet = await tweet.toJSON()
       return res.status(StatusCodes.OK).json(tweet)
     } catch (err) {
       next(err)
@@ -181,7 +172,6 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
-
   }
 
 }
