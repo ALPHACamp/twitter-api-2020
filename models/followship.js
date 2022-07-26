@@ -1,16 +1,29 @@
+// 'use strict';
+// const { Model } = require('sequelize')
+// module.exports = (sequelize, DataTypes) => {
+//   class Followship extends Model {
+//     static associate(models) {
+//     }
+//   }
+//   Followship.init({
+//     followerId: DataTypes.INTEGER,
+//     followingId: DataTypes.INTEGER
+//   }, {
+//     sequelize,
+//     modelName: 'Followship',
+//     tableName: 'Followships',
+//     underscored: true
+//   })
+//   return Followship
+// };
 'use strict';
-const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class Followship extends Model {
-    static associate(models) {
-    }
-  }
-  Followship.init({
+  const Followship = sequelize.define('Followship', {
     followerId: DataTypes.INTEGER,
     followingId: DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'Followship'
-  })
-  return Followship
+  }, {});
+  Followship.associate = function (models) {
+    // associations can be defined here
+  };
+  return Followship;
 };

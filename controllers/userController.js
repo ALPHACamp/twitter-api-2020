@@ -1,5 +1,9 @@
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
+const Followship = db.Followship
 const bcrypt = require('bcryptjs')
 
 const userController = {
@@ -31,6 +35,67 @@ const userController = {
           })
       })
   },
+  getUser: (req, res) => {
+    User.findByPk(req.params.id)
+      .then(user => {
+        return res.json(user)
+      })
+  },
+  getUserTweets: (req, res) => {
+    const userId = req.params.id
+    Tweet.findAll({ where: { UserId: userId }, raw: true, nest: true })
+      .then(tweets => {
+        return res.json(tweets)
+      })
+  },
+  getUserRepliedTweets: (req, res) => {
+    const userId = req.params.id
+    Reply.findAll({ where: { UserId: userId }, raw: true, nest: true })
+      .then(replies => {
+        return res.json(replies)
+      })
+  },
+  getUserLikes: (req, res) => {
+    const userId = req.params.id
+    Like.findAll({ where: { UserId: userId }, raw: true, nest: true })
+      .then(likes => {
+        return res.json(likes)
+      })
+  },
+  getUserFollowings: (req, res) => {
+    const userId = req.params.id
+    // 可以通過測試的寫法，但感覺實際又用上會有問題
+    return Followship.findAll({ where: { followerId: userId } })
+      .then(followings => {
+        return res.json(followings)
+      })
+
+    // 實際應用上比較可能出現的寫法，先保留
+    User.findByPk(userId, { include: [{ model: Tweet, include: Reply }, { model: Reply, include: Tweet }, { model: User, as: 'Followings' }, { model: User, as: 'Followers' }] })
+      .then(user => {
+        return res.json(user.Followings)
+      })
+  },
+  getUserFollowers: (req, res) => {
+    const userId = req.params.id
+    Followship.findAll({ where: { followingId: userId } })
+      .then(followers => {
+        return res.json(followers)
+      })
+  },
+  putUser: (req, res) => {
+    const { name, introduction } = req.body
+    User.findByPk(req.params.id)
+      .then(user => {
+        user.update({
+          name: name,
+          introduction: introduction,
+        })
+        .then(user => {
+          return res.json(user)
+        })
+      })
+  }
 }
 
 module.exports = userController
