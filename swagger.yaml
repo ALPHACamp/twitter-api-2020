@@ -1,0 +1,850 @@
+openapi: 3.0.0
+info:
+  title: Simple Twitter API
+  contact: {}
+  version: 1.0.0-oas3
+servers:
+  - url: https://simple-twitter-paul.herokuapp.com/api
+    variables: {}
+  - url: http://localhost:3000/api
+    variables: {}
+paths:
+  /admin/users:
+    get:
+      tags:
+        - Admin
+      summary: Get all users
+      operationId: Getallusers
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                id: 使用者ID
+                account: 使用者帳號
+                name: 使用者名稱
+                email: 使用者Email
+                introduction: 使用者自我介紹
+                avatar: 使用者頭像URL
+                cover: 使用者Cover URL
+                isAdmin: false
+                role: user
+                createdAt: '2022-07-25T11:42:14.000Z'
+                updatedAt: '2022-07-25T11:42:14.000Z'
+                tweetsCounts: 有幾篇tweets INTEGER
+                followingsCounts: 有幾位正在追蹤的人 INTEGER
+                followersCounts: 有幾位追蹤者 INTEGER
+                likedTweetsCounts: 已經按讚的貼文數 INTEGER
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /admin/tweets:
+    get:
+      tags:
+        - Admin
+      summary: Get all tweets
+      operationId: Getalltweets
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                id: 貼文ID
+                UserId: 貼文的使用者ID
+                description: 貼文預覽50字
+                createdAt: '2022-07-25T11:42:15.000Z'
+                updatedAt: '2022-07-25T11:42:15.000Z'
+                User: 使用者資訊
+                Replies: 回覆的資訊
+                Likes: 按讚的資訊
+                repliedCount: 回覆數量 INTEGER
+                likeCount: 按讚數量 INTEGER
+                liked: 是否已被按讚
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /admin/tweets/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the tweet to delete. eg:14
+    delete:
+      tags:
+        - Admin
+      summary: Delete tweet
+      operationId: Deletetweet
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example: 已刪除的貼文 JSON
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user page
+      operationId: Getuserpage
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                id: 14
+                account: user1
+                name: user1
+                email: user1@example.com
+                introduction: Quisquam placeat ipsa eius aperiam exercitationem minus.
+                avatar:
+                cover:
+                isAdmin: false
+                role: user
+                createdAt: '2022-07-25T11:42:14.000Z'
+                updatedAt: '2022-07-25T11:42:14.000Z'
+                Tweets:
+                Followings:
+                Followers:
+                tweetsCounts: 10
+                followingsCounts: 2
+                isBeingFollowed: false
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{editUserId}:
+    parameters:
+      - in: path
+        name: editUserId
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to edit. eg:14
+    put:
+      tags:
+        - User
+      summary: Edit user
+      operationId: Edituser
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}/likes:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get likes. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user likes
+      operationId: Getuserlikes
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                likeCreatedAt: '2022-07-25T11:42:15.000Z'
+                TweetId: 134
+                description: Et vel et natus quod quos libero.
+                createdAt: '2022-07-25T11:42:15.000Z'
+                userOflikedTweet: 24
+                userNameOflikedTweet: user2
+                userAccountOflikedTweet: user2
+                userAvatarOflikedTweet:
+                repliedCounts: 3
+                likesCounts: 3
+                isBeingLiked: true
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}/tweets:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get tweets. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user tweets
+      operationId: Getusertweets
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                id: 64
+                UserId: 14
+                description: Reprehenderit consequatur laboriosam.
+                createdAt: '2022-07-25T11:42:15.000Z'
+                updatedAt: '2022-07-25T11:42:15.000Z'
+                Replies:
+                Likes:
+                userOfTweet: 14
+                userNameOfTweet: user1
+                userAccountOfTweet: user1
+                userAvatarOfTweet:
+                repliedCounts: 3
+                likesCounts: 1
+                isBeingliked: false
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}/replied_tweets:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get replied tweet. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user replies
+      operationId: Getuserreplies
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                replyId: 74
+                comment: sit autem tempore
+                repliedTweet: 24
+                repliedTweetDescription: Voluptas illo quo odit qui fugiat laborum consequu
+                userOfRepliedTweet: 14
+                userAccountOfRepliedTweet: user1
+                userNameOfRepliedTweet: user1
+                userAvatarOfRepliedTweet:
+                repliedTweetCreatedAt: '2022-07-25T11:42:15.000Z'
+                isBeingliked: false
+                userOfReply: 14
+                userAccountOfReply: user1
+                userNameOfReply: user1
+                userAvatarOfReply:
+                timeOfReply: '2022-07-25T11:42:15.000Z'
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}/followings:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get followings. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user followings
+      operationId: Getuserfollowings
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                userOfFollowing: 24
+                userNameOfFollowing: user2
+                userAccountOfFollowing: user2
+                userAvatarOfFollowing:
+                createdAt: '2022-07-25T11:42:15.000Z'
+                isFollowing: true
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}/followers:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get followers. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user followers
+      operationId: Getuserfollowers
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                followerId: 34
+                userNameOfFollower: user3
+                userAccountOfFollower: user3
+                userAvatarOfFollower:
+                createdAt: '2022-07-25T11:42:15.000Z'
+                isFollowing: false
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/top10:
+    get:
+      tags:
+        - User
+      summary: Get top 10 users
+      operationId: Gettop10users
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - id: 14
+                  name: user1
+                  account: user1
+                  avatar:
+                  followersCounts: 3
+                  isFollowing: false
+                - id: 24
+                  name: user2
+                  account: user2
+                  avatar:
+                  followersCounts: 3
+                  isFollowing: true
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/current_user:
+    get:
+      tags:
+        - User
+      summary: Get current user
+      operationId: Getcurrentuser
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                user:
+                  id: 14
+                  account: user1
+                  name: user1
+                  email: user1@example.com
+                  introduction: Quisquam plac
+                  avatar:
+                  cover:
+                  createdAt: '2022-07-25T11:42:14.000Z'
+                  updatedAt: '2022-07-25T11:42:14.000Z'
+                  Tweets:
+                    - id: 4
+                      UserId: 14
+                      description: Sed tempore eos aut
+                      createdAt: '2022-07-25T11:42:15.000Z'
+                      updatedAt: '2022-07-25T11:42:15.000Z'
+                    - id: 14
+                      UserId: 14
+                      description: quod aliquam adipisci
+                      createdAt: '2022-07-25T11:42:15.000Z'
+                      updatedAt: '2022-07-25T11:42:15.000Z'
+                  Replies:
+                    - id: 74
+                      UserId: 14
+                      TweetId: 24
+                      comment: sit autem tempore
+                      createdAt: '2022-07-25T11:42:15.000Z'
+                      updatedAt: '2022-07-25T11:42:15.000Z'
+                    - id: 264
+                      UserId: 14
+                      TweetId: 84
+                      comment: atque
+                      createdAt: '2022-07-25T11:42:15.000Z'
+                      updatedAt: '2022-07-25T11:42:15.000Z'
+                  Likes:
+                    - id: 4
+                      UserId: 14
+                      TweetId: 274
+                      createdAt: '2022-07-25T11:42:15.000Z'
+                      updatedAt: '2022-07-25T11:42:15.000Z'
+                    - id: 14
+                      UserId: 14
+                      TweetId: 204
+                      createdAt: '2022-07-25T11:42:15.000Z'
+                      updatedAt: '2022-07-25T11:42:15.000Z'
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /tweets:
+    get:
+      tags:
+        - Tweet
+      summary: Get all tweets
+      operationId: Getalltweets1
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: http://localhost:3000/api
+          variables: {}
+    post:
+      tags:
+        - Tweet
+      summary: Create a tweet
+      operationId: Createatweet
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateatweetRequest'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /tweets/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the tweet to get. eg:14
+    get:
+      tags:
+        - Tweet
+      summary: Get a tweet
+      operationId: Getatweet
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /tweets/{id}/likes:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of tweet to add like. eg:14
+    post:
+      tags:
+        - Tweet
+      summary: User likes a tweet
+      operationId: Userlikesatweet
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /tweets/{id}/unlike:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of tweet to unlike. eg:14
+    post:
+      tags:
+        - Tweet
+      summary: User unlikes a tweet
+      operationId: Userunlikesatweet
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /tweets/{id}/replies:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of tweet to add reply. eg:14
+    post:
+      tags:
+        - Tweet
+      summary: User replies to  a tweet
+      operationId: Userrepliestoatweet
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserrepliestoatweetRequest'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: http://localhost:3000/api
+          variables: {}
+  /tweets/{tweetId}/replies:
+    parameters:
+      - in: path
+        name: tweetId
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of tweet to get replies. eg:14
+    get:
+      tags:
+        - Tweet
+      summary: Get edit reply page
+      operationId: Geteditreplypage
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /replies/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of reply to edit. eg:14
+    put:
+      tags:
+        - Reply
+      summary: Edit a reply
+      operationId: Editareply
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+    delete:
+      tags:
+        - Reply
+      summary: Delete a reply
+      operationId: Deleteareply
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /followships:
+    post:
+      tags:
+        - Followship
+      summary: User add a following
+      operationId: Useraddafollowing
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /followships/{followingId}:
+    parameters:
+      - in: path
+        name: followingId
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of following to cancel the followship. eg:14
+    delete:
+      tags:
+        - Followship
+      summary: User unfollow someone
+      operationId: Userunfollowsomeone
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /admin/signin:
+    post:
+      tags:
+        - Auth
+      summary: Admin login
+      description: 管理員登入
+      operationId: Adminlogin
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminloginRequest'
+            example:
+              account: root
+              password: '12345678'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users:
+    post:
+      tags:
+        - Auth
+      summary: User sign up
+      operationId: Usersignup
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          text/plain:
+            schema:
+              type: object
+              example:
+                account: user100
+                email: usere100@example
+                name: user100
+                password: '12345678'
+                checkPassword: '12345678'
+            example:
+              account: user100
+              email: usere100@example
+              name: user100
+              password: '12345678'
+              checkPassword: '12345678'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /signin:
+    post:
+      tags:
+        - Auth
+      summary: User login
+      operationId: Userlogin
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserloginRequest'
+            example:
+              account: user1
+              password: '12345678'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+components:
+  schemas:
+    AdminloginRequest:
+      title: AdminloginRequest
+      required:
+        - account
+        - password
+      type: object
+      properties:
+        account:
+          type: string
+        password:
+          type: string
+      example:
+        account: root
+        password: '12345678'
+    CreateatweetRequest:
+      title: CreateatweetRequest
+      required:
+        - description
+      type: object
+      properties:
+        description:
+          type: string
+      example:
+        UserId: '2'
+        description: Hello Word
+    UserrepliestoatweetRequest:
+      title: UserrepliestoatweetRequest
+      required:
+        - comment
+      type: object
+      properties:
+        comment:
+          type: string
+      example:
+        userId: '1'
+        tweetId: '2'
+        comment: Hello word
+    UserloginRequest:
+      title: UserloginRequest
+      required:
+        - account
+        - password
+      type: object
+      properties:
+        account:
+          type: string
+        password:
+          type: string
+      example:
+        account: user1
+        password: '12345678'
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+security: []
+tags:
+  - name: Admin
+  - name: User
+  - name: Tweet
+  - name: Reply
+  - name: Followship
+  - name: Auth
+    description: ''

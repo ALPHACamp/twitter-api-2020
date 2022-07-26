@@ -9,6 +9,10 @@ const routes = require('./routes/index')
 const passport = require('./config/passport')
 const helpers = require('./_helpers')
 
+const swaggerUI = require('swagger-ui-express')
+const YAML = require('yamljs')
+const swaggerDoc = YAML.load('./swagger.yaml')
+
 const app = express()
 const port = process.env.PORT || 3000
 const SESSION_KEY = 'secret'
@@ -23,6 +27,13 @@ app.use((req, res, next) => {
   res.user = helpers.getUser(req)
   next()
 })
+
+app.get('/', (req, res) => {
+  res.send('<h1>Simple Twitter API</h1><a href="/api-docs">Document</a>')
+})
+
+// swagger
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDoc))
 
 app.use('/api', routes)
 
