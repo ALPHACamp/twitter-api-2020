@@ -79,6 +79,9 @@ const tweetController = {
         })
       }
       tweet = await tweet.toJSON()
+      tweet.repliedCount = tweet.Replies.length
+      tweet.ikeCount = tweet.LikedUsers.length
+      tweet.liked = req.user.LikedTweets ? req.user && req.user.LikedTweets.some(l => l.id === tweet.id) : false
       return res.status(StatusCodes.OK).json(tweet)
     } catch (err) {
       next(err)
@@ -173,7 +176,5 @@ const tweetController = {
       next(err)
     }
   }
-
 }
-
 module.exports = tweetController
