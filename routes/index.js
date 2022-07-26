@@ -1,6 +1,7 @@
 const adminController = require('../controllers/adminController')
 const userController = require('../controllers/userController')
 const followshipController = require('../controllers/followshipController')
+const tweetController = require('../controllers/tweetController')
 
 module.exports = (app) => {
   app.post('/api/users', userController.signUp)
@@ -17,8 +18,8 @@ module.exports = (app) => {
 
   app.get('/api/tweets')
   app.post('/api/tweets')
-  app.post('/api/tweets/:id/like')
-  app.post('/api/tweets/:id/unlike')
+  app.post('/api/tweets/:id/like', tweetController.likeTweet)
+  app.post('/api/tweets/:id/unlike', tweetController.unlikeTweet)
   app.get('/api/tweets/:id/replies')
   app.post('/api/tweets/:id/replies')
   app.get('/api/tweets/:id')
