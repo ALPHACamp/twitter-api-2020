@@ -16,13 +16,13 @@ module.exports = (app) => {
   app.post('/api/followships', followshipController.postFollowship)
   app.delete('/api/followships/:id', followshipController.deleteFollowship)
 
-  app.get('/api/tweets')
-  app.post('/api/tweets')
+  app.get('/api/tweets', tweetController.getTweets)
+  app.post('/api/tweets', tweetController.postTweet)
   app.post('/api/tweets/:id/like', tweetController.likeTweet)
   app.post('/api/tweets/:id/unlike', tweetController.unlikeTweet)
   app.get('/api/tweets/:id/replies', tweetController.getTweetReplies)
   app.post('/api/tweets/:id/replies', tweetController.postTweetReply)
-  app.get('/api/tweets/:id')
+  app.get('/api/tweets/:id', tweetController.getTweet)
 
   app.get('/api/admin/users', adminController.getUsers)
   app.delete('/api/admin/tweets/:id', adminController.deleteTweet)

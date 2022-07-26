@@ -4,6 +4,31 @@ const Like = db.Like
 const Reply = db.Reply
 
 const tweetController = {
+  getTweets: (req, res) => {
+    const userId = 1
+    Tweet.findAll({ where: { UserId: userId } })
+      .then(tweets => {
+        return res.json(tweets)
+      })
+  },
+  getTweet: (req, res) => {
+    const tweetId = req.params.id
+    Tweet.findByPk(tweetId)
+      .then(tweet => {
+        return res.json(tweet)
+      })
+  },
+  postTweet: (req, res) => {
+    const userId = 1
+    const description = req.body.description
+    Tweet.create({
+      UserId: userId,
+      description: description
+    })
+      .then(tweet => {
+        return res.json({ status: 'success', message: '' })
+      })
+  },
   likeTweet: (req, res) => {
     const userId = 1
     const tweetId = req.params.id
@@ -24,20 +49,20 @@ const tweetController = {
         TweetId: tweetId
       }
     })
-    .then(like => {
-      like.destroy()
-      .then(() => {
-        return res.json({ status: 'success', message: '' })
+      .then(like => {
+        like.destroy()
+          .then(() => {
+            return res.json({ status: 'success', message: '' })
+          })
       })
-    })
   },
   getTweetReplies: (req, res) => {
     const userId = 1
     const tweetId = req.params.id
-    Reply.findAll({ where: { UserId: userId, TweetId: tweetId }})
-    .then(replies => {
-      return res.json(replies)
-    })
+    Reply.findAll({ where: { UserId: userId, TweetId: tweetId } })
+      .then(replies => {
+        return res.json(replies)
+      })
   },
   postTweetReply: (req, res) => {
     const userId = 1
@@ -48,9 +73,9 @@ const tweetController = {
       TweetId: tweetId,
       comment: comment
     })
-    .then(reply => {
-      return res.json(reply)
-    })
+      .then(reply => {
+        return res.json(reply)
+      })
   }
 }
 
