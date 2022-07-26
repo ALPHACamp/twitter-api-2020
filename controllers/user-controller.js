@@ -9,7 +9,7 @@ const userController = {
     const { account, password } = req.body
 
     // Check if any field remains blank
-    if (!account.trim() || !password.trim()) {
+    if (!account?.trim() || !password?.trim()) {
       return res.status(400).json({
         status: 'error',
         message: 'All fields are required.'
