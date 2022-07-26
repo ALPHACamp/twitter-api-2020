@@ -1,4 +1,5 @@
 'use strict';
+const faker = require('faker')
 const seedUsersAmount = 5
 const SEED_USER = [{
   account: 'root',
@@ -15,6 +16,9 @@ for (let i = 1; i < seedUsersAmount + 1; i++) {
     name: `user${i}`,
     email: `user${i}@example.com`,
     password: '12345678',
+    avatar: `https://loremflickr.com/320/240/cat/?lock=${Math.random() * 100}`,
+    introduction: faker.lorem.sentence(),
+    cover: `https://loremflickr.com/320/240/landscape/?lock=${Math.random() * 100}`,
     role: 'user',
     created_at: new Date(),
     updated_at: new Date()
@@ -27,7 +31,6 @@ module.exports = {
     await queryInterface.bulkInsert('Users', [...SEED_USER], {})
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Tweets', {})
-      .then(() => queryInterface.bulkDelete('Users', null, {}))
+    await queryInterface.bulkDelete('Users', {})
   }
 }
