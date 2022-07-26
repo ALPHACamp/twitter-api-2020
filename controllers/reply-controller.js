@@ -1,15 +1,15 @@
 const { Tweet, Reply } = require('../models')
 const { StatusCodes } = require('http-status-codes')
-const helper = require('../_helpers')
+const helpers = require('../_helpers')
 
 const replyController = {
   postReply: async (req, res, next) => {
     try {
       const { comment } = req.body
       const TweetId = req.params.id
-      const UserId = Number(helper.getUser(req).id)
+      const UserId = Number(helpers.getUser(req).id)
 
-      if (!comment) {
+      if (!comment.trim()) {
         return res.status(StatusCodes.NOT_ACCEPTABLE).json({
           status: 'error',
           message: '內容不可空白'
