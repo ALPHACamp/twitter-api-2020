@@ -5,7 +5,7 @@ const authenticated = passport.authenticate('jwt', {
   session: false
 })
 
-const isUser = (req, res, next) => {
+const authUser = (req, res, next) => {
   if (helpers.getUser(req)?.role === 'user') return next()
   return res.json({
     status: 'error',
@@ -13,7 +13,7 @@ const isUser = (req, res, next) => {
   })
 }
 
-const isAdmin = (req, res, next) => {
+const authAdmin = (req, res, next) => {
   if (helpers.getUser(req)?.role === 'admin') return next()
   return res.json({
     status: 'error',
@@ -23,6 +23,6 @@ const isAdmin = (req, res, next) => {
 
 module.exports = {
   authenticated,
-  isUser,
-  isAdmin
+  authUser,
+  authAdmin
 }
