@@ -80,7 +80,7 @@ const adminController = {
         ]
       })
       if (!tweets) {
-        return res.json({
+        return res.status(StatusCodes.NOT_FOUND).json({
           status: 'error',
           message: 'Tweets不存在'
         })
