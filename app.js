@@ -5,9 +5,13 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const methodOverride = require('method-override')
 const passport = require('./config/passport')
+const cors = require('cors')
 
 const { apis } = require('./routes')
 const app = express()
+// cors 的預設為全開放
+app.use(cors())
+
 const port = process.env.PORT || 3000
 
 app.use(express.urlencoded({ extended: true }))
