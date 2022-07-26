@@ -59,7 +59,7 @@ const userController = {
     try {
       const { account, name, email, password, passwordCheck } = req.body
       if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !passwordCheck?.trim()) {
-        return res.status(401).json({
+        return res.status(400).json({
           status: 'error',
           message: 'All fields required.'
         })
