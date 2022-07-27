@@ -35,7 +35,7 @@ passport.use(new LocalStrategy(
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: 'secret'
+  secretOrKey: process.env.JWT_SECRET
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id)
@@ -54,7 +54,4 @@ passport.deserializeUser((id, cb) => {
     return cb(null, user)
   })
 })
-module.exports = passport
-
-
 module.exports = passport
