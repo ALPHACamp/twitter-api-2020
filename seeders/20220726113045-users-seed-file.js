@@ -12,7 +12,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'root',
         avatar: 'https://joeschmoe.io/api/v1/random',
-        introduction: faker.lorem.paragraphs(),
+        introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -23,7 +23,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'user1',
         avatar: 'https://joeschmoe.io/api/v1/random',
-        introduction: faker.lorem.paragraphs(),
+        introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -34,7 +34,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'user2',
         avatar: 'https://joeschmoe.io/api/v1/random',
-        introduction: faker.lorem.paragraphs(),
+        introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -45,7 +45,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'user3',
         avatar: 'https://joeschmoe.io/api/v1/random',
-        introduction: faker.lorem.paragraphs(),
+        introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -56,7 +56,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'user4',
         avatar: 'https://joeschmoe.io/api/v1/random',
-        introduction: faker.lorem.paragraphs(),
+        introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -67,7 +67,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'user5',
         avatar: 'https://joeschmoe.io/api/v1/random',
-        introduction: faker.lorem.paragraphs(),
+        introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
