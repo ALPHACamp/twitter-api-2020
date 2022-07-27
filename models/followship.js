@@ -4,7 +4,7 @@ const {
 } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class Followship extends Model {
-    static associate(models) { }
+    static associate (models) { }
   }
   Followship.init({
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
