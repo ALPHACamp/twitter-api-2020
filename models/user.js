@@ -25,8 +25,16 @@ module.exports = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     password: DataTypes.STRING,
     name: DataTypes.STRING,
-    avatar: DataTypes.STRING,
-    cover: DataTypes.STRING,
+    avatar: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'https://joeschmoe.io/api/v1/random'
+    },
+    cover: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'https://github.com/ritachien/twitter-api-2022/blob/main/assets/default-cover.png?raw=true'
+    },
     introduction: DataTypes.TEXT,
     role: {
       type: DataTypes.STRING,

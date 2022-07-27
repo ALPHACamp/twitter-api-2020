@@ -57,8 +57,8 @@ const userController = {
   },
   signup: async (req, res, next) => {
     try {
-      const { account, name, email, password, passwordCheck } = req.body
-      if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !passwordCheck?.trim()) {
+      const { account, name, email, password, checkPassword } = req.body
+      if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) {
         return res.status(400).json({
           status: 'error',
           message: 'All fields required.'
@@ -72,10 +72,10 @@ const userController = {
         })
       }
 
-      if (password !== passwordCheck) {
+      if (password !== checkPassword) {
         return res.status(401).json({
           status: 'error',
-          message: 'Password and passwordCheck should be the same.'
+          message: 'Password and checkPassword should be the same.'
         })
       }
       const result = await User.findOne({
