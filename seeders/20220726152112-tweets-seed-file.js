@@ -12,7 +12,7 @@ module.exports = {
       const userTweets = Array.from({ length: 10 }, () => ({
         UserId: user.id,
         description: faker.lorem.sentences().substring(0, 140),
-        createdAt: new Date(),
+        createdAt: faker.date.recent(30),
         updatedAt: new Date()
       }))
       seedTweets.push(...userTweets)
