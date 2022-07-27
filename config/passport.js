@@ -14,7 +14,7 @@ passport.use(
       passwordField: 'password',
       passReqToCallback: true
     },
-    
+
     async (req, account, password, cb) => {
       try {
         const user = await User.findOne({ where: { account } })
