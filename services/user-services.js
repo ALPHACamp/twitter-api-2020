@@ -39,6 +39,27 @@ const userServices = {
       return cb(err)
     }
   },
+  getTopUsers: async (req, cb) => {
+    try {
+      const maxLength = 10
+      let users = await User.findAll({
+        include: [{ model: User, as: 'Followers' }]
+      })
+
+      users = users.map(user => {
+        return ({
+          id: user.dataValues.id,
+          followerCount: user.Followers.length
+        })
+      })
+      users.sort((a, b) => b.followerCount - a.followerCount)
+      users = users.slice(0, maxLength)
+
+      return cb(null, users)
+    } catch (err) {
+      cb(err)
+    }
+  },
   getUser: (req, cb) => {
     return User.findByPk(req.params.id)
       .then(user => {
