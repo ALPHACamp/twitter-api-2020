@@ -59,11 +59,19 @@ const userController = {
     try {
       const { account, name, email, password, passwordCheck } = req.body
       if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !passwordCheck?.trim()) {
-        return res.status(401).json({
+        return res.status(400).json({
           status: 'error',
           message: 'All fields required.'
         })
       }
+
+      if (name?.length > 50) {
+        return res.status(400).json({
+          status: 'error',
+          message: "Field 'name' should be limited within 50 characters."
+        })
+      }
+
       if (password !== passwordCheck) {
         return res.status(401).json({
           status: 'error',
