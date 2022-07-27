@@ -12,6 +12,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'root',
         avatar: 'https://joeschmoe.io/api/v1/random',
+        cover: 'https://github.com/ritachien/twitter-api-2022/blob/main/assets/default-cover.png?raw=true',
         introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'admin',
         createdAt: new Date(),
@@ -23,6 +24,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'user1',
         avatar: 'https://joeschmoe.io/api/v1/random',
+        cover: 'https://github.com/ritachien/twitter-api-2022/blob/main/assets/default-cover.png?raw=true',
         introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'user',
         createdAt: new Date(),
@@ -34,6 +36,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'user2',
         avatar: 'https://joeschmoe.io/api/v1/random',
+        cover: 'https://github.com/ritachien/twitter-api-2022/blob/main/assets/default-cover.png?raw=true',
         introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'user',
         createdAt: new Date(),
@@ -45,6 +48,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'user3',
         avatar: 'https://joeschmoe.io/api/v1/random',
+        cover: 'https://github.com/ritachien/twitter-api-2022/blob/main/assets/default-cover.png?raw=true',
         introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'user',
         createdAt: new Date(),
@@ -56,6 +60,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'user4',
         avatar: 'https://joeschmoe.io/api/v1/random',
+        cover: 'https://github.com/ritachien/twitter-api-2022/blob/main/assets/default-cover.png?raw=true',
         introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'user',
         createdAt: new Date(),
@@ -67,6 +72,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         name: 'user5',
         avatar: 'https://joeschmoe.io/api/v1/random',
+        cover: 'https://github.com/ritachien/twitter-api-2022/blob/main/assets/default-cover.png?raw=true',
         introduction: faker.lorem.paragraphs().substring(0, 160),
         role: 'user',
         createdAt: new Date(),
@@ -76,6 +82,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Users', null)
+    await queryInterface.bulkDelete('Users', {}, { truncate: true })
   }
 }

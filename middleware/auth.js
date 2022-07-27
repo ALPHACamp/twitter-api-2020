@@ -1,9 +1,9 @@
 const helpers = require('../_helpers')
-const passport = require('../config/passport')
 
-const authenticated = passport.authenticate('jwt', {
-  session: false
-})
+const authenticated = (err, req, res, next) => {
+  if (helpers.ensureAuthenticated(req)) return next()
+  return next(err)
+}
 
 const authUser = (req, res, next) => {
   if (helpers.getUser(req)?.role === 'user') return next()
