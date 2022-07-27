@@ -14,7 +14,7 @@ passport.use(
       passwordField: 'password',
       passReqToCallback: true
     },
-    
+
     async (req, account, password, cb) => {
       try {
         const user = await User.findOne({ where: { account } })
@@ -39,15 +39,15 @@ const jwtOptions = {
 passport.use(
   new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
     try {
-      let user = await User.findByPk(jwtPayload.id, {
+      const user = await User.findByPk(jwtPayload.id, {
         include: [
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' },
           { model: Tweet, as: 'LikedTweets' }
         ]
       })
-      if (!user) return done(null, false)
-      return done(null, user)
+      if (!user) return cb(null, false)
+      return cb(null, user)
     } catch (error) {
       cb(error, false)
     }
