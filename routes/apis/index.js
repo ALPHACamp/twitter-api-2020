@@ -24,6 +24,7 @@ router.put('/users/:id',
 router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
+router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 router.post('/followships', authenticated, userController.addFollowing)
 
 router.post('/tweets/:id/like', authenticated, userController.addLike)

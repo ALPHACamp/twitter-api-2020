@@ -47,6 +47,8 @@ const userServices = {
       })
 
       users = users.map(user => {
+        console.log('id: ' + user.dataValues.id)
+        console.log('Followers: ' + JSON.stringify(user.Followers))
         return ({
           id: user.dataValues.id,
           followerCount: user.Followers.length
@@ -167,6 +169,30 @@ const userServices = {
         })
       )
       return cb(null, results)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  removeFollowing: async (req, cb) => {
+    try {
+      const followerId = Number(req.user.dataValues.id)
+      const followingId = Number(req.params.followingId)
+
+      const followship = await Followship.findOne({
+        where: {
+          followerId,
+          followingId
+        }
+      })
+      if (!followship) {
+        throw new Error("You haven't followed this user!")
+      }
+      await followship.destroy()
+
+      const followings = await Followship.findAll(
+        { where: { followerId: followerId } }
+      )
+      return cb(null, followings)
     } catch (err) {
       return cb(err)
     }
