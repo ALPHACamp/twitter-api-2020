@@ -1,11 +1,13 @@
-'use strict';
+'use strict'
 const faker = require('faker')
+const bcrypt = require('bcryptjs')
 const seedUsersAmount = 5
+
 const SEED_USER = [{
   account: 'root',
   name: 'root',
   email: 'root@example.com',
-  password: '12345678',
+  password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
   role: 'admin',
   created_at: new Date(),
   updated_at: new Date()
@@ -15,7 +17,7 @@ for (let i = 1; i < seedUsersAmount + 1; i++) {
     account: `user${i}`,
     name: `user${i}`,
     email: `user${i}@example.com`,
-    password: '12345678',
+    password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
     avatar: `https://loremflickr.com/320/240/cat/?lock=${Math.random() * 100}`,
     introduction: faker.lorem.sentence(),
     cover: `https://loremflickr.com/320/240/landscape/?lock=${Math.random() * 100}`,
