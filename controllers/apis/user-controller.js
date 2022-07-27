@@ -1,5 +1,5 @@
 const userServices = require('../../services/user-services')
-
+const { Tweet, User, Reply, Like } = require('../../models')
 const userController = {
   signUp: (req, res, next) => {
     userServices.signUp(req, (err, data) => err ? next(err) : res.json({ status: 'success', ...data }))
@@ -36,6 +36,35 @@ const userController = {
   },
   unLike: (req, res, next) => {
     userServices.unLike(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getTweets: async (req, res) => {
+    try {
+      const tweets = await Tweet.findAll({
+        include: [
+          { model: User, attributes: ['account', 'name', 'avatar'] },
+          { model: Reply },
+          { model: Like }
+        ],
+        order: [['createdAt', 'DESC']],
+        nest: true
+        // raw: true
+      })
+      console.log('getTweets', tweets)
+      return res.json(tweets)
+    } catch (err) {
+      console.log('error=', err)
+    }
+  },
+  getCurrentUser: (req, res) => {
+    return res.json({
+      id: req.user.id,
+      account: req.user.account,
+      name: req.user.name,
+      email: req.user.email,
+      avatar: req.user.avatar,
+      cover: req.user.cover,
+      role: req.user.role
+    })
   }
 }
 

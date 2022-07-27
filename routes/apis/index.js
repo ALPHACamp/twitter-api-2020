@@ -27,6 +27,8 @@ router.post('/followships', authenticated, userController.addFollowing)
 
 router.post('/tweets/:id/like', authenticated, userController.addLike)
 router.post('/tweets/:id/unlike', authenticated, userController.unLike)
+router.get('/tweets', authenticated, userController.getTweets)
+router.get('/get_current_user', authenticated, userController.getCurrentUser)
 
 router.use('/', apiErrorHandler)
 
