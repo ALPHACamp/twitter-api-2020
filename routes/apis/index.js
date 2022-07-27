@@ -14,6 +14,7 @@ router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
 
+router.get('/users/top', authenticated, userController.getTopUsers)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id',
   upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]),
@@ -23,6 +24,7 @@ router.put('/users/:id',
 router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
+router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 router.post('/followships', authenticated, userController.addFollowing)
 
 router.post('/tweets/:id/like', authenticated, userController.addLike)

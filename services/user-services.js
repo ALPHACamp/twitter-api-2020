@@ -39,6 +39,35 @@ const userServices = {
       return cb(err)
     }
   },
+  getTopUsers: async (req, cb) => {
+    try {
+      const maxLength = 10
+
+      let users = await User.findAll({
+        include: [{ model: User, as: 'Followers' }]
+      })
+
+      const followings = await Followship.findAll(
+        { where: { followerId: req.user.dataValues.id } }
+      )
+
+      users = users.map(user => {
+        return ({
+          id: user.dataValues.id,
+          account: user.dataValues.account,
+          name: user.dataValues.name,
+          isFollowed: followings.some(f => f.followingId === user.dataValues.id),
+          followerCount: user.Followers.length
+        })
+      })
+      users.sort((a, b) => b.followerCount - a.followerCount)
+      users = users.slice(0, maxLength)
+
+      return cb(null, users)
+    } catch (err) {
+      cb(err)
+    }
+  },
   getUser: (req, cb) => {
     return User.findByPk(req.params.id)
       .then(user => {
@@ -146,6 +175,30 @@ const userServices = {
         })
       )
       return cb(null, results)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  removeFollowing: async (req, cb) => {
+    try {
+      const followerId = Number(req.user.dataValues.id)
+      const followingId = Number(req.params.followingId)
+
+      const followship = await Followship.findOne({
+        where: {
+          followerId,
+          followingId
+        }
+      })
+      if (!followship) {
+        throw new Error("You haven't followed this user!")
+      }
+      await followship.destroy()
+
+      const followings = await Followship.findAll(
+        { where: { followerId: followerId } }
+      )
+      return cb(null, followings)
     } catch (err) {
       return cb(err)
     }
