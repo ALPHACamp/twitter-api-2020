@@ -1,6 +1,6 @@
 const { StatusCodes } = require('http-status-codes')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { Op } = require('sequelize')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
@@ -108,7 +108,7 @@ const userController = {
         ]
       })
       if (!user) {
-        return res.status(StatusCodes.NOT_FOUND).json({
+        return res.status(StatusCodes.NotFound).json({
           status: 'error',
           message: '使用者不存在'
         })
@@ -413,6 +413,69 @@ const userController = {
       return res.status(StatusCodes.OK).json(top10Users)
     } catch (error) {
       next(error)
+    }
+  },
+  addFollow: async (req, res, next) => {
+    try {
+      const followerId = Number(helpers.getUser(req).id)
+      const followingId = Number(req.body.id)
+      const follower = await User.findByPk(followerId)
+      const following = await User.findByPk(followingId)
+      if (!follower || !following) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      const followship = await Followship.findOne({
+        where: { followerId, followingId }
+      })
+      if (followship) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+          status: 'error',
+          message: '使用者已追蹤'
+        })
+      }
+      await Followship.create({
+        followerId,
+        followingId
+      })
+      return res.status(StatusCodes.OK).json({
+        status: 'error',
+        message: '成功追蹤'
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  removeFollow: async (req, res, next) => {
+    try {
+      const followerId = Number(helpers.getUser(req).id)
+      const followingId = Number(req.params.followingId)
+      const follower = await User.findByPk(followerId)
+      const following = await User.findByPk(followingId)
+      if (!follower || !following) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      const followship = await Followship.findOne({
+        where: { followerId, followingId }
+      })
+      if (!followship) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+          status: 'error',
+          message: '使用者尚未追蹤'
+        })
+      }
+      await followship.destroy()
+      return res.status(StatusCodes.OK).json({
+        status: 'error',
+        message: '成功取消追蹤'
+      })
+    } catch (err) {
+      next(err)
     }
   }
 }
