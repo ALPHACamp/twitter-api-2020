@@ -1,4 +1,6 @@
 const express = require('express')
+const handlebars = require('express-handlebars')
+const routes = require('./routes')
 const helpers = require('./_helpers');
 
 const app = express()
@@ -9,7 +11,13 @@ function authenticated(req, res, next){
   // passport.authenticate('jwt', { ses...
 };
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.engine('hbs', handlebars({ extname: '.hbs' }))
+app.set('view engine', 'hbs')
+
+app.use(routes)
+
+// app.get('/', (req, res) => res.send('Hello World!'))
+
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
