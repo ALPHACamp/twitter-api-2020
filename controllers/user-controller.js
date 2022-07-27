@@ -25,13 +25,13 @@ const userController = {
       next(err)
     }
   },
-  signUpPage: (req, res) => {
-    res.render('signup')
-  },
-  signUp: (req, res, next) => {
+  signUp: (req, res, next) => { //可刪掉
     userServices.signUp(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
-  logout: (req, res) => {
+  signUpPage: (req, res) => { //可刪掉
+    res.render('signup')
+  },
+  logout: (req, res) => { //可刪掉
     req.logout()
     res.redirect('/signin')
   }
