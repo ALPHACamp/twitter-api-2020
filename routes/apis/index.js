@@ -3,6 +3,7 @@ const router = express.Router()
 
 const passport = require('../../config/passport')
 const userController = require('../../controllers/apis/user-controller')
+const tweetController = require('../../controllers/apis/tweet-controller')
 
 const { authenticated, authenticatedOwner } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
@@ -27,6 +28,7 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 router.post('/followships', authenticated, userController.addFollowing)
 
+router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets/:id/like', authenticated, userController.addLike)
 router.post('/tweets/:id/unlike', authenticated, userController.unLike)
 
