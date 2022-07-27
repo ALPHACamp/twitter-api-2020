@@ -21,7 +21,30 @@ const tweetServices = {
             replyCount
           })
       }))
-      console.log(results)
+      return cb(null, results)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  getTweet: async (req, cb) => {
+    try {
+      const TweetId = Number(req.params.id)
+      const tweet = await Tweet.findByPk(
+        TweetId, {
+          nest: true,
+          raw: true,
+          include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
+        }
+      )
+
+      let results = {}
+      const likeCount = await Like.count({ where: TweetId })
+      const replyCount = await Reply.count({ where: TweetId })
+      results = {
+        ...tweet,
+        likeCount,
+        replyCount
+      }
       return cb(null, results)
     } catch (err) {
       return cb(err)

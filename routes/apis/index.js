@@ -29,6 +29,7 @@ router.delete('/followships/:followingId', authenticated, userController.removeF
 router.post('/followships', authenticated, userController.addFollowing)
 
 router.get('/tweets', authenticated, tweetController.getTweets)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
 router.post('/tweets/:id/like', authenticated, userController.addLike)
 router.post('/tweets/:id/unlike', authenticated, userController.unLike)
 
