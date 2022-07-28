@@ -3,7 +3,7 @@ const router = express.Router()
 
 const userController = require('../../controllers/user-controller')
 
-// router.get('/:id/setting', userController.getSetting)
+router.get('/:id/setting', userController.getSetting)
 // router.patch('/:id/setting', userController.patchSetting)
 // router.get('/:id/tweets', userController.getUserTweets)
 // router.get('/:id/replied_tweets', userController.getUserReplies)
