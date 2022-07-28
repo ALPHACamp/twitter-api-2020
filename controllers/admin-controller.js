@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 
 const adminController = {
   signin: async (req, res, next) => {
@@ -53,6 +53,23 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+  deleteTweet: async (req, res, next) => {
+    const { id } = req.params
+    const tweet = await Tweet.findByPk(id)
+
+    if (!id || !tweet) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Invalid id parameter or no tweet was found'
+      })
+    }
+
+    await tweet.destroy()
+    return res.status(200).json({
+      status: 'success',
+      message: '1 tweet was deleted'
+    })
   }
 }
 
