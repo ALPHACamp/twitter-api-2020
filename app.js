@@ -1,9 +1,13 @@
 const express = require('express')
 const helpers = require('./_helpers');
 const bodyParser = require('body-parser')
+const cors = require('cors')
 
 const app = express()
 const port = 3000
+
+// cors 的預設為全開放
+app.use(cors())
 
 // use helpers.getUser(req) to replace req.user
 // function authenticated(req, res, next) {
