@@ -111,6 +111,20 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const user = await User.findByPk(id, {
+        raw: true,
+        nest: true,
+        attributes: { exclude: ['password'] }
+      })
+      if (!user) return res.status(404).json({ status: 'error', message: 'User is not found.' })
+      res.status(200).json(user)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
