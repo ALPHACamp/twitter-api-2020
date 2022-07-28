@@ -9,7 +9,8 @@ const tweetController = {
         include: [
           { model: User },
           { model: Like },
-          { model: Reply }],
+          { model: Reply }
+        ],
         order: [['createdAt', 'DESC']]
       })
       if (!tweets) {
@@ -24,9 +25,9 @@ const tweetController = {
         return {
           ...tweet,
           description: tweet.description,
-          repliedCount: tweet.Replies.length,
-          likeCount: tweet.Likes.length,
-          liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
+          repliedCounts: tweet.Replies.length,
+          likesCounts: tweet.Likes.length,
+          isBeingLiked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
         }
       })
       return res.status(StatusCodes.OK).json(tweets)
@@ -55,7 +56,6 @@ const tweetController = {
         UserId,
         description
       })
-
       return res.status(StatusCodes.OK).json({
         status: 'success',
         message: '成功建立一則tweet'
@@ -69,7 +69,7 @@ const tweetController = {
       let tweet = await Tweet.findByPk(req.params.id, {
         include: [
           { model: User },
-          { model: User, as: 'LikedUsers' },
+          { model: Like },
           { model: Reply }],
         order: [['createdAt', 'DESC']]
       })
@@ -80,35 +80,33 @@ const tweetController = {
         })
       }
       tweet = await tweet.toJSON()
-      tweet.repliedCount = tweet.Replies.length
-      tweet.ikeCount = tweet.LikedUsers.length
-      tweet.liked = req.user.LikedTweets ? req.user && req.user.LikedTweets.some(l => l.id === tweet.id) : false
+      tweet.repliedCounts = tweet.Replies.length
+      tweet.likesCounts = tweet.Likes.length
+      tweet.isBeingLiked = req.user.LikedTweets ? req.user && req.user.LikedTweets.some(l => l.id === tweet.id) : false
       return res.status(StatusCodes.OK).json(tweet)
     } catch (err) {
       next(err)
     }
   },
-  getReply: async (req, res, next) => {
+  getReplies: async (req, res, next) => {
     try {
       const tweetId = req.params.id
       const userId = Number(helpers.getUser(req).id)
-      const tweet = await Tweet.findByPk(tweetId, {
-        include: { model: User }
-      })
+      const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) {
         return res.status(StatusCodes.NOT_FOUND).json({
           status: 'error',
-          message: 'Tweets不存在'
+          message: 'Tweet不存在'
         })
       }
-      const reply = await Reply.findAll({
+      const replies = await Reply.findAll({
         where: { UserId: userId },
         include: [
           { model: Tweet, include: User }
         ],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
-      return res.status(StatusCodes.OK).json(reply)
+      return res.status(StatusCodes.OK).json(replies)
     } catch (err) {
       next(err)
     }

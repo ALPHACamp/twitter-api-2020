@@ -13,7 +13,6 @@ const adminController = {
       if (user.role !== 'admin') {
         return res.status(StatusCodes.FORBIDDEN)
           .json({
-
             status: 'error',
             message: '無管理員權限'
           })
@@ -94,7 +93,11 @@ const adminController = {
           likesCounts: tweet.Likes.length
         }
       })
-      return res.status(StatusCodes.OK).json({ status: 'success', tweets })
+      return res.status(StatusCodes.OK).json({
+        status: 'success',
+        message: '成功取得tweets',
+        tweets
+      })
     } catch (error) {
       next(error)
     }
@@ -110,7 +113,11 @@ const adminController = {
         })
       }
       await tweet.destroy()
-      return res.status(StatusCodes.OK).json({ status: 'success', tweet })
+      return res.status(StatusCodes.OK).json({
+        status: 'success',
+        message: '成功刪除tweet',
+        tweet
+      })
     } catch (error) {
       next(error)
     }

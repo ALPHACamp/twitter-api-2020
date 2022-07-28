@@ -31,7 +31,7 @@ const userController = {
           status: 'success',
           message: '成功登入',
           token,
-          data: user
+          user
         })
     } catch (err) {
       next(err)
@@ -122,7 +122,7 @@ const userController = {
         ]
       })
       if (!user) {
-        return res.status(StatusCodes.NotFound).json({
+        return res.status(StatusCodes.NOT_FOUND).json({
           status: 'error',
           message: '使用者不存在'
         })
@@ -130,7 +130,7 @@ const userController = {
       user = await user.toJSON()
       delete user.password
       delete user.isAdmin
-      return res.status(StatusCodes.OK).json({ user })
+      return res.status(StatusCodes.OK).json(user)
     } catch (error) {
       next(error)
     }
@@ -157,6 +157,7 @@ const userController = {
       return res.status(StatusCodes.OK).json(
         {
           status: 'success',
+          message: '成功取得User資料',
           ...user,
           tweetsCounts: user.Tweets.length,
           followingsCounts: user.Followings.length,
@@ -173,7 +174,7 @@ const userController = {
       const { name, introduction } = req.body
       const { files } = req
       if (helpers.getUser(req).id !== Number(userId)) {
-        return res.stauts(StatusCodes.NOT_ACCEPTABLE).json({
+        return res.stauts(StatusCodes.FORBIDDEN).json({
           status: 'error',
           message: '無權限編輯此使用者'
         })
@@ -425,6 +426,7 @@ const userController = {
 
       return res.status(StatusCodes.OK).json({
         status: 'success',
+        message: '成功取得top10使用者',
         top10Users
       })
     } catch (error) {
@@ -500,7 +502,7 @@ const userController = {
       const onPageUserId = req.params.id
       const emailRegex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/ //eslint-disable-line
       if (currentUserId !== Number(onPageUserId)) {
-        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+        return res.status(StatusCodes.FORBIDDEN).json({
           status: 'error',
           message: '無法編輯他人資訊'
         })

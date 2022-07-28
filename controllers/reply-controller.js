@@ -21,7 +21,6 @@ const replyController = {
           message: '字數需小於140字'
         })
       }
-
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) {
         return res.status(StatusCodes.NOT_FOUND).json({
@@ -68,18 +67,17 @@ const replyController = {
     }
     const reply = await Reply.findByPk(ReplyId)
     if (reply.toJSON().UserId !== UserId) {
-      return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+      return res.status(StatusCodes.FORBIDDEN).json({
         status: 'error',
         message: '無法編輯他人回覆'
       })
     }
-    const replyUpdate = await reply.update({
+    await reply.update({
       comment
     })
     return res.status(StatusCodes.OK).json({
       status: 'success',
-      message: '成功修改回覆',
-      reply: replyUpdate
+      message: '成功修改回覆'
     })
   },
   deleteReply: async (req, res, next) => {
@@ -101,7 +99,7 @@ const replyController = {
         })
       }
       if (reply.toJSON().UserId !== UserId) {
-        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+        return res.status(StatusCodes.FORBIDDEN).json({
           status: 'error',
           message: '無法刪除他人回覆'
         })
