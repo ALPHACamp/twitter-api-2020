@@ -462,7 +462,6 @@ paths:
         - url: https://simple-twitter-paul.herokuapp.com/api
           variables: {}
   /tweets:
-    /tweets:
     get:
       tags:
         - Tweet
@@ -501,8 +500,8 @@ paths:
                       comment:
                       createdAt:
                       updatedAt:
-                  repliedCount: 3
-                  likeCount: 0
+                  repliedCount:
+                  likeCount:
                   liked:
       deprecated: false
       security:
@@ -634,7 +633,7 @@ paths:
       security:
         - bearer: []
       servers:
-        - url: https://simple-twitter-paul.herokuapp.com/api
+        - url: http://localhost:3000/api
           variables: {}
   /tweets/{tweetId}/replies:
     parameters:
