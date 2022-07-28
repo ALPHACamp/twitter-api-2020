@@ -462,6 +462,7 @@ paths:
         - url: https://simple-twitter-paul.herokuapp.com/api
           variables: {}
   /tweets:
+    /tweets:
     get:
       tags:
         - Tweet
@@ -471,7 +472,38 @@ paths:
       responses:
         '200':
           description: ''
-          headers: {}
+          content:
+            application/json:
+              example:
+                - id:
+                  UserId:
+                  description:
+                  createdAt:
+                  updatedAt:
+                  User:
+                    id:
+                    account:
+                    name:
+                    email:
+                    password:
+                    introduction:
+                    avatar:
+                    cover:
+                    isAdmin:
+                    role:
+                    createdAt:
+                    updatedAt:
+                  LikedUsers: []
+                  Replies:
+                    - id:
+                      UserId:
+                      TweetId:
+                      comment:
+                      createdAt:
+                      updatedAt:
+                  repliedCount: 3
+                  likeCount: 0
+                  liked:
       deprecated: false
       security:
         - bearer: []
