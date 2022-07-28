@@ -20,6 +20,13 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUsers: (req, res, next) => {
+    adminServices.getUsers(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  getTweets: (req, res, next) => {
+    adminServices.getTweets(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
+
 module.exports = adminController

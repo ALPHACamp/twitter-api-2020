@@ -13,6 +13,8 @@ router.post('/api/users', userController.signUp) //註冊
 
 router.post('/api/admin/users', passport.authenticate('local', { session: false }), authenticatedAdmin, adminController.signIn)
 
+router.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 
 
 
