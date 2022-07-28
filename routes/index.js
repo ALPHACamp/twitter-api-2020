@@ -4,6 +4,7 @@ const followshipController = require('../controllers/followshipController')
 const tweetController = require('../controllers/tweetController')
 
 module.exports = (app) => {
+  app.post('/api/users/signin', userController.signIn)
   app.post('/api/users', userController.signUp)
   app.put('/api/users/:id', userController.putUser)
   app.get('/api/users/:id/tweets', userController.getUserTweets)

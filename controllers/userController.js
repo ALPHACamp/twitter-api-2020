@@ -5,8 +5,48 @@ const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
 const bcrypt = require('bcryptjs')
+// JWT
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
 
 const userController = {
+  signIn: (req, res) => {
+    const { email, password } = req.body
+    if (!email || !password) {
+      return res.json({ ststus: 'error', message: '請輸入 email 與密碼' })
+    }
+
+    User.findOne({ where: { email: email } })
+      .then(user => {
+        if (!user) {
+          return res.status(401).json({ ststus: 'error', message: '此 email 尚未註冊' })
+        }
+        if (!bcrypt.compareSync(password, user.password)) {
+          return res.status(401).json({ ststus: 'error', message: '密碼錯誤' })
+        }
+
+        // 簽發token
+        let payload = { id: user.id }
+        let token = jwt.sign(payload, process.env.JWT_SECRET)
+        // 回傳訊息、token、user data
+        return res.json({
+          status: 'success',
+          message: '登入驗證成功',
+          token: token,
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            account:user.account,
+            avatat: user.avatat,
+            introduction: user.introduction,
+            role: user.role
+          }
+        })
+      })
+  },
   signUp: (req, res) => {
     const { account, name, email, password, checkPassword } = req.body
 
@@ -91,9 +131,9 @@ const userController = {
           name: name,
           introduction: introduction,
         })
-        .then(user => {
-          return res.json(user)
-        })
+          .then(user => {
+            return res.json(user)
+          })
       })
   }
 }
