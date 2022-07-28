@@ -48,6 +48,7 @@ const userController = {
   },
   getReplies: (req, res, next) => {
     userServices.getReplies(req, (err, data) => err ? next(err) : res.json(data))
+
   }
 }
 
