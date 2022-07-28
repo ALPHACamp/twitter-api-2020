@@ -5,13 +5,15 @@ const bcrypt = require('bcryptjs')
 
 const adminServices = {
   getUsers: async (req, cb) => {
-    await User.findAndCountAll({
+    return await User.findAndCountAll({
       where: {
         [Op.not]: [
           { role: 'admin' },
         ]
       },
+      // order: [['', 'DESC']],  // ! 排序還沒有寫出來
       include: [Like, Tweet],
+      // raw: true,
       nest: true
     })
       // ! 還沒成功取出Tweet&Like的數量
