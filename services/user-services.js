@@ -42,21 +42,15 @@ const userServices = {
   getTopUsers: async (req, cb) => {
     try {
       const maxLength = 10
-
       let users = await User.findAll({
         include: [{ model: User, as: 'Followers' }]
       })
-
-      const followings = await Followship.findAll(
-        { where: { followerId: req.user.dataValues.id } }
-      )
 
       users = users.map(user => {
         return ({
           id: user.dataValues.id,
           account: user.dataValues.account,
           name: user.dataValues.name,
-          isFollowed: followings.some(f => f.followingId === user.dataValues.id),
           followerCount: user.Followers.length
         })
       })
@@ -183,7 +177,6 @@ const userServices = {
     try {
       const followerId = Number(req.user.dataValues.id)
       const followingId = Number(req.params.followingId)
-
       const followship = await Followship.findOne({
         where: {
           followerId,
