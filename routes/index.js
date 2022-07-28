@@ -10,8 +10,9 @@ const userController = require('../controllers/user-controller')
 
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/users', userController.signUp)
-router.use('/', errorHandler)
 
 router.get('/tweets', tweetController.getTweets)
+router.post('/tweets', tweetController.postTweet)
 
+router.use('/', errorHandler)
 module.exports = router
