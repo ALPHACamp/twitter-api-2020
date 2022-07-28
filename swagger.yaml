@@ -476,7 +476,7 @@ paths:
       security:
         - bearer: []
       servers:
-        - url: http://localhost:3000/api
+        - url: https://simple-twitter-paul.herokuapp.com/api
           variables: {}
     post:
       tags:
@@ -602,7 +602,7 @@ paths:
       security:
         - bearer: []
       servers:
-        - url: http://localhost:3000/api
+        - url: https://simple-twitter-paul.herokuapp.com/api
           variables: {}
   /tweets/{tweetId}/replies:
     parameters:
