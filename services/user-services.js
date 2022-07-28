@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs')
 
 const userServices = {
   signUp: (req, cb) => {
-    console.log('req.body', req.body) // ! 測試用，之後刪除
     if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match!')
     if (req.body.name.length > 50) throw new Error('名稱不可超過５０字')
     Promise.all([
@@ -31,7 +30,8 @@ const userServices = {
           account: req.body.account,
           name: req.body.name,
           email: req.body.email,
-          password: hash
+          password: hash,
+          role: 'user'
         }))
       .then(newUser => cb(null, { user: newUser }))
       .catch(err => cb(err))
