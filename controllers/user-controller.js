@@ -157,6 +157,7 @@ const userController = {
       delete user.password
       return res.status(StatusCodes.OK).json(
         {
+          status: 'success',
           ...user,
           tweetsCounts: user.Tweets.length,
           followingsCounts: user.Followings.length,
@@ -423,7 +424,10 @@ const userController = {
         }))
       top10Users = top10Users.sort((a, b) => b.followersCounts - a.followersCounts).slice(0, 10)
 
-      return res.status(StatusCodes.OK).json(top10Users)
+      return res.status(StatusCodes.OK).json({
+        status: 'success',
+        top10Users
+      })
     } catch (error) {
       next(error)
     }
@@ -454,7 +458,7 @@ const userController = {
         followingId
       })
       return res.status(StatusCodes.OK).json({
-        status: 'error',
+        status: 'success',
         message: '成功追蹤'
       })
     } catch (err) {
@@ -484,7 +488,7 @@ const userController = {
       }
       await followship.destroy()
       return res.status(StatusCodes.OK).json({
-        status: 'error',
+        status: 'success',
         message: '成功取消追蹤'
       })
     } catch (err) {
