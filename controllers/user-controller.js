@@ -130,7 +130,6 @@ const userController = {
       user = await user.toJSON()
       delete user.password
       delete user.isAdmin
-      delete user.role
       return res.status(StatusCodes.OK).json({ user })
     } catch (error) {
       next(error)
