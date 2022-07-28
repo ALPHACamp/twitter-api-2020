@@ -25,6 +25,7 @@ module.exports = (app) => {
   app.post('/api/tweets/:id/replies', tweetController.postTweetReply)
   app.get('/api/tweets/:id', tweetController.getTweet)
 
+  app.post('/api/admin/users/signin', adminController.signIn)
   app.get('/api/admin/users', adminController.getUsers)
   app.delete('/api/admin/tweets/:id', adminController.deleteTweet)
 }
