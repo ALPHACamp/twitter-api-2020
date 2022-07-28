@@ -3,6 +3,7 @@ const router = express.Router()
 
 const passport = require('../../config/passport')
 const userController = require('../../controllers/apis/user-controller')
+const tweetController = require('../../controllers/apis/tweet-controller')
 
 const { authenticated, authenticatedOwner } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
@@ -27,10 +28,15 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 router.post('/followships', authenticated, userController.addFollowing)
 
+router.get('/tweets/:tweet_id/replies', authenticated, userController.getReplies)
+
+router.post('/tweets/:tweet_id/replies', authenticated, userController.addReply)
 router.post('/tweets/:id/like', authenticated, userController.addLike)
 router.post('/tweets/:id/unlike', authenticated, userController.unLike)
-router.get('/tweets', authenticated, userController.getTweets)
+
 router.get('/get_current_user', authenticated, userController.getCurrentUser)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
 
 router.use('/', apiErrorHandler)
 
