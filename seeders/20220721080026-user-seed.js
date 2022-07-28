@@ -66,6 +66,66 @@ module.exports = {
       introduction: faker.lorem.text().substring(0, 100),
       createdAt: new Date(),
       updatedAt: new Date()
+    }, {
+      email: 'user4@example.com',
+      account: 'user6',
+      password: await bcrypt.hash(PASSWORD, 10),
+      isAdmin: false,
+      role: 'user',
+      name: 'user6',
+      introduction: faker.lorem.text().substring(0, 100),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }, {
+      email: 'user4@example.com',
+      account: 'user7',
+      password: await bcrypt.hash(PASSWORD, 10),
+      isAdmin: false,
+      role: 'user',
+      name: 'user7',
+      introduction: faker.lorem.text().substring(0, 100),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }, {
+      email: 'user4@example.com',
+      account: 'user8',
+      password: await bcrypt.hash(PASSWORD, 10),
+      isAdmin: false,
+      role: 'user',
+      name: 'user8',
+      introduction: faker.lorem.text().substring(0, 100),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }, {
+      email: 'user4@example.com',
+      account: 'user9',
+      password: await bcrypt.hash(PASSWORD, 10),
+      isAdmin: false,
+      role: 'user',
+      name: 'user9',
+      introduction: faker.lorem.text().substring(0, 100),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }, {
+      email: 'user4@example.com',
+      account: 'user10',
+      password: await bcrypt.hash(PASSWORD, 10),
+      isAdmin: false,
+      role: 'user',
+      name: 'user10',
+      introduction: faker.lorem.text().substring(0, 100),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }, {
+      email: 'user4@example.com',
+      account: 'userrr',
+      password: await bcrypt.hash(PASSWORD, 10),
+      isAdmin: false,
+      role: 'user',
+      name: 'userrr',
+      introduction: faker.lorem.text().substring(0, 100),
+      createdAt: new Date(),
+      updatedAt: new Date()
     }], {})
   },
 
