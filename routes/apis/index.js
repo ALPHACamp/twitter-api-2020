@@ -28,10 +28,12 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 router.post('/followships', authenticated, userController.addFollowing)
 
-router.get('/tweets', authenticated, tweetController.getTweets)
-router.get('/tweets/:id', authenticated, tweetController.getTweet)
+router.get('/tweets/:tweet_id/replies', authenticated, userController.getReplies)
+router.post('/tweets/:tweet_id/replies', authenticated, userController.addReply)
 router.post('/tweets/:id/like', authenticated, userController.addLike)
 router.post('/tweets/:id/unlike', authenticated, userController.unLike)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
 
 router.use('/', apiErrorHandler)
 
