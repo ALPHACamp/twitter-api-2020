@@ -90,9 +90,8 @@ const adminController = {
         return {
           ...tweet,
           description: tweet.description.substring(0, 50) + '...',
-          repliedCount: tweet.Replies.length,
-          likeCount: tweet.Likes.length,
-          liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
+          repliedCounts: tweet.Replies.length,
+          likesCounts: tweet.Likes.length
         }
       })
       return res.status(StatusCodes.OK).json(tweets)

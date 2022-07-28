@@ -81,6 +81,20 @@ const userController = {
             message: 'Account或Email已被使用'
           })
       }
+      if (account.length > 10) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json(
+          {
+            status: 'error',
+            message: 'Account限制為10字元'
+          })
+      }
+      if (name.length > 50) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json(
+          {
+            status: 'error',
+            message: 'Name限制為50字元'
+          })
+      }
       const hashedPassword = await bcrypt.hash(password, 10)
       await User.create({
         name,
@@ -207,7 +221,7 @@ const userController = {
         avatar: user.avatar,
         cover: user.cover
       })
-      return res.status(StatusCodes.OK).json({ status: 'success' })
+      return res.status(StatusCodes.OK).json({ status: 'success', message: '成功編輯個人資料' })
     } catch (error) {
       next(error)
     }
@@ -321,8 +335,7 @@ const userController = {
           userAccountOflikedTweet: likedTweet.User.account,
           userAvatarOflikedTweet: likedTweet.User.avatar,
           repliedCounts: likedTweet.Replies.length,
-          likesCounts: likedTweet.Likes.length,
-          isBeingLiked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === likedTweet.id) : false
+          likesCounts: likedTweet.Likes.length
         }
       })
       return res.status(StatusCodes.OK).json(likes)
