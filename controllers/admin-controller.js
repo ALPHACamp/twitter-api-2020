@@ -1,10 +1,9 @@
-const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../models')
 const { User } = db
-const userServices = require('../services/user-services')
+const adminServices = require('../services/admin-services')
 
-const userController = {
+const adminController = {
   signIn: (req, res, next) => {
     try {
       const userData = req.user.toJSON()
@@ -21,9 +20,6 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  },
-  signUp: (req, res, next) => {
-    userServices.signUp(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
-module.exports = userController
+module.exports = adminController

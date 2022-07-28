@@ -1,24 +1,20 @@
 const express = require('express')
-const { authenticated } = require('../middleware/auth')
+const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 const userController = require('../controllers/user-controller')
+const adminController = require('../controllers/admin-controller')
 const passport = require('../config/passport')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 const router = express.Router()
 
-// 測試用,可以刪掉
-router.post('/api/echo', function (req, res, next) {
-  const body = req.body
-  res.json(body)
-})
 
-router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn)
-router.post('/api/signup', userController.signUp)
-router.get('/api/signin', userController.signInPage) // 測試用,可以刪掉
-router.get('/api/signup', userController.signUpPage) // 測試用, 可以刪掉
-router.get('/api/logout', userController.logout) // 測試用, 可以刪掉
+router.post('/api/users/signin', passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
+router.post('/api/users', userController.signUp) //註冊
 
-// router.get('/', authenticated, (req, res) => { res.send('Hi!') })
+router.post('/api/admin/users', passport.authenticate('local', { session: false }), authenticatedAdmin, adminController.signIn)
+
+
+
 
 router.use('/', apiErrorHandler)
 
