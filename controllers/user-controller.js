@@ -59,6 +59,37 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  patchSetting: async (req, res, next) => {
+    try {
+      if (Number(req.params.id) !== req.user.id) return res.status(403).json({ status: 'error', message: 'permission denied' })
+      const { account, name, email, password, checkPassword } = req.body
+      const text = !account ? Object.keys({account})[0] : !name ? Object.keys({name})[0] : !email ? Object.keys({email})[0] : null  
+      if (text) throw new Error(`${text} is required`)
+      if (name.length > 50) throw new Error('name length should be less than 50')
+      if ((password || checkPassword) && password !== checkPassword) throw new Error('password and checkPassword not matched')
+      const [user, userAccount, userEmail] = await Promise.all([
+        User.findByPk(req.params.id),
+        User.findOne({ where: { account } }),
+        User.findOne({ where: { email } })
+      ])
+      if (userAccount && user.id !== userAccount.id) throw new Error('the account has already been used by someone else')
+      if (userEmail && user.id !== userEmail.id) throw new Error('the email has already been registered by someone else')
+      const userUpdate = await user.update({
+        account,
+        name,
+        email,
+        password: password ? bcrypt.hashSync(password, 10) : user.toJSON().password
+      })
+      const userJSON = userUpdate.toJSON()
+      delete userJSON.password
+      res.json({
+        status: 'success',
+        data: { user: userJSON }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
