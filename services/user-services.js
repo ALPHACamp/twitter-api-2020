@@ -4,8 +4,9 @@ const bcrypt = require('bcryptjs')
 
 const userServices = {
   signUp: (req, cb) => {
-    console.log('req.body', req.body)
+    console.log('req.body', req.body) // ! 測試用，之後刪除
     if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match!')
+    if (req.body.name.length > 50) throw new Error('名稱不可超過５０字')
     Promise.all([
       User.findOne({ where: { email: req.body.email } }),
       User.findOne({ where: { account: req.body.account } })
