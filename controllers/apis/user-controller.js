@@ -43,15 +43,7 @@ const userController = {
     userServices.unLike(req, (err, data) => err ? next(err) : res.json(data))
   },
   getCurrentUser: (req, res) => {
-    return res.json({
-      id: req.user.id,
-      account: req.user.account,
-      name: req.user.name,
-      email: req.user.email,
-      avatar: req.user.avatar,
-      cover: req.user.cover,
-      role: req.user.role
-    })
+    return res.json({ ...req.user.dataValues })
   },
   addReply: (req, res, next) => {
     userServices.addReply(req, (err, data) => err ? next(err) : res.json(data))
