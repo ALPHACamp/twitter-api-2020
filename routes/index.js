@@ -7,7 +7,7 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 const router = express.Router()
 
 
-router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn)
+router.post('/api/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/api/users', userController.signUp) //註冊
 
 
