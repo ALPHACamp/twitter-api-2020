@@ -12,9 +12,6 @@ router.post('/users/signin', passport.authenticate('local', { session: false }),
 router.post('/users', userController.signUp)
 router.use('/', errorHandler)
 
-
 router.get('/tweets', tweetController.getTweets)
-router.post('/tweets', tweetController.createTweet)
 
 module.exports = router
-

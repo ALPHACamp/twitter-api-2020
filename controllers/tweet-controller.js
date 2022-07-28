@@ -1,5 +1,5 @@
-const { User, Tweet, Reply } = require('../models')
-const helpers = require('../_helpers')
+const { User, Tweet, Reply, Like } = require('../models')
+const { getUser } = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -7,68 +7,40 @@ const tweetController = {
       let tweets = await Tweet.findAll({
         include: [
           { model: User },
-          { model: User, as: 'LikedUsers' },
-          { model: Reply }
-        ],
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
+          { model: Reply },
+          { model: Like }],
+        order: [['createdAt', 'DESC']]
       })
       if (!tweets) {
-        return res.status(500).json({
+        return res.status(400).json({
           status: 'error',
-          message: 'Tweets not find!'
+          message: 'Tweet不存在'
         })
       }
+
+      const likes = getUser(req, 'LikedTweets')
+
+      tweets = await tweets.map(tweet => tweet.toJSON())
       tweets = tweets.map(tweet => {
+        delete tweet.User.password
         return {
           ...tweet,
+          id: tweet.id,
+          UserId: tweet.UserId,
           description: tweet.description,
-          repliedCount: tweet.Replies.length,
-          likedCount: tweet.LikedUser.length,
-          liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
+          createdAt: tweet.createdAt,
+          updatedAt: tweet.updatedAt,
+          replyCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length,
+          liked: likes ? likes.includes(tweet.id) : false
         }
       })
       return res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
-  },
-  createTweet: async(req, res, next) => {
-    try {
-      const userId = Number(helpers.getUser(req).id)
-
-      const { UserId, description } = req.body
-      if (!UserId) {
-        return res.status(500).json({
-          status: 'error',
-          message: '查無使用者!'
-        })
-      }
-      if (!description.length) {
-        return res.status(500).json({
-          status: 'error',
-          message: '內容不可以空白!'
-        })
-      }
-      if (description.length > 140) {
-        return res.status(500).json({
-          status: 'error',
-          message: '字數不可以大於140字!'
-        })
-      }
-      await Tweet.create({
-        UserId: userId,
-        description
-      })
-      return res.status(200).json({
-        status: 'success',
-        message: '成功建立Tweet'
-      })
-    } catch (err) {
-      next(err)
-    }
   }
 }
+
 
 module.exports = tweetController
