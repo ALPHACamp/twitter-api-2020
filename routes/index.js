@@ -1,10 +1,12 @@
 const express = require('express')
 const router = express.Router()
+
 const { errorHandler } = require('../middleware/error-handler')
 
 const passport = require('../config/passport')
 
 // Controller
+const tweetController = require('../controllers/tweet-controller')
 const userController = require('../controllers/user-controller')
 
 // Middleware
@@ -16,5 +18,10 @@ router.post('/users', userController.signUp)
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.use('/users', authenticated, users)
 router.use('/', errorHandler)
+
+
+
+router.get('/tweets', tweetController.getTweets)
+
 
 module.exports = router
