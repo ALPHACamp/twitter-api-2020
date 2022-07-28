@@ -12,7 +12,12 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       TweetId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        onDelete: 'CASCADE',
+        references: {
+          model: 'Tweets',
+          key: 'id'
+        }
       },
       createdAt: {
         allowNull: false,
