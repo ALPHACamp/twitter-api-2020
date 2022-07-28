@@ -5,9 +5,6 @@ const { User } = db
 const userServices = require('../services/user-services')
 
 const userController = {
-  signInPage: (req, res, next) => {
-    return res.render('signin')
-  },
   signIn: (req, res, next) => {
     try {
       const userData = req.user.toJSON()
@@ -25,15 +22,8 @@ const userController = {
       next(err)
     }
   },
-  signUp: (req, res, next) => { //可刪掉
+  signUp: (req, res, next) => {
     userServices.signUp(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  signUpPage: (req, res) => { //可刪掉
-    res.render('signup')
-  },
-  logout: (req, res) => { //可刪掉
-    req.logout()
-    res.redirect('/signin')
   }
 }
 module.exports = userController
