@@ -494,6 +494,114 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  userSetting: async (req, res, next) => {
+    try {
+      const currentUserId = req.user.id
+      const onPageUserId = req.params.id
+      const emailRegex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/ //eslint-disable-line
+      if (currentUserId !== Number(onPageUserId)) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+          status: 'error',
+          message: '無法編輯他人資訊'
+        })
+      }
+      const user = await User.findByPk(onPageUserId)
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      const account = req.body.account.trim()
+      const password = req.body.password.trim()
+      const checkPassword = req.body.checkPassword.trim()
+      const name = req.body.name.trim()
+      const email = req.body.email.trim()
+
+      if (!account || !name || !email) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+          status: 'error',
+          message: '必填欄位不可為空'
+        })
+      }
+      if (!emailRegex.test(email)) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE)
+          .json({
+            status: 'error',
+            message: '信箱格式不符合'
+          })
+      }
+      if (account !== user.account || email !== user.email) {
+        const existUser = await User.findAll({
+          where: {
+            [Op.or]: [
+              { account },
+              { email }
+            ]
+          }
+        })
+        if (existUser.length > 0) {
+          return res.status(StatusCodes.NOT_ACCEPTABLE).json(
+            {
+              status: 'error',
+              message: 'Account或Email已被使用'
+            })
+        }
+      }
+      if (account.length > 10) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json(
+          {
+            status: 'error',
+            message: 'Account限制為10字元'
+          })
+      }
+      if (name.length > 50) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json(
+          {
+            status: 'error',
+            message: 'Name限制為50字元'
+          })
+      }
+      if (password) {
+        if (!checkPassword) {
+          return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            status: 'error',
+            message: '確認密碼不可為空'
+          })
+        }
+        if (password !== checkPassword) {
+          return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            status: 'error',
+            message: '確認密碼不相符'
+          })
+        }
+        const hashedPassword = await bcrypt.hash(password, 10)
+        await user.update({
+          name,
+          account,
+          email,
+          password: hashedPassword
+        })
+
+        return res.status(StatusCodes.OK).json({
+          status: 'success',
+          message: '帳號設定完成'
+        })
+      }
+      await user.update({
+        name,
+        account,
+        email
+      })
+
+      return res.status(StatusCodes.OK).json({
+        status: 'success',
+        message: '帳號設定完成'
+      })
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
