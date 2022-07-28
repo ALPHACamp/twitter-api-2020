@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const { User } = require('../models')
+const { User, Tweets } = require('../models')
 const { Op } = require('sequelize')
 
 const userController = {
@@ -122,6 +122,21 @@ const userController = {
       })
       if (!user) return res.status(404).json({ status: 'error', message: 'User is not found.' })
       res.status(200).json(user)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const tweets = await Tweets.findAll({
+        where: { UserId: id },
+        order: [['createAt', 'DESC']],
+        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+        raw: true,
+        nest: true
+      })
+      if (!tweets) return res.status(404).json({ status: 'error', message: 'Tweets are not found.' })
     } catch (err) {
       next(err)
     }
