@@ -27,8 +27,16 @@ const adminServices = {
     })
       .then(tweets => cb(null, { tweets }))
       .catch(err => cb(err))
+  },
+  deleteTweet: async (req, cb) => {
+    await Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) throw new Error("tweet didn't exist!")
+        return tweet.destroy()
+      })
+      .then(deletedTweet => cb(null, { tweet: deletedTweet }))
+      .catch(err => cb(err))
   }
-
 }
 
 module.exports = adminServices
