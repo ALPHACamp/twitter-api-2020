@@ -13,6 +13,8 @@ router.post('/users', userController.signUp)
 router.use('/', errorHandler)
 
 
+
 router.get('/tweets', tweetController.getTweets)
+
 
 module.exports = router

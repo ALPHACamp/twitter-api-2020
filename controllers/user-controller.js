@@ -28,7 +28,7 @@ const userController = {
   },
   signUp: async (req, res, next) => {
     try {
-      const {account, password, checkPassword, name, email} = req.body
+      const { account, password, checkPassword, name, email } = req.body
 
       if (!account || !name || !email || !password || !checkPassword) {
         throw new Error('欄位不可空白！')
@@ -59,7 +59,7 @@ const userController = {
         password: hash,
         role: 'user'
       })
-      userData = user.toJSON()
+      const userData = user.toJSON()
       delete userData.password
       return res.json({ status: 'success', user: userData })
     } catch (error) {

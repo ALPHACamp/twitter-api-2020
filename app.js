@@ -8,12 +8,8 @@ const routes = require('./routes')
 
 const passport = require('./config/passport')
 
-
-
 const app = express()
 const port = 3000
-
-
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -23,7 +19,6 @@ app.use((req, res, next) => {
   res.user = helpers.getUser(req)
   next()
 })
-
 
 app.use('/api', routes)
 
