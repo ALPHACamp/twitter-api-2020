@@ -1,5 +1,4 @@
 const userServices = require('../../services/user-services')
-
 const userController = {
   signUp: (req, res, next) => {
     userServices.signUp(req, (err, data) => err ? next(err) : res.json({ status: 'success', ...data }))
@@ -43,12 +42,14 @@ const userController = {
   unLike: (req, res, next) => {
     userServices.unLike(req, (err, data) => err ? next(err) : res.json(data))
   },
+  getCurrentUser: (req, res) => {
+    return res.json({ ...req.user.dataValues })
+  },
   addReply: (req, res, next) => {
     userServices.addReply(req, (err, data) => err ? next(err) : res.json(data))
   },
   getReplies: (req, res, next) => {
     userServices.getReplies(req, (err, data) => err ? next(err) : res.json(data))
-
   }
 }
 
