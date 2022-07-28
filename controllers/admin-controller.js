@@ -90,12 +90,11 @@ const adminController = {
         return {
           ...tweet,
           description: tweet.description.substring(0, 50) + '...',
-          repliedCount: tweet.Replies.length,
-          likeCount: tweet.Likes.length,
-          liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
+          repliedCounts: tweet.Replies.length,
+          likesCounts: tweet.Likes.length
         }
       })
-      return res.status(StatusCodes.OK).json(tweets)
+      return res.status(StatusCodes.OK).json({ status: 'success', tweets })
     } catch (error) {
       next(error)
     }
@@ -111,7 +110,7 @@ const adminController = {
         })
       }
       await tweet.destroy()
-      return res.status(StatusCodes.OK).json(tweet)
+      return res.status(StatusCodes.OK).json({ status: 'success', tweet })
     } catch (error) {
       next(error)
     }

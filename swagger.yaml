@@ -16,27 +16,28 @@ paths:
       summary: Get all users
       operationId: Getallusers
       parameters: []
+      description: 回傳資料為一個Array
       responses:
         '200':
           description: ''
           content:
             application/json:
               example:
-                id: 使用者ID
-                account: 使用者帳號
-                name: 使用者名稱
-                email: 使用者Email
-                introduction: 使用者自我介紹
-                avatar: 使用者頭像URL
-                cover: 使用者Cover URL
-                isAdmin: false
-                role: user
-                createdAt: '2022-07-25T11:42:14.000Z'
-                updatedAt: '2022-07-25T11:42:14.000Z'
-                tweetsCounts: 有幾篇tweets INTEGER
-                followingsCounts: 有幾位正在追蹤的人 INTEGER
-                followersCounts: 有幾位追蹤者 INTEGER
-                likedTweetsCounts: 已經按讚的貼文數 INTEGER
+                - id:
+                  account:
+                  name:
+                  email:
+                  introduction:
+                  avatar:
+                  cover:
+                  isAdmin:
+                  role:
+                  createdAt:
+                  updatedAt:
+                  tweetsCounts:
+                  followingsCounts:
+                  followersCounts:
+                  likedTweetsCounts:
       deprecated: false
       security:
         - bearer: []
@@ -50,23 +51,23 @@ paths:
       summary: Get all tweets
       operationId: Getalltweets
       parameters: []
+      description: 回傳資料為一個Array
       responses:
         '200':
           description: ''
           content:
             application/json:
               example:
-                id: 貼文ID
-                UserId: 貼文的使用者ID
-                description: 貼文預覽50字
-                createdAt: '2022-07-25T11:42:15.000Z'
-                updatedAt: '2022-07-25T11:42:15.000Z'
-                User: 使用者資訊
-                Replies: 回覆的資訊
-                Likes: 按讚的資訊
-                repliedCount: 回覆數量 INTEGER
-                likeCount: 按讚數量 INTEGER
-                liked: 是否已被按讚
+                - id:
+                  UserId:
+                  description:
+                  createdAt:
+                  updatedAt:
+                  User:
+                  Replies:
+                  Likes:
+                  repliedCounts:
+                  likesCounts:
       deprecated: false
       security:
         - bearer: []
@@ -87,12 +88,18 @@ paths:
       summary: Delete tweet
       operationId: Deletetweet
       parameters: []
+      description: 回傳資料為已刪除的貼文細節
       responses:
         '200':
           description: ''
           content:
             application/json:
-              example: 已刪除的貼文 JSON
+              example:
+                id:
+                UserId:
+                description:
+                createdAt:
+                updatedAt:
       deprecated: false
       security:
         - bearer: []
@@ -113,29 +120,30 @@ paths:
       summary: Get user page
       operationId: Getuserpage
       parameters: []
+      description: 回傳單一使用者資料
       responses:
         '200':
           description: ''
           content:
             application/json:
               example:
-                id: 14
-                account: user1
-                name: user1
-                email: user1@example.com
-                introduction: Quisquam placeat ipsa eius aperiam exercitationem minus.
+                id:
+                account:
+                name:
+                email:
+                introduction:
                 avatar:
                 cover:
-                isAdmin: false
-                role: user
-                createdAt: '2022-07-25T11:42:14.000Z'
-                updatedAt: '2022-07-25T11:42:14.000Z'
+                isAdmin:
+                role:
+                createdAt:
+                updatedAt:
                 Tweets:
                 Followings:
                 Followers:
-                tweetsCounts: 10
-                followingsCounts: 2
-                isBeingFollowed: false
+                tweetsCounts:
+                followingsCounts:
+                isBeingFollowed:
       deprecated: false
       security:
         - bearer: []
@@ -156,6 +164,22 @@ paths:
       summary: Edit user
       operationId: Edituser
       parameters: []
+      description: 此API用來編輯使用者avatar、cover、name、introduction資料，avatar與cover使用檔案上傳
+      requestBody:
+        description: ''
+        content:
+          text/plain:
+            schema:
+              type: object
+              example:
+                account: user100
+                email: usere100@example
+                name: user100
+                password: '12345678'
+                checkPassword: '12345678'
+            example:
+              name: user100 限制50字元
+              introduction: 我是user100 限制150字元
       responses:
         '200':
           description: ''
@@ -163,6 +187,7 @@ paths:
             application/json:
               example:
                 status: success
+                message: 成功編輯個人資料
       deprecated: false
       security:
         - bearer: []
@@ -183,23 +208,23 @@ paths:
       summary: Get user likes
       operationId: Getuserlikes
       parameters: []
+      description: 取得使用者按讚的貼文清單，回傳格式為Array
       responses:
         '200':
           description: ''
           content:
             application/json:
               example:
-                likeCreatedAt: '2022-07-25T11:42:15.000Z'
-                TweetId: 134
-                description: Et vel et natus quod quos libero.
-                createdAt: '2022-07-25T11:42:15.000Z'
-                userOflikedTweet: 24
-                userNameOflikedTweet: user2
-                userAccountOflikedTweet: user2
-                userAvatarOflikedTweet:
-                repliedCounts: 3
-                likesCounts: 3
-                isBeingLiked: true
+                - likeCreatedAt:
+                  TweetId:
+                  description:
+                  createdAt:
+                  userOflikedTweet:
+                  userNameOflikedTweet:
+                  userAccountOflikedTweet:
+                  userAvatarOflikedTweet:
+                  repliedCounts:
+                  likesCounts:
       deprecated: false
       security:
         - bearer: []
@@ -220,26 +245,27 @@ paths:
       summary: Get user tweets
       operationId: Getusertweets
       parameters: []
+      description: 取得使用者的貼文清單，回傳格式為Array
       responses:
         '200':
           description: ''
           content:
             application/json:
               example:
-                id: 64
-                UserId: 14
-                description: Reprehenderit consequatur laboriosam.
-                createdAt: '2022-07-25T11:42:15.000Z'
-                updatedAt: '2022-07-25T11:42:15.000Z'
-                Replies:
-                Likes:
-                userOfTweet: 14
-                userNameOfTweet: user1
-                userAccountOfTweet: user1
-                userAvatarOfTweet:
-                repliedCounts: 3
-                likesCounts: 1
-                isBeingliked: false
+                - id:
+                  UserId:
+                  description:
+                  createdAt:
+                  updatedAt:
+                  Replies:
+                  Likes:
+                  userOfTweet:
+                  userNameOfTweet:
+                  userAccountOfTweet:
+                  userAvatarOfTweet:
+                  repliedCounts:
+                  likesCounts:
+                  isBeingliked:
       deprecated: false
       security:
         - bearer: []
@@ -260,27 +286,28 @@ paths:
       summary: Get user replies
       operationId: Getuserreplies
       parameters: []
+      description: 取得使用者回覆的貼文清單，回傳格式為Array
       responses:
         '200':
           description: ''
           content:
             application/json:
               example:
-                replyId: 74
-                comment: sit autem tempore
-                repliedTweet: 24
-                repliedTweetDescription: Voluptas illo quo odit qui fugiat laborum consequu
-                userOfRepliedTweet: 14
-                userAccountOfRepliedTweet: user1
-                userNameOfRepliedTweet: user1
-                userAvatarOfRepliedTweet:
-                repliedTweetCreatedAt: '2022-07-25T11:42:15.000Z'
-                isBeingliked: false
-                userOfReply: 14
-                userAccountOfReply: user1
-                userNameOfReply: user1
-                userAvatarOfReply:
-                timeOfReply: '2022-07-25T11:42:15.000Z'
+                - replyId:
+                  comment:
+                  repliedTweet:
+                  repliedTweetDescription:
+                  userOfRepliedTweet:
+                  userAccountOfRepliedTweet:
+                  userNameOfRepliedTweet:
+                  userAvatarOfRepliedTweet:
+                  repliedTweetCreatedAt:
+                  isBeingliked:
+                  userOfReply:
+                  userAccountOfReply:
+                  userNameOfReply:
+                  userAvatarOfReply:
+                  timeOfReply:
       deprecated: false
       security:
         - bearer: []
@@ -301,18 +328,19 @@ paths:
       summary: Get user followings
       operationId: Getuserfollowings
       parameters: []
+      description: 取得使用者追蹤的清單，回傳格式為Array
       responses:
         '200':
           description: ''
           content:
             application/json:
               example:
-                userOfFollowing: 24
-                userNameOfFollowing: user2
-                userAccountOfFollowing: user2
-                userAvatarOfFollowing:
-                createdAt: '2022-07-25T11:42:15.000Z'
-                isFollowing: true
+                - userOfFollowing:
+                  userNameOfFollowing:
+                  userAccountOfFollowing:
+                  userAvatarOfFollowing:
+                  createdAt:
+                  isFollowing:
       deprecated: false
       security:
         - bearer: []
@@ -333,18 +361,19 @@ paths:
       summary: Get user followers
       operationId: Getuserfollowers
       parameters: []
+      description: 取得使用者粉絲的清單，回傳格式為Array
       responses:
         '200':
           description: ''
           content:
             application/json:
               example:
-                followerId: 34
-                userNameOfFollower: user3
-                userAccountOfFollower: user3
-                userAvatarOfFollower:
-                createdAt: '2022-07-25T11:42:15.000Z'
-                isFollowing: false
+                - followerId:
+                  userNameOfFollower:
+                  userAccountOfFollower:
+                  userAvatarOfFollwer:
+                  createdAt:
+                  isFollowing:
       deprecated: false
       security:
         - bearer: []
@@ -358,24 +387,25 @@ paths:
       summary: Get top 10 users
       operationId: Gettop10users
       parameters: []
+      description: 最高追蹤者清單，回傳格式為Array
       responses:
         '200':
           description: ''
           content:
             application/json:
               example:
-                - id: 14
-                  name: user1
-                  account: user1
+                - id:
+                  name:
+                  account:
                   avatar:
-                  followersCounts: 3
-                  isFollowing: false
-                - id: 24
-                  name: user2
-                  account: user2
+                  followersCounts:
+                  isFollowing:
+                - id:
+                  name:
+                  account:
                   avatar:
-                  followersCounts: 3
-                  isFollowing: true
+                  followersCounts:
+                  isFollowing:
       deprecated: false
       security:
         - bearer: []
@@ -389,6 +419,7 @@ paths:
       summary: Get current user
       operationId: Getcurrentuser
       parameters: []
+      description: 取得當前使用者資料
       responses:
         '200':
           description: ''
@@ -396,50 +427,34 @@ paths:
             application/json:
               example:
                 user:
-                  id: 14
-                  account: user1
-                  name: user1
-                  email: user1@example.com
-                  introduction: Quisquam plac
+                  id:
+                  account:
+                  name:
+                  email:
+                  introduction:
                   avatar:
                   cover:
-                  createdAt: '2022-07-25T11:42:14.000Z'
-                  updatedAt: '2022-07-25T11:42:14.000Z'
+                  createdAt:
+                  updatedAt:
                   Tweets:
-                    - id: 4
-                      UserId: 14
-                      description: Sed tempore eos aut
-                      createdAt: '2022-07-25T11:42:15.000Z'
-                      updatedAt: '2022-07-25T11:42:15.000Z'
-                    - id: 14
-                      UserId: 14
-                      description: quod aliquam adipisci
-                      createdAt: '2022-07-25T11:42:15.000Z'
-                      updatedAt: '2022-07-25T11:42:15.000Z'
+                    - id:
+                      UserId:
+                      description:
+                      createdAt:
+                      updatedAt:
                   Replies:
-                    - id: 74
-                      UserId: 14
-                      TweetId: 24
-                      comment: sit autem tempore
-                      createdAt: '2022-07-25T11:42:15.000Z'
-                      updatedAt: '2022-07-25T11:42:15.000Z'
-                    - id: 264
-                      UserId: 14
-                      TweetId: 84
-                      comment: atque
-                      createdAt: '2022-07-25T11:42:15.000Z'
-                      updatedAt: '2022-07-25T11:42:15.000Z'
+                    - id:
+                      UserId:
+                      TweetId:
+                      comment:
+                      createdAt:
+                      updatedAt:
                   Likes:
-                    - id: 4
-                      UserId: 14
-                      TweetId: 274
-                      createdAt: '2022-07-25T11:42:15.000Z'
-                      updatedAt: '2022-07-25T11:42:15.000Z'
-                    - id: 14
-                      UserId: 14
-                      TweetId: 204
-                      createdAt: '2022-07-25T11:42:15.000Z'
-                      updatedAt: '2022-07-25T11:42:15.000Z'
+                    - id:
+                      UserId:
+                      TweetId:
+                      createdAt:
+                      updatedAt:
       deprecated: false
       security:
         - bearer: []
@@ -456,12 +471,43 @@ paths:
       responses:
         '200':
           description: ''
-          headers: {}
+          content:
+            application/json:
+              example:
+                - id:
+                  UserId:
+                  description:
+                  createdAt:
+                  updatedAt:
+                  User:
+                    id:
+                    account:
+                    name:
+                    email:
+                    password:
+                    introduction:
+                    avatar:
+                    cover:
+                    isAdmin:
+                    role:
+                    createdAt:
+                    updatedAt:
+                  LikedUsers: []
+                  Replies:
+                    - id:
+                      UserId:
+                      TweetId:
+                      comment:
+                      createdAt:
+                      updatedAt:
+                  repliedCount:
+                  likeCount:
+                  liked:
       deprecated: false
       security:
         - bearer: []
       servers:
-        - url: http://localhost:3000/api
+        - url: https://simple-twitter-paul.herokuapp.com/api
           variables: {}
     post:
       tags:
@@ -699,7 +745,7 @@ paths:
       tags:
         - Auth
       summary: Admin login
-      description: 管理員登入
+      description: 接受body資料資料如example，回傳使用者資料以及token
       operationId: Adminlogin
       parameters: []
       requestBody:
@@ -715,19 +761,37 @@ paths:
       responses:
         '200':
           description: ''
-          headers: {}
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功登入
+                token:
+                data:
+                  id:
+                  account:
+                  name:
+                  email:
+                  introduction:
+                  avatar:
+                  cover:
+                  isAdmin: true
+                  role: admin
+                  createdAt:
+                  updatedAt:
       deprecated: false
       security: []
       servers:
         - url: https://simple-twitter-paul.herokuapp.com/api
           variables: {}
-  /users:
+  /signup:
     post:
       tags:
         - Auth
       summary: User sign up
       operationId: Usersignup
       parameters: []
+      description: 接受body資料資料如example，回傳成功訊息，無資料
       requestBody:
         description: ''
         content:
@@ -741,16 +805,20 @@ paths:
                 password: '12345678'
                 checkPassword: '12345678'
             example:
-              account: user100
+              account: user100 限制10字元
               email: usere100@example
-              name: user100
+              name: user100 限制50字元
               password: '12345678'
               checkPassword: '12345678'
         required: true
       responses:
         '200':
           description: ''
-          headers: {}
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功創建
       deprecated: false
       security: []
       servers:
@@ -763,6 +831,7 @@ paths:
       summary: User login
       operationId: Userlogin
       parameters: []
+      description: 接受body資料資料如example，回傳使用者資料以及token
       requestBody:
         description: ''
         content:
@@ -776,7 +845,24 @@ paths:
       responses:
         '200':
           description: ''
-          headers: {}
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功登入
+                token:
+                data:
+                  id:
+                  account:
+                  name:
+                  email:
+                  introduction:
+                  avatar:
+                  cover:
+                  isAdmin: false
+                  role: user
+                  createdAt:
+                  updatedAt:
       deprecated: false
       security: []
       servers:
@@ -807,7 +893,6 @@ components:
         description:
           type: string
       example:
-        UserId: '2'
         description: Hello Word
     UserrepliestoatweetRequest:
       title: UserrepliestoatweetRequest
@@ -818,8 +903,6 @@ components:
         comment:
           type: string
       example:
-        userId: '1'
-        tweetId: '2'
         comment: Hello word
     UserloginRequest:
       title: UserloginRequest
