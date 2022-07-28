@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { Op } = require('sequelize')
+const { Sequelize, Op } = require('sequelize')
 
 const { User } = require('../models')
 
@@ -62,6 +62,41 @@ const userController = {
       const userData = user.toJSON()
       delete userData.password
       return res.json({ status: 'success', user: userData })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUsers: async (req, res, next) => {
+    try {
+      const limit = Number(req.query.limit) || null
+      const users = await User.findAll({
+        where: { role: 'user' },
+        include: [{
+          model: User,
+          as: 'Followers',
+          attributes: [
+            'id',
+            'name',
+            'avatar',
+            'account'
+          ]
+        }],
+        attributes: [
+          'id',
+          'name',
+          'avatar',
+          'account',
+          [
+            Sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+            ),
+            'followersCount'
+          ]
+        ],
+        order: [[Sequelize.literal('followersCount'), 'DESC'], ['name', 'ASC']],
+        limit
+      })
+      res.json({ status: 'success', data: users })
     } catch (error) {
       next(error)
     }
