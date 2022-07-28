@@ -45,6 +45,20 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getSetting: async (req, res, next) => {
+    try {
+      if (Number(req.params.id) !== req.user.id) return res.status(403).json({ status: 'error', message: 'permission denied' })
+      const user = await User.findByPk(req.params.id, { raw: true })
+      if (!user) throw new Error('user not exist')
+      delete user.password
+      res.json({
+        status: 'success',
+        data: { user }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 

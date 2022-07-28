@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "SET NODE_ENV=development&& node app.js",
-    "dev": "SET NODE_ENV=development&& nodemon app.js",
+    "start": "cross-env NODE_ENV=development node app.js",
+    "dev": "cross-env NODE_ENV=development nodemon app.js",
     "test": "mocha test --exit --recursive --timeout 5000"
   },
   "author": "",
@@ -16,6 +16,7 @@
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.0.1",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
