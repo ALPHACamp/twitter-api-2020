@@ -8,7 +8,7 @@ const tweetController = {
       let tweets = await Tweet.findAll({
         include: [
           { model: User },
-          { model: User, as: 'LikedUsers' },
+          { model: Like },
           { model: Reply }],
         order: [['createdAt', 'DESC']]
       })
@@ -20,11 +20,12 @@ const tweetController = {
       }
       tweets = await tweets.map(tweet => tweet.toJSON())
       tweets = tweets.map(tweet => {
+        delete tweet.User.password
         return {
           ...tweet,
           description: tweet.description,
           repliedCount: tweet.Replies.length,
-          likeCount: tweet.LikedUsers.length,
+          likeCount: tweet.Likes.length,
           liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
         }
       })
