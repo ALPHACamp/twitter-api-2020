@@ -502,7 +502,7 @@ const userController = {
       const onPageUserId = req.params.id
       const emailRegex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/ //eslint-disable-line
       if (currentUserId !== Number(onPageUserId)) {
-        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+        return res.status(StatusCodes.FORBIDDEN).json({
           status: 'error',
           message: '無法編輯他人資訊'
         })
