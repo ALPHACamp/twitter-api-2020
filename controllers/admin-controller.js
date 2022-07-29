@@ -18,6 +18,7 @@ const adminController = {
 
       // Find admin
       const user = await User.findOne({
+        raw: true,
         where: {
           account,
           role: 'admin'
@@ -35,21 +36,9 @@ const adminController = {
       // Generate token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
+      delete user.password
 
-      return res.status(200).json({
-        status: 'success',
-        message: 'Login success.',
-        token,
-        data: {
-          user: {
-            id: user.id,
-            name: user.name,
-            account: user.account,
-            email: user.email,
-            role: user.role
-          }
-        }
-      })
+      return res.status(200).json({ token, user })
     } catch (err) {
       next(err)
     }

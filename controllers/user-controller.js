@@ -20,6 +20,7 @@ const userController = {
 
       // Find user
       const user = await User.findOne({
+        raw: true,
         where: {
           account,
           role: 'user'
@@ -37,21 +38,9 @@ const userController = {
       // Generate token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
+      delete user.password
 
-      return res.status(200).json({
-        status: 'success',
-        message: 'Login success.',
-        token,
-        data: {
-          user: {
-            id: user.id,
-            name: user.name,
-            account: user.account,
-            email: user.email,
-            role: user.role
-          }
-        }
-      })
+      return res.status(200).json({ token, user })
     } catch (err) {
       next(err)
     }
@@ -89,25 +78,16 @@ const userController = {
         })
       }
 
-      const userData = await User.create({
+      await User.create({
         account,
         name,
         email,
         password: bcrypt.hashSync(password, 10)
       })
-      const user = userData.toJSON()
-      delete user.password
+
       return res.status(200).json({
         status: 'success',
-        message: 'Sign up success.',
-        data: {
-          user: {
-            id: user.id,
-            name: user.name,
-            account: user.account,
-            role: user.role
-          }
-        }
+        message: 'Sign up success.'
       })
     } catch (err) {
       next(err)
@@ -155,14 +135,10 @@ const userController = {
         })
       }
 
-      const newFollow = await Followship.create({
-        followerId,
-        followingId
-      })
+      await Followship.create({ followerId, followingId })
       return res.status(200).json({
         status: 'success',
-        message: 'Followship added',
-        data: { newFollow }
+        message: 'Followship added'
       })
     } catch (err) {
       next(err)
@@ -201,8 +177,7 @@ const userController = {
       await followship.destroy()
       return res.status(200).json({
         status: 'success',
-        message: 'Removed followed success',
-        data: { followship }
+        message: 'Remove followed success'
       })
     } catch (err) {
       next(err)

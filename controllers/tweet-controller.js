@@ -33,8 +33,8 @@ const tweetController = {
       })
     }
 
-    const tweet = await Tweet.create({ userId, description })
-    return res.status(200).json(tweet)
+    await Tweet.create({ userId, description })
+    return res.status(200).json({ status: 'success', message: 'New tweet added' })
   }
 }
 
