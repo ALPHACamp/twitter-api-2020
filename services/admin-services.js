@@ -42,7 +42,7 @@ const adminServices = {
       .catch(err => cb(err))
   },
   deleteTweet: async (req, cb) => {
-    Tweet.findByPk(req.params.id)
+    return Tweet.findByPk(req.params.id)
       .then(tweet => {
         if (!tweet) throw new Error("tweet didn't exist!")
         return tweet.destroy()

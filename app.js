@@ -6,8 +6,6 @@ const express = require('express')
 const handlebars = require('express-handlebars')
 const routes = require('./routes')
 const helpers = require('./_helpers')
-// const methodOverride = require('method-override') 
-
 const session = require('express-session')
 const passport = require('./config/passport')
 
