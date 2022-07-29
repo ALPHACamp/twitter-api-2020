@@ -121,8 +121,12 @@ const userController = {
         nest: true,
         attributes: { exclude: ['password'] }
       })
-      if (!user) return res.status(404).json({ status: 'error', message: 'User is not found.' })
-      res.status(200).json(user)
+      if (!user) return res.status(404).json({ status: 'error', message: 'User is not found' })
+      res.status(200).json({
+        status: 'success',
+        message: 'User is found',
+        data: { user }
+      })
     } catch (err) {
       next(err)
     }
