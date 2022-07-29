@@ -2,11 +2,12 @@ const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const helpers = require('../_helpers')
 
 const userController = {
   signIn: (req, res, next) => {
     try {
-      const user = req.user.toJSON()
+      const user = helpers.getUser(req).toJSON()
       delete user.password
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '3d' })
       res.json({
@@ -25,6 +26,7 @@ const userController = {
       const { account, name, email, password, checkPassword } = req.body
       if (!account || !name || !email || !password || !checkPassword) throw new Error('all fields are required')
       if (password !== checkPassword) throw new Error('password and checkPassword not matched')
+      if (name.length > 50) throw new Error('name length should be less than 50')
       const [userAccount, userEmail] = await Promise.all([
         User.findOne({ where: { account } }),
         User.findOne({ where: { email } })
@@ -49,7 +51,7 @@ const userController = {
   },
   getSetting: async (req, res, next) => {
     try {
-      if (Number(req.params.id) !== req.user.id) return res.status(403).json({ status: 'error', message: 'permission denied' })
+      if (Number(req.params.id) !== helpers.getUser(req).id) return res.status(403).json({ status: 'error', message: 'permission denied' })
       const user = await User.findByPk(req.params.id, { raw: true })
       if (!user) throw new Error('user not exist')
       delete user.password
@@ -63,7 +65,7 @@ const userController = {
   },
   patchSetting: async (req, res, next) => {
     try {
-      if (Number(req.params.id) !== req.user.id) return res.status(403).json({ status: 'error', message: 'permission denied' })
+      if (Number(req.params.id) !== helpers.getUser(req).id) return res.status(403).json({ status: 'error', message: 'permission denied' })
       const { account, name, email, password, checkPassword } = req.body
       const text = !account ? Object.keys({account})[0] : !name ? Object.keys({name})[0] : !email ? Object.keys({email})[0] : null  
       if (text) throw new Error(`${text} is required`)
@@ -96,15 +98,13 @@ const userController = {
     try {
       const userFind = await User.findByPk(req.params.id, { raw: true })
       if (!userFind) throw new Error('user not exist')
-      const currentUser = req.user.toJSON()
+      const currentUser = helpers.getUser(req)
       delete currentUser.password
       const { id, name, introduction, avatar, banner } = userFind
       res.json({
         status: 'success',
-        data: { 
-          user: { id, name, introduction, avatar, banner },
-          currentUser
-        }
+        id, name, introduction, avatar, banner,
+        currentUser
       })
     } catch (err) {
       next(err)
@@ -112,7 +112,7 @@ const userController = {
   },
     putUser: async (req, res, next) => {
     try {
-      if (Number(req.params.id) !== req.user.id) return res.status(403).json({ status: 'error', message: 'permission denied' })
+      if (Number(req.params.id) !== helpers.getUser(req).id) return res.status(403).json({ status: 'error', message: 'permission denied' })
       const userFind = await User.findByPk(req.params.id)
       if (!userFind) throw new Error('user not exist')
       const { name, introduction } = req.body
