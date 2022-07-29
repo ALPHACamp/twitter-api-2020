@@ -10,6 +10,10 @@ const helpers = require('./_helpers');
 const session = require('express-session')
 const passport = require('./config/passport')
 
+const cors = require('cors')
+// Setting Cors
+app.use(cors())
+
 const app = express()
 const port = 3000
 
