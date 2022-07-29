@@ -633,7 +633,7 @@ paths:
       security:
         - bearer: []
       servers:
-        - url: http://localhost:3000/api
+        - url: https://simple-twitter-paul.herokuapp.com/api
           variables: {}
   /tweets/{tweetId}/replies:
     parameters:
@@ -673,6 +673,12 @@ paths:
       summary: Edit a reply
       operationId: Editareply
       parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEditReply'
       responses:
         '200':
           description: ''
@@ -904,6 +910,16 @@ components:
           type: string
       example:
         comment: Hello word
+    UserEditReply:
+      title: UserEditReply
+      required:
+        - comment
+      type: object
+      properties:
+        comment:
+          type: string
+      example:
+        comment: Hello word edit
     UserloginRequest:
       title: UserloginRequest
       required:
