@@ -1,5 +1,4 @@
 const { Tweet, User } = require('../models')
-// const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
