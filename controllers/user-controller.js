@@ -138,6 +138,7 @@ const userController = {
         nest: true
       })
       if (!tweets) return res.status(404).json({ status: 'error', message: 'Tweets are not found.' })
+      res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
