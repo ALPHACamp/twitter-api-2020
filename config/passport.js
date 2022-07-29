@@ -12,13 +12,13 @@ const ExtractJWT = passportJWT.ExtractJwt
 passport.use(new LocalStrategy(
   // customize user field
   {
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
   },
   // authenticate user
-  (req, email, password, cb) => {
-    User.findOne({ where: { email } })
+  (req, account, password, cb) => {
+    User.findOne({ where: { account } })
       .then(user => {
         if (!user) {
           return cb('帳號或密碼不正確', false)
@@ -32,6 +32,7 @@ passport.use(new LocalStrategy(
       })
   }
 ))
+
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),

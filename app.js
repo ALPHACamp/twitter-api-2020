@@ -5,19 +5,23 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const handlebars = require('express-handlebars')
 const routes = require('./routes')
-const helpers = require('./_helpers');
-
+const helpers = require('./_helpers')
 const session = require('express-session')
 const passport = require('./config/passport')
+
+const cors = require('cors')
+// Setting Cors
 
 const app = express()
 const port = 3000
 
 // use helpers.getUser(req) to replace req.user
+
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
+app.use(cors())
 app.engine('hbs', handlebars({ extname: '.hbs' }))
 app.set('view engine', 'hbs')
 app.use(express.urlencoded({ extended: true }))
@@ -26,7 +30,9 @@ app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUniniti
 app.use(passport.initialize())
 app.use(passport.session())
 
+// app.use(methodOverride('_method'))
 
+// app.use(helpers.getUser(req))
 app.use(routes)
 
 // app.get('/', (req, res) => res.send('Hello World!'))
