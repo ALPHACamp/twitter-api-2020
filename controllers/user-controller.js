@@ -363,6 +363,7 @@ const userController = {
           userNameOfFollowing: following.name,
           userAccountOfFollowing: following.account,
           userAvatarOfFollowing: following.avatar,
+          userInrtoductionOfFollowing: following.introduction,
           createdAt: following.createdAt,
           isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false
         }
@@ -394,6 +395,7 @@ const userController = {
           userNameOfFollower: follower.name,
           userAccountOfFollower: follower.account,
           userAvatarOfFollower: follower.avatar,
+          userInrtoductionOfFollower: follower.introduction,
           createdAt: follower.createdAt,
           isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === follower.id) : false
         }
