@@ -7,10 +7,14 @@ const tweetController = {
     try {
       let tweets = await Tweet.findAll({
         include: [
-          { model: User,
-            attributes: ['id', 'account', 'name', 'avatar', 'introduction', 'role', 'front_cover'] },
-          { model: Reply,
-            attributes: ['id'] },
+          {
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction', 'role', 'front_cover']
+          },
+          {
+            model: Reply,
+            attributes: ['id']
+          },
           { model: Like }],
         order: [['createdAt', 'DESC']]
       })
@@ -111,6 +115,5 @@ const tweetController = {
     }
   }
 }
-
 
 module.exports = tweetController
