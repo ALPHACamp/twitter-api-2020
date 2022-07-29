@@ -21,6 +21,8 @@ router.post('/users/signin', passport.authenticate('local', { session: false }),
 
 router.use('/users', authenticated, users)
 
+// Tweet API
+router.get('/tweets/:id', tweetController.getTweet)
 router.get('/tweets', tweetController.getTweets)
 router.post('/tweets', tweetController.postTweet)
 

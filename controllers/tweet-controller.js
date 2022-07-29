@@ -71,6 +71,44 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweet: async (req, res, next) => {
+    try {
+      let tweet = await Tweet.findByPk(req.params.id, {
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction', 'role', 'front_cover']
+          },
+          {
+            model: Reply,
+            attributes: ['id']
+          },
+          {
+            model: Like
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      if (!tweet) {
+        return res.status(500).json({
+          status: 'error',
+          message: '找不到此推特!'
+        })
+      }
+
+      const likes = getUser(req, 'LikedTweets')
+      tweet = await tweet.toJSON()
+      const data = {
+        ...tweet,
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.Likes.length,
+        isLiked: likes ? likes.includes(tweet.id) : null
+      }
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
