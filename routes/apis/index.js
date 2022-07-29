@@ -28,7 +28,6 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 router.post('/followships', authenticated, userController.addFollowing)
 
-
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
 
