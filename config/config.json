@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": "password",
-    "database": "ac_twitter_workspace",
+    "database": "simple_Twitter",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
