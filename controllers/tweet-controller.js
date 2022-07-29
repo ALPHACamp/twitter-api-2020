@@ -6,10 +6,11 @@ const tweetController = {
     try {
       const tweets = await Tweet.findAll({
         order: [['createdAt', 'DESC']],
-        include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
+        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
         raw: true,
         nest: true
       })
+      if (!tweets.length) return res.status(404).json({ status: 'error', message: 'Tweet is not found' })
       return res.status(200).json(tweets)
     } catch (err) {
       next(err)
