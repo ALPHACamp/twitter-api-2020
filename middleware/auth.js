@@ -11,7 +11,7 @@ const authenticated = (req, res, next) => {
 
 const authUser = (req, res, next) => {
   if (helpers.getUser(req)?.role === 'user') return next()
-  return res.json({
+  return res.status(403).json({
     status: 'error',
     message: 'permission denied: need permission of user'
   })
@@ -19,7 +19,7 @@ const authUser = (req, res, next) => {
 
 const authAdmin = (req, res, next) => {
   if (helpers.getUser(req)?.role === 'admin') return next()
-  return res.json({
+  return res.status(403).json({
     status: 'error',
     message: 'permission denied: need permission of admin'
   })
