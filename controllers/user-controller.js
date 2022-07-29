@@ -127,6 +127,47 @@ const userController = {
       next(err)
     }
   },
+  addFollow: async (req, res, next) => {
+    try {
+      const followerId = Number(helpers.getUser(req).id)
+      const followingId = Number(req.body.id)
+      if (!followerId || !followingId) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'followerId and followingId required'
+        })
+      }
+
+      if (followerId === followingId) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Can not follow yourself.'
+        })
+      }
+
+      const followed = await Followship.findOne({
+        where: { followerId, followingId }
+      })
+      if (followed) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Already followed'
+        })
+      }
+
+      const newFollow = await Followship.create({
+        followerId,
+        followingId
+      })
+      return res.status(200).json({
+        status: 'success',
+        message: 'Followship added',
+        data: { newFollow }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
   removeFollow: async (req, res, next) => {
     try {
       const followerId = Number(helpers.getUser(req).id)
