@@ -20,7 +20,7 @@ const tweetController = {
       })
   },
   postTweet: (req, res) => {
-    const userId = 1
+    const userId = req.body.UserId || 1
     const description = req.body.description
     Tweet.create({
       UserId: userId,
