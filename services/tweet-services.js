@@ -54,7 +54,8 @@ const tweetServices = {
     try {
       const UserId = req.user.dataValues.id
       const { description } = req.body
-      if (!description) throw new Error('The tweet can not be empty!')
+      const trimmedDescription = description.trim()
+      if (!trimmedDescription) throw new Error('The tweet can not be empty!')
 
       const createdTweet = await Tweet.create({
         UserId,
