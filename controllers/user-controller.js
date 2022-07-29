@@ -122,11 +122,7 @@ const userController = {
         attributes: { exclude: ['password'] }
       })
       if (!user) return res.status(404).json({ status: 'error', message: 'User is not found' })
-      res.status(200).json({
-        status: 'success',
-        message: 'User is found',
-        data: { user }
-      })
+      return res.status(200).json(user)
     } catch (err) {
       next(err)
     }

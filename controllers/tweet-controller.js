@@ -1,4 +1,5 @@
 const { Tweet, User } = require('../models')
+// const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -10,11 +11,7 @@ const tweetController = {
         nest: true
       })
       if (!tweets.length) return res.status(404).json({ status: 'error', message: 'Tweet is not found' })
-      return res.status(200).json({
-        status: 'success',
-        message: 'Tweets are found',
-        data: { tweets }
-      })
+      return res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
