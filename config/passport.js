@@ -18,10 +18,10 @@ passport.use(
     async (req, account, password, cb) => {
       try {
         const user = await User.findOne({ where: { account } })
-        if (!user) return cb(null, { error: { status: 'error', message: '帳號不存在' } })
+        if (!user) return cb(null, { error: { status: 'error', message: '帳號或密碼錯誤' } })
 
         const isMatch = await bcrypt.compare(password, user.password)
-        if (!isMatch) return cb(null, { error: { status: 'error', message: '密碼錯誤' } })
+        if (!isMatch) return cb(null, { error: { status: 'error', message: '帳號或密碼錯誤' } })
 
         return cb(null, user)
       } catch (error) {
