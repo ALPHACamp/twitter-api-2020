@@ -72,7 +72,7 @@ describe('# Tweet Model', () => {
     })
   })
 
-  // // 檢查 model 的新增、修改、刪除、更新
+  // 檢查 model 的新增、修改、刪除、更新
   context('action', () => {
 
     let data = null
