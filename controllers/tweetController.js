@@ -1,4 +1,5 @@
 const db = require('../models')
+const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
@@ -6,7 +7,7 @@ const Reply = db.Reply
 const tweetController = {
   getTweets: (req, res) => {
     const userId = 1
-    Tweet.findAll({ where: { UserId: userId } })
+    Tweet.findAll({ where: { UserId: userId }, include: [User, Like, Reply] })
       .then(tweets => {
         return res.json(tweets)
       })
