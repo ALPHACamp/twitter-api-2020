@@ -7,10 +7,14 @@ const tweetController = {
     try {
       let tweets = await Tweet.findAll({
         include: [
-          { model: User,
-            attributes: ['id', 'account', 'name', 'avatar', 'introduction', 'role', 'front_cover'] },
-          { model: Reply,
-            attributes: ['id'] },
+          {
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction', 'role', 'front_cover']
+          },
+          {
+            model: Reply,
+            attributes: ['id']
+          },
           { model: Like }],
         order: [['createdAt', 'DESC']]
       })
@@ -21,7 +25,7 @@ const tweetController = {
         })
       }
 
-      const likes = getUser(req, 'LikedTweets')
+      const likes = getUser(req)
 
       tweets = await tweets.map(tweet => tweet.toJSON())
       tweets = tweets.map(tweet => {
@@ -34,7 +38,7 @@ const tweetController = {
           updatedAt: tweet.updatedAt,
           replyCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
-          liked: likes ? likes.includes(tweet.id) : false
+          isLiked: likes ? likes.includes(tweet.id) : false
         }
       })
       return res.status(200).json(tweets)
@@ -71,8 +75,45 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweet: async (req, res, next) => {
+    try {
+      let tweet = await Tweet.findByPk(req.params.id, {
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction', 'role', 'front_cover']
+          },
+          {
+            model: Reply,
+            attributes: ['id']
+          },
+          {
+            model: Like
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      if (!tweet) {
+        return res.status(500).json({
+          status: 'error',
+          message: '找不到此推特!'
+        })
+      }
+
+      const likes = getUser(req)
+      tweet = await tweet.toJSON()
+      const data = {
+        ...tweet,
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.Likes.length,
+        isLiked: likes ? likes.includes(tweet.id) : null
+      }
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   }
 }
-
 
 module.exports = tweetController
