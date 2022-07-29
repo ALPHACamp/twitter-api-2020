@@ -12,7 +12,6 @@ const passport = require('./config/passport')
 
 const cors = require('cors')
 // Setting Cors
-app.use(cors())
 
 const app = express()
 const port = 3000
@@ -22,6 +21,7 @@ function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
+app.use(cors())
 app.engine('hbs', handlebars({ extname: '.hbs' }))
 app.set('view engine', 'hbs')
 app.use(express.urlencoded({ extended: true }))
