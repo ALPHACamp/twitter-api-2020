@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const upload = require('../../middlewares/multer')
 
 const userController = require('../../controllers/user-controller')
 
@@ -11,6 +12,6 @@ router.patch('/:id/setting', userController.patchSetting)
 // router.get('/:id/followings', userController.getUserFollowings)
 // router.get('/:id/followers', userController.getUserFollowers)
 router.get('/:id', userController.getUser)
-// router.put('/:id', userController.putUser)
+router.put('/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), userController.putUser)
 
 module.exports = router

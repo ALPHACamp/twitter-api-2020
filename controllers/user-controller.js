@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const bcrypt = require('bcryptjs')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -104,6 +105,34 @@ const userController = {
           user: { id, name, introduction, avatar, banner },
           currentUser
         }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+    putUser: async (req, res, next) => {
+    try {
+      if (Number(req.params.id) !== req.user.id) return res.status(403).json({ status: 'error', message: 'permission denied' })
+      const userFind = await User.findByPk(req.params.id)
+      if (!userFind) throw new Error('user not exist')
+      const { name, introduction } = req.body
+      const { avatar, banner } = req.files
+      if (!name) throw new Error('name is required')
+      if (name.length > 50) throw new Error('name length should be less than 50')
+      if (introduction && introduction.length > 160) throw new Error('introduction length should be less than 160')
+      const avatarPath = avatar ? await imgurFileHandler(avatar[0]) : userFind.avatar
+      const bannerPath = banner ? await imgurFileHandler(banner[0]) : userFind.banner
+      const userUpdate = await userFind.update({
+        name,
+        introduction,
+        avatar: avatarPath,
+        banner: bannerPath
+      })
+      const user = userUpdate.toJSON()
+      delete user.password
+      res.json({
+        status: 'success',
+        data: { user }
       })
     } catch (err) {
       next(err)
