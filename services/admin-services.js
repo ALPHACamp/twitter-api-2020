@@ -23,7 +23,12 @@ const adminServices = {
   getTweets: async (req, cb) => {
     await Tweet.findAll({
       order: [['createdAt', 'DESC']], //? post tweet功能做好後測試 order 功能
-      include: [User],
+      include: {
+        model: User,
+        attributes: {
+          exclude: ['password']
+        }
+      },
       raw: true,
       nest: true
     })
