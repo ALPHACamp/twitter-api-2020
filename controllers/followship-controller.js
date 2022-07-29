@@ -1,12 +1,12 @@
-const { Followship } = require('../models')
+const { User,Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const followshipController = {
   addFollowship: async (req, res, next) => {
     try {
-      const followerId = req.body.id
+      const followerId = helpers.getUser(req).id
       const followingId = req.body.id
-      const follower = await User.findByPk(followerId, {
+      const following = await User.findByPk(followingId, {
         raw: true,
         attributes: { exclude: [ 'password' ] }
       })
@@ -30,26 +30,25 @@ const followshipController = {
   deleteFollowing: async (req, res, next) => {
     try {
       const followerId = helpers.getUser(req).id
-      const { followingId } = req.params
+      const followingId = req.params.followingId
       const following = await User.findByPk(followingId, {
         raw: true,
         attributes: { exclude: [ 'password' ] }
       })
-      const follower = await User.findByPk(followerId, {
-        raw: true,
-        attributes: { exclude: [ 'password' ] }   
-      })
+
       const deleteFollowship = await Followship.findOne({
         where: { followerId,followingId }
       })
 
       if (!following || following.role === 'admin') throw new Error("無法取消追蹤不存在的使用者！")
       if (!deleteFollowship) throw new Error("你尚未追蹤該使用者！")
-      await deleteFollowship.destroy()
+      await Followship.destroy({
+        where: { followerId, followingId }
+      })
       
-      	res.status(200).json({
+      res.status(200).json({
         message: '已成功取消追蹤該使用者。',
-        deleteFollowingUser: user // deleted user
+        deleteFollowingUser: followingId
       })
     } catch (err) {
       next(err)
