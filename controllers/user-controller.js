@@ -3,11 +3,12 @@ const jwt = require('jsonwebtoken')
 const db = require('../models')
 const { User } = db
 const userServices = require('../services/user-services')
+const helpers = require('../_helpers')
 
 const userController = {
   signIn: (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
+      const userData = helpers.getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, 'secret', { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({

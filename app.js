@@ -13,6 +13,7 @@ const app = express()
 const port = 3000
 
 // use helpers.getUser(req) to replace req.user
+
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
@@ -27,6 +28,7 @@ app.use(passport.session())
 
 // app.use(methodOverride('_method'))
 
+// app.use(helpers.getUser(req))
 app.use(routes)
 
 // app.get('/', (req, res) => res.send('Hello World!'))
