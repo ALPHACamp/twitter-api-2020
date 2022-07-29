@@ -10,7 +10,7 @@ router.patch('/:id/setting', userController.patchSetting)
 // router.get('/:id/likes', userController.getUserLikes)
 // router.get('/:id/followings', userController.getUserFollowings)
 // router.get('/:id/followers', userController.getUserFollowers)
-// router.get('/:id', userController.getUser)
+router.get('/:id', userController.getUser)
 // router.put('/:id', userController.putUser)
 
 module.exports = router

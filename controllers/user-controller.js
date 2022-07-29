@@ -90,6 +90,24 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const userFind = await User.findByPk(req.params.id, { raw: true })
+      if (!userFind) throw new Error('user not exist')
+      const currentUser = req.user.toJSON()
+      delete currentUser.password
+      const { id, name, introduction, avatar, banner } = userFind
+      res.json({
+        status: 'success',
+        data: { 
+          user: { id, name, introduction, avatar, banner },
+          currentUser
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
