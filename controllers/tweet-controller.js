@@ -25,7 +25,7 @@ const tweetController = {
         })
       }
 
-      const likes = getUser(req, 'LikedTweets')
+      const likes = getUser(req)
 
       tweets = await tweets.map(tweet => tweet.toJSON())
       tweets = tweets.map(tweet => {
@@ -38,7 +38,7 @@ const tweetController = {
           updatedAt: tweet.updatedAt,
           replyCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
-          liked: likes ? likes.includes(tweet.id) : false
+          isLiked: likes ? likes.includes(tweet.id) : false
         }
       })
       return res.status(200).json(tweets)
@@ -101,7 +101,7 @@ const tweetController = {
         })
       }
 
-      const likes = getUser(req, 'LikedTweets')
+      const likes = getUser(req)
       tweet = await tweet.toJSON()
       const data = {
         ...tweet,
