@@ -6,7 +6,10 @@ const SEED_USER = {
   name: 'root',
   account: 'root',
   email: 'root@example.com',
-  password: '12345678'
+  password: '12345678',
+  role: 'admin',
+  avatar: faker.image.avatar(),
+  introduction: 'I am an admin manager.'
 }
 
 module.exports = {
@@ -28,7 +31,9 @@ module.exports = {
         account: SEED_USER.account, 
         email: SEED_USER.email,
         password: bcrypt.hashSync(SEED_USER.password, bcrypt.genSaltSync(10)),
-        role: 'admin',
+        role: SEED_USER.role,
+        avatar: SEED_USER.avatar,
+        introduction: SEED_USER.introduction,
         createdAt: new Date(),
         updatedAt: new Date(),
       }]
@@ -37,12 +42,16 @@ module.exports = {
     await queryInterface.bulkInsert('Users',
       Array.from({ length: 5 }).map((item, index) => {
         let name = faker.name.firstName()
+        let avatar = faker.image.avatar()
+        let introduction = faker.lorem.sentence(5)
         return ({
           name: name,
           account: name,
           email: name + '@aa.com',
           password: bcrypt.hashSync(name, bcrypt.genSaltSync(10)),
           role: 'user',
+          avatar: avatar,
+          introduction: introduction,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
