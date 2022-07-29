@@ -10,6 +10,14 @@ const userController = {
       if (req.user.error) {
         return res.json(req.user.error)
       }
+
+      if (req.user.role !== 'user') {
+        res.json({
+          status: 'error',
+          message: '帳號或密碼錯誤'
+        })
+      }
+
       const userData = req.user.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
