@@ -26,18 +26,14 @@ const tweetController = {
     }
 
     if (description.length > 140) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
         message: 'tweet should be within 140 characters'
       })
     }
 
     const tweet = await Tweet.create({ userId, description })
-    return res.status(200).json({
-      status: 'success',
-      message: '',
-      data: tweet.toJSON()
-    })
+    return res.status(200).json(tweet.toJSON())
   }
 }
 
