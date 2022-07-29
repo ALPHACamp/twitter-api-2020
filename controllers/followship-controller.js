@@ -4,8 +4,8 @@ const helpers = require('../_helpers')
 const followshipController = {
   addFollowship: async (req, res, next) => {
     try {
-      const followerId = helpers.getUser(req).id
-      const followingId = req.body.id
+      const followerId = Number(helpers.getUser(req).id)
+      const followingId = Number(req.body.id)
       const following = await User.findByPk(followingId, {
         raw: true,
         attributes: { exclude: [ 'password' ] }
