@@ -49,6 +49,21 @@ const tweetServices = {
     } catch (err) {
       return cb(err)
     }
+  },
+  postTweet: async (req, cb) => {
+    try {
+      const UserId = req.user.dataValues.id
+      const { description } = req.body
+      if (!description) throw new Error('The tweet can not be empty!')
+
+      const createdTweet = await Tweet.create({
+        UserId,
+        description
+      })
+      return cb(null, createdTweet)
+    } catch (err) {
+      return cb(err)
+    }
   }
 }
 
