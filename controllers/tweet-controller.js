@@ -1,3 +1,4 @@
+const helpers = require('../_helpers')
 const { Tweet, User } = require('../models')
 
 const tweetController = {
@@ -13,6 +14,27 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  addTweet: async (req, res, next) => {
+    const userId = Number(helpers.getUser(req).id)
+    const { description } = req.body
+    if (!userId || !description) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'userId and description required'
+      })
+    }
+
+    if (description.length > 140) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'tweet should be within 140 characters'
+      })
+    }
+
+    const tweet = await Tweet.create({ userId, description })
+    return res.status(200).json(tweet)
   }
 }
+
 module.exports = tweetController

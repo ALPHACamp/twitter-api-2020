@@ -5,6 +5,6 @@ const { authenticated, authAdmin } = require('../../middleware/auth')
 const adminController = require('../../controllers/admin-controller')
 
 router.post('/signin', adminController.signin)
-router.delete('/tweets/:id', authenticated, adminController.deleteTweet)
+router.delete('/tweets/:id', authenticated, authAdmin, adminController.deleteTweet)
 
 module.exports = router
