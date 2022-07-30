@@ -61,7 +61,7 @@ const likeController = {
       if (!like) {
         return res.status(500).json({
           status: 'error',
-          message: '取消喜歡此推文成功'
+          message: '沒有喜歡此推文!'
         })
       }
 
@@ -69,7 +69,7 @@ const likeController = {
 
       return res.status(200).json({
         status: 'success',
-        message: '成功不喜歡此推文!'
+        message: '取消喜歡此推文成功'
       })
     } catch (err) {
       next(err)
