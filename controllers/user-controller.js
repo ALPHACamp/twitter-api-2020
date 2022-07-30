@@ -20,15 +20,16 @@ const userController = {
 
       const userData = req.user.toJSON()
       delete userData.password
+      delete userData.introduction
+      delete userData.createdAt
+      delete userData.updatedAt
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
       res.json({
         status: 'success',
-        data: {
-          token,
-          user: userData
-        }
+        token,
+        user: userData
       })
     } catch (err) {
       next(err)
@@ -104,7 +105,7 @@ const userController = {
         order: [[Sequelize.literal('followersCount'), 'DESC'], ['name', 'ASC']],
         limit
       })
-      res.json({ status: 'success', data: users })
+      res.json({ status: 'success', users })
     } catch (error) {
       next(error)
     }
