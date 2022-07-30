@@ -12,8 +12,9 @@ const adminController = require('../controllers/admin-controller')
 // Middleware
 const { authenticated } = require('../middleware/auth')
 
-const users = require('./module/users')
-const tweets = require('./module/tweets')
+// module
+const users = require('./modules/users')
+const tweets = require('./modules/tweets')
 
 router.post('/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn)
 router.post('/users', userController.signUp)
