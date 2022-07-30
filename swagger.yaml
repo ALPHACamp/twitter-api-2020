@@ -24,20 +24,14 @@ paths:
             application/json:
               example:
                 - id:
-                  account:
-                  name:
-                  email:
-                  introduction:
                   avatar:
+                  name:
+                  account:
                   cover:
-                  isAdmin:
-                  role:
-                  createdAt:
-                  updatedAt:
                   tweetsCounts:
+                  likedTweetsCounts:
                   followingsCounts:
                   followersCounts:
-                  likedTweetsCounts:
       deprecated: false
       security:
         - bearer: []
@@ -59,15 +53,11 @@ paths:
             application/json:
               example:
                 - id:
-                  UserId:
+                  idOfUser:
+                  avatarOdUser:
+                  account:
                   description:
                   createdAt:
-                  updatedAt:
-                  User:
-                  Replies:
-                  Likes:
-                  repliedCounts:
-                  likesCounts:
       deprecated: false
       security:
         - bearer: []
@@ -426,35 +416,12 @@ paths:
           content:
             application/json:
               example:
-                user:
-                  id:
-                  account:
-                  name:
-                  email:
-                  introduction:
-                  avatar:
-                  cover:
-                  createdAt:
-                  updatedAt:
-                  Tweets:
-                    - id:
-                      UserId:
-                      description:
-                      createdAt:
-                      updatedAt:
-                  Replies:
-                    - id:
-                      UserId:
-                      TweetId:
-                      comment:
-                      createdAt:
-                      updatedAt:
-                  Likes:
-                    - id:
-                      UserId:
-                      TweetId:
-                      createdAt:
-                      updatedAt:
+                id:
+                account:
+                name:
+                email:
+                avatar:
+                isAdmin:
       deprecated: false
       security:
         - bearer: []

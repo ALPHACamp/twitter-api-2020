@@ -114,13 +114,7 @@ const userController = {
   },
   getCurrentUser: async (req, res, next) => {
     try {
-      let user = await User.findByPk(helpers.getUser(req).id, {
-        include: [
-          { model: Tweet },
-          { model: Reply },
-          { model: Like }
-        ]
-      })
+      let user = await User.findByPk(helpers.getUser(req).id)
       if (!user) {
         return res.status(StatusCodes.NOT_FOUND).json({
           status: 'error',
@@ -129,7 +123,11 @@ const userController = {
       }
       user = await user.toJSON()
       delete user.password
-      delete user.isAdmin
+      delete user.createdAt
+      delete user.updatedAt
+      delete user.cover
+      delete user.introduction
+      delete user.role
       return res.status(StatusCodes.OK).json(user)
     } catch (error) {
       next(error)
