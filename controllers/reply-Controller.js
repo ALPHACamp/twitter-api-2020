@@ -45,7 +45,10 @@ const replyController = {
         order: [['created_at', 'DESC']]
       })
 
-      res.status(200).json(replies)
+      res.status(200).json({
+        message: '您已成功！',
+        replies
+      })
     } catch (err) {
       next(err)
     }
