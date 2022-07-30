@@ -45,9 +45,12 @@ const adminController = {
           followerCounts: user.Followers.length
         }
         return restProps
-      })
+      }).sort((a, b) => b.tweetCounts - a.tweetCounts)
 
-    res.json({ data: { users: usersApiData }})
+    res.status(200).json({
+      status: 'success',
+      data: { users: usersApiData }
+    })
     } catch(error){
       next(error)
     }
