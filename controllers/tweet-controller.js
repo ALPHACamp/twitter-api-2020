@@ -45,7 +45,7 @@ const tweetController = {
       next(err)
     }
   },
-  postTweets: async (req, res, next) => {
+  postTweet: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req)?.id
       const { description } = req.body
