@@ -6,14 +6,26 @@ const Followship = db.Followship
 const followshipController = {
   getRecommendedFollowings: (req, res) => {
     const userId = req.query.userId
-    User.findAll({ where: { id: { [Op.not]: userId } }, limit: 10 })
+    User.findAll({ where: { id: { [Op.not]: userId } }, include: [{ model: User, as: 'Followers' }], limit: 10 })
       .then(users => {
+        users = { users: users }
+        users = JSON.stringify(users)
+        users = JSON.parse(users)
+        users = users.users.map(user => ({
+          account: user.account,
+          avatar: user.avatar,
+          id: user.id,
+          introduction: user.introduction,
+          name: user.name,
+          role: user.role,
+          Followers: user.Followers.map(follower => follower.Followship.followerId)
+        }))
         return res.json(users)
       })
   },
   postFollowship: (req, res) => {
-    const followerId = 1
-    const followingId = req.body.id
+    const followerId = req.body.userId || 1
+    const followingId = req.body.followingId
     Followship.create({
       followerId: followerId,
       followingId: followingId
