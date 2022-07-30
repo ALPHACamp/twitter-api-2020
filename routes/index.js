@@ -14,6 +14,7 @@ module.exports = (app) => {
   app.get('/api/users/:id/followers', userController.getUserFollowers)
   app.get('/api/users/:id', userController.getUser)
 
+  app.get('/api/followships/recommended', followshipController.getRecommendedFollowings)
   app.post('/api/followships', followshipController.postFollowship)
   app.delete('/api/followships/:id', followshipController.deleteFollowship)
 

@@ -1,7 +1,16 @@
+const { Op } = require('sequelize')
 const db = require('../models')
+const User = db.User
 const Followship = db.Followship
 
 const followshipController = {
+  getRecommendedFollowings: (req, res) => {
+    const userId = req.query.userId
+    User.findAll({ where: { id: { [Op.not]: userId } }, limit: 10 })
+      .then(users => {
+        return res.json(users)
+      })
+  },
   postFollowship: (req, res) => {
     const followerId = 1
     const followingId = req.body.id
@@ -24,9 +33,9 @@ const followshipController = {
     })
       .then(followship => {
         followship.destroy()
-        .then(() => {
-          return res.json({ status: 'success', message: '' })
-        })
+          .then(() => {
+            return res.json({ status: 'success', message: '' })
+          })
       })
   }
 }
