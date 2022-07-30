@@ -14,8 +14,36 @@ const tweetController = {
   },
   getTweet: (req, res) => {
     const tweetId = req.params.id
-    Tweet.findByPk(tweetId)
+    Tweet.findByPk(tweetId, { include: [User, Like, { model: Reply, include: User }] })
       .then(tweet => {
+        tweet = { tweet: tweet }
+        tweet = JSON.stringify(tweet)
+        tweet = JSON.parse(tweet)
+        tweet = tweet.tweet
+        tweet.User = {
+          account: tweet.User.account,
+          avatar: tweet.User.avatar,
+          id: tweet.User.id,
+          introduction: tweet.User.introduction,
+          name: tweet.User.name,
+          role: tweet.User.role,
+        }
+        tweet.Replies = tweet.Replies.map(reply => ({
+          TweetId: reply.TweetId,
+          User: {
+            account: reply.User.account,
+            avatar: reply.User.avatar,
+            id: reply.User.id,
+            introduction: reply.User.introduction,
+            name: reply.User.name,
+            role: reply.User.role,
+          },
+          UserId: reply.UserId,
+          comment: reply.comment,
+          createdAt: reply.createdAt,
+          id: reply.id,
+          updatedAt: reply.updatedAt,
+        }))
         return res.json(tweet)
       })
   },
