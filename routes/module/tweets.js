@@ -9,5 +9,6 @@ router.get('/', tweetController.getTweets)
 router.post('/', tweetController.postTweet)
 
 router.post('/:id/like', likeController.addLike)
+router.post('/:id/unlike', likeController.removeLike)
 
 module.exports = router
