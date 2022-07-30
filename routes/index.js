@@ -2,6 +2,7 @@ const express = require('express')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
+const like = require('./modules/like')
 const followship = require('./modules/followship')
 const passport = require('../config/passport')
 const { apiErrorHandler } = require('../middleware/error-handler')
@@ -18,6 +19,7 @@ router.post('/api/admin/users', passport.authenticate('local', { session: false 
 router.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 
+router.use('/api/tweets/:id', authenticated, authenticatedUser, like)
 router.use('/api/followships', authenticated, authenticatedUser, followship)
 
 
