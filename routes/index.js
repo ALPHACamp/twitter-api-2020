@@ -21,7 +21,7 @@ router.post('/users', userController.signUp)
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
 router.use('/users', authenticated, users)
-router.use('/tweets', tweets)
+router.use('/tweets', authenticated, tweets)
 
 router.use('/', errorHandler)
 
