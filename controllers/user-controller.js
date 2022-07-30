@@ -23,6 +23,7 @@ const userController = {
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
+      res.set('Access-Control-Allow-Origin', '*')
       res.json({
         status: 'success',
         data: {
@@ -69,6 +70,7 @@ const userController = {
       })
       const userData = user.toJSON()
       delete userData.password
+      res.set('Access-Control-Allow-Origin', '*')
       return res.json({ status: 'success', user: userData })
     } catch (error) {
       next(error)

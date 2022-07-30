@@ -19,6 +19,7 @@ const adminController = {
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
+      res.set('Access-Control-Allow-Origin', '*')
       res.json({
         status: 'success',
         data: {
