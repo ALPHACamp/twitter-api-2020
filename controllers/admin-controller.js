@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Like } = require('../models')
-const user = require('../models/user')
+const { User, Tweet, Like, Reply } = require('../models')
 
 const adminController = {
   signIn: async (req, res, next) => {
@@ -29,11 +28,11 @@ const adminController = {
         attributes: { exclude: ['password', 'email', 'introduction', 'createdAt', 'updatedAt' ] },
         include: [
           { model: Tweet, raw: true },
-          { model: Like, raw: true},
+          { model: Like, raw: true },
           { model: User, as: 'Followers', raw: true },
           { model: User, as: 'Followings', raw: true }
         ],
-        nest: true,
+        nest: true
       })
 
       const usersApiData = users.map(user => {
@@ -52,6 +51,58 @@ const adminController = {
       data: { users: usersApiData }
     })
     } catch(error){
+      next(error)
+    }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const theSignInUser = req.user.toJSON()
+      if (theSignInUser.role !== 'admin') throw new Error('Only admin is allowed to use backstage!')
+
+      const tweets = await Tweet.findAll({
+        include: {
+          model: User,
+          where: { role: 'user' },
+          attributes: ['name', 'account', 'avatar']
+        },
+        nest: true,
+        raw: true
+      })
+
+      const tweetsApiData = tweets.map(tweet => ({
+        ...tweet,
+        description: tweet.description.substring(0, 50)
+      }))
+
+      res.status(200).json({
+        status: 'success',
+        data: { tweets: tweetsApiData }
+      })
+    } catch(error) {
+      next(error)
+    }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const theSignInUser = req.user.toJSON()
+      if (theSignInUser.role !== 'admin') throw new Error('Only admin is allowed to use backstage!')
+
+      const reqTweetId = req.params.id
+      const tweet = await Tweet.findByPk(reqTweetId)
+      if (!tweet) throw new Error(`This tweet doesn't exist!`)
+
+      await tweet.destroy()
+      await Reply.destroy({
+        where: { tweet_id: reqTweetId }
+      })
+      await Like.destroy({
+        where: { tweet_id: reqTweetId }
+      })
+
+      res.status(200).json({
+        status: 'success'
+      })
+    } catch(error) {
       next(error)
     }
   }
