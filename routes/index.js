@@ -23,7 +23,7 @@ router.post('/users/signin', passport.authenticate('local', { session: false }),
 
 router.use('/users', authenticated, users)
 router.use('/tweets', authenticated, tweets)
-router.use('/followships', followships)
+router.use('/followships', authenticated, followships)
 
 router.use('/', errorHandler)
 
