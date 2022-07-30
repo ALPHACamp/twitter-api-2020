@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like } = require('../models')
 
 const adminController = {
   signin: async (req, res, next) => {
@@ -50,6 +51,49 @@ const adminController = {
           }
         }
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUsers: async (req, res, next) => {
+    try {
+      const usersData = await User.findAll({
+        attributes: [
+          'id', 'account', 'name', 'avatar', 'cover',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'),
+            'tweetCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'
+            ),
+            'likeCount'
+          ]
+        ],
+        include: [
+          { model: Tweet, include: [Like] },
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ],
+        order: [[sequelize.literal('tweetCount'), 'DESC']]
+      })
+
+      const users = usersData.map(user => {
+        return {
+          id: user.id,
+          name: user.name,
+          account: user.account,
+          avatar: user.avatar,
+          cover: user.cover,
+          tweetCount: user.dataValues.tweetCount,
+          likeCount: user.dataValues.likeCount,
+          followingCount: user.Followings.length,
+          followerCount: user.Followers.length
+        }
+      })
+
+      return res.status(200).json(users)
     } catch (err) {
       next(err)
     }
