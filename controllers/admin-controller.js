@@ -88,7 +88,7 @@ const adminController = {
       tweets = tweets.map(tweet => {
         return {
           ...tweet,
-          description: tweet.description.substring(0, 50) + '...',
+          description: tweet.description.substring(0, 50).length === 50 ? tweet.description.substring(0, 50) + '...' : tweet.description.substring(0, 50),
           repliedCounts: tweet.Replies.length,
           likesCounts: tweet.Likes.length
         }
