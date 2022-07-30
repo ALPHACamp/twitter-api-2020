@@ -10,6 +10,7 @@ const { authenticated, authenticatedOwner, authenticatedAdmin } = require('../..
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const upload = require('../../middleware/multer')
 
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)

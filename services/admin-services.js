@@ -31,6 +31,20 @@ const adminServices = {
     } catch (err) {
       return cb(err)
     }
+  },
+  deleteTweet: async (req, cb) => {
+    const TweetId = req.params.id
+    try {
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) throw new Error('Tweet does not exist!')
+
+      const deletedTweet = await tweet.destroy()
+      deletedTweet.toJSON()
+      const record = deletedTweet.toJSON()
+      return cb(null, record)
+    } catch (err) {
+      return cb(err)
+    }
   }
 }
 
