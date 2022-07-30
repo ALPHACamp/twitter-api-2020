@@ -34,6 +34,18 @@ const userServices = {
         }))
       .then(newUser => cb(null, { user: newUser }))
       .catch(err => cb(err))
+  }, getUser: (req, cb) => {
+    const id = req.params.id
+    User.findByPk(id, {
+      attributes: {
+        exclude: ['password']
+      }
+    })
+      .then(user => {
+        if (!user) throw new Error("user doesn't exist!")
+        return cb(null, { user })
+      })
+      .catch(err => cb(err))
   }
 }
 
