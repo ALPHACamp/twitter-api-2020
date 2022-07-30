@@ -75,7 +75,7 @@ module.exports = {
     // 新增每篇 post 有隨機 3 個留言者，每個人有 1 則留言 種子資料
     await queryInterface.bulkInsert('Replies',
       Array.from({ length: 153 }).map((item, index) => {
-        let UserId = Math.floor(Math.random() * 5) + 1
+        let UserId = Math.floor(Math.random() * 6) + 1
         let TweetId = Math.floor(index / 3) + 1
         return ({
           UserId: UserId,
