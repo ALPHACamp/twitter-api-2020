@@ -8,7 +8,7 @@ const SEED_USER = {
   email: 'root@example.com',
   password: '12345678',
   role: 'admin',
-  avatar: faker.image.avatar(),
+  avatar: 'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/1.jpg',
   introduction: 'I am an admin manager.'
 }
 
@@ -42,7 +42,8 @@ module.exports = {
     await queryInterface.bulkInsert('Users',
       Array.from({ length: 5 }).map((item, index) => {
         let name = faker.name.firstName()
-        let avatar = faker.image.avatar()
+        let randomNum = Math.floor(Math.random()*100 + 1)
+        let avatar = `https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/${randomNum}.jpg`
         let introduction = faker.lorem.sentence(5)
         return ({
           name: name,
@@ -60,9 +61,9 @@ module.exports = {
       , {})
     // 新增每個使用者有 10 篇 post 種子資料
     await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 50 }).map((item, index) => {
-        let UserId = Math.floor(index / 10) + 2
-        let UserTweetsIndex = index % 10 + 1
+      Array.from({ length: 60 }).map((item, index) => {
+        let UserId = Math.floor(index / 10) + 1
+        let UserTweetsIndex = index % 10 + 1 
         return ({
           UserId: UserId,
           description: `User: ${UserId} 的第 ${UserTweetsIndex} 篇推文`,
@@ -73,8 +74,8 @@ module.exports = {
     )
     // 新增每篇 post 有隨機 3 個留言者，每個人有 1 則留言 種子資料
     await queryInterface.bulkInsert('Replies',
-      Array.from({ length: 150 }).map((item, index) => {
-        let UserId = Math.floor(Math.random() * 5) + 2
+      Array.from({ length: 153 }).map((item, index) => {
+        let UserId = Math.floor(Math.random() * 5) + 1
         let TweetId = Math.floor(index / 3) + 1
         return ({
           UserId: UserId,
