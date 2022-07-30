@@ -69,7 +69,7 @@ const userController = {
         })
       }
       const result = await User.findOne({
-        where: { [Op.or]: [{ account }, { name }] }
+        where: { [Op.or]: [{ account }, { email }] }
       })
       if (result) {
         return res.status(401).json({
