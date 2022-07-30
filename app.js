@@ -5,6 +5,7 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const helpers = require('./_helpers')
 const routes = require('./routes')
+const cors = require('cors')
 
 const passport = require('./config/passport')
 
@@ -19,6 +20,8 @@ app.use((req, res, next) => {
   res.user = helpers.getUser(req)
   next()
 })
+
+app.use(cors())
 
 app.use('/api', routes)
 
