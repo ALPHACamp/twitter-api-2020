@@ -23,21 +23,21 @@ paths:
           content:
             application/json:
               example:
-                - id:
-                  account:
-                  name:
-                  email:
-                  introduction:
-                  avatar:
-                  cover:
-                  isAdmin:
-                  role:
-                  createdAt:
-                  updatedAt:
-                  tweetsCounts:
-                  followingsCounts:
-                  followersCounts:
-                  likedTweetsCounts:
+                - id: null
+                  account: null
+                  name: null
+                  email: null
+                  introduction: null
+                  avatar: null
+                  cover: null
+                  isAdmin: null
+                  role: null
+                  createdAt: null
+                  updatedAt: null
+                  tweetsCounts: null
+                  followingsCounts: null
+                  followersCounts: null
+                  likedTweetsCounts: null
       deprecated: false
       security:
         - bearer: []
@@ -58,16 +58,16 @@ paths:
           content:
             application/json:
               example:
-                - id:
-                  UserId:
-                  description:
-                  createdAt:
-                  updatedAt:
-                  User:
-                  Replies:
-                  Likes:
-                  repliedCounts:
-                  likesCounts:
+                - id: null
+                  UserId: null
+                  description: null
+                  createdAt: null
+                  updatedAt: null
+                  User: null
+                  Replies: null
+                  Likes: null
+                  repliedCounts: null
+                  likesCounts: null
       deprecated: false
       security:
         - bearer: []
@@ -95,11 +95,11 @@ paths:
           content:
             application/json:
               example:
-                id:
-                UserId:
-                description:
-                createdAt:
-                updatedAt:
+                id: null
+                UserId: null
+                description: null
+                createdAt: null
+                updatedAt: null
       deprecated: false
       security:
         - bearer: []
@@ -127,23 +127,23 @@ paths:
           content:
             application/json:
               example:
-                id:
-                account:
-                name:
-                email:
-                introduction:
-                avatar:
-                cover:
-                isAdmin:
-                role:
-                createdAt:
-                updatedAt:
-                Tweets:
-                Followings:
-                Followers:
-                tweetsCounts:
-                followingsCounts:
-                isBeingFollowed:
+                id: null
+                account: null
+                name: null
+                email: null
+                introduction: null
+                avatar: null
+                cover: null
+                isAdmin: null
+                role: null
+                createdAt: null
+                updatedAt: null
+                Tweets: null
+                Followings: null
+                Followers: null
+                tweetsCounts: null
+                followingsCounts: null
+                isBeingFollowed: null
       deprecated: false
       security:
         - bearer: []
@@ -215,16 +215,16 @@ paths:
           content:
             application/json:
               example:
-                - likeCreatedAt:
-                  TweetId:
-                  description:
-                  createdAt:
-                  userOflikedTweet:
-                  userNameOflikedTweet:
-                  userAccountOflikedTweet:
-                  userAvatarOflikedTweet:
-                  repliedCounts:
-                  likesCounts:
+                - likeCreatedAt: null
+                  TweetId: null
+                  description: null
+                  createdAt: null
+                  userOflikedTweet: null
+                  userNameOflikedTweet: null
+                  userAccountOflikedTweet: null
+                  userAvatarOflikedTweet: null
+                  repliedCounts: null
+                  likesCounts: null
       deprecated: false
       security:
         - bearer: []
@@ -252,20 +252,20 @@ paths:
           content:
             application/json:
               example:
-                - id:
-                  UserId:
-                  description:
-                  createdAt:
-                  updatedAt:
-                  Replies:
-                  Likes:
-                  userOfTweet:
-                  userNameOfTweet:
-                  userAccountOfTweet:
-                  userAvatarOfTweet:
-                  repliedCounts:
-                  likesCounts:
-                  isBeingliked:
+                - id: null
+                  UserId: null
+                  description: null
+                  createdAt: null
+                  updatedAt: null
+                  Replies: null
+                  Likes: null
+                  userOfTweet: null
+                  userNameOfTweet: null
+                  userAccountOfTweet: null
+                  userAvatarOfTweet: null
+                  repliedCounts: null
+                  likesCounts: null
+                  isBeingliked: null
       deprecated: false
       security:
         - bearer: []
@@ -293,21 +293,21 @@ paths:
           content:
             application/json:
               example:
-                - replyId:
-                  comment:
-                  repliedTweet:
-                  repliedTweetDescription:
-                  userOfRepliedTweet:
-                  userAccountOfRepliedTweet:
-                  userNameOfRepliedTweet:
-                  userAvatarOfRepliedTweet:
-                  repliedTweetCreatedAt:
-                  isBeingliked:
-                  userOfReply:
-                  userAccountOfReply:
-                  userNameOfReply:
-                  userAvatarOfReply:
-                  timeOfReply:
+                - replyId: null
+                  comment: null
+                  repliedTweet: null
+                  repliedTweetDescription: null
+                  userOfRepliedTweet: null
+                  userAccountOfRepliedTweet: null
+                  userNameOfRepliedTweet: null
+                  userAvatarOfRepliedTweet: null
+                  repliedTweetCreatedAt: null
+                  isBeingliked: null
+                  userOfReply: null
+                  userAccountOfReply: null
+                  userNameOfReply: null
+                  userAvatarOfReply: null
+                  timeOfReply: null
       deprecated: false
       security:
         - bearer: []
@@ -335,12 +335,12 @@ paths:
           content:
             application/json:
               example:
-                - userOfFollowing:
-                  userNameOfFollowing:
-                  userAccountOfFollowing:
-                  userAvatarOfFollowing:
-                  createdAt:
-                  isFollowing:
+                - userOfFollowing: null
+                  userNameOfFollowing: null
+                  userAccountOfFollowing: null
+                  userAvatarOfFollowing: null
+                  createdAt: null
+                  isFollowing: null
       deprecated: false
       security:
         - bearer: []
@@ -368,12 +368,12 @@ paths:
           content:
             application/json:
               example:
-                - followerId:
-                  userNameOfFollower:
-                  userAccountOfFollower:
-                  userAvatarOfFollwer:
-                  createdAt:
-                  isFollowing:
+                - followerId: null
+                  userNameOfFollower: null
+                  userAccountOfFollower: null
+                  userAvatarOfFollwer: null
+                  createdAt: null
+                  isFollowing: null
       deprecated: false
       security:
         - bearer: []
@@ -394,18 +394,18 @@ paths:
           content:
             application/json:
               example:
-                - id:
-                  name:
-                  account:
-                  avatar:
-                  followersCounts:
-                  isFollowing:
-                - id:
-                  name:
-                  account:
-                  avatar:
-                  followersCounts:
-                  isFollowing:
+                - id: null
+                  name: null
+                  account: null
+                  avatar: null
+                  followersCounts: null
+                  isFollowing: null
+                - id: null
+                  name: null
+                  account: null
+                  avatar: null
+                  followersCounts: null
+                  isFollowing: null
       deprecated: false
       security:
         - bearer: []
@@ -427,34 +427,34 @@ paths:
             application/json:
               example:
                 user:
-                  id:
-                  account:
-                  name:
-                  email:
-                  introduction:
-                  avatar:
-                  cover:
-                  createdAt:
-                  updatedAt:
+                  id: null
+                  account: null
+                  name: null
+                  email: null
+                  introduction: null
+                  avatar: null
+                  cover: null
+                  createdAt: null
+                  updatedAt: null
                   Tweets:
-                    - id:
-                      UserId:
-                      description:
-                      createdAt:
-                      updatedAt:
+                    - id: null
+                      UserId: null
+                      description: null
+                      createdAt: null
+                      updatedAt: null
                   Replies:
-                    - id:
-                      UserId:
-                      TweetId:
-                      comment:
-                      createdAt:
-                      updatedAt:
+                    - id: null
+                      UserId: null
+                      TweetId: null
+                      comment: null
+                      createdAt: null
+                      updatedAt: null
                   Likes:
-                    - id:
-                      UserId:
-                      TweetId:
-                      createdAt:
-                      updatedAt:
+                    - id: null
+                      UserId: null
+                      TweetId: null
+                      createdAt: null
+                      updatedAt: null
       deprecated: false
       security:
         - bearer: []
@@ -470,39 +470,43 @@ paths:
       parameters: []
       responses:
         '200':
-          description: ''
+          description: success
           content:
             application/json:
               example:
-                - id:
-                  UserId:
-                  description:
-                  createdAt:
-                  updatedAt:
+                - id: null
+                  UserId: null
+                  description: null
+                  createdAt: null
+                  updatedAt: null
                   User:
-                    id:
-                    account:
-                    name:
-                    email:
-                    password:
-                    introduction:
-                    avatar:
-                    cover:
-                    isAdmin:
-                    role:
-                    createdAt:
-                    updatedAt:
+                    id: null
+                    account: null
+                    name: null
+                    email: null
+                    password: null
+                    introduction: null
+                    avatar: null
+                    cover: null
+                    isAdmin: null
+                    role: null
+                    createdAt: null
+                    updatedAt: null
                   LikedUsers: []
                   Replies:
-                    - id:
-                      UserId:
-                      TweetId:
-                      comment:
-                      createdAt:
-                      updatedAt:
-                  repliedCount:
-                  likeCount:
-                  liked:
+                    - id: null
+                      UserId: null
+                      TweetId: null
+                      comment: null
+                      createdAt: null
+                      updatedAt: null
+                  repliedCount: null
+                  likeCount: null
+                  liked: null
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
       deprecated: false
       security:
         - bearer: []
@@ -515,16 +519,28 @@ paths:
       summary: Create a tweet
       operationId: Createatweet
       parameters: []
+      description: 回傳description創建一則tweet
       requestBody:
         description: ''
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateatweetRequest'
+            example:
+              description: '內容不可超過140字'
         required: true
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功建立一則tweet
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
           headers: {}
       deprecated: false
       security:
@@ -546,9 +562,50 @@ paths:
       summary: Get a tweet
       operationId: Getatweet
       parameters: []
+      description: 取得貼文資料
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              example:
+                - id: null
+                  UserId: null
+                  description: null
+                  createdAt: null
+                  updatedAt: null
+                  User:
+                    id: null
+                    account: null
+                    name: null
+                    email: null
+                    introduction: null
+                    avatar: null
+                    cover: null
+                    isAdmin: null
+                    role: null
+                    createdAt: null
+                    updatedAt: null
+                  Likes:
+                    - id: null
+                      UserId: null
+                      TweetId: null
+                      createdAt: null
+                      updatedAt: null
+                  Replies:
+                    - id: null
+                      UserId: null
+                      TweetId: null
+                      comment: null
+                      createdAt: null
+                      updatedAt: null
+                  repliedCounts: null
+                  likesCounts: null
+                  isBeingLiked: null
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
           headers: {}
       deprecated: false
       security:
@@ -570,10 +627,20 @@ paths:
       summary: User likes a tweet
       operationId: Userlikesatweet
       parameters: []
+      description: params Id為tweetId
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功對tweet按like          
           headers: {}
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
       deprecated: false
       security:
         - bearer: []
@@ -594,10 +661,20 @@ paths:
       summary: User unlikes a tweet
       operationId: Userunlikesatweet
       parameters: []
+      description: params Id為tweetId
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功取消tweet按like          
           headers: {}
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
       deprecated: false
       security:
         - bearer: []
@@ -618,6 +695,7 @@ paths:
       summary: User replies to  a tweet
       operationId: Userrepliestoatweet
       parameters: []
+      description: params Id為tweetId
       requestBody:
         description: ''
         content:
@@ -628,12 +706,42 @@ paths:
       responses:
         '200':
           description: ''
-          headers: {}
+          content:
+            application/json:
+              example:
+                - id: null
+                  UserId: null
+                  TweetId: null
+                  comment: null
+                  createdAt: null
+                  updatedAt: null
+                  Tweet:
+                    id: null
+                    UserId: null
+                    description: null
+                    createdAt: null
+                    updatedAt: null
+                    User:
+                      id: null
+                      account: null
+                      name: null
+                      email: null
+                      introduction: null
+                      avatar: null
+                      cover: null
+                      isAdmin: null
+                      role: null
+                      createdAt: null
+                      updatedAt: null
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
       deprecated: false
       security:
         - bearer: []
       servers:
-        - url: http://localhost:3000/api
+        - url: https://simple-twitter-paul.herokuapp.com/api
           variables: {}
   /tweets/{tweetId}/replies:
     parameters:
@@ -652,6 +760,37 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              example:
+                - id:
+                  UserId:
+                  TweetId:
+                  comment:
+                  createdAt:
+                  updatedAt:
+                  Tweet:
+                    id:
+                    UserId:
+                    description:
+                    createdAt:
+                    updatedAt:
+                    User:
+                      id:
+                      account:
+                      name:
+                      email:
+                      introduction:
+                      avatar:
+                      cover:
+                      isAdmin:
+                      role:
+                      createdAt:
+                      updatedAt:
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.            
           headers: {}
       deprecated: false
       security:
@@ -673,25 +812,27 @@ paths:
       summary: Edit a reply
       operationId: Editareply
       parameters: []
+      description: 編輯tweet回覆留言
+      requestBody:
+        description: ''
+        content:
+          text/plain:
+            schema:
+              type: object
+            example:
+              comment: 推文字數限制140字            
       responses:
         '200':
           description: ''
-          headers: {}
-      deprecated: false
-      security:
-        - bearer: []
-      servers:
-        - url: https://simple-twitter-paul.herokuapp.com/api
-          variables: {}
-    delete:
-      tags:
-        - Reply
-      summary: Delete a reply
-      operationId: Deleteareply
-      parameters: []
-      responses:
-        '200':
-          description: ''
+          content:
+            application/json:
+              example:       
+                status: success
+                message: 成功修改回覆 
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.                
           headers: {}
       deprecated: false
       security:
@@ -706,10 +847,29 @@ paths:
       summary: User add a following
       operationId: Useraddafollowing
       parameters: []
+      description: 追蹤user
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateatweetRequest'
+            example:
+              followingId: "104"
+        required: true
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功追蹤          
           headers: {}
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
       deprecated: false
       security:
         - bearer: []
@@ -730,10 +890,20 @@ paths:
       summary: User unfollow someone
       operationId: Userunfollowsomeone
       parameters: []
+      description: 取消按like
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 取消追蹤          
           headers: {}
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
       deprecated: false
       security:
         - bearer: []
@@ -766,19 +936,19 @@ paths:
               example:
                 status: success
                 message: 成功登入
-                token:
+                token: null
                 data:
-                  id:
-                  account:
-                  name:
-                  email:
-                  introduction:
-                  avatar:
-                  cover:
+                  id: null
+                  account: null
+                  name: null
+                  email: null
+                  introduction: null
+                  avatar: null
+                  cover: null
                   isAdmin: true
                   role: admin
-                  createdAt:
-                  updatedAt:
+                  createdAt: null
+                  updatedAt: null
       deprecated: false
       security: []
       servers:
@@ -850,20 +1020,19 @@ paths:
               example:
                 status: success
                 message: 成功登入
-                token:
+                token: null
                 data:
-                  id:
-                  account:
-                  name:
-                  email:
-                  introduction:
-                  avatar:
-                  cover:
+                  id: null
+                  account: null
+                  name: null
+                  email: null
+                  introduction: null
+                  avatar: null
+                  cover: null
                   isAdmin: false
                   role: user
-                  createdAt:
-                  updatedAt:
-      deprecated: false
+                  createdAt: null
+                  updatedAt: null
       security: []
       servers:
         - url: https://simple-twitter-paul.herokuapp.com/api
@@ -931,3 +1100,4 @@ tags:
   - name: Followship
   - name: Auth
     description: ''
+    

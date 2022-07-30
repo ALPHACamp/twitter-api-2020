@@ -56,6 +56,7 @@ const tweetController = {
         UserId,
         description
       })
+
       return res.status(StatusCodes.OK).json({
         status: 'success',
         message: '成功建立一則tweet'
@@ -80,6 +81,7 @@ const tweetController = {
         })
       }
       tweet = await tweet.toJSON()
+      delete tweet.User.password
       tweet.repliedCounts = tweet.Replies.length
       tweet.likesCounts = tweet.Likes.length
       tweet.isBeingLiked = req.user.LikedTweets ? req.user && req.user.LikedTweets.some(l => l.id === tweet.id) : false
