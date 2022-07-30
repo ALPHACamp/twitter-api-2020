@@ -3,6 +3,7 @@ const { User } = db
 const bcrypt = require('bcryptjs')
 const { Op } = require("sequelize")
 const helpers = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
   signUp: (req, cb) => {
@@ -49,13 +50,11 @@ const userServices = {
       })
       .catch(err => cb(err))
   }, editUser: async (req, cb) => {
-
     const currentUserId = helpers.getUser(req).id
     const { account, name, email, password, checkPassword, introduction } = req.body
-    // const id = Number(req.params.id)
     const id = req.params.id
-    console.log('currentUserId', currentUserId)
-    console.log('id', id)
+    const avatarImg = req.files.avatar ? req.files.avatar : []
+    const coverImg = req.files.cover ? req.files.cover : []
     try {
       if (Number(currentUserId) !== Number(id)) throw new Error('無法修改其他使用者之資料!')
       if (!account || !name || !email || !password || !checkPassword) throw new Error('必填欄位不可空白!')
@@ -76,9 +75,13 @@ const userServices = {
           account,
           [Op.not]: [{ id }]
         }
-      })
+      }),
+      // !如果下片判斷這次資料無法儲存，圖片放在這邊處理會拖慢速度...
+      // !但因為非同步的情況，我還不知道怎麼改比較好
+      imgurFileHandler(...avatarImg),
+      imgurFileHandler(...coverImg)
     ])
-      .then(([user, foundEmail, foundAccount]) => {
+      .then(([user, foundEmail, foundAccount, avatarImg, coverImg]) => {
         if (!user) throw new Error("user doesn't exist!")
         // !有餘力再來優化程式
         let errorMessage = []
@@ -92,22 +95,22 @@ const userServices = {
           throw new Error(errorMessage)
         }
         const newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-        return [user, newPassword]
+        return [user, newPassword, avatarImg, coverImg]
       })
-      .then(([user, newPassword]) => {
+      .then(([user, newPassword, avatarImg, coverImg]) => {
         return user.update({
           account, name, email, introduction,
-          password: newPassword
+          password: newPassword,
+          avatar: avatarImg || user.avatar,
+          cover: coverImg || user.cover
         })
       })
       .then(updatedUser => {
-        console.log(updatedUser)
         cb(null, { user: updatedUser })
       })
 
       .catch(err => cb(err))
   }
-
 }
 
 module.exports = userServices
