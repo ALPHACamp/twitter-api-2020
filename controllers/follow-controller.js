@@ -8,6 +8,14 @@ const followController = {
       const followerId = Number(helpers.getUser(req).id)
       const following = await User.findByPk(followingId)
       const follower = await User.findByPk(followerId)
+
+      if (followerId === followingId) {
+        return res.status(500).json({
+          status: 'error',
+          message: '使用者不能追蹤自己!'
+        })
+      }
+
       if (!follower || !following) {
         return res.status(500).json({
           status: 'error',
