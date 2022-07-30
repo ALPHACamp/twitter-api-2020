@@ -68,13 +68,18 @@ const userController = {
           message: 'Password and checkPassword should be the same.'
         })
       }
-      const result = await User.findOne({
-        where: { [Op.or]: [{ account }, { email }] }
-      })
-      if (result) {
+      const accountExist = await User.findOne({ where: { account } })
+      if (accountExist) {
         return res.status(401).json({
           status: 'error',
-          message: 'Account or email already exists. Please try another one.'
+          message: 'Account already exists. Please try another one.'
+        })
+      }
+      const emailExist = await User.findOne({ where: { email } })
+      if (emailExist) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Email already exists. Please try another one.'
         })
       }
 
