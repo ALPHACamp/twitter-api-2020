@@ -19,7 +19,7 @@ router.post('/api/admin/users', passport.authenticate('local', { session: false 
 router.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 
-router.use('/api/tweets/:id', authenticated, authenticatedUser, like)
+router.use('/api/tweets', authenticated, authenticatedUser, like)
 router.use('/api/followships', authenticated, authenticatedUser, followship)
 
 

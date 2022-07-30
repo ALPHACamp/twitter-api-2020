@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const likeController = require('../../controllers/like-controller')
 
-router.post('/like', likeController.add)
-router.post('/unlike', likeController.remove)
+router.post('/:id/like', likeController.add)
+router.post('/:id/unlike', likeController.remove)
 
 module.exports = router

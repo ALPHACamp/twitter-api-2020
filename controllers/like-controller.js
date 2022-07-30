@@ -5,8 +5,7 @@ const likeController = {
   add:async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
-      //const TweetId = req.params.id
-      const TweetId = 40
+      const TweetId = req.params.id
       console.log(TweetId)
 
       const tweet = await Tweet.findByPk(TweetId)
@@ -27,8 +26,7 @@ const likeController = {
   remove: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
-      const TweetId = 40
-      //const TweetId = Number(req.params.id)
+      const TweetId = Number(req.params.id)
 
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) throw new Error('沒有該則推文')
