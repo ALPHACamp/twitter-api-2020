@@ -9,6 +9,20 @@ const tweetController = {
     const userId = 1
     Tweet.findAll({ where: { UserId: userId }, include: [User, Like, Reply] })
       .then(tweets => {
+        tweets = { tweets: tweets }
+        tweets = JSON.stringify(tweets)
+        tweets = JSON.parse(tweets)
+        tweets = tweets.tweets.map(tweet => ({
+          ...tweet,
+          User: {
+            account: tweet.User.account,
+            avatar: tweet.User.avatar,
+            id: tweet.User.id,
+            introduction: tweet.User.introduction,
+            name: tweet.User.name,
+            role: tweet.User.role,
+          }
+        }))
         return res.json(tweets)
       })
   },
@@ -20,30 +34,35 @@ const tweetController = {
         tweet = JSON.stringify(tweet)
         tweet = JSON.parse(tweet)
         tweet = tweet.tweet
-        tweet.User = {
-          account: tweet.User.account,
-          avatar: tweet.User.avatar,
-          id: tweet.User.id,
-          introduction: tweet.User.introduction,
-          name: tweet.User.name,
-          role: tweet.User.role,
+        if (tweet.User) {
+          tweet.User = {
+            ...tweet.User,
+            account: tweet.User.account,
+            avatar: tweet.User.avatar,
+            id: tweet.User.id,
+            introduction: tweet.User.introduction,
+            name: tweet.User.name,
+            role: tweet.User.role
+          }
         }
-        tweet.Replies = tweet.Replies.map(reply => ({
-          TweetId: reply.TweetId,
-          User: {
-            account: reply.User.account,
-            avatar: reply.User.avatar,
-            id: reply.User.id,
-            introduction: reply.User.introduction,
-            name: reply.User.name,
-            role: reply.User.role,
-          },
-          UserId: reply.UserId,
-          comment: reply.comment,
-          createdAt: reply.createdAt,
-          id: reply.id,
-          updatedAt: reply.updatedAt,
-        }))
+        if (tweet.Replies[0].User.account) {
+          tweet.Replies = tweet.Replies.map(reply => ({
+            TweetId: reply.TweetId,
+            User: {
+              account: reply.User.account,
+              avatar: reply.User.avatar,
+              id: reply.User.id,
+              introduction: reply.User.introduction,
+              name: reply.User.name,
+              role: reply.User.role,
+            },
+            UserId: reply.UserId,
+            comment: reply.comment,
+            createdAt: reply.createdAt,
+            id: reply.id,
+            updatedAt: reply.updatedAt,
+          }))
+        }
         return res.json(tweet)
       })
   },
