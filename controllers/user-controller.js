@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { Sequelize, Op } = require('sequelize')
+const { getUser } = require('../_helpers')
 
 const { User } = require('../models')
 
@@ -106,6 +107,26 @@ const userController = {
         limit
       })
       res.json({ status: 'success', users })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const user = getUser(req)
+      if (!user) {
+        return res.status(500).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      const { id, account, name, email, avatar, frontCover, role } = user.toJSON()
+      const userData = {
+        id, account, name, email, avatar, frontCover, role
+      }
+      res.status(200).json({
+        user: userData
+      })
     } catch (error) {
       next(error)
     }
