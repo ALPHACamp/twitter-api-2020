@@ -1,9 +1,9 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 
 const helpers = require('../_helpers')
-const { User, Followship, Tweets } = require('../models')
-const { Op } = require('sequelize')
+const { User, Followship, Tweet, Like } = require('../models')
 
 const userController = {
   signin: async (req, res, next) => {
@@ -114,16 +114,37 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const id = req.params.id
-      const tweets = await Tweets.findAll({
+      const tweets = await Tweet.findAll({
         where: { UserId: id },
-        order: [['createAt', 'DESC']],
+        attributes: [
+          'id', 'description', 'createdAt',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'commentCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'
+          ]
+        ],
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
       if (!tweets) return res.status(404).json({ status: 'error', message: 'Tweets are not found.' })
-      res.status(200).json(tweets)
+
+      // check if the current user likes the tweets or not (add attribute "isLike" in tweets)
+      const currentUserLikedList = await Like.findAll({
+        where: { UserId: currentUserId },
+        raw: true
+      })
+      const likeTweetsIds = currentUserLikedList.map(like => like.TweetId)
+      const tweetsIncludeIsLike = tweets.map(tweet => ({
+        ...tweet, isLiked: likeTweetsIds.some(tweetId => tweetId === tweet.id)
+      }))
+
+      res.status(200).json(tweetsIncludeIsLike)
     } catch (err) {
       next(err)
     }
