@@ -1,6 +1,8 @@
 const db = require('../models')
 const { User } = db
 const bcrypt = require('bcryptjs')
+const { Op } = require("sequelize")
+const helpers = require('../_helpers')
 
 const userServices = {
   signUp: (req, cb) => {
@@ -46,7 +48,66 @@ const userServices = {
         return cb(null, { user })
       })
       .catch(err => cb(err))
+  }, editUser: async (req, cb) => {
+
+    const currentUserId = helpers.getUser(req).id
+    const { account, name, email, password, checkPassword, introduction } = req.body
+    // const id = Number(req.params.id)
+    const id = req.params.id
+    console.log('currentUserId', currentUserId)
+    console.log('id', id)
+    try {
+      if (Number(currentUserId) !== Number(id)) throw new Error('無法修改其他使用者之資料!')
+      if (!account || !name || !email || !password || !checkPassword) throw new Error('必填欄位不可空白!')
+      if (password !== checkPassword) throw new Error('Passwords do not match!')
+    } catch (err) {
+      cb(err)
+    }
+    return Promise.all([
+      User.findByPk(id),
+      User.findOne({
+        where: {
+          email,
+          [Op.not]: [{ id }]
+        }
+      }),
+      User.findOne({
+        where: {
+          account,
+          [Op.not]: [{ id }]
+        }
+      })
+    ])
+      .then(([user, foundEmail, foundAccount]) => {
+        if (!user) throw new Error("user doesn't exist!")
+        // !有餘力再來優化程式
+        let errorMessage = []
+        if (foundEmail) {
+          errorMessage += 'email 已重複註冊！'
+        }
+        if (foundAccount) {
+          errorMessage += 'account 已重複註冊！'
+        }
+        if (errorMessage.length > 0) {
+          throw new Error(errorMessage)
+        }
+        const newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+        return [user, newPassword]
+      })
+      .then(([user, newPassword]) => {
+        return user.update({
+          account, name, email, introduction,
+          password: newPassword
+        })
+      })
+      .then(updatedUser => {
+        console.log(updatedUser)
+        cb(null, { user: updatedUser })
+      })
+
+      .catch(err => cb(err))
   }
+
 }
 
 module.exports = userServices

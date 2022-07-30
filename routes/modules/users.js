@@ -4,5 +4,7 @@ const userController = require('../../controllers/user-controller')
 
 
 router.get('/:id', userController.getUser)
+router.put('/:id', userController.editUser)
+
 
 module.exports = router
