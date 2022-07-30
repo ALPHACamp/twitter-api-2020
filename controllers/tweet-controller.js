@@ -25,7 +25,7 @@ const tweetController = {
         })
       }
 
-      const likes = getUser(req)
+      const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(t => t.id) : []
 
       tweets = await tweets.map(tweet => tweet.toJSON())
       tweets = tweets.map(tweet => {
@@ -38,7 +38,7 @@ const tweetController = {
           updatedAt: tweet.updatedAt,
           replyCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
-          isLiked: likes ? likes.includes(tweet.id) : false
+          isLiked: likedTweetId.some(item => item === tweet.id)
         }
       })
       return res.status(200).json(tweets)
@@ -101,13 +101,13 @@ const tweetController = {
         })
       }
 
-      const likes = getUser(req)
+      const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(t => t.id) : []
       tweet = await tweet.toJSON()
       const data = {
         ...tweet,
         replyCount: tweet.Replies.length,
         likeCount: tweet.Likes.length,
-        isLiked: likes ? likes.includes(tweet.id) : null
+        isLiked: likedTweetId.some(item => item === tweet.id)
       }
       return res.status(200).json(data)
     } catch (err) {
