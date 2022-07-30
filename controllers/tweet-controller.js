@@ -1,6 +1,5 @@
 const { User, Tweet, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
-const { getUser } = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -25,7 +24,7 @@ const tweetController = {
         })
       }
 
-      const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(t => t.id) : []
+      const likedTweetId = helpers.getUser(req)?.LikedTweets ? helpers.getUser(req).LikedTweets.map(t => t.id) : []
 
       tweets = await tweets.map(tweet => tweet.toJSON())
       tweets = tweets.map(tweet => {
@@ -50,6 +49,13 @@ const tweetController = {
     try {
       const UserId = helpers.getUser(req)?.id
       const { description } = req.body
+
+      if (!UserId) {
+        res.status(500).json({
+          status: 'error',
+          message: '偵測不到當前使用者!'
+        })
+      }
       if (description.length > 140) {
         res.status(500).json({
           status: 'error',
@@ -101,7 +107,7 @@ const tweetController = {
         })
       }
 
-      const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(t => t.id) : []
+      const likedTweetId = helpers.getUser(req)?.LikedTweets ? helpers.getUser(req).LikedTweets.map(t => t.id) : []
       tweet = await tweet.toJSON()
       const data = {
         ...tweet,
