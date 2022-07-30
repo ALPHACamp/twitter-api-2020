@@ -79,39 +79,6 @@ const replyController = {
       status: 'success',
       message: '成功修改回覆'
     })
-  },
-  deleteReply: async (req, res, next) => {
-    try {
-      const ReplyId = Number(req.params.id)
-      const UserId = Number(helpers.getUser(req).id)
-      const user = await User.findByPk(UserId)
-      if (!user) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          status: 'error',
-          message: 'User不存在'
-        })
-      }
-      const reply = await Reply.findByPk(ReplyId)
-      if (!reply) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          status: 'error',
-          message: 'Reply不存在'
-        })
-      }
-      if (reply.toJSON().UserId !== UserId) {
-        return res.status(StatusCodes.FORBIDDEN).json({
-          status: 'error',
-          message: '無法刪除他人回覆'
-        })
-      }
-      await reply.destroy()
-      return res.status(StatusCodes.OK).json({
-        status: 'success',
-        message: 'Reply刪除成功'
-      })
-    } catch (err) {
-      next(err)
-    }
   }
 }
 
