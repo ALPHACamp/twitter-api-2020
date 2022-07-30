@@ -114,7 +114,7 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
-      const currentUserId = helpers.getUser(req).id
+      // get the tweets of a certain user (req.params.id === userId)
       const id = req.params.id
       const tweets = await Tweet.findAll({
         where: { UserId: id },
@@ -135,6 +135,7 @@ const userController = {
       if (!tweets) return res.status(404).json({ status: 'error', message: 'Tweets are not found.' })
 
       // check if the current user likes the tweets or not (add attribute "isLike" in tweets)
+      const currentUserId = helpers.getUser(req).id
       const currentUserLikedList = await Like.findAll({
         where: { UserId: currentUserId },
         raw: true
