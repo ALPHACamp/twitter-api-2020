@@ -17,24 +17,28 @@ const tweetController = {
     }
   },
   addTweet: async (req, res, next) => {
-    const userId = Number(helpers.getUser(req).id)
-    const { description } = req.body
-    if (!userId || !description) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'userId and description required'
-      })
-    }
+    try {
+      const userId = Number(helpers.getUser(req).id)
+      const { description } = req.body
+      if (!userId || !description) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'userId and description required'
+        })
+      }
 
-    if (description.length > 140) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'tweet should be within 140 characters'
-      })
-    }
+      if (description.length > 140) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'tweet should be within 140 characters'
+        })
+      }
 
-    const tweet = await Tweet.create({ userId, description })
-    return res.status(200).json(tweet)
+      await Tweet.create({ userId, description })
+      return res.status(200).json({ status: 'success', message: 'New tweet added' })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
