@@ -602,7 +602,7 @@ paths:
             application/json:
               example:
                 status: success
-                message: 成功對tweet按like          
+                message: 成功對tweet按like
           headers: {}
         '401':
           description: Authorization information is missing or invalid.
@@ -636,7 +636,7 @@ paths:
             application/json:
               example:
                 status: success
-                message: 成功取消tweet按like          
+                message: 成功取消tweet按like
           headers: {}
         '401':
           description: Authorization information is missing or invalid.
@@ -757,7 +757,7 @@ paths:
         '401':
           description: Authorization information is missing or invalid.
         '404':
-          description: A user with the specified ID was not found.            
+          description: A user with the specified ID was not found.
           headers: {}
       deprecated: false
       security:
@@ -779,15 +779,6 @@ paths:
       summary: Edit a reply
       operationId: Editareply
       parameters: []
-<<<<<<< HEAD
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserEditReply'
-||||||| 023fbb6
-=======
       description: 編輯tweet回覆留言
       requestBody:
         description: ''
@@ -797,19 +788,18 @@ paths:
               type: object
             example:
               comment: 推文字數限制140字
->>>>>>> 52ccf0bef0bfb89ab00dec1152cabf4a72068d4f
       responses:
         '200':
           description: ''
           content:
             application/json:
-              example:       
+              example:
                 status: success
-                message: 成功修改回覆 
+                message: 成功修改回覆
         '401':
           description: Authorization information is missing or invalid.
         '404':
-          description: A user with the specified ID was not found.                
+          description: A user with the specified ID was not found.
           headers: {}
       deprecated: false
       security:
@@ -832,7 +822,7 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateatweetRequest'
             example:
-              followingId: "104"
+              followingId: '104'
         required: true
       responses:
         '200':
@@ -841,7 +831,7 @@ paths:
             application/json:
               example:
                 status: success
-                message: 成功追蹤          
+                message: 成功追蹤
           headers: {}
         '401':
           description: Authorization information is missing or invalid.
@@ -875,7 +865,7 @@ paths:
             application/json:
               example:
                 status: success
-                message: 取消追蹤          
+                message: 取消追蹤
           headers: {}
         '401':
           description: Authorization information is missing or invalid.
@@ -1087,4 +1077,3 @@ tags:
   - name: Followship
   - name: Auth
     description: ''
-    
