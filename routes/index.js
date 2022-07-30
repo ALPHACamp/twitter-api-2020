@@ -15,6 +15,7 @@ const { authenticated } = require('../middleware/auth')
 // module
 const users = require('./modules/users')
 const tweets = require('./modules/tweets')
+const followships = require('./modules/followships')
 
 router.post('/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn)
 router.post('/users', userController.signUp)
@@ -22,6 +23,7 @@ router.post('/users/signin', passport.authenticate('local', { session: false }),
 
 router.use('/users', authenticated, users)
 router.use('/tweets', authenticated, tweets)
+router.use('/followships', followships)
 
 router.use('/', errorHandler)
 
