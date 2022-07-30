@@ -23,21 +23,15 @@ paths:
           content:
             application/json:
               example:
-                - id: null
-                  account: null
-                  name: null
-                  email: null
-                  introduction: null
-                  avatar: null
-                  cover: null
-                  isAdmin: null
-                  role: null
-                  createdAt: null
-                  updatedAt: null
-                  tweetsCounts: null
-                  followingsCounts: null
-                  followersCounts: null
-                  likedTweetsCounts: null
+                - id:
+                  avatar:
+                  name:
+                  account:
+                  cover:
+                  tweetsCounts:
+                  likedTweetsCounts:
+                  followingsCounts:
+                  followersCounts:
       deprecated: false
       security:
         - bearer: []
@@ -58,16 +52,12 @@ paths:
           content:
             application/json:
               example:
-                - id: null
-                  UserId: null
-                  description: null
-                  createdAt: null
-                  updatedAt: null
-                  User: null
-                  Replies: null
-                  Likes: null
-                  repliedCounts: null
-                  likesCounts: null
+                - id:
+                  idOfUser:
+                  avatarOdUser:
+                  account:
+                  description:
+                  createdAt:
       deprecated: false
       security:
         - bearer: []
@@ -426,35 +416,12 @@ paths:
           content:
             application/json:
               example:
-                user:
-                  id: null
-                  account: null
-                  name: null
-                  email: null
-                  introduction: null
-                  avatar: null
-                  cover: null
-                  createdAt: null
-                  updatedAt: null
-                  Tweets:
-                    - id: null
-                      UserId: null
-                      description: null
-                      createdAt: null
-                      updatedAt: null
-                  Replies:
-                    - id: null
-                      UserId: null
-                      TweetId: null
-                      comment: null
-                      createdAt: null
-                      updatedAt: null
-                  Likes:
-                    - id: null
-                      UserId: null
-                      TweetId: null
-                      createdAt: null
-                      updatedAt: null
+                id:
+                account:
+                name:
+                email:
+                avatar:
+                isAdmin:
       deprecated: false
       security:
         - bearer: []
@@ -820,7 +787,7 @@ paths:
             schema:
               type: object
             example:
-              comment: 推文字數限制140字            
+              comment: 推文字數限制140字
       responses:
         '200':
           description: ''
@@ -1073,6 +1040,16 @@ components:
           type: string
       example:
         comment: Hello word
+    UserEditReply:
+      title: UserEditReply
+      required:
+        - comment
+      type: object
+      properties:
+        comment:
+          type: string
+      example:
+        comment: Hello word edit
     UserloginRequest:
       title: UserloginRequest
       required:

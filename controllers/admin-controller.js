@@ -49,15 +49,18 @@ const adminController = {
         })
       }
       users = await users.map(user => ({ ...user.toJSON() }))
-      users.forEach(user => {
-        user.tweetsCounts = user.Tweets.length
-        user.followingsCounts = user.Followings.length
-        user.followersCounts = user.Followers.length
-        user.likedTweetsCounts = user.Tweets.reduce((prev, next) => prev + next.Likes.length, 0)
-        delete user.password
-        delete user.Tweets
-        delete user.Followings
-        delete user.Followers
+      users = await users.map(user => {
+        return {
+          id: user.id,
+          avatar: user.avatar,
+          name: user.name,
+          account: user.account,
+          cover: user.cover,
+          tweetsCounts: user.Tweets.length,
+          likedTweetsCounts: user.Tweets.reduce((prev, next) => prev + next.Likes.length, 0),
+          followingsCounts: user.Followings.length,
+          followersCounts: user.Followers.length
+        }
       })
       users.sort((a, b) => {
         if (a.tweetsCounts === b.tweetsCounts) return (a.id - b.id)
@@ -87,10 +90,12 @@ const adminController = {
       tweets = await tweets.map(tweet => tweet.toJSON())
       tweets = tweets.map(tweet => {
         return {
-          ...tweet,
-          description: tweet.description.substring(0, 50) + '...',
-          repliedCounts: tweet.Replies.length,
-          likesCounts: tweet.Likes.length
+          id: tweet.id,
+          idOfUser: tweet.User.id,
+          avatarOdUser: tweet.User.avatar,
+          account: tweet.User.account,
+          description: tweet.description.substring(0, 50).length === 50 ? tweet.description.substring(0, 50) + '...' : tweet.description.substring(0, 50),
+          createdAt: tweet.createdAt
         }
       })
       return res.status(StatusCodes.OK).json({
