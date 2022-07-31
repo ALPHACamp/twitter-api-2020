@@ -359,10 +359,8 @@ const userController = {
         return {
           followingId: following.id,
           userNameOfFollowing: following.name,
-          userAccountOfFollowing: following.account,
           userAvatarOfFollowing: following.avatar,
           userInrtoductionOfFollowing: following.introduction,
-          createdAt: following.createdAt,
           isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false
         }
       })
@@ -391,10 +389,8 @@ const userController = {
         return {
           followerId: follower.id,
           userNameOfFollower: follower.name,
-          userAccountOfFollower: follower.account,
           userAvatarOfFollower: follower.avatar,
           userInrtoductionOfFollower: follower.introduction,
-          createdAt: follower.createdAt,
           isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === follower.id) : false
         }
       })
@@ -419,7 +415,6 @@ const userController = {
           name: user.name,
           account: user.account,
           avatar: user.avatar,
-          followersCounts: user.Followers.length,
           isFollowing: req.user.Followings.some(following => following.id === user.id)
         }))
       top10Users = top10Users.sort((a, b) => b.followersCounts - a.followersCounts).slice(0, 10)

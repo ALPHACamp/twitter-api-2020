@@ -92,7 +92,8 @@ const adminController = {
         return {
           id: tweet.id,
           idOfUser: tweet.User.id,
-          avatarOdUser: tweet.User.avatar,
+          avatarOfUser: tweet.User.avatar,
+          nameOfUser: tweet.User.name,
           account: tweet.User.account,
           description: tweet.description.substring(0, 50).length === 50 ? tweet.description.substring(0, 50) + '...' : tweet.description.substring(0, 50),
           createdAt: tweet.createdAt
