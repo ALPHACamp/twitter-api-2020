@@ -13,7 +13,7 @@ const adminController = require('../controllers/admin-controller')
 
 router.post('/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signin)
 router.post('/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signin)
-router.post('/signup', userController.signUp)
+router.post('/users', userController.signUp)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/users', authenticated, users)
