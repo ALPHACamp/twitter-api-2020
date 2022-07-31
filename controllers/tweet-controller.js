@@ -1,4 +1,5 @@
 const helpers = require('../_helpers')
+const sequelize = require('sequelize')
 const { Tweet, User, Reply, Like } = require('../models')
 
 const tweetController = {
@@ -46,7 +47,17 @@ const tweetController = {
   },
   getTweets: async (req, res, next) => {
     try {
+      // get all tweets and its reply and like number
       const tweets = await Tweet.findAll({
+        attribute: [
+          'id', 'description', 'UserId', 'createdAt',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'
+          ]
+        ],
         order: [['createdAt', 'DESC']],
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
         raw: true,
