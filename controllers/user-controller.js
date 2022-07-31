@@ -389,10 +389,8 @@ const userController = {
         return {
           followerId: follower.id,
           userNameOfFollower: follower.name,
-          userAccountOfFollower: follower.account,
           userAvatarOfFollower: follower.avatar,
           userInrtoductionOfFollower: follower.introduction,
-          createdAt: follower.createdAt,
           isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === follower.id) : false
         }
       })
