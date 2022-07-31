@@ -162,15 +162,12 @@ paths:
       requestBody:
         description: ''
         content:
-          text/plain:
+          application/json:
             schema:
               type: object
               example:
-                account: user100
-                email: usere100@example
                 name: user100
-                password: '12345678'
-                checkPassword: '12345678'
+                introduction: usere100好棒棒
             example:
               name: user100 限制50字元
               introduction: 我是user100 限制150字元
@@ -182,6 +179,34 @@ paths:
               example:
                 status: success
                 message: 成功編輯個人資料
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/setting:
+    parameters:
+    put:
+      tags:
+        - User
+      summary: Edit user account
+      parameters: []
+      description: 此API用來編輯使用者帳號資料
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSetting'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 帳號設定完成
       deprecated: false
       security:
         - bearer: []
@@ -787,7 +812,7 @@ paths:
       requestBody:
         description: ''
         content:
-          text/plain:
+          application/json:
             schema:
               type: object
             example:
@@ -936,7 +961,7 @@ paths:
       requestBody:
         description: ''
         content:
-          text/plain:
+          application/json:
             schema:
               type: object
               example:
@@ -1024,6 +1049,32 @@ components:
       example:
         account: root
         password: '12345678'
+    UserSetting:
+      title: UserSetting
+      required:
+        - account
+        - name
+        - email
+        - password
+        - checkPassword
+      type: object
+      properties:
+        account:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        checkPassoword:
+          type: string
+      example:
+        account:
+        name:
+        email:
+        password: '選擇性提供(點開頁面不會帶入原本資料)，若無提供則沿用原本密碼'
+        checkPassword: '選擇性提供(點開頁面不會帶入原本資料)，若無提供則沿用原本密碼'
     CreateatweetRequest:
       title: CreateatweetRequest
       required:
