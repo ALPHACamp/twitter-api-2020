@@ -182,6 +182,34 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const user = User.findByPk(req.params.id)
+      if (!user) throw new Error('user not exist')
+      const likes = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [{ model: Tweet, include: [User, Reply, Like] }] 
+      })
+      const likesSort = likes
+        .map(like => {
+          const {User, Replies, Likes, ...restProps } = {
+            ...like.Tweet.toJSON(),
+            replyUserAccount: like.Tweet.User.account,
+            replyCounts: like.Tweet.Replies.length,
+            likeCounts: like.Tweet.Likes.length
+          }
+          const likeReturn = {
+            ...like.toJSON(),
+            Tweet: restProps
+          }
+          return likeReturn
+        })
+        .sort((a, b) => b.createAt - a.createAt)
+      res.json(likesSort)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
