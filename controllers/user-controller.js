@@ -121,7 +121,7 @@ const userController = {
         attributes: [
           'id', 'description', 'createdAt',
           [
-            sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'commentCount'
+            sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'
           ],
           [
             sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'
@@ -142,7 +142,7 @@ const userController = {
       })
       const likeTweetsIds = currentUserLikedList.map(like => like.TweetId)
       const tweetsIncludeIsLike = tweets.map(tweet => ({
-        ...tweet, isLiked: likeTweetsIds.some(tweetId => tweetId === tweet.id)
+        ...tweet, isLike: likeTweetsIds.some(tweetId => tweetId === tweet.id)
       }))
 
       res.status(200).json(tweetsIncludeIsLike)
