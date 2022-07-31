@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
@@ -11,11 +11,8 @@ const userController = {
       delete user.password
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '3d' })
       res.json({
-        status: 'success',
-        data: {
-          token,
-          user
-        }
+        token,
+        ...user
       })
     } catch (err) {
       next(err)
@@ -41,10 +38,7 @@ const userController = {
       })
       const user = userCreate.toJSON()
       delete user.password
-      res.json({
-        status: 'success',
-        data: { user }
-      })
+      res.json(user)
     } catch (err) {
       next(err)
     }
@@ -55,10 +49,7 @@ const userController = {
       const user = await User.findByPk(req.params.id, { raw: true })
       if (!user) throw new Error('user not exist')
       delete user.password
-      res.json({
-        status: 'success',
-        data: { user }
-      })
+      res.json(user)
     } catch (err) {
       next(err)
     }
@@ -86,24 +77,35 @@ const userController = {
       })
       const userJSON = userUpdate.toJSON()
       delete userJSON.password
-      res.json({
-        status: 'success',
-        data: { user: userJSON }
-      })
+      res.json(userJSON)
     } catch (err) {
       next(err)
     }
   },
   getUser: async (req, res, next) => {
     try {
-      const userFind = await User.findByPk(req.params.id, { raw: true })
+      const userFind = await User.findByPk(req.params.id, {
+        include: [
+          Tweet,
+          Reply,
+          Like,
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ] 
+      })
       if (!userFind) throw new Error('user not exist')
       const currentUser = helpers.getUser(req)
       delete currentUser.password
-      const { id, name, introduction, avatar, banner } = userFind
+      const { email, password, Tweets, Replies, Likes, Followers, Followings, ...restProps } = {
+        ...userFind.toJSON(),
+        tweetCounts: userFind.Tweets.length,
+        replyCounts: userFind.Replies.length,
+        likeCounts: userFind.Likes.length,
+        followerCounts: userFind.Followers.length,
+        followingCounts: userFind.Followings.length
+      }
       res.json({
-        status: 'success',
-        id, name, introduction, avatar, banner,
+        ...restProps,
         currentUser
       })
     } catch (err) {
@@ -116,12 +118,11 @@ const userController = {
       const userFind = await User.findByPk(req.params.id)
       if (!userFind) throw new Error('user not exist')
       const { name, introduction } = req.body
-      const { avatar, banner } = req.files
       if (!name) throw new Error('name is required')
       if (name.length > 50) throw new Error('name length should be less than 50')
       if (introduction && introduction.length > 160) throw new Error('introduction length should be less than 160')
-      const avatarPath = avatar ? await imgurFileHandler(avatar[0]) : userFind.avatar
-      const bannerPath = banner ? await imgurFileHandler(banner[0]) : userFind.banner
+      const avatarPath = req.files?.avatar ? await imgurFileHandler(avatar[0]) : userFind.avatar
+      const bannerPath = req.files?.banner ? await imgurFileHandler(banner[0]) : userFind.banner
       const userUpdate = await userFind.update({
         name,
         introduction,
@@ -130,10 +131,7 @@ const userController = {
       })
       const user = userUpdate.toJSON()
       delete user.password
-      res.json({
-        status: 'success',
-        data: { user }
-      })
+      res.json(user)
     } catch (err) {
       next(err)
     }
