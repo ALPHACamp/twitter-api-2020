@@ -38,6 +38,35 @@ const replyController = {
     } catch (err) {
       next(err)
     }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const TweetId = Number(req.params.tweet_id)
+      const tweet = await Tweet.findByPk(TweetId)
+
+      if (!tweet) {
+        return res.status(500).json({
+          status: 'error',
+          message: '找不到推文!'
+        })
+      }
+
+      const data = await Reply.findAll({
+        where: { TweetId },
+        attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatar']
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
