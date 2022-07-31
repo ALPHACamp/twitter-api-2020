@@ -108,7 +108,7 @@ const tweetController = {
         where: { TweetId: tweetId },
         attributes: { exclude: ['updatedAt'] },
         include: [
-          { model: User, attributes: ['account'] },
+          { model: User, attributes: ['account', 'avatar', 'name'] },
           {
             model: Tweet,
             attributes: { exclude: ['updatedAt'] },
