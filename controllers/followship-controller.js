@@ -28,14 +28,15 @@ const followshipController = {
   },
   postFollowship: async (req, res, next) => {
     try {
-      const theSignInUser = helpers.getUser(req).toJSON()
-      const { userId } = req.params
+      const theSignInUser = helpers.getUser(req)
+      const { id } = req.body
+
       const [targetUser, followship] = await Promise.all([
-        User.findByPk(userId),
+        User.findByPk(id),
         Followship.findOne({
           where: {
             followerId: theSignInUser.id,
-            followingId: userId,
+            followingId: id,
           },
         }),
       ])
@@ -45,7 +46,7 @@ const followshipController = {
 
       await Followship.create({
         followerId: theSignInUser.id,
-        followingId: userId,
+        followingId: id,
       })
 
       res.status(200).json({ status: 'success' })
@@ -55,14 +56,14 @@ const followshipController = {
   },
   deleteFollowship: async (req, res, next) => {
     try {
-      const theSignInUser = helpers.getUser(req).toJSON()
-      const { userId } = req.params
+      const theSignInUser = helpers.getUser(req)
+      const { followingId } = req.params
       const [targetUser, followship] = await Promise.all([
-        User.findByPk(userId),
+        User.findByPk(followingId),
         Followship.findOne({
           where: {
             followerId: theSignInUser.id,
-            followingId: userId,
+            followingId: followingId,
           },
         }),
       ])
@@ -71,7 +72,7 @@ const followshipController = {
       if (!followship) throw new Error(`You haven't followed this user!`)
 
       await Followship.destroy({
-        where: { follower_id: theSignInUser.id, following_id: userId },
+        where: { follower_id: theSignInUser.id, following_id: followingId },
       })
 
       res.status(200).json({ status: 'success' })
