@@ -1,9 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const db = require('../models')
-const { User } = db
+const { User, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
-const sequelize = require('sequelize')
 const { Op } = require("sequelize")
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
@@ -88,7 +86,8 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  }, editUser: async (req, res, next) => {
+  }, 
+  editUser: async (req, res, next) => {
     const currentUserId = helpers.getUser(req).id
     const { account, name, email, password, checkPassword, introduction } = req.body
     const id = req.params.id
@@ -126,6 +125,58 @@ const userController = {
         message: '成功編輯使用者資料',
         data: updatedUser
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  following: async (req, res, next) => {
+    try {
+      const UserId = Number(req.params.id)     
+      const followings = await User.findByPk(UserId, {
+        include: [{
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
+          }],
+        attributes: {
+          exclude: [ 'password' ]
+        }
+      })
+
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(followings)
+      } else { 
+        res.status(200).json({ 
+          status: 'Success',
+          message: '您已成功！', 
+          data: followings
+        })}
+    } catch (err) {
+      next(err)
+    }
+  },
+  follower: async (req, res, next) => {
+    try {
+      const UserId = Number(req.params.id)     
+      const followers = await User.findByPk(UserId, {
+        include: [{
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
+          }],
+        attributes: {
+          exclude: [ 'password' ]
+        }
+      })
+
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(followers)
+      } else { 
+        res.status(200).json({ 
+          status: 'Success',
+          message: '您已成功！', 
+          data: followers
+        })}
     } catch (err) {
       next(err)
     }
