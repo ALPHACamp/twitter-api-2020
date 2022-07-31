@@ -233,7 +233,20 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followers' }
+        ]
+      })
+      if (!user) throw new Error('user not exist')
+      const followerSort = user.Followers
+        .map(user => {
+          const { id, email, password, banner, ...restProps } = user.toJSON()
+          restProps.followerId = user.id
+          return restProps
+        })
+        .sort((a, b) => b.createAt - a.createAt)
+      res.json(followerSort)
     } catch (err) {
       next(err)
     }
