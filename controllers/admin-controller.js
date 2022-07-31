@@ -7,13 +7,13 @@ const adminController = {
   signIn: (req, res, next) => {
     try {
       if (req.user.error) {
-        return res.json(req.user.error)
+        return res.status(400).json(req.user.error)
       }
 
       if (req.user.role !== 'admin') {
-        res.json({
+        return res.status(400).json({
           status: 'error',
-          message: '帳號或密碼錯誤'
+          message: '帳號或密碼錯誤!'
         })
       }
 
@@ -79,13 +79,13 @@ const adminController = {
       const tweetId = Number(req.params.id)
       const tweet = await Tweet.findByPk(tweetId)
 
-      if (!tweet) res.status(500).json({ status: 'error', message: '找不到此推文' })
+      if (!tweet) res.status(404).json({ status: 'error', message: '找不到此推文!' })
 
       await tweet.destroy()
 
       return res.status(200).json({
         status: 'success',
-        message: '刪除推文成功',
+        message: '刪除推文成功!',
         tweet
       })
     } catch (error) {

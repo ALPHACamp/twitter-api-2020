@@ -9,13 +9,13 @@ const userController = {
   signIn: (req, res, next) => {
     try {
       if (req.user.error) {
-        return res.json(req.user.error)
+        return res.status(404).json(req.user.error)
       }
 
       if (req.user.role !== 'user') {
-        res.json({
+        return res.status(400).json({
           status: 'error',
-          message: '帳號或密碼錯誤'
+          message: '帳號或密碼錯誤!'
         })
       }
 
@@ -27,7 +27,7 @@ const userController = {
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
-      res.json({
+      return res.status(200).json({
         status: 'success',
         token,
         user: userData
@@ -41,11 +41,17 @@ const userController = {
       const { account, password, checkPassword, name, email } = req.body
 
       if (!account || !name || !email || !password || !checkPassword) {
-        throw new Error('欄位不可空白！')
+        return res.status(400).json({
+          status: 'error',
+          message: '欄位不可以空白!'
+        })
       }
 
       if (password !== checkPassword) {
-        throw new Error('密碼與確認密碼不相同！')
+        return res.status(400).json({
+          status: 'error',
+          message: '密碼與確認密碼不同!'
+        })
       }
 
       const userExist = await User.findAll({
@@ -58,7 +64,10 @@ const userController = {
       })
 
       if (userExist.length > 0) {
-        throw new Error('帳號或信箱已經有人使用了！')
+        return res.status(400).json({
+          status: 'error',
+          message: '帳號或信箱已有人使用了!'
+        })
       }
 
       const hash = await bcrypt.hash(password, 10)
@@ -71,7 +80,7 @@ const userController = {
       })
       const userData = user.toJSON()
       delete userData.password
-      return res.json({ status: 'success', user: userData })
+      return res.status(200).json({ status: 'success', user: userData })
     } catch (error) {
       next(error)
     }
@@ -106,7 +115,7 @@ const userController = {
         order: [[Sequelize.literal('followersCount'), 'DESC'], ['name', 'ASC']],
         limit
       })
-      res.json({ status: 'success', users })
+      return res.status(200).json({ status: 'success', users })
     } catch (error) {
       next(error)
     }
@@ -115,9 +124,9 @@ const userController = {
     try {
       const user = getUser(req)
       if (!user) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
-          message: '使用者不存在'
+          message: '使用者不存在!'
         })
       }
       const { id, account, name, email, avatar, frontCover, role } = user.toJSON()
@@ -150,7 +159,7 @@ const userController = {
 
       return res.status(200).json({
         status: 'success',
-        message: '成功取得User資料',
+        message: '成功取得使用者資料!',
         ...user,
         tweetsCount: user.Tweets.length,
         followingsCount: user.Followings.length,
@@ -165,9 +174,9 @@ const userController = {
       const userId = req.params.id
       const user = await User.findByPk(userId)
       if (!user) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
-          message: '使用者不存在'
+          message: '使用者不存在!'
         })
       }
       let likes = await Like.findAll({

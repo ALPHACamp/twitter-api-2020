@@ -6,7 +6,7 @@ const replyController = {
     try {
       const { comment } = req.body
       if (!comment) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
           message: '未找到推文!'
         })
@@ -18,7 +18,7 @@ const replyController = {
       const tweet = await Tweet.findByPk(tweetId)
 
       if (!user || !tweet) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
           message: '找不到推文或使用者!'
         })
@@ -45,7 +45,7 @@ const replyController = {
       const tweet = await Tweet.findByPk(TweetId)
 
       if (!tweet) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
           message: '找不到推文!'
         })

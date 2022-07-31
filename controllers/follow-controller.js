@@ -10,14 +10,14 @@ const followController = {
       const follower = await User.findByPk(followerId)
 
       if (followerId === followingId) {
-        return res.status(500).json({
+        return res.status(400).json({
           status: 'error',
           message: '使用者不能追蹤自己!'
         })
       }
 
       if (!follower || !following) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
           message: '找不到使用者!'
         })
@@ -28,7 +28,7 @@ const followController = {
       })
 
       if (followship) {
-        return res.status(500).json({
+        return res.status(400).json({
           status: 'error',
           message: '使用者已追蹤!'
         })
@@ -55,7 +55,7 @@ const followController = {
       const following = await User.findByPk(followingId)
 
       if (!follower || !following) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
           message: '找不到使用者!'
         })
@@ -66,7 +66,7 @@ const followController = {
       })
 
       if (!followship) {
-        return res.status(500).json({
+        return res.status(400).json({
           status: 'error',
           message: '使用者未追蹤!'
         })

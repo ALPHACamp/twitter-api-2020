@@ -9,7 +9,7 @@ const likeController = {
       const tweet = await Tweet.findByPk(tweetId)
       const user = await User.findByPk(userId)
       if (!tweet || !user) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
           message: '找不到推文或使用者'
         })
@@ -20,7 +20,7 @@ const likeController = {
       })
 
       if (like) {
-        return res.status(500).json({
+        return res.status(400).json({
           status: 'error',
           message: '已經喜歡過此推文'
         })
@@ -48,7 +48,7 @@ const likeController = {
       const user = await User.findByPk(userId)
 
       if (!tweet || !user) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
           message: '找不到推文或者使用者!'
         })
@@ -59,7 +59,7 @@ const likeController = {
       })
 
       if (!like) {
-        return res.status(500).json({
+        return res.status(400).json({
           status: 'error',
           message: '沒有喜歡此推文!'
         })
