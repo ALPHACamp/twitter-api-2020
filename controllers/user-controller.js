@@ -142,7 +142,7 @@ const userController = {
       })
       const likeTweetsIds = currentUserLikedList.map(like => like.TweetId)
       const tweetsIncludeIsLike = tweets.map(tweet => ({
-        ...tweet, isLike: likeTweetsIds.some(tweetId => tweetId === tweet.id)
+        ...tweet, isLiked: likeTweetsIds.some(tweetId => tweetId === tweet.id)
       }))
 
       res.status(200).json(tweetsIncludeIsLike)
