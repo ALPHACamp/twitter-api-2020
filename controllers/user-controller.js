@@ -121,8 +121,8 @@ const userController = {
       if (!name) throw new Error('name is required')
       if (name.length > 50) throw new Error('name length should be less than 50')
       if (introduction && introduction.length > 160) throw new Error('introduction length should be less than 160')
-      const avatarPath = req.files?.avatar ? await imgurFileHandler(avatar[0]) : userFind.avatar
-      const bannerPath = req.files?.banner ? await imgurFileHandler(banner[0]) : userFind.banner
+      const avatarPath = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : userFind.avatar
+      const bannerPath = req.files?.banner ? await imgurFileHandler(req.files.banner[0]) : userFind.banner
       const userUpdate = await userFind.update({
         name,
         introduction,
