@@ -185,8 +185,14 @@ paths:
       servers:
         - url: https://simple-twitter-paul.herokuapp.com/api
           variables: {}
-  /users/setting:
+  /users/{id}/setting:
     parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to edit. eg:14
     put:
       tags:
         - User
