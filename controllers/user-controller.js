@@ -68,7 +68,7 @@ const userController = {
       const data = await User.findByPk(id, {
         attributes: { exclude: ['password'] }
       })
-      if (!data) throw new Error("user doesn't exist!")
+      if (!data || data.role === 'admin') throw new Error("user doesn't exist!")
       res.json({
         status: 'success',
         message: '成功登入',
