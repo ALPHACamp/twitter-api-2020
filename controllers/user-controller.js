@@ -415,7 +415,6 @@ const userController = {
           name: user.name,
           account: user.account,
           avatar: user.avatar,
-          followersCounts: user.Followers.length,
           isFollowing: req.user.Followings.some(following => following.id === user.id)
         }))
       top10Users = top10Users.sort((a, b) => b.followersCounts - a.followersCounts).slice(0, 10)
