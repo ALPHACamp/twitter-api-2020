@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 
 const helpers = require('../_helpers')
-const { User, Followship, Tweet, Like } = require('../models')
+const { User, Followship, Tweet, Like, Reply } = require('../models')
 
 const userController = {
   signin: async (req, res, next) => {
@@ -156,6 +156,33 @@ const userController = {
       }))
 
       res.status(200).json(tweetsIncludeIsLike)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      // get the replies a certain user, and relating the tweet data of the reply
+      const id = req.params.id
+      const replies = await Reply.findAll({
+        where: { UserId: id },
+        attributes: ['id', 'comment', 'createdAt'],
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: ['id'],
+            include: [{
+              model: User, attributes: ['id', 'name', 'account']
+            }]
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      if (!replies.length) res.status(404).json({ status: 'error', message: 'Replies are not found.' })
+      res.status(200).json(replies)
     } catch (err) {
       next(err)
     }
