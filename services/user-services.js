@@ -163,8 +163,8 @@ const userServices = {
       await Promise.all(
         likedTweets.map(async like => {
           const TweetId = like.TweetId
-          const likeCount = await Like.count({ where: TweetId })
-          const replyCount = await Reply.count({ where: TweetId })
+          const likeCount = await Like.count({ where: { TweetId } })
+          const replyCount = await Reply.count({ where: { TweetId } })
           results.push({ ...like, Tweet: { ...like.Tweet, likeCount, replyCount } })
         })
       )
