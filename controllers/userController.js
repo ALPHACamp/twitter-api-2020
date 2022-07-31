@@ -39,8 +39,8 @@ const userController = {
             id: user.id,
             name: user.name,
             email: user.email,
-            account:user.account,
-            avatat: user.avatat,
+            account: user.account,
+            avatar: user.avatar,
             introduction: user.introduction,
             role: user.role
           }
@@ -78,6 +78,15 @@ const userController = {
   getUser: (req, res) => {
     User.findByPk(req.params.id)
       .then(user => {
+        user = {
+          account: user.account,
+          avatar: user.avatar,
+          id: user.id,
+          email: user.email,
+          introduction: user.introduction,
+          name: user.name,
+          role: user.role,
+        }
         return res.json(user)
       })
   },
@@ -124,14 +133,35 @@ const userController = {
       })
   },
   putUser: (req, res) => {
-    const { name, introduction } = req.body
+    const { name, introduction, email, account, checkPassword } = req.body
+    let { password } = req.body
+    if (password !== checkPassword) {
+      return res.json({ status: 'error', message: 'password, checkPassword 不一致' })
+    }
+    if (password) {
+      password = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+    } else {
+      password = ''
+    }
     User.findByPk(req.params.id)
       .then(user => {
         user.update({
-          name: name,
-          introduction: introduction,
+          name: name || user.name,
+          introduction: introduction || user.introduction,
+          email: email || user.email,
+          account: account || user.account,
+          password: password || user.password,
         })
           .then(user => {
+            user = {
+              account: user.account,
+              avatar: user.avatar,
+              id: user.id,
+              email: user.email,
+              introduction: user.introduction,
+              name: user.name,
+              role: user.role,
+            }
             return res.json(user)
           })
       })
