@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         as: 'Followings'
       })
       User.hasMany(models.Tweet, {
-        foreignKey: 'userId'
+        foreignKey: 'UserId'
       })
       User.hasMany(models.Like, {
         foreignKey: 'userId'

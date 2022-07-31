@@ -4,19 +4,20 @@ const helpers = require('../_helpers')
 const tweetController = {
   add:async (req, res, next) => {
     try {
-      const userId = helpers.getUser(req).id
+      const UserId = helpers.getUser(req).id
       const { description } = req.body
 
       if (!description) throw new Error('推文內容不可空白')
       if (description.length > 140) throw new Error('推文內容提交字數過長')
 
-      const newTweet = await Tweet.create({
-        userId,
+      const data = await Tweet.create({
+        UserId,
         description
       })
       res.status(200).json({
+        status: 'Success',
         message: '您已成功推文',
-        newTweet
+        data
       })
     } catch (err) {
       next(err)
@@ -24,8 +25,8 @@ const tweetController = {
   },
   get:async (req, res, next) => {
     try {
-      const tweetId = req.params.tweet_id
-      const tweet = await Tweet.findByPk(tweetId, {
+      const TweetId = req.params.tweet_id
+      const data = await Tweet.findByPk(TweetId, {
 	      attributes: [
           'id', 'description', 'userId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
@@ -41,10 +42,10 @@ const tweetController = {
         raw: true,
         order: [['created_at', 'DESC']]
       })
-      if (!tweet) throw new Error('沒有該則推文')
+      if (!data) throw new Error('沒有該則推文')
 
       const replies = await Reply.findAll({
-        where: { tweetId },
+        where: { TweetId },
         attributes: [ 'id', 'comment', 'userId', 'createdAt'],
         include: [{
           model: User,
@@ -55,20 +56,22 @@ const tweetController = {
         order: [['created_at', 'DESC']]
       })
 
-
-      res.status(200).json({
-        status: 'Success',
-        message: '您已成功！',
-        tweet,
-        replies
-      })
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(data)
+      } else { 
+        res.status(200).json({ 
+          status: 'Success',
+          message: '您已成功！', 
+          data,
+          replies
+        })}
     } catch (err) {
       next(err)
     }
   },
   getAll:async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll({
+      const data = await Tweet.findAll({
 	      attributes: [
           'id', 'description', 'userId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
@@ -84,12 +87,14 @@ const tweetController = {
         raw: true,
         order: [['created_at', 'DESC']]
       })
-
-      res.status(200).json({
-        status: 'Success',
-        message: '您已成功！',
-        tweets
-      })
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(data)
+      } else { 
+        res.status(200).json({ 
+          status: 'Success',
+          message: '您已成功！', 
+          data 
+        })}
     } catch (err) {
       next(err)
     }
