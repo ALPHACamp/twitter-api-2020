@@ -55,7 +55,6 @@ const adminController = {
 
       res.status(200).json(usersApiData)
     } catch (error) {
-      console.error(error)
       next(error)
     }
   },
