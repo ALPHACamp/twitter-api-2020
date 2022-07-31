@@ -1,8 +1,7 @@
 const jwt = require('jsonwebtoken')
 const db = require('../models')
-const { User, Tweet, Like } = db
+const { User, Tweet, sequelize } = db
 const helpers = require('../_helpers')
-const sequelize = require('sequelize')
 const { Op } = require("sequelize")
 
 const adminController = {
@@ -25,8 +24,8 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      const users = await User.findAll({
-        where: { [Op.not]: [{ role: 'admin' }] },
+      const data = await User.findAll({
+        // where: { [Op.not]: [{ role: 'admin' }] },
         attributes: [
           'id', 'account', 'name', 'email', 'avatar',
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'TweetsCount'],
@@ -38,11 +37,15 @@ const adminController = {
         raw: true,
         nest: true
       })
-      res.json({
-        status: 'success',
-        message: '成功取得所有使用者資料',
-        data: users
-      })
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(data)
+      } else {
+        res.status(200).json({
+          status: 'Success',
+          message: '您已成功',
+          data
+        })
+      }
     } catch (err) {
       next(err)
     }
