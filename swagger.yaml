@@ -965,7 +965,7 @@ paths:
       servers:
         - url: https://simple-twitter-paul.herokuapp.com/api
           variables: {}
-  /signin:
+  /users:
     post:
       tags:
         - Auth
@@ -1081,4 +1081,3 @@ tags:
   - name: Followship
   - name: Auth
     description: ''
-    
