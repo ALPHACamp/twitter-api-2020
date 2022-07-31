@@ -27,17 +27,17 @@ const userController = {
   },
   signUp: async (req, res, next) => {
     try {
-      if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
+      if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match')
       if (req.body.name && req.body.name.length > 50) throw new Error('名稱不可超過５０字')
       const foundEmail = await User.findOne({ where: { email: req.body.email } })
       const foundAccount = await User.findOne({ where: { account: req.body.account } })
       // !有餘力再來優化程式
       let errorMessage = []
       if (foundEmail) {
-        errorMessage += 'email 已重複註冊！'
+        errorMessage += 'email已重複註冊'
       }
       if (foundAccount) {
-        errorMessage += 'account 已重複註冊！'
+        errorMessage += 'account已重複註冊'
       }
       if (errorMessage.length > 0) {
         throw new Error(errorMessage)
@@ -75,7 +75,7 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!user || user.role === 'admin') throw new Error("user doesn't exist!")
+      if (!user || user.role === 'admin') throw new Error("user doesn't exist")
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(user)
       } else {
@@ -95,8 +95,8 @@ const userController = {
     const avatarImg = req.files.avatar ? req.files.avatar : []
     const coverImg = req.files.cover ? req.files.cover : []
     try {
-      if (Number(currentUserId) !== Number(id)) throw new Error('無法修改其他使用者之資料!')
-      if (!account || !name || !email || !password || !checkPassword) throw new Error('必填欄位不可空白!')
+      if (Number(currentUserId) !== Number(id)) throw new Error('無法修改其他使用者之資料')
+      if (!account || !name || !email || !password || !checkPassword) throw new Error('必填欄位不可空白')
       if (password !== checkPassword) throw new Error('Passwords do not match!')
       const user = await User.findByPk(id)
       if (!user || user.role === 'admin') throw new Error("user doesn't exist!")
@@ -104,10 +104,10 @@ const userController = {
       const foundAccount = await User.findOne({ where: { account, [Op.not]: [{ id }] } })
       let errorMessage = []
       if (foundEmail) {
-        errorMessage += 'email 已重複註冊！'
+        errorMessage += 'email已重複註冊'
       }
       if (foundAccount) {
-        errorMessage += 'account 已重複註冊！'
+        errorMessage += 'account已重複註冊'
       }
       if (errorMessage.length > 0) {
         throw new Error(errorMessage)
