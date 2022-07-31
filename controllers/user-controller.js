@@ -163,7 +163,22 @@ const userController = {
   },
   getUserReplies: async (req, res, next) => {
     try {
-
+      const user = User.findByPk(req.params.id)
+      if (!user) throw new Error('user not exist')
+      const replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [{ model: Tweet, include: User }] 
+      })
+      const repliesSort = replies
+        .map(reply => {
+          const { Tweet, ...restProps } = {
+            ...reply.toJSON(),
+            replyUserAccount: reply.Tweet.User.account
+          }
+          return restProps
+        })
+        .sort((a, b) => b.createAt - a.createAt)
+      res.json(repliesSort)
     } catch (err) {
       next(err)
     }
