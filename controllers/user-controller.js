@@ -140,7 +140,7 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
-      const user = User.findByPk(req.params.id)
+      const user = await User.findByPk(req.params.id)
       if (!user) throw new Error('user not exist')
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
@@ -163,7 +163,7 @@ const userController = {
   },
   getUserReplies: async (req, res, next) => {
     try {
-      const user = User.findByPk(req.params.id)
+      const user = await User.findByPk(req.params.id)
       if (!user) throw new Error('user not exist')
       const replies = await Reply.findAll({
         where: { UserId: req.params.id },
@@ -185,7 +185,7 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
-      const user = User.findByPk(req.params.id)
+      const user = await User.findByPk(req.params.id)
       if (!user) throw new Error('user not exist')
       const likes = await Like.findAll({
         where: { UserId: req.params.id },
