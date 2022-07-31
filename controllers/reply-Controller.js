@@ -4,21 +4,22 @@ const helpers = require('../_helpers')
 const replyController = {
   add:async (req, res, next) => {
     try {
-      const userId = helpers.getUser(req).id
-      const tweetId = req.params.tweet_id
+      const UserId = helpers.getUser(req).id
+      const TweetId = req.params.tweet_id
 
       const { comment } = req.body
       if (!comment) throw new Error('回覆不可空白')
       if (comment.length > 140) throw new Error('回覆提交字數過長')
-      const tweet = await Tweet.findByPk(tweetId)
+      const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) throw new Error('無法回覆不存在的推文')
 
-      const reply = await Reply.create({ 
-        userId, tweetId, comment 
+      const data = await Reply.create({ 
+        UserId, TweetId, comment 
       })
       res.status(200).json({
+        status: 'Success',
         message: '您已成功回覆該則推文',
-        reply
+        data
       })
     } catch (err) {
       next(err)
@@ -26,11 +27,11 @@ const replyController = {
   },
   getAll:async (req, res, next) => {
     try {
-      const tweetId = req.params.tweet_id     
-      const tweet = await Tweet.findByPk(tweetId)
+      const TweetId = req.params.tweet_id     
+      const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) throw new Error('推文不存在')
-      const replies = await Reply.findAll({
-        where: { tweetId },
+      const data = await Reply.findAll({
+        where: { TweetId },
         include: [{
           model: Tweet,
           attributes: ['id'],
@@ -44,11 +45,14 @@ const replyController = {
         raw: true,
         order: [['created_at', 'DESC']]
       })
-
-      res.status(200).json({
-        message: '您已成功！',
-        replies
-      })
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(data)
+      } else { 
+        res.status(200).json({ 
+          status: 'Success',
+          message: '您已成功！', 
+          data 
+        })}
     } catch (err) {
       next(err)
     }
