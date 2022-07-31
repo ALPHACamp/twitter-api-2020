@@ -18,9 +18,9 @@ const tweetController = {
         order: [['createdAt', 'DESC']]
       })
       if (!tweets) {
-        return res.status(400).json({
+        return res.status(404).json({
           status: 'error',
-          message: 'Tweet不存在'
+          message: 'Tweet不存在!'
         })
       }
 
@@ -51,19 +51,19 @@ const tweetController = {
       const { description } = req.body
 
       if (!UserId) {
-        res.status(500).json({
+        res.status(404).json({
           status: 'error',
           message: '偵測不到當前使用者!'
         })
       }
       if (description.length > 140) {
-        res.status(500).json({
+        res.status(400).json({
           status: 'error',
           message: '字數不可以超過140字!'
         })
       }
       if (!description.trim()) {
-        res.status(500).json({
+        res.status(400).json({
           status: 'error',
           message: '推文內容不可以空白!'
         })
@@ -101,7 +101,7 @@ const tweetController = {
         order: [['createdAt', 'DESC']]
       })
       if (!tweet) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
           message: '找不到此推特!'
         })

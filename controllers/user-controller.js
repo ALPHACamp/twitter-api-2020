@@ -41,11 +41,17 @@ const userController = {
       const { account, password, checkPassword, name, email } = req.body
 
       if (!account || !name || !email || !password || !checkPassword) {
-        throw new Error('欄位不可空白！')
+        return res.status(400).json({
+          status: 'error',
+          message: '欄位不可以空白!'
+        })
       }
 
       if (password !== checkPassword) {
-        throw new Error('密碼與確認密碼不相同！')
+        return res.status(400).json({
+          status: 'error',
+          message: '密碼與確認密碼不同!'
+        })
       }
 
       const userExist = await User.findAll({
@@ -58,7 +64,10 @@ const userController = {
       })
 
       if (userExist.length > 0) {
-        throw new Error('帳號或信箱已經有人使用了！')
+        return res.status(400).json({
+          status: 'error',
+          message: '帳號或信箱已有人使用了!'
+        })
       }
 
       const hash = await bcrypt.hash(password, 10)
@@ -115,7 +124,7 @@ const userController = {
     try {
       const user = getUser(req)
       if (!user) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
           message: '使用者不存在'
         })
@@ -165,7 +174,7 @@ const userController = {
       const userId = req.params.id
       const user = await User.findByPk(userId)
       if (!user) {
-        return res.status(500).json({
+        return res.status(404).json({
           status: 'error',
           message: '使用者不存在'
         })
