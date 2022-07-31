@@ -51,6 +51,7 @@ const userServices = {
           id: user.dataValues.id,
           account: user.dataValues.account,
           name: user.dataValues.name,
+          avatar: user.dataValues.avatar,
           followerCount: user.Followers.length
         })
       })
