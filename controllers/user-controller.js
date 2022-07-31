@@ -1,9 +1,9 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 
 const helpers = require('../_helpers')
-const { User, Followship } = require('../models')
-const { Op } = require('sequelize')
+const { User, Followship, Tweet, Like } = require('../models')
 
 const userController = {
   signin: async (req, res, next) => {
@@ -108,6 +108,44 @@ const userController = {
       })
       if (!user) return res.status(404).json({ status: 'error', message: 'User is not found' })
       return res.status(200).json(user)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      // get the tweets of a certain user (req.params.id === userId)
+      const id = req.params.id
+      const tweets = await Tweet.findAll({
+        where: { UserId: id },
+        attributes: [
+          'id', 'description', 'createdAt',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'
+          ]
+        ],
+        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      if (!tweets) return res.status(404).json({ status: 'error', message: 'Tweets are not found.' })
+
+      // check if the current user likes the tweets or not (add attribute "isLike" in tweets)
+      const currentUserId = helpers.getUser(req).id
+      const currentUserLikedList = await Like.findAll({
+        where: { UserId: currentUserId },
+        raw: true
+      })
+      const likeTweetsIds = currentUserLikedList.map(like => like.TweetId)
+      const tweetsIncludeIsLike = tweets.map(tweet => ({
+        ...tweet, isLiked: likeTweetsIds.some(tweetId => tweetId === tweet.id)
+      }))
+
+      res.status(200).json(tweetsIncludeIsLike)
     } catch (err) {
       next(err)
     }
