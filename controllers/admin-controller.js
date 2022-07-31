@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { Sequelize } = require('sequelize')
 
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -70,6 +70,24 @@ const adminController = {
         order: [[Sequelize.literal('tweetsCount'), 'DESC'], ['name', 'ASC']]
       })
       res.status(200).json(users)
+    } catch (error) {
+      next(error)
+    }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweetId = Number(req.params.id)
+      const tweet = await Tweet.findByPk(tweetId)
+
+      if (!tweet) res.status(500).json({ status: 'error', message: '找不到此推文' })
+
+      await tweet.destroy()
+
+      return res.status(200).json({
+        status: 'success',
+        message: '刪除推文成功',
+        tweet
+      })
     } catch (error) {
       next(error)
     }
