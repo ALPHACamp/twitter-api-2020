@@ -2,11 +2,10 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../models')
 const { User } = db
-const userServices = require('../services/user-services')
 const helpers = require('../_helpers')
+const sequelize = require('sequelize')
 const { Op } = require("sequelize")
 const { imgurFileHandler } = require('../helpers/file-helpers')
-
 
 const userController = {
   signIn: (req, res, next) => {
@@ -44,7 +43,7 @@ const userController = {
         throw new Error(errorMessage)
       }
       const hash = await bcrypt.hash(req.body.password, 10)
-      const data = await User.create({
+      const user = await User.create({
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
@@ -56,7 +55,7 @@ const userController = {
       res.json({
         status: 'success',
         message: '成功註冊',
-        data
+        data: user
       })
     } catch (err) {
       next(err)
@@ -65,14 +64,22 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const id = req.params.id
-      const data = await User.findByPk(id, {
-        attributes: { exclude: ['password'] }
+      const user = await User.findByPk(id, {
+        attributes: [
+          'id', 'account', 'name', 'email', 'avatar', 'cover',
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'TweetsCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE user_id = User.id)'), 'LikesCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'FollowingCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'FollowerCount']
+        ],
+        raw: true,
+        nest: true
       })
-      if (!data || data.role === 'admin') throw new Error("user doesn't exist!")
+      if (!user || user.role === 'admin') throw new Error("user doesn't exist!")
       res.json({
         status: 'success',
-        message: '成功登入',
-        data
+        message: '成功取得使用者資料',
+        data: user
       })
     } catch (err) {
       next(err)
@@ -104,7 +111,7 @@ const userController = {
       const newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
       const avatarFile = await imgurFileHandler(...avatarImg)
       const coverFile = await imgurFileHandler(...coverImg)
-      const data = await user.update({
+      const updatedUser = await user.update({
         account, name, email, introduction,
         password: newPassword,
         avatar: avatarFile || user.avatar,
@@ -112,8 +119,8 @@ const userController = {
       })
       res.json({
         status: 'success',
-        message: '成功登入',
-        data
+        message: '成功編輯使用者資料',
+        data: updatedUser
       })
     } catch (err) {
       next(err)
