@@ -11,17 +11,18 @@ const followshipController = {
         attributes: { exclude: [ 'password' ] }
       })
 
-      if (followerId === followingId) throw new Error('無法追蹤自己！')
-      if (!following || following.role === 'admin') throw new Error('追蹤者不存在！')
+      if (followerId === followingId) throw new Error('無法追蹤自己')
+      if (!following || following.role === 'admin') throw new Error('追蹤者不存在')
 
       const [followshiped, created] = await Followship.findOrCreate({
         where: { followerId,followingId }
       })
-      if (!created) throw new Error('你已經追蹤該名使用者!')
+      if (!created) throw new Error('你已經追蹤該名使用者')
 
       res.status(200).json({
+        status: 'Success',
         message: '已成功追蹤該名使用者。',
-        followshiped
+        data: followshiped
       })
     } catch (err) {
       next(err)
@@ -40,15 +41,16 @@ const followshipController = {
         where: { followerId,followingId }
       })
 
-      if (!following || following.role === 'admin') throw new Error("無法取消追蹤不存在的使用者！")
-      if (!deleteFollowship) throw new Error("你尚未追蹤該使用者！")
+      if (!following || following.role === 'admin') throw new Error("無法取消追蹤不存在的使用者")
+      if (!deleteFollowship) throw new Error("你尚未追蹤該使用者")
       await Followship.destroy({
         where: { followerId, followingId }
       })
       
       res.status(200).json({
-        message: '已成功取消追蹤該使用者。',
-        deleteFollowingUser: followingId
+        status: 'Success',
+        message: '已成功取消追蹤該使用者',
+        data: followingId
       })
     } catch (err) {
       next(err)

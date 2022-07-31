@@ -15,8 +15,9 @@ const likeController = {
       if (!created) throw new Error('您已喜歡過該則推文')
 
       res.status(200).json({
+        status: 'Success',
         message: '您已成功喜歡該則推文',
-        liked
+        data: liked
       })
     } catch (err) {
       next(err)
@@ -35,8 +36,9 @@ const likeController = {
       if (!liked) throw new Error('您未喜歡過該則推文')
 
       res.status(200).json({
+        status: 'Success',
         message: '您已成功取消喜歡該則推文',
-        deletedTweet: tweet.toJSON(), 
+        data: tweet.toJSON()
       })
     } catch (err) {
       next(err)
