@@ -102,9 +102,19 @@ const userController = {
     try {
       const id = req.params.id
       const user = await User.findByPk(id, {
-        raw: true,
-        nest: true,
-        attributes: { exclude: ['password'] }
+        attributes: [
+          'id', 'name', 'account', 'email', 'avatar', 'cover', 'introduction', 'role',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'
+          ]
+        ],
+        raw: true
       })
       if (!user) return res.status(404).json({ status: 'error', message: 'User is not found' })
       return res.status(200).json(user)
