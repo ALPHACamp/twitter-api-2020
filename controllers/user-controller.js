@@ -233,14 +233,15 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id, {
         include: [
-          { model: User, as: 'Followers' }
+          { model: User, as: 'Followers', include: { model: User, as: 'Followers' } }
         ]
       })
       if (!user) throw new Error('user not exist')
       const followerSort = user.Followers
-        .map(user => {
-          const { id, email, password, banner, ...restProps } = user.toJSON()
-          restProps.followerId = user.id
+        .map(follower => {
+          const { id, email, password, banner, ...restProps } = follower.toJSON()
+          restProps.isFollowing = follower.Followers.some(one => one.id === req.params.id)
+          restProps.followerId = follower.id
           return restProps
         })
         .sort((a, b) => b.createAt - a.createAt)
