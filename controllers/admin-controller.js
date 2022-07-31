@@ -7,7 +7,7 @@ const adminController = {
   signIn: (req, res, next) => {
     try {
       if (req.user.error) {
-        return res.json(req.user.error)
+        return res.status(400).json(req.user.error)
       }
 
       if (req.user.role !== 'admin') {

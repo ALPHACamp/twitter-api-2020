@@ -47,7 +47,7 @@ const tweetController = {
   },
   postTweet: async (req, res, next) => {
     try {
-      const UserId = helpers.getUser(req)?.id
+      const UserId = helpers.getUser(req).id
       const { description } = req.body
 
       if (!UserId) {

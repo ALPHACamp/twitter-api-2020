@@ -9,13 +9,13 @@ const userController = {
   signIn: (req, res, next) => {
     try {
       if (req.user.error) {
-        return res.json(req.user.error)
+        return res.status(404).json(req.user.error)
       }
 
       if (req.user.role !== 'user') {
-        res.json({
+        return res.status(400).json({
           status: 'error',
-          message: '帳號或密碼錯誤'
+          message: '帳號或密碼錯誤!'
         })
       }
 
@@ -27,7 +27,7 @@ const userController = {
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
-      res.json({
+      return res.status(200).json({
         status: 'success',
         token,
         user: userData
@@ -80,7 +80,7 @@ const userController = {
       })
       const userData = user.toJSON()
       delete userData.password
-      return res.json({ status: 'success', user: userData })
+      return res.status(200).json({ status: 'success', user: userData })
     } catch (error) {
       next(error)
     }
@@ -115,7 +115,7 @@ const userController = {
         order: [[Sequelize.literal('followersCount'), 'DESC'], ['name', 'ASC']],
         limit
       })
-      res.json({ status: 'success', users })
+      return res.status(200).json({ status: 'success', users })
     } catch (error) {
       next(error)
     }
@@ -126,7 +126,7 @@ const userController = {
       if (!user) {
         return res.status(404).json({
           status: 'error',
-          message: '使用者不存在'
+          message: '使用者不存在!'
         })
       }
       const { id, account, name, email, avatar, frontCover, role } = user.toJSON()
@@ -159,7 +159,7 @@ const userController = {
 
       return res.status(200).json({
         status: 'success',
-        message: '成功取得User資料',
+        message: '成功取得使用者資料!',
         ...user,
         tweetsCount: user.Tweets.length,
         followingsCount: user.Followings.length,
@@ -176,7 +176,7 @@ const userController = {
       if (!user) {
         return res.status(404).json({
           status: 'error',
-          message: '使用者不存在'
+          message: '使用者不存在!'
         })
       }
       let likes = await Like.findAll({
