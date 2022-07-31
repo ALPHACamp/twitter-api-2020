@@ -147,7 +147,8 @@ const userController = {
           ['createdAt', 'DESC']
         ],
         include: [
-          { model: Tweet,
+          {
+            model: Tweet,
             include: [User, Like, Reply]
           }
         ]
