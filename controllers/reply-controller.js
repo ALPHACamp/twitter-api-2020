@@ -39,7 +39,7 @@ const replyController = {
       next(err)
     }
   },
-  getReply: async (req, res, next) => {
+  getReplies: async (req, res, next) => {
     try {
       const TweetId = Number(req.params.tweet_id)
       const tweet = await Tweet.findByPk(TweetId)
