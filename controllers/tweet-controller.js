@@ -97,7 +97,6 @@ const tweetController = {
   getReplies: async (req, res, next) => {
     try {
       const tweetId = req.params.id
-      const userId = Number(helpers.getUser(req).id)
       const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) {
         return res.status(StatusCodes.NOT_FOUND).json({
@@ -106,14 +105,14 @@ const tweetController = {
         })
       }
       const replies = await Reply.findAll({
-        where: { UserId: userId },
+        where: { TweetId: tweetId },
         attributes: { exclude: ['updatedAt'] },
         include: [
           { model: User, attributes: ['account'] },
           {
             model: Tweet,
             attributes: { exclude: ['updatedAt'] },
-            include: [{ model: User, attributes: ['id', 'account', 'email', 'name', 'avatar'] }]
+            include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
           }
         ],
         order: [[Tweet, 'createdAt', 'DESC']]
