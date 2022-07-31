@@ -52,12 +52,16 @@ paths:
           content:
             application/json:
               example:
-                - id:
-                  idOfUser:
-                  avatarOdUser:
-                  account:
-                  description:
-                  createdAt:
+                - id: null
+                  UserId: null
+                  description: null
+                  createdAt: null
+                  updatedAt: null
+                  User: null
+                  Replies: null
+                  Likes: null
+                  repliedCounts: null
+                  likesCounts: null
       deprecated: false
       security:
         - bearer: []
@@ -1077,3 +1081,4 @@ tags:
   - name: Followship
   - name: Auth
     description: ''
+    

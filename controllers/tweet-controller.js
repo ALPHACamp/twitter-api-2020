@@ -6,10 +6,11 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       let tweets = await Tweet.findAll({
+        attributes: { exclude: ['updatedAt'] },
         include: [
-          { model: User },
-          { model: Like },
-          { model: Reply }
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          { model: Like, attributes: ['id'] },
+          { model: Reply, attributes: ['id'] }
         ],
         order: [['createdAt', 'DESC']]
       })
@@ -21,12 +22,15 @@ const tweetController = {
       }
       tweets = await tweets.map(tweet => tweet.toJSON())
       tweets = tweets.map(tweet => {
-        delete tweet.User.password
+        const repliedCounts = tweet.Replies.length
+        const likesCounts = tweet.Likes.length
+        delete tweet.Replies
+        delete tweet.Likes
         return {
           ...tweet,
           description: tweet.description,
-          repliedCounts: tweet.Replies.length,
-          likesCounts: tweet.Likes.length,
+          repliedCounts,
+          likesCounts,
           isBeingLiked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
         }
       })
@@ -103,8 +107,14 @@ const tweetController = {
       }
       const replies = await Reply.findAll({
         where: { UserId: userId },
+        attributes: { exclude: ['updatedAt'] },
         include: [
-          { model: Tweet, include: User }
+          { model: User, attributes: ['account'] },
+          {
+            model: Tweet,
+            attributes: { exclude: ['updatedAt'] },
+            include: [{ model: User, attributes: ['id', 'account', 'email', 'name', 'avatar'] }]
+          }
         ],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
