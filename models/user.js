@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId'
       })
       User.hasMany(models.Reply, {
-        foreignKey: 'userId'
+        foreignKey: 'UserId'
       })
     }
   }

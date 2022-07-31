@@ -46,8 +46,8 @@ describe('# reply requests', () => {
             // 檢查是否有成功新增留言
             db.Reply.findByPk(1).then(reply => {
               reply.comment.should.equal('comment');
-              reply.UserId.should.equal(1);
-              reply.TweetId.should.equal(1);
+              reply.userId.should.equal(1);
+              reply.tweetId.should.equal(1);
               return done();
             })
           })
@@ -89,7 +89,7 @@ describe('# reply requests', () => {
         // 在測試資料庫中，新增 mock 資料
         await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
         await db.Tweet.create({UserId: 1, description: 'User1 的 Tweet1'})
-        await db.Reply.create({UserId: 1, TweetId: 1, comment: 'Tweet1 的 comment'})
+        await db.Reply.create({userId: 1, tweetId: 1, comment: 'Tweet1 的 comment'})
       })
 
       // 瀏覽 GET /tweets/:tweet_id/replies
