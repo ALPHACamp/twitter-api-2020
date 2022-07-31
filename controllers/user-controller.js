@@ -210,6 +210,33 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followings' }
+        ]
+      })
+      if (!user) throw new Error('user not exist')
+      const followingSort = user.Followings
+        .map(user => {
+          const { id, email, password, banner, ...restProps } = user.toJSON()
+          restProps.followingId = user.id
+          return restProps
+        })
+        .sort((a, b) => b.createAt - a.createAt)
+      res.json(followingSort)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
