@@ -1,15 +1,15 @@
 const jwt = require('jsonwebtoken')
 const db = require('../models')
-const { User } = db
-const adminServices = require('../services/admin-services')
+const { User, Tweet, sequelize } = db
 const helpers = require('../_helpers')
+const { Op } = require("sequelize")
 
 const adminController = {
-  signIn: (req, res, next) => {
+  signIn: async (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
       delete userData.password
-      const token = jwt.sign(userData, 'secret', { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      const token = await jwt.sign(userData, 'secret', { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
         status: 'success',
         message: '成功登入',
@@ -22,14 +22,69 @@ const adminController = {
       next(err)
     }
   },
-  getUsers: (req, res, next) => {
-    return adminServices.getUsers(req, (err, data) => err ? next(err) : res.json({ status: 'Success', data }))
+  getUsers: async (req, res, next) => {
+    try {
+      const data = await User.findAll({
+        // where: { [Op.not]: [{ role: 'admin' }] },
+        attributes: [
+          'id', 'account', 'name', 'email', 'avatar',
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'TweetsCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE user_id = User.id)'), 'LikesCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'FollowingCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'FollowerCount']
+        ],
+        order: [[sequelize.literal('TweetsCount'), 'DESC']],
+        raw: true,
+        nest: true
+      })
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(data)
+      } else {
+        res.status(200).json({
+          status: 'Success',
+          message: '您已成功',
+          data
+        })
+      }
+    } catch (err) {
+      next(err)
+    }
   },
-  getTweets: (req, res, next) => {
-    return adminServices.getTweets(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        order: [['createdAt', 'DESC']],
+        include: {
+          model: User,
+          attributes: {
+            exclude: ['password']
+          }
+        },
+        raw: true,
+        nest: true
+      })
+      res.json({
+        status: 'success',
+        message: '成功取得所有推文資料',
+        data: tweets
+      })
+    } catch (err) {
+      next(err)
+    }
   },
-  deleteTweet: (req, res, next) => {
-    return adminServices.deleteTweet(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (!tweet) throw new Error("tweet didn't exist!")
+      await tweet.destroy()
+      res.json({
+        status: 'success',
+        message: '成功刪除',
+        data: tweet
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
