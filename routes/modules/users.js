@@ -5,6 +5,7 @@ const userController = require('../../controllers/user-controller')
 
 router.get('/:id/likes', userController.getUserLikes)
 router.get('/currentUser', userController.getCurrentUser)
+router.get('/:id', userController.getUser)
 router.get('/', userController.getUsers)
 
 module.exports = router
