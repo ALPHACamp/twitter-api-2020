@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
@@ -134,6 +134,79 @@ const userController = {
         status: 'success',
         data: { user }
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) throw new Error('user not exist')
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        include: [Reply, Like] 
+      })
+      const tweetsSort = tweets
+        .map(tweet => {
+          const { Replies, Likes, ...restProps } = {
+            ...tweet.toJSON(),
+            replyCounts: tweet.Replies.length,
+            likeCounts: tweet.Likes.length
+          }
+          return restProps
+        })
+        .sort((a, b) => b.createAt - a.createAt)
+      res.json(tweetsSort)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) throw new Error('user not exist')
+      const replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [{ model: Tweet, include: User }] 
+      })
+      const repliesSort = replies
+        .map(reply => {
+          const { Tweet, ...restProps } = {
+            ...reply.toJSON(),
+            replyUserAccount: reply.Tweet.User.account
+          }
+          return restProps
+        })
+        .sort((a, b) => b.createAt - a.createAt)
+      res.json(repliesSort)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) throw new Error('user not exist')
+      const likes = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [{ model: Tweet, include: [User, Reply, Like] }] 
+      })
+      const likesSort = likes
+        .map(like => {
+          const {User, Replies, Likes, ...restProps } = {
+            ...like.Tweet.toJSON(),
+            replyUserAccount: like.Tweet.User.account,
+            replyCounts: like.Tweet.Replies.length,
+            likeCounts: like.Tweet.Likes.length
+          }
+          const likeReturn = {
+            ...like.toJSON(),
+            Tweet: restProps
+          }
+          return likeReturn
+        })
+        .sort((a, b) => b.createAt - a.createAt)
+      res.json(likesSort)
     } catch (err) {
       next(err)
     }
