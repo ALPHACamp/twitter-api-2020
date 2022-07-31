@@ -42,7 +42,7 @@ const adminController = {
       } else {
         res.status(200).json({
           status: 'Success',
-          message: '您已成功',
+          message: '成功取得所有使用者之資料',
           data
         })
       }
@@ -75,7 +75,7 @@ const adminController = {
   deleteTweet: async (req, res, next) => {
     try {
       const tweet = await Tweet.findByPk(req.params.id)
-      if (!tweet) throw new Error("tweet didn't exist!")
+      if (!tweet) throw new Error("這篇推文不存在")
       await tweet.destroy()
       res.json({
         status: 'success',
