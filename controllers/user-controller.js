@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
@@ -134,6 +134,36 @@ const userController = {
         status: 'success',
         data: { user }
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const user = User.findByPk(req.params.id)
+      if (!user) throw new Error('user not exist')
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        include: [Reply, Like] 
+      })
+      const tweetsSort = tweets
+        .map(tweet => {
+          const { Replies, Likes, ...restProps } = {
+            ...tweet.toJSON(),
+            replyCounts: tweet.Replies.length,
+            likeCounts: tweet.Likes.length
+          }
+          return restProps
+        })
+        .sort((a, b) => b.createAt - a.createAt)
+      res.json(tweetsSort)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+
     } catch (err) {
       next(err)
     }
