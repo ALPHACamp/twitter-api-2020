@@ -70,6 +70,13 @@ const userController = {
         })
       }
 
+      if (name.length > 50) {
+        return res.status(400).json({
+          status: 'error',
+          message: '使用者名字不可超過50字!'
+        })
+      }
+
       const hash = await bcrypt.hash(password, 10)
       const user = await User.create({
         name,
