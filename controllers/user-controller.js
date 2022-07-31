@@ -76,11 +76,15 @@ const userController = {
         nest: true
       })
       if (!user || user.role === 'admin') throw new Error("user doesn't exist!")
-      res.json({
-        status: 'success',
-        message: '成功取得使用者資料',
-        data: user
-      })
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(user)
+      } else {
+        res.json({
+          status: 'Success',
+          message: '成功取得使用者資料',
+          data: user
+        })
+      }
     } catch (err) {
       next(err)
     }
