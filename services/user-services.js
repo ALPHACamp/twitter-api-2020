@@ -229,20 +229,56 @@ const userServices = {
   },
   getUserFollowings: async (req, cb) => {
     try {
-      const followings = await Followship.findAll(
-        { where: { followerId: req.params.id } }
+      const userId = req.params.id
+      const user = await User.findByPk(userId,
+        {
+          include: [{
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'avatar', 'account', 'name', 'introduction']
+          }]
+        }
       )
-      return cb(null, followings)
+
+      const results = user.Followings.map(following => {
+        const f = following.toJSON()
+        return {
+          followingId: f.id,
+          avatar: f.avatar,
+          account: f.account,
+          name: f.name,
+          introduction: f.introduction
+        }
+      })
+      return cb(null, results)
     } catch (err) {
       return cb(err)
     }
   },
   getUserFollowers: async (req, cb) => {
     try {
-      const followers = await Followship.findAll(
-        { where: { followingId: req.params.id } }
+      const userId = req.params.id
+      const user = await User.findByPk(userId,
+        {
+          include: [{
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'avatar', 'account', 'name', 'introduction']
+          }]
+        }
       )
-      return cb(null, followers)
+
+      const results = user.Followers.map(follower => {
+        const f = follower.toJSON()
+        return {
+          followerId: f.id,
+          avatar: f.avatar,
+          account: f.account,
+          name: f.name,
+          introduction: f.introduction
+        }
+      })
+      return cb(null, results)
     } catch (err) {
       return cb(err)
     }
