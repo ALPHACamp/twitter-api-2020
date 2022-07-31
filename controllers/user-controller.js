@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const { Sequelize, Op } = require('sequelize')
 const { getUser } = require('../_helpers')
 
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -158,6 +158,50 @@ const userController = {
       })
     } catch (error) {
       next(error)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(500).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      let likes = await Like.findAll({
+        where: { UserId: userId },
+        order: [
+          ['createdAt', 'DESC']
+        ],
+        include: [
+          {
+            model: Tweet,
+            include: [User, Like, Reply]
+          }
+        ]
+      })
+
+      likes = await likes.map(like => like.toJSON())
+      likes = likes.map(like => {
+        const likedTweet = like.Tweet
+        return {
+          likeCreatedAt: like.createdAt, // Like創建時間
+          TweetId: likedTweet.id, // 喜歡推文 id
+          description: likedTweet.description, // 喜歡推文內容
+          createdAt: likedTweet.createdAt, // 喜歡推文創建時間
+          userOfLikedTweet: likedTweet.User.id, // 喜歡推文的使用者id
+          userNameOfLikedTweet: likedTweet.User.name, // 喜歡推文的使用者名子
+          userAccountOfLikedTweet: likedTweet.User.account, // 喜歡推文的使用者帳戶名子
+          userAvatarOfLikedTweet: likedTweet.User.avatar, // 喜歡推文的使用者avatar
+          repliedCount: likedTweet.Replies.length, // 喜歡推文的回應數量
+          likesCount: likedTweet.Likes.length // 喜歡推文的喜歡數量
+        }
+      })
+      return res.status(200).json(likes)
+    } catch (err) {
+      next(err)
     }
   }
 }
