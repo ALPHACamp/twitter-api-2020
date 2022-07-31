@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const { Sequelize, Op } = require('sequelize')
 const { getUser } = require('../_helpers')
 
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -126,6 +126,35 @@ const userController = {
       }
       res.status(200).json({
         user: userData
+      })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      let user = await User.findByPk(userId, {
+        include: [
+          { model: Tweet },
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ]
+      })
+
+      if (!user || user.role === 'admin') res.status(404).json({ status: 'error', message: '找不到使用者' })
+
+      user = await user.toJSON()
+      const isFollowed = user.Followers.some(followers => followers.id === req.user.id)
+      delete user.password
+
+      return res.status(200).json({
+        status: 'success',
+        message: '成功取得User資料',
+        ...user,
+        tweetsCount: user.Tweets.length,
+        followingsCount: user.Followings.length,
+        isFollowed
       })
     } catch (error) {
       next(error)
