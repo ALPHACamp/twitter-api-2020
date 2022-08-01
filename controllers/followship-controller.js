@@ -31,6 +31,8 @@ const followshipController = {
       const theSignInUser = helpers.getUser(req)
       const { id } = req.body
 
+      if (theSignInUser.id === id) throw new Error(`Uesr can't follow`)
+
       const [targetUser, followship] = await Promise.all([
         User.findByPk(id),
         Followship.findOne({
