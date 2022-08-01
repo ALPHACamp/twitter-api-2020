@@ -41,6 +41,8 @@ const replyController = {
     try {
       const currentUser = helpers.getUser(req)
       const { comment } = req.body
+      if (!comment || comment.trim() === '') throw new Error('comment could not be blank')
+      if (comment.length > 140) throw new Error('comment length should be less than 140')
       const tweet = await Tweet.findByPk(req.params.tweet_id)
       if(!tweet) throw new Error('the tweet not exist')
       const reply = await Reply.create({
