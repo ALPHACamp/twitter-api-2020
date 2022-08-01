@@ -72,10 +72,11 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     try {
       let tweet = await Tweet.findByPk(req.params.id, {
+        attributes: { exclude: ['updatedAt'] },
         include: [
-          { model: User },
-          { model: Like },
-          { model: Reply }],
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          { model: Like, attributes: ['id'] },
+          { model: Reply, attributes: ['id'] }],
         order: [['createdAt', 'DESC']]
       })
       if (!tweet) {
@@ -85,9 +86,10 @@ const tweetController = {
         })
       }
       tweet = await tweet.toJSON()
-      delete tweet.User.password
       tweet.repliedCounts = tweet.Replies.length
       tweet.likesCounts = tweet.Likes.length
+      delete tweet.Replies
+      delete tweet.Likes
       tweet.isBeingLiked = req.user.LikedTweets ? req.user && req.user.LikedTweets.some(l => l.id === tweet.id) : false
       return res.status(StatusCodes.OK).json(tweet)
     } catch (err) {

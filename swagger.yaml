@@ -52,16 +52,12 @@ paths:
           content:
             application/json:
               example:
-                - id: null
-                  UserId: null
-                  description: null
-                  createdAt: null
-                  updatedAt: null
-                  User: null
-                  Replies: null
-                  Likes: null
-                  repliedCounts: null
-                  likesCounts: null
+                - id:
+                  idOfUser:
+                  avatarOdUser:
+                  account:
+                  description:
+                  createdAt:
       deprecated: false
       security:
         - bearer: []
@@ -476,35 +472,18 @@ paths:
           content:
             application/json:
               example:
-                - id: null
-                  UserId: null
-                  description: null
-                  createdAt: null
-                  updatedAt: null
+                - id:
+                  UserId:
+                  description:
+                  createdAt:
                   User:
-                    id: null
-                    account: null
-                    name: null
-                    email: null
-                    password: null
-                    introduction: null
-                    avatar: null
-                    cover: null
-                    isAdmin: null
-                    role: null
-                    createdAt: null
-                    updatedAt: null
-                  LikedUsers: []
-                  Replies:
-                    - id: null
-                      UserId: null
-                      TweetId: null
-                      comment: null
-                      createdAt: null
-                      updatedAt: null
-                  repliedCount: null
-                  likeCount: null
-                  liked: null
+                    id:
+                    account:
+                    name:
+                    avatar:
+                  repliedCounts:
+                  likesCounts:
+                  isBeingLiked:
         '401':
           description: Authorization information is missing or invalid.
         '404':
@@ -571,39 +550,18 @@ paths:
           content:
             application/json:
               example:
-                - id: null
-                  UserId: null
-                  description: null
-                  createdAt: null
-                  updatedAt: null
+                - id:
+                  UserId:
+                  description:
+                  createdAt:
                   User:
-                    id: null
-                    account: null
-                    name: null
-                    email: null
-                    introduction: null
-                    avatar: null
-                    cover: null
-                    isAdmin: null
-                    role: null
-                    createdAt: null
-                    updatedAt: null
-                  Likes:
-                    - id: null
-                      UserId: null
-                      TweetId: null
-                      createdAt: null
-                      updatedAt: null
-                  Replies:
-                    - id: null
-                      UserId: null
-                      TweetId: null
-                      comment: null
-                      createdAt: null
-                      updatedAt: null
-                  repliedCounts: null
-                  likesCounts: null
-                  isBeingLiked: null
+                    id:
+                    account:
+                    name:
+                    avatar:
+                  repliedCounts:
+                  likesCounts:
+                  isBeingLiked:
         '401':
           description: Authorization information is missing or invalid.
         '404':
@@ -716,7 +674,6 @@ paths:
                   TweetId: null
                   comment: null
                   createdAt: null
-                  updatedAt: null
                   Tweet:
                     id: null
                     UserId: null
@@ -770,25 +727,20 @@ paths:
                   TweetId:
                   comment:
                   createdAt:
-                  updatedAt:
+                  User:
+                    account:
+                    avatar:
+                    name:
                   Tweet:
                     id:
                     UserId:
                     description:
                     createdAt:
-                    updatedAt:
                     User:
                       id:
                       account:
                       name:
-                      email:
-                      introduction:
                       avatar:
-                      cover:
-                      isAdmin:
-                      role:
-                      createdAt:
-                      updatedAt:
         '401':
           description: Authorization information is missing or invalid.
         '404':
