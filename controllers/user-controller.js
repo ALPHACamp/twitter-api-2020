@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 
 const helpers = require('../_helpers')
-const { User, Tweet, Like, Reply } = require('../models')
+const { User, Tweet, Like, Reply, Followship } = require('../models')
 
 const userController = {
   signin: async (req, res, next) => {
