@@ -180,6 +180,7 @@ const userController = {
             include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
           }
         ],
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
