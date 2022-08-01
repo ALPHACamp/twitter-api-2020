@@ -20,7 +20,7 @@ for (let i = 1; i < seedUsersAmount + 1; i++) {
     password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
     avatar: `https://loremflickr.com/320/240/cat/?lock=${Math.random() * 100}`,
     introduction: faker.lorem.sentence(),
-    cover: `https://loremflickr.com/320/240/landscape/?lock=${Math.random() * 100}`,
+    cover: 'https://i.imgur.com/hCJiDle.png',
     role: 'user',
     created_at: new Date(),
     updated_at: new Date()

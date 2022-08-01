@@ -27,7 +27,7 @@ const adminController = {
       const data = await User.findAll({
         // where: { [Op.not]: [{ role: 'admin' }] },
         attributes: [
-          'id', 'account', 'name', 'email', 'avatar',
+          'id', 'account', 'name', 'email', 'avatar', 'cover',
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'TweetsCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE user_id = User.id)'), 'LikesCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'FollowingCount'],
