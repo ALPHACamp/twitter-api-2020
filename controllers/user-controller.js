@@ -304,6 +304,14 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getCurrentUser: async (req, res, next) => {
+    const id = helpers.getUser(req).id
+    const user = await User.findByPk(id, {
+      attributes: ['id', 'name', 'account', 'avatar', 'email', 'role']
+    })
+    if (!user) return res.json({ status: 'error', message: 'user not found' })
+    return res.json(user)
   }
 }
 
