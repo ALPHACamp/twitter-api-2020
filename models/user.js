@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'UserId'
       })
       User.hasMany(models.Like, {
-        foreignKey: 'userId'
+        foreignKey: 'UserId'
       })
       User.hasMany(models.Reply, {
         foreignKey: 'UserId'

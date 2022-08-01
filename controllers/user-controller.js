@@ -129,18 +129,116 @@ const userController = {
       next(err)
     }
   },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId)
+      if (!user || user.role === 'admin') throw new Error("使用者不存在")
+      const tweets = await Tweet.findAll({
+        where: { userId },
+        attributes: ['id', 'description', 'userId', 'createdAt'],
+        include: [{
+          model: User,
+          attributes: ['name', 'account', 'avatar']
+        }],
+        nest: true,
+        raw: true,
+        order: [['created_at', 'DESC']]
+      })
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(tweets)
+      } else {
+        res.json({
+          status: 'success',
+          message: '成功取得使用者的所有推文',
+          tweets
+        })
+      }
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserRepliedTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId)
+      if (!user || user.role === 'admin') throw new Error("使用者不存在")
+      const tweets = await Reply.findAll({
+        where: { userId },
+        attributes: ['id', 'comment', 'tweetId', 'userId', 'createdAt'],
+        include: [{
+          model: Tweet,
+          where: { userId },
+          attributes: ['id', 'description', 'userId', 'createdAt'],
+          include: [{
+            model: User,
+            where: { id: userId },
+            attributes: ['id', 'account', 'name', 'avatar']
+          }]
+        }],
+        nest: true,
+        raw: true,
+        order: [['created_at', 'DESC']]
+      })
+      // !現在的寫法，如果同一人在同篇tweet下有兩篇reply，tweet就會出現兩次
+      // !需要再想想要怎麼抓資料庫
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(tweets)
+      } else {
+        res.json({
+          status: 'success',
+          message: '成功取得使用者的所有的回覆與回覆過的推文',
+          tweets
+        })
+      }
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const UserId = Number(req.params.id)
+      const user = await User.findByPk(UserId)
+      if (!user || user.role === 'admin') throw new Error("使用者不存在")
+      const likedTweets = await Like.findAll({
+        where: { UserId },
+        attributes: ['id', 'TweetId', 'UserId', 'createdAt'],
+        include: [{
+          model: Tweet,
+          attributes: ['id', 'description', 'UserId', 'createdAt'],
+          include: [{
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatar']
+          }]
+        }],
+        nest: true,
+        raw: true,
+        order: [['created_at', 'DESC']]
+      })
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(likedTweets)
+      } else {
+        res.status(200).json({
+          status: 'Success',
+          message: '成功取得所有使用者之資料',
+          likedTweets
+        })
+      }
+    } catch (err) {
+      next(err)
+    }
+  },
   following: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)     
-      const followings = await User.findByPk(UserId, {
-        include: [{
-            model: User,
-            as: 'Followings',
-            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
-          }],
-        attributes: {
-          exclude: [ 'password' ]
-        }
+      const followings = await Followship.findAll({
+        where: { followerId: req.params.id },
+        attributes: [
+          'followingId', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = following_id)`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = following_id)`), 'name'],
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = following_id)`), 'introduction']
+        ],
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
@@ -157,16 +255,15 @@ const userController = {
   },
   follower: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)     
-      const followers = await User.findByPk(UserId, {
-        include: [{
-            model: User,
-            as: 'Followers',
-            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
-          }],
-        attributes: {
-          exclude: [ 'password' ]
-        }
+      const followers = await Followship.findAll({
+        where: { followingId: req.params.id },
+        attributes: [
+          'followerId', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = follower_id)`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = follower_id)`), 'name'],
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = follower_id)`), 'introduction']
+        ],
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {

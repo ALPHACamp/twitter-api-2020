@@ -28,7 +28,7 @@ const tweetController = {
       const TweetId = req.params.tweet_id
       const data = await Tweet.findByPk(TweetId, {
 	      attributes: [
-          'id', 'description', 'userId', 'createdAt',
+          'id', 'description', 'UserId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
             'likeCount'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
@@ -46,7 +46,7 @@ const tweetController = {
 
       const replies = await Reply.findAll({
         where: { TweetId },
-        attributes: [ 'id', 'comment', 'userId', 'createdAt'],
+        attributes: [ 'id', 'comment', 'UserId', 'createdAt'],
         include: [{
           model: User,
           attributes: ['name', 'account', 'avatar']
@@ -73,7 +73,7 @@ const tweetController = {
     try {
       const data = await Tweet.findAll({
 	      attributes: [
-          'id', 'description', 'userId', 'createdAt',
+          'id', 'description', 'UserId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
             'likeCount'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
