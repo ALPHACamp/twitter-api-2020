@@ -43,6 +43,7 @@ const userController = {
     userServices.unLike(req, (err, data) => err ? next(err) : res.json(data))
   },
   getCurrentUser: (req, res) => {
+    delete req.user.dataValues.password
     return res.json({ ...req.user.dataValues })
   },
   addReply: (req, res, next) => {
