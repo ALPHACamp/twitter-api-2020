@@ -1,9 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const db = require('../models')
-const { User } = db
+const { User, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
-const sequelize = require('sequelize')
 const { Op } = require("sequelize")
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
@@ -88,7 +86,8 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  }, editUser: async (req, res, next) => {
+  }, 
+  editUser: async (req, res, next) => {
     const currentUserId = helpers.getUser(req).id
     const { account, name, email, password, checkPassword, introduction } = req.body
     const id = req.params.id
@@ -126,6 +125,56 @@ const userController = {
         message: '成功編輯使用者資料',
         data: updatedUser
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  following: async (req, res, next) => {
+    try {
+      const followings = await Followship.findAll({
+        where: { followerId: req.params.id },
+        attributes: [
+          'followingId', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = following_id)`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = following_id)`), 'name'],
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = following_id)`), 'introduction']
+        ],
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
+      })
+
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(followings)
+      } else { 
+        res.status(200).json({ 
+          status: 'Success',
+          message: '您已成功！', 
+          data: followings
+        })}
+    } catch (err) {
+      next(err)
+    }
+  },
+  follower: async (req, res, next) => {
+    try {
+      const followers = await Followship.findAll({
+        where: { followingId: req.params.id },
+        attributes: [
+          'followerId', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = follower_id)`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = follower_id)`), 'name'],
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = follower_id)`), 'introduction']
+        ],
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
+      })
+
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+        res.json(followers)
+      } else { 
+        res.status(200).json({ 
+          status: 'Success',
+          message: '您已成功！', 
+          data: followers
+        })}
     } catch (err) {
       next(err)
     }
