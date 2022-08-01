@@ -38,6 +38,8 @@ const tweetController = {
       nest: true,
     })
 
+    if (!tweets) throw new Error(`Not any tweet has been post!`)
+
     const TweetsApiData = tweets.map((tweet) => {
       const { Likes, Replies, ...restProps } = tweet.toJSON()
       return { ...restProps, likesCounts: Likes.length, repliesCounts: Replies.length }
@@ -67,6 +69,8 @@ const tweetController = {
         ],
         nest: true,
       })
+
+      if (!tweet) throw new Error(`This tweet doesn't exist!`)
 
       const { Replies, Likes, UserId, ...restProps } = tweet.toJSON()
       const TweetApiData = { ...restProps, likesCounts: Likes.length, repliesCounts: Replies.length }
