@@ -1,3 +1,4 @@
+const sequelize = require('sequelize')
 const helpers = require('../_helpers')
 const { Followship, User } = require('../models')
 
@@ -74,6 +75,44 @@ const followController = {
         status: 'success',
         message: 'Remove followed success'
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowRank: async (req, res, next) => {
+    try {
+      // get top 10 users who has most followers
+      const rankData = await User.findAll({
+        where: { role: 'user' },
+        order: [[sequelize.literal('followersCount'), 'DESC']],
+        limit: 10,
+        attributes: [
+          'id', 'name', 'avatar', 'account',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+            ),
+            'followersCount'
+          ]
+        ]
+      })
+
+      if (!rankData) {
+        return res.status(400).json({ status: 'error', message: 'users not found' })
+      }
+
+      const currentUser = helpers.getUser(req)
+      const followingsId = currentUser.Followings.map(f => f.id)
+      const rankUsers = rankData.map(rank => ({
+        id: rank.id,
+        name: rank.name,
+        account: rank.account,
+        avatar: rank.avatar,
+        followerCount: rank.followersCount,
+        isFollowed: followingsId.includes(rank.id)
+      }))
+
+      return res.status(200).json(rankUsers)
     } catch (err) {
       next(err)
     }
