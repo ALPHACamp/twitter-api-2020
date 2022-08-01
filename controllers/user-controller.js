@@ -131,16 +131,15 @@ const userController = {
   },
   following: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)     
-      const followings = await User.findByPk(UserId, {
-        include: [{
-            model: User,
-            as: 'Followings',
-            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
-          }],
-        attributes: {
-          exclude: [ 'password' ]
-        }
+      const followings = await Followship.findAll({
+        where: { followerId: req.params.id },
+        attributes: [
+          'followingId', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = following_id)`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = following_id)`), 'name'],
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = following_id)`), 'introduction']
+        ],
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
@@ -157,16 +156,15 @@ const userController = {
   },
   follower: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)     
-      const followers = await User.findByPk(UserId, {
-        include: [{
-            model: User,
-            as: 'Followers',
-            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
-          }],
-        attributes: {
-          exclude: [ 'password' ]
-        }
+      const followers = await Followship.findAll({
+        where: { followingId: req.params.id },
+        attributes: [
+          'followerId', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = follower_id)`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = follower_id)`), 'name'],
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = follower_id)`), 'introduction']
+        ],
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
