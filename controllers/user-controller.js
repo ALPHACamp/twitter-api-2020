@@ -219,6 +219,58 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const currentUserId = getUser(req).id
+
+      if (!userId) {
+        return res.status(404).json({
+          status: 'error',
+          message: '使用者不存在!'
+        })
+      }
+
+      let tweets = await Tweet.findAll({
+        where: { UserId: userId },
+        attributes: [
+          'id',
+          'description',
+          'createdAt',
+          [
+            Sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+            ),
+            'LikesCount'
+          ],
+          [
+            Sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+            ),
+            'RepliesCount'
+          ]
+        ],
+        include: { model: Like },
+        order: [
+          ['createdAt', 'DESC']
+        ]
+      })
+
+      tweets = tweets.map(tweet => tweet.toJSON())
+      tweets = tweets.map(tweet => {
+        const isLiked = tweet.Likes.some(likes => likes.UserId === currentUserId)
+        delete tweet.Likes
+        return {
+          ...tweet,
+          isLiked
+        }
+      })
+
+      res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
