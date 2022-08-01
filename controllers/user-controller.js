@@ -223,7 +223,8 @@ const userController = {
           message: '成功取得所有使用者之資料',
           likedTweets
         })
-      } catch (err) {
+      }
+    } catch (err) {
       next(err)
     }
   },
