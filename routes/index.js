@@ -7,7 +7,7 @@ const adminController = require('../controllers/admin-controller')
 
 const admin = require('./modules/admin')
 const users = require('./modules/users')
-// const tweets = require('./modules/tweets')
+const tweets = require('./modules/tweets')
 const followships = require('./modules/followships')
 const passport = require('../config/passport')
 
@@ -31,7 +31,7 @@ router.post('/users', userController.signUp)
 
 router.use('/admin', authenticated, authenticateAdmin, admin)
 router.use('/users', authenticated, authenticateUser, users)
-// router.use('/tweets', authenticated, authenticateUser, tweets)
+router.use('/tweets', authenticated, authenticateUser, tweets)
 router.use('/followships', authenticated, authenticateUser, followships)
 
 router.use('/', apiErrorHandler)
