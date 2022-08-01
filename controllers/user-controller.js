@@ -409,6 +409,7 @@ const userController = {
         }
       })
       users = await users.map(user => user.toJSON())
+      users.shift()
       let top10Users = users
         .map(user => ({
           id: user.id,
