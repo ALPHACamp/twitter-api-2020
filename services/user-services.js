@@ -131,6 +131,7 @@ const userServices = {
             replyCount
           })
       }))
+      results.sort((a, b) => b.createdAt - a.createdAt)
       return cb(null, results)
     } catch (err) {
       cb(err)
@@ -169,6 +170,7 @@ const userServices = {
           results.push({ ...like, Tweet: { ...like.Tweet, likeCount, replyCount } })
         })
       )
+      results.sort((a, b) => b.createdAt - a.createdAt)
       return cb(null, results)
     } catch (err) {
       return cb(err)

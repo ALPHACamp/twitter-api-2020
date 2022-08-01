@@ -21,6 +21,7 @@ const tweetServices = {
             replyCount
           })
       }))
+      results.sort((a, b) => b.createdAt - a.createdAt)
       return cb(null, results)
     } catch (err) {
       return cb(err)
