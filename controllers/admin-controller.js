@@ -27,10 +27,16 @@ const adminController = {
       })
 
       // Check if admin exists and password correct
-      if (!user || !bcrypt.compareSync(password, user.password)) {
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Account not exists for admin'
+        })
+      }
+      if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({
           status: 'error',
-          message: 'Account or password incorrect.'
+          message: 'Password incorrect.'
         })
       }
 
