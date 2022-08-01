@@ -364,7 +364,7 @@ const userController = {
           isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false
         }
       })
-      followingsOfUser = followingsOfUser.sort((a, b) => b.createdAt - a.createdAt)
+      followingsOfUser = followingsOfUser.sort((a, b) => a.createdAt - b.createdAt)
 
       return res.status(StatusCodes.OK).json(followingsOfUser)
     } catch (error) {
@@ -394,7 +394,7 @@ const userController = {
           isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === follower.id) : false
         }
       })
-      followersOfUser = followersOfUser.sort((a, b) => b.createdAt - a.createdAt)
+      followersOfUser = followersOfUser.sort((a, b) => a.createdAt - b.createdAt)
 
       return res.status(StatusCodes.OK).json(followersOfUser)
     } catch (error) {
