@@ -4,7 +4,8 @@ const helpers = require('../_helpers')
 const replyController = {
   getReplies: async (req, res, next) => {
     try {
-      if(!req.params.tweet_id) throw new Error('the tweet not exist')
+      const tweet = await Tweet.findByPk(req.params.tweet_id)
+      if(!tweet) throw new Error('the tweet not exist')
       const replies = await Reply.findAll({
         where: { tweetId: req.params.tweet_id },
         include: [
@@ -32,6 +33,26 @@ const replyController = {
         })
         .sort((a, b) => b.createAt - a.createAt)
         res.json(replySort)
+    } catch (err) {
+      next(err)
+    }
+  },
+  postReply: async (req, res, next) => {
+    try {
+      const currentUser = helpers.getUser(req)
+      const { comment } = req.body
+      const tweet = await Tweet.findByPk(req.params.tweet_id)
+      if(!tweet) throw new Error('the tweet not exist')
+      const reply = await Reply.create({
+        UserId: currentUser.id,
+        TweetId: req.params.tweet_id,
+        comment
+      })
+      delete currentUser.password
+      res.json({
+        ...reply.toJSON(),
+        currentUser
+      })
     } catch (err) {
       next(err)
     }
