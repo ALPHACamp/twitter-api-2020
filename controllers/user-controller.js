@@ -201,7 +201,6 @@ const userController = {
       const UserId = Number(req.params.id)
       const user = await User.findByPk(UserId)
       if (!user || user.role === 'admin') throw new Error("使用者不存在")
-      if (!user) throw new Error("使用者不存在")
       const likedTweets = await Like.findAll({
         where: { UserId },
         attributes: ['id', 'TweetId', 'UserId', 'createdAt'],
@@ -232,7 +231,6 @@ const userController = {
   },
   getRecommendUsers: async (req, res, next) => {
     try {
-
       const data = await User.findAll({
         where: { [Op.not]: [{ role: 'admin' }] },
         attributes: [
