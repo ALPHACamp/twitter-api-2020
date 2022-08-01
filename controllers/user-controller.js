@@ -160,6 +160,47 @@ const userController = {
       next(err)
     }
   },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const likes = await Like.findAll({
+        where: { UserId: id },
+        attributes: ['id', 'TweetId', 'createdAt'],
+        include: [
+          {
+            model: Tweet,
+            attributes: ['id', 'description', 'createdAt',
+              [
+                sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'
+              ],
+              [
+                sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'
+              ]
+            ],
+            include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          }
+        ],
+        raw: true,
+        nest: true
+      })
+      if (!likes.length) res.status(404).json({ status: 'error', message: 'Likes are not found.' })
+
+      // check if the current user likes the tweets or not (add attribute "isLiked" in tweets)
+      const currentUserId = helpers.getUser(req).id
+      const currentUserLikedList = await Like.findAll({
+        where: { UserId: currentUserId },
+        raw: true
+      })
+      const likeTweetsIds = currentUserLikedList.map(like => like.TweetId)
+      const tweetsIncludeIsLike = likes.map(like => ({
+        ...like, isLiked: likeTweetsIds.some(tweetId => tweetId === like.TweetId)
+      }))
+
+      res.status(200).json(tweetsIncludeIsLike)
+    } catch (err) {
+      next(err)
+    }
+  },
   addFollow: async (req, res, next) => {
     try {
       const followerId = Number(helpers.getUser(req).id)
