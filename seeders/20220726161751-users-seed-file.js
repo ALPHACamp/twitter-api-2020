@@ -9,6 +9,9 @@ module.exports = {
       email: `user${i + 1}@example.com`,
       password: bcrypt.hashSync('12345678', 10),
       role: 'user',
+      avatar: 'https://loremflickr.com/320/240/paris,girl/all',
+      banner: 'https://loremflickr.com/320/240/beach',
+      introduction: 'say something..',
       created_at: new Date(),
       updated_at: new Date()
     }))
@@ -19,6 +22,9 @@ module.exports = {
         email: 'root@example.com',
         password: bcrypt.hashSync('12345678', 10),
         role: 'admin',
+        avatar: 'https://loremflickr.com/320/240/paris,girl/all',
+        banner: 'https://loremflickr.com/320/240/beach',
+        introduction: 'say something..',
         created_at: new Date(),
         updated_at: new Date()
       },

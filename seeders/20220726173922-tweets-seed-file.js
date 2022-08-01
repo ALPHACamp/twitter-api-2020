@@ -5,7 +5,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const tweets = []
     const users = await queryInterface.sequelize.query(
-      'SELECT id FROM Users;',
+      'SELECT id FROM Users WHERE account <> "root";',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     users.map(user => {
