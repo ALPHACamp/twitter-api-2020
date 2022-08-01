@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
+const { Tweet, Followship, User, Reply, Like, sequelize } = require('../models')
 const { Op } = require("sequelize")
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
@@ -88,17 +88,15 @@ const userController = {
     }
   }, 
   editUser: async (req, res, next) => {
-    const currentUserId = helpers.getUser(req).id
+    const UserId = helpers.getUser(req).id
     const { account, name, email, password, checkPassword, introduction } = req.body
     const id = req.params.id
-    const avatarImg = req.files.avatar ? req.files.avatar : []
-    const coverImg = req.files.cover ? req.files.cover : []
     try {
-      if (Number(currentUserId) !== Number(id)) throw new Error('無法修改其他使用者之資料')
+      if (Number(UserId) !== Number(id)) throw new Error('無法修改其他使用者之資料')
       if (!account || !name || !email || !password || !checkPassword) throw new Error('必填欄位不可空白')
       if (password !== checkPassword) throw new Error('Passwords do not match!')
       const user = await User.findByPk(id)
-      if (!user || user.role === 'admin') throw new Error("user doesn't exist!")
+      if (!user || user.role === 'admin') throw new Error("使用者不存在")
       const foundEmail = await User.findOne({ where: { email, [Op.not]: [{ id }] } })
       const foundAccount = await User.findOne({ where: { account, [Op.not]: [{ id }] } })
       let errorMessage = []
@@ -112,18 +110,20 @@ const userController = {
         throw new Error(errorMessage)
       }
       const newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-      const avatarFile = await imgurFileHandler(...avatarImg)
-      const coverFile = await imgurFileHandler(...coverImg)
+      const avatarFile = req.files?.avatar ? await imgurFileHandler(...req.files.avatar) : null
+      const coverFile = req.files?.avatar ? await imgurFileHandler(...req.files.cover) : null
       const updatedUser = await user.update({
         account, name, email, introduction,
         password: newPassword,
         avatar: avatarFile || user.avatar,
         cover: coverFile || user.cover
       })
+      const data = updatedUser.toJSON()
+      delete data.password
       res.json({
         status: 'success',
         message: '成功編輯使用者資料',
-        data: updatedUser
+        data
       })
     } catch (err) {
       next(err)
@@ -249,6 +249,31 @@ const userController = {
           message: '您已成功！', 
           data: followings
         })}
+    } catch (err) {
+      next(err)
+    }
+  },
+  getRecommendUsers: async (req, res, next) => {
+    try {
+      const data = await User.findAll({
+        where: { [Op.not]: [{ role: 'admin' }] },
+        attributes: [
+          'id', 'account', 'name', 'email', 'avatar',
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'TweetsCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE user_id = User.id)'), 'LikesCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'FollowingCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'FollowerCount']
+        ],
+        order: [[sequelize.literal('FollowingCount'), 'DESC']],
+        limit: 10,
+        raw: true,
+        nest: true
+      })
+      res.status(200).json({
+        status: 'Success',
+        message: '成功取得被追蹤人數前十之使用者資料',
+        data
+      })
     } catch (err) {
       next(err)
     }
