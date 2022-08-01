@@ -109,10 +109,10 @@ const tweetController = {
     try {
       const UserId = Number(helpers.getUser(req).id)
       const TweetId = Number(req.params.id)
-      if (!UserId || !TweetId) {
+      if (!TweetId) {
         return res.status(400).json({
           status: 'error',
-          message: 'UserId and TweetId are required'
+          message: 'TweetId is required'
         })
       }
 
@@ -131,10 +131,10 @@ const tweetController = {
     try {
       const UserId = Number(helpers.getUser(req).id)
       const TweetId = Number(req.params.id)
-      if (!UserId || !TweetId) {
+      if (!TweetId) {
         return res.status(400).json({
           status: 'error',
-          message: 'UserId and TweetId are required'
+          message: 'TweetId is required'
         })
       }
 
