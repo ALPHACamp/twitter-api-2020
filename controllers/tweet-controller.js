@@ -104,6 +104,48 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  likeTweet: async (req, res, next) => {
+    try {
+      const UserId = Number(helpers.getUser(req).id)
+      const TweetId = Number(req.params.id)
+      if (!TweetId) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'TweetId is required'
+        })
+      }
+
+      const like = await Like.findOne({ where: { TweetId, UserId } })
+      if (like) {
+        return res.status(401).json({ status: 'error', message: 'already liked' })
+      }
+
+      await Like.create({ TweetId, UserId })
+      return res.status(200).json({ status: 'success', message: 'like success' })
+    } catch (err) {
+      next(err)
+    }
+  },
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const UserId = Number(helpers.getUser(req).id)
+      const TweetId = Number(req.params.id)
+      if (!TweetId) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'TweetId is required'
+        })
+      }
+
+      const like = await Like.findOne({ where: { TweetId, UserId } })
+      if (!like) return res.status(404).json({ status: 'error', message: 'like not found' })
+
+      await like.destroy()
+      return res.status(200).json({ status: 'success', message: 'unlike success' })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
