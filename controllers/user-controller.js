@@ -230,8 +230,11 @@ const userController = {
   },
   following: async (req, res, next) => {
     try {
+      const followerId = req.params.id
+      const follower = await User.findByPk(followerId)
+      if (!follower || follower.role === 'admin') throw new Error("使用者不存在")
       const followings = await Followship.findAll({
-        where: { followerId: req.params.id },
+        where: { followerId },
         attributes: [
           'followingId', 'createdAt',
           [sequelize.literal(`(SELECT avatar FROM Users WHERE id = following_id)`), 'avatar'],
@@ -280,8 +283,11 @@ const userController = {
   },
   follower: async (req, res, next) => {
     try {
+      const followingId = req.params.id
+      const following = await User.findByPk(followingId)
+      if (!following || following.role === 'admin') throw new Error("使用者不存在")
       const followers = await Followship.findAll({
-        where: { followingId: req.params.id },
+        where: { followingId },
         attributes: [
           'followerId', 'createdAt',
           [sequelize.literal(`(SELECT avatar FROM Users WHERE id = follower_id)`), 'avatar'],
