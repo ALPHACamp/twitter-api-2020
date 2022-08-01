@@ -345,7 +345,7 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       const userId = req.params.id
-      let user = await User.findByPk(userId, {
+      const user = await User.findByPk(userId, {
         include: [{ model: User, as: 'Followings' }]
       })
       if (!user) {
@@ -354,14 +354,14 @@ const userController = {
           message: '使用者不存在'
         })
       }
-      user = await user.toJSON()
       let followingsOfUser = user.Followings.map(following => {
         return {
           followingId: following.id,
           userNameOfFollowing: following.name,
           userAvatarOfFollowing: following.avatar,
           userInrtoductionOfFollowing: following.introduction,
-          isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false
+          isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false,
+          createdAt: following.Followship.createdAt
         }
       })
       followingsOfUser = followingsOfUser.sort((a, b) => b.createdAt - a.createdAt)
@@ -374,7 +374,7 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const userId = req.params.id
-      let user = await User.findByPk(userId,
+      const user = await User.findByPk(userId,
         {
           include: [{ model: User, as: 'Followers' }]
         })
@@ -384,14 +384,14 @@ const userController = {
           message: '使用者不存在'
         })
       }
-      user = await user.toJSON()
       let followersOfUser = user.Followers.map(follower => {
         return {
           followerId: follower.id,
           userNameOfFollower: follower.name,
           userAvatarOfFollower: follower.avatar,
           userInrtoductionOfFollower: follower.introduction,
-          isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === follower.id) : false
+          isFollowing: req.user.Followings ? req.user.Followings.some(reqUserFollowing => reqUserFollowing.id === follower.id) : false,
+          createdAt: follower.Followship.createdAt
         }
       })
       followersOfUser = followersOfUser.sort((a, b) => b.createdAt - a.createdAt)
