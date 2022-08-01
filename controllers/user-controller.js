@@ -235,6 +235,45 @@ const userController = {
       next(err)
     }
   },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+      const followings = await Followship.findAll({
+        where: { FollowerId: id },
+        attributes: ['followingId', 'createdAt',
+          [
+            sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.followingId)'), 'name'
+          ],
+          [
+            sequelize.literal('(SELECT account FROM Users WHERE Users.id = Followship.followingId)'), 'account'
+          ],
+          [
+            sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.followingId)'), 'avatar'
+          ]
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        next: true
+      })
+      if (!followings.length) res.status(404).json({ status: 'error', message: 'No followings found.' })
+
+      // check if the current user is following the user (add attribute "isFollowing" in followings)
+      const currentUserId = Number(helpers.getUser(req).id)
+      const currentUserFollowingList = await Followship.findAll({
+        where: { followerId: currentUserId },
+        raw: true
+      })
+      const currentUserFollowingIds = currentUserFollowingList.map(f => f.followingId)
+      const followingsData = followings.map(following => ({
+        ...following,
+        isFollowing: currentUserFollowingIds.some(id => id === following.followingId)
+      }))
+
+      res.status(200).json(followingsData)
+    } catch (err) {
+      next(err)
+    }
+  },
   addFollow: async (req, res, next) => {
     try {
       const followerId = Number(helpers.getUser(req).id)
