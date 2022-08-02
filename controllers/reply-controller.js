@@ -5,12 +5,11 @@ const replyController = {
   getReplies: async (req, res, next) => {
     try {
       const tweet = await Tweet.findByPk(req.params.tweet_id)
-      if (!tweet) throw new Error('the tweet not exist')
+      if (!tweet) throw new Error('Target tweet not exist')
       const replies = await Reply.findAll({
         where: { tweetId: req.params.tweet_id },
         include: [{ model: User }, { model: Tweet, include: User }],
       })
-      if (!replies) throw new Error('no reply for the tweet')
       const replySort = replies
         .map((reply) => {
           const { User, Tweet, ...restProps } = {
@@ -19,6 +18,7 @@ const replyController = {
               id: reply.User.id,
               name: reply.User.name,
               account: reply.User.account,
+              avatar: reply.User.avatar
             },
             tweetUser: {
               id: reply.Tweet.User.id,
@@ -38,20 +38,16 @@ const replyController = {
     try {
       const currentUser = helpers.getUser(req)
       const { comment } = req.body
-      if (!comment || comment.trim() === '') throw new Error('comment could not be blank')
-      if (comment.length > 140) throw new Error('comment length should be less than 140')
+      if (!comment || comment.trim() === '') throw new Error('comment field is required.')
+      if (comment.length > 140) throw new Error('Characters length of comment should be less than 140.')
       const tweet = await Tweet.findByPk(req.params.tweet_id)
-      if (!tweet) throw new Error('the tweet not exist')
-      const reply = await Reply.create({
+      if (!tweet) throw new Error('Target tweet not exist')
+      await Reply.create({
         UserId: currentUser.id,
         TweetId: req.params.tweet_id,
         comment,
       })
-      delete currentUser.password
-      res.json({
-        ...reply.toJSON(),
-        currentUser,
-      })
+      res.json({ status: 'success' })
     } catch (err) {
       next(err)
     }
