@@ -146,6 +146,60 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweetReplies: async (req, res, next) => {
+    try {
+      const TweetId = Number(req.params.tweet_id)
+      const repliesData = await Reply.findAll({
+        where: { TweetId },
+        attributes: ['id', 'comment', 'createdAt'],
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: ['id'],
+            include: [
+              { model: User, attributes: ['id', 'account'] }
+            ]
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      if (!repliesData) return res.status(404).json({ status: 'error', message: 'Reply is not found' })
+
+      // set response contents
+      const replies = repliesData.map(reply => (
+        {
+          id: reply.id,
+          comment: reply.comment,
+          tweetAuthorId: reply.Tweet.User.id,
+          tweetAuthorAccount: reply.Tweet.User.account,
+          User: reply.User,
+          createdAt: reply.createdAt
+        }
+      ))
+      return res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  },
+  replyTweet: async (req, res, next) => {
+    try {
+      const UserId = Number(helpers.getUser(req).id)
+      const TweetId = Number(req.params.tweet_id)
+      if (!TweetId) return res.status(400).json({ status: 'error', message: 'TweetId is required' })
+
+      const tweet = await Tweet.findOne({ where: { id: TweetId } })
+      if (!tweet) return res.status(404).json({ status: 'error', message: 'Tweet is not found' })
+
+      const { comment } = req.body
+      if (!comment || !comment.trim()) return res.status(400).json({ status: 'error', message: 'Reply is blank.' })
+
+      await Reply.create({ TweetId, UserId, comment })
+      return res.status(200).json({ status: 'success', message: 'Post reply successfully' })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
