@@ -240,6 +240,16 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const { Followers, Followings, ...currentUser } = helpers.getUser(req)
+      res.json({
+        ...currentUser
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
