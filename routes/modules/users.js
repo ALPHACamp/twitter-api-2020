@@ -13,6 +13,8 @@ router.get('/recommendUsers', userController.getRecommendUsers)
 
 router.get('/:id', userController.getUser)
 router.put('/:id', upload.fields([{ name: 'cover' }, { name: 'avatar' }]), userController.editUser)
+router.put('/:id/setting', userController.modifyUser)
+
 
 
 module.exports = router

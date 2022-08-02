@@ -88,6 +88,38 @@ const userController = {
     }
   }, 
   editUser: async (req, res, next) => {
+    try {
+      const {id} = req.params
+      if (Number(id) !== helpers.getUser(req).id) return res.status(403).json({ status: 'error', message: '無法修改其他使用者之資料' })
+      const user = await User.findByPk(id)
+      if (!user) throw new Error('使用者不存在')
+      
+      const { name, introduction } = req.body
+      if (!name || !introduction) throw new Error('必填欄位不可空白')
+      if (name.length > 50) throw new Error('名稱不能超過50字')
+      if (introduction.length > 150) throw new Error('簡介不能超過150字')
+
+      const avatarFile = req.files?.avatar ? await imgurFileHandler(...req.files.avatar) : null
+      const coverFile = req.files?.avatar ? await imgurFileHandler(...req.files.cover) : null
+
+      const updatedUser = await user.update({
+        name,
+        introduction,
+	      avatar: avatarFile || user.avatar,
+        cover: coverFile || user.cover
+      })
+      const data = updatedUser.toJSON()
+      delete data.password
+      res.json({
+        status: 'success',
+        message: '成功編輯使用者資料',
+        data
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  modifyUser: async (req, res, next) => {
     const UserId = helpers.getUser(req).id
     const { account, name, email, password, checkPassword, introduction } = req.body
     const id = req.params.id
