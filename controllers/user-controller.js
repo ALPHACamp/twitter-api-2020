@@ -260,14 +260,14 @@ const userController = {
       }
       user = await user.toJSON()
       const tweets = await user.Tweets.map(tweet => {
+        const repliedCounts = tweet.Replies.length
+        const likesCounts = tweet.Likes.length
+        delete tweet.Likes
+        delete tweet.Replies
         return {
           ...tweet,
-          userOfTweet: user.id,
-          userNameOfTweet: user.name,
-          userAccountOfTweet: user.account,
-          userAvatarOfTweet: user.avatar,
-          repliedCounts: tweet.Replies.length,
-          likesCounts: tweet.Likes.length,
+          repliedCounts,
+          likesCounts,
           isBeingliked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === tweet.id) : false
         }
       })
