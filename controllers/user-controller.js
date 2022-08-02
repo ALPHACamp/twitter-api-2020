@@ -462,7 +462,7 @@ const userController = {
           message: '使用者不存在'
         })
       }
-      if (Number(follower.id) === Number(followerId)) {
+      if (Number(followingId) === Number(followerId)) {
         return res.status(StatusCodes.NOT_ACCEPTABLE).json({
           status: 'error',
           message: '無法追蹤自己'
