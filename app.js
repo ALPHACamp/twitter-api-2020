@@ -25,7 +25,9 @@ app.use(session({
   secret: SESSION_KEY,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URL,
-    ttl: 1 * 24 * 60 * 60
+    ttl: 1 * 24 * 60 * 60,
+    autoRemove: 'interval',
+    autoRemoveInterval: 30
   }),
   resave: false,
   saveUninitialized: false
