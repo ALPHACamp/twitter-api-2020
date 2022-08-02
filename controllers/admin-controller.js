@@ -48,7 +48,6 @@ const adminController = {
           message: 'Users不存在'
         })
       }
-      users = await users.map(user => ({ ...user.toJSON() }))
       users = await users.map(user => {
         return {
           id: user.id,
