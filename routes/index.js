@@ -11,20 +11,20 @@ const tweets = require('./modules/tweets')
 const followships = require('./modules/followships')
 const passport = require('../config/passport')
 
-const { authenticated, authenticateUser, authenticateAdmin } = require('../middlewares/api-auth')
+const { authenticated, signinRoleUser, signinRoleAdmin, authenticateUser, authenticateAdmin } = require('../middlewares/api-auth')
 const { apiErrorHandler } = require('../middlewares/error-handler')
 
 router.get('/test', APItestController.getTestJSON)
 router.post(
   '/admin/signin',
   passport.authenticate('local', { session: false }),
-  authenticateAdmin,
+  signinRoleAdmin,
   adminController.signIn
 )
 router.post(
   '/users/signin',
   passport.authenticate('local', { session: false }),
-  authenticateUser,
+  signinRoleUser,
   userController.signIn
 )
 router.post('/users', userController.signUp)

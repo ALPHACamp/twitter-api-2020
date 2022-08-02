@@ -10,6 +10,17 @@ const authenticated = (req, res, next) => {
     next()
   })(req, res, next)
 }
+
+const signinRoleUser = (req, res, next) => {
+  if (helpers.getUser(req)?.role === 'user') return next()
+  throw new Error('account not exist')
+}
+
+const signinRoleAdmin = (req, res, next) => {
+  if (helpers.getUser(req)?.role === 'admin') return next()
+  throw new Error('account not exist')
+}
+
 const authenticateUser = (req, res, next) => {
   if (helpers.getUser(req)?.role === 'user') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied' })
@@ -21,6 +32,8 @@ const authenticateAdmin = (req, res, next) => {
 
 module.exports = {
   authenticated,
+  signinRoleUser,
+  signinRoleAdmin,
   authenticateUser,
   authenticateAdmin
 }
