@@ -21,10 +21,12 @@ passport.use(new LocalStrategy(
   },
   async (req, account, password, callbackFn) => {
     try {
-      const user = await User.findOne({ where: { account } })
-      if (!user) throw new Error('Account or Password error!')
-      const isMatch = await bcrypt.compare(password, user.password)
+      const userFind = await User.findOne({ where: { account } })
+      if (!userFind) throw new Error('Account or Password error!')
+      const isMatch = await bcrypt.compare(password, userFind.password)
       if (!isMatch) throw new Error('Account or Password error!')
+      const user = userFind.toJSON()
+      delete user.password
       return callbackFn(null, user)
     } catch (err) {
       callbackFn(err)
@@ -39,17 +41,17 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, callbackFn) => {
         { model: User, as: 'Followings', raw: true }
       ]
     })
-    const { password, ...userJSON } = userFind.toJSON()
-    const followers = userJSON.Followers.map(follower => {
+    const { password, ...restUser } = userFind.toJSON()
+    const followers = restUser.Followers.map(follower => {
       const { email, password, banner, ...restProps } = follower
       return restProps
     })
-    const followings = userJSON.Followings.map(following => {
+    const followings = restUser.Followings.map(following => {
       const { email, password, banner, ...restProps } = following
       return restProps
     })
     const user = {
-      ...userJSON,
+      ...restUser,
       Followers: followers,
       Followings: followings
     }
@@ -58,22 +60,5 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, callbackFn) => {
     callbackFn(err)
   }
 }))
-// Serialize and deserialize
-passport.serializeUser((user, callbackFn) => {
-  callbackFn(null, user.id)
-})
-passport.deserializeUser(async (id, callbackFn) => {
-  try {
-    const user = await User.findByPk(id, {
-      include: [
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ]
-    })
-    return callbackFn(null, user.toJSON())
-  } catch (err) {
-    callbackFn(err)
-  }
-})
 
 module.exports = passport
