@@ -4,14 +4,14 @@ const helpers = require('../_helpers')
 const tweetController = {
   postTweet: async (req, res, next) => {
     try {
-      const theSignInUserId = helpers.getUser(req)?.id || null
+      const currentUser = helpers.getUser(req)?.id || null
       const description = req.body?.description || null || ''
 
-      if (!theSignInUserId) throw new Error(`Server side can't get user id.`)
+      if (!currentUser) throw new Error(`Server side can't get user id.`)
       if (!description) throw new Error(`Server side can't get the tweet description.`)
 
       if (description.trim().length > 0 && description.length <= 140) {
-        await Tweet.create({ userId: theSignInUserId, description })
+        await Tweet.create({ userId: currentUser, description })
       } else {
         throw new Error(`The characters in a tweet should between 0 and 140.`)
       }
@@ -45,7 +45,7 @@ const tweetController = {
       return { ...restProps, likesCounts: Likes.length, repliesCounts: Replies.length }
     })
 
-    res.status(200).json(TweetsApiData)
+    res.json(TweetsApiData)
     try {
     } catch (error) {
       next(error)
@@ -73,9 +73,10 @@ const tweetController = {
       if (!tweet) throw new Error(`This tweet doesn't exist!`)
 
       const { Replies, Likes, UserId, ...restProps } = tweet.toJSON()
+      console.log(tweet.toJSON())
       const TweetApiData = { ...restProps, likesCounts: Likes.length, repliesCounts: Replies.length }
 
-      res.status(200).json(TweetApiData)
+      res.json(TweetApiData)
     } catch (error) {
       next(error)
     }

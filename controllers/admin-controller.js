@@ -7,15 +7,16 @@ const adminController = {
     try {
       // "helpers.getUser(req).toJSON()" needs .toJSON()
       // otherwise signing in action would fail
-      const theSignInuser = helpers.getUser(req).toJSON() || undefined
-      if (theSignInuser.role !== 'admin') throw new Error('Only admin is allow to use backstage!')
+      const currentUser = helpers.getUser(req).toJSON() || undefined
 
-      delete theSignInuser.password
-      const token = jwt.sign(theSignInuser, process.env.JWT_SECRET, { expiresIn: '14d' })
+      console.log(currentUser)
+      if (currentUser.role !== 'admin') throw new Error('Only admin is allow to use backstage!')
 
-      res.status(200).json({
+      delete currentUser.password
+      const token = jwt.sign(currentUser, process.env.JWT_SECRET, { expiresIn: '14d' })
+      res.json({
         status: 'success',
-        data: { token, user: theSignInuser },
+        token,
       })
     } catch (error) {
       next(error)
@@ -23,9 +24,9 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      // for pass test, "theSignInuser = helpers.getUser(req)" can't be added .toJSON()
-      const theSignInuser = helpers.getUser(req) || undefined
-      if (theSignInuser.role !== 'admin') {
+      // for pass test, "currentUser = helpers.getUser(req)" can't be added .toJSON()
+      const currentUser = helpers.getUser(req) || undefined
+      if (currentUser.role !== 'admin') {
         throw new Error('Only admin is allowed to use backstage!')
       }
 
@@ -53,7 +54,7 @@ const adminController = {
         })
         .sort((a, b) => b.tweetCounts - a.tweetCounts)
 
-      res.status(200).json(usersApiData)
+      res.json(usersApiData)
     } catch (error) {
       next(error)
     }
@@ -62,8 +63,8 @@ const adminController = {
     try {
       // "helpers.getUser(req).toJSON()" needs .toJSON()
       // otherwise getting tweets action would fail
-      const theSignInuser = helpers.getUser(req).toJSON() || undefined
-      if (theSignInuser.role !== 'admin') throw new Error('Only admin is allowed to use backstage!')
+      const currentUser = helpers.getUser(req) || undefined
+      if (currentUser.role !== 'admin') throw new Error('Only admin is allowed to use backstage!')
 
       const tweets = await Tweet.findAll({
         include: {
@@ -80,19 +81,16 @@ const adminController = {
         description: tweet.description.substring(0, 50),
       }))
 
-      res.status(200).json({
-        status: 'success',
-        data: { tweets: tweetsApiData },
-      })
+      res.json(tweetsApiData)
     } catch (error) {
       next(error)
     }
   },
   deleteTweet: async (req, res, next) => {
     try {
-      // for pass test, "theSignInuser = helpers.getUser(req)" can't be added .toJSON()
-      const theSignInuser = helpers.getUser(req)
-      if (theSignInuser.role !== 'admin') throw new Error('Only admin is allowed to use backstage!')
+      // for pass test, "currentUser = helpers.getUser(req)" can't be added .toJSON()
+      const currentUser = helpers.getUser(req)
+      if (currentUser.role !== 'admin') throw new Error('Only admin is allowed to use backstage!')
 
       const reqTweetId = req.params.id
       const tweet = await Tweet.findByPk(reqTweetId)
