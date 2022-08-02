@@ -42,7 +42,8 @@ const userController = {
             account: user.account,
             avatar: user.avatar,
             introduction: user.introduction,
-            role: user.role
+            role: user.role,
+            banner: user.banner,
           }
         })
       })
@@ -86,7 +87,12 @@ const userController = {
           introduction: user.introduction,
           name: user.name,
           role: user.role,
+          banner: user.banner,
         }
+        console.log('===')
+        console.log('===')
+        console.log('===')
+        console.log('user', user)
         return res.json(user)
       })
   },
@@ -161,6 +167,7 @@ const userController = {
               introduction: user.introduction,
               name: user.name,
               role: user.role,
+              banner: user.banner,
             }
             return res.json(user)
           })

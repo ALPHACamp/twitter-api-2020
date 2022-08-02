@@ -9,7 +9,8 @@ const SEED_USER = {
   password: '12345678',
   role: 'admin',
   avatar: 'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/1.jpg',
-  introduction: 'I am an admin manager.'
+  introduction: 'I am an admin manager.',
+  banner: 'https://i.pinimg.com/originals/32/36/08/323608123209203afe1f365fa929701d.jpg',
 }
 
 module.exports = {

@@ -18,6 +18,7 @@ const followshipController = {
           introduction: user.introduction,
           name: user.name,
           role: user.role,
+          banner: user.banner,
           Followers: user.Followers.map(follower => follower.Followship.followerId)
         }))
         return res.json(users)

@@ -38,7 +38,8 @@ const adminController = {
             account: user.account,
             avatat: user.avatat,
             introduction: user.introduction,
-            role: user.role
+            role: user.role,
+            banner: user.banner,
           }
         })
       })

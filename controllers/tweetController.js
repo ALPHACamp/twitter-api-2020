@@ -21,6 +21,7 @@ const tweetController = {
             introduction: tweet.User.introduction,
             name: tweet.User.name,
             role: tweet.User.role,
+            banner: tweet.User.banner,
           }
         }))
         return res.json(tweets)
@@ -42,7 +43,8 @@ const tweetController = {
             id: tweet.User.id,
             introduction: tweet.User.introduction,
             name: tweet.User.name,
-            role: tweet.User.role
+            role: tweet.User.role,
+            banner: tweet.User.banner,
           }
         }
         if (tweet.Replies[0].User.account) {
@@ -55,6 +57,7 @@ const tweetController = {
               introduction: reply.User.introduction,
               name: reply.User.name,
               role: reply.User.role,
+              banner: reply.User.banner,
             },
             UserId: reply.UserId,
             comment: reply.comment,
