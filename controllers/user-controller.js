@@ -209,9 +209,9 @@ const userController = {
       })
       if (!user || user.role !== 'user') throw new Error('Target user not exist')
       const followingSort = user.Followings
-        .map(user => {
-          const { id, email, password, banner, ...restProps } = user.toJSON()
-          restProps.followingId = user.id
+        .map(following => {
+          const { email, password, banner, Followship, ...restProps } = following.toJSON()
+          restProps.followingId = following.Followship.followingId
           return restProps
         })
         .sort((a, b) => b.createAt - a.createAt)
@@ -230,9 +230,9 @@ const userController = {
       if (!user || user.role !== 'user') throw new Error('Target user not exist')
       const followerSort = user.Followers
         .map(follower => {
-          const { id, email, password, banner, ...restProps } = follower.toJSON()
-          restProps.isFollowing = follower.Followers.some(one => one.id === req.params.id)
-          restProps.followerId = follower.id
+          const { email, password, banner, Followship, Followers, ...restProps } = follower.toJSON()
+          restProps.isFollowed = follower.Followers.some(one => one.Followship.followerId === Number(req.params.id))
+          restProps.followerId = follower.Followship.followerId
           return restProps
         })
         .sort((a, b) => b.createAt - a.createAt)
