@@ -114,20 +114,25 @@ const userController = {
   },
   getCurrentUser: async (req, res, next) => {
     try {
-      let user = await User.findByPk(helpers.getUser(req).id)
+      const userId = Number(helpers.getUser(req).id)
+      const user = await User.findByPk(userId, {
+        attributes: {
+          exclude: [
+            'password',
+            'createdAt',
+            'updatedAt',
+            'cover',
+            'introduction',
+            'role'
+          ]
+        }
+      })
       if (!user) {
         return res.status(StatusCodes.NOT_FOUND).json({
           status: 'error',
           message: '使用者不存在'
         })
       }
-      user = await user.toJSON()
-      delete user.password
-      delete user.createdAt
-      delete user.updatedAt
-      delete user.cover
-      delete user.introduction
-      delete user.role
       return res.status(StatusCodes.OK).json(user)
     } catch (error) {
       next(error)
@@ -135,10 +140,20 @@ const userController = {
   },
   getUserPage: async (req, res, next) => {
     try {
-      const userId = req.params.id
+      const userId = Number(req.params.id)
       let user = await User.findByPk(userId, {
+        attributes: {
+          exclude: [
+            'password',
+            'createdAt',
+            'updatedAt',
+            'role'
+          ]
+        },
         include: [
           { model: Tweet },
+          { model: Like },
+          { model: Reply },
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' }
         ]
@@ -150,16 +165,22 @@ const userController = {
         })
       }
       user = await user.toJSON()
-      const isBeingFollowed = user.Followers.some(followers => followers.id === req.user.id)
-      delete user.password
+      const isFollowing = user.Followers.some(followers => followers.id === req.user.id)
+      const followingsCounts = user.Followings.length
+      const followersCounts = user.Followers.length
+      delete user.Followings
+      delete user.Followers
       return res.status(StatusCodes.OK).json(
         {
           status: 'success',
           message: '成功取得User資料',
           ...user,
           tweetsCounts: user.Tweets.length,
-          followingsCounts: user.Followings.length,
-          isBeingFollowed
+          likesCounts: user.Likes.length,
+          repliesCounts: user.Replies.length,
+          followingsCounts,
+          followersCounts,
+          isFollowing
         }
       )
     } catch (err) {
@@ -168,16 +189,16 @@ const userController = {
   },
   editUser: async (req, res, next) => {
     try {
-      const userId = req.params.id
+      const userId = Number(req.params.id)
       const { name, introduction } = req.body
       const { files } = req
-      if (helpers.getUser(req).id !== Number(userId)) {
+      if (helpers.getUser(req).id !== userId) {
         return res.stauts(StatusCodes.FORBIDDEN).json({
           status: 'error',
           message: '無權限編輯此使用者'
         })
       }
-      const user = await User.findByPk(req.params.id)
+      const user = await User.findByPk(userId)
       if (!user) {
         return res.status(StatusCodes.NOT_FOUND).json({
           status: 'error',
@@ -227,7 +248,7 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
-      const userId = req.params.id
+      const userId = Number(req.params.id)
       let user = await User.findByPk(userId, {
         include: [
           { model: Tweet, include: [Reply, Like] }
@@ -260,7 +281,7 @@ const userController = {
   },
   getUserReliedTweets: async (req, res, next) => {
     try {
-      const userId = req.params.id
+      const userId = Number(req.params.id)
       const user = await User.findByPk(userId)
       if (!user) {
         return res.status(StatusCodes.NOT_FOUND).json({
@@ -303,7 +324,7 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
-      const userId = req.params.id
+      const userId = Number(req.params.id)
       const user = await User.findByPk(userId)
       if (!user) {
         return res.status(StatusCodes.NOT_FOUND).json({
@@ -344,7 +365,7 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
-      const userId = req.params.id
+      const userId = Number(req.params.id)
       const user = await User.findByPk(userId, {
         include: [{ model: User, as: 'Followings' }]
       })
@@ -373,7 +394,7 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      const userId = req.params.id
+      const userId = Number(req.params.id)
       const user = await User.findByPk(userId,
         {
           include: [{ model: User, as: 'Followers' }]
@@ -500,8 +521,8 @@ const userController = {
   },
   userSetting: async (req, res, next) => {
     try {
-      const currentUserId = req.user.id
-      const onPageUserId = req.params.id
+      const currentUserId = Number(req.user.id)
+      const onPageUserId = Number(req.params.id)
       const emailRegex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/ //eslint-disable-line
       if (currentUserId !== Number(onPageUserId)) {
         return res.status(StatusCodes.FORBIDDEN).json({

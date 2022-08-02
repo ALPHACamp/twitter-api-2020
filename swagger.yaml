@@ -117,23 +117,41 @@ paths:
           content:
             application/json:
               example:
-                id: null
-                account: null
-                name: null
-                email: null
-                introduction: null
-                avatar: null
-                cover: null
-                isAdmin: null
-                role: null
-                createdAt: null
-                updatedAt: null
-                Tweets: null
-                Followings: null
-                Followers: null
-                tweetsCounts: null
-                followingsCounts: null
-                isBeingFollowed: null
+                status: success
+                message: 成功取得User資料
+                id:
+                account:
+                name:
+                email:
+                introduction:
+                avatar:
+                cover:
+                isAdmin:
+                Tweets:
+                  - id:
+                    UserId:
+                    description:
+                    createdAt:
+                    updatedAt:
+                Likes:
+                  - id:
+                    UserId:
+                    TweetId:
+                    createdAt:
+                    updatedAt:
+                Replies:
+                  - id:
+                    UserId:
+                    TweetId:
+                    comment:
+                    createdAt:
+                    updatedAt:
+                tweetsCounts:
+                likesCounts:
+                repliesCounts:
+                followingsCounts:
+                followersCounts:
+                isFollowing:
       deprecated: false
       security:
         - bearer: []
