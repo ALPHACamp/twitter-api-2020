@@ -33,12 +33,26 @@ passport.use(new LocalStrategy(
 ))
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, callbackFn) => {
   try {
-    const user = await User.findByPk(jwtPayload.id, {
+    const userFind = await User.findByPk(jwtPayload.id, {
       include: [
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
+        { model: User, as: 'Followers', raw:true },
+        { model: User, as: 'Followings', raw: true }
       ]
     })
+    const { password, ...userJSON } = userFind.toJSON()
+    const followers = userJSON.Followers.map(follower => {
+      const { email, password, banner, ...restProps } = follower
+      return restProps
+    })
+    const followings = userJSON.Followings.map(following => {
+      const { email, password, banner, ...restProps } = following
+      return restProps
+    })
+    const user = {
+      ...userJSON,
+      Followers: followers,
+      Followings: followings
+    }
     return callbackFn(null, user)
   } catch (err) {
     callbackFn(err)

@@ -6,7 +6,7 @@ module.exports = {
     const replies = []
     const [ users , tweets ] = await Promise.all([
       queryInterface.sequelize.query(
-        'SELECT id FROM Users;',
+        'SELECT id FROM Users WHERE account <> "root";',
         { type: queryInterface.sequelize.QueryTypes.SELECT }
       ),
       queryInterface.sequelize.query(
