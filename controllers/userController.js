@@ -103,8 +103,35 @@ const userController = {
   },
   getUserRepliedTweets: (req, res) => {
     const userId = req.params.id
-    Reply.findAll({ where: { UserId: userId }, raw: true, nest: true })
+    Reply.findAll({ where: { UserId: userId }, include: [User, { model: Tweet, include: [User] }], raw: true, nest: true })
       .then(replies => {
+        replies = replies.map(reply => ({
+          id: reply.id,
+          UserId: reply.UserId,
+          TweetId: reply.TweetId,
+          comment: reply.comment,
+          createdAt: reply.createdAt,
+          updatedAt: reply.updatedAt,
+          User: {
+            account: reply.User.account,
+            avatar: reply.User.avatar,
+            id: reply.User.id,
+            name: reply.User.name,
+          },
+          Tweet: {
+            id: reply.Tweet.id,
+            UserId: reply.Tweet.UserId,
+            description: reply.Tweet.description,
+            createdAt: reply.Tweet.createdAt,
+            updatedAt: reply.Tweet.updatedAt,
+            User: {
+              account: reply.Tweet.User.account,
+              avatar: reply.Tweet.User.avatar,
+              id: reply.Tweet.User.id,
+              name: reply.Tweet.User.name,
+            }
+          }
+        }))
         return res.json(replies)
       })
   },

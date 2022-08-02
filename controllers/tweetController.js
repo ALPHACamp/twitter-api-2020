@@ -29,7 +29,7 @@ const tweetController = {
   },
   getTweet: (req, res) => {
     const tweetId = req.params.id
-    Tweet.findByPk(tweetId, { include: [User, Like, { model: Reply, include: User }] })
+    Tweet.findByPk(tweetId, { include: [User, Like, Reply] })
       .then(tweet => {
         tweet = { tweet: tweet }
         tweet = JSON.stringify(tweet)
@@ -37,34 +37,11 @@ const tweetController = {
         tweet = tweet.tweet
         if (tweet.User) {
           tweet.User = {
-            ...tweet.User,
             account: tweet.User.account,
             avatar: tweet.User.avatar,
             id: tweet.User.id,
-            introduction: tweet.User.introduction,
             name: tweet.User.name,
-            role: tweet.User.role,
-            banner: tweet.User.banner,
           }
-        }
-        if (tweet.Replies[0].User.account) {
-          tweet.Replies = tweet.Replies.map(reply => ({
-            TweetId: reply.TweetId,
-            User: {
-              account: reply.User.account,
-              avatar: reply.User.avatar,
-              id: reply.User.id,
-              introduction: reply.User.introduction,
-              name: reply.User.name,
-              role: reply.User.role,
-              banner: reply.User.banner,
-            },
-            UserId: reply.UserId,
-            comment: reply.comment,
-            createdAt: reply.createdAt,
-            id: reply.id,
-            updatedAt: reply.updatedAt,
-          }))
         }
         return res.json(tweet)
       })
@@ -108,10 +85,36 @@ const tweetController = {
       })
   },
   getTweetReplies: (req, res) => {
-    const userId = 1
     const tweetId = req.params.id
-    Reply.findAll({ where: { UserId: userId, TweetId: tweetId } })
+    Reply.findAll({ where: { TweetId: tweetId }, include: [User, { model: Tweet, include: [User] }] })
       .then(replies => {
+        replies = replies.map(reply => ({
+          id: reply.id,
+          UserId: reply.UserId,
+          TweetId: reply.TweetId,
+          comment: reply.comment,
+          createdAt: reply.createdAt,
+          updatedAt: reply.updatedAt,
+          User: {
+            account: reply.User.account,
+            avatar: reply.User.avatar,
+            id: reply.User.id,
+            name: reply.User.name,
+          },
+          Tweet: {
+            id: reply.Tweet.id,
+            UserId: reply.Tweet.UserId,
+            description: reply.Tweet.description,
+            createdAt: reply.Tweet.createdAt,
+            updatedAt: reply.Tweet.updatedAt,
+            User: {
+              account: reply.Tweet.User.account,
+              avatar: reply.Tweet.User.avatar,
+              id: reply.Tweet.User.id,
+              name: reply.Tweet.User.name,
+            }
+          }
+        }))
         return res.json(replies)
       })
   },
