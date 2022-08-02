@@ -168,16 +168,18 @@ const userController = {
       const isFollowing = user.Followers.some(followers => followers.id === req.user.id)
       const followingsCounts = user.Followings.length
       const followersCounts = user.Followers.length
+      const tweetsCounts = user.Tweets.length
       delete user.Followings
       delete user.Followers
+      delete user.Tweets
+      delete user.Replies
+      delete user.Likes
       return res.status(StatusCodes.OK).json(
         {
           status: 'success',
           message: '成功取得User資料',
           ...user,
-          tweetsCounts: user.Tweets.length,
-          likesCounts: user.Likes.length,
-          repliesCounts: user.Replies.length,
+          tweetsCounts,
           followingsCounts,
           followersCounts,
           isFollowing

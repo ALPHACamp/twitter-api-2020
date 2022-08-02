@@ -127,28 +127,7 @@ paths:
                 avatar:
                 cover:
                 isAdmin:
-                Tweets:
-                  - id:
-                    UserId:
-                    description:
-                    createdAt:
-                    updatedAt:
-                Likes:
-                  - id:
-                    UserId:
-                    TweetId:
-                    createdAt:
-                    updatedAt:
-                Replies:
-                  - id:
-                    UserId:
-                    TweetId:
-                    comment:
-                    createdAt:
-                    updatedAt:
                 tweetsCounts:
-                likesCounts:
-                repliesCounts:
                 followingsCounts:
                 followersCounts:
                 isFollowing:
