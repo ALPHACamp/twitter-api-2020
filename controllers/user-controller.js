@@ -7,8 +7,7 @@ const helpers = require('../_helpers')
 const userController = {
   signIn: (req, res, next) => {
     try {
-      const user = helpers.getUser(req).toJSON()
-      delete user.password
+      const user = helpers.getUser(req)
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '3d' })
       res.json({
         token,
