@@ -4,8 +4,12 @@ const helpers = require('../_helpers')
 const followController = {
   addFollow: async (req, res, next) => {
     try {
-      const followingId = Number(req.body.id)
-      const followerId = Number(helpers.getUser(req).id)
+      const followingId = req.body.id
+      const followerId = helpers.getUser(req).id
+
+      if (!followingId) res.status(404).json({ status: 'error', message: '找不到 followingId!' })
+      if (!followerId) res.status(404).json({ status: 'error', message: '找不到 followerId!' })
+
       const following = await User.findByPk(followingId)
       const follower = await User.findByPk(followerId)
 

@@ -56,16 +56,16 @@ const tweetController = {
           message: '偵測不到當前使用者!'
         })
       }
+      if (!description || !description.trim()) {
+        res.status(400).json({
+          status: 'error',
+          message: '推文內容不可以空白!'
+        })
+      }
       if (description.length > 140) {
         res.status(400).json({
           status: 'error',
           message: '字數不可以超過140字!'
-        })
-      }
-      if (!description.trim()) {
-        res.status(400).json({
-          status: 'error',
-          message: '推文內容不可以空白!'
         })
       }
       const tweet = await Tweet.create({

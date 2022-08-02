@@ -220,6 +220,64 @@ const userController = {
       next(err)
     }
   },
+  getUserFollowing: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId, {
+        include: [{ model: User, as: 'Followings' }],
+        order: [['createdAt', 'DESC']]
+      })
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: '使用者不存在!'
+        })
+      }
+      const followingUser = user.Followings.map(following => {
+        return {
+          followingId: following.id,
+          followingName: following.name,
+          followingAvatar: following.avatar,
+          followingAccount: following.account,
+          followingIntroduction: following.introduction,
+          isFollowing: getUser(req).Followings ? getUser(req).Followings.some(f => f.id === following.id) : false,
+          createdAt: following.Followship.createdAt
+        }
+      })
+      return res.status(200).json(followingUser)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollower: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId, {
+        include: [{ model: User, as: 'Followers' }],
+        order: [['createdAt', 'DESC']]
+      })
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: '使用者不存在!'
+        })
+      }
+      const followerUser = user.Followers.map(follower => {
+        return {
+          followerId: follower.id,
+          followerName: follower.name,
+          followerAvatar: follower.avatar,
+          followerAccount: follower.account,
+          followerIntroduction: follower.introduction,
+          isFollower: getUser(req).Followers ? getUser(req).Followers.some(f => f.id === follower.id) : false,
+          createdAt: follower.Followship.createdAt
+        }
+      })
+      return res.status(200).json(followerUser)
+    } catch (err) {
+      next(err)
+    }
+  },
   getUserTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
@@ -231,7 +289,6 @@ const userController = {
           message: '使用者不存在!'
         })
       }
-
       let tweets = await Tweet.findAll({
         where: { UserId: userId },
         attributes: [
