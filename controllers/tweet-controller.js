@@ -117,7 +117,7 @@ const tweetController = {
             include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
           }
         ],
-        order: [[Tweet, 'createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']]
       })
       return res.status(StatusCodes.OK).json(replies)
     } catch (err) {
