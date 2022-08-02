@@ -88,34 +88,24 @@ const userController = {
     }
   }, 
   editUser: async (req, res, next) => {
-    const UserId = helpers.getUser(req).id
-    const { account, name, email, password, checkPassword, introduction } = req.body
-    const id = req.params.id
     try {
-      if (Number(UserId) !== Number(id)) throw new Error('無法修改其他使用者之資料')
-      if (!account || !name || !email || !password || !checkPassword) throw new Error('必填欄位不可空白')
-      if (password !== checkPassword) throw new Error('Passwords do not match!')
+      const {id} = req.params
+      if (Number(id) !== helpers.getUser(req).id) return res.status(403).json({ status: 'error', message: '無法修改其他使用者之資料' })
       const user = await User.findByPk(id)
-      if (!user || user.role === 'admin') throw new Error("使用者不存在")
-      const foundEmail = await User.findOne({ where: { email, [Op.not]: [{ id }] } })
-      const foundAccount = await User.findOne({ where: { account, [Op.not]: [{ id }] } })
-      let errorMessage = []
-      if (foundEmail) {
-        errorMessage += 'email已重複註冊'
-      }
-      if (foundAccount) {
-        errorMessage += 'account已重複註冊'
-      }
-      if (errorMessage.length > 0) {
-        throw new Error(errorMessage)
-      }
-      const newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+      if (!user) throw new Error('使用者不存在')
+      
+      const { name, introduction } = req.body
+      if (!name || !introduction) throw new Error('必填欄位不可空白')
+      if (name.length > 50) throw new Error('名稱不能超過50字')
+      if (introduction.length > 150) throw new Error('簡介不能超過150字')
+
       const avatarFile = req.files?.avatar ? await imgurFileHandler(...req.files.avatar) : null
       const coverFile = req.files?.avatar ? await imgurFileHandler(...req.files.cover) : null
+
       const updatedUser = await user.update({
-        account, name, email, introduction,
-        password: newPassword,
-        avatar: avatarFile || user.avatar,
+        name,
+        introduction,
+	      avatar: avatarFile || user.avatar,
         cover: coverFile || user.cover
       })
       const data = updatedUser.toJSON()
