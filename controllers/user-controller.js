@@ -328,6 +328,40 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: '使用者不存在!'
+        })
+      }
+      const replied = await Reply.findAll({
+        where: { UserId: userId },
+        order: [['createdAt', 'DESC']],
+        attributes: ['id', 'UserId', 'TweetId', 'comment', 'createdAt'],
+        include: [
+          {
+            model: Tweet,
+            attributes: ['id', 'UserId'],
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'account', 'name', 'avatar']
+              }
+            ]
+          }
+        ],
+        raw: true,
+        nest: true
+      })
+      return res.status(200).json(replied)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
