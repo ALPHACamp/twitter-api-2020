@@ -152,8 +152,6 @@ const userController = {
         },
         include: [
           { model: Tweet },
-          { model: Like },
-          { model: Reply },
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' }
         ]
@@ -172,8 +170,6 @@ const userController = {
       delete user.Followings
       delete user.Followers
       delete user.Tweets
-      delete user.Replies
-      delete user.Likes
       return res.status(StatusCodes.OK).json(
         {
           status: 'success',
