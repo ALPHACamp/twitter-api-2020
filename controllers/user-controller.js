@@ -320,6 +320,56 @@ const userController = {
     })
     if (!user) return res.json({ status: 'error', message: 'user not found' })
     return res.json(user)
+  },
+  editUser: async (req, res, next) => {
+    try {
+      const { account, name, email, password, checkPassword, introduction } = req.body
+      const id = Number(req.params.id)
+      if (!id) return res.status(401).json({ status: 'error', message: 'params.id not found' })
+
+      // check if the profile belongs to current user
+      const currentUser = helpers.getUser(req)
+      if (id !== currentUser.id) return res.status(400).json({ status: 'error', message: "Can not edit other's profile" })
+
+      // get the user instance
+      const user = await User.findByPk(id)
+
+      // check if any column is blank
+      if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) {
+        return res.status(400).json({ status: 'error', message: 'All fields are required.' })
+      }
+
+      // check if the email and account is changed. If yes, check if the new one has been registered.
+      if (email !== user.email) {
+        const emailExist = await User.findOne({ where: { email } })
+        if (emailExist) return res.status(401).json({ status: 'error', message: 'The email is registered.' })
+      }
+      if (account !== user.account) {
+        const accountExist = await User.findOne({ where: { account } })
+        if (accountExist) return res.status(401).json({ status: 'error', message: 'The account is registered.' })
+      }
+
+      // check if updated name < 50 and introduction < 160 characters
+      if (name.length > 50) return res.status(400).json({ status: 'error', message: 'Name is too long.' })
+      if (introduction?.length > 50) return res.status(400).json({ status: 'error', message: 'Introduction is too long.' })
+
+      // check if the password and checkPassword are the same
+      if (password !== checkPassword) return res.status(401).json({ status: 'error', message: 'Password and checkPassword are not same.' })
+
+      // update user data (expect for avatar and cover images)
+      const updatedUser = await user.update({
+        name,
+        account,
+        email,
+        password: bcrypt.hashSync(password, 10),
+        introduction: introduction || user.introduction
+      })
+      const data = updatedUser.toJSON()
+      delete data.password
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
