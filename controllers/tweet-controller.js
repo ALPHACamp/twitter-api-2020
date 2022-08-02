@@ -146,6 +146,24 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  replyTweet: async (req, res, next) => {
+    try {
+      const UserId = Number(helpers.getUser(req).id)
+      const TweetId = Number(req.params.tweet_id)
+      if (!TweetId) return res.status(400).json({ status: 'error', message: 'TweetId is required' })
+
+      const tweet = await Tweet.findOne({ where: { id: TweetId } })
+      if (!tweet) return res.status(404).json({ status: 'error', message: 'Tweet is not found' })
+
+      const { comment } = req.body
+      if (!comment || !comment.trim()) return res.status(400).json({ status: 'error', message: 'Reply is blank.' })
+
+      await Reply.create({ TweetId, UserId, comment })
+      return res.status(200).json({ status: 'success', message: 'Post reply successfully' })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
