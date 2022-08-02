@@ -136,12 +136,6 @@ const tweetController = {
           message: 'Tweet或user不存在'
         })
       }
-      if (Number(user.id) === Number(userId)) {
-        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
-          status: 'error',
-          message: '無法對自己按like'
-        })
-      }
       const like = await Like.findOne({
         where: { UserId: userId, TweetId: tweetId }
       })
