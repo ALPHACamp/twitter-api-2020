@@ -77,7 +77,7 @@ const userController = {
       })
   },
   getUser: (req, res) => {
-    User.findByPk(req.params.id)
+    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
       .then(user => {
         user = {
           account: user.account,
@@ -88,6 +88,8 @@ const userController = {
           name: user.name,
           role: user.role,
           banner: user.banner,
+          Followers: user.Followers.map(follower => follower.Followship.followerId),
+          Followings: user.Followings.map(following => following.Followship.followingId)
         }
         return res.json(user)
       })
@@ -145,7 +147,7 @@ const userController = {
     } else {
       password = ''
     }
-    User.findByPk(req.params.id)
+    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
       .then(user => {
         user.update({
           name: name || user.name,
@@ -164,6 +166,8 @@ const userController = {
               name: user.name,
               role: user.role,
               banner: user.banner,
+              Followers: user.Followers.map(follower => follower.Followship.followerId),
+              Followings: user.Followings.map(following => following.Followship.followingId)
             }
             return res.json(user)
           })
