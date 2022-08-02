@@ -159,7 +159,7 @@ const tweetController = {
             model: Tweet,
             attributes: ['id'],
             include: [
-              { model: User, attributes: ['account'] }
+              { model: User, attributes: ['id', 'account'] }
             ]
           }
         ],
@@ -172,6 +172,7 @@ const tweetController = {
         {
           id: reply.id,
           comment: reply.comment,
+          tweetAuthorId: reply.Tweet.User.id,
           tweetAuthorAccount: reply.Tweet.User.account,
           User: reply.User,
           createdAt: reply.createdAt
