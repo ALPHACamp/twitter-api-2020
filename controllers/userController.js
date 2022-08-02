@@ -89,10 +89,6 @@ const userController = {
           role: user.role,
           banner: user.banner,
         }
-        console.log('===')
-        console.log('===')
-        console.log('===')
-        console.log('user', user)
         return res.json(user)
       })
   },
