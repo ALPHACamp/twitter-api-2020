@@ -151,6 +151,7 @@ const tweetController = {
           message: '已對此則tweet按like'
         })
       }
+
       const data = await Like.create({
         UserId: userId,
         TweetId: tweetId
