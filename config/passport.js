@@ -33,10 +33,13 @@ passport.use(new LocalStrategy(
   }
 ))
 
-
+let jwSecretForTest
+if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+  jwSecretForTest = 'secret'
+}
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: jwSecretForTest ? jwSecretForTest : process.env.JWT_SECRET
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id)
