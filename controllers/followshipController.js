@@ -26,7 +26,7 @@ const followshipController = {
   },
   postFollowship: (req, res) => {
     const followerId = req.body.userId || 1
-    const followingId = req.body.followingId
+    const followingId = req.body.id
     Followship.create({
       followerId: followerId,
       followingId: followingId

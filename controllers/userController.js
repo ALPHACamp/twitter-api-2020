@@ -166,16 +166,31 @@ const userController = {
   },
   getUserFollowings: (req, res) => {
     const userId = req.params.id
-    // 可以通過測試的寫法，但感覺實際又用上會有問題
-    return Followship.findAll({ where: { followerId: userId } })
-      .then(followings => {
-        return res.json(followings)
-      })
-
-    // 實際應用上比較可能出現的寫法，先保留
-    User.findByPk(userId, { include: [{ model: Tweet, include: Reply }, { model: Reply, include: Tweet }, { model: User, as: 'Followings' }, { model: User, as: 'Followers' }] })
-      .then(user => {
-        return res.json(user.Followings)
+    Promise.all([Followship.findAll({ where: { followerId: userId } })])
+      .then(([followings]) => {
+        followings = { followings: followings }
+        followings = JSON.stringify(followings)
+        followings = JSON.parse(followings)
+        followings = followings.followings.map(following => following)
+        Promise.all(followings.map(following => {
+          return User.findByPk(following.followingId)
+        }))
+          .then((users) => {
+            users = { users: users }
+            users = JSON.stringify(users)
+            users = JSON.parse(users)
+            users = users.users.map(user => ({
+              account: user.account,
+              avatar: user.avatar,
+              id: user.id,
+              introduction: user.introduction,
+              name: user.name,
+            }))
+            followings.forEach((following, index) => {
+              following.followingUser = users[index]
+            })
+            return res.json(followings)
+          })
       })
   },
   getUserFollowers: (req, res) => {
