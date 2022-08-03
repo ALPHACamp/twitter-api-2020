@@ -126,8 +126,7 @@ const userController = {
     const id = req.params.id
     try {
       if (Number(UserId) !== Number(id)) throw new Error('無法修改其他使用者之資料')
-      if (!account || !name || !email || !password || !checkPassword) throw new Error('必填欄位不可空白')
-      if (introduction ? introduction.length > 160 : false || name.length > 50) throw new Error('字數超出上限！')
+      if (introduction ? introduction.length > 160 : false || name ? name.length > 50 : false) throw new Error('字數超出上限！')
       if (password !== checkPassword) throw new Error('Passwords do not match!')
       const user = await User.findByPk(id)
       if (!user || user.role === 'admin') throw new Error("使用者不存在")
