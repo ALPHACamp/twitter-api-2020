@@ -6,6 +6,7 @@ const followshipController = {
     try {
       const currentUser = helpers.getUser(req)
       const targetUsers = await User.findAll({
+        where: { role: 'user' },
         include: [{ model: User, as: 'Followers' }]
       })
 
@@ -20,7 +21,7 @@ const followshipController = {
           }
           return restProps
         })
-        .sort((a, b) => b.followersCounts - a.followersCounts)
+        .sort((a, b) => b.followerCounts - a.followerCounts)
         .slice(0, 10)
 
       res.json(topUsersApiData)
@@ -35,6 +36,14 @@ const followshipController = {
 
       if (!id) throw new Error('Target user id is required.')
       if (currentUserId === id) throw new Error(`Current uesr can't follow itself.`)
+
+      const admins = await User.findAll({
+        where: { role: 'admin' },
+        raw: true
+      })
+      const isAdminId = admins.some(admin => admin.id === id)
+
+      if (isAdminId) throw new Error(`Current uesr can't follow admin.`)
 
       const [targetUser, followship] = await Promise.all([
         User.findByPk(id),
@@ -67,6 +76,14 @@ const followshipController = {
       const { followingId } = req.params
 
       if (!Number(followingId)) throw new Error('Params target user id is required.')
+
+      const admins = await User.findAll({
+        where: { role: 'admin' },
+        raw: true
+      })
+      const isAdminId = admins.some(admin => admin.id === followingId)
+
+      if (isAdminId) throw new Error(`Current uesr can't unfollow admin.`)
 
       const [targetUser, followship] = await Promise.all([
         User.findByPk(followingId),
