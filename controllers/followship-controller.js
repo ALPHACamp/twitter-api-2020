@@ -4,17 +4,19 @@ const helpers = require('../_helpers')
 const followshipController = {
   getTopUsers: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req).toJSON()
-      const users = await User.findAll({
-        include: [{ model: User, as: 'Followers' }],
+      const currentUser = helpers.getUser(req)
+      const targetUsers = await User.findAll({
+        include: [{ model: User, as: 'Followers' }]
       })
 
-      const topUsersApiData = users
+      if (!targetUsers) throw new Error('Target users not exist.')
+
+      const topUsersApiData = targetUsers
         .map((user) => {
-          const { Followers, email, password, introduction, banner, createdAt, updatedAt, ...restProps } = {
+          const { Followers, role, email, password, introduction, banner, createdAt, updatedAt, ...restProps } = {
             ...user.toJSON(),
-            followersCounts: user.Followers.length,
-            isFollowed: currentUser.Followings.some((followingUser) => followingUser.id === user.id),
+            followerCounts: user.Followers.length,
+            isFollowed: currentUser.Followings.some((followingUser) => followingUser.id === user.id)
           }
           return restProps
         })
@@ -28,60 +30,68 @@ const followshipController = {
   },
   postFollowship: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req)
+      const currentUserId = helpers.getUser(req)?.id
       const { id } = req.body
 
-      if (currentUser.id === id) throw new Error(`Uesr can't follow`)
+      if (!id || (typeof id !== 'number')) throw new Error('Target user id is required.')
+      if (currentUserId === id) throw new Error(`Current uesr can't follow itself.`)
 
       const [targetUser, followship] = await Promise.all([
         User.findByPk(id),
         Followship.findOne({
           where: {
-            followerId: currentUser.id,
-            followingId: id,
-          },
-        }),
+            followerId: currentUserId,
+            followingId: id
+          }
+        })
       ])
 
-      if (!targetUser) throw new Error(`This user doesn't exist!`)
-      if (followship) throw new Error(`User is following the target user!`)
+      if (!targetUser) throw new Error(`Target user doesn't exist.`)
+      if (followship) throw new Error(`User has already followed the target user.`)
 
       await Followship.create({
-        followerId: currentUser.id,
-        followingId: id,
+        followerId: currentUserId,
+        followingId: id
       })
 
-      res.json({ status: 'success' })
+      res.json({
+        status: 'success'
+      })
     } catch (error) {
       next(error)
     }
   },
   deleteFollowship: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req)
+      const currentUserId = helpers.getUser(req)?.id
       const { followingId } = req.params
+
+      if (!Number(followingId)) throw new Error('Params target user id is required.')
+
       const [targetUser, followship] = await Promise.all([
         User.findByPk(followingId),
         Followship.findOne({
           where: {
-            followerId: currentUser.id,
-            followingId: followingId,
-          },
-        }),
+            followerId: currentUserId,
+            followingId: followingId
+          }
+        })
       ])
 
-      if (!targetUser) throw new Error(`This user doesn't exist!`)
-      if (!followship) throw new Error(`You haven't followed this user!`)
+      if (!targetUser) throw new Error('Target user not exist.')
+      if (!followship) throw new Error('You have not followed target user.')
 
       await Followship.destroy({
-        where: { follower_id: currentUser.id, following_id: followingId },
+        where: { follower_id: currentUserId, following_id: followingId }
       })
 
-      res.json({ status: 'success' })
+      res.json({
+        status: 'success'
+      })
     } catch (error) {
       next(error)
     }
-  },
+  }
 }
 
 module.exports = followshipController
