@@ -33,7 +33,7 @@ const followshipController = {
       const currentUserId = helpers.getUser(req)?.id
       const { id } = req.body
 
-      if (!id || (typeof id !== 'number')) throw new Error('Target user id is required.')
+      if (!id) throw new Error('Target user id is required.')
       if (currentUserId === id) throw new Error(`Current uesr can't follow itself.`)
 
       const [targetUser, followship] = await Promise.all([
