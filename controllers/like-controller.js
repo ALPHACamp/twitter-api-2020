@@ -4,15 +4,16 @@ const helpers = require('../_helpers')
 const likeController = {
   postLikeToTweet: async (req, res, next) => {
     try {
-      const theSignInUserId = helpers.getUser(req)?.id
+      const currentUserId = helpers.getUser(req)?.id
       const { id } = req.params
 
-      if (!theSignInUserId) throw new Error(`Server side can't get user id.`)
-      if (!id) throw new Error(`Params /:id is required!`)
+      if (!Number(id)) throw new Error('Params id is required.')
 
-      await Like.findOrCreate({ where: { UserId: theSignInUserId, TweetId: id } })
+      await Like.findOrCreate({ where: { UserId: currentUserId, TweetId: id } })
 
-      res.status(200).json({ status: 'success' })
+      res.json({
+        status: 'success'
+      })
     } catch (error) {
       next(error)
     }
@@ -20,18 +21,19 @@ const likeController = {
 
   postUnlikeToTweet: async (req, res, next) => {
     try {
-      const theSignInUserId = helpers.getUser(req)?.id
+      const currentUserId = helpers.getUser(req)?.id
       const { id } = req.params
 
-      if (!theSignInUserId) throw new Error(`Server side can't get user id.`)
-      if (!id) throw new Error(`Params /:id is required!`)
+      if (!Number(id)) throw new Error('Params id is required.')
 
-      const userLikedTweet = await Like.findOne({ where: { UserId: theSignInUserId, TweetId: id } })
-      if (!userLikedTweet) throw new Error(`User didn't click like to this tweet!`)
+      const userLikedTweet = await Like.findOne({ where: { UserId: currentUserId, TweetId: id } })
+      if (!userLikedTweet) throw new Error('Current user has not liked this tweet.')
 
-      await Like.destroy({ where: { user_id: theSignInUserId, tweet_id: id } })
+      await Like.destroy({ where: { user_id: currentUserId, tweet_id: id } })
 
-      res.status(200).json({ status: 'success' })
+      res.json({
+        status: 'success'
+      })
     } catch (error) {
       next(error)
     }

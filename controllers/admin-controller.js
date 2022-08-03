@@ -5,17 +5,12 @@ const helpers = require('../_helpers')
 const adminController = {
   signIn: async (req, res, next) => {
     try {
-      // "helpers.getUser(req).toJSON()" needs .toJSON()
-      // otherwise signing in action would fail
-      const theSignInuser = helpers.getUser(req).toJSON() || undefined
-      if (theSignInuser.role !== 'admin') throw new Error('Only admin is allow to use backstage!')
+      const admin = helpers.getUser(req)
+      const token = jwt.sign(admin, process.env.JWT_SECRET, { expiresIn: '14d' })
 
-      delete theSignInuser.password
-      const token = jwt.sign(theSignInuser, process.env.JWT_SECRET, { expiresIn: '14d' })
-
-      res.status(200).json({
+      res.json({
         status: 'success',
-        data: { token, user: theSignInuser },
+        token
       })
     } catch (error) {
       next(error)
@@ -23,22 +18,18 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      // for pass test, "theSignInuser = helpers.getUser(req)" can't be added .toJSON()
-      const theSignInuser = helpers.getUser(req) || undefined
-      if (theSignInuser.role !== 'admin') {
-        throw new Error('Only admin is allowed to use backstage!')
-      }
-
       const users = await User.findAll({
-        attributes: { exclude: ['password', 'email', 'introduction', 'createdAt', 'updatedAt'] },
+        attributes: { exclude: ['role', 'password', 'email', 'introduction', 'createdAt', 'updatedAt'] },
         include: [
           { model: Tweet, raw: true },
           { model: Like, raw: true },
           { model: User, as: 'Followers', raw: true },
-          { model: User, as: 'Followings', raw: true },
+          { model: User, as: 'Followings', raw: true }
         ],
-        nest: true,
+        nest: true
       })
+
+      if (!users) throw new Error('Target users not exist.')
 
       const usersApiData = users
         .map((user) => {
@@ -47,72 +38,71 @@ const adminController = {
             tweetCounts: user.Tweets.length,
             likeCounts: user.Likes.length,
             followingCounts: user.Followings.length,
-            followerCounts: user.Followers.length,
+            followerCounts: user.Followers.length
           }
           return restProps
         })
         .sort((a, b) => b.tweetCounts - a.tweetCounts)
 
-      res.status(200).json(usersApiData)
+      res.json(usersApiData)
     } catch (error) {
       next(error)
     }
   },
   getTweets: async (req, res, next) => {
     try {
-      // "helpers.getUser(req).toJSON()" needs .toJSON()
-      // otherwise getting tweets action would fail
-      const theSignInuser = helpers.getUser(req).toJSON() || undefined
-      if (theSignInuser.role !== 'admin') throw new Error('Only admin is allowed to use backstage!')
-
       const tweets = await Tweet.findAll({
         include: {
           model: User,
           where: { role: 'user' },
-          attributes: ['name', 'account', 'avatar'],
+          attributes: ['id', 'name', 'account', 'avatar']
         },
+        order: [['createdAt', 'DESC']],
         nest: true,
-        raw: true,
+        raw: true
       })
 
-      const tweetsApiData = tweets.map((tweet) => ({
-        ...tweet,
-        description: tweet.description.substring(0, 50),
-      }))
+      if (!tweets) throw new Error('Target tweets not exist.')
 
-      res.status(200).json({
-        status: 'success',
-        data: { tweets: tweetsApiData },
+      const tweetsApiData = tweets.map((tweet) => {
+        const { updatedAt, UserId, userId, User: user,  ...restProps } = tweet
+        const description = tweet.description.substring(0, 50)
+        return {
+          ...restProps,
+          user,
+          description
+        }
       })
+
+      res.json(tweetsApiData)
     } catch (error) {
       next(error)
     }
   },
   deleteTweet: async (req, res, next) => {
     try {
-      // for pass test, "theSignInuser = helpers.getUser(req)" can't be added .toJSON()
-      const theSignInuser = helpers.getUser(req)
-      if (theSignInuser.role !== 'admin') throw new Error('Only admin is allowed to use backstage!')
-
       const reqTweetId = req.params.id
-      const tweet = await Tweet.findByPk(reqTweetId)
-      if (!tweet) throw new Error(`This tweet doesn't exist!`)
+      const targetTweet = await Tweet.findByPk(reqTweetId)
 
-      await tweet.destroy()
+      if (!Number(reqTweetId)) throw new Error('Params id is required.')
+      if (!targetTweet) throw new Error('Target tweet not exist.')
+
+      await targetTweet.destroy()
       await Reply.destroy({
-        where: { tweet_id: reqTweetId },
+        where: { tweet_id: reqTweetId }
       })
       await Like.destroy({
-        where: { tweet_id: reqTweetId },
+        where: { tweet_id: reqTweetId }
       })
 
-      res.status(200).json({
-        status: 'success',
+      res.json({
+        status: 'success'
       })
     } catch (error) {
       next(error)
     }
-  },
+  }
 }
 
 module.exports = adminController
+
