@@ -197,16 +197,18 @@ const userController = {
       const userId = req.params.id
       const user = await User.findByPk(userId)
       if (!user || user.role === 'admin') throw new Error("使用者不存在")
-      const tweets = await Reply.findAll({
+      const replies = await Reply.findAll({
         where: { userId },
         attributes: ['id', 'comment', 'tweetId', 'userId', 'createdAt'],
         include: [{
+          model: User,
+          attributes: [
+            'id', 'account', 'name', 'avatar']
+        },
+        {
           model: Tweet,
-          where: { userId },
-          attributes: ['id', 'description', 'userId', 'createdAt'],
           include: [{
             model: User,
-            where: { id: userId },
             attributes: ['id', 'account', 'name', 'avatar']
           }]
         }],
@@ -214,15 +216,13 @@ const userController = {
         raw: true,
         order: [['created_at', 'DESC']]
       })
-      // !現在的寫法，如果同一人在同篇tweet下有兩篇reply，tweet就會出現兩次
-      // !需要再想想要怎麼抓資料庫
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
-        res.json(tweets)
+        res.json(replies)
       } else {
         res.json({
           status: 'success',
-          message: '成功取得使用者的所有的回覆與回覆過的推文',
-          tweets
+          message: '成功取得使用者的所有的回覆',
+          replies
         })
       }
     } catch (err) {
