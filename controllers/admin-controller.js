@@ -63,10 +63,14 @@ const adminController = {
         raw: true,
         nest: true
       })
+      const data = await tweets.map(tweet => ({
+        ...tweet,
+        description: tweet.description.substring(0, 50)
+      }))
       res.json({
         status: 'success',
         message: '成功取得所有推文資料',
-        data: tweets
+        tweets: data
       })
     } catch (err) {
       next(err)
