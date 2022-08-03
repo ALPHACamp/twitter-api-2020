@@ -21,7 +21,6 @@
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "faker": "^4.1.0",
-    "imgur": "^1.0.2",
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
     "mocha": "^6.0.2",
