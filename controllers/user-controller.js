@@ -62,10 +62,12 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const id = req.params.id
+      const isCurrentUser = (currentUserId === Number(id))
       const user = await User.findByPk(id, {
         attributes: [
-          'id', 'account', 'name', 'email', 'avatar', 'cover',
+          'id', 'account', 'name', 'email', 'avatar', 'cover', 'introduction',
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'TweetsCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE user_id = User.id)'), 'LikesCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'FollowingCount'],
@@ -75,13 +77,21 @@ const userController = {
         nest: true
       })
       if (!user || user.role === 'admin') throw new Error("user doesn't exist")
+      const checkUserFollowing = await Followship.findOne({
+        where: { followerId: currentUserId, followingId: id },
+        raw: true
+      })
+      const isFollowing = checkUserFollowing ? true : false
+
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(user)
       } else {
         res.json({
           status: 'Success',
           message: '成功取得使用者資料',
-          data: user
+          isCurrentUser,
+          isFollowing,
+          user
         })
       }
     } catch (err) {
@@ -123,7 +133,6 @@ const userController = {
   modifyUser: async (req, res, next) => {
     const UserId = helpers.getUser(req).id
     const { account, name, email, password, checkPassword, introduction } = req.body
-    const id = req.params.id
     try {
       if (Number(UserId) !== Number(id)) throw new Error('無法修改其他使用者之資料')
       if (introduction ? introduction.length > 160 : false || name ? name.length > 50 : false) throw new Error('字數超出上限！')
