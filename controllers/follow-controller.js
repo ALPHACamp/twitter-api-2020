@@ -1,4 +1,4 @@
-const { Followship, User } = require('../models')
+const { Followship, User, Tweet } = require('../models')
 const helpers = require('../_helpers')
 
 const followController = {
@@ -82,6 +82,38 @@ const followController = {
         status: 'success',
         message: '成功取消追蹤!'
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowersTweets: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+
+      const followers = await Followship.findAll({
+        where: { followerId: currentUserId },
+        attributes: ['followingId'],
+        raw: true
+      })
+
+      const userIdArray = [currentUserId]
+      followers.forEach(follower => {
+        userIdArray.push(follower.followingId)
+      })
+
+      const data = await Tweet.findAll({
+        where: { UserId: userIdArray },
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'account', 'avatar', 'name']
+          }
+        ],
+        raw: true
+      })
+
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
