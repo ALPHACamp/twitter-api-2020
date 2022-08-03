@@ -84,16 +84,20 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const userFind = await User.findByPk(req.params.id, {
+        attributes: {
+          exclude: ['email', 'password']
+        },
         include: [
           Tweet,
           Reply,
           Like,
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
-        ] 
+        ],
+        nest: true
       })
       if (!userFind || (userFind.role !== 'user')) throw new Error('Target user not exist')
-      const { email, password, Tweets, Replies, Likes, Followers, Followings, ...restProps } = {
+      const { Tweets, Replies, Likes, Followers, Followings, ...restProps } = {
         ...userFind.toJSON(),
         tweetCounts: userFind.Tweets.length,
         replyCounts: userFind.Replies.length,
