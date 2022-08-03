@@ -14,6 +14,7 @@ const passport = require('../config/passport')
 const { authenticated, signinRoleUser, signinRoleAdmin, authenticateUser, authenticateAdmin } = require('../middlewares/api-auth')
 const { apiErrorHandler } = require('../middlewares/error-handler')
 
+router.get('/get_current_user', authenticated, userController.getCurrentUser)
 router.get('/test', APItestController.getTestJSON)
 router.post(
   '/admin/signin',
