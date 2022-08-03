@@ -4,16 +4,15 @@ const helpers = require('../_helpers')
 const tweetController = {
   postTweet: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req)?.id || null
-      const description = req.body?.description || null || ''
+      const currentUserId = helpers.getUser(req)?.id
+      const description = req.body?.description
 
-      if (!currentUser) throw new Error(`Server side can't get user id.`)
-      if (!description) throw new Error(`Server side can't get the tweet description.`)
+      if (!description || (description.trim().length === 0)) throw new Error('Target tweet description is required.')
 
       if (description.trim().length > 0 && description.length <= 140) {
-        await Tweet.create({ userId: currentUser, description })
+        await Tweet.create({ userId: currentUserId, description })
       } else {
-        throw new Error(`The characters in a tweet should between 0 and 140.`)
+        throw new Error('Characters length of description should be less than 140.')
       }
 
       res.json({
@@ -24,6 +23,7 @@ const tweetController = {
     }
   },
   getTweets: async (req, res, next) => {
+    const currentUserId = helpers.getUser(req)?.id
     const tweets = await Tweet.findAll({
       include: [
         {
@@ -38,11 +38,12 @@ const tweetController = {
       nest: true,
     })
 
-    if (!tweets) throw new Error(`Not any tweet has been post!`)
+    if (!tweets) throw new Error('Not any tweet has been post.')
 
     const TweetsApiData = tweets.map((tweet) => {
-      const { Likes, Replies, ...restProps } = tweet.toJSON()
-      return { ...restProps, likesCounts: Likes.length, repliesCounts: Replies.length }
+      const { Likes, Replies, UserId, userId, User: user, updatedAt, ...restProps } = tweet.toJSON()
+      const isLiked = Likes.some(Like => Like.UserId === currentUserId)
+      return { ...restProps, user, isLiked, likeCounts: Likes.length, replyCounts: Replies.length }
     })
 
     res.json(TweetsApiData)
@@ -53,8 +54,10 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req)?.id
       const { tweet_id } = req.params
-      if (!tweet_id) throw new Error(`Params /:tweet_id is required!`)
+
+      if (!Number(tweet_id)) throw new Error(`Params tweet_id is required.`)
 
       const tweet = await Tweet.findOne({
         where: { id: tweet_id },
@@ -70,11 +73,11 @@ const tweetController = {
         nest: true,
       })
 
-      if (!tweet) throw new Error(`This tweet doesn't exist!`)
+      if (!tweet) throw new Error(`Target tweet not exist.`)
 
-      const { Replies, Likes, UserId, ...restProps } = tweet.toJSON()
-      console.log(tweet.toJSON())
-      const TweetApiData = { ...restProps, likesCounts: Likes.length, repliesCounts: Replies.length }
+      const { Replies, Likes, UserId, userId, User: user, updatedAt, ...restProps } = tweet.toJSON()
+      const isLiked = Likes.some(Like => Like.UserId === currentUserId)
+      const TweetApiData = { ...restProps, user, isLiked, likeCounts: Likes.length, replyCounts: Replies.length }
 
       res.json(TweetApiData)
     } catch (error) {
