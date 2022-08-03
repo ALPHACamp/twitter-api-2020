@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { Sequelize, Op } = require('sequelize')
-const { getUser } = require('../_helpers')
+const { getUser, imgurFileHandler } = require('../_helpers')
 
 const { User, Tweet, Like, Reply } = require('../models')
 
@@ -368,7 +368,7 @@ const userController = {
       const userId = Number(req.params.id)
       // const currentUserId = getUser(req).id
       const { account, name, email, password, checkPassword, introduction } = req.body
-      // front_cover, avatar
+      const { files } = req // front_cover, avatar
 
       // if (userId !== currentUserId) {
       //   return res.status(403).json({
@@ -443,6 +443,18 @@ const userController = {
           })
         }
         editData.introduction = introduction
+      }
+
+      if (files) {
+        // avatar
+        if (files.avatar) {
+          editData.avatar = await imgurFileHandler(files.avatar[0])
+        }
+
+        // front_cover
+        if (files.front_cover) {
+          editData.front_cover = await imgurFileHandler(files.front_cover[0])
+        }
       }
 
       if (!Object.keys(editData).length) {
