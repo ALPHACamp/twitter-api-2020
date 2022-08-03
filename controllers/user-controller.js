@@ -266,6 +266,10 @@ const userController = {
         delete tweet.Replies
         return {
           ...tweet,
+          userOfTweeet: user.id,
+          userNameOfTweeet: user.name,
+          userAccountOfTweeet: user.account,
+          userAvatarOfTweeet: user.avatar,
           repliedCounts,
           likesCounts,
           isBeingliked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === tweet.id) : false
@@ -300,14 +304,9 @@ const userController = {
         return {
           replyId: reply.id,
           comment: reply.comment,
-          repliedTweet: repliedTweet.id,
-          repliedTweetDescription: repliedTweet.description,
           userOfRepliedTweet: repliedTweet.User.id,
           userAccountOfRepliedTweet: repliedTweet.User.account,
-          userNameOfRepliedTweet: repliedTweet.User.name,
-          userAvatarOfRepliedTweet: repliedTweet.User.avatar,
           repliedTweetCreatedAt: repliedTweet.createdAt,
-          isBeingliked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === repliedTweet.id) : false,
           userOfReply: user.id,
           userAccountOfReply: user.account,
           userNameOfReply: user.name,
