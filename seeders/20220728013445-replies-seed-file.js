@@ -1,36 +1,30 @@
 'use strict'
 const faker = require('faker')
-const { randomPick } = require('../helpers/seeder-helper')
+const { User, Tweet } = require('../models')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    // get users (admin not included)
-    const users = await queryInterface.sequelize.query(
-      "SELECT id FROM Users WHERE role = 'user';",
-      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    // get users' id and tweets' id
+    const [users, tweets] = await Promise.all([
+      User.findAll({ where: { role: 'user' }, attributes: ['id'], raw: true }),
+      Tweet.findAll({ attributes: ['id'], raw: true })
+    ])
+
+    const repliesPerTweet = 3
+    const tweetCount = tweets.length
+    const userCount = users.length
+
+    await queryInterface.bulkInsert('Replies',
+      Array
+        .from({ length: tweetCount * repliesPerTweet })
+        .map((_reply, index) => ({
+          UserId: users[index % userCount].id,
+          TweetId: tweets[index % tweetCount].id,
+          comment: faker.lorem.words(),
+          createdAt: faker.date.recent(30),
+          updatedAt: new Date()
+        }))
     )
-
-    // get all tweets
-    const tweets = await queryInterface.sequelize.query(
-      'SELECT id FROM Tweets;',
-      { type: queryInterface.sequelize.QueryTypes.SELECT }
-    )
-
-    const seedReplies = []
-    // for each tweet, randomly pick 3 users and leave 1 reply per user
-    tweets.forEach(tweet => {
-      const randomUsers = randomPick(users, 3)
-      const randomReplies = randomUsers.map(user => ({
-        UserId: user.id,
-        TweetId: tweet.id,
-        comment: faker.lorem.words(),
-        createdAt: faker.date.recent(30),
-        updatedAt: new Date()
-      }))
-      seedReplies.push(...randomReplies)
-    })
-
-    await queryInterface.bulkInsert('Replies', seedReplies)
   },
 
   down: async (queryInterface, Sequelize) => {
