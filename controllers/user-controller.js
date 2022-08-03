@@ -362,6 +362,110 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  putUser: async (req, res, next) => {
+    try {
+      const userId = Number(req.params.id)
+      // const currentUserId = getUser(req).id
+      const { account, name, email, password, checkPassword, introduction } = req.body
+      // front_cover, avatar
+
+      // if (userId !== currentUserId) {
+      //   return res.status(403).json({
+      //     status: 'error',
+      //     message: '無編輯權限'
+      //   })
+      // }
+
+      const user = await User.findByPk(userId)
+      const editData = {}
+
+      // account verify
+      if (account && user.account !== account) {
+        const otherUser = await User.findOne({ where: { account, role: 'user' } })
+        if (otherUser) {
+          return res.status(400).json({
+            status: 'error',
+            message: '帳號已被使用！'
+          })
+        }
+        editData.account = account
+      }
+
+      // email verify
+      if (email && user.email !== email) {
+        const otherUser = await User.findOne({ where: { email, role: 'user' } })
+        if (otherUser) {
+          return res.status(400).json({
+            status: 'error',
+            message: '電子信箱已被使用！'
+          })
+        }
+        editData.email = email
+      }
+
+      // name verify
+      if (name && name !== user.name) {
+        if (name.length > 50) {
+          return res.status(400)
+            .json({
+              status: 'error',
+              message: 'name 不能超過 50 字！'
+            })
+        }
+        editData.name = name
+      }
+
+      // password verify
+      if (password) {
+        if (!checkPassword) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'checkPassword 不能為空！'
+          })
+        }
+
+        if (password !== checkPassword) {
+          return res.status(400).json({
+            status: 'error',
+            message: '兩次填寫的密碼不同！'
+          })
+        }
+        editData.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+      }
+
+      // introduction verify
+      if (introduction && introduction !== user.introduction) {
+        if (introduction.length > 160) {
+          return res.status(400).json({
+            status: 'error',
+            message: '自介不可超過 160 字！'
+          })
+        }
+        editData.introduction = introduction
+      }
+
+      if (!Object.keys(editData).length) {
+        res.status(400).json({
+          status: 'error',
+          message: '沒有編輯任何欄位！'
+        })
+      }
+
+      let newData = await user.update(editData)
+      newData = newData.toJSON()
+      delete newData.password
+      delete newData.role
+      delete newData.createdAt
+
+      return res.status(200).json({
+        status: 'success',
+        message: '編輯成功！',
+        newData
+      })
+    } catch (error) {
+      next(error)
+    }
   }
 }
 

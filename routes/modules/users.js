@@ -10,6 +10,7 @@ router.get('/:id/likes', userController.getUserLikes)
 router.get('/:id/tweets', userController.getUserTweets)
 router.get('/currentUser', userController.getCurrentUser)
 router.get('/:id', userController.getUser)
+router.put('/:id', userController.putUser)
 router.get('/', userController.getUsers)
 
 module.exports = router
