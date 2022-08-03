@@ -2,12 +2,12 @@ const { Tweet, User, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
-  add:async (req, res, next) => {
+  add: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
       const { description } = req.body
 
-      if (!description) throw new Error('推文內容不可空白')
+      if (!description) throw new Error('內容不可空白')
       if (description.length > 140) throw new Error('推文內容提交字數過長')
 
       const data = await Tweet.create({
@@ -23,11 +23,11 @@ const tweetController = {
       next(err)
     }
   },
-  get:async (req, res, next) => {
+  get: async (req, res, next) => {
     try {
       const TweetId = req.params.tweet_id
       const data = await Tweet.findByPk(TweetId, {
-	      attributes: [
+        attributes: [
           'id', 'description', 'UserId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
             'likeCount'],
@@ -46,7 +46,7 @@ const tweetController = {
 
       const replies = await Reply.findAll({
         where: { TweetId },
-        attributes: [ 'id', 'comment', 'UserId', 'createdAt'],
+        attributes: ['id', 'comment', 'UserId', 'createdAt'],
         include: [{
           model: User,
           attributes: ['name', 'account', 'avatar']
@@ -58,21 +58,22 @@ const tweetController = {
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(data)
-      } else { 
-        res.status(200).json({ 
+      } else {
+        res.status(200).json({
           status: 'Success',
-          message: '您已成功！', 
+          message: '您已成功！',
           data,
           replies
-        })}
+        })
+      }
     } catch (err) {
       next(err)
     }
   },
-  getAll:async (req, res, next) => {
+  getAll: async (req, res, next) => {
     try {
       const data = await Tweet.findAll({
-	      attributes: [
+        attributes: [
           'id', 'description', 'UserId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
             'likeCount'],
@@ -89,12 +90,13 @@ const tweetController = {
       })
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(data)
-      } else { 
-        res.status(200).json({ 
+      } else {
+        res.status(200).json({
           status: 'Success',
-          message: '您已成功！', 
-          data 
-        })}
+          message: '您已成功！',
+          data
+        })
+      }
     } catch (err) {
       next(err)
     }

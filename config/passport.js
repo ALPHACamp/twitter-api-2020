@@ -21,11 +21,11 @@ passport.use(new LocalStrategy(
     User.findOne({ where: { account } })
       .then(user => {
         if (!user) {
-          return cb('帳號或密碼不正確', false)
+          return cb('帳號或密碼不正確！', false)
         }
         bcrypt.compare(password, user.password).then(res => {
           if (!res) {
-            return cb('帳號或密碼不正確', false)
+            return cb('帳號或密碼不正確！', false)
           }
           return cb(null, user)
         })
