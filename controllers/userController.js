@@ -137,8 +137,30 @@ const userController = {
   },
   getUserLikes: (req, res) => {
     const userId = req.params.id
-    Like.findAll({ where: { UserId: userId }, raw: true, nest: true })
+    Like.findAll({ where: { UserId: userId }, include: [{ model: Tweet, include: [User, Reply, Like] }] })
       .then(likes => {
+        likes = likes.map(like => ({
+          id: like.id,
+          UserId: like.UserId,
+          TweetId: like.TweetId,
+          createdAt: like.createdAt,
+          updatedAt: like.updatedAt,
+          Tweet: {
+            id: like.Tweet.id,
+            UserId: like.Tweet.UserId,
+            description: like.Tweet.description,
+            createdAt: like.Tweet.createdAt,
+            updatedAt: like.Tweet.updatedAt,
+            User: {
+              id: like.Tweet.User.id,
+              account: like.Tweet.User.account,
+              avatar: like.Tweet.User.avatar,
+              name: like.Tweet.User.name,
+            },
+            Replies: like.Tweet.Replies,
+            Likes: like.Tweet.Likes,
+          },
+        }))
         return res.json(likes)
       })
   },
