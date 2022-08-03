@@ -4,6 +4,7 @@ const helpers = require('../_helpers')
 const { Tweet, Followship, User, Reply, Like, sequelize } = require('../models')
 const { Op } = require("sequelize")
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const fa = require('faker/lib/locales/fa')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -26,16 +27,16 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match')
-      if (req.body.name && req.body.name.length > 50) throw new Error('名稱不可超過５０字')
+      if (req.body.name && req.body.name.length > 50) throw new Error('字數超出上限！')
       const foundEmail = await User.findOne({ where: { email: req.body.email } })
       const foundAccount = await User.findOne({ where: { account: req.body.account } })
       // !有餘力再來優化程式
       let errorMessage = []
       if (foundEmail) {
-        errorMessage += 'email已重複註冊'
+        errorMessage += 'email已重複註冊！'
       }
       if (foundAccount) {
-        errorMessage += 'account已重複註冊'
+        errorMessage += 'account已重複註冊！'
       }
       if (errorMessage.length > 0) {
         throw new Error(errorMessage)
@@ -86,18 +87,18 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  }, 
+  },
   editUser: async (req, res, next) => {
     try {
-      const {id} = req.params
+      const { id } = req.params
       if (Number(id) !== helpers.getUser(req).id) return res.status(403).json({ status: 'error', message: '無法修改其他使用者之資料' })
       const user = await User.findByPk(id)
       if (!user) throw new Error('使用者不存在')
-      
+
       const { name, introduction } = req.body
       if (!name || !introduction) throw new Error('必填欄位不可空白')
-      if (name.length > 50) throw new Error('名稱不能超過50字')
-      if (introduction.length > 150) throw new Error('簡介不能超過150字')
+      if (name.length > 50) throw new Error('字數超出上限！')
+      if (introduction.length > 160) throw new Error('簡介不能超過150字')
 
       const avatarFile = req.files?.avatar ? await imgurFileHandler(...req.files.avatar) : null
       const coverFile = req.files?.avatar ? await imgurFileHandler(...req.files.cover) : null
@@ -105,7 +106,7 @@ const userController = {
       const updatedUser = await user.update({
         name,
         introduction,
-	      avatar: avatarFile || user.avatar,
+        avatar: avatarFile || user.avatar,
         cover: coverFile || user.cover
       })
       const data = updatedUser.toJSON()
@@ -126,6 +127,7 @@ const userController = {
     try {
       if (Number(UserId) !== Number(id)) throw new Error('無法修改其他使用者之資料')
       if (!account || !name || !email || !password || !checkPassword) throw new Error('必填欄位不可空白')
+      if (introduction ? introduction.length > 160 : false || name.length > 50) throw new Error('字數超出上限！')
       if (password !== checkPassword) throw new Error('Passwords do not match!')
       const user = await User.findByPk(id)
       if (!user || user.role === 'admin') throw new Error("使用者不存在")
@@ -133,10 +135,10 @@ const userController = {
       const foundAccount = await User.findOne({ where: { account, [Op.not]: [{ id }] } })
       let errorMessage = []
       if (foundEmail) {
-        errorMessage += 'email已重複註冊'
+        errorMessage += 'email已重複註冊！'
       }
       if (foundAccount) {
-        errorMessage += 'account已重複註冊'
+        errorMessage += 'account已重複註冊！'
       }
       if (errorMessage.length > 0) {
         throw new Error(errorMessage)
@@ -278,12 +280,13 @@ const userController = {
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(followings)
-      } else { 
-        res.status(200).json({ 
+      } else {
+        res.status(200).json({
           status: 'Success',
-          message: '您已成功！', 
+          message: '您已成功！',
           data: followings
-        })}
+        })
+      }
     } catch (err) {
       next(err)
     }
@@ -331,12 +334,13 @@ const userController = {
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(followers)
-      } else { 
-        res.status(200).json({ 
+      } else {
+        res.status(200).json({
           status: 'Success',
-          message: '您已成功！', 
+          message: '您已成功！',
           data: followers
-        })}
+        })
+      }
     } catch (err) {
       next(err)
     }
