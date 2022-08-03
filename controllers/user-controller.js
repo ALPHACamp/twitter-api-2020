@@ -325,32 +325,30 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword, introduction } = req.body
       const id = Number(req.params.id)
-      if (!id) return res.status(401).json({ status: 'error', message: 'params.id not found' })
+      if (!id) return res.status(401).json({ status: 'error', message: 'Id number is not found in url request' })
 
       // check if the profile belongs to current user
       const currentUser = helpers.getUser(req)
       if (id !== currentUser.id) return res.status(400).json({ status: 'error', message: "Can not edit other's profile" })
 
-      // get the user instance
+      // get the user instance (full data, including hashed password)
       const user = await User.findByPk(id)
 
-      // check if any column is blank
-      if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) {
-        return res.status(400).json({ status: 'error', message: 'All fields are required.' })
-      }
-
       // check if the email and account is changed. If yes, check if the new one has been registered.
-      if (email !== user.email) {
-        const emailExist = await User.findOne({ where: { email } })
-        if (emailExist) return res.status(401).json({ status: 'error', message: 'The email is registered.' })
+      if (email) {
+        if (email !== user.email) {
+          const emailExist = await User.findOne({ where: { email } })
+          if (emailExist) return res.status(401).json({ status: 'error', message: 'The email is registered.' })
+        }
       }
-      if (account !== user.account) {
-        const accountExist = await User.findOne({ where: { account } })
-        if (accountExist) return res.status(401).json({ status: 'error', message: 'The account is registered.' })
+      if (account) {
+        if (account !== user.account) {
+          const accountExist = await User.findOne({ where: { account } })
+          if (accountExist) return res.status(401).json({ status: 'error', message: 'The account is registered.' })
+        }
       }
-
-      // check if updated name < 50 and introduction < 160 characters
-      if (name.length > 50) return res.status(400).json({ status: 'error', message: 'Name is too long.' })
+      // check if updated name > 50 and introduction > 160 characters
+      if (name?.length > 50) return res.status(400).json({ status: 'error', message: 'Name is too long.' })
       if (introduction?.length > 50) return res.status(400).json({ status: 'error', message: 'Introduction is too long.' })
 
       // check if the password and checkPassword are the same
@@ -358,10 +356,10 @@ const userController = {
 
       // update user data (expect for avatar and cover images)
       const updatedUser = await user.update({
-        name,
-        account,
-        email,
-        password: bcrypt.hashSync(password, 10),
+        name: name || user.name,
+        account: account || user.account,
+        email: email || user.email,
+        password: password ? bcrypt.hashSync(password, 10) : user.password,
         introduction: introduction || user.introduction
       })
       const data = updatedUser.toJSON()
