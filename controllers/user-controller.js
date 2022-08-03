@@ -323,7 +323,7 @@ const userController = {
   },
   editUser: async (req, res, next) => {
     try {
-      const { account, name, email, password, checkPassword, introduction } = req.body
+      let { account, name, email, password, checkPassword, introduction } = req.body
       const id = Number(req.params.id)
       if (!id) return res.status(401).json({ status: 'error', message: 'Id number is not found in url request' })
 
@@ -333,6 +333,14 @@ const userController = {
 
       // get the user instance (full data, including hashed password)
       const user = await User.findByPk(id)
+
+      // remove whitespace of input strings
+      account = account?.trim()
+      name = name?.trim()
+      email = email?.trim()
+      password = password?.trim()
+      checkPassword = checkPassword?.trim()
+      introduction = introduction?.trim()
 
       // check if the email and account is changed. If yes, check if the new one has been registered.
       if (email) {
@@ -349,7 +357,7 @@ const userController = {
       }
       // check if updated name > 50 and introduction > 160 characters
       if (name?.length > 50) return res.status(400).json({ status: 'error', message: 'Name is too long.' })
-      if (introduction?.length > 50) return res.status(400).json({ status: 'error', message: 'Introduction is too long.' })
+      if (introduction?.length > 160) return res.status(400).json({ status: 'error', message: 'Introduction is too long.' })
 
       // check if the password and checkPassword are the same
       if (password !== checkPassword) return res.status(401).json({ status: 'error', message: 'Password and checkPassword are not same.' })
