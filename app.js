@@ -20,13 +20,19 @@ function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
+let sessionSecretForTest
+if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
+  sessionSecretForTest = 'secret'
+}
+
+
 app.use(cors())
 app.engine('hbs', handlebars({ extname: '.hbs' }))
 app.set('view engine', 'hbs')
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false }))
+app.use(session({ secret: sessionSecretForTest ? sessionSecretForTest : process.env.SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
 app.use(passport.session())
 
