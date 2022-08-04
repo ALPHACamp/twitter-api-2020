@@ -92,6 +92,25 @@ const adminController = {
     } catch (error) {
       next(error)
     }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        order: [['createdAt', 'DESC']],
+        include: [{
+          model: User,
+          attributes: [
+            'id',
+            'name',
+            'avatar'
+          ]
+        }]
+      })
+
+      return res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
