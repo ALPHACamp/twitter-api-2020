@@ -6,40 +6,54 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
-  signUp: (req, cb) => {
-    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
+  signUp: async (req, cb) => {
+    try {
+      if (req.body.password !== req.body.checkPassword) {
+        return cb(Error('Passwords do not match!'))
+      }
 
-    User.findOne(
-      {
+      if (!req.body.account) {
+        return cb(Error('Account is not allowed empty!'))
+      }
+
+      if (!req.body.email) {
+        return cb(Error('Email is not allowed empty!'))
+      }
+
+      const userByAccount = await User.findOne({
         where: {
-          [Op.or]: [
-            { email: req.body.email },
-            { account: req.body.account }
-          ]
+          account: req.body.account || ''
         }
       })
-      .then(user => {
-        if (user) {
-          return cb(null, { user })
-          // throw new Error('Email already exists!')
-        }
+      if (userByAccount) { // email or account already exists
+        return cb(Error('Account already exists!'))
+      }
 
-        return bcrypt.hash(req.body.password, 10)
+      const userByEmail = await User.findOne({
+        where: {
+          email: req.body.email || ''
+        }
       })
-      .then(hash => {
-        return User.create({
-          account: req.body.account,
-          name: req.body.name,
-          email: req.body.email,
-          password: hash
-        })
-      })
-      .then(newUser => {
-        const data = newUser.toJSON()
-        delete data.password
-        return cb(null, { user: data })
-      })
-      .catch(err => cb(err))
+      if (userByEmail) { // email or account already exists
+        return cb(Error('Email already exists!'))
+      }
+
+      const hash = typeof req.body.password === 'string' ? await bcrypt.hash(req.body.password, 10) : undefined
+
+      const updateData = {}
+      req.body.account && (updateData.account = req.body.account)
+      typeof req.body.name === 'string' && (updateData.name = req.body.name)
+      req.body.email && (updateData.email = req.body.email)
+      hash && (updateData.password = hash)
+
+      const newUser = await User.create(updateData)
+
+      const userData = newUser.toJSON()
+      delete userData.password
+      return cb(null, { user: userData })
+    } catch (err) {
+      return cb(err)
+    }
   },
   signIn: (req, cb) => {
     try {
@@ -91,21 +105,39 @@ const userServices = {
       if (req.body.password !== req.body.checkPassword) {
         return cb(Error('Passwords do not match!'))
       }
-      const aUser = await User.findOne(
-        {
-          where: {
-            [Op.or]: [
-              { email: req.body.email },
-              { account: req.body.account }
-            ]
-          }
-        })
-      if (aUser) { // email or account already exists
-        return cb(null, { user: aUser })
-      }
 
       const user = await User.findByPk(req.params.id)
       if (!user) return cb(Error("User didn't exist!"))
+
+      if (!req.body.account) {
+        return cb(Error('Account is not allowed empty!'))
+      }
+
+      if (!req.body.email) {
+        return cb(Error('Email is not allowed empty!'))
+      }
+
+      const userByAccount = await User.findOne({
+        where: {
+          account: req.body.account || ''
+        }
+      })
+      if (userByAccount) { // email or account already exists
+        if (Number(userByAccount.id) !== Number(user.id)) {
+          return cb(Error('Account already exists!'))
+        }
+      }
+
+      const userByEmail = await User.findOne({
+        where: {
+          email: req.body.email || ''
+        }
+      })
+      if (userByEmail) { // email or account already exists
+        if (Number(userByEmail.id) !== Number(user.id)) {
+          return cb(Error('Email already exists!'))
+        }
+      }
 
       const avatarFile = req.files?.avatar[0]
       const avatarPath = avatarFile ? await imgurFileHandler(req.files.avatar[0]) : undefined
