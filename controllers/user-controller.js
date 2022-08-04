@@ -308,9 +308,15 @@ const userController = {
         order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
 
+      const currentList = await Followship.findAll({
+        where: { followerId: currentUserId },
+        raw: true
+      })
+      const current = currentList.map(id => id.followingId)
+      console.log(current)
       const data = followings.map(following => ({
         ...following.toJSON(),
-        isFollowing: currentUserId.Followings ? currentUserId.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false,
+        isFollowing: current ? current.includes(following.followingId) : false,
       }))
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
@@ -374,9 +380,15 @@ const userController = {
         order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
 
+      const currentList = await Followship.findAll({
+        where: { followerId: currentUserId },
+        raw: true
+      })
+      const current = currentList.map(id => id.followingId)
+      console.log(current)
       const data = followers.map(follower => ({
         ...follower.toJSON(),
-        isFollowing: currentUserId.Followings ? currentUserId.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false,
+        isFollowing: current ? current.includes(follower.followerId) : false,
       }))
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
