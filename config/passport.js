@@ -6,7 +6,7 @@ const { User } = require('../models')
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET ? process.env.JWT_SECRET : 'jwtSecretForTravis',
+  secretOrKey: process.env.JWT_SECRET || 'jwtSecretForTravis',
   passReqToCallback: true
 }
 
