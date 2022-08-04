@@ -190,15 +190,10 @@ const userController = {
         raw: true,
         order: [['created_at', 'DESC']]
       })
-
-      console.log('tweets', tweets[0])
       const newData = tweets.map(t => ({
         ...t,
         isLike: t.isLike === 1 ? true : false
       }))
-
-      console.log('newData', newData)
-
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(tweets)
       } else {
@@ -251,6 +246,7 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const UserId = Number(req.params.id)
       const user = await User.findByPk(UserId)
       if (!user || user.role === 'admin') throw new Error("使用者不存在")
@@ -259,7 +255,11 @@ const userController = {
         attributes: ['id', 'TweetId', 'UserId', 'createdAt'],
         include: [{
           model: Tweet,
-          attributes: ['id', 'description', 'UserId', 'createdAt'],
+          attributes: ['id', 'description', 'UserId', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likesCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'repliesCount'],
+            [sequelize.literal(`(SELECT EXISTS(SELECT * FROM Likes WHERE user_id = ${currentUserId} AND tweet_id = Tweet.id))`), 'isLike']
+          ],
           include: [{
             model: User,
             attributes: ['id', 'account', 'name', 'avatar']
@@ -269,13 +269,21 @@ const userController = {
         raw: true,
         order: [['created_at', 'DESC']]
       })
+
+      const newData = await likedTweets.map(t => (
+        {
+          ...t,
+          islike: t.Tweet.isLike === 1 ? true : false
+        }
+      ))
+
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(likedTweets)
       } else {
         res.status(200).json({
           status: 'Success',
           message: '成功取得所有使用者之資料',
-          likedTweets
+          likedTweets: newData
         })
       }
     } catch (err) {
