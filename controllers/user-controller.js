@@ -56,9 +56,9 @@ const userController = {
     try {
       if (Number(req.params.id) !== helpers.getUser(req).id) return res.status(403).json({ status: 'error', message: 'permission denied' })
       const { account, name, email, password, checkPassword } = req.body
-      const text = !account ? 
-        Object.keys({account})[0] : !name ? 
-        Object.keys({name})[0] : !email ? 
+      const text = !account ?
+        Object.keys({account})[0] : !name ?
+        Object.keys({name})[0] : !email ?
         Object.keys({email})[0] : null
       if (text) throw new Error(`${text} field is required`)
       if (name.length > 50) throw new Error('Characters length of name should be less than 50.')
@@ -83,27 +83,25 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req)?.id
       const userFind = await User.findByPk(req.params.id, {
         attributes: {
-          exclude: ['email', 'password']
+          exclude: ['email', 'password', 'createdAt', 'updatedAt']
         },
         include: [
           Tweet,
-          Reply,
-          Like,
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
         ],
         nest: true
       })
       if (!userFind || (userFind.role !== 'user')) throw new Error('Target user not exist')
-      const { Tweets, Replies, Likes, Followers, Followings, ...restProps } = {
+      const { Tweets, Followers, Followings, ...restProps } = {
         ...userFind.toJSON(),
         tweetCounts: userFind.Tweets.length,
-        replyCounts: userFind.Replies.length,
-        likeCounts: userFind.Likes.length,
         followerCounts: userFind.Followers.length,
-        followingCounts: userFind.Followings.length
+        followingCounts: userFind.Followings.length,
+        isFollowed: userFind.Followers.some(follower => follower.id === currentUserId)
       }
       res.json({
         ...restProps
@@ -140,7 +138,7 @@ const userController = {
       if (!user || (user.role !== 'user')) throw new Error('Target user not exist')
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
-        include: [Reply, Like] 
+        include: [Reply, Like]
       })
       const tweetsSort = tweets
         .map(tweet => {
@@ -163,7 +161,7 @@ const userController = {
       if (!user || (user.role !== 'user')) throw new Error('Target user not exist')
       const replies = await Reply.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet, include: User }] 
+        include: [{ model: Tweet, include: User }]
       })
       const repliesSort = replies
         .map(reply => {
@@ -185,7 +183,7 @@ const userController = {
       if (!user || (user.role !== 'user')) throw new Error('Target user not exist')
       const likes = await Like.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet, include: [User, Reply, Like] }] 
+        include: [{ model: Tweet, include: [User, Reply, Like] }]
       })
       const likesSort = likes
         .map(like => {
