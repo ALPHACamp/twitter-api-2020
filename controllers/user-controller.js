@@ -18,7 +18,7 @@ const userController = {
         return res.status(StatusCodes.FORBIDDEN)
           .json({
             status: 'error',
-            message: '無使用者權限'
+            message: '帳號不存在'
           })
       }
       const payload = {
