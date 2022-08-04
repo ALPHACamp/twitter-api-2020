@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { Op } = require('sequelize')
 
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -8,9 +9,20 @@ const userServices = {
   signUp: (req, cb) => {
     if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
 
-    User.findOne({ where: { email: req.body.email } })
+    User.findOne(
+      {
+        where: {
+          [Op.or]: [
+            { email: req.body.email },
+            { account: req.body.account }
+          ]
+        }
+      })
       .then(user => {
-        if (user) throw new Error('Email already exists!')
+        if (user) {
+          return cb(null, { user })
+          // throw new Error('Email already exists!')
+        }
 
         return bcrypt.hash(req.body.password, 10)
       })
