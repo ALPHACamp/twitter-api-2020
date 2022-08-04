@@ -197,7 +197,29 @@ const userController = {
     const userId = req.params.id
     Followship.findAll({ where: { followingId: userId } })
       .then(followers => {
-        return res.json(followers)
+        followers = { followers: followers }
+        followers = JSON.stringify(followers)
+        followers = JSON.parse(followers)
+        followers = followers.followers.map(follower => follower)
+        Promise.all(followers.map(follower => {
+          return User.findByPk(follower.followerId)
+        }))
+          .then((users) => {
+            users = { users: users }
+            users = JSON.stringify(users)
+            users = JSON.parse(users)
+            users = users.users.map(user => ({
+              account: user.account,
+              avatar: user.avatar,
+              id: user.id,
+              introduction: user.introduction,
+              name: user.name,
+            }))
+            followers.forEach((follower, index) => {
+              follower.followerUser = users[index]
+            })
+            return res.json(followers)
+          })
       })
   },
   putUser: (req, res) => {
