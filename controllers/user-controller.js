@@ -321,6 +321,7 @@ const userController = {
   },
   getRecommendUsers: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const data = await User.findAll({
         where: { [Op.not]: [{ role: 'admin' }] },
         attributes: [
@@ -328,17 +329,22 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'TweetsCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE user_id = User.id)'), 'LikesCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'FollowingCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'FollowerCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'FollowerCount'],
+          [sequelize.literal(`(SELECT EXISTS(SELECT * FROM Followships WHERE follower_id = ${currentUserId} AND following_id = User.id))`), 'isFollowing']
         ],
         order: [[sequelize.literal('FollowingCount'), 'DESC']],
         limit: 10,
         raw: true,
         nest: true
       })
+      const users = await data.map(element => ({
+        ...element,
+        isFollowing: element.isFollowing === 1 ? true : false
+      }))
       res.status(200).json({
         status: 'Success',
         message: '成功取得被追蹤人數前十之使用者資料',
-        data
+        users
       })
     } catch (err) {
       next(err)
