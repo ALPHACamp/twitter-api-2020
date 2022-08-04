@@ -59,7 +59,7 @@ const tweetController = {
         raw: true
       })
       const isLikedId = likedList.map(like => like.TweetId)
-      data.isLiked = isLikedId?.includes(data.id) || false
+      data.isLike = isLikedId?.includes(data.id) || false
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(data)
@@ -100,9 +100,9 @@ const tweetController = {
         raw: true
       })
       const isLikedId = likedList.map(like => like.TweetId)
-      const data = tweets.map(tweet => ({
-        ...tweet,
-        tweet: isLikedId?.includes(tweet.id) || false,
+      const data = tweets.map(isLike => ({
+        ...isLike,
+        isLike: isLikedId?.includes(isLike.id) || false,
       }))
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
