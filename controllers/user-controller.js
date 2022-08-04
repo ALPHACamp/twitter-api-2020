@@ -4,7 +4,7 @@ const helpers = require('../_helpers')
 const { Tweet, Followship, User, Reply, Like, sequelize } = require('../models')
 const { Op } = require("sequelize")
 const { imgurFileHandler } = require('../helpers/file-helpers')
-const fa = require('faker/lib/locales/fa')
+// const fa = require('faker/lib/locales/fa')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -62,26 +62,33 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const id = req.params.id
+      const isCurrentUser = (currentUserId === Number(id))
       const user = await User.findByPk(id, {
         attributes: [
-          'id', 'account', 'name', 'email', 'avatar', 'cover',
+          'id', 'account', 'name', 'email', 'avatar', 'cover', 'introduction',
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'TweetsCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE user_id = User.id)'), 'LikesCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'FollowingCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'FollowerCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'FollowerCount'],
+          [sequelize.literal(`(SELECT EXISTS(SELECT * FROM Followships WHERE follower_id = ${currentUserId} AND following_id = User.id))`), 'isFollowing']
         ],
         raw: true,
         nest: true
       })
       if (!user || user.role === 'admin') throw new Error("user doesn't exist")
+
+      user.isCurrentUser = isCurrentUser
+      user.isFollowing = user.isFollowing === 1 ? true : false
+
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(user)
       } else {
         res.json({
           status: 'Success',
           message: '成功取得使用者資料',
-          data: user
+          user
         })
       }
     } catch (err) {
@@ -126,29 +133,29 @@ const userController = {
     const id = req.params.id
     try {
       if (Number(UserId) !== Number(id)) throw new Error('無法修改其他使用者之資料')
-      if (!account || !name || !email || !password || !checkPassword) throw new Error('必填欄位不可空白')
-      if (introduction ? introduction.length > 160 : false || name.length > 50) throw new Error('字數超出上限！')
-      if (password !== checkPassword) throw new Error('Passwords do not match!')
+      if (introduction ? introduction.length > 160 : false || name ? name.length > 50 : false) throw new Error('字數超出上限！')
+      if (password && checkPassword && password !== checkPassword) throw new Error('Passwords do not match!')
       const user = await User.findByPk(id)
       if (!user || user.role === 'admin') throw new Error("使用者不存在")
-      const foundEmail = await User.findOne({ where: { email, [Op.not]: [{ id }] } })
-      const foundAccount = await User.findOne({ where: { account, [Op.not]: [{ id }] } })
       let errorMessage = []
-      if (foundEmail) {
+      if (email && await User.findOne({ where: { email, [Op.not]: [{ id }] } })) {
         errorMessage += 'email已重複註冊！'
       }
-      if (foundAccount) {
+      if (account && await User.findOne({ where: { account, [Op.not]: [{ id }] } })) {
         errorMessage += 'account已重複註冊！'
       }
       if (errorMessage.length > 0) {
         throw new Error(errorMessage)
       }
-      const newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+      const newPassword = password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : null
       const avatarFile = req.files?.avatar ? await imgurFileHandler(...req.files.avatar) : null
-      const coverFile = req.files?.avatar ? await imgurFileHandler(...req.files.cover) : null
+      const coverFile = req.files?.cover ? await imgurFileHandler(...req.files.cover) : null
       const updatedUser = await user.update({
-        account, name, email, introduction,
-        password: newPassword,
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        introduction: introduction || user.introduction,
+        password: newPassword || user.password,
         avatar: avatarFile || user.avatar,
         cover: coverFile || user.cover
       })
@@ -165,12 +172,17 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const userId = req.params.id
       const user = await User.findByPk(userId)
       if (!user || user.role === 'admin') throw new Error("使用者不存在")
       const tweets = await Tweet.findAll({
         where: { userId },
-        attributes: ['id', 'description', 'userId', 'createdAt'],
+        attributes: ['id', 'description', 'userId', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likesCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'repliesCount'],
+          [sequelize.literal(`(SELECT EXISTS(SELECT * FROM Likes WHERE user_id = ${currentUserId} AND tweet_id = Tweet.id))`), 'isLike']
+        ],
         include: [{
           model: User,
           attributes: ['name', 'account', 'avatar']
@@ -179,13 +191,17 @@ const userController = {
         raw: true,
         order: [['created_at', 'DESC']]
       })
+      const newData = tweets.map(t => ({
+        ...t,
+        isLike: t.isLike === 1 ? true : false
+      }))
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(tweets)
       } else {
         res.json({
           status: 'success',
           message: '成功取得使用者的所有推文',
-          tweets
+          tweets: newData
         })
       }
     } catch (err) {
@@ -231,6 +247,7 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const UserId = Number(req.params.id)
       const user = await User.findByPk(UserId)
       if (!user || user.role === 'admin') throw new Error("使用者不存在")
@@ -239,7 +256,11 @@ const userController = {
         attributes: ['id', 'TweetId', 'UserId', 'createdAt'],
         include: [{
           model: Tweet,
-          attributes: ['id', 'description', 'UserId', 'createdAt'],
+          attributes: ['id', 'description', 'UserId', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likesCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'repliesCount'],
+            [sequelize.literal(`(SELECT EXISTS(SELECT * FROM Likes WHERE user_id = ${currentUserId} AND tweet_id = Tweet.id))`), 'isLike']
+          ],
           include: [{
             model: User,
             attributes: ['id', 'account', 'name', 'avatar']
@@ -249,13 +270,21 @@ const userController = {
         raw: true,
         order: [['created_at', 'DESC']]
       })
+
+      const newData = await likedTweets.map(t => (
+        {
+          ...t,
+          islike: t.Tweet.isLike === 1 ? true : false
+        }
+      ))
+
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(likedTweets)
       } else {
         res.status(200).json({
           status: 'Success',
           message: '成功取得所有使用者之資料',
-          likedTweets
+          likedTweets: newData
         })
       }
     } catch (err) {
@@ -293,6 +322,7 @@ const userController = {
   },
   getRecommendUsers: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const data = await User.findAll({
         where: { [Op.not]: [{ role: 'admin' }] },
         attributes: [
@@ -300,17 +330,22 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'TweetsCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE user_id = User.id)'), 'LikesCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'FollowingCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'FollowerCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'FollowerCount'],
+          [sequelize.literal(`(SELECT EXISTS(SELECT * FROM Followships WHERE follower_id = ${currentUserId} AND following_id = User.id))`), 'isFollowing']
         ],
         order: [[sequelize.literal('FollowingCount'), 'DESC']],
         limit: 10,
         raw: true,
         nest: true
       })
+      const users = await data.map(element => ({
+        ...element,
+        isFollowing: element.isFollowing === 1 ? true : false
+      }))
       res.status(200).json({
         status: 'Success',
         message: '成功取得被追蹤人數前十之使用者資料',
-        data
+        users
       })
     } catch (err) {
       next(err)
