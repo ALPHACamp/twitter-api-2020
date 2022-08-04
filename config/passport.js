@@ -20,7 +20,7 @@ passport.use(new LocalStrategy(
     User.findOne({ where: { account } })
       .then(user => {
         if (!user) {
-          return cb(Error('account or password incorrect!'))
+          return cb(Error("User didn't exist!"))
         }
 
         bcrypt.compare(password, user.password).then(res => {
