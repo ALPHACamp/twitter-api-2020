@@ -166,8 +166,8 @@ const userController = {
   },
   getUserFollowings: (req, res) => {
     const userId = req.params.id
-    Promise.all([Followship.findAll({ where: { followerId: userId } })])
-      .then(([followings]) => {
+    Followship.findAll({ where: { followerId: userId } })
+      .then(followings => {
         followings = { followings: followings }
         followings = JSON.stringify(followings)
         followings = JSON.parse(followings)
