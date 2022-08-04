@@ -91,6 +91,18 @@ const userServices = {
       if (req.body.password !== req.body.checkPassword) {
         return cb(Error('Passwords do not match!'))
       }
+      const aUser = await User.findOne(
+        {
+          where: {
+            [Op.or]: [
+              { email: req.body.email },
+              { account: req.body.account }
+            ]
+          }
+        })
+      if (aUser) { // email or account already exists
+        return cb(null, { user: aUser })
+      }
 
       const user = await User.findByPk(req.params.id)
       if (!user) return cb(Error("User didn't exist!"))
