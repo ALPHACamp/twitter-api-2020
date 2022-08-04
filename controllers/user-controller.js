@@ -134,27 +134,28 @@ const userController = {
     try {
       if (Number(UserId) !== Number(id)) throw new Error('無法修改其他使用者之資料')
       if (introduction ? introduction.length > 160 : false || name ? name.length > 50 : false) throw new Error('字數超出上限！')
-      if (password !== checkPassword) throw new Error('Passwords do not match!')
+      if (password && checkPassword && password !== checkPassword) throw new Error('Passwords do not match!')
       const user = await User.findByPk(id)
       if (!user || user.role === 'admin') throw new Error("使用者不存在")
-      const foundEmail = await User.findOne({ where: { email, [Op.not]: [{ id }] } })
-      const foundAccount = await User.findOne({ where: { account, [Op.not]: [{ id }] } })
       let errorMessage = []
-      if (foundEmail) {
+      if (email && await User.findOne({ where: { email, [Op.not]: [{ id }] } })) {
         errorMessage += 'email已重複註冊！'
       }
-      if (foundAccount) {
+      if (account && await User.findOne({ where: { account, [Op.not]: [{ id }] } })) {
         errorMessage += 'account已重複註冊！'
       }
       if (errorMessage.length > 0) {
         throw new Error(errorMessage)
       }
-      const newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+      const newPassword = password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : null
       const avatarFile = req.files?.avatar ? await imgurFileHandler(...req.files.avatar) : null
-      const coverFile = req.files?.avatar ? await imgurFileHandler(...req.files.cover) : null
+      const coverFile = req.files?.cover ? await imgurFileHandler(...req.files.cover) : null
       const updatedUser = await user.update({
-        account, name, email, introduction,
-        password: newPassword,
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        introduction: introduction || user.introduction,
+        password: newPassword || user.password,
         avatar: avatarFile || user.avatar,
         cover: coverFile || user.cover
       })
