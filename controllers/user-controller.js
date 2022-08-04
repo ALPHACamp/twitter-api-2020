@@ -313,7 +313,6 @@ const userController = {
         raw: true
       })
       const current = currentList.map(id => id.followingId)
-      console.log(current)
       const data = followings.map(following => ({
         ...following.toJSON(),
         isFollowing: current ? current.includes(following.followingId) : false,
@@ -385,7 +384,6 @@ const userController = {
         raw: true
       })
       const current = currentList.map(id => id.followingId)
-      console.log(current)
       const data = followers.map(follower => ({
         ...follower.toJSON(),
         isFollowing: current ? current.includes(follower.followerId) : false,
