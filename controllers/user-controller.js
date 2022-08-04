@@ -342,15 +342,15 @@ const userController = {
       const replied = await Reply.findAll({
         where: { UserId: userId },
         order: [['createdAt', 'DESC']],
-        attributes: ['id', 'UserId', 'TweetId', 'comment', 'createdAt'],
+        attributes: ['id', 'comment', 'createdAt'],
         include: [
           {
             model: Tweet,
-            attributes: ['id', 'UserId'],
+            attributes: ['id'],
             include: [
               {
                 model: User,
-                attributes: ['id', 'account', 'name', 'avatar']
+                attributes: ['id', 'account']
               }
             ]
           }
