@@ -130,8 +130,12 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
-      // get the tweets of a certain user (req.params.id === userId)
-      const id = req.params.id
+      // check the user id is existing
+      const id = Number(req.params.id)
+      const userIsExist = await User.findByPk(id)
+      if (!userIsExist) return res.status(404).json({ status: 'error', message: 'User is not found' })
+
+      // get the tweets of a certain user
       const tweets = await Tweet.findAll({
         where: { UserId: id },
         attributes: [
@@ -148,7 +152,7 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!tweets) return res.status(404).json({ status: 'error', message: 'Tweets are not found.' })
+      if (!tweets.length) return res.status(200).json([])
 
       // check if the current user likes the tweets or not (add attribute "isLike" in tweets)
       const currentUserId = helpers.getUser(req).id
@@ -168,8 +172,12 @@ const userController = {
   },
   getUserReplies: async (req, res, next) => {
     try {
+      // check the user id is existing
+      const id = Number(req.params.id)
+      const userIsExist = await User.findByPk(id)
+      if (!userIsExist) return res.status(404).json({ status: 'error', message: 'User is not found' })
+
       // get the replies a certain user, and relating the tweet data of the reply
-      const id = req.params.id
       const replies = await Reply.findAll({
         where: { UserId: id },
         attributes: ['id', 'comment', 'createdAt'],
@@ -187,7 +195,7 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!replies.length) res.status(404).json({ status: 'error', message: 'Replies are not found.' })
+      if (!replies.length) return res.status(200).json([])
       res.status(200).json(replies)
     } catch (err) {
       next(err)
@@ -195,7 +203,11 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
-      const id = req.params.id
+      // check the user id is existing
+      const id = Number(req.params.id)
+      const userIsExist = await User.findByPk(id)
+      if (!userIsExist) return res.status(404).json({ status: 'error', message: 'User is not found' })
+
       const likes = await Like.findAll({
         where: { UserId: id },
         attributes: ['id', 'TweetId', 'createdAt'],
@@ -217,7 +229,7 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!likes.length) res.status(404).json({ status: 'error', message: 'Likes are not found.' })
+      if (!likes.length) return res.status(200).json([])
 
       // check if the current user likes the tweets or not (add attribute "isLiked" in tweets)
       const currentUserId = helpers.getUser(req).id
@@ -237,7 +249,11 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
+      // check the user id is existing
       const id = Number(req.params.id)
+      const userIsExist = await User.findByPk(id)
+      if (!userIsExist) return res.status(404).json({ status: 'error', message: 'User is not found' })
+
       const followings = await Followship.findAll({
         where: { FollowerId: id },
         attributes: ['followingId', 'createdAt',
@@ -258,7 +274,7 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!followings.length) res.status(404).json({ status: 'error', message: 'No followings found.' })
+      if (!followings.length) res.status(200).json([])
 
       // check if the current user is following the user (add attribute "isFollowing" in followings)
       const currentUserFollowingIds = helpers.getUser(req).Followings.map(f => f.id)
@@ -275,7 +291,11 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
+      // check the user id is existing
       const id = Number(req.params.id)
+      const userIsExist = await User.findByPk(id)
+      if (!userIsExist) return res.status(404).json({ status: 'error', message: 'User is not found' })
+
       const followers = await Followship.findAll({
         where: { FollowingId: id },
         attributes: ['followerId', 'createdAt',
@@ -296,7 +316,7 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!followers.length) res.status(404).json({ status: 'error', message: 'No followers found.' })
+      if (!followers.length) return res.status(200).json([])
 
       // check if the current user is following the user (add attribute "isFollowing" in followings)
       const currentUserFollowingIds = helpers.getUser(req).Followings.map(f => f.id)

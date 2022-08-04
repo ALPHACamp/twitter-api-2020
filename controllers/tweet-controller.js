@@ -149,7 +149,11 @@ const tweetController = {
   },
   getTweetReplies: async (req, res, next) => {
     try {
+      // check if tweet is existing
       const TweetId = Number(req.params.tweet_id)
+      const tweetIsExist = await Tweet.findByPk(TweetId)
+      if (!tweetIsExist) return res.status(404).json({ status: 'error', message: 'Tweet is not found' })
+
       const repliesData = await Reply.findAll({
         where: { TweetId },
         attributes: ['id', 'comment', 'createdAt'],
@@ -165,7 +169,7 @@ const tweetController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (!repliesData) return res.status(404).json({ status: 'error', message: 'Reply is not found' })
+      if (!repliesData.length) return res.status(200).json([])
 
       // set response contents
       const replies = repliesData.map(reply => (
