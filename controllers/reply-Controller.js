@@ -32,7 +32,7 @@ const replyController = {
       if (!tweet) throw new Error('推文不存在')
       const data = await Reply.findAll({
         where: { TweetId },
-        attributes: ['id','comment','TweetId','UserId'],
+        attributes: ['id','comment','TweetId','UserId','createdAt'],
         include: [{
           model: Tweet,
           attributes: ['description'],
