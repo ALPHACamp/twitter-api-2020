@@ -1,4 +1,4 @@
-const { Tweet, User, Reply, sequelize } = require('../models')
+const { Tweet, User, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -25,8 +25,9 @@ const tweetController = {
   },
   get: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const TweetId = req.params.tweet_id
-      const data = await Tweet.findByPk(TweetId, {
+      const tweet = await Tweet.findByPk(TweetId, {
         attributes: [
           'id', 'description', 'UserId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
@@ -37,12 +38,10 @@ const tweetController = {
         include: [{
           model: User,
           attributes: ['name', 'account', 'avatar']
-        }],
-        nest: true,
-        raw: true,
-        order: [['created_at', 'DESC']]
+        }]
       })
-      if (!data) throw new Error('沒有該則推文')
+      if (!tweet) throw new Error('沒有該則推文')
+      const data = tweet.toJSON()
 
       const replies = await Reply.findAll({
         where: { TweetId },
@@ -55,6 +54,12 @@ const tweetController = {
         raw: true,
         order: [['created_at', 'DESC']]
       })
+      const likedList = await Like.findAll({
+        where: { UserId: currentUserId },
+        raw: true
+      })
+      const isLikedId = likedList.map(like => like.TweetId)
+      data.isLiked = isLikedId?.includes(data.id) || false
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(data)
@@ -72,7 +77,8 @@ const tweetController = {
   },
   getAll: async (req, res, next) => {
     try {
-      const data = await Tweet.findAll({
+      const currentUserId = helpers.getUser(req).id
+      const tweets = await Tweet.findAll({
         attributes: [
           'id', 'description', 'UserId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
@@ -84,10 +90,21 @@ const tweetController = {
           model: User,
           attributes: ['name', 'account', 'avatar']
         }],
+        order: [['created_at', 'DESC']],
         nest: true,
-        raw: true,
-        order: [['created_at', 'DESC']]
+        raw: true
       })
+
+      const likedList = await Like.findAll({
+        where: { UserId: currentUserId },
+        raw: true
+      })
+      const isLikedId = likedList.map(like => like.TweetId)
+      const data = tweets.map(tweet => ({
+        ...tweet,
+        tweet: isLikedId?.includes(tweet.id) || false,
+      }))
+
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(data)
       } else {
