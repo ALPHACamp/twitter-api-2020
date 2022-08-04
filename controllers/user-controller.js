@@ -293,6 +293,7 @@ const userController = {
   },
   following: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const followerId = req.params.id
       const follower = await User.findByPk(followerId)
       if (!follower || follower.role === 'admin') throw new Error("使用者不存在")
@@ -307,13 +308,18 @@ const userController = {
         order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
 
+      const data = followings.map(following => ({
+        ...following.toJSON(),
+        isFollowing: currentUserId.Followings ? currentUserId.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false,
+      }))
+
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(followings)
       } else {
         res.status(200).json({
           status: 'Success',
           message: '您已成功！',
-          data: followings
+          data
         })
       }
     } catch (err) {
@@ -353,6 +359,7 @@ const userController = {
   },
   follower: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const followingId = req.params.id
       const following = await User.findByPk(followingId)
       if (!following || following.role === 'admin') throw new Error("使用者不存在")
@@ -367,13 +374,18 @@ const userController = {
         order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
 
+      const data = followers.map(follower => ({
+        ...follower.toJSON(),
+        isFollowing: currentUserId.Followings ? currentUserId.Followings.some(reqUserFollowing => reqUserFollowing.id === following.id) : false,
+      }))
+
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(followers)
       } else {
         res.status(200).json({
           status: 'Success',
           message: '您已成功！',
-          data: followers
+          data
         })
       }
     } catch (err) {
