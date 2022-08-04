@@ -4,7 +4,7 @@ const helpers = require('../_helpers')
 const { Tweet, Followship, User, Reply, Like, sequelize } = require('../models')
 const { Op } = require("sequelize")
 const { imgurFileHandler } = require('../helpers/file-helpers')
-const fa = require('faker/lib/locales/fa')
+// const fa = require('faker/lib/locales/fa')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -71,17 +71,16 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'TweetsCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE user_id = User.id)'), 'LikesCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'FollowingCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'FollowerCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'FollowerCount'],
+          [sequelize.literal(`(SELECT EXISTS(SELECT * FROM Followships WHERE follower_id = ${currentUserId} AND following_id = User.id))`), 'isFollowing']
         ],
         raw: true,
         nest: true
       })
       if (!user || user.role === 'admin') throw new Error("user doesn't exist")
-      const checkUserFollowing = await Followship.findOne({
-        where: { followerId: currentUserId, followingId: id },
-        raw: true
-      })
-      const isFollowing = checkUserFollowing ? true : false
+
+      user.isCurrentUser = isCurrentUser
+      user.isFollowing = user.isFollowing === 1 ? true : false
 
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(user)
@@ -89,8 +88,6 @@ const userController = {
         res.json({
           status: 'Success',
           message: '成功取得使用者資料',
-          isCurrentUser,
-          isFollowing,
           user
         })
       }
@@ -133,6 +130,7 @@ const userController = {
   modifyUser: async (req, res, next) => {
     const UserId = helpers.getUser(req).id
     const { account, name, email, password, checkPassword, introduction } = req.body
+    const id = req.params.id
     try {
       if (Number(UserId) !== Number(id)) throw new Error('無法修改其他使用者之資料')
       if (introduction ? introduction.length > 160 : false || name ? name.length > 50 : false) throw new Error('字數超出上限！')
