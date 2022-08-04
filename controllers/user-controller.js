@@ -18,7 +18,7 @@ const userController = {
         return res.status(StatusCodes.FORBIDDEN)
           .json({
             status: 'error',
-            message: '無使用者權限'
+            message: '帳號不存在'
           })
       }
       const payload = {
@@ -260,14 +260,18 @@ const userController = {
       }
       user = await user.toJSON()
       const tweets = await user.Tweets.map(tweet => {
+        const repliedCounts = tweet.Replies.length
+        const likesCounts = tweet.Likes.length
+        delete tweet.Likes
+        delete tweet.Replies
         return {
           ...tweet,
-          userOfTweet: user.id,
-          userNameOfTweet: user.name,
-          userAccountOfTweet: user.account,
-          userAvatarOfTweet: user.avatar,
-          repliedCounts: tweet.Replies.length,
-          likesCounts: tweet.Likes.length,
+          userOfTweeet: user.id,
+          userNameOfTweeet: user.name,
+          userAccountOfTweeet: user.account,
+          userAvatarOfTweeet: user.avatar,
+          repliedCounts,
+          likesCounts,
           isBeingliked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === tweet.id) : false
         }
       })
@@ -300,14 +304,9 @@ const userController = {
         return {
           replyId: reply.id,
           comment: reply.comment,
-          repliedTweet: repliedTweet.id,
-          repliedTweetDescription: repliedTweet.description,
           userOfRepliedTweet: repliedTweet.User.id,
           userAccountOfRepliedTweet: repliedTweet.User.account,
-          userNameOfRepliedTweet: repliedTweet.User.name,
-          userAvatarOfRepliedTweet: repliedTweet.User.avatar,
           repliedTweetCreatedAt: repliedTweet.createdAt,
-          isBeingliked: req.user.LikedTweets ? req.user.LikedTweets.some(like => like.id === repliedTweet.id) : false,
           userOfReply: user.id,
           userAccountOfReply: user.account,
           userNameOfReply: user.name,
@@ -536,10 +535,10 @@ const userController = {
         })
       }
       const account = req.body.account.trim()
-      const password = req.body.password.trim()
-      const checkPassword = req.body.checkPassword.trim()
       const name = req.body.name.trim()
       const email = req.body.email.trim()
+      const password = req.body.password
+      const checkPassword = req.body.checkPassword
 
       if (!account || !name || !email) {
         return res.status(StatusCodes.NOT_ACCEPTABLE).json({
@@ -586,10 +585,10 @@ const userController = {
           })
       }
       if (password) {
-        if (!checkPassword) {
+        if (!checkPassword.trim() || !password.trim()) {
           return res.status(StatusCodes.NOT_ACCEPTABLE).json({
             status: 'error',
-            message: '確認密碼不可為空'
+            message: '密碼或確認密碼不可為空白字元'
           })
         }
         if (password !== checkPassword) {
