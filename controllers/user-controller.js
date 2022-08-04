@@ -535,10 +535,10 @@ const userController = {
         })
       }
       const account = req.body.account.trim()
-      const password = req.body.password.trim()
-      const checkPassword = req.body.checkPassword.trim()
       const name = req.body.name.trim()
       const email = req.body.email.trim()
+      const password = req.body.password
+      const checkPassword = req.body.checkPassword
 
       if (!account || !name || !email) {
         return res.status(StatusCodes.NOT_ACCEPTABLE).json({
@@ -585,10 +585,10 @@ const userController = {
           })
       }
       if (password) {
-        if (!checkPassword) {
+        if (!checkPassword.trim() || !password.trim()) {
           return res.status(StatusCodes.NOT_ACCEPTABLE).json({
             status: 'error',
-            message: '確認密碼不可為空'
+            message: '密碼或確認密碼不可為空白字元'
           })
         }
         if (password !== checkPassword) {
