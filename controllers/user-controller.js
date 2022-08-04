@@ -171,12 +171,17 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const userId = req.params.id
       const user = await User.findByPk(userId)
       if (!user || user.role === 'admin') throw new Error("使用者不存在")
       const tweets = await Tweet.findAll({
         where: { userId },
-        attributes: ['id', 'description', 'userId', 'createdAt'],
+        attributes: ['id', 'description', 'userId', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likesCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'repliesCount'],
+          [sequelize.literal(`(SELECT EXISTS(SELECT * FROM Likes WHERE user_id = ${currentUserId} AND tweet_id = Tweet.id))`), 'isLike']
+        ],
         include: [{
           model: User,
           attributes: ['name', 'account', 'avatar']
@@ -185,13 +190,22 @@ const userController = {
         raw: true,
         order: [['created_at', 'DESC']]
       })
+
+      console.log('tweets', tweets[0])
+      const newData = tweets.map(t => ({
+        ...t,
+        isLike: t.isLike === 1 ? true : false
+      }))
+
+      console.log('newData', newData)
+
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(tweets)
       } else {
         res.json({
           status: 'success',
           message: '成功取得使用者的所有推文',
-          tweets
+          tweets: newData
         })
       }
     } catch (err) {
