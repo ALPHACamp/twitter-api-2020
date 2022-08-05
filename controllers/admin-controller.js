@@ -3,6 +3,8 @@ const { User, Tweet, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 const adminController = {
+  // feature: admin sign in to backage
+  // route: POST /api/admin/signin
   signIn: async (req, res, next) => {
     try {
       const admin = helpers.getUser(req)
@@ -16,6 +18,8 @@ const adminController = {
       next(error)
     }
   },
+  // feature: admin can see all users
+  // route: GET /api/admin/users
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
@@ -49,6 +53,8 @@ const adminController = {
       next(error)
     }
   },
+  // feature: admin can see all tweets
+  // route: GET /api/admin/tweets
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
@@ -79,6 +85,8 @@ const adminController = {
       next(error)
     }
   },
+  // feature: admin can delete the specific tweet
+  // route: DELETE /api/admin/tweets/:id
   deleteTweet: async (req, res, next) => {
     try {
       const reqTweetId = req.params.id

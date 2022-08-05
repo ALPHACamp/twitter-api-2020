@@ -5,6 +5,8 @@ const { imgurFileHandler } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
 
 const userController = {
+  // feature: user can sign in
+  // route: POST /api/users/signin
   signIn: (req, res, next) => {
     try {
       const user = helpers.getUser(req)
@@ -17,6 +19,8 @@ const userController = {
       next(err)
     }
   },
+  // feature: user can register an account
+  // route: POST /api/users
   signUp: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
@@ -41,6 +45,8 @@ const userController = {
       next(err)
     }
   },
+  // feature: user can see his or her own registered data
+  // route: GET /api/users/setting
   getSetting: async (req, res, next) => {
     try {
       if (Number(req.params.id) !== helpers.getUser(req).id) return res.status(403).json({ status: 'error', message: 'permission denied' })
@@ -52,6 +58,8 @@ const userController = {
       next(err)
     }
   },
+  // feature: user can edit his or her own registered data
+  // route: PATCH /api/users/setting
   patchSetting: async (req, res, next) => {
     try {
       if (Number(req.params.id) !== helpers.getUser(req).id) return res.status(403).json({ status: 'error', message: 'permission denied' })
@@ -81,6 +89,8 @@ const userController = {
       next(err)
     }
   },
+  // feature: user can see his or her own profile data
+  // route: GET /api/users/:id
   getUser: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req)?.id
@@ -110,7 +120,9 @@ const userController = {
       next(err)
     }
   },
-    putUser: async (req, res, next) => {
+  // feature: user can edit his or her own profile data
+  // route: PUT /api/users/:id
+  putUser: async (req, res, next) => {
     try {
       if (Number(req.params.id) !== helpers.getUser(req).id) return res.status(403).json({ status: 'error', message: 'permission denied' })
       const userFind = await User.findByPk(req.params.id)
@@ -132,6 +144,8 @@ const userController = {
       next(err)
     }
   },
+  // feature: user can see all tweets that the specific user posted
+  // route: GET /api/users/:id/tweets
   getUserTweets: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
@@ -157,6 +171,8 @@ const userController = {
       next(err)
     }
   },
+  // feature: get all replies of the specific user
+  // route: GET /api/users/:id/replied_tweets
   getUserReplies: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -179,6 +195,8 @@ const userController = {
       next(err)
     }
   },
+  // feature: user can see all tweets that the specific user liked
+  // route: GET /api/users/:id/likes
   getUserLikes: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -207,6 +225,8 @@ const userController = {
       next(err)
     }
   },
+  // feature: user can see all people that the specific user is following
+  // route: GET /api/:id/followings
   getUserFollowings: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id, {
@@ -227,6 +247,8 @@ const userController = {
       next(err)
     }
   },
+  // feature: user can see the specific user’s all followers
+  // route: GET /api/:id/followers
   getUserFollowers: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
@@ -249,6 +271,8 @@ const userController = {
       next(err)
     }
   },
+  // feature: get current user's data
+  // route: GET /api/get_current_user
   getCurrentUser: async (req, res, next) => {
     try {
       const { Followers, Followings, ...currentUser } = helpers.getUser(req)

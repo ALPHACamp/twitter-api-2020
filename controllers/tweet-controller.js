@@ -2,6 +2,8 @@ const { User, Tweet, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
+  // feature: user can post a tweet
+  // route: POST /api/tweets
   postTweet: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req)?.id
@@ -22,6 +24,8 @@ const tweetController = {
       next(error)
     }
   },
+  // feature: user can see all tweets
+  // route: GET /api/tweets
   getTweets: async (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id
     const tweets = await Tweet.findAll({
@@ -52,6 +56,8 @@ const tweetController = {
       next(error)
     }
   },
+  // feature: user can see the specific tweet
+  // route: GET /api/tweets/:tweet_id
   getTweet: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req)?.id

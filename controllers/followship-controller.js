@@ -2,6 +2,8 @@ const { User, Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const followshipController = {
+  // feature: user can see 10 users having the most followers
+  // route: GET /api/followships/top_users
   getTopUsers: async (req, res, next) => {
     try {
       const currentUser = helpers.getUser(req)
@@ -29,6 +31,8 @@ const followshipController = {
       next(error)
     }
   },
+  // feature: user can follow another user, but can't follow itself
+  // route: POST /api/followships
   postFollowship: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req)?.id
@@ -70,6 +74,8 @@ const followshipController = {
       next(error)
     }
   },
+  // feature: user can unfollow another user
+  // route: DELETE /api/followships/:followingId
   deleteFollowship: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req)?.id

@@ -2,6 +2,8 @@ const { User, Tweet, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 const replyController = {
+  // feature: user can see all replies of the specific tweet
+  // route: GET /api/tweets/:tweet_id/replies
   getReplies: async (req, res, next) => {
     try {
       const tweet = await Tweet.findByPk(req.params.tweet_id)
@@ -34,6 +36,8 @@ const replyController = {
       next(err)
     }
   },
+  // feature: user can post a reply to the specific tweet
+  // route: POST /api/tweets/:tweet_id/replies
   postReply: async (req, res, next) => {
     try {
       const currentUser = helpers.getUser(req)
