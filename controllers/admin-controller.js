@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { Sequelize } = require('sequelize')
 
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -83,6 +83,8 @@ const adminController = {
       if (!tweet) res.status(404).json({ status: 'error', message: '找不到此推文!' })
 
       await tweet.destroy()
+      await Reply.destroy({ where: { TweetId: tweetId } })
+      await Like.destroy({ where: { TweetId: tweetId } })
 
       return res.status(200).json({
         status: 'success',
