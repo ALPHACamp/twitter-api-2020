@@ -553,14 +553,21 @@ const userController = {
             message: '信箱格式不符合'
           })
       }
-      if (account !== user.account || email !== user.email) {
+      if (account !== user.account) {
         const existUser = await User.findAll({
-          where: {
-            [Op.or]: [
-              { account },
-              { email }
-            ]
-          }
+          where: { account }
+        })
+        if (existUser.length > 0) {
+          return res.status(StatusCodes.NOT_ACCEPTABLE).json(
+            {
+              status: 'error',
+              message: 'Account或Email已被使用'
+            })
+        }
+      }
+      if (email !== user.email) {
+        const existUser = await User.findAll({
+          where: { email }
         })
         if (existUser.length > 0) {
           return res.status(StatusCodes.NOT_ACCEPTABLE).json(
