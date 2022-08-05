@@ -7,9 +7,9 @@ const Followship = db.Followship
 const bcrypt = require('bcryptjs')
 // JWT
 const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
+// const passportJWT = require('passport-jwt')
+// const ExtractJwt = passportJWT.ExtractJwt
+// const JwtStrategy = passportJWT.Strategy
 
 const userController = {
   signIn: (req, res) => {
@@ -94,10 +94,39 @@ const userController = {
         return res.json(user)
       })
   },
+  getCurrentUser: (req, res) => {
+    return res.json({
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+      account: req.user.account,
+      avatar: req.user.avatar,
+      banner: req.user.banner,
+      introduction: req.user.introduction,
+      role: req.user.role,
+      Followers: req.user.Followers,
+      Followings: req.user.Followings
+    })
+  },
   getUserTweets: (req, res) => {
     const userId = req.params.id
-    Tweet.findAll({ where: { UserId: userId }, raw: true, nest: true })
+    Tweet.findAll({ where: { UserId: userId }, include: [User, Like, Reply] })
       .then(tweets => {
+        tweets = { tweets: tweets }
+        tweets = JSON.stringify(tweets)
+        tweets = JSON.parse(tweets)
+        tweets = tweets.tweets.map(tweet => ({
+          ...tweet,
+          User: {
+            account: tweet.User.account,
+            avatar: tweet.User.avatar,
+            id: tweet.User.id,
+            introduction: tweet.User.introduction,
+            name: tweet.User.name,
+            role: tweet.User.role,
+            banner: tweet.User.banner,
+          }
+        }))
         return res.json(tweets)
       })
   },

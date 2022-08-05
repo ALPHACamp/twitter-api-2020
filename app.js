@@ -13,6 +13,7 @@ const port = 3000
 // cors 的預設為全開放
 app.use(cors())
 
+const passport = require('./config/passport')
 // use helpers.getUser(req) to replace req.user
 // function authenticated(req, res, next) {
 //   // passport.authenticate('jwt', { ses...
