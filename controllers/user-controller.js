@@ -95,7 +95,7 @@ const userController = {
   getUsers: async (req, res, next) => {
     try {
       const limit = Number(req.query.limit) || null
-      const users = await User.findAll({
+      let users = await User.findAll({
         where: { role: 'user' },
         include: [{
           model: User,
@@ -122,6 +122,16 @@ const userController = {
         order: [[Sequelize.literal('followersCount'), 'DESC'], ['name', 'ASC']],
         limit
       })
+
+      users = users.map(user => user.toJSON())
+      users = users.map(user => {
+        const isFollowed = getUser(req).Followings ? getUser(req).Followings.some(f => f.id === user.id) : false
+        return {
+          ...user,
+          isFollowed
+        }
+      })
+
       return res.status(200).json({ status: 'success', users })
     } catch (error) {
       next(error)
