@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const imgurFileHandler = require('../helpers/file-helper')
 const helpers = require('../_helpers')
+const validator = require('validator')
 const { User, Tweet, Like, Reply, Followship } = require('../models')
 
 const userController = {
@@ -58,6 +59,13 @@ const userController = {
         return res.status(400).json({
           status: 'error',
           message: 'All fields required.'
+        })
+      }
+
+      if (!validator.isEmail(email)) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid email address.'
         })
       }
 
@@ -342,6 +350,7 @@ const userController = {
   editUser: async (req, res, next) => {
     try {
       let { account, name, email, password, checkPassword, introduction } = req.body
+      const { files } = req
       const id = Number(req.params.id)
       if (!id) return res.status(401).json({ status: 'error', message: 'Id number is not found in url request' })
 
@@ -360,19 +369,29 @@ const userController = {
       checkPassword = checkPassword?.trim()
       introduction = introduction?.trim()
 
-      // check if the email and account is changed. If yes, check if the new one has been registered.
+      // if all input fields are null, it means no change. Return the original user instance here
+      if (!account && !name && !email && !password && !checkPassword && !introduction && !files) {
+        const data = user.toJSON()
+        delete data.password
+        return res.status(200).json(data)
+      }
+
+      // check if email or account is changed. If yes, check if the new email is valid and not registered
       if (email) {
+        if (!validator.isEmail(email)) return res.status(400).json({ status: 'error', message: 'Invalid email address.' })
         if (email !== user.email) {
           const emailExist = await User.findOne({ where: { email } })
           if (emailExist) return res.status(401).json({ status: 'error', message: 'The email is registered.' })
         }
       }
+      // check if the account is changed. If yes, check if the new account has been registered
       if (account) {
         if (account !== user.account) {
           const accountExist = await User.findOne({ where: { account } })
           if (accountExist) return res.status(401).json({ status: 'error', message: 'The account is registered.' })
         }
       }
+
       // check if updated name > 50 and introduction > 160 characters
       if (name?.length > 50) return res.status(400).json({ status: 'error', message: 'Name is too long.' })
       if (introduction?.length > 160) return res.status(400).json({ status: 'error', message: 'Introduction is too long.' })
@@ -381,13 +400,12 @@ const userController = {
       if (password !== checkPassword) return res.status(401).json({ status: 'error', message: 'Password and checkPassword are not same.' })
 
       // check if the user uploads new files. If yes, handle the image with the helper and get the link(str)
-      const { files } = req
       let avatar = files?.avatar || null
       if (avatar) { avatar = await imgurFileHandler(avatar[0]) }
       let cover = files?.cover || null
       if (cover) { cover = await imgurFileHandler(cover[0]) }
 
-      // update user data (expect for avatar and cover images)
+      // update user data
       const updatedUser = await user.update({
         name: name || user.name,
         account: account || user.account,
