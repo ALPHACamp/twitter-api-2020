@@ -33,10 +33,10 @@ const userController = {
       // !有餘力再來優化程式
       let errorMessage = []
       if (foundEmail) {
-        errorMessage += 'email已重複註冊！'
+        errorMessage += 'email 已重複註冊！'
       }
       if (foundAccount) {
-        errorMessage += 'account已重複註冊！'
+        errorMessage += 'account 已重複註冊！'
       }
       if (errorMessage.length > 0) {
         throw new Error(errorMessage)
@@ -67,7 +67,7 @@ const userController = {
       const isCurrentUser = (currentUserId === Number(id))
       const user = await User.findByPk(id, {
         attributes: [
-          'id', 'account', 'name', 'email', 'avatar', 'cover', 'introduction',
+          'id', 'account', 'name', 'email', 'avatar', 'cover', 'introduction', 'role',
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'TweetsCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE user_id = User.id)'), 'LikesCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'FollowingCount'],
@@ -139,10 +139,10 @@ const userController = {
       if (!user || user.role === 'admin') throw new Error("使用者不存在")
       let errorMessage = []
       if (email && await User.findOne({ where: { email, [Op.not]: [{ id }] } })) {
-        errorMessage += 'email已重複註冊！'
+        errorMessage += 'email 已重複註冊！'
       }
       if (account && await User.findOne({ where: { account, [Op.not]: [{ id }] } })) {
-        errorMessage += 'account已重複註冊！'
+        errorMessage += 'account 已重複註冊！'
       }
       if (errorMessage.length > 0) {
         throw new Error(errorMessage)
