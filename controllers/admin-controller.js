@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet } = require('../models')
 
 const adminController = {
   signin: async (req, res, next) => {
@@ -61,34 +61,24 @@ const adminController = {
           ],
           [
             sequelize.literal(
-              '(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'
-            ),
+              '(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'),
             'likeCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.FollowerId = User.id)'),
+            'followingCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.FollowingId = User.id)'),
+            'followerCount'
           ]
-        ],
-        include: [
-          { model: Tweet, include: [Like] },
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
         ],
         order: [[sequelize.literal('tweetCount'), 'DESC']]
       })
 
-      const users = usersData.map(user => {
-        return {
-          id: user.id,
-          name: user.name,
-          account: user.account,
-          avatar: user.avatar,
-          cover: user.cover,
-          tweetCount: user.dataValues.tweetCount,
-          likeCount: user.dataValues.likeCount,
-          followingCount: user.Followings.length,
-          followerCount: user.Followers.length
-        }
-      })
-
-      return res.status(200).json(users)
+      return res.status(200).json(usersData)
     } catch (err) {
       next(err)
     }
