@@ -12,7 +12,9 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       role: 'admin',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      avatar: `https://randomuser.me/api/portraits/women/${10}.jpg`,
+      front_cover: `https://picsum.photos/400/300?random=${10}`
     }
     users.push(admin)
 
@@ -25,7 +27,9 @@ module.exports = {
         introduction: faker.lorem.text().substring(0, 150),
         role: 'user',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        avatar: `https://randomuser.me/api/portraits/women/${i}.jpg`,
+        front_cover: `https://picsum.photos/400/300?random=${i}`
       }
       users.push(user)
     }
