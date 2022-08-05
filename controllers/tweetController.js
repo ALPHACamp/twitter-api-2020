@@ -6,7 +6,7 @@ const Reply = db.Reply
 
 const tweetController = {
   getTweets: (req, res) => {
-    const userId = 1
+    const userId = req.headers.userid || 1
     Tweet.findAll({ where: { UserId: userId }, include: [User, Like, Reply] })
       .then(tweets => {
         tweets = { tweets: tweets }
