@@ -2,6 +2,8 @@ const { Like } = require('../models')
 const helpers = require('../_helpers')
 
 const likeController = {
+  // feature: user can click "like" to the specific tweet
+  // route: POST /api/tweets/:id/like
   postLikeToTweet: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req)?.id
@@ -18,7 +20,8 @@ const likeController = {
       next(error)
     }
   },
-
+  // feature: user can click "unlike" to the specific tweet
+  // route: POST /api/tweets/:id/unlike
   postUnlikeToTweet: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req)?.id
