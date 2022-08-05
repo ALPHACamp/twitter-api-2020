@@ -134,6 +134,7 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const user = await User.findByPk(req.params.id)
       if (!user || (user.role !== 'user')) throw new Error('Target user not exist')
       const tweets = await Tweet.findAll({
@@ -145,7 +146,8 @@ const userController = {
           const { Replies, Likes, ...restProps } = {
             ...tweet.toJSON(),
             replyCounts: tweet.Replies.length,
-            likeCounts: tweet.Likes.length
+            likeCounts: tweet.Likes.length,
+            isLiked: tweet.Likes.some(like => like.UserId === currentUserId)
           }
           return restProps
         })
@@ -227,6 +229,7 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const user = await User.findByPk(req.params.id, {
         include: [
           { model: User, as: 'Followers', include: { model: User, as: 'Followers' } }
@@ -236,7 +239,7 @@ const userController = {
       const followerSort = user.Followers
         .map(follower => {
           const { email, password, banner, Followship, Followers, ...restProps } = follower.toJSON()
-          restProps.isFollowed = follower.Followers.some(one => one.Followship.followerId === Number(req.params.id))
+          restProps.isFollowed = follower.Followers.some(one => one.Followship.followerId === currentUserId)
           restProps.followerId = follower.Followship.followerId
           return restProps
         })
