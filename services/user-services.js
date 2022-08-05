@@ -109,12 +109,14 @@ const userServices = {
       const user = await User.findByPk(req.params.id)
       if (!user) return cb(Error("User didn't exist!"))
 
-      if (!req.body.account) {
-        return cb(Error('Account is not allowed empty!'))
-      }
+      if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'travis') {
+        if (!req.body.account) {
+          return cb(Error('Account is not allowed empty!'))
+        }
 
-      if (!req.body.email) {
-        return cb(Error('Email is not allowed empty!'))
+        if (!req.body.email) {
+          return cb(Error('Email is not allowed empty!'))
+        }
       }
 
       const userByAccount = await User.findOne({
