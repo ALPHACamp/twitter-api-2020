@@ -4,7 +4,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express')
 const session = require('express-session')
-const MongoStore = require('connect-mongo')
 const cors = require('cors')
 const routes = require('./routes/index')
 const passport = require('./config/passport')
@@ -23,12 +22,6 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(session({
   secret: SESSION_KEY,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGO_URL,
-    ttl: 1 * 24 * 60 * 60,
-    autoRemove: 'interval',
-    autoRemoveInterval: 30
-  }),
   resave: false,
   saveUninitialized: false
 }))

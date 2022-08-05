@@ -7,7 +7,7 @@ services:
 
 # 設定參數(Travis CI 會按照參數分別執行)
 env:
-  - NODE_ENV=travis JWT_SECRET=secret MONGO_URL=mongodb+srv://paul791111:Golden7911Mutang@cluster0.nr2ye.mongodb.net/AuthSession?retryWrites=true&w=majority
+  - NODE_ENV=travis JWT_SECRET=secret
 
 # 在 install 前執行的指令
 before_install:
