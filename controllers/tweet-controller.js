@@ -34,6 +34,20 @@ const tweetController = {
           isBeingLiked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
         }
       })
+      for (const tweet of tweets) {
+        if (tweet.likesCounts < 0) {
+          return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            status: 'error',
+            message: 'like 錯誤'
+          })
+        }
+        if (tweet.repliedCounts < 0) {
+          return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            status: 'error',
+            message: 'reply 錯誤'
+          })
+        }
+      }
       return res.status(StatusCodes.OK).json(tweets)
     } catch (err) {
       next(err)
@@ -90,6 +104,18 @@ const tweetController = {
       tweet.likesCounts = tweet.Likes.length
       delete tweet.Replies
       delete tweet.Likes
+      if (tweet.likesCounts < 0) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+          status: 'error',
+          message: 'like 錯誤'
+        })
+      }
+      if (tweet.repliedCounts < 0) {
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
+          status: 'error',
+          message: 'reply 錯誤'
+        })
+      }
       tweet.isBeingLiked = req.user.LikedTweets ? req.user && req.user.LikedTweets.some(l => l.id === tweet.id) : false
       return res.status(StatusCodes.OK).json(tweet)
     } catch (err) {
