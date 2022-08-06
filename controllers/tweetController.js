@@ -46,7 +46,7 @@ const tweetController = {
       })
   },
   postTweet: (req, res) => {
-    const userId = req.body.UserId || 1
+    const userId = req.user.id
     const description = req.body.description
     Tweet.create({
       UserId: userId,
@@ -57,7 +57,7 @@ const tweetController = {
       })
   },
   likeTweet: (req, res) => {
-    const userId = 1
+    const userId = req.user.id
     const tweetId = req.params.id
     Like.create({
       UserId: userId,
@@ -68,7 +68,7 @@ const tweetController = {
       })
   },
   unlikeTweet: (req, res) => {
-    const userId = 1
+    const userId = req.user.id
     const tweetId = req.params.id
     Like.findOne({
       where: {
@@ -118,7 +118,7 @@ const tweetController = {
       })
   },
   postTweetReply: (req, res) => {
-    const userId = 1
+    const userId = req.user.id
     const tweetId = req.params.id
     const comment = req.body.comment
     Reply.create({
