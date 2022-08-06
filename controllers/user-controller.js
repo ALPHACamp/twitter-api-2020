@@ -401,6 +401,23 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const currentUserData = await User.findByPk(currentUserId, {
+        raw: true,
+        attributes: { exclude: ['password'] }
+      })
+      if (!currentUserData) throw new Error("使用者不存在")
+      res.status(200).json({
+        status: 'Success',
+        message: '成功取得當前使用者之資訊',
+        currentUserData
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
