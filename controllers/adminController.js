@@ -1,6 +1,8 @@
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Like = db.Like
+const Reply = db.Reply
 const bcrypt = require('bcryptjs')
 // JWT
 const jwt = require('jsonwebtoken')
@@ -68,15 +70,67 @@ const adminController = {
         return res.json(tweets)
       })
   },
+  // async deleteTweet(req, res) {
+  //   // 改成 async await 寫法，但好像只 call database 去 destroy 資料，還沒等到 database 回傳執行結果，就 return 結果給前端了
+  //   try {
+  //     const tweet = await Tweet.findByPk(req.params.id, { include: [Reply, Like] })
+  //     const likes = await Promise.all(tweet.Likes.map(like => {
+  //       return Like.findByPk(like.id)
+  //         .then(like => {
+  //           like.destroy()
+  //         })
+  //     }))
+  //     const replies = await Promise.all(tweet.Replies.map(reply => {
+  //       return Reply.findByPk(reply.id)
+  //         .then(reply => {
+  //           reply.destroy()
+  //         })
+  //     }))
+  //     tweet.destroy()
+  //     .then(() => {
+  //       return res.json({ status: 'success', message: '' })
+  //     })
+  //   } catch (error) {
+  //     console.warn(error)
+  //   }
+  // },
   deleteTweet: (req, res) => {
-    Tweet.findByPk(req.params.id)
+    // 刪除 Tweet 相關的 likes、replies，通過測試檔
+    // 層層下去，確實等到 database 都執行完畢，才 return 結果給前端
+    Tweet.findByPk(req.params.id, { include: [Reply, Like] })
       .then(tweet => {
-        tweet.destroy()
+        Promise.all(tweet.Likes.map(like => {
+          return Like.findByPk(like.id)
+            .then(like => {
+              like.destroy()
+            })
+        }))
           .then(() => {
-            return res.json({ status: 'success', message: '' })
+            Promise.all(tweet.Replies.map(reply => {
+              return Reply.findByPk(reply.id)
+                .then(reply => {
+                  reply.destroy()
+                })
+            }))
+              .then(() => {
+                tweet.destroy()
+                  .then(() => {
+                    return res.json({ status: 'success', message: '' })
+                  })
+              })
           })
       })
-  }
+  },
+  // deleteTweet: (req, res) => {
+  //   // 最早可以通過測試檔的版本
+  //   Tweet.findByPk(req.params.id)
+  //     .then(tweet => {
+  //       tweet.destroy()
+  //         .then(() => {
+  //           return res.json({ status: 'success', message: '' })
+  //         })
+  //     })
+  // }
 }
 
 module.exports = adminController
