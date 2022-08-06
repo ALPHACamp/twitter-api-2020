@@ -19,7 +19,7 @@ module.exports = {
         .from({ length: tweetCount * repliesPerTweet })
         .map((_reply, index) => ({
           UserId: users[index % userCount].id,
-          TweetId: tweets[index % tweetCount].id,
+          TweetId: tweets[Math.floor(index / repliesPerTweet)].id,
           comment: faker.lorem.words(),
           createdAt: faker.date.recent(30),
           updatedAt: new Date()
