@@ -9,7 +9,7 @@ const replyController = {
       const tweet = await Tweet.findByPk(req.params.tweet_id)
       if (!tweet) throw new Error('Target tweet not exist')
       const replies = await Reply.findAll({
-        where: { tweetId: req.params.tweet_id },
+        where: { TweetId: req.params.tweet_id },
         include: [{ model: User }, { model: Tweet, include: User }],
       })
       const replySort = replies
