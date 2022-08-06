@@ -207,9 +207,10 @@ const userController = {
       })
       const likesSort = likes
         .map(like => {
-          const {User, Replies, Likes, ...restProps } = {
+          const { id, name, account, avatar } = like.Tweet.User.toJSON() 
+          const { Replies, Likes, UserId, ...restProps } = {
             ...like.Tweet.toJSON(),
-            replyUserAccount: like.Tweet.User.account,
+            User: { id, name, account, avatar},
             replyCounts: like.Tweet.Replies.length,
             likeCounts: like.Tweet.Likes.length
           }
