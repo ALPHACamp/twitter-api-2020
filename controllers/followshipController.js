@@ -5,7 +5,7 @@ const Followship = db.Followship
 
 const followshipController = {
   getRecommendedFollowings: (req, res) => {
-    const userId = req.query.userId
+    const userId = req.user.id //req.query.userId
     User.findAll({ where: { id: { [Op.not]: userId } }, include: [{ model: User, as: 'Followers' }], limit: 10 })
       .then(users => {
         users = { users: users }
@@ -25,7 +25,7 @@ const followshipController = {
       })
   },
   postFollowship: (req, res) => {
-    const followerId = req.body.userId || 1
+    const followerId = req.user.id || 1
     const followingId = req.body.id
     Followship.create({
       followerId: followerId,
@@ -36,7 +36,7 @@ const followshipController = {
       })
   },
   deleteFollowship: (req, res) => {
-    const followerId = 1
+    const followerId = req.user.id
     const followingId = req.params.id
     Followship.findOne({
       where: {
