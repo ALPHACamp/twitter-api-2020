@@ -50,6 +50,24 @@ const adminController = {
         return res.json(users)
       })
   },
+  getTweet: (req, res) => {
+    Tweet.findAll({ include: [User] })
+      .then(tweets => {
+        tweets = { tweets: tweets }
+        tweets = JSON.stringify(tweets)
+        tweets = JSON.parse(tweets)
+        tweets = tweets.tweets.map(tweet => ({
+          ...tweet,
+          User: {
+            account: tweet.User.account,
+            avatar: tweet.User.avatar,
+            id: tweet.User.id,
+            name: tweet.User.name,
+          }
+        }))
+        return res.json(tweets)
+      })
+  },
   deleteTweet: (req, res) => {
     Tweet.findByPk(req.params.id)
       .then(tweet => {
