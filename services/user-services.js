@@ -141,10 +141,14 @@ const userServices = {
         }
       }
 
-      const avatarFile = req.files?.avatar[0]
-      const avatarPath = avatarFile ? await imgurFileHandler(req.files.avatar[0]) : undefined
-      const coverFile = req.files?.cover[0]
-      const coverPath = coverFile ? await imgurFileHandler(req.files.coverPath[0]) : undefined
+      let avatarPath = ''
+      let coverPath = ''
+      if (req.files) {
+        const avatarFile = req.files?.avatar && req?.files.avatar[0]
+        avatarPath = avatarFile ? await imgurFileHandler(req.files.avatar[0]) : undefined
+        const coverFile = req.files?.cover && req?.files?.cover[0]
+        coverPath = coverFile ? await imgurFileHandler(req.files.cover[0]) : undefined
+      }
 
       const hash = typeof req.body.password === 'string' ? await bcrypt.hash(req.body.password, 10) : undefined
 
