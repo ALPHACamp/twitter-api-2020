@@ -12,7 +12,7 @@ const tweetController = {
       if (!description || (description.trim().length === 0)) throw new Error('Target tweet description is required.')
 
       if (description.trim().length > 0 && description.length <= 140) {
-        await Tweet.create({ userId: currentUserId, description })
+        await Tweet.create({ UserId: currentUserId, description })
       } else {
         throw new Error('Characters length of description should be less than 140.')
       }
