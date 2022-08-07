@@ -13,7 +13,7 @@ const followController = {
       const following = await User.findByPk(followingId)
       const follower = await User.findByPk(followerId)
 
-      if (followerId === followingId) {
+      if (Number(followerId) === Number(followingId)) {
         return res.status(400).json({
           status: 'error',
           message: '使用者不能追蹤自己!'
