@@ -225,6 +225,7 @@ const userController = {
           likesCount: likedTweet.Likes.length // 喜歡推文的喜歡數量
         }
       })
+      likes = likes.sort((a, b) => b.likeCreatedAt - a.likeCreatedAt)
       return res.status(200).json(likes)
     } catch (err) {
       next(err)
@@ -243,7 +244,7 @@ const userController = {
           message: '使用者不存在!'
         })
       }
-      const followingUser = user.Followings.map(following => {
+      let followingUser = user.Followings.map(following => {
         return {
           followingId: following.id,
           followingName: following.name,
@@ -254,6 +255,7 @@ const userController = {
           createdAt: following.Followship.createdAt
         }
       })
+      followingUser = followingUser.sort((a, b) => b.createdAt - a.createdAt)
       return res.status(200).json(followingUser)
     } catch (err) {
       next(err)
@@ -272,7 +274,7 @@ const userController = {
           message: '使用者不存在!'
         })
       }
-      const followerUser = user.Followers.map(follower => {
+      let followerUser = user.Followers.map(follower => {
         return {
           followerId: follower.id,
           followerName: follower.name,
@@ -283,6 +285,7 @@ const userController = {
           createdAt: follower.Followship.createdAt
         }
       })
+      followerUser = followerUser.sort((a, b) => b.createdAt - a.createdAt)
       return res.status(200).json(followerUser)
     } catch (err) {
       next(err)
