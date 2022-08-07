@@ -191,6 +191,8 @@ const userController = {
             },
             Replies: like.Tweet.Replies,
             Likes: like.Tweet.Likes,
+            likesLength: like.Tweet.Likes.length,
+            repliesLength: like.Tweet.Replies.length,
           },
         }))
         return res.json(likes)
