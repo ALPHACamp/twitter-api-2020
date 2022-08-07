@@ -46,6 +46,7 @@ module.exports = {
         let randomNum = Math.floor(Math.random()*100 + 1)
         let avatar = `https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/${randomNum}.jpg`
         let introduction = faker.lorem.sentence(5)
+        let banner = 'https://cdn.pixabay.com/photo/2017/03/19/12/42/banner-2156395_960_720.jpg'
         return ({
           name: name,
           account: name,
@@ -54,6 +55,7 @@ module.exports = {
           role: 'user',
           avatar: avatar,
           introduction: introduction,
+          banner: banner,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
@@ -73,6 +75,19 @@ module.exports = {
         })
       })
     )
+    // 新增每個使用者有 2 位 follower 種子資料
+    await queryInterface.bulkInsert('Followships',
+      Array.from({ length: 12 }).map((item, index) => {
+        let followingId = Math.floor(index / 2) + 1
+        let followerId = index % 6 + 1
+        return ({
+          followingId: followingId,
+          followerId: followerId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+      })
+    )
     // 新增每篇 post 有隨機 3 個留言者，每個人有 1 則留言 種子資料
     await queryInterface.bulkInsert('Replies',
       Array.from({ length: 153 }).map((item, index) => {
@@ -87,6 +102,19 @@ module.exports = {
         })
       })
     )
+    // 新增每篇 post 有隨機 3 個like， 種子資料
+    await queryInterface.bulkInsert('Likes', 
+    Array.from({length: 153}).map((item, index) => {
+      let UserId = index % 6 + 1
+      let TweetId = Math.floor(index / 3) + 1
+      return ({
+        UserId: UserId,
+        TweetId: TweetId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+    })
+    )
   },
 
   async down(queryInterface, Sequelize) {
@@ -100,5 +128,7 @@ module.exports = {
     await queryInterface.bulkDelete('Users', null, {})
     await queryInterface.bulkDelete('Tweets', null, {})
     await queryInterface.bulkDelete('Replies', null, {})
+    await queryInterface.bulkDelete('Likes', null, {})
+    await queryInterface.bulkDelete('Followships', null, {})
   }
 };
