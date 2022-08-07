@@ -47,8 +47,24 @@ const adminController = {
       })
   },
   getUsers: (req, res) => {
-    User.findAll({ raw: true, nest: true })
+    User.findAll({ include: [Like, Reply, { model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
       .then(users => {
+        users = { users: users }
+        users = JSON.stringify(users)
+        users = JSON.parse(users)
+        users = users.users.map(user => ({
+          account: user.account,
+          avatar: user.avatar,
+          id: user.id,
+          introduction: user.introduction,
+          name: user.name,
+          role: user.role,
+          banner: user.banner,
+          likesLength: user.Likes.length,
+          repliesLength: user.Replies.length,
+          followers: user.Followers.length,
+          followings: user.Followings.length,
+        }))
         return res.json(users)
       })
   },
