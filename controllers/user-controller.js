@@ -217,6 +217,7 @@ const userController = {
           TweetId: likedTweet.id, // 喜歡推文 id
           description: likedTweet.description, // 喜歡推文內容
           createdAt: likedTweet.createdAt, // 喜歡推文創建時間
+          tweetUserId: likedTweet.UserId, // 推文者 id
           userOfLikedTweet: likedTweet.User.id, // 喜歡推文的使用者id
           userNameOfLikedTweet: likedTweet.User.name, // 喜歡推文的使用者名子
           userAccountOfLikedTweet: likedTweet.User.account, // 喜歡推文的使用者帳戶名子
