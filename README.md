@@ -20,6 +20,8 @@ account: user1 (~user11)
 password: 12345678
 ```
 
+:sparkles: **Simple Twitter Frontend** is developed by Vue.js ([repo link](https://github.com/ziwenying/simple-twitter-frontend)).  
+
 ## API Features  
 ### Authentication  
 Check if the user is authenticated and authorized. Some routes are available to use after login, some are admin/user role only. Please refer to the API documents.  
