@@ -367,10 +367,15 @@ const userController = {
       email = email?.trim()
       password = password?.trim()
       checkPassword = checkPassword?.trim()
-      introduction = introduction?.trim()
 
-      // if all input fields are null, it means no change. Return the original user instance here
-      if (!account && !name && !email && !password && !checkPassword && !introduction && !files) {
+      // check if the password and checkPassword are the same
+      if (password !== checkPassword) return res.status(401).json({ status: 'error', message: 'Password and checkPassword are not same.' })
+
+      // if no changes from the request from 帳戶設定 or 編輯個人資料, return the original user instance here
+      if (
+        (account === user.account && name === user.name && email === user.email && bcrypt.compareSync(password, user.password) && !files) ||
+        (!account && name === user.name && introduction === user.introduction && !files)
+      ) {
         const data = user.toJSON()
         delete data.password
         return res.status(200).json(data)
@@ -394,10 +399,7 @@ const userController = {
 
       // check if updated name > 50 and introduction > 160 characters
       if (name?.length > 50) return res.status(400).json({ status: 'error', message: 'Name is too long.' })
-      if (introduction?.length > 160) return res.status(400).json({ status: 'error', message: 'Introduction is too long.' })
-
-      // check if the password and checkPassword are the same
-      if (password !== checkPassword) return res.status(401).json({ status: 'error', message: 'Password and checkPassword are not same.' })
+      if (!validator.isByteLength(introduction, { min: 0, max: 160 })) return res.status(400).json({ status: 'error', message: 'Introduction is too long.' })
 
       // check if the user uploads new files. If yes, handle the image with the helper and get the link(str)
       let avatar = files?.avatar || null
