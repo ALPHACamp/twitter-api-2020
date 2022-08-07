@@ -9,6 +9,7 @@
     "migrate": "npx sequelize-cli db:migrate",
     "seed": "npx sequelize-cli db:seed:all",
     "seed:undo": "npx sequelize-cli db:seed:undo:all",
+    "test:local": "cross-env NODE_ENV=test mocha test --exit --recursive --timeout 5000",
     "test": "mocha test --exit --recursive --timeout 5000",
     "migrate:test": "cross-env NODE_ENV=test npx sequelize-cli db:migrate"
   },
