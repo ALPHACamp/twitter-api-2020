@@ -97,8 +97,8 @@ const followController = {
         ]
       })
 
-      if (!rankData) {
-        return res.status(400).json({ status: 'error', message: 'users not found' })
+      if (!rankData.length) {
+        return res.status(200).json([])
       }
 
       const currentUser = helpers.getUser(req)

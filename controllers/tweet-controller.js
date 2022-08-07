@@ -63,7 +63,7 @@ const tweetController = {
         raw: true,
         nest: true
       })
-      if (!tweets.length) return res.status(404).json({ status: 'error', message: 'Tweet is not found' })
+      if (!tweets.length) return res.status(200).json([])
 
       // check if the current user likes the tweets or not (add attribute "isLiked" in tweets)
       const currentUserId = helpers.getUser(req).id
