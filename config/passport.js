@@ -6,6 +6,7 @@ const JwtStrategy = passportJWT.Strategy
 
 const db = require('../models')
 const User = db.User
+const Like = db.Like
 
 let jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
@@ -13,7 +14,7 @@ jwtOptions.secretOrKey = process.env.JWT_SECRET
 
 let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   User.findByPk(jwt_payload.id, {
-    include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }]
+    include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like]
   }).then(user => {
     if (!user) return next(null, false)
     user = {
@@ -26,7 +27,8 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
       role: user.role,
       banner: user.banner,
       Followers: user.Followers.map(follower => follower.Followship.followerId),
-      Followings: user.Followings.map(following => following.Followship.followingId)
+      Followings: user.Followings.map(following => following.Followship.followingId),
+      userLikesId: user.Likes.map(like => like.TweetId)
     }
     return next(null, user)
   })

@@ -105,7 +105,8 @@ const userController = {
       introduction: req.user.introduction,
       role: req.user.role,
       Followers: req.user.Followers,
-      Followings: req.user.Followings
+      Followings: req.user.Followings,
+      userLikesId: req.user.userLikesId
     })
   },
   getUserTweets: (req, res) => {
@@ -117,6 +118,8 @@ const userController = {
         tweets = JSON.parse(tweets)
         tweets = tweets.tweets.map(tweet => ({
           ...tweet,
+          likesLength: tweet.Likes.length,
+          repliesLength: tweet.Replies.length,
           User: {
             account: tweet.User.account,
             avatar: tweet.User.avatar,

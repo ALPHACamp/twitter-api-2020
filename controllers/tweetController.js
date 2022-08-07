@@ -13,6 +13,8 @@ const tweetController = {
         tweets = JSON.parse(tweets)
         tweets = tweets.tweets.map(tweet => ({
           ...tweet,
+          likesLength: tweet.Likes.length,
+          repliesLength: tweet.Replies.length,
           User: {
             account: tweet.User.account,
             avatar: tweet.User.avatar,
