@@ -44,6 +44,8 @@ const tweetController = {
             name: tweet.User.name,
           }
         }
+        tweet.likesLength = tweet.Likes.length
+        tweet.repliesLength = tweet.Replies.length
         return res.json(tweet)
       })
   },
