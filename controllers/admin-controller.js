@@ -36,7 +36,13 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      const users = await User.findAll({
+      let users = await User.findAll({
+        include: [
+          {
+            model: Tweet,
+            include: Like
+          }
+        ],
         attributes: [
           'id',
           'name',
@@ -48,12 +54,6 @@ const adminController = {
               '(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'
             ),
             'tweetsCount'
-          ],
-          [
-            Sequelize.literal(
-              '(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)'
-            ),
-            'likedTweetsCount'
           ],
           [
             Sequelize.literal(
@@ -70,6 +70,25 @@ const adminController = {
         ],
         order: [[Sequelize.literal('tweetsCount'), 'DESC'], ['name', 'ASC']]
       })
+
+      users = await users.map(user => {
+        let likedTweetsCount = 0
+        user.Tweets.forEach(tweet => {
+          likedTweetsCount += tweet.Likes.length
+        })
+        return {
+          id: user.dataValues.id,
+          name: user.dataValues.name,
+          avatar: user.dataValues.avatar,
+          account: user.dataValues.account,
+          tweetsCount: user.dataValues.tweetsCount,
+          front_cover: user.dataValues.front_cover,
+          likedTweetsCount,
+          followingsCount: user.dataValues.followingsCount,
+          followersCount: user.dataValues.followersCount
+        }
+      })
+
       res.status(200).json(users)
     } catch (error) {
       next(error)
