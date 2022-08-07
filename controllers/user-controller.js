@@ -361,6 +361,7 @@ const userController = {
       // get the user instance (full data, including hashed password)
       const user = await User.findByPk(id)
 
+      // ===== 帳戶設定 input: account, name, email, password, checkPassword ===
       // remove whitespace of input strings
       account = account?.trim()
       name = name?.trim()
@@ -368,27 +369,6 @@ const userController = {
       password = password?.trim()
       checkPassword = checkPassword?.trim()
 
-      // check if the password and checkPassword are the same
-      if (password !== checkPassword) return res.status(401).json({ status: 'error', message: 'Password and checkPassword are not same.' })
-
-      // if no changes from the request from 帳戶設定 or 編輯個人資料, return the original user instance here
-      if (
-        (account === user.account && name === user.name && email === user.email && bcrypt.compareSync(password, user.password) && !files) ||
-        (!account && name === user.name && introduction === user.introduction && !files)
-      ) {
-        const data = user.toJSON()
-        delete data.password
-        return res.status(200).json(data)
-      }
-
-      // check if email or account is changed. If yes, check if the new email is valid and not registered
-      if (email) {
-        if (!validator.isEmail(email)) return res.status(400).json({ status: 'error', message: 'Invalid email address.' })
-        if (email !== user.email) {
-          const emailExist = await User.findOne({ where: { email } })
-          if (emailExist) return res.status(401).json({ status: 'error', message: 'The email is registered.' })
-        }
-      }
       // check if the account is changed. If yes, check if the new account has been registered
       if (account) {
         if (account !== user.account) {
@@ -396,10 +376,30 @@ const userController = {
           if (accountExist) return res.status(401).json({ status: 'error', message: 'The account is registered.' })
         }
       }
-
-      // check if updated name > 50 and introduction > 160 characters
+      // check if updated name > 50
       if (name?.length > 50) return res.status(400).json({ status: 'error', message: 'Name is too long.' })
-      if (!validator.isByteLength(introduction, { min: 0, max: 160 })) return res.status(400).json({ status: 'error', message: 'Introduction is too long.' })
+      // check if email is changed. If yes, check if the new email is valid and not registered
+      if (email) {
+        if (!validator.isEmail(email)) return res.status(400).json({ status: 'error', message: 'Invalid email address.' })
+        if (email !== user.email) {
+          const emailExist = await User.findOne({ where: { email } })
+          if (emailExist) return res.status(401).json({ status: 'error', message: 'The email is registered.' })
+        }
+      }
+      // check if the password and checkPassword are the same
+      if (password !== checkPassword) return res.status(401).json({ status: 'error', message: 'Password and checkPassword are not same.' })
+
+      // update user data
+      const updatedUserSetting = await user.update({
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        password: password ? bcrypt.hashSync(password, 10) : user.password
+      })
+
+      // ===== 編輯個人資料 input: name(上面檢查更新過了), introduction, files ===
+      // check if introduction > 160 characters
+      if (introduction?.length > 160) return res.status(400).json({ status: 'error', message: 'Introduction is too long.' })
 
       // check if the user uploads new files. If yes, handle the image with the helper and get the link(str)
       let avatar = files?.avatar || null
@@ -408,16 +408,12 @@ const userController = {
       if (cover) { cover = await imgurFileHandler(cover[0]) }
 
       // update user data
-      const updatedUser = await user.update({
-        name: name || user.name,
-        account: account || user.account,
-        email: email || user.email,
-        password: password ? bcrypt.hashSync(password, 10) : user.password,
-        introduction: introduction || user.introduction,
+      const updatedUserProfile = await updatedUserSetting.update({
+        introduction: introduction,
         avatar: avatar || user.avatar,
         cover: cover || user.cover
       })
-      const data = updatedUser.toJSON()
+      const data = updatedUserProfile.toJSON()
       delete data.password
       return res.status(200).json(data)
     } catch (err) {
