@@ -1,4 +1,4 @@
-const { User, Tweet, Like, Followship } = require('../models')
+const { User, Tweet, Like, Followship, Reply } = require('../models')
 const { Op } = require('sequelize')
 
 const adminServices = {
@@ -39,7 +39,19 @@ const adminServices = {
       if (!tweet) throw new Error('Tweet does not exist!')
 
       const deletedTweet = await tweet.destroy()
-      deletedTweet.toJSON()
+
+      await Like.destroy({
+        where: {
+          TweetId
+        }
+      })
+
+      await Reply.destroy({
+        where: {
+          TweetId
+        }
+      })
+
       const record = deletedTweet.toJSON()
       return cb(null, record)
     } catch (err) {
