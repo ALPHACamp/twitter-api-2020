@@ -230,15 +230,17 @@ const userController = {
   // route: GET /api/:id/followings
   getUserFollowings: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const user = await User.findByPk(req.params.id, {
         include: [
-          { model: User, as: 'Followings' }
+          { model: User, as: 'Followings', include: { model: User, as: 'Followers' } }
         ]
       })
       if (!user || (user.role !== 'user')) throw new Error('Target user not exist')
       const followingSort = user.Followings
         .map(following => {
-          const { email, password, banner, Followship, ...restProps } = following.toJSON()
+          const { email, password, banner, Followship, Followers, ...restProps } = following.toJSON()
+          restProps.isFollowed = following.Followers.some(one => one.Followship.followerId === currentUserId)
           restProps.followingId = following.Followship.followingId
           return restProps
         })
