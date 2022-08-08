@@ -63,12 +63,16 @@ Example app listening on port 3000!
 ```
 10. 使用帳號登入  
 ```
-一般帳號 user1@example.com  
-密碼 12345678  
+前台測試帳號
+account: user1
+email: user1@example.com
+password: 12345678
 ```
 ```
-管理員帳號 root@example.com  
-密碼 12345678  
+後台測試帳號
+account: root
+email: root@example.com
+password: 12345678 
 ```
 ## 後端開發工具
 bcrypt-nodejs: v0.0.3  
