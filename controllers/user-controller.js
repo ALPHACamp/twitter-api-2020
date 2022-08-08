@@ -165,7 +165,7 @@ const userController = {
           }
           return restProps
         })
-        .sort((a, b) => b.createAt - a.createAt)
+        .sort((a, b) => b.createdAt - a.createdAt)
       res.json(tweetsSort)
     } catch (err) {
       next(err)
@@ -189,7 +189,7 @@ const userController = {
           }
           return restProps
         })
-        .sort((a, b) => b.createAt - a.createAt)
+        .sort((a, b) => b.createdAt - a.createdAt)
       res.json(repliesSort)
     } catch (err) {
       next(err)
@@ -207,7 +207,7 @@ const userController = {
       })
       const likesSort = likes
         .map(like => {
-          const { id, name, account, avatar } = like.Tweet.User.toJSON() 
+          const { id, name, account, avatar } = like.Tweet.User.toJSON()
           const { Replies, Likes, UserId, ...restProps } = {
             ...like.Tweet.toJSON(),
             User: { id, name, account, avatar},
@@ -220,7 +220,7 @@ const userController = {
           }
           return likeReturn
         })
-        .sort((a, b) => b.createAt - a.createAt)
+        .sort((a, b) => b.createdAt - a.createdAt)
       res.json(likesSort)
     } catch (err) {
       next(err)
@@ -242,7 +242,7 @@ const userController = {
           restProps.followingId = following.Followship.followingId
           return restProps
         })
-        .sort((a, b) => b.createAt - a.createAt)
+        .sort((a, b) => b.createdAt - a.createdAt)
       res.json(followingSort)
     } catch (err) {
       next(err)
@@ -266,7 +266,7 @@ const userController = {
           restProps.followerId = follower.Followship.followerId
           return restProps
         })
-        .sort((a, b) => b.createAt - a.createAt)
+        .sort((a, b) => b.createdAt - a.createdAt)
       res.json(followerSort)
     } catch (err) {
       next(err)
