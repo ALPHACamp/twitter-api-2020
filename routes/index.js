@@ -6,6 +6,12 @@ const tweetController = require('../controllers/tweetController')
 const passport = require('../config/passport')
 const authenticated = passport.authenticate('jwt', { session: false })
 
+// 測試用，上傳圖片到 imgur，尚未完成
+const multer = require('multer')
+let upload = multer()
+const { ImgurClient } = require('imgur');
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
 module.exports = (app) => {
   app.get('/api/get_current_user', authenticated, userController.getCurrentUser)
 
@@ -35,4 +41,29 @@ module.exports = (app) => {
   app.get('/api/admin/users', adminController.getUsers)
   app.get('/api/admin/tweets', adminController.getTweet)
   app.delete('/api/admin/tweets/:id', adminController.deleteTweet)
+
+  // 測試用，上傳圖片到 imgur，尚未完成。目前用 postman 傳 OK
+  app.post('/api/test', upload.single('userNewBanner'), async (req, res) => {
+    try {
+      console.log('===')
+      console.log('===')
+      console.log('===')
+      console.log('req.body', typeof req.body, req.body)
+      console.log('req.file', req.file)
+
+      const encode_image = req.file.buffer.toString('base64')
+      const client = new ImgurClient({ clientId: IMGUR_CLIENT_ID });
+      const response = await client.upload({
+        image: encode_image,
+        type: 'base64',
+      })
+      if (response.status === 200) {
+        return res.json({ status: 'success', link: response.data.link })
+      } else {
+        return res.json({ status: 'error', message: '上傳失敗' })
+      }
+    } catch (error) {
+      console.warn(error)
+    }
+  })
 }
