@@ -274,7 +274,7 @@ const userController = {
       const newData = await likedTweets.map(t => (
         {
           ...t,
-          islike: t.Tweet.isLike === 1 ? true : false,
+          isLike: t.Tweet.isLike === 1 ? true : false,
           likesCount: t.Tweet.likesCount,
           repliesCount: t.Tweet.repliesCount
         }
