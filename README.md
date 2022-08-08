@@ -4,12 +4,12 @@
 並以 JWT(JSON Web Token) 進行身份驗證。
 本專案採前後端分離的開發模式，此 repo  為後端 API ，請搭配前端 repo 使用。
 
-[前端repo連結](https://)
+[前端repo連結](https://github.com/Ingrid-chi/twitter_frontend)
 
 ---
 
 ### 專案DEMO
-[專案入口網站](https://)
+[專案入口網站](https://ingrid-chi.github.io/twitter_frontend/#/signin)
 
 #### 測試帳號
 
@@ -173,6 +173,6 @@ ctrl + c
 ---
 
 ### 開發成員與GitHub連結
-* 後端：[小玥](https://github.com/InzooC)、[singinw](https://github.com/singingw)
+* 後端：[小玥](https://github.com/InzooC)、[singingw](https://github.com/singingw)
 * 前端：[渣渣兒](https://github.com/yaoqizha)、[Ingrid](https://github.com/Ingrid-chi)
 
