@@ -4,9 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "set \"NODE_ENV=development\" && node app.js",
-    "dev": "set \"NODE_ENV=development\" && nodemon app.js",
-    "test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000",
+    "start": "cross-env NODE_ENV=development && node app.js",
+    "dev": "cross-env NODE_ENV=development && nodemon app.js",
+    "test": "cross-env NODE_ENV=test && mocha test --exit --recursive --timeout 5000",
     "resetdb": "npx sequelize db:seed:undo:all && npx sequelize db:migrate:undo:all && npx sequelize db:migrate && npx sequelize db:seed:all",
     "lint": "eslint \"**/*.js\" --fix"
   },
@@ -42,6 +42,7 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.23.4",
