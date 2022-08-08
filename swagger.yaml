@@ -1,0 +1,1089 @@
+openapi: 3.0.0
+info:
+  title: Simple Twitter API
+  contact: {}
+  version: 1.0.0-oas3
+servers:
+  - url: https://simple-twitter-paul.herokuapp.com/api
+    variables: {}
+  - url: http://localhost:3000/api
+    variables: {}
+paths:
+  /admin/users:
+    get:
+      tags:
+        - Admin
+      summary: Get all users
+      operationId: Getallusers
+      parameters: []
+      description: 回傳資料為一個Array
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - id:
+                  avatar:
+                  name:
+                  account:
+                  cover:
+                  tweetsCounts:
+                  likedTweetsCounts:
+                  followingsCounts:
+                  followersCounts:
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /admin/tweets:
+    get:
+      tags:
+        - Admin
+      summary: Get all tweets
+      operationId: Getalltweets
+      parameters: []
+      description: 回傳資料為一個Array
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - id:
+                  idOfUser:
+                  avatarOdUser:
+                  account:
+                  description:
+                  createdAt:
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /admin/tweets/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the tweet to delete. eg:14
+    delete:
+      tags:
+        - Admin
+      summary: Delete tweet
+      operationId: Deletetweet
+      parameters: []
+      description: 回傳資料為已刪除的貼文細節
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                id: null
+                UserId: null
+                description: null
+                createdAt: null
+                updatedAt: null
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user page
+      operationId: Getuserpage
+      parameters: []
+      description: 回傳單一使用者資料
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功取得User資料
+                id:
+                account:
+                name:
+                email:
+                introduction:
+                avatar:
+                cover:
+                isAdmin:
+                tweetsCounts:
+                followingsCounts:
+                followersCounts:
+                isFollowing:
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{editUserId}:
+    parameters:
+      - in: path
+        name: editUserId
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to edit. eg:14
+    put:
+      tags:
+        - User
+      summary: Edit user
+      operationId: Edituser
+      parameters: []
+      description: 此API用來編輯使用者avatar、cover、name、introduction資料，avatar與cover使用檔案上傳
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: user100
+                introduction: usere100好棒棒
+            example:
+              name: user100 限制50字元
+              introduction: 我是user100 限制150字元
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功編輯個人資料
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}/setting:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to edit. eg:14
+    put:
+      tags:
+        - User
+      summary: Edit user account
+      parameters: []
+      description: 此API用來編輯使用者帳號資料
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSetting'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 帳號設定完成
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}/likes:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get likes. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user likes
+      operationId: Getuserlikes
+      parameters: []
+      description: 取得使用者按讚的貼文清單，回傳格式為Array
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - likeCreatedAt: null
+                  TweetId: null
+                  description: null
+                  createdAt: null
+                  userOflikedTweet: null
+                  userNameOflikedTweet: null
+                  userAccountOflikedTweet: null
+                  userAvatarOflikedTweet: null
+                  repliedCounts: null
+                  likesCounts: null
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}/tweets:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get tweets. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user tweets
+      operationId: Getusertweets
+      parameters: []
+      description: 取得使用者的貼文清單，回傳格式為Array
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - id: null
+                  UserId: null
+                  description: null
+                  createdAt: null
+                  updatedAt: null
+                  Replies: null
+                  Likes: null
+                  userOfTweet: null
+                  userNameOfTweet: null
+                  userAccountOfTweet: null
+                  userAvatarOfTweet: null
+                  repliedCounts: null
+                  likesCounts: null
+                  isBeingliked: null
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}/replied_tweets:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get replied tweet. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user replies
+      operationId: Getuserreplies
+      parameters: []
+      description: 取得使用者回覆的貼文清單，回傳格式為Array
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - replyId: null
+                  comment: null
+                  repliedTweet: null
+                  repliedTweetDescription: null
+                  userOfRepliedTweet: null
+                  userAccountOfRepliedTweet: null
+                  userNameOfRepliedTweet: null
+                  userAvatarOfRepliedTweet: null
+                  repliedTweetCreatedAt: null
+                  isBeingliked: null
+                  userOfReply: null
+                  userAccountOfReply: null
+                  userNameOfReply: null
+                  userAvatarOfReply: null
+                  timeOfReply: null
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}/followings:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get followings. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user followings
+      operationId: Getuserfollowings
+      parameters: []
+      description: 取得使用者追蹤的清單，回傳格式為Array
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - userOfFollowing: null
+                  userNameOfFollowing: null
+                  userAccountOfFollowing: null
+                  userAvatarOfFollowing: null
+                  createdAt: null
+                  isFollowing: null
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/{id}/followers:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get followers. eg:14
+    get:
+      tags:
+        - User
+      summary: Get user followers
+      operationId: Getuserfollowers
+      parameters: []
+      description: 取得使用者粉絲的清單，回傳格式為Array
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - followerId: null
+                  userNameOfFollower: null
+                  userAccountOfFollower: null
+                  userAvatarOfFollwer: null
+                  createdAt: null
+                  isFollowing: null
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/top10:
+    get:
+      tags:
+        - User
+      summary: Get top 10 users
+      operationId: Gettop10users
+      parameters: []
+      description: 最高追蹤者清單，回傳格式為Array
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - id: null
+                  name: null
+                  account: null
+                  avatar: null
+                  followersCounts: null
+                  isFollowing: null
+                - id: null
+                  name: null
+                  account: null
+                  avatar: null
+                  followersCounts: null
+                  isFollowing: null
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users/current_user:
+    get:
+      tags:
+        - User
+      summary: Get current user
+      operationId: Getcurrentuser
+      parameters: []
+      description: 取得當前使用者資料
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                id:
+                account:
+                name:
+                email:
+                avatar:
+                isAdmin:
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /tweets:
+    get:
+      tags:
+        - Tweet
+      summary: Get all tweets
+      operationId: Getalltweets1
+      parameters: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              example:
+                - id:
+                  UserId:
+                  description:
+                  createdAt:
+                  User:
+                    id:
+                    account:
+                    name:
+                    avatar:
+                  repliedCounts:
+                  likesCounts:
+                  isBeingLiked:
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+    post:
+      tags:
+        - Tweet
+      summary: Create a tweet
+      operationId: Createatweet
+      parameters: []
+      description: 回傳description創建一則tweet
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateatweetRequest'
+            example:
+              description: '內容不可超過140字'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功建立一則tweet
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /tweets/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the tweet to get. eg:14
+    get:
+      tags:
+        - Tweet
+      summary: Get a tweet
+      operationId: Getatweet
+      parameters: []
+      description: 取得貼文資料
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - id:
+                  UserId:
+                  description:
+                  createdAt:
+                  User:
+                    id:
+                    account:
+                    name:
+                    avatar:
+                  repliedCounts:
+                  likesCounts:
+                  isBeingLiked:
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /tweets/{id}/likes:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of tweet to add like. eg:14
+    post:
+      tags:
+        - Tweet
+      summary: User likes a tweet
+      operationId: Userlikesatweet
+      parameters: []
+      description: params Id為tweetId
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功對tweet按like
+          headers: {}
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /tweets/{id}/unlike:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of tweet to unlike. eg:14
+    post:
+      tags:
+        - Tweet
+      summary: User unlikes a tweet
+      operationId: Userunlikesatweet
+      parameters: []
+      description: params Id為tweetId
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功取消tweet按like
+          headers: {}
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /tweets/{id}/replies:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of tweet to add reply. eg:14
+    post:
+      tags:
+        - Tweet
+      summary: User replies to  a tweet
+      operationId: Userrepliestoatweet
+      parameters: []
+      description: params Id為tweetId
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserrepliestoatweetRequest'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - id: null
+                  UserId: null
+                  TweetId: null
+                  comment: null
+                  createdAt: null
+                  Tweet:
+                    id: null
+                    UserId: null
+                    description: null
+                    createdAt: null
+                    updatedAt: null
+                    User:
+                      id: null
+                      account: null
+                      name: null
+                      email: null
+                      introduction: null
+                      avatar: null
+                      cover: null
+                      isAdmin: null
+                      role: null
+                      createdAt: null
+                      updatedAt: null
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /tweets/{tweetId}/replies:
+    parameters:
+      - in: path
+        name: tweetId
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of tweet to get replies. eg:14
+    get:
+      tags:
+        - Tweet
+      summary: Get edit reply page
+      operationId: Geteditreplypage
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - id:
+                  UserId:
+                  TweetId:
+                  comment:
+                  createdAt:
+                  User:
+                    account:
+                    avatar:
+                    name:
+                  Tweet:
+                    id:
+                    UserId:
+                    description:
+                    createdAt:
+                    User:
+                      id:
+                      account:
+                      name:
+                      avatar:
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /replies/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of reply to edit. eg:14
+    put:
+      tags:
+        - Reply
+      summary: Edit a reply
+      operationId: Editareply
+      parameters: []
+      description: 編輯tweet回覆留言
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              comment: 推文字數限制140字
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功修改回覆
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
+          headers: {}
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /followships:
+    post:
+      tags:
+        - Followship
+      summary: User add a following
+      operationId: Useraddafollowing
+      parameters: []
+      description: 追蹤user
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateatweetRequest'
+            example:
+              followingId: '104'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功追蹤
+          headers: {}
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /followships/{followingId}:
+    parameters:
+      - in: path
+        name: followingId
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of following to cancel the followship. eg:14
+    delete:
+      tags:
+        - Followship
+      summary: User unfollow someone
+      operationId: Userunfollowsomeone
+      parameters: []
+      description: 取消按like
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 取消追蹤
+          headers: {}
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: A user with the specified ID was not found.
+      deprecated: false
+      security:
+        - bearer: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /admin/signin:
+    post:
+      tags:
+        - Auth
+      summary: Admin login
+      description: 接受body資料資料如example，回傳使用者資料以及token
+      operationId: Adminlogin
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminloginRequest'
+            example:
+              account: root
+              password: '12345678'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功登入
+                token: null
+                data:
+                  id: null
+                  account: null
+                  name: null
+                  email: null
+                  introduction: null
+                  avatar: null
+                  cover: null
+                  isAdmin: true
+                  role: admin
+                  createdAt: null
+                  updatedAt: null
+      deprecated: false
+      security: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /signup:
+    post:
+      tags:
+        - Auth
+      summary: User sign up
+      operationId: Usersignup
+      parameters: []
+      description: 接受body資料資料如example，回傳成功訊息，無資料
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                account: user100
+                email: usere100@example
+                name: user100
+                password: '12345678'
+                checkPassword: '12345678'
+            example:
+              account: user100 限制10字元
+              email: usere100@example
+              name: user100 限制50字元
+              password: '12345678'
+              checkPassword: '12345678'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功創建
+      deprecated: false
+      security: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+  /users:
+    post:
+      tags:
+        - Auth
+      summary: User login
+      operationId: Userlogin
+      parameters: []
+      description: 接受body資料資料如example，回傳使用者資料以及token
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserloginRequest'
+            example:
+              account: user1
+              password: '12345678'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                status: success
+                message: 成功登入
+                token: null
+                data:
+                  id: null
+                  account: null
+                  name: null
+                  email: null
+                  introduction: null
+                  avatar: null
+                  cover: null
+                  isAdmin: false
+                  role: user
+                  createdAt: null
+                  updatedAt: null
+      security: []
+      servers:
+        - url: https://simple-twitter-paul.herokuapp.com/api
+          variables: {}
+components:
+  schemas:
+    AdminloginRequest:
+      title: AdminloginRequest
+      required:
+        - account
+        - password
+      type: object
+      properties:
+        account:
+          type: string
+        password:
+          type: string
+      example:
+        account: root
+        password: '12345678'
+    UserSetting:
+      title: UserSetting
+      required:
+        - account
+        - name
+        - email
+        - password
+        - checkPassword
+      type: object
+      properties:
+        account:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        checkPassoword:
+          type: string
+      example:
+        account:
+        name:
+        email:
+        password: '選擇性提供(點開頁面不會帶入原本資料)，若無提供則沿用原本密碼'
+        checkPassword: '選擇性提供(點開頁面不會帶入原本資料)，若無提供則沿用原本密碼'
+    CreateatweetRequest:
+      title: CreateatweetRequest
+      required:
+        - description
+      type: object
+      properties:
+        description:
+          type: string
+      example:
+        description: Hello Word
+    UserrepliestoatweetRequest:
+      title: UserrepliestoatweetRequest
+      required:
+        - comment
+      type: object
+      properties:
+        comment:
+          type: string
+      example:
+        comment: Hello word
+    UserEditReply:
+      title: UserEditReply
+      required:
+        - comment
+      type: object
+      properties:
+        comment:
+          type: string
+      example:
+        comment: Hello word edit
+    UserloginRequest:
+      title: UserloginRequest
+      required:
+        - account
+        - password
+      type: object
+      properties:
+        account:
+          type: string
+        password:
+          type: string
+      example:
+        account: user1
+        password: '12345678'
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+security: []
+tags:
+  - name: Admin
+  - name: User
+  - name: Tweet
+  - name: Reply
+  - name: Followship
+  - name: Auth
+    description: ''

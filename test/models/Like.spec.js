@@ -71,7 +71,7 @@ describe('# Like Model', () => {
 
     // 檢查 db.Like 是否真的可以新增一筆資料
     it('create', (done) => {
-      db.Like.create({}).then((like) => {   
+      db.Like.create({}).then((like) => {
         data = like
         done()
       })
