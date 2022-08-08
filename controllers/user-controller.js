@@ -4,7 +4,6 @@ const helpers = require('../_helpers')
 const { Tweet, Followship, User, Reply, Like, sequelize } = require('../models')
 const { Op } = require("sequelize")
 const { imgurFileHandler } = require('../helpers/file-helpers')
-// const fa = require('faker/lib/locales/fa')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -38,6 +37,8 @@ const userController = {
       if (foundAccount) {
         errorMessage += 'account 已重複註冊！'
       }
+
+
       if (errorMessage.length > 0) {
         throw new Error(errorMessage)
       }
@@ -275,7 +276,9 @@ const userController = {
       const newData = await likedTweets.map(t => (
         {
           ...t,
-          islike: t.Tweet.isLike === 1 ? true : false
+          islike: t.Tweet.isLike === 1 ? true : false,
+          likesCount: t.Tweet.likesCount,
+          repliesCount: t.Tweet.repliesCount
         }
       ))
 
