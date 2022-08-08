@@ -77,7 +77,7 @@ const userController = {
       })
   },
   getUser: (req, res) => {
-    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
+    User.findByPk(req.params.id, { include: [Like, Reply, { model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
       .then(user => {
         user = {
           account: user.account,
@@ -89,7 +89,9 @@ const userController = {
           role: user.role,
           banner: user.banner,
           Followers: user.Followers.map(follower => follower.Followship.followerId),
-          Followings: user.Followings.map(following => following.Followship.followingId)
+          Followings: user.Followings.map(following => following.Followship.followingId),
+          likesLength: user.Likes.length,
+          repliesLength: user.Replies.length
         }
         return res.json(user)
       })
