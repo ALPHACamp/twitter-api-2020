@@ -130,7 +130,7 @@ const userController = {
   },
   modifyUser: async (req, res, next) => {
     const UserId = helpers.getUser(req).id
-    const { account, name, email, password, checkPassword, introduction } = req.body
+    const { account, name, email, password, checkPassword, introduction, avatar, cover } = req.body
     const id = req.params.id
     try {
       if (Number(UserId) !== Number(id)) throw new Error('無法修改其他使用者之資料')
@@ -149,16 +149,17 @@ const userController = {
         throw new Error(errorMessage)
       }
       const newPassword = password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : null
-      const avatarFile = req.files?.avatar ? await imgurFileHandler(...req.files.avatar) : null
-      const coverFile = req.files?.cover ? await imgurFileHandler(...req.files.cover) : null
+      // const avatarFile = req.files?.avatar ? await imgurFileHandler(...req.files.avatar) : null
+      // const coverFile = req.files?.cover ? await imgurFileHandler(...req.files.cover) : null
+
       const updatedUser = await user.update({
         account: account || user.account,
         name: name || user.name,
         email: email || user.email,
         introduction: introduction || user.introduction,
         password: newPassword || user.password,
-        avatar: avatarFile || user.avatar,
-        cover: coverFile || user.cover
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover
       })
       const data = updatedUser.toJSON()
       delete data.password
