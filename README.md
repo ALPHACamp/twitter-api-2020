@@ -49,7 +49,8 @@ npx sequelize db:seed:all
 ```
 7. 新增 .env 檔案，根據 .env.example 補足所需變數設定  
 ```
-JWT_SECRET=  
+JWT_SECRET=
+IMGUR_CLIENT_ID=
 ```
 8. 當種子資料建立完畢後，請依照使用的電腦系統輸入以下內容啟動後端伺服器  
 ```
