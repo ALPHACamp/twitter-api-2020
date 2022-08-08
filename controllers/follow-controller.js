@@ -81,11 +81,17 @@ const followController = {
   },
   getFollowRank: async (req, res, next) => {
     try {
+      // Get query for pagination(optional)
+      const limit = Number(req.query.count) || 10
+      const offset = (Number(req.query.page) - 1) * limit || null
+
       // get top 10 users who has most followers
       const rankData = await User.findAll({
+        limit,
+        offset,
+        raw: true,
         where: { role: 'user' },
         order: [[sequelize.literal('followersCount'), 'DESC']],
-        limit: 10,
         attributes: [
           'id', 'name', 'avatar', 'account',
           [

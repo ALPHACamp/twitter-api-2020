@@ -47,8 +47,14 @@ const tweetController = {
   },
   getTweets: async (req, res, next) => {
     try {
+      // Get query for pagination(optional)
+      const limit = Number(req.query.count) || null
+      const offset = (Number(req.query.page) - 1) * limit || null
+
       // get all tweets and its reply and like number
       const tweets = await Tweet.findAll({
+        limit,
+        offset,
         attributes: [
           'id', 'description', 'createdAt',
           [
@@ -149,12 +155,18 @@ const tweetController = {
   },
   getTweetReplies: async (req, res, next) => {
     try {
+      // Get query for pagination(optional)
+      const limit = Number(req.query.count) || null
+      const offset = (Number(req.query.page) - 1) * limit || null
+
       // check if tweet is existing
       const TweetId = Number(req.params.tweet_id)
       const tweetIsExist = await Tweet.findByPk(TweetId)
       if (!tweetIsExist) return res.status(404).json({ status: 'error', message: 'Tweet is not found' })
 
       const repliesData = await Reply.findAll({
+        limit,
+        offset,
         where: { TweetId },
         attributes: ['id', 'comment', 'createdAt'],
         include: [

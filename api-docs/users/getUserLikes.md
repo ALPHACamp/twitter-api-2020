@@ -7,6 +7,12 @@ Get likes data of a certain user
 
 
 ## Input data  
+### query string  
+Settings for pagination (optional)  
+| name    | description           | default |
+| ------- | --------------------- | ------- |
+| `count` | limit of data records | null    |
+| `page`  | page (start from 1)   | null    |
 ### parameters  
 | params | Description               | required |
 | ------ | ------------------------- | -------- |

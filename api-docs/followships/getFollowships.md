@@ -4,6 +4,12 @@
 Get top 10 users who has most followers  
 
 ## Input data  
+### query string  
+Settings for pagination (optional)  
+| name    | description           | default |
+| ------- | --------------------- | ------- |
+| `count` | limit of data records | 10      |
+| `page`  | page (start from 1)   | null    |
 ### parameters  
 None
 
@@ -16,18 +22,20 @@ None
 // status code: 200
 [
     {
-        "id": 114,
-        "name": "autem qui",
-        "account": "user11",
-        "avatar": "<url>",
+        "id": 11,
+        "name": "maiores officia",
+        "account": "user10",
+        "avatar": "https://avatar-url",
+        "followerCount": 7,
         "isFollowed": true
     },
     {
-        "id": 84,
-        "name": "qui aliquid",
-        "account": "user8",
-        "avatar": "<url>",
-        "isFollowed": false
+        "id": 4,
+        "name": "earum quo",
+        "account": "user3",
+        "avatar": "https://avatar-url",
+        "followerCount": 6,
+        "isFollowed": true
     }
 ]
 ```

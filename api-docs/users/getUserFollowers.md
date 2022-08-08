@@ -5,6 +5,12 @@ Get followers data of a certain user
 * Ordered by timestamp of followship created 
 
 ## Input data  
+### query string  
+Settings for pagination (optional)  
+| name    | description           | default |
+| ------- | --------------------- | ------- |
+| `count` | limit of data records | null    |
+| `page`  | page (start from 1)   | null    |
 ### parameters  
 | params | Description               | required |
 | ------ | ------------------------- | -------- |

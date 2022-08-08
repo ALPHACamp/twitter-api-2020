@@ -8,6 +8,12 @@ Get data of all users.
 * Ordered by tweetCount
 
 ## Input data  
+### query string  
+Settings for pagination (optional)  
+| name    | description           | default |
+| ------- | --------------------- | ------- |
+| `count` | limit of data records | null    |
+| `page`  | page (start from 1)   | null    |
 ### parameters  
 None
 ### req.body  

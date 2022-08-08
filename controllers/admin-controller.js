@@ -52,7 +52,13 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
+      // Get query for pagination(optional)
+      const limit = Number(req.query.count) || null
+      const offset = (Number(req.query.page) - 1) * limit || null
+
       const usersData = await User.findAll({
+        limit,
+        offset,
         include: [{ model: Tweet, attributes: [] }],
         attributes: [
           'id', 'account', 'name', 'avatar', 'cover',

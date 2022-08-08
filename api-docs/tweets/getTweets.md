@@ -1,9 +1,15 @@
 # `GET` /api/tweets  
 
 ## API feature
-Get dat of all tweets  
+Get data of all tweets  
 
 ## Input data  
+### query string  
+Settings for pagination (optional)  
+| name    | description           | default |
+| ------- | --------------------- | ------- |
+| `count` | limit of data records | null    |
+| `page`  | page (start from 1)   | null    |
 ### parameters  
 None
 

@@ -138,6 +138,10 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
+      // Get query for pagination(optional)
+      const limit = Number(req.query.count) || null
+      const offset = (Number(req.query.page) - 1) * limit || null
+
       // check the user id is existing
       const id = Number(req.params.id)
       const userIsExist = await User.findByPk(id)
@@ -145,6 +149,8 @@ const userController = {
 
       // get the tweets of a certain user
       const tweets = await Tweet.findAll({
+        limit,
+        offset,
         where: { UserId: id },
         attributes: [
           'id', 'description', 'createdAt',
@@ -180,6 +186,10 @@ const userController = {
   },
   getUserReplies: async (req, res, next) => {
     try {
+      // Get query for pagination(optional)
+      const limit = Number(req.query.count) || null
+      const offset = (Number(req.query.page) - 1) * limit || null
+
       // check the user id is existing
       const id = Number(req.params.id)
       const userIsExist = await User.findByPk(id)
@@ -187,6 +197,8 @@ const userController = {
 
       // get the replies a certain user, and relating the tweet data of the reply
       const replies = await Reply.findAll({
+        limit,
+        offset,
         where: { UserId: id },
         attributes: ['id', 'comment', 'createdAt'],
         include: [
@@ -211,12 +223,18 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
+      // Get query for pagination(optional)
+      const limit = Number(req.query.count) || null
+      const offset = (Number(req.query.page) - 1) * limit || null
+
       // check the user id is existing
       const id = Number(req.params.id)
       const userIsExist = await User.findByPk(id)
       if (!userIsExist) return res.status(404).json({ status: 'error', message: 'User is not found' })
 
       const likes = await Like.findAll({
+        limit,
+        offset,
         where: { UserId: id },
         attributes: ['id', 'TweetId', 'createdAt'],
         include: [
@@ -257,12 +275,18 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
+      // Get query for pagination(optional)
+      const limit = Number(req.query.count) || null
+      const offset = (Number(req.query.page) - 1) * limit || null
+
       // check the user id is existing
       const id = Number(req.params.id)
       const userIsExist = await User.findByPk(id)
       if (!userIsExist) return res.status(404).json({ status: 'error', message: 'User is not found' })
 
       const followings = await Followship.findAll({
+        limit,
+        offset,
         where: { FollowerId: id },
         attributes: ['followingId', 'createdAt',
           [
@@ -299,12 +323,18 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
+      // Get query for pagination(optional)
+      const limit = Number(req.query.count) || null
+      const offset = (Number(req.query.page) - 1) * limit || null
+
       // check the user id is existing
       const id = Number(req.params.id)
       const userIsExist = await User.findByPk(id)
       if (!userIsExist) return res.status(404).json({ status: 'error', message: 'User is not found' })
 
       const followers = await Followship.findAll({
+        limit,
+        offset,
         where: { FollowingId: id },
         attributes: ['followerId', 'createdAt',
           [
