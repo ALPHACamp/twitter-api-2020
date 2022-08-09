@@ -11,6 +11,9 @@ const jwt = require('jsonwebtoken')
 // const ExtractJwt = passportJWT.ExtractJwt
 // const JwtStrategy = passportJWT.Strategy
 
+const { ImgurClient } = require('imgur');
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
 const userController = {
   signIn: (req, res) => {
     const { email, password } = req.body
@@ -294,7 +297,70 @@ const userController = {
             return res.json(user)
           })
       })
-  }
+  },
+  async putUserInfo(req, res) {
+    try {
+      // user name、introduction 會在 body 內；avatar、banner 在 files 內
+
+      // user.name 不可更新為空白，如傳入資料為空白，則結束函式
+      if (!req.body.name) {
+        return res.json({ status: 'error', message: 'Name 不可為空白' })
+      }
+
+      // 傳送 avatar、banner 檔案給 imgur，可以兩個都有、一有一無，或兩個都沒有
+      Promise.all(req.files.map(async (file) => {
+        let encode_image = file.buffer.toString('base64')
+        const client = new ImgurClient({ clientId: IMGUR_CLIENT_ID })
+
+        // 傳 encode_image 給 imgur
+        const response = await client.upload({
+          image: encode_image,
+          type: 'base64',
+        })
+
+        // 整理 imgur 回傳的圖片連結，存到 imgurLink
+        const result = {
+          'originalname': file.originalname,
+          'imgurLink': response.data.link
+        }
+        return result
+      }))
+        .then((results) => {
+          const name = req.body.name
+          const introduction = req.body.introduction
+          let avatar = undefined
+          let banner = undefined
+
+          //如果有更新 avatar 或 banner，則 results 至少會有一個物件，將該物件中的 imgurLink 存到變數 avatar 或 banner 中，等等再更新到資料庫內
+          if (results.length > 0) {
+            results.forEach(result => {
+              if (result.originalname === 'avatar') {
+                avatar = result.imgurLink
+              } else if (result.originalname === 'banner') {
+                banner = result.imgurLink
+              }
+            })
+          }
+
+          // 更新到資料庫
+          User.findByPk(req.user.id)
+            .then(user => {
+              user.update({
+                ...user,
+                name: name,
+                introduction: introduction,
+                avatar: avatar,
+                banner: banner,
+              })
+                .then(() => {
+                  return res.json({ status: 'success', results: results })
+                })
+            })
+        })
+    } catch (error) {
+      console.warn(error)
+    }
+  },
 }
 
 module.exports = userController
