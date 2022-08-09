@@ -6,11 +6,17 @@ const tweetController = require('../controllers/tweetController')
 const passport = require('../config/passport')
 const authenticated = passport.authenticate('jwt', { session: false })
 
-// 測試用，上傳圖片到 imgur，尚未完成
-const multer = require('multer')
-let upload = multer()
+
 const { ImgurClient } = require('imgur');
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const multer = require('multer')
+// 單一檔案
+// let upload = multer()
+// 多個檔案
+let upload = multer()
+
+const db = require('../models')
+const User = db.User
 
 module.exports = (app) => {
   app.get('/api/get_current_user', authenticated, userController.getCurrentUser)
@@ -42,28 +48,112 @@ module.exports = (app) => {
   app.get('/api/admin/tweets', adminController.getTweet)
   app.delete('/api/admin/tweets/:id', adminController.deleteTweet)
 
-  // 測試用，上傳圖片到 imgur，尚未完成。目前用 postman 傳 OK
-  app.post('/api/test', upload.single('userNewBanner'), async (req, res) => {
-    try {
-      console.log('===')
-      console.log('===')
-      console.log('===')
-      console.log('req.body', typeof req.body, req.body)
-      console.log('req.file', req.file)
 
-      const encode_image = req.file.buffer.toString('base64')
-      const client = new ImgurClient({ clientId: IMGUR_CLIENT_ID });
-      const response = await client.upload({
-        image: encode_image,
-        type: 'base64',
-      })
-      if (response.status === 200) {
-        return res.json({ status: 'success', link: response.data.link })
-      } else {
-        return res.json({ status: 'error', message: '上傳失敗' })
+  // 測試用，多個圖片 OK；只傳單一圖片也 OK
+  app.post('/api/test', authenticated, upload.array('files', 2), async (req, res) => {
+    try {
+      // user name、introduction 會在 body 內；avatar、banner 在 files 內
+      console.log('req.body:', req.body)
+      console.log('req.body:', req.body)
+      console.log('req.body:', req.body)
+      if (!req.body.name) {
+        console.log('req.body.name:', req.body.name)
+        return res.json({ status: 'error', message: 'Name 不可為空白' })
       }
+      console.log('xxxxx')
+
+      //return res.json({ status: 'success' })
+      Promise.all(req.files.map(async (file) => {
+        let encode_image = file.buffer.toString('base64')
+        const client = new ImgurClient({ clientId: IMGUR_CLIENT_ID })
+        const response = await client.upload({
+          image: encode_image,
+          type: 'base64',
+        })
+        const result = {
+          'originalname': file.originalname,
+          'imgurLink': response.data.link
+        }
+        return result
+      }))
+        .then((results) => {
+          console.log('results', results)
+          const name = req.body.name
+          const introduction = req.body.introduction
+          let avatar = undefined
+          let banner = undefined
+          results.forEach(result => {
+            if (result.originalname === 'avatar') {
+              avatar = result.imgurLink
+            } else if (result.originalname === 'banner') {
+              banner = result.imgurLink
+            }
+          })
+          User.findByPk(req.user.id)
+            .then(user => {
+              user.update({
+                ...user,
+                name: name,
+                introduction: introduction,
+                avatar: avatar,
+                banner: banner,
+              })
+            })
+          return res.json({ status: 'success', results: results })
+        })
     } catch (error) {
       console.warn(error)
     }
   })
+  // // 測試用，多個圖片 OK；只傳單一圖片也 OK
+  // app.post('/api/test', authenticated, upload.array('files', 2), async (req, res) => {
+  //   try {
+  //     // user name、introduction 會在 body 內；avatar、banner 在 files 內
+  //     console.log('req.body', req.body)
+  //     console.log('req.files', req.files)
+  //     console.log('req.user', req.user)
+
+  //     //return res.json({ status: 'success' })
+  //     Promise.all(req.files.map(async (file) => {
+  //       let encode_image = file.buffer.toString('base64')
+  //       const client = new ImgurClient({ clientId: IMGUR_CLIENT_ID })
+  //       const response = await client.upload({
+  //         image: encode_image,
+  //         type: 'base64',
+  //       })
+  //       return response
+  //     }))
+  //       .then((results) => {
+  //         const likes = []
+  //         results.forEach(result => {
+  //           likes.push(result.data.link)
+  //         })
+  //         return res.json({ status: 'success', links: likes })
+  //       })
+  //   } catch (error) {
+  //     console.warn(error)
+  //   }
+  // })
+  // 測試用，單一圖片 OK
+  // app.post('/api/test', authenticated, upload.single('file'), async (req, res) => {
+  //   try {
+  //     // user name、introduction 會在 body 內；banner 在 file 內
+  //     console.log('req.body', req.body)
+  //     console.log('req.file', req.file)
+
+  //     const encode_image = req.file.buffer.toString('base64')
+  //     const client = new ImgurClient({ clientId: IMGUR_CLIENT_ID });
+  //     const response = await client.upload({
+  //       image: encode_image,
+  //       type: 'base64',
+  //     })
+  //     if (response.status === 200) {
+  //       return res.json({ status: 'success', link: response.data.link })
+  //     } else {
+  //       return res.json({ status: 'error', message: '上傳失敗' })
+  //     }
+  //   } catch (error) {
+  //     console.warn(error)
+  //   }
+  // })
 }
