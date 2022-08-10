@@ -21,7 +21,7 @@ const userController = {
       return res.json({ ststus: 'error', message: '請輸入 email 與密碼' })
     }
 
-    User.findOne({ where: { email: email }, include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like] })
+    User.findOne({ where: { email: email }, include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, { model: User, as: 'NotiObjs' }] })
       .then(user => {
         if (!user) {
           return res.status(401).json({ ststus: 'error', message: '此 email 尚未註冊' })
@@ -41,7 +41,8 @@ const userController = {
           banner: user.banner,
           Followers: user.Followers.map(follower => follower.Followship.followerId),
           Followings: user.Followings.map(following => following.Followship.followingId),
-          userLikesId: user.Likes.map(like => like.TweetId)
+          userLikesId: user.Likes.map(like => like.TweetId),
+          NotiObjs: user.NotiObjs.map(notiObj => notiObj.Notify.notiObj)
         }
 
         // 簽發token
