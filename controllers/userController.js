@@ -21,13 +21,27 @@ const userController = {
       return res.json({ ststus: 'error', message: '請輸入 email 與密碼' })
     }
 
-    User.findOne({ where: { email: email } })
+    User.findOne({ where: { email: email }, include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like] })
       .then(user => {
         if (!user) {
           return res.status(401).json({ ststus: 'error', message: '此 email 尚未註冊' })
         }
         if (!bcrypt.compareSync(password, user.password)) {
           return res.status(401).json({ ststus: 'error', message: '密碼錯誤' })
+        }
+
+        user = {
+          account: user.account,
+          avatar: user.avatar,
+          id: user.id,
+          email: user.email,
+          introduction: user.introduction,
+          name: user.name,
+          role: user.role,
+          banner: user.banner,
+          Followers: user.Followers.map(follower => follower.Followship.followerId),
+          Followings: user.Followings.map(following => following.Followship.followingId),
+          userLikesId: user.Likes.map(like => like.TweetId)
         }
 
         // 簽發token
@@ -38,16 +52,7 @@ const userController = {
           status: 'success',
           message: '登入驗證成功',
           token: token,
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            account: user.account,
-            avatar: user.avatar,
-            introduction: user.introduction,
-            role: user.role,
-            banner: user.banner,
-          }
+          user: user
         })
       })
   },
