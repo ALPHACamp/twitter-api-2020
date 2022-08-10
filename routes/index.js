@@ -2,15 +2,13 @@ const adminController = require('../controllers/adminController')
 const userController = require('../controllers/userController')
 const followshipController = require('../controllers/followshipController')
 const tweetController = require('../controllers/tweetController')
+const notifyController = require('../controllers/notifyController')
 
 const passport = require('../config/passport')
 const authenticated = passport.authenticate('jwt', { session: false })
 
 const multer = require('multer')
 let upload = multer()
-
-const db = require('../models')
-const User = db.User
 
 module.exports = (app) => {
   app.get('/api/get_current_user', authenticated, userController.getCurrentUser)
@@ -29,6 +27,9 @@ module.exports = (app) => {
   app.get('/api/followships/recommended', authenticated, followshipController.getRecommendedFollowings)
   app.post('/api/followships', authenticated, followshipController.postFollowship)
   app.delete('/api/followships/:id', authenticated, followshipController.deleteFollowship)
+
+  app.post('/api/notify', authenticated, notifyController.postNoti)
+  app.delete('/api/notify/:id', authenticated, notifyController.deleteNoti)
 
   app.get('/api/tweets', authenticated, authenticated, tweetController.getTweets)
   app.post('/api/tweets', authenticated, tweetController.postTweet)

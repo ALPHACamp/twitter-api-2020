@@ -116,7 +116,8 @@ const userController = {
       role: req.user.role,
       Followers: req.user.Followers,
       Followings: req.user.Followings,
-      userLikesId: req.user.userLikesId
+      userLikesId: req.user.userLikesId,
+      NotiObjs: req.user.NotiObjs
     })
   },
   getUserTweets: (req, res) => {

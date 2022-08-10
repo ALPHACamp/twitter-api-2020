@@ -14,7 +14,7 @@ jwtOptions.secretOrKey = process.env.JWT_SECRET
 
 let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   User.findByPk(jwt_payload.id, {
-    include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like]
+    include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, { model: User, as: 'NotiObjs' }]
   }).then(user => {
     if (!user) return next(null, false)
     user = {
@@ -28,7 +28,8 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
       banner: user.banner,
       Followers: user.Followers.map(follower => follower.Followship.followerId),
       Followings: user.Followings.map(following => following.Followship.followingId),
-      userLikesId: user.Likes.map(like => like.TweetId)
+      userLikesId: user.Likes.map(like => like.TweetId),
+      NotiObjs: user.NotiObjs.map(notiObj => notiObj.Notify.notiObj)
     }
     return next(null, user)
   })
