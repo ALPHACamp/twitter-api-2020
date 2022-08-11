@@ -46,7 +46,7 @@ module.exports = {
         let randomNum = Math.floor(Math.random()*100 + 1)
         let avatar = `https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/${randomNum}.jpg`
         let introduction = faker.lorem.sentence(5)
-        let banner = 'https://cdn.pixabay.com/photo/2017/03/19/12/42/banner-2156395_960_720.jpg'
+        let banner = 'https://i.imgur.com/wjSOQDI.png'
         return ({
           name: name,
           account: name,
