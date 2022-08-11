@@ -1,3 +1,4 @@
+const { Op } = require('sequelize')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
@@ -61,30 +62,46 @@ const userController = {
       })
   },
   signUp: (req, res) => {
+    // 取得前端表單資料
     const { account, name, email, password, checkPassword } = req.body
 
+    // 表單資料有缺漏，或是password, checkPassword 不一致時，return
     if (!account || !name || !email || !password || !checkPassword) {
       return res.status(401).json({ status: 'error', message: 'account, name, email, password, checkPassword 均需填寫' })
     }
-
     if (password !== checkPassword) {
       return res.status(401).json({ status: 'error', message: 'password, checkPassword 不一致' })
     }
 
+    // 檢查輸入之 account, email是否已經被註冊過
+    let errorMessages = []
     User.findOne({ where: { email: email } })
       .then(user => {
         if (user) {
-          return res.status(401).json({ status: 'error', message: 'email 已經註冊' })
+          errorMessages.push('此 email 已經註冊')
         }
-        User.create({
-          account: account,
-          name: name,
-          email: email,
-          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-          role: 'user'
-        })
+        User.findOne({ where: { account: account } })
           .then(user => {
-            return res.json({ status: 'success', message: '' })
+            if (user) {
+              errorMessages.push('此 account 已經註冊')
+            }
+
+            // 如果輸入之 account, email，其中有一已經被註冊過，return
+            if (errorMessages.length > 0) {
+              return res.status(401).json({ status: 'error', errorMessages: errorMessages })
+            }
+
+            // 無誤時，建立新的資用者資料到資料庫中
+            User.create({
+              account: account,
+              name: name,
+              email: email,
+              password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+              role: 'user'
+            })
+              .then(user => {
+                return res.json({ status: 'success', message: '' })
+              })
           })
       })
   },
@@ -275,7 +292,7 @@ const userController = {
     const { name, introduction, email, account, checkPassword } = req.body
     let { password } = req.body
     if (!name || !email || !account) {
-      return res.status(401).json({ status: 'error', message: 'Name、Email、Account 不可為空白'})
+      return res.status(401).json({ status: 'error', message: 'Name、Email、Account 不可為空白' })
     }
     if (password !== checkPassword) {
       return res.status(401).json({ status: 'error', message: 'password, checkPassword 不一致' })
