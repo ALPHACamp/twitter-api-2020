@@ -29,7 +29,7 @@ module.exports = {
     await queryInterface.bulkInsert('Users',
       [{
         name: SEED_USER.name,
-        account: SEED_USER.account, 
+        account: SEED_USER.account,
         email: SEED_USER.email,
         password: bcrypt.hashSync(SEED_USER.password, bcrypt.genSaltSync(10)),
         role: SEED_USER.role,
@@ -43,7 +43,7 @@ module.exports = {
     await queryInterface.bulkInsert('Users',
       Array.from({ length: 5 }).map((item, index) => {
         let name = faker.name.firstName()
-        let randomNum = Math.floor(Math.random()*100 + 1)
+        let randomNum = Math.floor(Math.random() * 100 + 1)
         let avatar = `https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/${randomNum}.jpg`
         let introduction = faker.lorem.sentence(5)
         let banner = 'https://i.imgur.com/wjSOQDI.png'
@@ -62,11 +62,11 @@ module.exports = {
       }
       )
       , {})
-    // 新增每個使用者有 10 篇 post 種子資料
+    // 新增每個使用者有 10 篇 post 種子資料(5個一般 user，不含admin管理者)
     await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 60 }).map((item, index) => {
-        let UserId = Math.floor(index / 10) + 1
-        let UserTweetsIndex = index % 10 + 1 
+      Array.from({ length: 50 }).map((item, index) => {
+        let UserId = Math.floor(index / 10) + 2 // user.id 1 是 admin管理者，第 1 個一般 user.id 從 2 開始
+        let UserTweetsIndex = index % 10 + 1
         return ({
           UserId: UserId,
           description: `User: ${UserId} 的第 ${UserTweetsIndex} 篇推文`,
@@ -75,11 +75,16 @@ module.exports = {
         })
       })
     )
-    // 新增每個使用者有 2 位 follower 種子資料
+    // 新增每個使用者有 2 位 follower 種子資料(5個一般 user，不含admin管理者)
     await queryInterface.bulkInsert('Followships',
-      Array.from({ length: 12 }).map((item, index) => {
-        let followingId = Math.floor(index / 2) + 1
-        let followerId = index % 6 + 1
+      Array.from({ length: 10 }).map((item, index) => {
+        let followingId = 0
+        let followerId = 0
+        // 確保不會自己追蹤自己
+        while (followingId === followerId) {
+          followingId = Math.floor(index / 2) + 2
+          followerId = Math.floor(Math.random() * 5) + 2
+        }
         return ({
           followingId: followingId,
           followerId: followerId,
@@ -88,10 +93,10 @@ module.exports = {
         })
       })
     )
-    // 新增每篇 post 有隨機 3 個留言者，每個人有 1 則留言 種子資料
+    // 新增每篇 post 有隨機 3 個留言者，每個人有 1 則留言種子資料(5個一般 user，不含admin管理者)
     await queryInterface.bulkInsert('Replies',
-      Array.from({ length: 153 }).map((item, index) => {
-        let UserId = Math.floor(Math.random() * 6) + 1
+      Array.from({ length: 150 }).map((item, index) => {
+        let UserId = Math.floor(Math.random() * 5) + 2
         let TweetId = Math.floor(index / 3) + 1
         return ({
           UserId: UserId,
@@ -102,18 +107,18 @@ module.exports = {
         })
       })
     )
-    // 新增每篇 post 有隨機 3 個like， 種子資料
-    await queryInterface.bulkInsert('Likes', 
-    Array.from({length: 153}).map((item, index) => {
-      let UserId = index % 6 + 1
-      let TweetId = Math.floor(index / 3) + 1
-      return ({
-        UserId: UserId,
-        TweetId: TweetId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+    // 新增每篇 post 有隨機 3 個 like 種子資料(5個一般 user，不含admin管理者)
+    await queryInterface.bulkInsert('Likes',
+      Array.from({ length: 150 }).map((item, index) => {
+        let UserId = index % 5 + 2
+        let TweetId = Math.floor(index / 3) + 1
+        return ({
+          UserId: UserId,
+          TweetId: TweetId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
       })
-    })
     )
   },
 
