@@ -372,6 +372,13 @@ const userController = {
             })
           }
 
+          // 如果使用者在前端 cancel banner，此時 req.body.banner 會回傳 default banner URL
+          if (req.body.banner) {
+            if (req.body.banner.length > 0 || typeof req.body.banner === 'string') {
+              banner = req.body.banner
+            }
+          }
+
           // 更新到資料庫
           User.findByPk(req.user.id)
             .then(user => {
