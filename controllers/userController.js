@@ -23,6 +23,9 @@ const userController = {
 
     User.findOne({ where: { email: email }, include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, { model: User, as: 'NotiObjs' }] })
       .then(user => {
+        if (user.role !== 'user') {
+          return res.status(401).json({ status: 'error', message: '不存在此 user 一般使用者' })
+        }
         if (!user) {
           return res.status(401).json({ ststus: 'error', message: '此 email 尚未註冊' })
         }
