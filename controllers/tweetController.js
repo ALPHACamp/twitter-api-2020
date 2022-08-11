@@ -6,7 +6,7 @@ const Reply = db.Reply
 
 const tweetController = {
   getTweets: (req, res) => {
-    Tweet.findAll({ limit: 20, include: [User, Like, Reply] })
+    Tweet.findAll({ limit: 20, include: [User, Like, Reply], order: [['createdAt', 'DESC']] })
       .then(tweets => {
         tweets = { tweets: tweets }
         tweets = JSON.stringify(tweets)
@@ -89,7 +89,7 @@ const tweetController = {
   },
   getTweetReplies: (req, res) => {
     const tweetId = req.params.id
-    Reply.findAll({ where: { TweetId: tweetId }, include: [User, { model: Tweet, include: [User] }] })
+    Reply.findAll({ where: { TweetId: tweetId }, include: [User, { model: Tweet, include: [User] }], order: [['createdAt', 'DESC']] })
       .then(replies => {
         replies = replies.map(reply => ({
           id: reply.id,

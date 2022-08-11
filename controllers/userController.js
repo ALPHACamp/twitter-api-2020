@@ -143,7 +143,7 @@ const userController = {
   },
   getUserTweets: (req, res) => {
     const userId = req.params.id
-    Tweet.findAll({ where: { UserId: userId }, include: [User, Like, Reply] })
+    Tweet.findAll({ where: { UserId: userId }, include: [User, Like, Reply], order: [['createdAt', 'DESC']] })
       .then(tweets => {
         tweets = { tweets: tweets }
         tweets = JSON.stringify(tweets)
@@ -167,7 +167,7 @@ const userController = {
   },
   getUserRepliedTweets: (req, res) => {
     const userId = req.params.id
-    Reply.findAll({ where: { UserId: userId }, include: [User, { model: Tweet, include: [User] }], raw: true, nest: true })
+    Reply.findAll({ where: { UserId: userId }, include: [User, { model: Tweet, include: [User] }], order: [['createdAt', 'DESC']], raw: true, nest: true })
       .then(replies => {
         replies = replies.map(reply => ({
           id: reply.id,
@@ -201,7 +201,7 @@ const userController = {
   },
   getUserLikes: (req, res) => {
     const userId = req.params.id
-    Like.findAll({ where: { UserId: userId }, include: [{ model: Tweet, include: [User, Reply, Like] }] })
+    Like.findAll({ where: { UserId: userId }, include: [{ model: Tweet, include: [User, Reply, Like] }], order: [['createdAt', 'DESC']] })
       .then(likes => {
         likes = likes.map(like => ({
           id: like.id,
@@ -232,7 +232,7 @@ const userController = {
   },
   getUserFollowings: (req, res) => {
     const userId = req.params.id
-    Followship.findAll({ where: { followerId: userId } })
+    Followship.findAll({ where: { followerId: userId }, order: [['createdAt', 'DESC']] })
       .then(followings => {
         followings = { followings: followings }
         followings = JSON.stringify(followings)
@@ -261,7 +261,7 @@ const userController = {
   },
   getUserFollowers: (req, res) => {
     const userId = req.params.id
-    Followship.findAll({ where: { followingId: userId } })
+    Followship.findAll({ where: { followingId: userId }, order: [['createdAt', 'DESC']] })
       .then(followers => {
         followers = { followers: followers }
         followers = JSON.stringify(followers)
