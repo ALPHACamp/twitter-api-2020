@@ -37,7 +37,15 @@ const followshipController = {
       followingId: followingId
     })
       .then(followship => {
-        return res.json({ status: 'success', message: '' })
+        User.findByPk(followingId)
+          .then(user => {
+            user.update({
+              followersNum: user.followersNum + 1,
+            })
+              .then(() => {
+                return res.json({ status: 'success', message: '' })
+              })
+          })
       })
   },
   deleteFollowship: (req, res) => {
@@ -52,7 +60,15 @@ const followshipController = {
       .then(followship => {
         followship.destroy()
           .then(() => {
-            return res.json({ status: 'success', message: '' })
+            User.findByPk(followingId)
+              .then(user => {
+                user.update({
+                  followersNum: user.followersNum - 1,
+                })
+                  .then(() => {
+                    return res.json({ status: 'success', message: '' })
+                  })
+              })
           })
       })
   }
