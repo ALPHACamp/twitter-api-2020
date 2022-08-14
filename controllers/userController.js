@@ -398,6 +398,40 @@ const userController = {
       console.warn(error)
     }
   },
+  // 計算每個 User 有幾個 followers，並把數字更新到 User.followersNum
+  // countUserFollowersNum: (req, res) => {
+  //   User.findAll()
+  //     .then(users => {
+  //       users = { users: users }
+  //       users = JSON.stringify(users)
+  //       users = JSON.parse(users)
+  //       users = users.users.map(user => ({
+  //         account: user.account,
+  //         avatar: user.avatar,
+  //         id: user.id,
+  //         introduction: user.introduction,
+  //         name: user.name,
+  //         role: user.role,
+  //         banner: user.banner,
+  //       }))
+
+  //       Promise.all(users.map(user => {
+  //         return User.findByPk(user.id, { include: [{ model: User, as: 'Followers' }] })
+  //           .then(user => {
+  //             let followersNum = 0
+  //             if (user.Followers) {
+  //               followersNum = user.Followers.length
+  //             }
+  //             user.update({
+  //               followersNum: followersNum,
+  //             })
+  //           })
+  //       }))
+  //         .then((users) => {
+  //           return res.json(users)
+  //         })
+  //     })
+  // }
 }
 
 module.exports = userController

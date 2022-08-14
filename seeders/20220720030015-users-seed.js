@@ -56,6 +56,7 @@ module.exports = {
           avatar: avatar,
           introduction: introduction,
           banner: banner,
+          followersNum: 2,
           createdAt: new Date(),
           updatedAt: new Date(),
         })

@@ -6,7 +6,12 @@ const Followship = db.Followship
 const followshipController = {
   getRecommendedFollowings: (req, res) => {
     const userId = req.user.id //req.query.userId
-    User.findAll({ where: { id: { [Op.not]: userId } }, include: [{ model: User, as: 'Followers' }], limit: 10 })
+    User.findAll({
+      where: { id: { [Op.not]: userId } },
+      include: [{ model: User, as: 'Followers' }],
+      order: [['followersNum', 'DESC']],
+      limit: 10
+    })
       .then(users => {
         users = { users: users }
         users = JSON.stringify(users)
