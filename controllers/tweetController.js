@@ -57,7 +57,7 @@ const tweetController = {
       description: description
     })
       .then(tweet => {
-        return res.json({ status: 'success', message: '' })
+        return res.json({ status: 'success', message: '', tweetId: tweet.id })
       })
   },
   likeTweet: (req, res) => {
