@@ -39,6 +39,9 @@ module.exports = (sequelize, DataTypes) => {
     account: DataTypes.STRING,
     banner: DataTypes.STRING,
     followersNum: DataTypes.INTEGER,
+    tweetsNum: DataTypes.INTEGER,
+    repliesNum: DataTypes.INTEGER,
+    likesNum: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'User'

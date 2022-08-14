@@ -57,6 +57,9 @@ module.exports = {
           introduction: introduction,
           banner: banner,
           followersNum: 2,
+          tweetsNum: 10,
+          repliesNum: 50,
+          likesNum: 50,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
@@ -97,7 +100,7 @@ module.exports = {
     // 新增每篇 post 有隨機 3 個留言者，每個人有 1 則留言種子資料(5個一般 user，不含admin管理者)
     await queryInterface.bulkInsert('Replies',
       Array.from({ length: 150 }).map((item, index) => {
-        let UserId = Math.floor(Math.random() * 5) + 2
+        let UserId = index % 5 + 2
         let TweetId = Math.floor(index / 3) + 1
         return ({
           UserId: UserId,

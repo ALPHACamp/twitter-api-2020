@@ -398,6 +398,44 @@ const userController = {
       console.warn(error)
     }
   },
+  // 計算每個 User 有幾個 tweets、replies、likes，並把數字更新到 User
+  // countUserTweetsRepliesLikesNum: (req, res) => {
+  //   User.findAll()
+  //     .then(users => {
+  //       users = { users: users }
+  //       users = JSON.stringify(users)
+  //       users = JSON.parse(users)
+  //       users = users.users.map(user => ({
+  //         ...user,
+  //       }))
+
+  //       Promise.all(users.map(user => {
+  //         return User.findByPk(user.id, { include: [Tweet, Reply, Like] })
+  //           .then(user => {
+  //             let tweetsNum = 0
+  //             let repliesNum = 0
+  //             let likesNum = 0
+  //             if (user.Tweets) {
+  //               tweetsNum = user.Tweets.length
+  //             }
+  //             if (user.Replies) {
+  //               repliesNum = user.Replies.length
+  //             }
+  //             if (user.Likes) {
+  //               likesNum = user.Likes.length
+  //             }
+  //             user.update({
+  //               tweetsNum: tweetsNum,
+  //               repliesNum: repliesNum,
+  //               likesNum: likesNum,
+  //             })
+  //           })
+  //       }))
+  //         .then((users) => {
+  //           return res.json(users)
+  //         })
+  //     })
+  // }
   // 計算每個 User 有幾個 followers，並把數字更新到 User.followersNum
   // countUserFollowersNum: (req, res) => {
   //   User.findAll()

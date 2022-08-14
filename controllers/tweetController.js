@@ -57,7 +57,15 @@ const tweetController = {
       description: description
     })
       .then(tweet => {
-        return res.json({ status: 'success', message: '', tweetId: tweet.id })
+        User.findByPk(userId)
+        .then(user => {
+          user.update({
+            tweetsNum: user.tweetsNum + 1,
+          })
+          .then(() => {
+            return res.json({ status: 'success', message: '', tweetId: tweet.id })
+          })
+        })
       })
   },
   likeTweet: (req, res) => {
@@ -68,7 +76,15 @@ const tweetController = {
       TweetId: tweetId
     })
       .then(like => {
-        return res.json({ status: 'success', message: '' })
+        User.findByPk(userId)
+          .then(user => {
+            user.update({
+              likesNum: user.likesNum + 1,
+            })
+              .then(() => {
+                return res.json({ status: 'success', message: '' })
+              })
+          })
       })
   },
   unlikeTweet: (req, res) => {
@@ -83,7 +99,15 @@ const tweetController = {
       .then(like => {
         like.destroy()
           .then(() => {
-            return res.json({ status: 'success', message: '' })
+            User.findByPk(userId)
+              .then(user => {
+                user.update({
+                  likesNum: user.likesNum - 1,
+                })
+                  .then(() => {
+                    return res.json({ status: 'success', message: '' })
+                  })
+              })
           })
       })
   },
@@ -131,7 +155,15 @@ const tweetController = {
       comment: comment
     })
       .then(reply => {
-        return res.json(reply)
+        User.findByPk(userId)
+          .then(user => {
+            user.update({
+              repliesNum: user.repliesNum + 1,
+            })
+              .then(() => {
+                return res.json(reply)
+              })
+          })
       })
   }
 }

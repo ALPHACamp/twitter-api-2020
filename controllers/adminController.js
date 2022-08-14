@@ -47,7 +47,10 @@ const adminController = {
       })
   },
   getUsers: (req, res) => {
-    User.findAll({ include: [Like, Reply, { model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
+    User.findAll({
+      include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }],
+      order: [['tweetsNum', 'DESC']]
+    })
       .then(users => {
         users = { users: users }
         users = JSON.stringify(users)
@@ -60,8 +63,9 @@ const adminController = {
           name: user.name,
           role: user.role,
           banner: user.banner,
-          likesLength: user.Likes.length,
-          repliesLength: user.Replies.length,
+          tweetsNum: user.tweetsNum,
+          repliesNum: user.repliesNum,
+          likesNum: user.likesNum,
           followers: user.Followers.length,
           followings: user.Followings.length,
         }))
