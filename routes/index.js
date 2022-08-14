@@ -41,6 +41,6 @@ module.exports = (app) => {
 
   app.post('/api/admin/users/signin', adminController.signIn)
   app.get('/api/admin/users', adminController.getUsers)
-  app.get('/api/admin/tweets', adminController.getTweet)
+  app.get('/api/admin/tweets', adminController.getTweets)
   app.delete('/api/admin/tweets/:id', adminController.deleteTweet)
 }

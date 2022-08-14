@@ -68,7 +68,7 @@ const adminController = {
         return res.json(users)
       })
   },
-  getTweet: (req, res) => {
+  getTweets: (req, res) => {
     Tweet.findAll({ include: [User] })
       .then(tweets => {
         tweets = { tweets: tweets }
