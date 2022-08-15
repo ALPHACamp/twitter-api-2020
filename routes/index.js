@@ -11,8 +11,6 @@ const multer = require('multer')
 let upload = multer()
 
 module.exports = (app) => {
-  // app.get('/api/users/countUserTweetsRepliesLikesNum', userController.countUserTweetsRepliesLikesNum)
-
   app.get('/api/get_current_user', authenticated, userController.getCurrentUser)
 
   app.post('/api/users/signin', userController.signIn)
@@ -45,4 +43,6 @@ module.exports = (app) => {
   app.get('/api/admin/users', adminController.getUsers)
   app.get('/api/admin/tweets', adminController.getTweets)
   app.delete('/api/admin/tweets/:id', adminController.deleteTweet)
+  app.get('/api/admin/recountUserTweetsRepliesLikesNum', adminController.recountUserTweetsRepliesLikesNum)
+  app.get('/api/admin/recountUserFollowersNum', adminController.recountUserFollowersNum)
 }
