@@ -58,8 +58,8 @@ module.exports = {
           banner: banner,
           followersNum: 2,
           tweetsNum: 10,
-          repliesNum: 50,
-          likesNum: 50,
+          repliesNum: 30,
+          likesNum: 30,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
@@ -86,8 +86,8 @@ module.exports = {
         let followerId = 0
         // 確保不會自己追蹤自己
         while (followingId === followerId) {
-          followingId = Math.floor(index / 2) + 2
-          followerId = Math.floor(Math.random() * 5) + 2
+          followingId = index % 5 + 2
+          followerId = ((index % 5 + 2) + (index % 2 + 1)) % 5 + 2
         }
         return ({
           followingId: followingId,

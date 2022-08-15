@@ -5,17 +5,17 @@ const tweetController = require('../controllers/tweetController')
 const notifyController = require('../controllers/notifyController')
 
 const passport = require('../config/passport')
-//const authenticated = passport.authenticate('jwt', { session: false })
+const authenticated = passport.authenticate('jwt', { session: false })
 // 跑測試檔，替代authenticate
-const authenticated = (req, res, next) => {
-  const user = {
-    id: 1,
-  }
-  req.user = user
-  req.body.email = 'User1' 
-  req.body.account = 'User1' 
-  next(null, user)
-}
+// const authenticated = (req, res, next) => {
+//   const user = {
+//     id: 1,
+//   }
+//   req.user = user
+//   req.body.email = 'User1' 
+//   req.body.account = 'User1' 
+//   next(null, user)
+// }
 
 const multer = require('multer')
 let upload = multer()
