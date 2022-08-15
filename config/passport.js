@@ -10,7 +10,7 @@ const Like = db.Like
 
 let jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
-jwtOptions.secretOrKey = process.env.JWT_SECRET
+jwtOptions.secretOrKey = process.env.JWT_SECRET || 'secret'
 
 let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   User.findByPk(jwt_payload.id, {

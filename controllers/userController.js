@@ -51,7 +51,7 @@ const userController = {
 
         // 簽發token
         let payload = { id: user.id }
-        let token = jwt.sign(payload, process.env.JWT_SECRET)
+        let token = jwt.sign(payload, process.env.JWT_SECRET || 'secret')
         // 回傳訊息、token、user data
         return res.json({
           status: 'success',

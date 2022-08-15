@@ -28,7 +28,7 @@ const adminController = {
 
         //簽發 token
         let payload = { id: user.id }
-        let token = jwt.sign(payload, process.env.JWT_SECRET)
+        let token = jwt.sign(payload, process.env.JWT_SECRET || 'secret')
         return res.json({
           status: 'success',
           message: '登入驗證成功',
