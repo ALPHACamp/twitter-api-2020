@@ -17,6 +17,14 @@ const authenticated = passport.authenticate('jwt', { session: false })
 //   next(null, user)
 // }
 
+const authenticatedAdmin = (req, res, next) => {
+  if (req.user.role === 'admin') {
+    next()
+  } else {
+    return res.status(401).json({status: 'error', message: '沒有 Admin 權限'})
+  }
+}
+
 const multer = require('multer')
 let upload = multer()
 
@@ -50,9 +58,9 @@ module.exports = (app) => {
   app.get('/api/tweets/:id', authenticated, tweetController.getTweet)
 
   app.post('/api/admin/users/signin', adminController.signIn)
-  app.get('/api/admin/users', authenticated, adminController.getUsers)
-  app.get('/api/admin/tweets', authenticated, adminController.getTweets)
-  app.delete('/api/admin/tweets/:id', authenticated, adminController.deleteTweet)
-  app.get('/api/admin/recountUserTweetsRepliesLikesNum', authenticated, adminController.recountUserTweetsRepliesLikesNum)
-  app.get('/api/admin/recountUserFollowersNum', authenticated, adminController.recountUserFollowersNum)
+  app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+  app.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
+  app.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+  app.get('/api/admin/recountUserTweetsRepliesLikesNum', authenticatedAdmin, authenticated, adminController.recountUserTweetsRepliesLikesNum)
+  app.get('/api/admin/recountUserFollowersNum', authenticated, authenticatedAdmin, adminController.recountUserFollowersNum)
 }
