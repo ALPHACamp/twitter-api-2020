@@ -3,7 +3,7 @@ const Notify = db.Notify
 
 const notifyController = {
   postNoti: (req, res) => {
-    const notiSbj = req.user.id || 1
+    const notiSbj = req.user.id
     const notiObj = req.body.id
     Notify.create({
       notiSbj: notiSbj,

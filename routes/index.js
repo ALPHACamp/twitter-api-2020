@@ -5,7 +5,17 @@ const tweetController = require('../controllers/tweetController')
 const notifyController = require('../controllers/notifyController')
 
 const passport = require('../config/passport')
-const authenticated = passport.authenticate('jwt', { session: false })
+//const authenticated = passport.authenticate('jwt', { session: false })
+// 跑測試檔，替代authenticate
+const authenticated = (req, res, next) => {
+  const user = {
+    id: 1,
+  }
+  req.user = user
+  req.body.email = 'User1' 
+  req.body.account = 'User1' 
+  next(null, user)
+}
 
 const multer = require('multer')
 let upload = multer()
@@ -31,7 +41,7 @@ module.exports = (app) => {
   app.post('/api/notify', authenticated, notifyController.postNoti)
   app.delete('/api/notify/:id', authenticated, notifyController.deleteNoti)
 
-  app.get('/api/tweets', authenticated, authenticated, tweetController.getTweets)
+  app.get('/api/tweets', authenticated, tweetController.getTweets)
   app.post('/api/tweets', authenticated, tweetController.postTweet)
   app.post('/api/tweets/:id/like', authenticated, tweetController.likeTweet)
   app.post('/api/tweets/:id/unlike', authenticated, tweetController.unlikeTweet)
@@ -40,9 +50,9 @@ module.exports = (app) => {
   app.get('/api/tweets/:id', authenticated, tweetController.getTweet)
 
   app.post('/api/admin/users/signin', adminController.signIn)
-  app.get('/api/admin/users', adminController.getUsers)
-  app.get('/api/admin/tweets', adminController.getTweets)
-  app.delete('/api/admin/tweets/:id', adminController.deleteTweet)
-  app.get('/api/admin/recountUserTweetsRepliesLikesNum', adminController.recountUserTweetsRepliesLikesNum)
-  app.get('/api/admin/recountUserFollowersNum', adminController.recountUserFollowersNum)
+  app.get('/api/admin/users', authenticated, adminController.getUsers)
+  app.get('/api/admin/tweets', authenticated, adminController.getTweets)
+  app.delete('/api/admin/tweets/:id', authenticated, adminController.deleteTweet)
+  app.get('/api/admin/recountUserTweetsRepliesLikesNum', authenticated, adminController.recountUserTweetsRepliesLikesNum)
+  app.get('/api/admin/recountUserFollowersNum', authenticated, adminController.recountUserFollowersNum)
 }
