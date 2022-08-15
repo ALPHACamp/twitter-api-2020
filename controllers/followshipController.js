@@ -5,7 +5,7 @@ const Followship = db.Followship
 
 const followshipController = {
   getRecommendedFollowings: (req, res) => {
-    const userId = req.user.id //req.query.userId
+    const userId = req.user.id // req.query.userId
     User.findAll({
       where: { id: { [Op.not]: userId } },
       include: [{ model: User, as: 'Followers' }],
@@ -40,7 +40,7 @@ const followshipController = {
         User.findByPk(followingId)
           .then(user => {
             user.update({
-              followersNum: user.followersNum + 1,
+              followersNum: user.followersNum + 1
             })
               .then(() => {
                 return res.json({ status: 'success', message: '' })
@@ -63,7 +63,7 @@ const followshipController = {
             User.findByPk(followingId)
               .then(user => {
                 user.update({
-                  followersNum: user.followersNum - 1,
+                  followersNum: user.followersNum - 1
                 })
                   .then(() => {
                     return res.json({ status: 'success', message: '' })

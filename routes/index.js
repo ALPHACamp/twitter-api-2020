@@ -5,34 +5,34 @@ const tweetController = require('../controllers/tweetController')
 const notifyController = require('../controllers/notifyController')
 
 const passport = require('../config/passport')
-//const authenticated = passport.authenticate('jwt', { session: false })
+const authenticated = passport.authenticate('jwt', { session: false })
 // 跑測試檔，替代authenticate
-const authenticated = (req, res, next) => {
-  const user = {
-    id: 1,
-  }
-  req.user = user
-  req.body.email = 'User1' 
-  req.body.account = 'User1' 
-  next(null, user)
-}
-
-// const authenticatedAdmin = (req, res, next) => {
-//   if (req.user.role === 'admin') {
-//     next()
-//   } else {
-//     return res.status(401).json({status: 'error', message: '沒有 Admin 權限'})
+// const authenticated = (req, res, next) => {
+//   const user = {
+//     id: 1
 //   }
+//   req.user = user
+//   req.body.email = 'User1'
+//   req.body.account = 'User1'
+//   next(null, user)
 // }
-// 跑測試檔，替代authenticatedAdmin
+
 const authenticatedAdmin = (req, res, next) => {
-  const user = req.user
-  user.role = 'admin'
-  next(null, user)
+  if (req.user.role === 'admin') {
+    next()
+  } else {
+    return res.status(401).json({status: 'error', message: '沒有 Admin 權限'})
+  }
 }
+// 跑測試檔，替代authenticatedAdmin
+// const authenticatedAdmin = (req, res, next) => {
+//   const user = req.user
+//   user.role = 'admin'
+//   next(null, user)
+// }
 
 const multer = require('multer')
-let upload = multer()
+const upload = multer()
 
 module.exports = (app) => {
   app.get('/api/get_current_user', authenticated, userController.getCurrentUser)

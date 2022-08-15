@@ -6,9 +6,6 @@ const Reply = db.Reply
 const bcrypt = require('bcryptjs')
 // JWT
 const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
 
 const adminController = {
   signIn: (req, res) => {
@@ -26,9 +23,9 @@ const adminController = {
           return res.status(401).json({ ststus: 'error', message: '密碼錯誤' })
         }
 
-        //簽發 token
-        let payload = { id: user.id }
-        let token = jwt.sign(payload, process.env.JWT_SECRET || 'secret')
+        // 簽發 token
+        const payload = { id: user.id }
+        const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret')
         return res.json({
           status: 'success',
           message: '登入驗證成功',
@@ -41,7 +38,7 @@ const adminController = {
             avatat: user.avatat,
             introduction: user.introduction,
             role: user.role,
-            banner: user.banner,
+            banner: user.banner
           }
         })
       })
@@ -67,7 +64,7 @@ const adminController = {
           repliesNum: user.repliesNum,
           likesNum: user.likesNum,
           followers: user.Followers.length,
-          followings: user.Followings.length,
+          followings: user.Followings.length
         }))
         return res.json(users)
       })
@@ -84,7 +81,7 @@ const adminController = {
             account: tweet.User.account,
             avatar: tweet.User.avatar,
             id: tweet.User.id,
-            name: tweet.User.name,
+            name: tweet.User.name
           }
         }))
         return res.json(tweets)
@@ -164,7 +161,7 @@ const adminController = {
         users = JSON.stringify(users)
         users = JSON.parse(users)
         users = users.users.map(user => ({
-          ...user,
+          ...user
         }))
 
         Promise.all(users.map(user => {
@@ -185,7 +182,7 @@ const adminController = {
               user.update({
                 tweetsNum: tweetsNum,
                 repliesNum: repliesNum,
-                likesNum: likesNum,
+                likesNum: likesNum
               })
             })
         }))
@@ -208,7 +205,7 @@ const adminController = {
           introduction: user.introduction,
           name: user.name,
           role: user.role,
-          banner: user.banner,
+          banner: user.banner
         }))
 
         Promise.all(users.map(user => {
@@ -219,7 +216,7 @@ const adminController = {
                 followersNum = user.Followers.length
               }
               user.update({
-                followersNum: followersNum,
+                followersNum: followersNum
               })
             })
         }))
@@ -227,7 +224,7 @@ const adminController = {
             return res.json({ status: 'success', message: '' })
           })
       })
-  },
+  }
 }
 
 module.exports = adminController

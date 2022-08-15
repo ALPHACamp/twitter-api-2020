@@ -1,4 +1,3 @@
-const { Op } = require('sequelize')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
@@ -12,7 +11,7 @@ const jwt = require('jsonwebtoken')
 // const ExtractJwt = passportJWT.ExtractJwt
 // const JwtStrategy = passportJWT.Strategy
 
-const { ImgurClient } = require('imgur');
+const { ImgurClient } = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const userController = {
@@ -50,8 +49,8 @@ const userController = {
         }
 
         // 簽發token
-        let payload = { id: user.id }
-        let token = jwt.sign(payload, process.env.JWT_SECRET || 'secret')
+        const payload = { id: user.id }
+        const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret')
         // 回傳訊息、token、user data
         return res.json({
           status: 'success',
@@ -74,7 +73,7 @@ const userController = {
     }
 
     // 檢查輸入之 account, email是否已經被註冊過
-    let errorMessages = []
+    const errorMessages = []
     User.findOne({ where: { email: email } })
       .then(user => {
         if (user) {
@@ -159,7 +158,7 @@ const userController = {
             introduction: tweet.User.introduction,
             name: tweet.User.name,
             role: tweet.User.role,
-            banner: tweet.User.banner,
+            banner: tweet.User.banner
           }
         }))
         return res.json(tweets)
@@ -180,7 +179,7 @@ const userController = {
             account: reply.User.account,
             avatar: reply.User.avatar,
             id: reply.User.id,
-            name: reply.User.name,
+            name: reply.User.name
           },
           Tweet: {
             id: reply.Tweet.id,
@@ -192,7 +191,7 @@ const userController = {
               account: reply.Tweet.User.account,
               avatar: reply.Tweet.User.avatar,
               id: reply.Tweet.User.id,
-              name: reply.Tweet.User.name,
+              name: reply.Tweet.User.name
             }
           }
         }))
@@ -219,13 +218,13 @@ const userController = {
               id: like.Tweet.User.id,
               account: like.Tweet.User.account,
               avatar: like.Tweet.User.avatar,
-              name: like.Tweet.User.name,
+              name: like.Tweet.User.name
             },
             Replies: like.Tweet.Replies,
             Likes: like.Tweet.Likes,
             likesLength: like.Tweet.Likes.length,
-            repliesLength: like.Tweet.Replies.length,
-          },
+            repliesLength: like.Tweet.Replies.length
+          }
         }))
         return res.json(likes)
       })
@@ -250,7 +249,7 @@ const userController = {
               avatar: user.avatar,
               id: user.id,
               introduction: user.introduction,
-              name: user.name,
+              name: user.name
             }))
             followings.forEach((following, index) => {
               following.followingUser = users[index]
@@ -279,7 +278,7 @@ const userController = {
               avatar: user.avatar,
               id: user.id,
               introduction: user.introduction,
-              name: user.name,
+              name: user.name
             }))
             followers.forEach((follower, index) => {
               follower.followerUser = users[index]
@@ -309,7 +308,7 @@ const userController = {
           introduction: introduction || user.introduction,
           email: email || user.email,
           account: account || user.account,
-          password: password || user.password,
+          password: password || user.password
         })
           .then(user => {
             user = {
@@ -328,7 +327,7 @@ const userController = {
           })
       })
   },
-  async putUserInfo(req, res) {
+  async putUserInfo (req, res) {
     try {
       // user name、introduction 會在 body 內；avatar、banner 在 files 內
 
@@ -339,13 +338,13 @@ const userController = {
 
       // 傳送 avatar、banner 檔案給 imgur，可以兩個都有、一有一無，或兩個都沒有
       Promise.all(req.files.map(async (file) => {
-        let encode_image = file.buffer.toString('base64')
+        const encode_image = file.buffer.toString('base64')
         const client = new ImgurClient({ clientId: IMGUR_CLIENT_ID })
 
         // 傳 encode_image 給 imgur
         const response = await client.upload({
           image: encode_image,
-          type: 'base64',
+          type: 'base64'
         })
 
         // 整理 imgur 回傳的圖片連結，存到 imgurLink
@@ -361,7 +360,7 @@ const userController = {
           let avatar = undefined
           let banner = undefined
 
-          //如果有更新 avatar 或 banner，則 results 至少會有一個物件，將該物件中的 imgurLink 存到變數 avatar 或 banner 中，等等再更新到資料庫內
+          // 如果有更新 avatar 或 banner，則 results 至少會有一個物件，將該物件中的 imgurLink 存到變數 avatar 或 banner 中，等等再更新到資料庫內
           if (results.length > 0) {
             results.forEach(result => {
               if (result.originalname === 'avatar') {
@@ -387,7 +386,7 @@ const userController = {
                 name: name,
                 introduction: introduction,
                 avatar: avatar,
-                banner: banner,
+                banner: banner
               })
                 .then(() => {
                   return res.json({ status: 'success', results: results })
@@ -397,7 +396,7 @@ const userController = {
     } catch (error) {
       console.warn(error)
     }
-  },
+  }
 }
 
 module.exports = userController

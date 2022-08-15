@@ -22,7 +22,7 @@ const tweetController = {
             introduction: tweet.User.introduction,
             name: tweet.User.name,
             role: tweet.User.role,
-            banner: tweet.User.banner,
+            banner: tweet.User.banner
           }
         }))
         return res.json(tweets)
@@ -41,7 +41,7 @@ const tweetController = {
             account: tweet.User.account,
             avatar: tweet.User.avatar,
             id: tweet.User.id,
-            name: tweet.User.name,
+            name: tweet.User.name
           }
         }
         tweet.likesLength = tweet.Likes.length
@@ -58,14 +58,14 @@ const tweetController = {
     })
       .then(tweet => {
         User.findByPk(userId)
-        .then(user => {
-          user.update({
-            tweetsNum: user.tweetsNum + 1,
+          .then(user => {
+            user.update({
+              tweetsNum: user.tweetsNum + 1
+            })
+              .then(() => {
+                return res.json({ status: 'success', message: '', tweetId: tweet.id })
+              })
           })
-          .then(() => {
-            return res.json({ status: 'success', message: '', tweetId: tweet.id })
-          })
-        })
       })
   },
   likeTweet: (req, res) => {
@@ -79,7 +79,7 @@ const tweetController = {
         User.findByPk(userId)
           .then(user => {
             user.update({
-              likesNum: user.likesNum + 1,
+              likesNum: user.likesNum + 1
             })
               .then(() => {
                 return res.json({ status: 'success', message: '' })
@@ -102,7 +102,7 @@ const tweetController = {
             User.findByPk(userId)
               .then(user => {
                 user.update({
-                  likesNum: user.likesNum - 1,
+                  likesNum: user.likesNum - 1
                 })
                   .then(() => {
                     return res.json({ status: 'success', message: '' })
@@ -126,7 +126,7 @@ const tweetController = {
             account: reply.User.account,
             avatar: reply.User.avatar,
             id: reply.User.id,
-            name: reply.User.name,
+            name: reply.User.name
           },
           Tweet: {
             id: reply.Tweet.id,
@@ -138,7 +138,7 @@ const tweetController = {
               account: reply.Tweet.User.account,
               avatar: reply.Tweet.User.avatar,
               id: reply.Tweet.User.id,
-              name: reply.Tweet.User.name,
+              name: reply.Tweet.User.name
             }
           }
         }))
@@ -158,7 +158,7 @@ const tweetController = {
         User.findByPk(userId)
           .then(user => {
             user.update({
-              repliesNum: user.repliesNum + 1,
+              repliesNum: user.repliesNum + 1
             })
               .then(() => {
                 return res.json(reply)
