@@ -190,7 +190,7 @@ const adminController = {
             })
         }))
           .then((users) => {
-            return res.json(users)
+            return res.json({ status: 'success', message: '' })
           })
       })
   },
@@ -224,7 +224,7 @@ const adminController = {
             })
         }))
           .then((users) => {
-            return res.json(users)
+            return res.json({ status: 'success', message: '' })
           })
       })
   },
