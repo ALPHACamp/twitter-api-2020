@@ -311,10 +311,28 @@ const userController = {
   async putUser(req, res, done) {
     try {
       // user name、introduction 會在 body 內；avatar、banner 在 files 內
+      const userId = req.user.id
 
       // user.name 不可更新為空白，如傳入資料為空白，則結束函式
       if (!req.body.name) {
         return res.status(401).json({ status: 'error', message: 'Name 不可為空白' })
+      }
+
+      // 檢查輸入之 name 是否已經被使用過
+      const nameHasBeenUsed = await User.findOne({ where: { name: req.body.name } })
+        .then(user => {
+          if (user) {
+            // email 已有人此用，且該人並不是 currentUser
+            if (user.id !== userId) {
+              console.log('此 name 已經有其他使用者使用')
+              return true
+            } else {
+              return false
+            }
+          }
+        })
+      if (nameHasBeenUsed) {
+        return res.status(401).json({ status: 'error', message: '此 name 已經有其他使用者使用' })
       }
 
       // 如果有傳圖檔的話
@@ -428,30 +446,72 @@ const userController = {
     } else {
       password = ''
     }
-    User.findByPk(userId, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
+
+    // 檢查輸入之 account, email, name 是否已經被使用了
+    const errorMessages = []
+    User.findOne({ where: { email: email } })
       .then(user => {
-        user.update({
-          name: name || user.name,
-          introduction: introduction || user.introduction,
-          email: email || user.email,
-          account: account || user.account,
-          password: password || user.password
-        })
+        if (user) {
+          // email 已有人此用，且該人並不是 currentUser
+          if (user.id !== userId) {
+            errorMessages.push('此 email 已經有其他使用者使用')
+          }
+        }
+
+        User.findOne({ where: { account: account } })
           .then(user => {
-            user = {
-              account: user.account,
-              avatar: user.avatar,
-              id: user.id,
-              email: user.email,
-              introduction: user.introduction,
-              name: user.name,
-              role: user.role,
-              banner: user.banner,
-              Followers: user.Followers.map(follower => follower.Followship.followerId),
-              Followings: user.Followings.map(following => following.Followship.followingId)
+            if (user) {
+              // account 已有人此用，且該人並不是 currentUser
+              if (user.id !== userId) {
+                errorMessages.push('此 account 已經有其他使用者使用')
+              }
             }
-            return res.json(user)
+
+            User.findOne({ where: { name: name } })
+              .then(user => {
+                if (user) {
+                  // account 已有人此用，且該人並不是 currentUser
+                  if (user.id !== userId) {
+                    errorMessages.push('此 name 已經有其他使用者使用')
+                  }
+                }
+
+                // 如果輸入之 account, email，其中有一已經被其他人使用了，return
+                if (errorMessages.length > 0) {
+                  return res.status(401).json({ status: 'error', errorMessages: errorMessages })
+                }
+
+                // 無誤時，建立新的資用者資料到資料庫中
+                User.findByPk(userId, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
+                  .then(user => {
+                    user.update({
+                      name: name || user.name,
+                      introduction: introduction || user.introduction,
+                      email: email || user.email,
+                      account: account || user.account,
+                      password: password || user.password
+                    })
+                      .then(user => {
+                        user = {
+                          account: user.account,
+                          avatar: user.avatar,
+                          id: user.id,
+                          email: user.email,
+                          introduction: user.introduction,
+                          name: user.name,
+                          role: user.role,
+                          banner: user.banner,
+                          Followers: user.Followers.map(follower => follower.Followship.followerId),
+                          Followings: user.Followings.map(following => following.Followship.followingId)
+                        }
+                        return res.json(user)
+                      })
+                  })
+              })
           })
+      })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', errorMessages: [] })
       })
   }
 }
