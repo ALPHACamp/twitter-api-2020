@@ -7,9 +7,6 @@ const Followship = db.Followship
 const bcrypt = require('bcryptjs')
 // JWT
 const jwt = require('jsonwebtoken')
-// const passportJWT = require('passport-jwt')
-// const ExtractJwt = passportJWT.ExtractJwt
-// const JwtStrategy = passportJWT.Strategy
 
 const { ImgurClient } = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
@@ -23,11 +20,11 @@ const userController = {
 
     User.findOne({ where: { email: email }, include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, { model: User, as: 'NotiObjs' }] })
       .then(user => {
-        if (user.role !== 'user') {
-          return res.status(401).json({ status: 'error', message: '不存在此 user 一般使用者' })
-        }
         if (!user) {
           return res.status(401).json({ ststus: 'error', message: '此 email 尚未註冊' })
+        }
+        if (user.role !== 'user') {
+          return res.status(401).json({ status: 'error', message: '不存在此 user 一般使用者' })
         }
         if (!bcrypt.compareSync(password, user.password)) {
           return res.status(401).json({ ststus: 'error', message: '密碼錯誤' })
@@ -287,47 +284,7 @@ const userController = {
           })
       })
   },
-  // putUser: (req, res) => {
-  //   const { name, introduction, email, account, checkPassword } = req.body
-  //   let { password } = req.body
-  //   if (!name || !email || !account) {
-  //     return res.status(401).json({ status: 'error', message: 'Name、Email、Account 不可為空白' })
-  //   }
-  //   if (password !== checkPassword) {
-  //     return res.status(401).json({ status: 'error', message: 'password, checkPassword 不一致' })
-  //   }
-  //   if (password) {
-  //     password = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-  //   } else {
-  //     password = ''
-  //   }
-  //   User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
-  //     .then(user => {
-  //       user.update({
-  //         name: name || user.name,
-  //         introduction: introduction || user.introduction,
-  //         email: email || user.email,
-  //         account: account || user.account,
-  //         password: password || user.password
-  //       })
-  //         .then(user => {
-  //           user = {
-  //             account: user.account,
-  //             avatar: user.avatar,
-  //             id: user.id,
-  //             email: user.email,
-  //             introduction: user.introduction,
-  //             name: user.name,
-  //             role: user.role,
-  //             banner: user.banner,
-  //             Followers: user.Followers.map(follower => follower.Followship.followerId),
-  //             Followings: user.Followings.map(following => following.Followship.followingId)
-  //           }
-  //           return res.json(user)
-  //         })
-  //     })
-  // },
-  async putUser(req, res) {
+  async putUser(req, res, done) {
     try {
       // user name、introduction 會在 body 內；avatar、banner 在 files 內
 
@@ -336,68 +293,98 @@ const userController = {
         return res.status(401).json({ status: 'error', message: 'Name 不可為空白' })
       }
 
-      // 傳送 avatar、banner 檔案給 imgur，可以兩個都有、一有一無，或兩個都沒有
-      Promise.all(req.files.map(async (file) => {
-        const encode_image = file.buffer.toString('base64')
-        const client = new ImgurClient({ clientId: IMGUR_CLIENT_ID })
+      // 如果有傳圖檔的話
+      if (req.files) {
+        // 傳送 avatar、banner 檔案給 imgur，可以兩個都有、一有一無，或兩個都沒有
+        Promise.all(req.files.map(async (file) => {
+          const encode_image = file.buffer.toString('base64')
+          const client = new ImgurClient({ clientId: IMGUR_CLIENT_ID })
 
-        // 傳 encode_image 給 imgur
-        const response = await client.upload({
-          image: encode_image,
-          type: 'base64'
-        })
+          // 傳 encode_image 給 imgur
+          const response = await client.upload({
+            image: encode_image,
+            type: 'base64'
+          })
 
-        // 整理 imgur 回傳的圖片連結，存到 imgurLink
-        const result = {
-          'originalname': file.originalname,
-          'imgurLink': response.data.link
-        }
-        return result
-      }))
-        .then((results) => {
-          const name = req.body.name
-          const introduction = req.body.introduction
-          let avatar = undefined
-          let banner = undefined
-
-          // 如果有更新 avatar 或 banner，則 results 至少會有一個物件，將該物件中的 imgurLink 存到變數 avatar 或 banner 中，等等再更新到資料庫內
-          if (results.length > 0) {
-            results.forEach(result => {
-              if (result.originalname === 'avatar') {
-                avatar = result.imgurLink
-              } else if (result.originalname === 'banner') {
-                banner = result.imgurLink
-              }
-            })
+          // 整理 imgur 回傳的圖片連結，存到 imgurLink
+          const result = {
+            'originalname': file.originalname,
+            'imgurLink': response.data.link
           }
+          return result
+          // return done(null, result)
+        }))
+          .then((results) => {
+            const name = req.body.name
+            const introduction = req.body.introduction
+            let avatar = undefined
+            let banner = undefined
 
-          // 如果使用者在前端 cancel banner，此時 req.body.banner 會回傳 default banner URL
-          if (req.body.banner) {
-            if (req.body.banner.length > 0 || typeof req.body.banner === 'string') {
-              banner = req.body.banner
-            }
-          }
-
-          // 更新到資料庫
-          User.findByPk(req.user.id)
-            .then(user => {
-              user.update({
-                ...user,
-                name: name,
-                introduction: introduction,
-                avatar: avatar,
-                banner: banner
+            // 如果有更新 avatar 或 banner，則 results 至少會有一個物件，將該物件中的 imgurLink 存到變數 avatar 或 banner 中，等等再更新到資料庫內
+            if (results.length > 0) {
+              results.forEach(result => {
+                if (result.originalname === 'avatar') {
+                  avatar = result.imgurLink
+                } else if (result.originalname === 'banner') {
+                  banner = result.imgurLink
+                }
               })
-                .then(() => {
-                  return res.json({ status: 'success', results: results })
+            }
+
+            // 如果使用者在前端 cancel banner，此時 req.body.banner 會回傳 default banner URL
+            if (req.body.banner) {
+              if (req.body.banner.length > 0 || typeof req.body.banner === 'string') {
+                banner = req.body.banner
+              }
+            }
+
+            // 更新到資料庫
+            User.findByPk(req.user.id)
+              .then(user => {
+                user.update({
+                  ...user,
+                  name: name,
+                  introduction: introduction,
+                  avatar: avatar,
+                  banner: banner
                 })
+                  .then(() => {
+                    return res.json({ status: 'success', results: results })
+                  })
+              })
+          })
+      } else {
+        // 如果沒有傳圖檔，單純更新 name 或 introduction
+        const name = req.body.name
+        const introduction = req.body.introduction
+        let banner = ''
+
+        if (req.body.banner) {
+          if (req.body.banner.length > 0 || typeof req.body.banner === 'string') {
+            banner = req.body.banner
+          }
+        }
+
+        // 更新到資料庫
+        User.findByPk(req.user.id)
+          .then(user => {
+            user.update({
+              ...user,
+              name: name,
+              introduction: introduction,
+              banner: banner !== '' ? banner : user.banner
             })
-        })
+              .then(() => {
+                return res.json({ status: 'success' })
+              })
+          })
+      }
     } catch (error) {
       console.warn(error)
     }
   },
   putSetting: (req, res) => {
+    const userId = req.user.id
     const { name, introduction, email, account, checkPassword } = req.body
     let { password } = req.body
     if (!name || !email || !account) {
@@ -411,7 +398,7 @@ const userController = {
     } else {
       password = ''
     }
-    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
+    User.findByPk(userId, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
       .then(user => {
         user.update({
           name: name || user.name,
@@ -436,77 +423,7 @@ const userController = {
             return res.json(user)
           })
       })
-  },
-  // async putUserInfo (req, res) {
-  //   try {
-  //     // user name、introduction 會在 body 內；avatar、banner 在 files 內
-
-  //     // user.name 不可更新為空白，如傳入資料為空白，則結束函式
-  //     if (!req.body.name) {
-  //       return res.status(401).json({ status: 'error', message: 'Name 不可為空白' })
-  //     }
-
-  //     // 傳送 avatar、banner 檔案給 imgur，可以兩個都有、一有一無，或兩個都沒有
-  //     Promise.all(req.files.map(async (file) => {
-  //       const encode_image = file.buffer.toString('base64')
-  //       const client = new ImgurClient({ clientId: IMGUR_CLIENT_ID })
-
-  //       // 傳 encode_image 給 imgur
-  //       const response = await client.upload({
-  //         image: encode_image,
-  //         type: 'base64'
-  //       })
-
-  //       // 整理 imgur 回傳的圖片連結，存到 imgurLink
-  //       const result = {
-  //         'originalname': file.originalname,
-  //         'imgurLink': response.data.link
-  //       }
-  //       return result
-  //     }))
-  //       .then((results) => {
-  //         const name = req.body.name
-  //         const introduction = req.body.introduction
-  //         let avatar = undefined
-  //         let banner = undefined
-
-  //         // 如果有更新 avatar 或 banner，則 results 至少會有一個物件，將該物件中的 imgurLink 存到變數 avatar 或 banner 中，等等再更新到資料庫內
-  //         if (results.length > 0) {
-  //           results.forEach(result => {
-  //             if (result.originalname === 'avatar') {
-  //               avatar = result.imgurLink
-  //             } else if (result.originalname === 'banner') {
-  //               banner = result.imgurLink
-  //             }
-  //           })
-  //         }
-
-  //         // 如果使用者在前端 cancel banner，此時 req.body.banner 會回傳 default banner URL
-  //         if (req.body.banner) {
-  //           if (req.body.banner.length > 0 || typeof req.body.banner === 'string') {
-  //             banner = req.body.banner
-  //           }
-  //         }
-
-  //         // 更新到資料庫
-  //         User.findByPk(req.user.id)
-  //           .then(user => {
-  //             user.update({
-  //               ...user,
-  //               name: name,
-  //               introduction: introduction,
-  //               avatar: avatar,
-  //               banner: banner
-  //             })
-  //               .then(() => {
-  //                 return res.json({ status: 'success', results: results })
-  //               })
-  //           })
-  //       })
-  //   } catch (error) {
-  //     console.warn(error)
-  //   }
-  // }
+  }
 }
 
 module.exports = userController

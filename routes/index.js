@@ -24,8 +24,8 @@ const authenticatedAdmin = (req, res, next) => {
 //       ...req.user,
 //       ...user
 //     }
-//     req.body.email = 'User1'
-//     req.body.account = 'User1'
+//     // req.body.email = 'User1'
+//     // req.body.account = 'User1'
 //     return next()
 //   }
 //   return res.status(401).json({ status: 'error' })
@@ -39,8 +39,8 @@ module.exports = (app) => {
 
   app.post('/api/users/signin', userController.signIn)
   app.post('/api/users', userController.signUp)
-  app.put('/api/users/userInfo', authenticated, upload.array('files', 2), userController.putUser)
-  app.put('/api/users/:id', authenticated, userController.putSetting)
+  app.put('/api/users/setting', authenticated, userController.putSetting)
+  app.put('/api/users/:id', authenticated, upload.array('files', 2), userController.putUser)
   app.get('/api/users/:id/tweets', authenticated, userController.getUserTweets)
   app.get('/api/users/:id/replied_tweets', authenticated, userController.getUserRepliedTweets)
   app.get('/api/users/:id/likes', authenticated, userController.getUserLikes)
