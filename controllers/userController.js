@@ -56,6 +56,9 @@ const userController = {
           user: user
         })
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
   signUp: (req, res) => {
     // 取得前端表單資料
@@ -100,6 +103,9 @@ const userController = {
               })
           })
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', errorMessages: [] })
+      })
   },
   getUser: (req, res) => {
     User.findByPk(req.params.id, { include: [Like, Reply, { model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
@@ -119,6 +125,9 @@ const userController = {
           repliesLength: user.Replies.length
         }
         return res.json(user)
+      })
+      .catch(error => {
+        return res.status(404).json({ status: 'error', message: 'not-found', error: error })
       })
   },
   getCurrentUser: (req, res) => {
@@ -160,6 +169,9 @@ const userController = {
         }))
         return res.json(tweets)
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
   getUserRepliedTweets: (req, res) => {
     const userId = req.params.id
@@ -194,6 +206,9 @@ const userController = {
         }))
         return res.json(replies)
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
   getUserLikes: (req, res) => {
     const userId = req.params.id
@@ -225,6 +240,9 @@ const userController = {
         }))
         return res.json(likes)
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
   getUserFollowings: (req, res) => {
     const userId = req.params.id
@@ -254,6 +272,9 @@ const userController = {
             return res.json(followings)
           })
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
   getUserFollowers: (req, res) => {
     const userId = req.params.id
@@ -282,6 +303,9 @@ const userController = {
             })
             return res.json(followers)
           })
+      })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
       })
   },
   async putUser(req, res, done) {
@@ -352,6 +376,9 @@ const userController = {
                     return res.json({ status: 'success', results: results })
                   })
               })
+              .catch(error => {
+                return res.status(401).json({ status: 'error', error: error })
+              })
           })
       } else {
         // 如果沒有傳圖檔，單純更新 name 或 introduction
@@ -377,6 +404,9 @@ const userController = {
               .then(() => {
                 return res.json({ status: 'success' })
               })
+          })
+          .catch(error => {
+            return res.status(401).json({ status: 'error', error: error })
           })
       }
     } catch (error) {

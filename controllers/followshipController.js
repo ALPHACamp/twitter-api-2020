@@ -28,6 +28,9 @@ const followshipController = {
         }))
         return res.json(users)
       })
+      .catch(error => {
+        return res.status(404).json({ status: 'error', message: 'not-found', error: error })
+      })
   },
   postFollowship: (req, res) => {
     const followerId = req.user.id
@@ -46,6 +49,9 @@ const followshipController = {
                 return res.json({ status: 'success', message: '' })
               })
           })
+      })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
       })
   },
   deleteFollowship: (req, res) => {
@@ -70,6 +76,9 @@ const followshipController = {
                   })
               })
           })
+      })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
       })
   }
 }

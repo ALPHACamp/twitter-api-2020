@@ -27,6 +27,9 @@ const tweetController = {
         }))
         return res.json(tweets)
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
   getTweet: (req, res) => {
     const tweetId = req.params.id
@@ -48,6 +51,9 @@ const tweetController = {
         tweet.repliesLength = tweet.Replies.length
         return res.json(tweet)
       })
+      .catch(error => {
+        return res.status(404).json({ status: 'error', message: 'not-found', error: error })
+      })
   },
   postTweet: (req, res) => {
     const userId = req.user.id
@@ -66,6 +72,9 @@ const tweetController = {
                 return res.json({ status: 'success', message: '', tweetId: tweet.id })
               })
           })
+      })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
       })
   },
   likeTweet: (req, res) => {
@@ -110,6 +119,9 @@ const tweetController = {
               })
           })
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
   getTweetReplies: (req, res) => {
     const tweetId = req.params.id
@@ -144,6 +156,9 @@ const tweetController = {
         }))
         return res.json(replies)
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
   postTweetReply: (req, res) => {
     const userId = req.user.id
@@ -164,6 +179,9 @@ const tweetController = {
                 return res.json(reply)
               })
           })
+      })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
       })
   }
 }

@@ -42,6 +42,9 @@ const adminController = {
           }
         })
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
   getUsers: (req, res) => {
     User.findAll({
@@ -68,6 +71,9 @@ const adminController = {
         }))
         return res.json(users)
       })
+      .catch(error => {
+        return res.status(404).json({ status: 'error', message: 'not-found', error: error })
+      })
   },
   getTweets: (req, res) => {
     Tweet.findAll({ include: [User] })
@@ -85,6 +91,9 @@ const adminController = {
           }
         }))
         return res.json(tweets)
+      })
+      .catch(error => {
+        return res.status(404).json({ status: 'error', message: 'not-found', error: error })
       })
   },
   // async deleteTweet(req, res) {
@@ -111,11 +120,6 @@ const adminController = {
   //     console.warn(error)
   //   }
   // },
-  //   !!!   !!!   !!!
-  //   !!!   !!!   !!!
-  //   刪除 tweet以及與tweet相關之replies、likes，尚不能一併更新user的tweetsNum、repliesNum、likesNum
-  //   !!!   !!!   !!!
-  //   !!!   !!!   !!!
   deleteTweet: (req, res) => {
     // 刪除 Tweet 相關的 likes、replies，通過測試檔
     // 層層下去，確實等到 database 都執行完畢，才 return 結果給前端
@@ -142,17 +146,10 @@ const adminController = {
               })
           })
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
-  // deleteTweet: (req, res) => {
-  //   // 最早可以通過測試檔的版本
-  //   Tweet.findByPk(req.params.id)
-  //     .then(tweet => {
-  //       tweet.destroy()
-  //         .then(() => {
-  //           return res.json({ status: 'success', message: '' })
-  //         })
-  //     })
-  // },
   // 重新計算每個 User 有幾個 tweets、replies、likes，並把數字更新到 User
   recountUserTweetsRepliesLikesNum: (req, res) => {
     User.findAll()
@@ -190,6 +187,9 @@ const adminController = {
             return res.json({ status: 'success', message: '' })
           })
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
   // 重新計算每個 User 有幾個 followers，並把數字更新到 User.followersNum
   recountUserFollowersNum: (req, res) => {
@@ -223,6 +223,9 @@ const adminController = {
           .then((users) => {
             return res.json({ status: 'success', message: '' })
           })
+      })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
       })
   }
 }

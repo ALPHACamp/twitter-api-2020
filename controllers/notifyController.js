@@ -12,6 +12,9 @@ const notifyController = {
       .then(notify => {
         return res.json({ status: 'success', message: '' })
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
+      })
   },
   deleteNoti: (req, res) => {
     const notiSbj = req.user.id
@@ -27,6 +30,9 @@ const notifyController = {
           .then(() => {
             return res.json({ status: 'success', message: '' })
           })
+      })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', error: error })
       })
   }
 }
