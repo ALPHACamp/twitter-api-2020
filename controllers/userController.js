@@ -110,32 +110,37 @@ const userController = {
   getUser: (req, res) => {
     // 目前前端 fetchUser 拉出 user資料，似無使用到 Like, Reply 相關資料，先註解起來降低後端工作量
     // User.findByPk(req.params.id, { include: [Like, Reply, { model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
-    User.findByPk(req.params.id, { include: [ { model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
+    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
       .then(user => {
+        // 讓一般使用者，無法撈到 admin 管理者的資訊
+        if (user.role === 'admin' && req.user.role !== 'admin') {
+          return res.status(404).json({ status: 'error', message: 'not-found', error: error })
+        }
+
         // 每次撈出資料後，順便檢視、更新 followersNum
         user.update({
-         // likesNum: user.Likes.length + 999,
-         // repliesNum: user.Replies.length,
+          // likesNum: user.Likes.length + 999,
+          // repliesNum: user.Replies.length,
           followersNum: user.Followers.length
         })
-        .then(user => {
-          user = {
-            account: user.account,
-            avatar: user.avatar,
-            id: user.id,
-            email: user.email,
-            introduction: user.introduction,
-            name: user.name,
-            role: user.role,
-            banner: user.banner,
-            Followers: user.Followers.map(follower => follower.Followship.followerId),
-            Followings: user.Followings.map(following => following.Followship.followingId),
-            tweetsNum: user.tweetsNum,
-            likesNum: user.likesNum,
-            repliesNum: user.repliesNum
-          }
-          return res.json(user)
-        })
+          .then(user => {
+            user = {
+              account: user.account,
+              avatar: user.avatar,
+              id: user.id,
+              email: user.email,
+              introduction: user.introduction,
+              name: user.name,
+              role: user.role,
+              banner: user.banner,
+              Followers: user.Followers.map(follower => follower.Followship.followerId),
+              Followings: user.Followings.map(following => following.Followship.followingId),
+              tweetsNum: user.tweetsNum,
+              likesNum: user.likesNum,
+              repliesNum: user.repliesNum
+            }
+            return res.json(user)
+          })
       })
       .catch(error => {
         return res.status(404).json({ status: 'error', message: 'not-found', error: error })
@@ -183,14 +188,14 @@ const userController = {
 
         // 每次撈出資料後，順便檢視、更新 User tweetsNum
         User.findByPk(userId)
-        .then(user => {
-          user.update({
-            tweetsNum: tweets.length
+          .then(user => {
+            user.update({
+              tweetsNum: tweets.length
+            })
+              .then(() => {
+                return res.json(tweets)
+              })
           })
-          .then(() => {
-            return res.json(tweets)
-          })
-        })
       })
       .catch(error => {
         return res.status(401).json({ status: 'error', error: error })

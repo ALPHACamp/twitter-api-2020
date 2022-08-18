@@ -7,7 +7,7 @@ const followshipController = {
   getRecommendedFollowings: (req, res) => {
     const userId = req.user.id // req.query.userId
     User.findAll({
-      where: { id: { [Op.not]: userId } },
+      where: { id: { [Op.not]: userId }, role: { [Op.not]: 'admin' } },
       include: [{ model: User, as: 'Followers' }],
       order: [['followersNum', 'DESC']],
       limit: 10
