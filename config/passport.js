@@ -25,6 +25,7 @@ const strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
       name: user.name,
       role: user.role,
       banner: user.banner,
+      // 將 follower、following、like、notiObj 的 id 存到新陣列中，在前端可以比對畫面上每個 follower、following、like、notiObj 是否與 currentUser 有互動關聯，已決定顯示介面，例如 跟隨/正在跟隨、like/unlike...等。
       Followers: user.Followers.map(follower => follower.Followship.followerId),
       Followings: user.Followings.map(following => following.Followship.followingId),
       userLikesId: user.Likes.map(like => like.TweetId),

@@ -108,29 +108,42 @@ const userController = {
       })
   },
   getUser: (req, res) => {
-    User.findByPk(req.params.id, { include: [Like, Reply, { model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
+    // 目前前端 fetchUser 拉出 user資料，似無使用到 Like, Reply 相關資料，先註解起來降低後端工作量
+    // User.findByPk(req.params.id, { include: [Like, Reply, { model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
+    User.findByPk(req.params.id, { include: [ { model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
       .then(user => {
-        user = {
-          account: user.account,
-          avatar: user.avatar,
-          id: user.id,
-          email: user.email,
-          introduction: user.introduction,
-          name: user.name,
-          role: user.role,
-          banner: user.banner,
-          Followers: user.Followers.map(follower => follower.Followship.followerId),
-          Followings: user.Followings.map(following => following.Followship.followingId),
-          likesLength: user.Likes.length,
-          repliesLength: user.Replies.length
-        }
-        return res.json(user)
+        // 每次撈出資料後，順便檢視、更新 followersNum
+        user.update({
+         // likesNum: user.Likes.length + 999,
+         // repliesNum: user.Replies.length,
+          followersNum: user.Followers.length
+        })
+        .then(user => {
+          user = {
+            account: user.account,
+            avatar: user.avatar,
+            id: user.id,
+            email: user.email,
+            introduction: user.introduction,
+            name: user.name,
+            role: user.role,
+            banner: user.banner,
+            Followers: user.Followers.map(follower => follower.Followship.followerId),
+            Followings: user.Followings.map(following => following.Followship.followingId),
+            tweetsNum: user.tweetsNum,
+            likesNum: user.likesNum,
+            repliesNum: user.repliesNum
+          }
+          return res.json(user)
+        })
       })
       .catch(error => {
         return res.status(404).json({ status: 'error', message: 'not-found', error: error })
       })
   },
   getCurrentUser: (req, res) => {
+    // JWT驗證後從資料庫撈出的 req.user
+    // 這邊的資料屬性要和 /config/passport.js 定義的一致
     return res.json({
       id: req.user.id,
       name: req.user.name,
@@ -167,7 +180,17 @@ const userController = {
             banner: tweet.User.banner
           }
         }))
-        return res.json(tweets)
+
+        // 每次撈出資料後，順便檢視、更新 User tweetsNum
+        User.findByPk(userId)
+        .then(user => {
+          user.update({
+            tweetsNum: tweets.length
+          })
+          .then(() => {
+            return res.json(tweets)
+          })
+        })
       })
       .catch(error => {
         return res.status(401).json({ status: 'error', error: error })
@@ -204,7 +227,17 @@ const userController = {
             }
           }
         }))
-        return res.json(replies)
+
+        // 每次撈出資料後，順便檢視、更新 User repliesNum
+        User.findByPk(userId)
+          .then(user => {
+            user.update({
+              repliesNum: replies.length
+            })
+              .then(() => {
+                return res.json(replies)
+              })
+          })
       })
       .catch(error => {
         return res.status(401).json({ status: 'error', error: error })
@@ -238,7 +271,16 @@ const userController = {
             repliesLength: like.Tweet.Replies.length
           }
         }))
-        return res.json(likes)
+        // 每次撈出資料後，順便檢視、更新 User likesNum
+        User.findByPk(userId)
+          .then(user => {
+            user.update({
+              likesNum: likes.length
+            })
+              .then(() => {
+                return res.json(likes)
+              })
+          })
       })
       .catch(error => {
         return res.status(401).json({ status: 'error', error: error })

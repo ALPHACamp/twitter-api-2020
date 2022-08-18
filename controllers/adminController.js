@@ -151,6 +151,8 @@ const adminController = {
       })
   },
   // 重新計算每個 User 有幾個 tweets、replies、likes，並把數字更新到 User
+  // 資料龐大時應不該如此使用
+  // 在 userController.js 的 getUserTweets、getUserLikes、getUserRepliedTweets 有設定每次撈出資料後，順便檢視、更新 tweetsNum likesNum、repliesNum
   recountUserTweetsRepliesLikesNum: (req, res) => {
     User.findAll()
       .then(users => {
@@ -192,6 +194,8 @@ const adminController = {
       })
   },
   // 重新計算每個 User 有幾個 followers，並把數字更新到 User.followersNum
+  // 資料龐大時應不該如此使用
+  // 在 userController.js 的 getUser 有設定每次撈出資料後，順便檢視、更新 followersNum
   recountUserFollowersNum: (req, res) => {
     User.findAll()
       .then(users => {
