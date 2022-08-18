@@ -67,6 +67,6 @@ module.exports = (app) => {
   app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
   app.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
   app.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
-  app.get('/api/admin/recountUserTweetsRepliesLikesNum', authenticatedAdmin, authenticated, adminController.recountUserTweetsRepliesLikesNum)
+  app.get('/api/admin/recountUserTweetsRepliesLikesNum', authenticated, authenticatedAdmin, adminController.recountUserTweetsRepliesLikesNum)
   app.get('/api/admin/recountUserFollowersNum', authenticated, authenticatedAdmin, adminController.recountUserFollowersNum)
 }

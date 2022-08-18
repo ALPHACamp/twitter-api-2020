@@ -324,7 +324,6 @@ const userController = {
           if (user) {
             // email 已有人此用，且該人並不是 currentUser
             if (user.id !== userId) {
-              console.log('此 name 已經有其他使用者使用')
               return true
             } else {
               return false
