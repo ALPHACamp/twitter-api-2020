@@ -38,7 +38,7 @@ const authenticated = passport.authenticate('jwt', { session: false })
 //   return res.status(401).json({ status: 'error' })
 // }
 ```
-![alt text](https://github.com/yc62897441/twitter-api-2020/blob/main/images/guide_pic.jpg?raw=true)
+![alt text](https://github.com/yc62897441/twitter-api-2020/blob/mastar/images/guide_pic.jpg?raw=true)
 
 5. 建立資料表
 ```
