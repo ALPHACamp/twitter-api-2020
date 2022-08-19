@@ -4,8 +4,8 @@ const followshipController = require('../controllers/followshipController')
 const tweetController = require('../controllers/tweetController')
 const notifyController = require('../controllers/notifyController')
 
-// const passport = require('../config/passport')
-// const authenticated = passport.authenticate('jwt', { session: false })
+const passport = require('../config/passport')
+const authenticated = passport.authenticate('jwt', { session: false })
 const authenticatedAdmin = (req, res, next) => {
   if (req.user.role === 'admin') {
     next()
@@ -16,20 +16,20 @@ const authenticatedAdmin = (req, res, next) => {
 
 // 跑測試檔，替代authenticate
 // 正式跑專案時無法使用，因為 helpers return 的 res.user的資訊 是由測試檔提供，正式專案下的 user的資訊 是透過驗證 token 後，JWT 給出的 jwt_payload.id 去資料庫撈出對應的 user資訊，此時 helpers return 的應該是 undefined
-const helpers = require('../_helpers')
-const authenticated = (req, res, next) => {
-  if (helpers.getUser(req)) {
-    const user = helpers.getUser(req)
-    req.user = {
-      ...req.user,
-      ...user
-    }
-    // req.body.email = 'User1'
-    // req.body.account = 'User1'
-    return next()
-  }
-  return res.status(401).json({ status: 'error' })
-}
+// const helpers = require('../_helpers')
+// const authenticated = (req, res, next) => {
+//   if (helpers.getUser(req)) {
+//     const user = helpers.getUser(req)
+//     req.user = {
+//       ...req.user,
+//       ...user
+//     }
+//     // req.body.email = 'User1'
+//     // req.body.account = 'User1'
+//     return next()
+//   }
+//   return res.status(401).json({ status: 'error' })
+// }
 
 const multer = require('multer')
 const upload = multer()
