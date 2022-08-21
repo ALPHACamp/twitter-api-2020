@@ -23,40 +23,35 @@ const io = socketIO(server, {
   }
 })
 
-const ENTER = 0
-const LEAVE = 1
-const MESSAGE = 2
-
 let count = 0
 
 io.on('connection', socket => {
-  console.log('user connected')
   count++
-  let user = `用户${count}`
+  let user = `User ${count} `
 
-  io.sockets.emit('broadcast_msg',
-    {
-      type: ENTER,
-      msg: `${user}加入群聊`,
-      time: new Date().toLocaleString()
-    }
+  io.sockets.emit('broadcast_msg', {
+    type: 'enter',
+    inputText: `${user}加入聊天室`
+  }
   )
 
   socket.on('send_msg', (data) => {
-    console.log(`收到客户端的消息：${data}`)
     io.sockets.emit('broadcast_msg', {
-      type: MESSAGE,
-      msg: `${user}:${data}`,
-      time: new Date().toLocaleString()
+      type: 'message',
+      inputText: data.inputText,
+      time: new Date().toLocaleString(),
+      user: {
+        id: data.user.id,
+        name: data.user.name,
+        avatar: data.user.avatar
+      }
     })
   })
 
   socket.on('disconnect', () => {
-    console.log('user disconnected')
     io.sockets.emit('broadcast_msg', {
-      type: LEAVE,
-      msg: `${user}离开了群聊`,
-      time: new Date().toLocaleString()
+      type: 'leave',
+      inputText: `${user}離開聊天室`,
     })
     count--
   })
