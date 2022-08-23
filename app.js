@@ -17,6 +17,11 @@ const http = require('http')
 const server = http.createServer(app)
 const socketIO = require('socket.io')
 
+const db = require('./models')
+const User = db.User
+const Room = db.Room
+const Message = db.Message
+
 const io = socketIO(server, {
   cors: {
     origin: '*'
@@ -41,11 +46,50 @@ io.on('connection', socket => {
     })
   })
 
+  socket.on('historical_messages', async (data) => {
+    try {
+      Message.findAll({ include: [User], order: [['createdAt', 'ASC']] })
+        .then(messages => {
+          messages = { messages: messages }
+          messages = JSON.stringify(messages)
+          messages = JSON.parse(messages)
+          messages = messages.messages.map(message => ({
+            id: message.id,
+            UserId: message.UserId,
+            RoomId: message.RoomId,
+            text: message.text,
+            createdAt: message.createdAt,
+            updatedAt: message.updatedAt,
+            User: {
+              id: message.User.id,
+              name: message.User.name,
+              avatar: message.User.avatar
+            }
+          }))
+          return messages
+        })
+        .then(messages => {
+          io.sockets.to(socket.id).emit('historical_messages', messages)
+        })
+    } catch (error) {
+      console.warn(error)
+    }
+  })
+
   socket.on('send_msg', (data) => {
+    let time = new Date()
+    let RoomId = 1
+    Message.create({
+      UserId: data.user.id,
+      text: data.inputText,
+      RoomId: RoomId,
+      createdAt: time
+    })
+
     io.sockets.emit('broadcast_msg', {
       type: 'message',
       inputText: data.inputText,
-      time: new Date().toLocaleString(),
+      time: time.toLocaleString(),
       user: {
         id: data.user.id,
         name: data.user.name,
