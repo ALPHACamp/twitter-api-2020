@@ -28,12 +28,11 @@ const io = socketIO(server, {
   }
 })
 
-let count = 0
+// 目前在線上的使用者資訊與其id
+let onlineUsers = []
+let onlineUsersId = []
 
 io.on('connection', socket => {
-  count++
-  let user = `User ${count} `
-
   // io.sockets.emit('broadcast_msg', {
   //   type: 'enter',
   //   inputText: `${user}加入聊天室`
@@ -44,6 +43,15 @@ io.on('connection', socket => {
       type: 'enter',
       inputText: `${data.user.name} 進入聊天室`
     })
+ 
+    // 檢查目前新連線的使用者，是否已經在 onlineUsers 中，若否則新加入。最後將 onlineUsers 傳給所有使用者，更新前端的上線使用者列表畫面
+    if (!onlineUsersId.includes(data.user.id)) {
+      onlineUsersId.push(data.user.id)
+      let newUser = { ...data.user }
+      onlineUsers.push(newUser)
+    }
+
+    io.sockets.emit('add_user', onlineUsers)
   })
 
   socket.on('historical_messages', async (data) => {
@@ -103,7 +111,6 @@ io.on('connection', socket => {
       type: 'leave',
       inputText: `${user}離開聊天室`,
     })
-    count--
   })
 })
 
