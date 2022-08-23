@@ -29,11 +29,17 @@ io.on('connection', socket => {
   count++
   let user = `User ${count} `
 
-  io.sockets.emit('broadcast_msg', {
-    type: 'enter',
-    inputText: `${user}加入聊天室`
-  }
-  )
+  // io.sockets.emit('broadcast_msg', {
+  //   type: 'enter',
+  //   inputText: `${user}加入聊天室`
+  // }
+  // )
+  socket.on('enter_chat', (data) => {
+    io.sockets.emit('broadcast_msg', {
+      type: 'enter',
+      inputText: `${data.user.name} 進入聊天室`
+    })
+  })
 
   socket.on('send_msg', (data) => {
     io.sockets.emit('broadcast_msg', {
@@ -61,11 +67,11 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 // app.get('/', (req, res) => res.send('Hello World!'))
-// app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 // module.exports = app
 
-server.listen(3000, () => {
-  console.log('listening on *:3000')
+server.listen(3030, () => {
+  console.log('listening on *:3030')
 })
 
 const router = require('./routes')
