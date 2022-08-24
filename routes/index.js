@@ -46,6 +46,7 @@ module.exports = (app) => {
   app.get('/api/users/:id/likes', authenticated, userController.getUserLikes)
   app.get('/api/users/:id/followings', authenticated, userController.getUserFollowings)
   app.get('/api/users/:id/followers', authenticated, userController.getUserFollowers)
+  app.get('/api/users/:id/getConnectedUsers', authenticated, userController.getConnectedUsers)
   app.get('/api/users/:id', authenticated, userController.getUser)
 
   app.get('/api/followships/recommended', authenticated, followshipController.getRecommendedFollowings)

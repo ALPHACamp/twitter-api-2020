@@ -1,9 +1,11 @@
+const { Op } = require('sequelize')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
+const Room = db.Room
 const bcrypt = require('bcryptjs')
 // JWT
 const jwt = require('jsonwebtoken')
@@ -558,6 +560,55 @@ const userController = {
       })
       .catch(error => {
         return res.status(401).json({ status: 'error', errorMessages: [] })
+      })
+  },
+  getConnectedUsers: (req, res) => {
+    const userId = Number(req.params.id)
+
+    // 找出 currentUser 在其中的所有聊天室
+    Room.findAll({
+      where: {
+        [Op.or]: [
+          { User1Id: userId },
+          { User2Id: userId }
+        ]
+      }
+    })
+      .then(rooms => {
+        // 將 rooms 轉成純陣列(去除資料庫的一些屬性)
+        rooms = { rooms: rooms }
+        rooms = JSON.stringify(rooms)
+        rooms = JSON.parse(rooms)
+        rooms = rooms.rooms.map(room => ({
+          ...room,
+        }))
+
+        // 找出所有聊天室中的使用者(不包含 currentUser)，並將這些使用者的資訊回傳給前端
+        // 找出包含所有使用者們 id 的集合
+        const connectedUsers = new Set()
+        rooms.forEach(room => {
+          connectedUsers.add(room.User1Id)
+          connectedUsers.add(room.User2Id)
+        })
+        connectedUsers.delete(userId)
+
+        // 透過包含所有使用者們 id 的集合(先轉成陣列)，找出使用者們的資訊，再回傳給前端
+        Promise.all(Array.from(connectedUsers).map(userId => {
+          return User.findByPk(userId)
+            .then(user => {
+              user = {
+                id: user.id,
+                name: user.name,
+                avatar: user.avatar,
+                account: user.account
+              }
+              return user
+            })
+        }))
+          .then(users => {
+            return res.json(users)
+          })
+
       })
   }
 }

@@ -52,6 +52,16 @@ io.on('connection', socket => {
     }
 
     io.sockets.emit('update_users', onlineUsers)
+
+    User.findByPk(data.user.id)
+    .then(user => {
+      user.update({
+        socketId: socket.id
+      })
+      .then(() => {
+        io.sockets.to(socket.id).emit('get_socket_id', socket.id)
+      })
+    })
   })
 
   socket.on('historical_messages', async (data) => {
@@ -133,6 +143,22 @@ io.on('connection', socket => {
 
   socket.on('disconnect', () => {
     return
+  })
+
+
+
+  socket.on('send_private_msg', (data) => {
+    if (data.user1 && data.user2) {
+      io.sockets.to(data.user1).to(data.user2).emit('broadcast_msg', {
+        type: 'enter',
+        inputText: `send_private_msg`
+      })
+    } else {
+      io.sockets.to(socket.id).emit('broadcast_msg', {
+        type: 'enter',
+        inputText: `${socket.id}`
+      })
+    }
   })
 })
 

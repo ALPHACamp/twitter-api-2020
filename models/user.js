@@ -43,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
     tweetsNum: DataTypes.INTEGER,
     repliesNum: DataTypes.INTEGER,
     likesNum: DataTypes.INTEGER,
+    socketId: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'User'
