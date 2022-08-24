@@ -51,7 +51,7 @@ io.on('connection', socket => {
       onlineUsers.push(newUser)
     }
 
-    io.sockets.emit('add_user', onlineUsers)
+    io.sockets.emit('update_users', onlineUsers)
   })
 
   socket.on('historical_messages', async (data) => {
@@ -106,11 +106,33 @@ io.on('connection', socket => {
     })
   })
 
-  socket.on('disconnect', () => {
+  socket.on('remove_user', (data) => {
+    // 更新 onlineUsers、onlineUsers，並將更新後的 onlineUsers 傳給所有使用者，更新前端的上線使用者列表畫面
+    let tempOnlineUsersId = []
+    let tempOnlineUsers = []
+    onlineUsersId.forEach(onlineUserId => {
+      if (onlineUserId !== data.user.id) {
+        tempOnlineUsersId.push(onlineUserId)
+      }
+    })
+    onlineUsersId = tempOnlineUsersId
+
+    onlineUsers.forEach(onlineUser => {
+      if (onlineUsersId.includes(onlineUser.id)) {
+        tempOnlineUsers.push(onlineUser)
+      }
+    })
+    onlineUsers = tempOnlineUsers
+
     io.sockets.emit('broadcast_msg', {
       type: 'leave',
-      inputText: `${user}離開聊天室`,
+      inputText: `${data.user.name}離開聊天室`,
     })
+    io.sockets.emit('update_users', onlineUsers)
+  })
+
+  socket.on('disconnect', () => {
+    return
   })
 })
 
