@@ -43,7 +43,7 @@ io.on('connection', socket => {
       type: 'enter',
       inputText: `${data.user.name} 進入聊天室`
     })
- 
+
     // 檢查目前新連線的使用者，是否已經在 onlineUsers 中，若否則新加入。最後將 onlineUsers 傳給所有使用者，更新前端的上線使用者列表畫面
     if (!onlineUsersId.includes(data.user.id)) {
       onlineUsersId.push(data.user.id)
@@ -54,14 +54,14 @@ io.on('connection', socket => {
     io.sockets.emit('update_users', onlineUsers)
 
     User.findByPk(data.user.id)
-    .then(user => {
-      user.update({
-        socketId: socket.id
+      .then(user => {
+        user.update({
+          socketId: socket.id
+        })
+          .then(() => {
+            io.sockets.to(socket.id).emit('get_socket_id', socket.id)
+          })
       })
-      .then(() => {
-        io.sockets.to(socket.id).emit('get_socket_id', socket.id)
-      })
-    })
   })
 
   socket.on('historical_messages', async (data) => {
@@ -88,6 +88,51 @@ io.on('connection', socket => {
         })
         .then(messages => {
           io.sockets.to(socket.id).emit('historical_messages', messages)
+        })
+    } catch (error) {
+      console.warn(error)
+    }
+  })
+
+  socket.on('historical_messages_private', async (data) => {
+    try {
+      // 透過前端傳來的 2 位使用者的 id，找出對應的 room
+      let user1Id = 0
+      let user2Id = 0
+      if (data.currentUserId > data.targetUserId) {
+        user1Id = data.targetUserId
+        user2Id = data.currentUserId
+      } else {
+        user1Id = data.currentUserId
+        user2Id = data.targetUserId
+      }
+      Room.findOne({ where: { user1Id: user1Id, user2Id: user2Id } })
+        .then(room => {
+          // 透過 room id 找到歷史聊天訊息，並將聊天訊息回傳給前端
+          Message.findAll({ where: { RoomId: room.id }, include: [User], order: [['createdAt', 'ASC']] })
+            .then(messages => {
+              messages = { messages: messages }
+              messages = JSON.stringify(messages)
+              messages = JSON.parse(messages)
+              messages = messages.messages.map(message => ({
+                id: message.id,
+                UserId: message.UserId,
+                RoomId: message.RoomId,
+                text: message.text,
+                createdAt: message.createdAt,
+                updatedAt: message.updatedAt,
+                User: {
+                  id: message.User.id,
+                  name: message.User.name,
+                  avatar: message.User.avatar
+                }
+              }))
+              return messages
+            })
+            .then(messages => {
+              io.sockets.to(socket.id).emit('historical_messages', messages)
+            })
+
         })
     } catch (error) {
       console.warn(error)
