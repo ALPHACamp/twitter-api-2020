@@ -33,11 +33,16 @@ let onlineUsers = []
 let onlineUsersId = []
 
 io.on('connection', socket => {
-  // io.sockets.emit('broadcast_msg', {
-  //   type: 'enter',
-  //   inputText: `${user}加入聊天室`
-  // }
-  // )
+  // 公開聊天與私人聊天共用部分
+  // 公開聊天與私人聊天共用部分
+  // 公開聊天與私人聊天共用部分
+  socket.on('disconnect', () => {
+    return
+  })
+
+  // 公開聊天部分
+  // 公開聊天部分
+  // 公開聊天部分
   socket.on('enter_chat', (data) => {
     io.sockets.emit('broadcast_msg', {
       type: 'enter',
@@ -51,22 +56,13 @@ io.on('connection', socket => {
       onlineUsers.push(newUser)
     }
 
+    //將 onlineUsers 傳給所有使用者，更新前端的上線使用者列表畫面
     io.sockets.emit('update_users', onlineUsers)
-
-    User.findByPk(data.user.id)
-      .then(user => {
-        user.update({
-          socketId: socket.id
-        })
-          .then(() => {
-            io.sockets.to(socket.id).emit('get_socket_id', socket.id)
-          })
-      })
   })
 
   socket.on('historical_messages', async (data) => {
     try {
-      Message.findAll({ include: [User], order: [['createdAt', 'ASC']] })
+      Message.findAll({ where: { RoomId: 1 }, include: [User], order: [['createdAt', 'ASC']] })
         .then(messages => {
           messages = { messages: messages }
           messages = JSON.stringify(messages)
@@ -76,7 +72,7 @@ io.on('connection', socket => {
             UserId: message.UserId,
             RoomId: message.RoomId,
             text: message.text,
-            createdAt: message.createdAt,
+            createdAt: new Date(message.createdAt).toLocaleString(),
             updatedAt: message.updatedAt,
             User: {
               id: message.User.id,
@@ -88,51 +84,6 @@ io.on('connection', socket => {
         })
         .then(messages => {
           io.sockets.to(socket.id).emit('historical_messages', messages)
-        })
-    } catch (error) {
-      console.warn(error)
-    }
-  })
-
-  socket.on('historical_messages_private', async (data) => {
-    try {
-      // 透過前端傳來的 2 位使用者的 id，找出對應的 room
-      let user1Id = 0
-      let user2Id = 0
-      if (data.currentUserId > data.targetUserId) {
-        user1Id = data.targetUserId
-        user2Id = data.currentUserId
-      } else {
-        user1Id = data.currentUserId
-        user2Id = data.targetUserId
-      }
-      Room.findOne({ where: { user1Id: user1Id, user2Id: user2Id } })
-        .then(room => {
-          // 透過 room id 找到歷史聊天訊息，並將聊天訊息回傳給前端
-          Message.findAll({ where: { RoomId: room.id }, include: [User], order: [['createdAt', 'ASC']] })
-            .then(messages => {
-              messages = { messages: messages }
-              messages = JSON.stringify(messages)
-              messages = JSON.parse(messages)
-              messages = messages.messages.map(message => ({
-                id: message.id,
-                UserId: message.UserId,
-                RoomId: message.RoomId,
-                text: message.text,
-                createdAt: message.createdAt,
-                updatedAt: message.updatedAt,
-                User: {
-                  id: message.User.id,
-                  name: message.User.name,
-                  avatar: message.User.avatar
-                }
-              }))
-              return messages
-            })
-            .then(messages => {
-              io.sockets.to(socket.id).emit('historical_messages', messages)
-            })
-
         })
     } catch (error) {
       console.warn(error)
@@ -186,24 +137,102 @@ io.on('connection', socket => {
     io.sockets.emit('update_users', onlineUsers)
   })
 
-  socket.on('disconnect', () => {
-    return
+  // 私人聊天部分
+  // 私人聊天部分
+  // 私人聊天部分
+  socket.on('enter_chat_private', (data) => {
+    User.findByPk(data.user.id)
+      .then(user => {
+        user.update({
+          socketId: socket.id
+        })
+          .then(() => {
+            io.sockets.to(socket.id).emit('get_socket_id', socket.id)
+          })
+      })
   })
 
+  socket.on('historical_messages_private', async (data) => {
+    try {
+      // 透過前端傳來的 2 位使用者的 id，找出對應的 room
+      let user1Id = 0
+      let user2Id = 0
+      if (data.currentUserId > data.targetUserId) {
+        user1Id = data.targetUserId
+        user2Id = data.currentUserId
+      } else {
+        user1Id = data.currentUserId
+        user2Id = data.targetUserId
+      }
+      Room.findOne({ where: { user1Id: user1Id, user2Id: user2Id } })
+        .then(room => {
+          // 透過 room id 找到歷史聊天訊息，並將聊天訊息回傳給前端
+          Message.findAll({ where: { RoomId: room.id }, include: [User], order: [['createdAt', 'ASC']] })
+            .then(messages => {
+              messages = { messages: messages }
+              messages = JSON.stringify(messages)
+              messages = JSON.parse(messages)
+              messages = messages.messages.map(message => ({
+                id: message.id,
+                UserId: message.UserId,
+                RoomId: message.RoomId,
+                text: message.text,
+                createdAt: new Date(message.createdAt).toLocaleString(),
+                updatedAt: message.updatedAt,
+                User: {
+                  id: message.User.id,
+                  name: message.User.name,
+                  avatar: message.User.avatar
+                }
+              }))
+              return messages
+            })
+            .then(messages => {
+              io.sockets.to(socket.id).emit('historical_messages', messages)
+            })
 
+        })
+    } catch (error) {
+      console.warn(error)
+    }
+  })
 
   socket.on('send_private_msg', (data) => {
-    if (data.user1 && data.user2) {
-      io.sockets.to(data.user1).to(data.user2).emit('broadcast_msg', {
-        type: 'enter',
-        inputText: `send_private_msg`
-      })
+    let time = new Date()
+    // 透過前端傳來的 2 位使用者的 id，找出對應的 room
+    let user1Id = 0
+    let user2Id = 0
+    if (data.user1.id < data.user2.id) {
+      user1Id = data.user1.id
+      user2Id = data.user2.id
     } else {
-      io.sockets.to(socket.id).emit('broadcast_msg', {
-        type: 'enter',
-        inputText: `${socket.id}`
-      })
+      user1Id = data.user2.id
+      user2Id = data.user1.id
     }
+    Room.findOne({ where: { user1Id: user1Id, user2Id: user2Id } })
+      .then(room => {
+        // 儲存該筆聊天訊息到資料庫，並將聊天訊息回傳給前端私聊的 2 位使用者
+        let RoomId = room.id
+        Message.create({
+          UserId: data.user1.id,
+          text: data.inputText,
+          RoomId: RoomId,
+          createdAt: time
+        })
+          .then(() => {
+            io.sockets.to(data.user1.socketId).to(data.user2.socketId).emit('broadcast_msg_private', {
+              type: 'message',
+              inputText: data.inputText,
+              time: time.toLocaleString(),
+              // 建立聊天訊息頭像的所需資料
+              user: {
+                id: data.user1.id,
+                name: data.user1.name,
+                avatar: data.user1.avatar
+              }
+            })
+          })
+      })
   })
 })
 

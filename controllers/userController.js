@@ -600,7 +600,8 @@ const userController = {
                 id: user.id,
                 name: user.name,
                 avatar: user.avatar,
-                account: user.account
+                account: user.account,
+                socketId: user.socketId
               }
               return user
             })
