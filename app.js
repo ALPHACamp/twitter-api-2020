@@ -222,6 +222,7 @@ io.on('connection', socket => {
           .then(() => {
             io.sockets.to(data.user1.socketId).to(data.user2.socketId).emit('broadcast_msg_private', {
               type: 'message',
+              senderId: data.user1.id,
               inputText: data.inputText,
               time: time.toLocaleString(),
               // 建立聊天訊息頭像的所需資料
