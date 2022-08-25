@@ -611,6 +611,52 @@ const userController = {
           })
 
       })
+  },
+  createChatRoom: (req, res) => {
+    // 透過前端傳來的 2 位使用者的 id，找出對應的 room
+    let user1Id = 0
+    let user2Id = 0
+    if (req.user.id > req.body.targetUserId) {
+      user1Id = req.body.targetUserId
+      user2Id = req.user.id
+    } else {
+      user1Id = req.user.id
+      user2Id = req.body.targetUserId
+    }
+
+    Room.findOne({ where: { User1Id: user1Id, User2Id: user2Id } })
+      .then(room => {
+        if (room) {
+          User.findByPk(req.body.targetUserId)
+            .then(user => {
+              user = {
+                id: user.id,
+                name: user.name,
+                account: user.account,
+                avatar: user.avatar
+              }
+              return res.json({ RoomId: room.id, targetUser: user })
+            })
+        } else {
+          Room.create({
+            User1Id: user1Id,
+            User2Id: user2Id
+          })
+            .then(room => {
+
+              User.findByPk(req.body.targetUserId)
+                .then(user => {
+                  user = {
+                    id: user.id,
+                    name: user.name,
+                    account: user.account,
+                    avatar: user.avatar
+                  }
+                  return res.json({ RoomId: room.id, targetUser: user })
+                })
+            })
+        }
+      })
   }
 }
 
