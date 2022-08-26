@@ -3,6 +3,7 @@ const userController = require('../controllers/userController')
 const followshipController = require('../controllers/followshipController')
 const tweetController = require('../controllers/tweetController')
 const notifyController = require('../controllers/notifyController')
+const roomController = require('../controllers/roomController')
 
 const passport = require('../config/passport')
 const authenticated = passport.authenticate('jwt', { session: false })
@@ -46,9 +47,10 @@ module.exports = (app) => {
   app.get('/api/users/:id/likes', authenticated, userController.getUserLikes)
   app.get('/api/users/:id/followings', authenticated, userController.getUserFollowings)
   app.get('/api/users/:id/followers', authenticated, userController.getUserFollowers)
-  app.get('/api/users/:id/getConnectedUsers', authenticated, userController.getConnectedUsers)
   app.get('/api/users/:id', authenticated, userController.getUser)
-  app.post('/api/users/createChatRoom', authenticated, userController.createChatRoom)
+
+  app.get('/api/rooms/getConnectedUsers', authenticated, roomController.getConnectedUsers)
+  app.post('/api/rooms/createChatRoom', authenticated, roomController.createChatRoom)
 
   app.get('/api/followships/recommended', authenticated, followshipController.getRecommendedFollowings)
   app.post('/api/followships', authenticated, followshipController.postFollowship)
