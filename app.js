@@ -85,6 +85,9 @@ io.on('connection', socket => {
         .then(messages => {
           io.sockets.to(socket.id).emit('historical_messages', messages)
         })
+        .catch(error => {
+          return res.status(401).json({ status: 'error', message: 'historical_messages', error: error })
+        })
     } catch (error) {
       console.warn(error)
     }
@@ -99,6 +102,9 @@ io.on('connection', socket => {
       RoomId: RoomId,
       createdAt: time
     })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', message: 'send_msg', error: error })
+      })
 
     io.sockets.emit('broadcast_msg', {
       type: 'message',
@@ -150,6 +156,9 @@ io.on('connection', socket => {
             io.sockets.to(socket.id).emit('get_socket_id', socket.id)
           })
       })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', message: 'enter_chat_private', error: error })
+      })
   })
 
   socket.on('historical_messages_private', async (data) => {
@@ -192,6 +201,9 @@ io.on('connection', socket => {
             })
 
         })
+        .catch(error => {
+          return res.status(401).json({ status: 'error', message: 'historical_messages_private', error: error })
+        })
     } catch (error) {
       console.warn(error)
     }
@@ -220,19 +232,25 @@ io.on('connection', socket => {
           createdAt: time
         })
           .then(() => {
-            io.sockets.to(data.user1.socketId).to(data.user2.socketId).emit('broadcast_msg_private', {
-              type: 'message',
-              senderId: data.user1.id,
-              inputText: data.inputText,
-              time: time.toLocaleString(),
-              // 建立聊天訊息頭像的所需資料
-              user: {
-                id: data.user1.id,
-                name: data.user1.name,
-                avatar: data.user1.avatar
-              }
-            })
+            User.findByPk(data.user2.id)
+              .then(user => {
+                io.sockets.to(socket.id).to(user.socketId).emit('broadcast_msg_private', {
+                  type: 'message',
+                  senderId: data.user1.id,
+                  inputText: data.inputText,
+                  time: time.toLocaleString(),
+                  // 建立聊天訊息頭像的所需資料
+                  user: {
+                    id: data.user1.id,
+                    name: data.user1.name,
+                    avatar: data.user1.avatar
+                  }
+                })
+              })
           })
+      })
+      .catch(error => {
+        return res.status(401).json({ status: 'error', message: 'send_private_msg', error: error })
       })
   })
 })
