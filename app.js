@@ -86,7 +86,7 @@ io.on('connection', socket => {
           io.sockets.to(socket.id).emit('historical_messages', messages)
         })
         .catch(error => {
-          return res.status(401).json({ status: 'error', message: 'historical_messages', error: error })
+          console.warn('error historical_messages', error)
         })
     } catch (error) {
       console.warn(error)
@@ -103,7 +103,7 @@ io.on('connection', socket => {
       createdAt: time
     })
       .catch(error => {
-        return res.status(401).json({ status: 'error', message: 'send_msg', error: error })
+        console.warn('error send_msg', error)
       })
 
     io.sockets.emit('broadcast_msg', {
@@ -157,7 +157,7 @@ io.on('connection', socket => {
           })
       })
       .catch(error => {
-        return res.status(401).json({ status: 'error', message: 'enter_chat_private', error: error })
+        console.warn('error enter_chat_private', error)
       })
   })
 
@@ -202,7 +202,7 @@ io.on('connection', socket => {
 
         })
         .catch(error => {
-          return res.status(401).json({ status: 'error', message: 'historical_messages_private', error: error })
+          console.warn('error historical_messages_private', error)
         })
     } catch (error) {
       console.warn(error)
@@ -250,7 +250,7 @@ io.on('connection', socket => {
           })
       })
       .catch(error => {
-        return res.status(401).json({ status: 'error', message: 'send_private_msg', error: error })
+        console.warn('error send_private_msg', error)
       })
   })
 
@@ -307,7 +307,7 @@ io.on('connection', socket => {
             })
         })
         .catch(error => {
-          console.warn('error', error)
+          console.warn('error test_historical_messages_private', error)
         })
     } catch (error) {
       console.warn(error)
@@ -360,7 +360,7 @@ io.on('connection', socket => {
           })
       })
       .catch(error => {
-        console.warn('error', error)
+        console.warn('error test_send_private_msg', error)
       })
   })
 })
