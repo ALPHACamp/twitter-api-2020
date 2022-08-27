@@ -132,9 +132,9 @@ module.exports = {
         return ({
           User1Id: 1,
           User2Id: 1,
-          User1Unread: 0,
+          User1Unread: false,
           User1UnreadNum: 0,
-          User2Unread: 0,
+          User2Unread: false,
           User2UnreadNum: 0,
           createdAt: new Date(),
           updatedAt: new Date()
