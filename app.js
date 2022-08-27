@@ -337,28 +337,32 @@ io.on('connection', socket => {
           createdAt: time
         })
           .then(() => {
-            io.sockets.to(`room${room.id}`).emit('broadcast_msg_private', {
-              type: 'message',
-              RoomId: RoomId,
-              senderId: data.user1.id,
-              inputText: data.inputText,
-              time: time.toLocaleString(),
-              // 建立聊天訊息頭像的所需資料
-              user: {
-                id: data.user1.id,
-                name: data.user1.name,
-                avatar: data.user1.avatar
-              }
-            })
+            // 確認聊天對象的 socketId 是最新的，確保對方仍在 room 裡面，避免對方沒有收到未讀訊息通知。(對方登出再登入，或是重新整理頁面時，他的 socketId 會更新，此時該 socketId 就已經不是當初在 socketsJoin(room) 記錄的 id 了)
+            User.findByPk(data.user2.id)
+              .then(user2 => {
+                io.in(user2.socketId).socketsJoin(`room${room.id}`)
+              })
+              .then(() => {
+                io.sockets.to(`room${room.id}`).emit('broadcast_msg_private', {
+                  type: 'message',
+                  RoomId: RoomId,
+                  senderId: data.user1.id,
+                  inputText: data.inputText,
+                  time: time.toLocaleString(),
+                  // 建立聊天訊息頭像的所需資料
+                  user: {
+                    id: data.user1.id,
+                    name: data.user1.name,
+                    avatar: data.user1.avatar
+                  }
+                })
+              })
           })
       })
       .catch(error => {
         console.warn('error', error)
       })
   })
-
-
-
 })
 
 app.use(express.urlencoded({ extended: true }))
