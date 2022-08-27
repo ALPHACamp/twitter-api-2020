@@ -108,6 +108,28 @@ const roomController = {
             })
         }
       })
+  },
+  updateUserUnreadNum: (req, res) => {
+    // 由 RoomId 找到 2 位使用者所在的 room，透過 currentUserId 找到未讀取訊息的使用者，並更新「未讀取訊息的狀態 + 數量」
+    Room.findByPk(req.body.RoomId)
+      .then(room => {
+        if (room.User1Id === req.body.currentUserId) {
+          room.update({
+            User1Unread: true,
+            User1UnreadNum: req.body.userUnreadNum
+          })
+          return res.json({ status: 'success' })
+        } else {
+          room.update({
+            User2Unread: true,
+            User2UnreadNum: req.body.userUnreadNum
+          })
+          return res.json({ status: 'success' })
+        }
+      })
+      .catch(error => {
+        return res.status(401).json({ ststus: 'error', message: '未成功更新「未讀取訊息 + 數量」', error: error })
+      })
   }
 }
 

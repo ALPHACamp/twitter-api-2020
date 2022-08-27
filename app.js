@@ -343,6 +343,7 @@ io.on('connection', socket => {
           .then(() => {
             io.sockets.to(`room${room.id}`).emit('broadcast_msg_private', {
               type: 'message',
+              RoomId: RoomId,
               senderId: data.user1.id,
               inputText: data.inputText,
               time: time.toLocaleString(),

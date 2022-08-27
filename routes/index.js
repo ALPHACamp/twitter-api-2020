@@ -51,6 +51,7 @@ module.exports = (app) => {
 
   app.get('/api/rooms/getConnectedUsers', authenticated, roomController.getConnectedUsers)
   app.post('/api/rooms/createChatRoom', authenticated, roomController.createChatRoom)
+  app.put('/api/rooms/updateUserUnreadNum', authenticated, roomController.updateUserUnreadNum)
 
   app.get('/api/followships/recommended', authenticated, followshipController.getRecommendedFollowings)
   app.post('/api/followships', authenticated, followshipController.postFollowship)
