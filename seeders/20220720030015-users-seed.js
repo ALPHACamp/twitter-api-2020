@@ -36,7 +36,8 @@ module.exports = {
         avatar: SEED_USER.avatar,
         introduction: SEED_USER.introduction,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        socketId: 'EcNIwmvjoQmUia79AAA_'
       }]
       , {})
     // 新增 5 個一般使用者 種子資料
@@ -60,6 +61,7 @@ module.exports = {
           tweetsNum: 10,
           repliesNum: 30,
           likesNum: 30,
+          socketId: 'EcNIwmvjoQmUia79AAA_',
           createdAt: new Date(),
           updatedAt: new Date()
         })
@@ -119,6 +121,21 @@ module.exports = {
         return ({
           UserId: UserId,
           TweetId: TweetId,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+      })
+    )
+    // 新增 公開聊天室 room 1
+    await queryInterface.bulkInsert('Rooms',
+      Array.from({ length: 1 }).map((item, index) => {
+        return ({
+          User1Id: 1,
+          User2Id: 1,
+          User1Unread: 0,
+          User1UnreadNum: 0,
+          User2Unread: 0,
+          User2UnreadNum: 0,
           createdAt: new Date(),
           updatedAt: new Date()
         })
