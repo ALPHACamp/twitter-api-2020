@@ -25,7 +25,10 @@ const Message = db.Message
 const io = socketIO(server, {
   cors: {
     origin: '*'
-  }
+  },
+  transports: [
+    'websocket'
+  ]
 })
 
 // 目前在線上的使用者資訊與其id
