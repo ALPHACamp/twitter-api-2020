@@ -156,5 +156,6 @@ module.exports = {
     await queryInterface.bulkDelete('Replies', null, {})
     await queryInterface.bulkDelete('Likes', null, {})
     await queryInterface.bulkDelete('Followships', null, {})
+    await queryInterface.bulkDelete('Rooms', null, {})
   }
 }
