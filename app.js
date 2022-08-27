@@ -307,10 +307,6 @@ io.on('connection', socket => {
             })
         })
         .catch(error => {
-          console.warn('===')
-          console.warn('===')
-          console.warn('===')
-          console.warn('test_historical_messages_private')
           console.warn('error', error)
         })
     } catch (error) {
@@ -357,10 +353,6 @@ io.on('connection', socket => {
           })
       })
       .catch(error => {
-        console.warn('===')
-        console.warn('===')
-        console.warn('===')
-        console.warn('test_send_private_msg')
         console.warn('error', error)
       })
   })

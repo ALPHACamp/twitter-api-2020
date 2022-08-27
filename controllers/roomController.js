@@ -110,25 +110,37 @@ const roomController = {
       })
   },
   updateUserUnreadNum: (req, res) => {
-    // 由 RoomId 找到 2 位使用者所在的 room，透過 currentUserId 找到未讀取訊息的使用者，並更新「未讀取訊息的狀態 + 數量」
-    Room.findByPk(req.body.RoomId)
+    // 透過前端傳來的 2 位使用者的 id，找出對應的 room
+    let user1Id = 0
+    let user2Id = 0
+    if (req.user.id > req.body.senderOrTargetUserId) {
+      user1Id = req.body.senderOrTargetUserId
+      user2Id = req.user.id
+    } else {
+      user1Id = req.user.id
+      user2Id = req.body.senderOrTargetUserId
+    }
+
+    // 透過 req.user.id 找到未讀取訊息的使用者(即currentUser)，並更新「未讀取訊息的狀態 + 數量」
+    Room.findOne({ where: { User1Id: user1Id, User2Id: user2Id } })
       .then(room => {
-        if (room.User1Id === req.body.currentUserId) {
+        const unreadState = req.body.unread  // true or false
+        if (room.User1Id === req.user.id) {
           room.update({
-            User1Unread: true,
+            User1Unread: unreadState,
             User1UnreadNum: req.body.userUnreadNum
           })
           return res.json({ status: 'success' })
         } else {
           room.update({
-            User2Unread: true,
+            User2Unread: unreadState,
             User2UnreadNum: req.body.userUnreadNum
           })
           return res.json({ status: 'success' })
         }
       })
       .catch(error => {
-        return res.status(401).json({ ststus: 'error', message: '未成功更新「未讀取訊息 + 數量」', error: error })
+        return res.status(401).json({ status: 'error', message: '未成功更新「未讀取訊息 + 數量」', error: error })
       })
   }
 }
