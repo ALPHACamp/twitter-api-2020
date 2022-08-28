@@ -4,6 +4,7 @@ const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
+const Room = db.Room
 const bcrypt = require('bcryptjs')
 // JWT
 const jwt = require('jsonwebtoken')
