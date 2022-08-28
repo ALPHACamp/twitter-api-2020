@@ -281,7 +281,7 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 // module.exports = app
 
 // heroku 使用
-server.listen(['websocket'], () => {
+server.listen('websocket', () => {
   console.log('listening on *:websocket')
 })
 // 本地端 使用
