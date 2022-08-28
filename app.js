@@ -27,9 +27,9 @@ const io = socketIO(server, {
     origin: '*'
   },
   // heroku 使用
-  // transports: [
-  //   'websocket'
-  // ]
+  transports: [
+    'websocket'
+  ]
 })
 
 // 目前在線上的使用者資訊與其id
@@ -277,17 +277,17 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 // app.get('/', (req, res) => res.send('Hello World!'))
-// app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 // module.exports = app
 
 // heroku 使用
-// server.listen('websocket', () => {
-//   console.log('listening on *:websocket')
-// })
-// 本地端 使用
-server.listen(port, () => {
-  console.log('listening on *:3030')
+server.listen('websocket', () => {
+  console.log('listening on *:websocket')
 })
+// 本地端 使用
+// server.listen('3030', () => {
+//   console.log('listening on *:3030')
+// })
 
 const router = require('./routes')
 router(app)
