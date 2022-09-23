@@ -167,7 +167,8 @@ const userController = {
   },
   getUserTweets: (req, res) => {
     const userId = req.params.id
-    Tweet.findAll({ where: { UserId: userId }, include: [User, Like, Reply], order: [['createdAt', 'DESC']] })
+    const offset = Number(req.query.tweetsOffset) || 0
+    Tweet.findAll({ offset: offset, limit: 10, where: { UserId: userId }, include: [User, Like, Reply], order: [['createdAt', 'DESC']] })
       .then(tweets => {
         tweets = { tweets: tweets }
         tweets = JSON.stringify(tweets)
@@ -194,7 +195,11 @@ const userController = {
               tweetsNum: tweets.length
             })
               .then(() => {
-                return res.json(tweets)
+                if (tweets.length !== 0) {
+                  return res.json(tweets)
+                } else {
+                  return res.json('loadToEnd')
+                }
               })
           })
       })
@@ -204,7 +209,8 @@ const userController = {
   },
   getUserRepliedTweets: (req, res) => {
     const userId = req.params.id
-    Reply.findAll({ where: { UserId: userId }, include: [User, { model: Tweet, include: [User] }], order: [['createdAt', 'DESC']], raw: true, nest: true })
+    const offset = Number(req.query.repliesOffset) || 0
+    Reply.findAll({ offset: offset, limit: 10, where: { UserId: userId }, include: [User, { model: Tweet, include: [User] }], order: [['createdAt', 'DESC']], raw: true, nest: true })
       .then(replies => {
         replies = replies.map(reply => ({
           id: reply.id,
@@ -241,7 +247,11 @@ const userController = {
               repliesNum: replies.length
             })
               .then(() => {
-                return res.json(replies)
+                if (replies.length !== 0) {
+                  return res.json(replies)
+                } else {
+                  return res.json('loadToEnd')
+                }
               })
           })
       })
@@ -251,7 +261,8 @@ const userController = {
   },
   getUserLikes: (req, res) => {
     const userId = req.params.id
-    Like.findAll({ where: { UserId: userId }, include: [{ model: Tweet, include: [User, Reply, Like] }], order: [['createdAt', 'DESC']] })
+    const offset = Number(req.query.likesOffset) || 0
+    Like.findAll({ offset: offset, limit: 10, where: { UserId: userId }, include: [{ model: Tweet, include: [User, Reply, Like] }], order: [['createdAt', 'DESC']] })
       .then(likes => {
         likes = likes.map(like => ({
           id: like.id,
@@ -284,7 +295,11 @@ const userController = {
               likesNum: likes.length
             })
               .then(() => {
-                return res.json(likes)
+                if (likes.length !== 0) {
+                  return res.json(likes)
+                } else {
+                  return res.json('loadToEnd')
+                }
               })
           })
       })

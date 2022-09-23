@@ -6,7 +6,8 @@ const Reply = db.Reply
 
 const tweetController = {
   getTweets: (req, res) => {
-    Tweet.findAll({ limit: 20, include: [User, Like, Reply], order: [['createdAt', 'DESC']] })
+    const offset = Number(req.query.offset) || 0
+    Tweet.findAll({ offset: offset, limit: 10, include: [User, Like, Reply], order: [['createdAt', 'DESC']] })
       .then(tweets => {
         tweets = { tweets: tweets }
         tweets = JSON.stringify(tweets)
@@ -25,7 +26,11 @@ const tweetController = {
             banner: tweet.User.banner
           }
         }))
-        return res.json(tweets)
+        if (tweets.length !== 0) {
+          return res.json(tweets)
+        } else {
+          return res.json('loadToEnd')
+        }
       })
       .catch(error => {
         return res.status(401).json({ status: 'error', error: error })
