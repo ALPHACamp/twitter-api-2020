@@ -289,6 +289,8 @@ server.listen('websocket', () => {
 //   console.log('listening on *:3030')
 // })
 
+console.log('test git push')
+
 const router = require('./routes')
 router(app)
 module.exports = app
