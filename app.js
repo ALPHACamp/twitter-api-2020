@@ -276,14 +276,20 @@ app.use(cors())
 //       })
 //   })
 // })
+// 結束註解 //
+// 結束註解 //
+// 結束註解 //
 
-// app.use(express.urlencoded({ extended: true }))
-// app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
-// // app.get('/', (req, res) => res.send('Hello World!'))
-// app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-// // module.exports = app
+// app.get('/', (req, res) => res.send('Hello World!'))
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+// module.exports = app
 
+// 開始註解 //
+// 開始註解 //
+// 開始註解 //
 // // heroku 使用
 // server.listen('websocket', () => {
 //   console.log('listening on *:websocket')
