@@ -8,6 +8,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      name: {
+        type: Sequelize.STRING
+      },
       account: {
         type: Sequelize.STRING
       },
@@ -17,13 +20,10 @@ module.exports = {
       password: {
         type: Sequelize.STRING
       },
-      name: {
+      profile_photo: {
         type: Sequelize.STRING
       },
-      profilePhoto: {
-        type: Sequelize.STRING
-      },
-      coverPhoto: {
+      cover_photo: {
         type: Sequelize.STRING
       },
       introduction: {
@@ -32,11 +32,11 @@ module.exports = {
       role: {
         type: Sequelize.STRING
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }
