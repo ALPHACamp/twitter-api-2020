@@ -1,3 +1,4 @@
 /node_modules/*
-/tests/*
+/test/*
 /models/index.js
+/diff
