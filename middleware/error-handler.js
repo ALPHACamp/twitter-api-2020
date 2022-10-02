@@ -1,5 +1,6 @@
 module.exports = {
-  apiErrorHandler (err, req, res, next) {
+  // eslint-disable-next-line space-before-function-paren
+  apiErrorHandler(err, req, res, next) {
     if (err instanceof Error) {
       res.status(err.status || 500).json({
         status: 'error',
