@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
@@ -26,6 +27,7 @@
     "method-override": "^3.0.0",
     "mocha": "^6.0.2",
     "mysql2": "^1.6.4",
+    "nodemon": "^2.0.20",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "sequelize": "^6.18.0",
