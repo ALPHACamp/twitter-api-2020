@@ -19,9 +19,12 @@ passport.use(new LocalStrategy(
   (account, password, cb) => {
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) return cb(null, false)
+        if (!user) {
+          cb(new Error('帳號不存在'))
+          return
+        }
         bcrypt.compare(password, user.password).then(res => {
-          if (!res) return cb(null, false)
+          if (!res) cb(new Error('帳號或密碼錯誤'))
           return cb(null, user)
         })
       })
@@ -49,6 +52,5 @@ passport.deserializeUser((id, cb) => {
     return cb(null, user)
   })
 })
-module.exports = passport
 
 module.exports = passport
