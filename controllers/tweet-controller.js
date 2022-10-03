@@ -24,6 +24,16 @@ const tweetController = {
       .then(tweets => {
         res.json({ status: 'success', data: { tweets } })
       })
+      .catch(err => next(err))
+  },
+  getTweet: (req, res, next) => {
+    const tweetId = req.params.tweet_id
+    Tweet.findByPk(tweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error('此推文不存在')
+        res.json({ status: 'success', data: { tweet } })
+      })
+      .catch(err => next(err))
   }
 }
 
