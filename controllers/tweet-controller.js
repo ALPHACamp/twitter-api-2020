@@ -4,14 +4,15 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const { description } = req.body
     const userId = req.user.id
-    if (!description) throw new Error('文章必須有內容')
+    const [descriptionMin, descriptionMax] = [1, 140]
+    if (description.length < descriptionMin || description.length > descriptionMax) throw new Error(`字數限制需在 ${descriptionMin} ~ ${descriptionMax} 之間`)
 
     User.findByPk(userId) // 查看user是否存在
       .then(user => {
         if (!user) throw new Error('使用者不存在')
         return Tweet.create({
           description,
-          UserId: userId
+          userId: userId
         })
       })
       .then(tweet => {
