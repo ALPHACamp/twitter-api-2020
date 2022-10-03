@@ -4,8 +4,8 @@ const { Op } = require('sequelize')
 const { User } = require('../models')
 const userController = {
   signUp: (req, res, next) => {
-    const { password, passwordCheck, email, account, name } = req.body
-    if (password !== passwordCheck) throw new Error('密碼與確認密碼不相符')
+    const { password, checkPassword, email, account, name } = req.body
+    if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
     User.findOne({
       attributes: ['email', 'account'],
       where: {
@@ -25,25 +25,25 @@ const userController = {
         profilePhoto: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
         coverPhoto: 'https://i.imgur.com/t0YRqQH.jpg'
       }))
-      .then(newUser => res.json({ status: 'success', data: newUser }))
+      .then(newUser => res.json({ status: 'success', data: { user: newUser } }))
       .catch(err => next(err))
-   },
-    signIn: (req, res, next) => {
-      try {
-        const userData = req.user.toJSON()
-        delete userData.password
-        const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
-        res.json({
-          status: 'success',
-          data: {
-            token,
-            user: userData
-          }
-        })
-      } catch (err) {
-        next(err)
-      }
+  },
+  signIn: (req, res, next) => {
+    try {
+      const userData = req.user.toJSON()
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      res.json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+      })
+    } catch (err) {
+      next(err)
     }
+  }
 }
 
 module.exports = userController
