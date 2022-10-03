@@ -21,6 +21,7 @@ const userController = {
         name,
         account,
         email,
+        role: 'user',
         password: hash,
         profilePhoto: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
         coverPhoto: 'https://i.imgur.com/t0YRqQH.jpg'
@@ -43,6 +44,17 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getProfile: (req, res, next) => {
+    const id = Number(req.params.id)
+    User.findByPk(id)
+      .then(user => {
+        if (!user) throw new Error('該使用者不存在')
+        const userData = user.toJSON()
+        delete userData.password
+        return res.json({ status: 'success', data: { user: userData } })
+      })
+      .catch(err => next(err))
   }
 }
 
