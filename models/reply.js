@@ -5,7 +5,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Reply extends Model {
     static associate (models) {
-      // define association here
+      Reply.belongsTo(models.User, { foreignKey: 'userId' })
+      Reply.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
     }
   }
   Reply.init({
