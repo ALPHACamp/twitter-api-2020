@@ -7,18 +7,24 @@ const userController = {
   signIn: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-
       switch (true) {
         case (req.originalUrl === '/api/users/signin' && userData.role !== 'user'):
-          throw new Error('帳號不存在！')
+          res.status(403).json({
+            status: 'error',
+            message: 'Permission denied.'
+          })
+          break
         case (req.originalUrl === '/api/admin/signin' && userData.role !== 'admin'):
-          throw new Error('帳號不存在！')
+          res.status(403).json({
+            status: 'error',
+            message: 'Permission denied.'
+          })
+          break
         default: {
           delete userData.password
           const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '15d' })
           return res.json({
-            status: 'success',
-            data: { token, user: userData }
+            status: 'success', token, user: userData
           })
         }
       }
