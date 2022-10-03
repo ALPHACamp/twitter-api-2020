@@ -25,10 +25,11 @@ passport.use(new LocalStrategy({
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: process.env.JWT_SECRET,
+  passReqToCallback: true
 }
 
-passport.use(new JWTStrategy(jwtOptions, async (payload, cb) => {
+passport.use(new JWTStrategy(jwtOptions, async (req, payload, cb) => {
   try {
     const user = await User.findByPk(payload.id, {
       include: [
@@ -36,8 +37,12 @@ passport.use(new JWTStrategy(jwtOptions, async (payload, cb) => {
         { model: User, as: 'Followers' }
       ]
     })
-
-    return cb(null, user)
+    if (user) {
+      req.user = user.toJSON()
+      return cb(null, user)
+    } else {
+      cb(null, false)
+    }
   } catch (err) {
     cb(err, false)
   }

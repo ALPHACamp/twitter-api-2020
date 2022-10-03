@@ -9,7 +9,7 @@ const userController = {
       const userData = helpers.getUser(req).toJSON()
 
       switch (true) {
-        case (req.originalUrl === '/api/signin' && userData.role !== 'user'):
+        case (req.originalUrl === '/api/users/signin' && userData.role !== 'user'):
           throw new Error('帳號不存在！')
         case (req.originalUrl === '/api/admin/signin' && userData.role !== 'admin'):
           throw new Error('帳號不存在！')
