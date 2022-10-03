@@ -1,3 +1,4 @@
+const test = '我是測試'
 const express = require('express')
 const helpers = require('./_helpers');
 
