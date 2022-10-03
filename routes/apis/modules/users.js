@@ -7,5 +7,6 @@ const userController = require('../../../controllers/user-controller')
 router.post('/', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.get('/:id', authenticated, userController.getProfile)
+router.put('/:id', authenticated, userController.putProfile)
 
 module.exports = router
