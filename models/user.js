@@ -18,7 +18,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'followerId',
         as: 'Followings'
       })
-    }
   }
   User.init({
     account: DataTypes.STRING,
