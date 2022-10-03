@@ -11,13 +11,19 @@ const tweetController = {
         if (!user) throw new Error('使用者不存在')
         return Tweet.create({
           description,
-          userId
+          UserId: userId
         })
       })
       .then(tweet => {
         res.json({ status: 'success', data: { tweet } })
       })
       .catch(err => next(err))
+  },
+  getTweets: (req, res, next) => {
+    Tweet.findAll({})
+      .then(tweets => {
+        res.json({ status: 'success', data: { tweets } })
+      })
   }
 }
 

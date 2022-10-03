@@ -4,8 +4,8 @@ const { Op } = require('sequelize')
 const { User } = require('../models')
 const userController = {
   signUp: (req, res, next) => {
-    const { password, passwordCheck, email, account, name } = req.body
-    if (password !== passwordCheck) throw new Error('密碼與確認密碼不相符')
+    const { password, checkPassword, email, account, name } = req.body
+    if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
     User.findOne({
       attributes: ['email', 'account'],
       where: {

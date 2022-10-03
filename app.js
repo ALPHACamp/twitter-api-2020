@@ -4,7 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express')
 const passport = require('./config/passport')
-const helpers = require('./_helpers')
+const { getUser } = require('./helpers/auth-helpers')
 const { apis } = require('./routes')
 
 const app = express()
@@ -18,8 +18,9 @@ function authenticated (req, res, next) {
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json()) // 把json 文件功能打開，這樣程式才能解析JSON格式的請求物件
 app.use(passport.initialize()) // 初始化 Passport
+app.use(passport.session())
 app.use((req, res, next) => {
-  res.locals.user = req.user
+  res.locals.user = getUser(req)
   next()
 })
 
