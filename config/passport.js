@@ -5,7 +5,7 @@ const LocalStrategy = require('passport-local').Strategy
 const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
-// const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs')
 
 passport.use(new LocalStrategy({
   usernameField: 'account',
@@ -14,8 +14,8 @@ passport.use(new LocalStrategy({
   try {
     const user = await User.findOne({ where: { account } })
     if (!user) throw new Error('帳號或密碼錯誤！')
-    // const isMatch = await bcrypt.compare(password, user.passport)
-    const isMatch = password === user.password
+    const isMatch = await bcrypt.compare(password, user.password)
+    // const isMatch = password === user.password
     if (!isMatch) throw new Error('帳號或密碼錯誤！')
     return cb(null, user)
   } catch (err) {
