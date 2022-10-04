@@ -9,7 +9,7 @@ const router = express.Router()
 const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
 const { generalErrorHandler } = require('../middleware/error-handler')
-const { authenticated, authenticatedAdmin } = require('../middleware/auth')
+const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 
 // signin for admin
 router.post('/api/admin/signin', passport.authenticate('local', { session: false }), userController.signIn)
@@ -24,12 +24,13 @@ router.post('/api/users', userController.signUp)
 router.get('/api/current_user', authenticated, userController.getCurrentUser)
 
 // modules
-router.use('/api/followship', authenticated, followship)
-router.use('/api/tweets', authenticated, tweet)
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
-router.use('/api/users', authenticated, user)
+router.use('/api/followship', authenticated, authenticatedUser, followship)
+router.use('/api/tweets', authenticated, authenticatedUser, tweet)
+router.use('/api/users', authenticated, authenticatedUser, user)
 router.get('/', (req, res) => res.send('Hello World!'))
 
 // error handler
 router.use(generalErrorHandler)
+
 module.exports = router

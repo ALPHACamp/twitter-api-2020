@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const validator = require('validator')
-const { User } = require('../models')
 const helpers = require('../_helpers')
+const { User } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -37,7 +37,7 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
       // check required fields
-      if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw new Error('All the fields are required.')
+      if (!account?.trim() || !name?.trim() || !email?.trim() || !password || !checkPassword) throw new Error('All the fields are required.')
       // check password
       if (password !== checkPassword) throw new Error('The password confirmation does not match.')
       // check email format
@@ -71,6 +71,59 @@ const userController = {
     try {
       const { id, email, account, name, avatar, role } = helpers.getUser(req)
       return res.json({ id, email, account, name, avatar, role })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  putUserProfile: async (req, res, next) => {
+  },
+
+  putUserSetting: async (req, res, next) => {
+    try {
+      const { account, name, email, password, checkPassword } = req.body
+      const id = Number(req.params.id)
+      const currentUser = helpers.getUser(req)
+      // check if the req is from current user
+      if (id !== currentUser.id) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'User can only edit their own profile.'
+        })
+      }
+      // check if the user exists
+      const user = await User.findByPk(id)
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+      console.log(user.password)
+      // check required fields
+      if (!account?.trim() || !name?.trim() || !email?.trim()) throw new Error('Account, name, email are required')
+      // check length of name
+      if (name?.length > 50) throw new Error('Name must be less than 50 characters long.')
+      // check account existence
+      if (account !== user.account) {
+        const userAccount = await User.findOne({ where: { account } })
+        if (userAccount) throw new Error('Account already exists.')
+      }
+      // check email format and existence
+      if (email !== user.email) {
+        if (!validator.isEmail(email)) throw new Error('Email address is invalid.')
+        const userEmail = await User.findOne({ where: { email } })
+        if (userEmail) throw new Error('Email already exists.')
+      }
+      // check password
+      if ((password || checkPassword) && password !== checkPassword) throw new Error('The password confirmation does not match.')
+      const userUpdate = await user.update({
+        account,
+        name,
+        email,
+        password: password ? bcrypt.hashSync(password, 10) : user.password
+      })
+      return res.json({ ...userUpdate.toJSON() })
     } catch (err) {
       next(err)
     }
