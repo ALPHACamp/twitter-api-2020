@@ -3,6 +3,9 @@ const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
 const bcrypt = require('bcrypt-nodejs')
 const { User } = require('../models')
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 passport.use(new LocalStrategy({
