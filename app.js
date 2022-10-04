@@ -10,7 +10,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const app = express()
-const port = 3000
+const PORT = process.env.PORT
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -28,6 +28,6 @@ app.use('/upload', express.static(path.join(__dirname, 'upload')))
 // };
 
 app.use(routes)
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
 
 module.exports = app
