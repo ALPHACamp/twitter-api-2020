@@ -50,7 +50,6 @@ const userController = {
     } catch (err) {
       next(err)
     }
-
   },
   getProfile: (req, res, next) => {
     const id = Number(req.params.id)

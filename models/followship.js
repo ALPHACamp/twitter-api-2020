@@ -9,7 +9,6 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Followship.init({
-    comment: DataTypes.TEXT,
     followerId: DataTypes.INTEGER,
     followingId: DataTypes.INTEGER
   }, {
