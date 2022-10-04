@@ -14,5 +14,4 @@ router.post('/', tweetController.postTweet) // 新增一筆貼文
 router.post('/:id/like', tweetController.likeTweet)
 router.post('/:id/unlike', tweetController.unlikeTweet)
 
-
 module.exports = router

@@ -1,18 +1,19 @@
-const { Tweet, User, ReplyLike } = require('../models')
+const { Tweet, User, Reply, Like } = require('../models')
+const helpers = require('../_helpers')
 
 const tweetController = {
   postTweet: (req, res, next) => {
     const { description } = req.body
-    const userId = req.user.id
+    const UserId = helpers.getUser(req)?.id
     const [descriptionMin, descriptionMax] = [1, 140]
     if (description.length < descriptionMin || description.length > descriptionMax) throw new Error(`字數限制需在 ${descriptionMin} ~ ${descriptionMax} 之間`)
 
-    User.findByPk(userId) // 查看user是否存在
+    User.findByPk(UserId) // 查看user是否存在
       .then(user => {
         if (!user) throw new Error('使用者不存在')
         return Tweet.create({
           description,
-          userId: userId
+          UserId
         })
       })
       .then(tweet => {
@@ -38,7 +39,7 @@ const tweetController = {
   },
   likeTweet: (req, res, next) => {
     const TweetId = Number(req.params.id)
-    const UserId = req.user.id
+    const UserId = helpers.getUser(req)?.id
     return Promise.all([
       Tweet.findByPk(TweetId, { raw: true }),
       Like.findOne({
@@ -53,19 +54,19 @@ const tweetController = {
           TweetId
         })
       })
-      .then((like) => {
+      .then(like => {
         res.json({ status: 'success', data: { like } })
       })
       .catch(err => next(err))
   },
   unlikeTweet: (req, res, next) => {
-    const tweetId = Number(req.params.id)
-    const userId = req.user.id
+    const TweetId = Number(req.params.id)
+    const UserId = helpers.getUser(req)?.id
     return Promise.all([
-      Tweet.findByPk(tweetId, { raw: true }),
+      Tweet.findByPk(TweetId, { raw: true }),
       Like.findOne({
         attributes: ['id', 'UserId', 'TweetId', 'createdAt', 'updatedAt'],
-        where: { userId, tweetId }
+        where: { UserId, TweetId }
       })
     ])
       .then(([tweet, like]) => {
@@ -73,20 +74,21 @@ const tweetController = {
         if (!like) throw new Error('沒按過')
         return like.destroy()
       })
-      .then((like) => {
+      .then(like => {
         res.json({ status: 'success', data: { like } })
-        },
+      })
+  },
   postReply: (req, res, next) => {
-    const tweetId = Number(req.params.tweet_id)
+    const TweetId = Number(req.params.tweet_id)
     const { comment } = req.body
-    const userId = req.user.id
-    Tweet.findByPk(tweetId)
+    const UserId = helpers.getUser(req)?.id
+    Tweet.findByPk(TweetId)
       .then(tweet => {
         if (!tweet) throw new Error('此貼文不存在')
         return Reply.create({
           comment,
-          userId,
-          tweetId
+          UserId,
+          TweetId
         })
       })
       .then(reply => {
@@ -95,10 +97,10 @@ const tweetController = {
       .catch(err => next(err))
   },
   getReplies: (req, res, next) => {
-    const tweetId = Number(req.params.tweet_id)
+    const TweetId = Number(req.params.tweet_id)
     Promise.all([
-      Tweet.findByPk(tweetId),
-      Reply.findAll({ where: { tweetId }, raw: true })
+      Tweet.findByPk(TweetId),
+      Reply.findAll({ where: { TweetId }, raw: true })
     ])
       .then(([tweet, replies]) => {
         if (!tweet) throw new Error('此推文不存在')
