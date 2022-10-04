@@ -2,9 +2,10 @@ const express = require('express')
 const session = require('express-session')
 const routes = require('./routes')
 const passport = require('./config/passport')
-const { getUser } = require('./_helpers')
 
-if (!process.env.NODE_ENV !== 'production') {
+// const { getUser } = require('./_helpers')
+
+if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const app = express()
@@ -20,9 +21,9 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 // use helpers.getUser(req) to replace req.user
-function authenticated (req, res, next) {
-  // passport.authenticate('jwt', { ses...
-};
+// function authenticated (req, res, next) {
+//   // passport.authenticate('jwt', { ses...
+// };
 
 app.use(routes)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
