@@ -1,9 +1,10 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { getUser } = require('../helpers/auth-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { Op } = require('sequelize')
 const { User } = require('../models')
+const helpers = require('../_helpers')
+
 const userController = {
   signUp: (req, res, next) => {
     const { password, checkPassword, email, account, name } = req.body
@@ -37,7 +38,7 @@ const userController = {
   },
   signIn: (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
+      const userData = helpers.getUser(req)?.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
@@ -63,7 +64,7 @@ const userController = {
   },
   putProfile: (req, res, next) => {
     const id = Number(req.params.id)
-    const userId = getUser(req).id
+    const userId = helpers.getUser(req)?.id
     const { name, introduction } = req.body
     const { file } = req
     const [nameMin, nameMax] = [1, 50]
