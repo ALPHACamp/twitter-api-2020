@@ -1,4 +1,4 @@
-const { Tweet, User, Like } = require('../models')
+const { Tweet, User, ReplyLike } = require('../models')
 
 const tweetController = {
   postTweet: (req, res, next) => {
@@ -75,6 +75,34 @@ const tweetController = {
       })
       .then((like) => {
         res.json({ status: 'success', data: { like } })
+        },
+  postReply: (req, res, next) => {
+    const tweetId = Number(req.params.tweet_id)
+    const { comment } = req.body
+    const userId = req.user.id
+    Tweet.findByPk(tweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error('此貼文不存在')
+        return Reply.create({
+          comment,
+          userId,
+          tweetId
+        })
+      })
+      .then(reply => {
+        res.json({ status: 'success', data: { reply } })
+      })
+      .catch(err => next(err))
+  },
+  getReplies: (req, res, next) => {
+    const tweetId = Number(req.params.tweet_id)
+    Promise.all([
+      Tweet.findByPk(tweetId),
+      Reply.findAll({ where: { tweetId }, raw: true })
+    ])
+      .then(([tweet, replies]) => {
+        if (!tweet) throw new Error('此推文不存在')
+        res.json({ status: 'success', data: { replies } })
       })
       .catch(err => next(err))
   }
