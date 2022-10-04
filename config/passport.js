@@ -34,7 +34,8 @@ passport.use(new JWTStrategy(jwtOptions, async (req, payload, cb) => {
       include: [
         { model: User, as: 'Followings' },
         { model: User, as: 'Followers' }
-      ]
+      ],
+      attributes: { exclude: ['password'] }
     })
     if (user) {
       req.user = user.toJSON()
