@@ -86,7 +86,7 @@ const userController = {
           coverPhoto: filePath || user.coverPhoto
         })
       })
-      .then((updateUser) => {
+      .then(updateUser => {
         const user = updateUser.toJSON()
         delete user.password
         res.json(

@@ -1,4 +1,4 @@
-const { Tweet, User, ReplyLike } = require('../models')
+const { Tweet, User, Reply, Like } = require('../models')
 
 const tweetController = {
   postTweet: (req, res, next) => {
@@ -53,7 +53,7 @@ const tweetController = {
           TweetId
         })
       })
-      .then((like) => {
+      .then(like => {
         res.json({ status: 'success', data: { like } })
       })
       .catch(err => next(err))
@@ -73,9 +73,10 @@ const tweetController = {
         if (!like) throw new Error('沒按過')
         return like.destroy()
       })
-      .then((like) => {
+      .then(like => {
         res.json({ status: 'success', data: { like } })
-        },
+      })
+  },
   postReply: (req, res, next) => {
     const tweetId = Number(req.params.tweet_id)
     const { comment } = req.body

@@ -3,6 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const path = require('path')
 const express = require('express')
+const cors = require('cors')
 const passport = require('./config/passport')
 const { getUser } = require('./helpers/auth-helpers')
 const { apis } = require('./routes')
@@ -25,6 +26,7 @@ app.use((req, res, next) => {
   next()
 })
 
+app.use(cors())
 app.use('/api', apis)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
