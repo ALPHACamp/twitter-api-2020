@@ -5,6 +5,7 @@ const tweetController = require('../../../controllers/tweet-controller.js')
 
 // 留言ＡＰＩ區塊
 router.post('/:tweet_id/replies', tweetController.postReply) // 在推文新增一筆回覆
+router.get('/:tweet_id/replies', tweetController.getReplies) // 瀏覽推文所有留言
 
 // 推文ＡＰＩ區塊
 router.get('/:tweet_id', tweetController.getTweet) // 瀏覽一筆貼文

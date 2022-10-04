@@ -53,6 +53,18 @@ const tweetController = {
         res.json({ status: 'success', data: { reply } })
       })
       .catch(err => next(err))
+  },
+  getReplies: (req, res, next) => {
+    const tweetId = Number(req.params.tweet_id)
+    Promise.all([
+      Tweet.findByPk(tweetId),
+      Reply.findAll({ where: { tweetId }, raw: true })
+    ])
+      .then(([tweet, replies]) => {
+        if (!tweet) throw new Error('此推文不存在')
+        res.json({ status: 'success', data: { replies } })
+      })
+      .catch(err => next(err))
   }
 }
 
