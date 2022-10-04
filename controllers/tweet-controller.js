@@ -1,4 +1,4 @@
-const { Tweet, User } = require('../models')
+const { Tweet, User, Reply } = require('../models')
 
 const tweetController = {
   postTweet: (req, res, next) => {
@@ -33,6 +33,24 @@ const tweetController = {
       .then(tweet => {
         if (!tweet) throw new Error('此推文不存在')
         res.json({ status: 'success', data: { tweet } })
+      })
+      .catch(err => next(err))
+  },
+  postReply: (req, res, next) => {
+    const tweetId = Number(req.params.tweet_id)
+    const { comment } = req.body
+    const userId = req.user.id
+    Tweet.findByPk(tweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error('此貼文不存在')
+        return Reply.create({
+          comment,
+          userId,
+          tweetId
+        })
+      })
+      .then(reply => {
+        res.json({ status: 'success', data: { reply } })
       })
       .catch(err => next(err))
   }
