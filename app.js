@@ -1,3 +1,4 @@
+const path = require('path')
 const express = require('express')
 const session = require('express-session')
 const routes = require('./routes')
@@ -20,6 +21,7 @@ app.use(session({
 }))
 app.use(passport.initialize())
 app.use(passport.session())
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 // use helpers.getUser(req) to replace req.user
 // function authenticated (req, res, next) {
 //   // passport.authenticate('jwt', { ses...
