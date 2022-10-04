@@ -17,14 +17,23 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING(50) // 上限50字
     },
+    account: {
+      type: DataTypes.STRING
+    },
+    nickname: {
+      type: DataTypes.STRING
+    },
     avatar: {
       type: DataTypes.STRING
     },
-    introduction: {
+    coverPhoto: {
+      type: DataTypes.STRING
+    },
+    intro: {
       type: DataTypes.TEXT(160)
     },
-    role: {
-      type: DataTypes.STRING
+    isAdmin: {
+      type: DataTypes.BOOLEAN
     }
   }, {
     tableName: 'Users',
