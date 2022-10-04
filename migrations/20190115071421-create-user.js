@@ -14,19 +14,22 @@ module.exports = {
       },
       email: {
         type: Sequelize.STRING,
-        unique: true
+        unique: true,
+        validate: { isEmail: true }
       },
       password: {
         type: Sequelize.STRING
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        validate: { len: 50 },
       },
       avatar: {
         type: Sequelize.STRING
       },
       introduction: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
+        validate: { len: 160  },
       },
       role: {
         type: Sequelize.STRING
