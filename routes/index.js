@@ -16,6 +16,10 @@ router.post('/api/admin/signin', passport.authenticate('local', { session: false
 
 // 一般使用者登入路由
 router.post('/api/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
+
+// get current user (admin and normal user)
+router.get('/api/current_user', authenticated, userController.getCurrentUser)
+
 // modules
 router.use('/api/followship', authenticated, followship)
 router.use('/api/tweets', authenticated, tweet)

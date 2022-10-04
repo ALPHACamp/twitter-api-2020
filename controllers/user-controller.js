@@ -21,13 +21,21 @@ const userController = {
           })
           break
         default: {
-          delete userData.password
           const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '15d' })
           return res.json({
             status: 'success', token, user: userData
           })
         }
       }
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getCurrentUser: (req, res, next) => {
+    try {
+      const { id, email, account, name, avatar, role } = helpers.getUser(req)
+      return res.json({ id, email, account, name, avatar, role })
     } catch (err) {
       next(err)
     }
