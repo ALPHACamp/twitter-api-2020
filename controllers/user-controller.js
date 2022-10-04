@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
-// const bcrypt = require('bcryptjs')
-// const { User } = require('../models')
+const bcrypt = require('bcryptjs')
+const validator = require('validator')
+const { User } = require('../models')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -27,6 +28,40 @@ const userController = {
           })
         }
       }
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  signUp: async (req, res, next) => {
+    try {
+      const { account, name, email, password, checkPassword } = req.body
+      // check required fields
+      if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw new Error('All the fields are required.')
+      // check password
+      if (password !== checkPassword) throw new Error('The password confirmation does not match.')
+      // check email format
+      if (!validator.isEmail(email)) throw new Error('Email address is invalid.')
+      // check length of name
+      if (name?.length > 50) throw new Error('Name must be less than 50 characters long.')
+      // check account and email existence
+      const [userAccount, userEmail] = await Promise.all([
+        User.findOne({ where: { account } }),
+        User.findOne({ where: { email } })
+      ])
+      if (userAccount) throw new Error('Account already exists.')
+      if (userEmail) throw new Error('Email already exists.')
+
+      const user = await User.create({
+        account,
+        name,
+        email,
+        password: bcrypt.hashSync(password, 10)
+      })
+      return res.json({
+        id: user.id,
+        account: user.account
+      })
     } catch (err) {
       next(err)
     }
