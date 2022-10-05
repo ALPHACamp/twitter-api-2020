@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { Op } = require('sequelize')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -130,6 +130,46 @@ const userController = {
         if (!user) throw new Error('使用者不存在')
         res.json(replies)
       })
+  },
+  addFollowing: (req, res, next) => {
+    const currentUserId = helpers.getUser(req)?.id
+    const { userId } = req.body
+    Promise.all([
+      User.findByPk(userId),
+      Followship.findOne({
+        where: {
+          followerId: currentUserId,
+          followingId: userId,
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+        if (!user) throw new Error("該使用者不存在")
+        if (user.id === currentUserId) throw new Error("無法追蹤自己")
+        if (followship) throw new Error('已追蹤過這個使用者')
+        return Followship.create({
+          followerId: currentUserId,
+          followingId: Number(userId)
+        })
+      })
+      .then((followingUser) => res.json(followingUser))
+      .catch(err => next(err))
+  },
+  removeFollowing: (req, res, next) => {
+    const currentUserId = helpers.getUser(req)?.id
+    const userId = req.params.followingId
+    console.log(userId)
+    Followship.findOne({
+      where: {
+        followerId: currentUserId,
+        followingId: userId
+      },
+    })
+      .then(followship => {
+        if (!followship) throw new Error("尚未追蹤這個使用者")
+        return followship.destroy()
+      })
+      .then((removeFollowingUser) => res.json({ status: 'success', data: { user: removeFollowingUser } }))
       .catch(err => next(err))
   }
 }
