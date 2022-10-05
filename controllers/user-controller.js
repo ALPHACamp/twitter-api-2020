@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 const helpers = require('../_helpers')
 const imgurFileHandler = require('../helpers/file-helpers')
-const { User, sequelize } = require('../models')
+const { User, Tweet, Like, sequelize } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -103,7 +103,7 @@ const userController = {
       // check length of name
       if (name?.length > 50) throw new Error('Name must be less than 50 characters long.')
       // check length of introduction
-      if (introduction?.length > 160) throw new Error('Introduction must be less than 50 characters long.')
+      if (introduction?.length > 160) throw new Error('Introduction must be less than 160 characters long.')
 
       const avatarPath = files?.avatar ? await imgurFileHandler(files.avatar[0]) : user.avatar
       const coverPath = files?.cover ? await imgurFileHandler(files.cover[0]) : user.cover
@@ -123,7 +123,7 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
       const reqUserId = Number(req.params.id)
-      const currentUser = helpers.getUser(req)
+      const currentUserId = helpers.getUser(req).id
       // check if the user exists
       const user = await User.findByPk(reqUserId)
       if (!user) {
@@ -133,7 +133,7 @@ const userController = {
         })
       }
       // check if the req is from current user
-      if (reqUserId !== currentUser.id) {
+      if (reqUserId !== currentUserId) {
         return res.status(403).json({
           status: 'error',
           message: 'User can only edit their own profile.'
@@ -190,6 +190,45 @@ const userController = {
         topUser.isFollowed = followingsId.has(topUser.id)
       })
       return res.json(topUsers)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserTweets: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      // check if the user exists
+      const user = await User.findByPk(reqUserId)
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+      const [userTweets, currentUserLikes] = await Promise.all([
+        Tweet.findAll({
+          where: { UserId: reqUserId },
+          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          attributes: [
+            'id', 'description', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
+          ],
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        }),
+        Like.findAll({ where: { UserId: currentUserId } })
+      ])
+      // add isLiked attribute
+      const currentUserLikedTweetsId = new Set()
+      currentUserLikes.forEach(like => currentUserLikedTweetsId.add(like.TweetId))
+      userTweets.forEach(tweet => {
+        tweet.isLiked = currentUserLikedTweetsId.has(tweet.id)
+      })
+      return res.json(userTweets)
     } catch (err) {
       next(err)
     }
