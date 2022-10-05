@@ -17,10 +17,5 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Replies',
     underscored: true
   })
-  // const Reply = sequelize.define('Reply', {
-  // }, {})
-  // Reply.associate = function (models) {
-  // }
-  // return Reply
   return Reply
 }

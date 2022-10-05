@@ -17,10 +17,5 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Tweets',
     underscored: true
   })
-  // const Tweet = sequelize.define('Tweet', {
-  // }, {})
-  // Tweet.associate = function (models) {
-  // }
-  // return Tweet
   return Tweet
 }

@@ -33,9 +33,5 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Users',
     underscored: true
   })
-  // const User = sequelize.define('User', {
-  // }, {})
-  // User.associate = function (models) {
-  // }
   return User
 }

@@ -14,10 +14,5 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Followships',
     underscored: true
   })
-  // const Followship = sequelize.define('Followship', {
-  // }, {})
-  // Followship.associate = function (models) {
-  // }
-  // return Followship
   return Followship
 }

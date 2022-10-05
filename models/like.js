@@ -17,10 +17,5 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Likes',
     underscored: true
   })
-  // const Like = sequelize.define('Like', {
-  // }, {})
-  // Like.associate = function (models) {
-  // }
-  // return Like
   return Like
 }
