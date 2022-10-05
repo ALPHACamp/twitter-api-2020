@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const validator = require('validator')
 const helpers = require('../_helpers')
+const imgurFileHandler = require('../helpers/file-helpers')
 const { User } = require('../models')
 
 const userController = {
@@ -77,29 +78,67 @@ const userController = {
   },
 
   putUserProfile: async (req, res, next) => {
-  },
-
-  putUserSetting: async (req, res, next) => {
     try {
-      const { account, name, email, password, checkPassword } = req.body
-      const id = Number(req.params.id)
-      const currentUser = helpers.getUser(req)
-      // check if the req is from current user
-      if (id !== currentUser.id) {
-        return res.status(403).json({
-          status: 'error',
-          message: 'User can only edit their own profile.'
-        })
-      }
+      const { name, introduction } = req.body
+      const { files } = req
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
       // check if the user exists
-      const user = await User.findByPk(id)
+      const user = await User.findByPk(reqUserId)
       if (!user) {
         return res.status(404).json({
           status: 'error',
           message: 'The user does not exist.'
         })
       }
-      console.log(user.password)
+      // check if the req is from current user
+      if (reqUserId !== currentUserId) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'User can only edit their own profile.'
+        })
+      }
+      // check required fields
+      if (!name?.trim()) throw new Error('Name is required')
+      // check length of name
+      if (name?.length > 50) throw new Error('Name must be less than 50 characters long.')
+      // check length of introduction
+      if (introduction?.length > 160) throw new Error('Introduction must be less than 50 characters long.')
+
+      const avatarPath = files?.avatar ? await imgurFileHandler(files.avatar[0]) : user.avatar
+      const coverPath = files?.cover ? await imgurFileHandler(files.cover[0]) : user.cover
+      const userData = await user.update({
+        name,
+        introduction,
+        avatar: avatarPath,
+        cover: coverPath
+      })
+      return res.json({ ...userData.toJSON() })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  putUserSetting: async (req, res, next) => {
+    try {
+      const { account, name, email, password, checkPassword } = req.body
+      const reqUserId = Number(req.params.id)
+      const currentUser = helpers.getUser(req)
+      // check if the user exists
+      const user = await User.findByPk(reqUserId)
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+      // check if the req is from current user
+      if (reqUserId !== currentUser.id) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'User can only edit their own profile.'
+        })
+      }
       // check required fields
       if (!account?.trim() || !name?.trim() || !email?.trim()) throw new Error('Account, name, email are required')
       // check length of name
@@ -117,6 +156,7 @@ const userController = {
       }
       // check password
       if ((password || checkPassword) && password !== checkPassword) throw new Error('The password confirmation does not match.')
+
       const userUpdate = await user.update({
         account,
         name,
