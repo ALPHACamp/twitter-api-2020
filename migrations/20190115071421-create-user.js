@@ -34,7 +34,7 @@ module.exports = {
       role: {
         type: Sequelize.STRING
       },
-      cover:{
+      cover: {
         type: Sequelize.STRING
       },
       created_at: {
