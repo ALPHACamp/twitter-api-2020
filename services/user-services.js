@@ -1,21 +1,6 @@
-const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const bcrypt = require('bcryptjs')
 const userServices = {
-  signIn: (req, cb) => {
-    try {
-      const token = jwt.sign(req.user, process.env.JWT_SECRET, { expiresIn: '30d' })
-      return cb(null, {
-        status: 'success',
-        data: {
-          token,
-          user: req.user
-        }
-      })
-    } catch (err) {
-      cb(err)
-    }
-  },
   signUp: (req, cb) => {
     // 密碼輸入不一致
     if (req.body.password !== req.user.passwordCheck) throw new Error("Passwords doesn't match!")

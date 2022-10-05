@@ -8,14 +8,14 @@ const { apiErrorHandler } = require('../../middleware/error-handler')
 const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 
 // 後台
-// Admin: sign in/sign up/ logout
-router.post('/admin/signin', authenticated, authenticatedAdmin, adminController.signIn)
-router.use('/admin', authenticated, authenticatedAdmin, admin)
+// Admin: sign in/ logout
+router.post('/api/admin/signin', authenticated, authenticatedAdmin, adminController.signIn)
+router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 
 // 前台
 // Users
-router.post('/signin', authenticated, userController.signIn)
-router.post('/signup', authenticated, userController.signUp)
+router.post('/api/signin', authenticated, userController.signIn)
+router.post('/api/signup', authenticated, userController.signUp)
 // Tweets
 // router.get('/tweets', authenticated, tweetController.getTweets)
 

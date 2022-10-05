@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const { User } = require('../models')
 const adminServices = {
   signIn: (req, cb) => {
     try {
@@ -13,6 +14,13 @@ const adminServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  getUsers: (req, cb) => {
+    return User.findAll({
+      raw: true
+    })
+      .then(users => cb(null, users))
+      .catch(err => cb(err))
   }
 }
 module.exports = adminServices
