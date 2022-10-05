@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 const helpers = require('../_helpers')
 const imgurFileHandler = require('../helpers/file-helpers')
-const { User } = require('../models')
+const { User, sequelize } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -167,6 +167,33 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+
+  getTopUsers: async (req, res, next) => {
+    try {
+      const currentUser = helpers.getUser(req)
+      const LIMIT = 10
+      const topUsers = await User.findAll({
+        where: { role: 'user' },
+        attributes: [
+          'id', 'account', 'name', 'avatar',
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount']
+        ],
+        order: [[sequelize.literal('followerCount'), 'DESC']],
+        limit: LIMIT,
+        raw: true
+      })
+      // add isFollowed attribute
+      const followingsId = new Set()
+      currentUser.Followings.forEach(user => followingsId.add(user.id))
+      topUsers.forEach(topUser => {
+        topUser.isFollowed = followingsId.has(topUser.id)
+      })
+      return res.json(topUsers)
+    } catch (err) {
+      next(err)
+    }
   }
 }
+
 module.exports = userController
