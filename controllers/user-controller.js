@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { Op } = require('sequelize')
-const { User, Followship } = require('../models')
+const { User, Tweet, Reply, Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -52,7 +52,7 @@ const userController = {
       next(err)
     }
   },
-  getProfile: (req, res, next) => {
+  getUserProfile: (req, res, next) => {
     const id = Number(req.params.id)
     User.findByPk(id, { raw: true })
       .then(user => {
@@ -62,7 +62,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  putProfile: (req, res, next) => {
+  putUserProfile: (req, res, next) => {
     const id = Number(req.params.id)
     const userId = helpers.getUser(req)?.id
     const { name, introduction } = req.body
@@ -99,6 +99,37 @@ const userController = {
         )
       })
       .catch(err => next(err))
+  },
+  getUserTweets: (req, res, next) => {
+    const currentUserId = helpers.getUser(req)?.id // 當前登入使用者id
+    const UserId = Number(req.params.id) // 動態路由取得的id
+    let id // 最後要拿來查詢的id
+    if (currentUserId === UserId) {
+      id = currentUserId
+    } else {
+      id = UserId
+    }
+    Promise.all([User.findByPk(id), Tweet.findAll({ where: { UserId: id } })])
+      .then(([user, tweets]) => {
+        if (!user) throw new Error('使用者不存在')
+        res.json(tweets)
+      })
+      .catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    const currentUserId = helpers.getUser(req)?.id // 當前登入使用者id
+    const UserId = Number(req.params.id) // 動態路由取得的id
+    let id // 最後要拿來查詢的id
+    if (currentUserId === UserId) {
+      id = currentUserId
+    } else {
+      id = UserId
+    }
+    Promise.all([User.findByPk(id), Reply.findAll({ where: { UserId: id } })])
+      .then(([user, replies]) => {
+        if (!user) throw new Error('使用者不存在')
+        res.json(replies)
+      })
   },
   addFollowing: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id
