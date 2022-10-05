@@ -10,7 +10,6 @@ module.exports = {
     const user = await queryInterface.sequelize.query(
       'SELECT id FROM Users WHERE role = "user"; ',
       { type: queryInterface.sequelize.QueryTypes.SELECT })
-
     const tweet =  await queryInterface.sequelize.query(
       'SELECT id FROM Tweets ; ',
       { type: queryInterface.sequelize.QueryTypes.SELECT })
@@ -28,16 +27,22 @@ module.exports = {
 
 function replyGenerate(user,tweet, NumberOfReplyPerTweet){
   let result = []
+  const userList = new Set()    
   for (let i = 0 ; i < tweet.length ; i++){
-    for(let y = 0 ; y < NumberOfReplyPerTweet ; y++){
-      result.push({
-        UserId:user[Math.floor( Math.random()*user.length)].id,
-        TweetId:tweet[i].id,
-        comment:faker.lorem.text(),
-        createdAt: dayJs.between('2022-10-05', '2022-11-05').format('YYYY-MM-DD HH:MM:ss'),
-        updatedAt: new Date()
+    //使user不重複
+      while(userList.size < NumberOfReplyPerTweet ){
+          userList.add(user[Math.floor( Math.random()*user.length)].id)
+      }
+      userList.forEach(userId => {
+          result.push({
+            UserId:userId,
+            TweetId:tweet[i].id,
+            comment:faker.lorem.text(),
+            createdAt: dayJs.between('2022-10-05', '2022-11-05').format('YYYY-MM-DD HH:MM:ss'),
+            updatedAt: new Date()
+          })
       })
-    }
+    userList.clear()
   }
   return result
 }
