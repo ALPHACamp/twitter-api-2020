@@ -10,6 +10,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       role: 'admin',
       profile_photo: 'https://fakeimg.pl/140/',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -19,6 +20,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
       profile_photo: 'https://fakeimg.pl/140/',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -28,6 +30,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
       profile_photo: 'https://fakeimg.pl/140/',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -37,6 +40,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
       profile_photo: 'https://fakeimg.pl/140/',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -46,6 +50,17 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
       profile_photo: 'https://fakeimg.pl/140/',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
+      created_at: new Date(),
+      updated_at: new Date()
+    }, {
+      name: 'user5',
+      account: 'user5',
+      email: 'user5@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      profile_photo: 'https://fakeimg.pl/140/',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
     }], {})
