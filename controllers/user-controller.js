@@ -117,8 +117,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserReplies: (req, res, next) => {
-    const currentUserId = req.user.id
-    // const currentUserId = helpers.getUser(req)?.id // 當前登入使用者id
+    const currentUserId = helpers.getUser(req)?.id // 當前登入使用者id
     const UserId = Number(req.params.id) // 動態路由取得的id
     let id // 最後要拿來查詢的id
     if (currentUserId === UserId) {
@@ -126,10 +125,12 @@ const userController = {
     } else {
       id = UserId
     }
-    Reply.findAll({ where: { UserId: id } })
-      .then(replies => {
+    Promise.all([User.findByPk(id), Reply.findAll({ where: { UserId: id } })])
+      .then(([user, replies]) => {
+        if (!user) throw new Error('使用者不存在')
         res.json(replies)
       })
+      .catch(err => next(err))
   }
 }
 
