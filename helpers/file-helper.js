@@ -2,7 +2,7 @@ const fs = require('fs')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 imgur.setClientId(IMGUR_CLIENT_ID)
-
+// 上傳圖檔至本機儲存
 const localFileHandler = file => {
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null)
@@ -13,6 +13,7 @@ const localFileHandler = file => {
       .catch(err => reject(err))
   })
 }
+// 上傳圖檔至imgur api儲存
 const imgurFileHandler = file => {
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null)
