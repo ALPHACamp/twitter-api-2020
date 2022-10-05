@@ -1,5 +1,5 @@
 'use strict'
-const bcrypt = require('bcrypt-nodejs')
+const bcrypt = require('bcryptjs')
 const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -22,17 +22,52 @@ module.exports = {
     }, {
       email: 'user2@example.com',
       password: await bcrypt.hash('12345678', 10),
-      name: faker.name.findName().subString(0, 50),
+      name: faker.name.findName(),
       account: '@' + faker.name.findName().replace(/\s+/g, ''),
-      nickname: faker.name.findName().subString(0, 50),
-      avatar: '',
+      nickname: faker.name.findName(),
+      avatar: `https://loremflickr.com/320/240/boy,girl/?random=${Math.random() * 100}`,
       cover_photo: '',
-      intro: faker.lorem.text().subString(0, 160),
+      intro: faker.lorem.text(),
       is_admin: false,
       created_at: new Date(),
       updated_at: new Date()
-    }
-    ], {})
+    }, {
+      email: 'user3@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      name: faker.name.findName(),
+      account: '@' + faker.name.findName().replace(/\s+/g, ''),
+      nickname: faker.name.findName(),
+      avatar: `https://loremflickr.com/320/240/boy,girl/?random=${Math.random() * 100}`,
+      cover_photo: '',
+      intro: faker.lorem.text(),
+      is_admin: false,
+      created_at: new Date(),
+      updated_at: new Date()
+    }, {
+      email: 'user4@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      name: faker.name.findName(),
+      account: '@' + faker.name.findName().replace(/\s+/g, ''),
+      nickname: faker.name.findName(),
+      avatar: `https://loremflickr.com/320/240/boy,girl/?random=${Math.random() * 100}`,
+      cover_photo: '',
+      intro: faker.lorem.text(),
+      is_admin: false,
+      created_at: new Date(),
+      updated_at: new Date()
+    }, {
+      email: 'user5@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      name: faker.name.findName(),
+      account: '@' + faker.name.findName().replace(/\s+/g, ''),
+      nickname: faker.name.findName(),
+      avatar: `https://loremflickr.com/320/240/boy,girl/?random=${Math.random() * 100}`,
+      cover_photo: '',
+      intro: faker.lorem.text(),
+      is_admin: false,
+      created_at: new Date(),
+      updated_at: new Date()
+    }], {})
   },
 
   down: async (queryInterface, Sequelize) => {
