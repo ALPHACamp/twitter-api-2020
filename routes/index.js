@@ -8,6 +8,7 @@ const router = express.Router()
 
 const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
+const tweetController = require('../controllers/tweet-controller')
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 
@@ -22,6 +23,9 @@ router.post('/api/users', userController.signUp)
 
 // get current user for admin and normal user
 router.get('/api/current_user', authenticated, userController.getCurrentUser)
+
+// get all tweets
+router.get('/api/tweets', authenticated, tweetController.getTweets)
 
 // modules
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
