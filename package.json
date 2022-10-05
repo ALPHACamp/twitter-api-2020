@@ -4,14 +4,14 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "NODE_ENV=development node app.js",
-    "dev": "NODE_ENV=development nodemon app.js",
-    "test": "mocha test --exit --recursive --timeout 5000"
+    "start": "set \"NODE_ENV=development\" && node app.js",
+    "dev": "set \"NODE_ENV=development\" && nodemon app.js",
+    "test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt-nodejs": "0.0.3",
+    "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
