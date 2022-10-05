@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { Op } = require('sequelize')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -52,7 +52,7 @@ const userController = {
       next(err)
     }
   },
-  getProfile: (req, res, next) => {
+  getUserProfile: (req, res, next) => {
     const id = Number(req.params.id)
     User.findByPk(id, { raw: true })
       .then(user => {
@@ -62,7 +62,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  putProfile: (req, res, next) => {
+  putUserProfile: (req, res, next) => {
     const id = Number(req.params.id)
     const userId = helpers.getUser(req)?.id
     const { name, introduction } = req.body
@@ -97,6 +97,24 @@ const userController = {
             data: { user }
           }
         )
+      })
+      .catch(err => next(err))
+  },
+  getUserTweets: (req, res, next) => {
+    const currentUserId = helpers.getUser(req).id // 當前登入使用者id
+    const UserId = Number(req.params.id) // 動態路由取得的id
+    let id // 最後要拿來查詢的id
+    if (currentUserId === UserId) {
+      id = currentUserId
+    } else {
+      id = UserId
+    }
+    User.findByPk(id, {
+      include: Tweet
+    })
+      .then(user => {
+        if (!user) throw new Error('此使用者不存在')
+        res.json({ status: 'success', data: { user } })
       })
       .catch(err => next(err))
   }

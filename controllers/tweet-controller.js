@@ -77,6 +77,7 @@ const tweetController = {
       .then(like => {
         res.json({ status: 'success', data: { like } })
       })
+      .catch(err => next(err))
   },
   postReply: (req, res, next) => {
     const TweetId = Number(req.params.tweet_id)
