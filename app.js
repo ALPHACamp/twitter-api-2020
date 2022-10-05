@@ -10,11 +10,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const app = express()
-<<<<<<< HEAD
 const PORT = process.env.PORT
-=======
-const port = process.env.PORT || 3000
->>>>>>> 4ccf7dbe141a416b296a0fc73a2982ff9fdf4c09
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
