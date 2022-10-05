@@ -1,0 +1,46 @@
+{
+  "userSeed": [
+    {
+      "account": "root",
+      "name": "root",
+      "email": "root@example.com",
+      "password": "12345678",
+      "is_admin": true
+    },
+    {
+      "account": "user1",
+      "name": "user1",
+      "email": "user1@example.com",
+      "password": "12345678",
+      "is_admin": false
+    },
+    {
+      "account": "user2",
+      "name": "user2",
+      "email": "user2@example.com",
+      "password": "12345678",
+      "is_admin": false
+    },
+    {
+      "account": "user3",
+      "name": "user3",
+      "email": "user3@example.com",
+      "password": "12345678",
+      "is_admin": false
+    },
+    {
+      "account": "user4",
+      "name": "user4",
+      "email": "user4@example.com",
+      "password": "12345678",
+      "is_admin": false
+    },
+    {
+      "account": "user5",
+      "name": "user5",
+      "email": "user5@example.com",
+      "password": "12345678",
+      "is_admin": false
+    }
+  ]
+}

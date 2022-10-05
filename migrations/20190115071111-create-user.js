@@ -32,7 +32,7 @@ module.exports = {
       },
       introduction: {
         allowNull: false,
-        default: '請輸入自我介紹',
+        defaultValue: '請輸入自我介紹',
         type: Sequelize.STRING
       },
       is_admin: {
