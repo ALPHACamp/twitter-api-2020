@@ -109,12 +109,10 @@ const userController = {
     } else {
       id = UserId
     }
-    User.findByPk(id, {
-      include: Tweet
-    })
-      .then(user => {
-        if (!user) throw new Error('此使用者不存在')
-        res.json({ status: 'success', data: { user } })
+    Promise.all([User.findByPk(id), Tweet.findAll({ where: { UserId: id } })])
+      .then(([user, tweets]) => {
+        if (!user) throw new Error('使用者不存在')
+        res.json(tweets)
       })
       .catch(err => next(err))
   },
