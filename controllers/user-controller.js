@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { Op } = require('sequelize')
-const { User } = require('../models')
+const { User, Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -98,6 +98,30 @@ const userController = {
           }
         )
       })
+      .catch(err => next(err))
+  },
+  addFollowing: (req, res, next) => {
+    const userId = helpers.getUser(req)?.id
+    const { id } = req.body
+    Promise.all([
+      User.findByPk(id),
+      Followship.findOne({
+        where: {
+          followerId: userId,
+          followingId: id
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+        if (!user) throw new Error("該使用者不存在")
+        if (user.id === userId) throw new Error("無法追蹤自己")
+        if (followship) throw new Error('已追蹤過這個使用者')
+        return Followship.create({
+          followerId: userId,
+          followingId: id
+        })
+      })
+      .then((followingUser) => res.json({ status: 'success', data: { followingUser } }))
       .catch(err => next(err))
   }
 }
