@@ -9,6 +9,11 @@ const adminController = {
     return adminServices.getUsers(req, (err, data) => {
       err ? next(err) : res.json({ status: 'success', data })
     })
+  },
+  deleteTweets: (req, res, next) => {
+    return adminServices.deleteTweets(req, (err, data) => {
+      err ? next(err) : res.json({ status: 'success', data })
+    })
   }
 }
 module.exports = adminController
