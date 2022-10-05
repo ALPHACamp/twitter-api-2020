@@ -7,6 +7,7 @@ const userController = require('../../../controllers/user-controller')
 
 // 使用者頁面ＡＰＩ
 router.get('/:id/tweets', authenticated, userController.getUserTweets) // 取得使用者發過的推文
+router.get('/:id/replied_tweets', authenticated, userController.getUserReplies) // 取得使用者回覆過的留言
 
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn) // 使用者登入
 router.get('/:id', authenticated, userController.getUserProfile) // 取得使用者資料

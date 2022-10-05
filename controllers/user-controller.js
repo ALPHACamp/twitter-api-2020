@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { Op } = require('sequelize')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -101,7 +101,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserTweets: (req, res, next) => {
-    const currentUserId = helpers.getUser(req).id // 當前登入使用者id
+    const currentUserId = helpers.getUser(req)?.id // 當前登入使用者id
     const UserId = Number(req.params.id) // 動態路由取得的id
     let id // 最後要拿來查詢的id
     if (currentUserId === UserId) {
@@ -117,6 +117,21 @@ const userController = {
         res.json({ status: 'success', data: { user } })
       })
       .catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    const currentUserId = req.user.id
+    // const currentUserId = helpers.getUser(req)?.id // 當前登入使用者id
+    const UserId = Number(req.params.id) // 動態路由取得的id
+    let id // 最後要拿來查詢的id
+    if (currentUserId === UserId) {
+      id = currentUserId
+    } else {
+      id = UserId
+    }
+    Reply.findAll({ where: { UserId: id } })
+      .then(replies => {
+        res.json(replies)
+      })
   }
 }
 
