@@ -33,7 +33,7 @@ const userController = {
         profilePhoto: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
         coverPhoto: 'https://i.imgur.com/t0YRqQH.jpg'
       }))
-      .then(newUser => res.json({ status: 'success', data: { user: newUser } }))
+      .then(newUser => res.json(newUser))
       .catch(err => next(err))
   },
   signIn: (req, res, next) => {
@@ -42,11 +42,8 @@ const userController = {
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
-        status: 'success',
-        data: {
-          token,
-          user: userData
-        }
+        token,
+        userData
       })
     } catch (err) {
       next(err)
@@ -58,7 +55,7 @@ const userController = {
       .then(user => {
         if (!user) throw new Error('該使用者不存在')
         delete user.password
-        return res.json({ status: 'success', data: { user } })
+        return res.json(user)
       })
       .catch(err => next(err))
   },
@@ -90,13 +87,7 @@ const userController = {
       .then(updateUser => {
         const user = updateUser.toJSON()
         delete user.password
-        res.json(
-          {
-            status: 'success',
-            message: '使用者資料編輯成功！',
-            data: { user }
-          }
-        )
+        res.json(user)
       })
       .catch(err => next(err))
   },
@@ -169,7 +160,7 @@ const userController = {
         if (!followship) throw new Error('尚未追蹤這個使用者')
         return followship.destroy()
       })
-      .then(removeFollowingUser => res.json({ status: 'success', data: { user: removeFollowingUser } }))
+      .then(removeFollowingUser => res.json(removeFollowingUser))
       .catch(err => next(err))
   }
 }

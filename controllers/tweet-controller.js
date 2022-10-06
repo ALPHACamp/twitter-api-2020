@@ -6,7 +6,7 @@ const tweetController = {
     const { description } = req.body
     const UserId = helpers.getUser(req)?.id
     const [descriptionMin, descriptionMax] = [1, 140]
-    if (description.length < descriptionMin || description.length > descriptionMax) throw new Error(`字數限制需在 ${descriptionMin} ~ ${descriptionMax} 之間`)
+    if (description.length < descriptionMin || description.length > descriptionMax) throw new Error(`字數限制需在 ${descriptionMin} ~ ${descriptionMax} 之內`)
 
     User.findByPk(UserId) // 查看user是否存在
       .then(user => {
@@ -17,14 +17,14 @@ const tweetController = {
         })
       })
       .then(tweet => {
-        res.json({ status: 'success', data: { tweet } })
+        res.json(tweet)
       })
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
     Tweet.findAll({})
       .then(tweets => {
-        res.json({ status: 'success', data: { tweets } })
+        res.json(tweets)
       })
       .catch(err => next(err))
   },
@@ -33,7 +33,7 @@ const tweetController = {
     Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) throw new Error('此推文不存在')
-        res.json({ status: 'success', data: { tweet } })
+        res.json(tweet)
       })
       .catch(err => next(err))
   },
@@ -55,7 +55,7 @@ const tweetController = {
         })
       })
       .then(like => {
-        res.json({ status: 'success', data: { like } })
+        res.json(like)
       })
       .catch(err => next(err))
   },
@@ -75,7 +75,7 @@ const tweetController = {
         return like.destroy()
       })
       .then(like => {
-        res.json({ status: 'success', data: { like } })
+        res.json(like)
       })
       .catch(err => next(err))
   },
@@ -93,7 +93,7 @@ const tweetController = {
         })
       })
       .then(reply => {
-        res.json({ status: 'success', data: { reply } })
+        res.json(reply)
       })
       .catch(err => next(err))
   },
@@ -105,7 +105,7 @@ const tweetController = {
     ])
       .then(([tweet, replies]) => {
         if (!tweet) throw new Error('此推文不存在')
-        res.json({ status: 'success', data: { replies } })
+        res.json(replies)
       })
       .catch(err => next(err))
   }
