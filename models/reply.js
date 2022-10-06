@@ -8,10 +8,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER
     },
     UserId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Users',
+        key: 'id'
+      }
     },
     TweetId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Tweets',
+        key: 'id'
+      }
     },
     text: {
       type: DataTypes.TEXT

@@ -9,7 +9,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     UserId: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      references: {
+        model: 'Users',
+        key: 'id'
+      }
     },
     content: {
       type: DataTypes.TEXT(140)
