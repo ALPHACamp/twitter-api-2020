@@ -1,4 +1,4 @@
-const { Tweet, User, Reply, sequelize } = require('../models')
+const { Tweet, Like, User, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -66,6 +66,64 @@ const tweetController = {
         raw: true
       })
       res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  addTweetLike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+      const currentUserId = helpers.getUser(req).id
+      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+
+      // status 404 tweet not exist
+      if (!tweet) {
+        res.status(404).json({
+          status: 'error',
+          message: 'The tweet does not exist.'
+        })
+      }
+      const like = await Like.findOne({
+        where: { TweetId, UserId: currentUserId }
+      })
+
+      // status 400 like liked tweets
+      if (like) throw new Error('You already liked the tweet.')
+      await Like.create({ TweetId, UserId: currentUserId })
+      return res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  deleteTweetLike: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+
+      // status 404 tweets not found
+      if (!tweet) {
+        res.status(404).json({
+          status: 'error',
+          message: 'The tweet does not exist.'
+        })
+      }
+
+      const like = await Like.findOne({
+        where: { TweetId, UserId: currentUserId },
+        raw: true
+      })
+
+      // status 400 have not liked the tweet
+      if (!like) throw new Error('You have not liked the tweet.')
+
+      // destroy like
+      await Like.destroy({ where: { id: like.id } })
+
+      // status 200 success
+      res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }
