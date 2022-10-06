@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 
 const userController = {
-
+  signIn: (req, res, next) => {
     try {
       // if (req.user.role.include('admin')) throw new Error("This account didn't exist！")
 
