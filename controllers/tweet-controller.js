@@ -81,7 +81,7 @@ const tweetController = {
       if (!tweet) {
         res.status(404).json({
           status: 'error',
-          message: 'The tweet does not exist'
+          message: 'The tweet does not exist.'
         })
       }
       const like = await Like.findOne({
@@ -89,7 +89,7 @@ const tweetController = {
       })
 
       // status 400 like liked tweets
-      if (like) throw new Error('You already liked the tweet')
+      if (like) throw new Error('You already liked the tweet.')
       await Like.create({ TweetId, UserId: currentUserId })
       return res.status(200).json({ status: 'success' })
     } catch (err) {
@@ -99,7 +99,31 @@ const tweetController = {
 
   deleteTweetLike: async (req, res, next) => {
     try {
-      res.send('delete')
+      const currentUserId = helpers.getUser(req).id
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+
+      // status 404 tweets not found
+      if (!tweet) {
+        res.status(404).json({
+          status: 'error',
+          message: 'The tweet does not exist.'
+        })
+      }
+
+      const like = await Like.findOne({
+        where: { TweetId, UserId: currentUserId },
+        raw: true
+      })
+
+      // status 400 have not liked the tweet
+      if (!like) throw new Error('You have not liked the tweet.')
+
+      // destroy like
+      await Like.destroy({ where: { id: like.id } })
+
+      // status 200 success
+      res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }
