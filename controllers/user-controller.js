@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { Op } = require('sequelize')
-const { User, Tweet, Reply, Followship } = require('../models')
+const { User, Tweet, Reply, Followship, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -130,6 +130,55 @@ const userController = {
         if (!user) throw new Error('使用者不存在')
         res.json(replies)
       })
+  },
+  getUserLikes: (req, res, next) => {
+    const currentUserId = helpers.getUser(req)?.id
+    const UserId = req.params.id
+    console.log(UserId)
+    let id
+    currentUserId === UserId ? id = currentUserId : id = UserId
+
+    Like.findAll({
+      where: { UserId: id },
+      attributes: ['id', 'UserId', 'TweetId'],
+      include: [
+        {
+          model: Tweet,
+          include:
+            [
+              {
+                model: User,
+                attributes: ['id', 'name', 'account', 'profilePhoto']
+              }
+            ],
+          attributes:
+          {
+            include:
+              [
+                [sequelize.literal(
+                  '(SELECT COUNT(*) FROM Replies AS ReplyUsers WHERE tweet_id = Tweet.id )'
+                ), 'ReplyCount'
+                ],
+                [
+                  sequelize.literal(
+                    '(SELECT COUNT(*) FROM likes AS LikeUsers WHERE tweet_id = Tweet.id )'
+                  ), 'LikeCount'
+                ]
+              ],
+            exclude: ['userId']
+          }
+        },
+        {
+          model: User,
+          attributes: ['id', 'name', 'account', 'profilePhoto']
+        }
+      ],
+      order: [['createdAt', 'Desc']]
+    })
+      .then(likes => {
+        res.json(likes)
+      })
+      .catch(err => next(err))
   },
   addFollowing: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id
