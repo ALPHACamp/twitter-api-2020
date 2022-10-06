@@ -1,19 +1,24 @@
-const { Like, Tweet, User } = require('../models')
+const { Like, Reply, Tweet, User } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
-    console.log('推送前記得掛上中介軟體')
     return Tweet.findAll({
       attributes: { exclude:[ 'updatedAt' ] },
       include: [{
         model: User,
         attributes: [ 'id', 'account', 'name', 'avatar' ]
-      }, {model: Like}],
-      nest: true,
-      // raw: true
+      }, 
+      {model: Like},
+      {model: Reply},
+    ]
     })
     .then(tweets => {
-      data = tweets.sort((a, b) => b.createdAt - a.createdAt)
+      const data = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        likeCount: tweet.Likes.length,
+        replyCount: tweet.Replies.length
+      }))
+      .sort((a, b) => b.createdAt - a.createdAt)
       res.json(data)
     })
     .catch(err => next(err))

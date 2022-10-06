@@ -8,7 +8,7 @@ router.post('/:id/like', authenticated, tweetController.likeTweet)
 router.post('/:id/unlike', authenticated, tweetController.unlikeTweet)
 router.get('/:id', authenticated, tweetController.getTweet)
 router.post('/', authenticated, tweetController.postTweet)
-router.get('/', tweetController.getTweets)
+router.get('/', authenticated, tweetController.getTweets)
 
 router.use('/', apiErrorHandler)
 
