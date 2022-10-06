@@ -6,11 +6,27 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {
 
 static associate (models) {
-      // associations can be defined here
+      User.hasMany(models.Tweet)
+      User.hasMany(models.Reply)
+      User.hasMany(models.Like)
+      User.belongsToMany(User, {
+        through:models.Followship,
+        foreignKey:'followingId',
+        as: 'Followers'
+      })
+      User.belongsToMany(User, {
+        through: models.Followship,
+        foreignKey: 'followingId',
+        as: 'Followings'
+      })
+      User.belongsToMany(models.Tweet, {
+        through: models.Like,
+        foreignKey: 'UserId',
+        as: 'LikedTweets'
+      })
 }
 
-
-  }; 
+  }
   User.init({
     email: DataTypes.STRING,
     password: DataTypes.STRING,
@@ -23,7 +39,7 @@ static associate (models) {
     modelName: 'User',
     tableName: 'Users',
     underscored: true,
-  });
+  })
   
-  return User;
-};
+  return User
+}
