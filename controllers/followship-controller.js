@@ -31,13 +31,39 @@ const followshipController = {
       })
 
       // res 200 success
-      res.status(200).json({ status: 'success' })
+      return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }
   },
-  deleteFollowing: (req, res, next) => {
+  deleteFollowing: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const followingId = req.params.followingId
+      const followship = await Followship.findOne({
+        where: { followingId, followerId: currentUserId },
+        raw: true,
+        attributes: ['id']
+      })
 
+      // status 404 for non followShip
+      if (!followship) {
+        res.status(404).json({
+          status: 'error',
+          message: 'You have not followed the user.'
+        })
+      }
+
+      // destroy followShip
+      await Followship.destroy({ where: { id: followship.id } })
+
+      // status 200 success
+      res.status(200).json({
+        status: 'success'
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
