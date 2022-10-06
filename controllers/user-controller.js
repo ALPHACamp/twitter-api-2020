@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 const helpers = require('../_helpers')
 const imgurFileHandler = require('../helpers/file-helpers')
-const { User, Tweet, Like, sequelize } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -207,26 +207,18 @@ const userController = {
           message: 'The user does not exist.'
         })
       }
-      const [userTweets, currentUserLikes] = await Promise.all([
-        Tweet.findAll({
-          where: { UserId: reqUserId },
-          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          attributes: [
-            'id', 'description', 'createdAt',
-            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
-          ],
-          order: [['createdAt', 'DESC']],
-          nest: true,
-          raw: true
-        }),
-        Like.findAll({ where: { UserId: currentUserId } })
-      ])
-      // add isLiked attribute
-      const currentUserLikedTweetsId = new Set()
-      currentUserLikes.forEach(like => currentUserLikedTweetsId.add(like.TweetId))
-      userTweets.forEach(tweet => {
-        tweet.isLiked = currentUserLikedTweetsId.has(tweet.id)
+      const userTweets = await Tweet.findAll({
+        where: { UserId: reqUserId },
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        attributes: [
+          'id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+          [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
+        ],
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
       })
       return res.json(userTweets)
     } catch (err) {
