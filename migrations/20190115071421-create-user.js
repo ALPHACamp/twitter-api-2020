@@ -20,14 +20,14 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
-        validate: { len: 50 },
+        validate: { len: [1, 50] },
       },
       avatar: {
         type: Sequelize.STRING
       },
       introduction: {
         type: Sequelize.TEXT,
-        validate: { len: 160 },
+        validate: { len: [0, 160] },
       },
       role: {
         type: Sequelize.STRING
