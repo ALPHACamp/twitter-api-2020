@@ -3,24 +3,28 @@ const bcrypt = require('bcrypt-nodejs')
 const { User } = require('../../models')
 
 const userController = {
-  signUp: (req, res, next) => {
-    const { account, name, email, password, checkPassword } = req.body
-    if (password !== checkPassword) throw new Error('密碼輸入錯誤，請重新確認')
+  signUp: async (req, res, next) => {
+    try {
+      const { account, name, email, password, checkPassword } = req.body
+      if (password !== checkPassword) throw new Error('密碼輸入錯誤，請重新確認')
+  
+      const [ userEmail, userAccount ] = Promise.all([
+        User.findOne({ where: { email } }),
+        User.findOne({ where: { account }})
+      ])
 
-    User.findOne({ where: { email } })
-      .then(user => {
-        if (user) throw new Error('email 已重複註冊！')
-        if (user) throw new Error('account 已重複註冊！')
-        return bcrypt.hash(password, 10)
-      })
-      .then(hash => User.create({
+      if (userEmail) throw new Error('email 已重複註冊！')
+      if (userAccount) throw new Error('account 已重複註冊！')
+      const user = await User.create({
         account,
         name,
         email,
-        password: hash
-      }))
-      .then(user => res.json({status: 'success', data: user}))
-      .catch(err => next(err))
+        password: bcrypt.hash(password, 10)
+      })
+      return res.json({status: 'success', data: user})
+    } catch(err) {
+      next(err)
+    }
   }
 }
 
