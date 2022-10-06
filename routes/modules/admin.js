@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const { apiErrorHandler } = require('../../middleware/error-handler')
-const { authenticated } = require('../../middleware/auth')
 const adminController = require('../../controllers/admin-controller')
 
 router.delete('/tweets/:id', adminController.deleteTweet)
