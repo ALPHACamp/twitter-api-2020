@@ -240,7 +240,7 @@ const userController = {
       const currentUserId = helpers.getUser(req).id
       // check if the user exists
       const targetUser = await User.findByPk(followerId)
-      if (!targetUser) return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
+      if (!targetUser || targetUser.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
 
       const user = await User.findByPk(followerId, {
         include: [{
@@ -264,7 +264,27 @@ const userController = {
 
   getUserFollowers: async (req, res, next) => {
     try {
+      const followingId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      // check if the user exists
+      const targetUser = await User.findByPk(followingId)
+      if (!targetUser || targetUser.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
 
+      const user = await User.findByPk(followingId, {
+        include: [{
+          model: User,
+          as: 'Followers',
+          attributes: [
+            ['id', 'followerId'],
+            'account', 'name', 'introduction', 'avatar',
+            [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = Followers.id)`), 'isFollowed']
+          ]
+        }],
+        attributes: ['id'],
+        nest: true
+      })
+      user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
+      res.json(user.Followers)
     } catch (err) {
       next(err)
     }
