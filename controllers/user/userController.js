@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt-nodejs')
 
-const { User } = require('../models')
+const { User } = require('../../models')
 
 const userController = {
   signUp: (req, res, next) => {
@@ -9,7 +9,8 @@ const userController = {
 
     User.findOne({ where: { email } })
       .then(user => {
-        if (user) throw new Error('此信箱已註冊過，請使用其他信箱')
+        if (user) throw new Error('email 已重複註冊！')
+        if (user) throw new Error('account 已重複註冊！')
         return bcrypt.hash(password, 10)
       })
       .then(hash => User.create({
