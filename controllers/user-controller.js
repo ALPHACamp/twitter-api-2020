@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 const helpers = require('../_helpers')
 const imgurFileHandler = require('../helpers/file-helpers')
-const { User, Tweet, Like, sequelize } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -77,6 +77,24 @@ const userController = {
     }
   },
 
+  getUserProfile: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const user = await User.findByPk(reqUserId, {
+        attributes: [
+          'id', 'account', 'name', 'avatar', 'cover', 'introduction', 'role',
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'), 'followingCount']
+        ]
+      })
+      // check if the user exists
+      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
+      return res.json(user)
+    } catch (err) {
+      next(err)
+    }
+  },
+
   putUserProfile: async (req, res, next) => {
     try {
       const { name, introduction } = req.body
@@ -107,13 +125,13 @@ const userController = {
 
       const avatarPath = files?.avatar ? await imgurFileHandler(files.avatar[0]) : user.avatar
       const coverPath = files?.cover ? await imgurFileHandler(files.cover[0]) : user.cover
-      const userData = await user.update({
+      await user.update({
         name,
         introduction,
         avatar: avatarPath,
         cover: coverPath
       })
-      return res.json({ ...userData.toJSON() })
+      return res.json({ status: 'success' })
     } catch (err) {
       next(err)
     }
@@ -157,13 +175,13 @@ const userController = {
       // check password
       if ((password || checkPassword) && password !== checkPassword) throw new Error('The password confirmation does not match.')
 
-      const userUpdate = await user.update({
+      await user.update({
         account,
         name,
         email,
         password: password ? bcrypt.hashSync(password, 10) : user.password
       })
-      return res.json({ ...userUpdate.toJSON() })
+      return res.json({ status: 'success' })
     } catch (err) {
       next(err)
     }
@@ -171,23 +189,18 @@ const userController = {
 
   getTopUsers: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req)
+      const currentUserId = helpers.getUser(req).id
       const LIMIT = 10
       const topUsers = await User.findAll({
         where: { role: 'user' },
         attributes: [
           'id', 'account', 'name', 'avatar',
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
+          [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = User.id)`), 'isFollowed']
         ],
         order: [[sequelize.literal('followerCount'), 'DESC']],
         limit: LIMIT,
         raw: true
-      })
-      // add isFollowed attribute
-      const followingsId = new Set()
-      currentUser.Followings.forEach(user => followingsId.add(user.id))
-      topUsers.forEach(topUser => {
-        topUser.isFollowed = followingsId.has(topUser.id)
       })
       return res.json(topUsers)
     } catch (err) {
@@ -207,28 +220,74 @@ const userController = {
           message: 'The user does not exist.'
         })
       }
-      const [userTweets, currentUserLikes] = await Promise.all([
-        Tweet.findAll({
-          where: { UserId: reqUserId },
-          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          attributes: [
-            'id', 'description', 'createdAt',
-            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
-          ],
-          order: [['createdAt', 'DESC']],
-          nest: true,
-          raw: true
-        }),
-        Like.findAll({ where: { UserId: currentUserId } })
-      ])
-      // add isLiked attribute
-      const currentUserLikedTweetsId = new Set()
-      currentUserLikes.forEach(like => currentUserLikedTweetsId.add(like.TweetId))
-      userTweets.forEach(tweet => {
-        tweet.isLiked = currentUserLikedTweetsId.has(tweet.id)
+      const userTweets = await Tweet.findAll({
+        where: { UserId: reqUserId },
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        attributes: [
+          'id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+          [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
+        ],
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
       })
       return res.json(userTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const followerId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const user = await User.findByPk(followerId, {
+        include: [{
+          model: User,
+          as: 'Followings',
+          attributes: [
+            ['id', 'followingId'],
+            'account', 'name', 'introduction', 'avatar',
+            [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = Followings.id)`), 'isFollowed']
+          ]
+        }],
+        attributes: ['id', 'role'],
+        nest: true
+      })
+      // check if the user exists
+      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
+
+      user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
+      return res.json(user.Followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const followingId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const user = await User.findByPk(followingId, {
+        include: [{
+          model: User,
+          as: 'Followers',
+          attributes: [
+            ['id', 'followerId'],
+            'account', 'name', 'introduction', 'avatar',
+            [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = Followers.id)`), 'isFollowed']
+          ]
+        }],
+        attributes: ['id', 'role'],
+        nest: true
+      })
+      // check if the user exists
+      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
+
+      user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
+      return res.json(user.Followers)
     } catch (err) {
       next(err)
     }
