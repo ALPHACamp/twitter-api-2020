@@ -171,23 +171,18 @@ const userController = {
 
   getTopUsers: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req)
+      const currentUserId = helpers.getUser(req).id
       const LIMIT = 10
       const topUsers = await User.findAll({
         where: { role: 'user' },
         attributes: [
           'id', 'account', 'name', 'avatar',
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
+          [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = User.id)`), 'isFollowed']
         ],
         order: [[sequelize.literal('followerCount'), 'DESC']],
         limit: LIMIT,
         raw: true
-      })
-      // add isFollowed attribute
-      const followingsId = new Set()
-      currentUser.Followings.forEach(user => followingsId.add(user.id))
-      topUsers.forEach(topUser => {
-        topUser.isFollowed = followingsId.has(topUser.id)
       })
       return res.json(topUsers)
     } catch (err) {
