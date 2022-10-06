@@ -21,8 +21,8 @@ const userController = {
       .then(user => {
         if (!user) return bcrypt.hash(password, 10)
         if (name.length < nameMin || name.length > nameMax) throw new Error(`暱稱字數限制需在 ${nameMin}~ ${nameMax} 字之內`)
-        if (user.email === email) throw new Error('該Email已被註冊！')
-        if (user.account === account) throw new Error('該account已被註冊！')
+        if (user.email === email) throw new Error('該Email已被註冊!')
+        if (user.account === account) throw new Error('該account已被註冊!')
       })
       .then(hash => User.create({
         name,
@@ -188,20 +188,20 @@ const userController = {
       Followship.findOne({
         where: {
           followerId: currentUserId,
-          followingId: userId,
+          followingId: userId
         }
       })
     ])
       .then(([user, followship]) => {
-        if (!user) throw new Error("該使用者不存在")
-        if (user.id === currentUserId) throw new Error("無法追蹤自己")
+        if (!user) throw new Error('該使用者不存在')
+        if (user.id === currentUserId) throw new Error('無法追蹤自己')
         if (followship) throw new Error('已追蹤過這個使用者')
         return Followship.create({
           followerId: currentUserId,
           followingId: Number(userId)
         })
       })
-      .then((followingUser) => res.json(followingUser))
+      .then(followingUser => res.json(followingUser))
       .catch(err => next(err))
   },
   removeFollowing: (req, res, next) => {
@@ -212,13 +212,13 @@ const userController = {
       where: {
         followerId: currentUserId,
         followingId: userId
-      },
+      }
     })
       .then(followship => {
-        if (!followship) throw new Error("尚未追蹤這個使用者")
+        if (!followship) throw new Error('尚未追蹤這個使用者')
         return followship.destroy()
       })
-      .then((removeFollowingUser) => res.json({ status: 'success', data: { user: removeFollowingUser } }))
+      .then(removeFollowingUser => res.json({ status: 'success', data: { user: removeFollowingUser } }))
       .catch(err => next(err))
   }
 }
