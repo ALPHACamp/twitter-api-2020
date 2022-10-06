@@ -16,6 +16,8 @@
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
     "cross-env": "^7.0.3",
+    "dayjs": "^1.11.5",
+    "dayjs-random": "^1.0.1",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "faker": "^4.1.0",
