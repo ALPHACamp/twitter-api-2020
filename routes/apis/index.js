@@ -9,14 +9,14 @@ const { authenticated, authenticatedAdmin, authenticatedLocal } = require('../..
 
 // 後台
 // Admin: sign in/ logout
-router.use('/api/admin', authenticated, authenticatedAdmin, admin)
-router.post('/api/admin/signin', authenticated, authenticatedAdmin, adminController.signIn)
+router.post('/admin/signin', authenticatedLocal, authenticatedAdmin, adminController.signIn)
+router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 // 前台
 // Users
-router.post('/api/users', userController.signUp)
-router.post('/api/signin', authenticatedLocal, userController.signIn)
-router.get('/api/users/:id/tweets', authenticated, userController.getTweets)
+router.post('/users', userController.signUp)
+router.post('/signin', authenticatedLocal, userController.signIn)
+router.get('/users/:id/tweets', authenticated, userController.getTweets)
 // Tweets
 // router.get('/tweets', authenticated, tweetController.getTweets)
 

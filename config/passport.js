@@ -34,7 +34,6 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id)
     .then(user => {
-      console.log(user)
       cb(null, user)
     })
     .catch(err => cb(err))
@@ -45,7 +44,6 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser((id, cb) => {
   User.findByPk(id)
     .then(user => {
-      console.log(user)
       return cb(null, user)
     })
 })
