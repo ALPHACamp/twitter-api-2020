@@ -22,7 +22,11 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
-    Tweet.findAll({})
+    Tweet.findAll({
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }
+      ]
+    })
       .then(tweets => {
         res.json(tweets)
       })
