@@ -107,13 +107,13 @@ const userController = {
 
       const avatarPath = files?.avatar ? await imgurFileHandler(files.avatar[0]) : user.avatar
       const coverPath = files?.cover ? await imgurFileHandler(files.cover[0]) : user.cover
-      const userData = await user.update({
+      await user.update({
         name,
         introduction,
         avatar: avatarPath,
         cover: coverPath
       })
-      return res.json({ ...userData.toJSON() })
+      return res.json({ status: 'success' })
     } catch (err) {
       next(err)
     }
@@ -157,13 +157,13 @@ const userController = {
       // check password
       if ((password || checkPassword) && password !== checkPassword) throw new Error('The password confirmation does not match.')
 
-      const userUpdate = await user.update({
+      await user.update({
         account,
         name,
         email,
         password: password ? bcrypt.hashSync(password, 10) : user.password
       })
-      return res.json({ ...userUpdate.toJSON() })
+      return res.json({ status: 'success' })
     } catch (err) {
       next(err)
     }
