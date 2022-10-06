@@ -4,6 +4,7 @@ const { apiErrorHandler } = require('../../middleware/error-handler')
 const { authenticated } = require('../../middleware/auth')
 const adminController = require('../../controllers/admin-controller')
 
+router.delete('/tweets/:id', adminController.deleteTweet)
 router.get('/users', adminController.getUsers)
 
 router.use('/', apiErrorHandler)

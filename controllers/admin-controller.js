@@ -39,7 +39,17 @@ const adminController = {
       res.status(200).json(users)
     })
     .catch(err => next(err))
-  }
+  },
+  deleteTweet: (req, res, next) => {
+    // DELETE /admin/tweets/:id - 刪除使用者的推文
+    return Tweet.findByPk(req.params.id)
+    .then(tweet => {
+      if(!tweet) throw new Error("The tweet does not exist!")
+      return tweet.destroy()
+    })
+    .then(data => res.json(data))
+    .catch(err => next(err))
+  }  
 }
 
 module.exports = adminController
