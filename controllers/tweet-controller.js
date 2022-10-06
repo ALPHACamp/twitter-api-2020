@@ -1,34 +1,28 @@
-const { Tweet, User, Like, Reply, sequelize } = require('../models')
+const { Tweet, User, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
+
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
-      const [userTweets, currentUserLikes] = await Promise.all([
-        Tweet.findAll({
-          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          attributes: [
-            'id', 'description', 'createdAt',
-            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
-          ],
-          order: [['createdAt', 'DESC']],
-          nest: true,
-          raw: true
-        }),
-        Like.findAll({ where: { UserId: currentUserId } })
-      ])
-      // add isLiked attribute
-      const currentUserLikedTweetsId = new Set()
-      currentUserLikes.forEach(like => currentUserLikedTweetsId.add(like.TweetId))
-      userTweets.forEach(tweet => {
-        tweet.isLiked = currentUserLikedTweetsId.has(tweet.id)
+      const tweets = await Tweet.findAll({
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        attributes: [
+          'id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+          [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
+        ],
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
       })
-      return res.json(userTweets)
+      return res.json(tweets)
     } catch (err) {
       next(err)
     }
   },
+
   getTweet: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
@@ -38,7 +32,8 @@ const tweetController = {
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
         attributes: ['id', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+          [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
         ],
         raw: true,
         nest: true
@@ -50,20 +45,12 @@ const tweetController = {
           message: 'The tweet does not exist.'
         })
       }
-      const likes = await Like.findAll({
-        where: { tweetId },
-        attributes: ['UserId'],
-        nest: true,
-        raw: true
-      })
-      const currentUserLikedTweetsId = new Set()
-      likes.forEach(like => currentUserLikedTweetsId.add(like.UserId))
-      tweet.isLiked = currentUserLikedTweetsId.has(currentUserId)
       return res.status(200).json(tweet)
     } catch (err) {
       return next(err)
     }
   },
+
   getTweetReplies: async (req, res, next) => {
     try {
       const tweetId = Number(req.params.tweet_id)
