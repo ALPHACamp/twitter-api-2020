@@ -18,7 +18,14 @@ const adminController = {
     } catch (err) {
       next(err)
     }
-  }
+  },
+  getUsers: (req, res, next) => {
+    User.findAll({})
+      .then(users => {
+        res.json(users)
+      })
+  },
+  
 }
 
 module.exports = adminController
