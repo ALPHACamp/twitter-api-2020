@@ -6,9 +6,22 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {
 
 static associate (models) {
-      // associations can be defined here
+      User.belongsToMany(User, {
+        through:models.Followship,
+        foreignKey:'followingId',
+        as: 'Followers'
+      })
+      User.belongsToMany(User, {
+        through: models.Followship,
+        foreignKey: 'followingId',
+        as: 'Followings'
+      })
+      User.belongsToMany(models.Tweet, {
+        through: models.Like,
+        foreignKey: 'UserId',
+        as: 'LikedTweets'
+      })
 }
-
 
   }; 
   User.init({
