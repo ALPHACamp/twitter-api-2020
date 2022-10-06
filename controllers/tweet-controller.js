@@ -1,4 +1,4 @@
-const { Tweet, User, Reply, Like } = require('../models')
+const { Tweet, User, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -25,7 +25,13 @@ const tweetController = {
     Tweet.findAll({
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }
-      ]
+      ],
+      attributes: {
+        include:
+        [[sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'repliesCount'], [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likedCount']
+        ]
+      },
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         res.json(tweets)
@@ -34,7 +40,16 @@ const tweetController = {
   },
   getTweet: (req, res, next) => {
     const tweetId = req.params.tweet_id
-    Tweet.findByPk(tweetId)
+    Tweet.findByPk(tweetId, {
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }
+      ],
+      attributes: {
+        include:
+        [[sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'repliesCount'], [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likedCount']
+        ]
+      }
+    })
       .then(tweet => {
         if (!tweet) throw new Error('此推文不存在')
         res.json(tweet)
