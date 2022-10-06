@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const bcrypt = require('bcryptjs')
 const userServices = {
   signUp: (req, cb) => {
@@ -17,6 +17,22 @@ const userServices = {
         password: hash
       }))
       .then(newUser => cb(null, { newUser }))
+      .catch(err => cb(err))
+  },
+  getTweets: (req, cb) => {
+    return User.findByPk(req.params.id, {
+      include: Tweet
+    })
+      .then(user => {
+        if (!user) {
+          const err = new Error("User didn't exist!")
+          err.status = 404
+          throw err
+        }
+        user = user.toJSON()
+        console.log(user)
+        return cb(null, { user })
+      })
       .catch(err => cb(err))
   }
 }

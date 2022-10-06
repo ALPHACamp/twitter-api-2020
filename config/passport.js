@@ -13,14 +13,14 @@ passport.use(new LocalStrategy({
   passwordField: 'password',
   passReqToCallBack: true
 },
-(req, email, password, cb) => {
+(email, password, cb) => {
   User.findOne({ where: { email } })
     .then(user => {
       // if user不存在
-      if (!user) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤!'))
+      if (!user) return cb(null, false)
       // 驗證密碼是否正確
-      bcrypt.compare(password, user.password).them(res => {
-        if (!res) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤!'))
+      bcrypt.compare(password, user.password).then(res => {
+        if (!res) return cb(null, false)
         // 密碼正確回傳資料
         return cb(null, user)
       })
@@ -33,7 +33,10 @@ const jwtOptions = {
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id)
-    .then(user => cb(null, user))
+    .then(user => {
+      console.log(user)
+      cb(null, user)
+    })
     .catch(err => cb(err))
 }))
 passport.serializeUser((user, cb) => {

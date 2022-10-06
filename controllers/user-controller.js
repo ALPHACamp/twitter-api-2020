@@ -21,6 +21,11 @@ const userController = {
     return userServices.signUp(req, (err, data) => {
       err ? next(err) : res.json({ status: 'success', data })
     })
+  },
+  getTweets: (req, res, next) => {
+    return userServices.getTweets(req, (err, data) => {
+      err ? next(err) : res.json({ status: 'success', data })
+    })
   }
 }
 module.exports = userController
