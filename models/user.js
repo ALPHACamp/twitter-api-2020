@@ -6,6 +6,9 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {
 
 static associate (models) {
+      User.hasMany(models.Tweet)
+      User.hasMany(models.Reply)
+      User.hasMany(models.Like)
       User.belongsToMany(User, {
         through:models.Followship,
         foreignKey:'followingId',
@@ -23,7 +26,7 @@ static associate (models) {
       })
 }
 
-  }; 
+  }
   User.init({
     email: DataTypes.STRING,
     password: DataTypes.STRING,
@@ -36,7 +39,7 @@ static associate (models) {
     modelName: 'User',
     tableName: 'Users',
     underscored: true,
-  });
+  })
   
-  return User;
-};
+  return User
+}
