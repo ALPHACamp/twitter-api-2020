@@ -2,14 +2,19 @@ const { Like, Tweet, User } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
-    return Tweet.findAll({ raw:true })
+    console.log('推送前記得掛上中介軟體')
+    return Tweet.findAll({
+      attributes: { exclude:[ 'updatedAt' ] },
+      include: [{
+        model: User,
+        attributes: [ 'id', 'account', 'name', 'avatar' ]
+      }, {model: Like}],
+      nest: true,
+      // raw: true
+    })
     .then(tweets => {
       data = tweets.sort((a, b) => b.createdAt - a.createdAt)
-      console.log('暫時移除中介軟體、檢查data是否為陣列', data)
-      res.json({ 
-        status: 'success',
-        data
-      })
+      res.json(data)
     })
     .catch(err => next(err))
   },
