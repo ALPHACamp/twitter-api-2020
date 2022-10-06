@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Like = sequelize.define('Like', {
   }, {});
@@ -16,5 +16,5 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Likes',
     underscored: true
   })
-  return Like;
-};
+  return Like
+}
