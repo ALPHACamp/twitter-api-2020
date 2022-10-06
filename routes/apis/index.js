@@ -14,8 +14,8 @@ router.post('/api/admin/signin', authenticated, authenticatedAdmin, adminControl
 
 // 前台
 // Users
+router.post('/api/users', userController.signUp)
 router.post('/api/signin', authenticatedLocal, userController.signIn)
-router.post('/api/users', authenticated, userController.signUp)
 router.get('/api/users/:id/tweets', authenticated, userController.getTweets)
 // Tweets
 // router.get('/tweets', authenticated, tweetController.getTweets)
