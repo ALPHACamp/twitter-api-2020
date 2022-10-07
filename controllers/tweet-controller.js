@@ -196,6 +196,38 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+
+  addTweetReply: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const comment = req.body.comment?.trim()
+      const TweetId = req.params.tweet_id
+      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+
+      // status 400 no comment
+      if (!comment) throw new Error('Reply comment is required.')
+
+      // status 400 comment too long
+      if (comment.length > 140) throw new Error('Reply comment must be less than 140 characters long.')
+      // status 404 tweet not exist.
+      if (!tweet) {
+        res.status(404).json({
+          status: 'error',
+          message: 'The tweet you want to reply does not exist.'
+        })
+      }
+
+      // status 200 success comment
+      await Reply.create({ comment, UserId: currentUserId, TweetId })
+      return res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  deleteTweetReply: (req, res, next) => {
+    res.send('delete')
   }
 }
 
