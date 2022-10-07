@@ -54,17 +54,26 @@ const tweetController = {
   getTweetReplies: async (req, res, next) => {
     try {
       const tweetId = Number(req.params.tweet_id)
-      const replies = await Reply.findAll({
-        where: { TweetId: tweetId },
-        attributes: ['id', 'comment', 'createdAt'],
-        include: [
-          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          { model: Tweet, attributes: ['id'], include: { model: User, attributes: ['id', 'account'] } }
-        ],
-        order: [['createdAt', 'DESC']],
-        nest: true,
-        raw: true
-      })
+      const [tweet, replies] = await Promise.all([
+        Tweet.findByPk(tweetId),
+        Reply.findAll({
+          where: { TweetId: tweetId },
+          attributes: ['id', 'comment', 'createdAt'],
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+            { model: Tweet, attributes: ['id'], include: { model: User, attributes: ['id', 'account'] } }
+          ],
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The tweet does not exist.'
+        })
+      }
       res.status(200).json(replies)
     } catch (err) {
       next(err)
@@ -79,7 +88,7 @@ const tweetController = {
 
       // status 404 tweet not exist
       if (!tweet) {
-        res.status(404).json({
+        return res.status(404).json({
           status: 'error',
           message: 'The tweet does not exist.'
         })
@@ -105,7 +114,7 @@ const tweetController = {
 
       // status 404 tweets not found
       if (!tweet) {
-        res.status(404).json({
+        return res.status(404).json({
           status: 'error',
           message: 'The tweet does not exist.'
         })
@@ -124,6 +133,128 @@ const tweetController = {
 
       // status 200 success
       res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  addTweet: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const description = req.body.description?.trim()
+
+      // status 400 while description length > 140
+      if (description.length > 140) throw new Error('Tweet description must be less than 140 characters long.')
+
+      // status 400 wile description is empty
+      if (!description) throw new Error('Tweet description is required.')
+
+      await Tweet.create({
+        UserId: currentUserId,
+        description
+      })
+      // success 200
+      return res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  deleteTweet: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.id)
+      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+
+      // 404 find no tweet
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The tweet does not exist.'
+        })
+      }
+
+      // 403 wanna delete others tweet
+      if (tweet.UserId !== currentUserId) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'User can only delete their own tweet.'
+        })
+      }
+
+      // delete tweet
+      // delete replies of tweet
+      // delete likes of tweet
+      await Promise.all([
+        Tweet.destroy({ where: { id: TweetId } }),
+        Reply.destroy({ where: { TweetId } }),
+        Like.destroy({ where: { TweetId } })
+      ])
+
+      // status 200 success
+      return res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  addTweetReply: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const comment = req.body.comment?.trim()
+      const TweetId = req.params.tweet_id
+      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+
+      // status 400 no comment
+      if (!comment) throw new Error('Reply comment is required.')
+
+      // status 400 comment too long
+      if (comment.length > 140) throw new Error('Reply comment must be less than 140 characters long.')
+
+      // status 404 tweet not exist.
+      if (!tweet) {
+        res.status(404).json({
+          status: 'error',
+          message: 'The tweet you want to reply does not exist.'
+        })
+      }
+
+      // status 200 success comment
+      await Reply.create({ comment, UserId: currentUserId, TweetId })
+      return res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  deleteTweetReply: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const TweetId = req.params.tweet_id
+      const replyId = req.params.reply_id
+      const reply = await Reply.findOne({ where: { TweetId, id: replyId }, raw: true })
+
+      // status 404 tweet not found
+      if (!reply) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The reply does not exist.'
+        })
+      }
+
+      // status 403 wanna delete others reply
+      if (currentUserId !== reply.UserId) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'User can only delete their own reply.'
+        })
+      }
+
+      // success 200 delete the reply
+      await Reply.destroy({ where: { id: replyId } })
+      return res.status(200).json({
+        status: 'success'
+      })
     } catch (err) {
       next(err)
     }
