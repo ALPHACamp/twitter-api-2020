@@ -208,6 +208,25 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  getTopFollowings: (req, res, next) => {
+
+    User.findAll({
+      attributes:
+      {
+        include:
+          [
+            [sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'
+            ), 'FollowingsCount'
+            ]
+          ],
+        exclude: ['password', 'email', 'coverPhoto', 'role', 'createdAt', 'updatedAt']
+      },
+      order: [[sequelize.literal('FollowingsCount'), 'Desc']]
+    })
+      .then(user => res.json(user))
+      .catch(err => next(err))
+  },
   addFollowing: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id
     const { userId } = req.body
