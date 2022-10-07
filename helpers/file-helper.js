@@ -1,5 +1,5 @@
 const fs = require('fs')
-const imgur = require('imgur')
+const imgur = require('imgur-v2')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 imgur.setClientId(IMGUR_CLIENT_ID)
 // 上傳圖檔至本機儲存
