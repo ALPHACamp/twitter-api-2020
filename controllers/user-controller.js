@@ -61,6 +61,7 @@ const userController = {
       await User.create({
         account,
         name,
+        email,
         password:bcrypt.hashSync(
           password,
           bcrypt.genSaltSync(10),
