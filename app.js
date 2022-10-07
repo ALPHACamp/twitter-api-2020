@@ -7,14 +7,14 @@ const routes = require('./routes')
 const passport = require('./config/passport')
 const helpers = require('./_helpers')
 const cors = require('cors')
-const corsOption = {
-  origin: [
-    'https://twitter-api-2022-10.herokuapp.com/',
-    'http://localhost:3000'
-  ],
-  methods: 'GET,HEAD,PUT,POST,DELETE,OPTIONS',
-  allowedHeaders: ['Content-Type', 'Authorization']
-}
+// const corsOption = {
+//   origin: [
+//     'https://twitter-api-2022-10.herokuapp.com/',
+//     'http://localhost:3000'
+//   ],
+//   methods: 'GET,HEAD,PUT,POST,DELETE,OPTIONS',
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }
 
 const app = express()
 const port = 3000
@@ -28,7 +28,7 @@ app.use((req, res, next) => {
   req.user = helpers.getUser(req) // global req.user
   next()
 })
-app.use(cors(corsOption))
+app.use(cors())
 
 app.use('/api', routes)
 
