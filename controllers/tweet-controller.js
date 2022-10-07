@@ -145,7 +145,7 @@ const tweetController = {
         description
       })
       // success 200
-      res.status(200).json({ status: 'success' })
+      return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }
@@ -153,7 +153,34 @@ const tweetController = {
 
   deleteTweet: async (req, res, next) => {
     try {
-      res.send('delete')
+      const currentUserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.id)
+      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+
+      // 404 find no tweet
+      if (!tweet) {
+        res.status(404).json({
+          status: 'error',
+          message: 'The tweet does not exist.'
+        })
+      }
+
+      // 403 wanna delete others tweet
+      if (tweet.UserId !== currentUserId) {
+        res.status(403).json({
+          status: 'error',
+          message: 'User can only delete their own tweet.'
+        })
+      }
+
+      // delete tweet
+      await Tweet.destroy({ where: { id: TweetId } })
+
+      // delete replies of tweet
+      await Reply.destroy({ where: { TweetId } })
+
+      // status 200 success
+      return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }
