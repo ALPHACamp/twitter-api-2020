@@ -2,10 +2,12 @@
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
   }, {})
+
   User.associate = function(models) {
     User.hasMany(models.Like, { foreignKey: 'UserId' })
     User.hasMany(models.Reply, { foreignKey: 'UserId' })
     User.hasMany(models.Tweet, { foreignKey: 'UserId' })
+
     User.belongsToMany(User, {
       through: models.Followship,
       foreignKey: 'followingId',
@@ -24,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     avatar: DataTypes.STRING,
     introduction: DataTypes.TEXT,
-    role: DataTypes.BOOLEAN
+    role: DataTypes.BOOLEAN,
+    backgroundImage:DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',

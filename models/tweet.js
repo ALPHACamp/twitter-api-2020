@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     Tweet.hasMany(models.Reply, {foreignKey: 'TweetId'})
     Tweet.belongsTo(models.User, {foreignKey: 'UserId'})
   };
+
   Tweet.init({
     description: DataTypes.TEXT,
     UserId: DataTypes.INTEGER
