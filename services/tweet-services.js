@@ -1,4 +1,5 @@
 const { Tweet, User, sequelize } = require('../models')
+const { getUser } = require('../_helpers')
 
 const tweetServices = {
   getTweets: (req, cb) => {
@@ -31,6 +32,16 @@ const tweetServices = {
         ]
       },
       order: [['createdAt', 'DESC']]
+    })
+      .then(tweet => cb(null, { tweet }))
+      .catch(err => cb(err))
+  },
+  postTweet: (req, cb) => {
+    const { description } = req.body
+    if (description.trim() === '') throw new Error('推文內容不可空白')
+    return Tweet.create({
+      description,
+      userId: getUser(req).dataValues.id
     })
       .then(tweet => cb(null, { tweet }))
       .catch(err => cb(err))
