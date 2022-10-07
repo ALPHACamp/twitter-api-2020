@@ -4,10 +4,9 @@ const { User } = require('../models')
 const userController = {
   signIn: (req, res, next) => {
     try {
-      // if (req.user.role.include('admin')) throw new Error("This account didn't exist！")
+      if (req.user && req.user.role === 'admin') throw new Error("This account didn't exist！")
 
       const userData = req.user.toJSON()
-      console.log(userData)
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({

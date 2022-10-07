@@ -11,17 +11,24 @@ const ExtractJWT = passportJWT.ExtractJwt
 passport.use(new LocalStrategy(
   {
     usernameField: 'account',
-    passwordField: 'password'
+    passwordField: 'password',
+    passReqToCallback: true
   },
 
-  (account, password, cb) => {
+  (req, account, password, cb) => {
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) return cb(null, false)
+        if (!user) {
+          req.authError = "此帳號不存在！"
+          return cb(null, false)
+        }
 
         return bcrypt.compare(password, user.password)
           .then(res => {
-            if (!res) return cb(null, false)
+            if (!res) {
+              req.authError = "密碼不正確！"
+              return cb(null, false)
+            }
 
             return cb(null, user)
           })
