@@ -1,5 +1,6 @@
 const { User, Tweet, Reply } = require('../models')
 const bcrypt = require('bcryptjs')
+const { imgurFileHandler } = require('../helpers/file-helper')
 const userServices = {
   signUp: (req, cb) => {
     // 密碼輸入不一致
@@ -44,16 +45,41 @@ const userServices = {
       ]
     })
       .then(user => {
-        console.log(user)
         if (!user) {
           const err = new Error("User didn't exist!")
           err.status = 404
           throw err
         }
-        console.log('getUser_user:', user)
         return cb(null, { user })
+      })
+      .catch(err => cb(err))
+  },
+  putUser: (req, cb) => {
+    if (Number(req.params.id) !== Number(req.user.id)) {
+      const err = new Error('User not authorized to edit.')
+      err.status = 404
+      throw err
+    }
+    const { coverPhoto, avatar } = req
+    return Promise.all([
+      User.findByPk(req.params.id),
+      imgurFileHandler(coverPhoto),
+      imgurFileHandler(avatar)
+    ])
+      .then(([user, coverPhotoPath, avatarPath]) => {
+        if (!user) throw new Error("User didn't exist.")
+        return user.update({
+          name: req.body.name,
+          intro: req.body.intro,
+          avatar: coverPhotoPath || user.coverPhoto,
+          coverPhoto: avatarPath || user.avatar
+        })
+      })
+      .then(user => {
+        return cb(null, user)
       })
       .catch(err => cb(err))
   }
 }
+
 module.exports = userServices

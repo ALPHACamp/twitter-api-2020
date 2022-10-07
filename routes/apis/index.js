@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const upload = require('../../middleware/multer')
 const admin = require('./modules/admin')
 const adminController = require('../../controllers/admin-controller')
 const userController = require('../../controllers/user-controller')
@@ -18,7 +19,8 @@ router.post('/users', userController.signUp)
 router.post('/signin', authenticatedLocal, userController.signIn)
 
 router.get('/users/:id', authenticated, userController.getUser)
-router.get('/users/:id/tweets', authenticated, userController.getTweets)
+router.put('/users/:id', authenticated, userController.putUser)
+router.get('/users/:id/tweets', authenticated, upload.single('image'), userController.getTweets)
 // Tweets
 // router.get('/tweets', authenticated, tweetController.getTweets)
 
