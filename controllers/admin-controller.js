@@ -3,7 +3,9 @@ const jwt = require('jsonwebtoken')
 const adminController = {
   signIn: (req, res, next) => {
     try {
-      if (req.user && req.user.role !== 'admin') throw new Error("This account didn't exist！")
+      if (req.user && req.user.role !== 'admin') {
+        return res.status(403).json({ status: 'error', message: "This account didn't exist!" })
+      }
       
       const userData = req.user.toJSON()
       delete userData.password

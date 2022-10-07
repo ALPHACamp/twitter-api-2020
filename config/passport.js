@@ -19,14 +19,14 @@ passport.use(new LocalStrategy(
     User.findOne({ where: { account } })
       .then(user => {
         if (!user) {
-          req.authError = "此帳號不存在！"
+          req.authError = "This account didn't exist!"
           return cb(null, false)
         }
 
         return bcrypt.compare(password, user.password)
           .then(res => {
             if (!res) {
-              req.authError = "密碼不正確！"
+              req.authError = "password is incorrect！"
               return cb(null, false)
             }
 
