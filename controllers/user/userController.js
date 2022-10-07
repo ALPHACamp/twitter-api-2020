@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt-nodejs')
+const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { User } = require('../../models')
 
@@ -30,7 +30,7 @@ const userController = {
     try {
       const userData = req.user.toJSON()
       delete userData.password
-      const token = jwt.sign(req.user, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({ status: 'success', data: {
         token,
         user: userData
