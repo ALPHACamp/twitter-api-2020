@@ -17,8 +17,8 @@ router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.post('/users', userController.signUp)
 router.post('/signin', authenticatedLocal, userController.signIn)
 
-router.get('/users/:id/tweets', authenticated, userController.getTweets)
 router.get('/users/:id', authenticated, userController.getUser)
+router.get('/users/:id/tweets', authenticated, userController.getTweets)
 // Tweets
 // router.get('/tweets', authenticated, tweetController.getTweets)
 
