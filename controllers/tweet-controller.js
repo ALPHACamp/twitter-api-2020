@@ -19,7 +19,7 @@ const tweetController = {
         replyCount: tweet.Replies.length
       }))
       .sort((a, b) => b.createdAt - a.createdAt)
-      res.json(data)
+      res.status(200).json(data)
     })
     .catch(err => next(err))
   },
