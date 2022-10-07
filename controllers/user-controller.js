@@ -121,16 +121,13 @@ const userController = {
         if (!user) throw new Error('使用者不存在')
         res.json(replies)
       })
+      .catch(err => next(err))
   },
   getUserLikes: (req, res, next) => {
-    const currentUserId = helpers.getUser(req)?.id
     const UserId = req.params.id
-    console.log(UserId)
-    let id
-    currentUserId === UserId ? id = currentUserId : id = UserId
 
     Like.findAll({
-      where: { UserId: id },
+      where: { UserId },
       attributes: ['id', 'UserId', 'TweetId'],
       include: [
         {
@@ -158,16 +155,34 @@ const userController = {
               ],
             exclude: ['userId']
           }
-        },
-        {
-          model: User,
-          attributes: ['id', 'name', 'account', 'profilePhoto']
         }
       ],
       order: [['createdAt', 'Desc']]
     })
       .then(likes => {
         res.json(likes)
+      })
+      .catch(err => next(err))
+  },
+  getUserFollowings: (req, res, next) => {
+    const UserId = req.params.id
+
+    User.findByPk(UserId, {
+      include: [{
+        model: User,
+        as: 'Followings',
+        attributes: ['id', 'name', 'profilePhoto', 'introduction'],
+        through: { attributes: [] }
+      }],
+    })
+      .then(followings => {
+        if (!followings) throw new Error('此頁面不存在')
+        const result = followings.Followings
+          .map(followings => ({
+            ...followings.toJSON(),
+            followingId: followings.id
+          }))
+        res.json(result)
       })
       .catch(err => next(err))
   },
