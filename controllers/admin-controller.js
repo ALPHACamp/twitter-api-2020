@@ -1,4 +1,4 @@
-const { User, Tweet, Like, Followship } = require('../models')
+const { User, Tweet, Like, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 
@@ -21,21 +21,35 @@ const adminController = {
   },
   getUsers: (req, res, next) => {
     User.findAll({
-      attributes: ['id', 'account', 'name', 'profilePhoto', 'coverPhoto'],
-      include: [
-        { model: User, as: 'Followers', attributes: ['id'], through: { attributes: [] } },
-        { model: User, as: 'Followings', attributes: ['id'], through: { attributes: [] } },
-        { model: Tweet, include: Like, attributes: ['id'] }
-      ]
+      include: [{
+        model: Tweet,
+        include: Like,
+        attributes: {
+          include: [
+            [sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes WHERE Tweet_id = Tweets.id)'
+            ), 'likesCount']
+          ]
+        }
+      }],
+      attributes: {
+        include: [
+          [sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships AS Followers WHERE following_id = user.id )'
+          ), 'followerCount'],
+          [sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships AS Followings WHERE follower_id = user.id )'
+          ), 'followingCount'],
+          [sequelize.literal(
+            '(SELECT COUNT(*) FROM Tweets WHERE User_id = user.id)'
+          ), 'tweetsCount']
+        ],
+        exclude: ['password', 'email', 'role', 'introduction']
+      },
+      order: [[sequelize.literal('tweetsCount'), 'DESC']]
     })
       .then(users => {
-        const result = users.map(user => ({
-          ...user.toJSON(),
-          followerCount: user.Followers.length,
-          followingCount: user.Followings.length,
-          tweetsCount: user.Tweets.length
-        }))
-        res.json(result)
+        res.json(users)
       })
       .catch(err => next(err))
   },
