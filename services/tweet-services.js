@@ -1,4 +1,4 @@
-const { Tweet, User, Like, Reply, sequelize } = require('../models')
+const { Tweet, User, sequelize } = require('../models')
 
 const tweetServices = {
   getTweets: (req, cb) => {
@@ -6,8 +6,6 @@ const tweetServices = {
       raw: true,
       nest: true,
       include: [
-        { model: Like },
-        { model: Reply },
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ],
       attributes: {
@@ -24,13 +22,7 @@ const tweetServices = {
   getTweet: (req, cb) => {
     return Tweet.findByPk(req.params.id, {
       include: [
-        { model: Like },
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        {
-          model: Reply,
-          attributes: [['id', 'text', 'createdAt']],
-          include: { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
-        }
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ],
       attributes: {
         include: [
