@@ -11,12 +11,13 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Tweet.init({
-    description: DataTypes.TEXT,
+    description: DataTypes.TEXT(140),
     UserId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Tweet',
     tableName: 'Tweets',
+    paranoid: false,
     underscored: true
   })
   return Tweet
