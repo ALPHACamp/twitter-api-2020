@@ -67,6 +67,20 @@ const tweetServices = {
       })
       .then(like => cb(null, like))
       .catch(err => cb(err))
+  },
+  unlikeTweet: (req, cb) => {
+    return Like.findOne({
+      where: {
+        TweetId: req.params.id,
+        UserId: getUser(req).dataValues.id
+      }
+    })
+      .then(like => {
+        if (!like) throw new Error("You haven't liked this tweet!")
+        return like.destroy()
+      })
+      .then(like => cb(null, like))
+      .catch(err => cb(err))
   }
 }
 
