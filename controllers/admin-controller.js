@@ -1,4 +1,4 @@
-const { User, Tweet, Like, Followship, sequelize } = require('../models')
+const { User, Tweet, Like, Followship } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 
@@ -46,6 +46,16 @@ const adminController = {
         return tweet.destroy()
       })
       .then(deletetweet => { res.json(deletetweet) })
+      .catch(err => next(err))
+  },
+  getTweets: (req, res, next) => {
+    Tweet.findAll({
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => {
+        res.json(tweets)
+      })
       .catch(err => next(err))
   }
 }
