@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -88,7 +88,33 @@ const userController = {
         res.status(200).json(user)
       })
       .catch(err => next(err))
+  },
+  getUserTweets: (req, res, next) => {
+    const { id } = req.params
+    return Tweet.findAll({
+      where: { UserId: id },
+      order: [['createdAt', 'DESC']],
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }, { model: Reply, attributes: ['id'] }, { model: Like, attributes: ['UserId'] }]
+    })
+      .then(tweets => {
+        const currentUser = helpers.getUser(req).dataValues
+        tweets = tweets.map(tweet => ({
+          id: tweet.id,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          User: tweet.User.dataValues,
+          replyCounts: tweet.Replies.length,
+          likeCounts: tweet.Likes.length,
+          isLiked: tweet.Likes.some(l => l.UserId === currentUser.id),
+        }
+         ))
+        
+        res.status(200).json(tweets)
+      })
   }
+
+
+
 
 }
 module.exports = userController
