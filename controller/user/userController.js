@@ -2,6 +2,7 @@ const { User } = require('../../models')
 const assert = require('assert')
 const { multerFilesHandler } = require('../../helper/file-helper')
 const bcrypt = require('bcryptjs')
+const { userValidation } = require('../../helper/validations')
 module.exports = {
   getUser: async (req, res, next) => {
     try {
@@ -10,6 +11,7 @@ module.exports = {
         raw: true,
         nest: true
       })
+      assert(user, '使用者不存在')
       res.json(user)
     } catch (error) {
       next(error)
@@ -17,25 +19,43 @@ module.exports = {
   },
   putUser: async (req, res, next) => {
     const userId = req.params.id
-    const { account, name, email, password, introduction } = req.body
+    const { value, error } = userValidation(req.body)
     const { files } = req
-
     try {
-      const cover = await multerFilesHandler(files.cover[0])
-      const avatar = await multerFilesHandler(files.avatar[0])
-      console.log('cover', cover, 'response2', avatar)
-
+      // 對輸入的資料做檢查
+      if (error) throw new Error(error.details[0].message)
+      const { account, name, email, password, introduction } = value
+      console.log(
+        'account, name, email, password, introduction',
+        account,
+        name,
+        email,
+        password,
+        introduction
+      )
+      // 將圖片上傳至第三方圖庫
+      // 若沒有傳入照片回傳null
+      // console.log(Object.keys(files).length === 0)
+      console.log(files?.cover)
+      const cover = await multerFilesHandler(
+        files?.cover ? files.cover[0] : null
+      )
+      const avatar = await multerFilesHandler(
+        files.avatar ? files.avatar[0] : null
+      )
       const user = await User.findByPk(userId)
       assert(user, '使用者不存在')
+      // 確認 account 、 email 是否重複
       const [accountCheck, emailCheck] = await Promise.all([
-        User.findOne({ where: { account } }),
-        User.findOne({ where: { email } })
+        User.findOne({ where: { account }, attributes: ['id'] }),
+        User.findOne({ where: { email }, attributes: ['id'] })
       ])
-      assert(!accountCheck, '帳號已存在')
-      assert(!emailCheck, '這個email已被使用')
-      assert(!(introduction.length > 160), '自我介紹超過字數上限')
-      assert(!(name.length > 50), '暱稱超過字數上限')
-
+      if (accountCheck && accountCheck.id !== user.id) {
+        throw new Error('帳號已存在')
+      }
+      if (emailCheck && emailCheck.id !== user.id) {
+        throw new Error('這個email已被使用')
+      }
       const updatedUser = await user.update({
         account,
         name,
@@ -52,10 +72,5 @@ module.exports = {
     } catch (error) {
       next(error)
     }
-  },
-  userTest: (req, res, next) => {
-    res.json({
-      message: 'here is user '
-    })
   }
 }

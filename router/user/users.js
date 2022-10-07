@@ -14,6 +14,4 @@ router.put(
   userController.putUser
 )
 
-router.get('/test', userController.userTest)
-
 module.exports = router
