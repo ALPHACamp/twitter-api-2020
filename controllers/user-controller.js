@@ -121,16 +121,13 @@ const userController = {
         if (!user) throw new Error('使用者不存在')
         res.json(replies)
       })
+      .catch(err => next(err))
   },
   getUserLikes: (req, res, next) => {
-    const currentUserId = helpers.getUser(req)?.id
     const UserId = req.params.id
-    console.log(UserId)
-    let id
-    currentUserId === UserId ? id = currentUserId : id = UserId
 
     Like.findAll({
-      where: { UserId: id },
+      where: { UserId },
       attributes: ['id', 'UserId', 'TweetId'],
       include: [
         {
@@ -158,10 +155,6 @@ const userController = {
               ],
             exclude: ['userId']
           }
-        },
-        {
-          model: User,
-          attributes: ['id', 'name', 'account', 'profilePhoto']
         }
       ],
       order: [['createdAt', 'Desc']]
@@ -169,6 +162,69 @@ const userController = {
       .then(likes => {
         res.json(likes)
       })
+      .catch(err => next(err))
+  },
+  getUserFollowings: (req, res, next) => {
+    const UserId = req.params.id
+
+    User.findByPk(UserId, {
+      include: [{
+        model: User,
+        as: 'Followings',
+        attributes: ['id', 'name', 'profilePhoto', 'introduction'],
+        through: { attributes: [] }
+      }],
+    })
+      .then(followings => {
+        if (!followings) throw new Error('此頁面不存在')
+        const result = followings.Followings
+          .map(followings => ({
+            ...followings.toJSON(),
+            followingId: followings.id
+          }))
+        res.json(result)
+      })
+      .catch(err => next(err))
+  },
+  getUserFollowers: (req, res, next) => {
+    const UserId = req.params.id
+
+    User.findByPk(UserId, {
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: ['id', 'name', 'profilePhoto', 'introduction'],
+        through: { attributes: [] }
+      }],
+    })
+      .then(followers => {
+        if (!followers) throw new Error('此頁面不存在')
+        const result = followers.Followers
+          .map(followers => ({
+            ...followers.toJSON(),
+            followerId: followers.id
+          }))
+        res.json(result)
+      })
+      .catch(err => next(err))
+  },
+  getTopFollowings: (req, res, next) => {
+
+    User.findAll({
+      attributes:
+      {
+        include:
+          [
+            [sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'
+            ), 'FollowingsCount'
+            ]
+          ],
+        exclude: ['password', 'email', 'coverPhoto', 'role', 'createdAt', 'updatedAt']
+      },
+      order: [[sequelize.literal('FollowingsCount'), 'Desc']]
+    })
+      .then(user => res.json(user))
       .catch(err => next(err))
   },
   addFollowing: (req, res, next) => {
