@@ -9,6 +9,7 @@ const { authenticated } = require('../../middleware/api-auth')
 router.post('/signin', passport.authenticate('local', { failureRedirect: '/signin', failureFlash: true }), userController.signIn)
 
 // Tweets
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 
 module.exports = router
