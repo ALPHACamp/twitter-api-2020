@@ -1,6 +1,7 @@
-const bcrypt = require('bcrypt-nodejs')
-
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const { User } = require('../../models')
+const helpers = require('../../_helpers')
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -23,6 +24,19 @@ const userController = {
       })
       return res.json({status: 'success', data: user})
     } catch(err) {
+      next(err)
+    }
+  },
+  signIn: (req, res, next) => {
+    try {
+      const userData = helpers.getUser(req).toJSON()
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      res.json({ status: 'success', data: {
+        token,
+        user: userData
+      }})
+    } catch (err) {
       next(err)
     }
   }
