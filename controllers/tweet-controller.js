@@ -232,13 +232,10 @@ const tweetController = {
       const currentUserId = helpers.getUser(req).id
       const TweetId = req.params.tweet_id
       const replyId = req.params.reply_id
-      const [tweet, reply] = await Promise.all([
-        Tweet.findByPk(TweetId, { raw: true }),
-        Reply.findOne({ where: { TweetId, id: replyId }, raw: true })
-      ])
+      const reply = await Reply.findOne({ where: { TweetId, id: replyId }, raw: true })
 
       // status 404 tweet not found
-      if (!tweet || !reply) {
+      if (!reply) {
         return res.status(404).json({
           status: 'error',
           message: 'The reply does not exist.'
