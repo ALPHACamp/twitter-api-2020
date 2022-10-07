@@ -29,7 +29,7 @@ module.exports = {
       cover_photo: {
         type: Sequelize.STRING
       },
-      intro: {
+      introduction: {
         type: Sequelize.TEXT
       },
       is_admin: {
