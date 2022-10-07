@@ -127,6 +127,36 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+
+  addTweet: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const description = req.body.description?.trim()
+
+      // status 400 while description length > 140
+      if (description.length > 140) throw new Error('Tweet description must be less than 140 characters long.')
+
+      // status 400 wile description is empty
+      if (!description) throw new Error('Tweet description is required.')
+
+      await Tweet.create({
+        UserId: currentUserId,
+        description
+      })
+      // success 200
+      res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  deleteTweet: async (req, res, next) => {
+    try {
+      res.send('delete')
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
