@@ -3,6 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const passport = require('./config/passport')
 const express = require('express')
+const bodyParser = require('body-parser')
 const session = require('express-session')
 const helpers = require('./_helpers');
 const apis = require('./routes/apis')
@@ -15,6 +16,10 @@ const SESSION_SECRET = 'secret'
 function authenticated(req, res, next){
   // passport.authenticate('jwt', { ses...
 }
+
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
+
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
