@@ -3,20 +3,25 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
+const routes = require('./routes')
+const passport = require('./config/passport')
 const helpers = require('./_helpers')
 
 const app = express()
 const port = 3000
+require('./models')
 
+// middleware
 app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
+app.use(express.json()) // set response format
+app.use(passport.initialize()) // init passport.js
+app.use((req, res, next) => {
+  req.user = helpers.getUser(req) // global req.user
+  next()
+})
 
-// use helpers.getUser(req) to replace req.user
-function authenticated (req, res, next) {
-  // passport.authenticate('jwt', { ses...
-};
+app.use('/api', routes)
 
-app.get('/api/signin', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
