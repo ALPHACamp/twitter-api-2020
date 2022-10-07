@@ -1,4 +1,4 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like, Followship, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 
@@ -20,9 +20,22 @@ const adminController = {
     }
   },
   getUsers: (req, res, next) => {
-    User.findAll({})
+    User.findAll({
+      attributes: ['id', 'account', 'name', 'profilePhoto', 'coverPhoto'],
+      include: [
+        { model: User, as: 'Followers', attributes: ['id'], through: { attributes: [] } },
+        { model: User, as: 'Followings', attributes: ['id'], through: { attributes: [] } },
+        { model: Tweet, include: Like, attributes: ['id'] }
+      ]
+    })
       .then(users => {
-        res.json(users)
+        const result = users.map(user => ({
+          ...user.toJSON(),
+          followerCount: user.Followers.length,
+          followingCount: user.Followings.length,
+          tweetsCount: user.Tweets.length
+        }))
+        res.json(result)
       })
       .catch(err => next(err))
   },
