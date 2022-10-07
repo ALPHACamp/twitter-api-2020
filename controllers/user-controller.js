@@ -26,37 +26,31 @@ const userController = {
   },
   signUp: async (req, res, next) => {
     try{
-      const { account,name,email,password,confirmPassword} =req.body
-      const errors = []
-      if (!account || !name || !email || !password || !confirmPassword ){
-        errors.push({message:'所有欄位都是必填'})
+      const { account, name, email, password, checkPassword } =req.body
+      if (!account || !name || !email || !password || !checkPassword ){
+        res.status(403).json({ status: 'error', message: '所有欄位都是必填' })
       }
       if (email && !validator.isEmail(email)){
-       errors.push({ message: '請輸入正確信箱地址'}) 
+         res.status(403).json({ status: 'error', message: '請輸入正確信箱地址' })
      }
-      if(password && !validator.isByteLength(password,{min:8,max:12})){
-        errors.push({ message: '密碼長度須介於8到12位數' }) 
-      }
-      if (password !== confirmPassword) {
-        errors.push({ message: '密碼與確認密碼不相符' })
+      if (password !== checkPassword) {
+        res.status(403).json({ status: 'error', message: '密碼與確認密碼不相符' })
       }
       if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
-        errors.push({ message: '名稱長度不可超過50字' })
+         res.status(403).json({ status: 'error', message: '名稱長度不可超過50字' })
       }
       if (account && !validator.isByteLength(account, { min: 0, max: 15 })) {
-        errors.push({ message: '帳號長度不可超過15字' })
+          res.status(403).json({ status: 'error', message: '帳號長度不可超過15字' })
       }
-      if(errors.length >0) return {errors}
 
       const [enterAccount, enterEmail] = await Promise.all([User.findOne({ where: { account } }), User.findOne({ where: { email} })])
       const message=[]
       if(enterAccount){
-        message.push('此帳號已註冊過！')
+         res.status(403).json({ status: 'error', message: '此帳號已註冊過！' })
       }
       if(enterEmail){
-        message.push('此信箱已註冊過！')
+         res.status(403).json({ status: 'error', message: '此信箱已註冊過！' })
       }
-      if(message.length >0) return {errors}
       
       await User.create({
         account,
