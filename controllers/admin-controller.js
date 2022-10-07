@@ -5,7 +5,7 @@ const adminController = {
   signIn: (req, res, next) => {
     try {
       if (req.user && req.user.role !== 'admin') {
-        return res.status(403).json({ status: 'error', message: "This account didn't exist!" })
+        return res.status(403).json({ status: 'error', message: "此帳號不存在!" })
       }
       
       const userData = req.user.toJSON()
@@ -16,7 +16,8 @@ const adminController = {
         data: {
           token,
           user: userData
-        }
+        },
+        message: '成功登入！'
       })
     } catch (err) {
       next(err)

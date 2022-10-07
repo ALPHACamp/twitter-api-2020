@@ -7,7 +7,7 @@ const userController = {
   signIn: (req, res, next) => {
     try {
       if (req.user && req.user.role === 'admin') {
-        return res.status(403).json({ status: 'error', message: "This account didn't exist!" })
+        return res.status(403).json({ status: 'error', message: "此帳號不存在!" })
       }
       
       const userData = req.user.toJSON()
@@ -18,8 +18,10 @@ const userController = {
         data: {
           token,
           user: userData
-        }
+        },
+        message: '成功登入！'
       })
+      
     } catch (err) {
       next(err)
     }
@@ -44,7 +46,7 @@ const userController = {
       }
 
       const [enterAccount, enterEmail] = await Promise.all([User.findOne({ where: { account } }), User.findOne({ where: { email} })])
-      const message=[]
+      //const message=[]
       if(enterAccount){
          res.status(403).json({ status: 'error', message: '此帳號已註冊過！' })
       }
