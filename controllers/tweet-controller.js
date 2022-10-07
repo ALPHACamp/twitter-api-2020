@@ -1,12 +1,8 @@
-const { Tweet } = require('../models')
+const tweetServices = require('../services/tweet-services')
 
 const tweetController = {
   getTweets: (req, res, next) => {
-    Tweet.findAll({})
-      .then(tweets => {
-        res.json({ status: 'success', data: { tweets } })
-      })
-      .catch(err => next(err))
+    tweetServices.getTweets(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', data }))
   }
 }
 
