@@ -186,6 +186,28 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  getUserFollowers: (req, res, next) => {
+    const UserId = req.params.id
+
+    User.findByPk(UserId, {
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: ['id', 'name', 'profilePhoto', 'introduction'],
+        through: { attributes: [] }
+      }],
+    })
+      .then(followers => {
+        if (!followers) throw new Error('此頁面不存在')
+        const result = followers.Followers
+          .map(followers => ({
+            ...followers.toJSON(),
+            followerId: followers.id
+          }))
+        res.json(result)
+      })
+      .catch(err => next(err))
+  },
   addFollowing: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id
     const { userId } = req.body
