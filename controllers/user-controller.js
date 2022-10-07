@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 const helpers = require('../_helpers')
 const imgurFileHandler = require('../helpers/file-helpers')
-const { User, Tweet, Reply, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -269,7 +269,35 @@ const userController = {
 
   getUserLikedTweets: async (req, res, next) => {
     try {
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const [user, likedTweets] = await Promise.all([
+        User.findByPk(reqUserId),
+        Like.findAll({
+          where: { UserId: reqUserId },
+          attributes: ['id', 'TweetId', 'createdAt'],
+          include: {
+            model: Tweet,
+            attributes: [
+              'id', 'description', 'createdAt',
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+              [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
+            ],
+            include: {
+              model: User,
+              attributes: ['id', 'name', 'account', 'avatar']
+            }
+          },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+      // check if the user exists
+      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
 
+      return res.json(likedTweets)
     } catch (err) {
       next(err)
     }
