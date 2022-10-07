@@ -24,6 +24,7 @@ app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
 app.use(passport.session())
+
 app.use('/api', apis)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
