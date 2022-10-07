@@ -2,6 +2,7 @@ const { Like, Reply, Tweet, User } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
+    // GET /api/tweets - 瀏覽所有推文
     return Tweet.findAll({
       attributes: { exclude:[ 'updatedAt' ] },
       include: [{
@@ -24,13 +25,24 @@ const tweetController = {
     .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
+    // GET /api/tweets/:tweet_id - 讀取特定推文
   },
   postTweet:(req, res, next) => {
+    // POST /api/tweets - 發布一筆推文
   },
   likeTweet:(req, res, next) => {
+    // POST /api/tweets/:tweet_id/like - 喜歡一則推文
   },
   unlikeTweet:(req, res, next) => {
-  }
+    // POST /api/tweets/:tweet_id/unlike - 取消喜歡一則推文
+  },
+  getReplies:(req, res, next) => {
+    // GET /api/tweets/:tweet_id/replies - 讀取回覆串
+  },
+  postReply:(req, res, next) => {
+    // POST /tweets/:tweet_id/replies - 新增回覆
+  },
+
 }
 
 module.exports = tweetController

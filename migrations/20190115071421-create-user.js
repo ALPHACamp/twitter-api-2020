@@ -10,11 +10,9 @@ module.exports = {
       },
       account: {
         type: Sequelize.STRING,
-        unique: true
       },
       email: {
         type: Sequelize.STRING,
-        unique: true,
         validate: { isEmail: true }
       },
       password: {
@@ -22,20 +20,21 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
-        validate: { len: 50 },
+        validate: { len: [1, 50] },
       },
       avatar: {
         type: Sequelize.STRING
       },
       introduction: {
         type: Sequelize.TEXT,
-        validate: { len: 160  },
+        validate: { len: [0, 160] },
       },
       role: {
         type: Sequelize.STRING
       },
-      cover:{
-        type: Sequelize.STRING
+      background_image: {
+        type: Sequelize.STRING,
+        defaultValue: 'https://img.onl/nFml6y'
       },
       created_at: {
         allowNull: false,
