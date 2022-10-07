@@ -6,6 +6,7 @@ const { errorHandler } = require('../middleware/error-handler')
 
 // user
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
+router.post('/users', userController.signup)
 
 // error handler
 router.use('/', errorHandler)
