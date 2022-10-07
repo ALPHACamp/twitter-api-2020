@@ -15,6 +15,9 @@ const tweetController = {
         message: '成功新增推文',
         data
       }))
+  },
+  likeTweet: (req, res, next) => {
+    tweetServices.likeTweet(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', data }))
   }
 }
 

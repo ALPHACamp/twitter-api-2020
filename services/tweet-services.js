@@ -1,4 +1,4 @@
-const { Tweet, User, sequelize } = require('../models')
+const { Tweet, User, Like, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const tweetServices = {
@@ -37,13 +37,35 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   postTweet: (req, cb) => {
-    const { description } = req.body
-    if (description.trim() === '') throw new Error('推文內容不可空白')
     return Tweet.create({
-      description,
-      userId: getUser(req).dataValues.id
+      description: req.body.description,
+      UserId: getUser(req).dataValues.id
     })
-      .then(tweet => cb(null, { tweet }))
+      .then(tweet => cb(null, tweet))
+      .catch(err => cb(err))
+  },
+  likeTweet: (req, cb) => {
+    const TweetId = req.params.id
+    const UserId = getUser(req).dataValues.id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          TweetId,
+          UserId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        if (like) throw new Error('You have liked this tweet!')
+
+        return Like.create({
+          TweetId,
+          UserId
+        })
+      })
+      .then(like => cb(null, like))
       .catch(err => cb(err))
   }
 }
