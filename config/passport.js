@@ -18,6 +18,7 @@ passport.use(new LocalStrategy({
           if (!result) throw new Error('帳號或密碼錯誤')
           cb(null, user)
         })
+        .catch(error => cb(error))
     })
     .catch(error => cb(error))
 }))
