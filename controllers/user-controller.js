@@ -26,6 +26,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUser: (req, res, next) => {
+    console.log(req.user.toJSON())
     const { id } = req.params
     return User.findByPk(id, { raw: true })
       .then(user => {
@@ -42,7 +43,7 @@ const userController = {
   postUser: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     if (!account || !name || !email || !password || !checkPassword) throw new Error('all fields are required')
-    if (name.length > 50) throw new Error('Name is accepted within 50 characters.')
+    
     if (password !== checkPassword) throw new Error('Two password need to be same.')
 
     return Promise.all([User.findOne({ where: { account } }), User.findOne({ where: { email } })])

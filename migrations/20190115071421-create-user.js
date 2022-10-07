@@ -13,21 +13,36 @@ module.exports = {
       },
       email: {
         type: Sequelize.STRING,
-        validate: { isEmail: true }
+        allowNull: false,
+        validate: {
+          isEmail: {
+            msg: "The email doesn't fit the email format"
+          }
+        }
       },
       password: {
         type: Sequelize.STRING
       },
       name: {
         type: Sequelize.STRING,
-        validate: { len: [1, 50] },
+        validate: {
+          len: {
+            args: [1, 50],
+            msg: "Name is accepted within 50 characters"
+          }
+        }
       },
       avatar: {
         type: Sequelize.STRING
       },
       introduction: {
         type: Sequelize.TEXT,
-        validate: { len: [0, 160] },
+        validate: {
+          len: {
+            args: [1, 160],
+            msg: "introduction is accepted within 160 characters"
+          }
+        }
       },
       role: {
         type: Sequelize.STRING
