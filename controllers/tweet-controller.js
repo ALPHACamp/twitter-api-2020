@@ -54,17 +54,26 @@ const tweetController = {
   getTweetReplies: async (req, res, next) => {
     try {
       const tweetId = Number(req.params.tweet_id)
-      const replies = await Reply.findAll({
-        where: { TweetId: tweetId },
-        attributes: ['id', 'comment', 'createdAt'],
-        include: [
-          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          { model: Tweet, attributes: ['id'], include: { model: User, attributes: ['id', 'account'] } }
-        ],
-        order: [['createdAt', 'DESC']],
-        nest: true,
-        raw: true
-      })
+      const [tweet, replies] = await Promise.all([
+        Tweet.findByPk(tweetId),
+        Reply.findAll({
+          where: { TweetId: tweetId },
+          attributes: ['id', 'comment', 'createdAt'],
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+            { model: Tweet, attributes: ['id'], include: { model: User, attributes: ['id', 'account'] } }
+          ],
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The tweet does not exist.'
+        })
+      }
       res.status(200).json(replies)
     } catch (err) {
       next(err)
