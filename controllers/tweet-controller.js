@@ -183,10 +183,13 @@ const tweetController = {
       }
 
       // delete tweet
-      await Tweet.destroy({ where: { id: TweetId } })
-
       // delete replies of tweet
-      await Reply.destroy({ where: { TweetId } })
+      // delete likes of tweet
+      await Promise.all([
+        Tweet.destroy({ where: { id: TweetId } }),
+        Reply.destroy({ where: { TweetId } }),
+        Like.destroy({ where: { TweetId } })
+      ])
 
       // status 200 success
       return res.status(200).json({ status: 'success' })
