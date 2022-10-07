@@ -2,6 +2,7 @@ const { Like, Tweet, User } = require('../models')
 
 const adminController = {
   getUsers: (req, res, next) => {
+    // GET /api/admin/users - 瀏覽使用者清單
     return User.findAll({
       attributes:['id', 'account', 'name', 'avatar'],
       include:[{
@@ -36,12 +37,13 @@ const adminController = {
         Followers: ['omit'],
         Followings: ['omit']
       }))
+      .sort((a, b) => ( b.tweetCount - a.tweetCount ))
       res.status(200).json(users)
     })
     .catch(err => next(err))
   },
   deleteTweet: (req, res, next) => {
-    // DELETE /admin/tweets/:id - 刪除使用者的推文
+    // DELETE /api/admin/tweets/:id - 刪除使用者的推文
     return Tweet.findByPk(req.params.id)
     .then(tweet => {
       if(!tweet) throw new Error("The tweet does not exist!")
