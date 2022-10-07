@@ -21,17 +21,6 @@ const adminController = {
   },
   getUsers: (req, res, next) => {
     User.findAll({
-      include: [{
-        model: Tweet,
-        include: Like,
-        attributes: {
-          include: [
-            [sequelize.literal(
-              '(SELECT COUNT(*) FROM Likes WHERE Tweet_id = Tweets.id)'
-            ), 'likesCount']
-          ]
-        }
-      }],
       attributes: {
         include: [
           [sequelize.literal(
@@ -42,11 +31,16 @@ const adminController = {
           ), 'followingCount'],
           [sequelize.literal(
             '(SELECT COUNT(*) FROM Tweets WHERE User_id = user.id)'
-          ), 'tweetsCount']
+          ), 'tweetsCount'],
+          [sequelize.literal(
+            '(SELECT COUNT(*) FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweet_id WHERE Tweets.User_id = User.id)'
+          ), 'likesCount']
         ],
-        exclude: ['password', 'email', 'role', 'introduction']
+        exclude: ['password', 'email', 'role', 'introduction', 'updatedAt']
       },
-      order: [[sequelize.literal('tweetsCount'), 'DESC']]
+      order: [
+        [sequelize.literal('tweetsCount'), 'DESC'],
+        [sequelize.literal('likesCount'), 'DESC']]
     })
       .then(users => {
         res.json(users)

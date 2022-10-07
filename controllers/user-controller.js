@@ -155,8 +155,7 @@ const userController = {
                     '(SELECT COUNT(*) FROM likes AS LikeUsers WHERE tweet_id = Tweet.id )'
                   ), 'LikeCount'
                 ]
-              ],
-            exclude: ['userId']
+              ]
           }
         }
       ],
