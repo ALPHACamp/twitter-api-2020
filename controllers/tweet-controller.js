@@ -88,7 +88,7 @@ const tweetController = {
 
       // status 404 tweet not exist
       if (!tweet) {
-        res.status(404).json({
+        return res.status(404).json({
           status: 'error',
           message: 'The tweet does not exist.'
         })
@@ -114,7 +114,7 @@ const tweetController = {
 
       // status 404 tweets not found
       if (!tweet) {
-        res.status(404).json({
+        return res.status(404).json({
           status: 'error',
           message: 'The tweet does not exist.'
         })
@@ -168,7 +168,7 @@ const tweetController = {
 
       // 404 find no tweet
       if (!tweet) {
-        res.status(404).json({
+        return res.status(404).json({
           status: 'error',
           message: 'The tweet does not exist.'
         })
@@ -176,7 +176,7 @@ const tweetController = {
 
       // 403 wanna delete others tweet
       if (tweet.UserId !== currentUserId) {
-        res.status(403).json({
+        return res.status(403).json({
           status: 'error',
           message: 'User can only delete their own tweet.'
         })
@@ -210,6 +210,7 @@ const tweetController = {
 
       // status 400 comment too long
       if (comment.length > 140) throw new Error('Reply comment must be less than 140 characters long.')
+
       // status 404 tweet not exist.
       if (!tweet) {
         res.status(404).json({
@@ -226,8 +227,40 @@ const tweetController = {
     }
   },
 
-  deleteTweetReply: (req, res, next) => {
-    res.send('delete')
+  deleteTweetReply: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const TweetId = req.params.tweet_id
+      const replyId = req.params.reply_id
+      const [tweet, reply] = await Promise.all([
+        Tweet.findByPk(TweetId, { raw: true }),
+        Reply.findOne({ where: { TweetId, id: replyId }, raw: true })
+      ])
+
+      // status 404 tweet not found
+      if (!tweet || !reply) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The reply does not exist.'
+        })
+      }
+
+      // status 403 wanna delete others reply
+      if (currentUserId !== reply.UserId) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'User can only delete their own reply.'
+        })
+      }
+
+      // success 200 delete the reply
+      await Reply.destroy({ where: { id: replyId } })
+      return res.status(200).json({
+        status: 'success'
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
