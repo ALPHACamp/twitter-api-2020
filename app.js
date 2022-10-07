@@ -9,7 +9,7 @@ const helpers = require('./_helpers')
 const cors = require('cors')
 const corsOption = {
   origin: [
-    'heroku',
+    'https://twitter-api-2022-10.herokuapp.com/',
     'http://localhost:3000'
   ],
   methods: 'GET,HEAD,PUT,POST,DELETE,OPTIONS',
