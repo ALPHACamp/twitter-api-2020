@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 const helpers = require('../_helpers')
 const imgurFileHandler = require('../helpers/file-helpers')
-const { User, Tweet, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -212,28 +212,92 @@ const userController = {
     try {
       const reqUserId = Number(req.params.id)
       const currentUserId = helpers.getUser(req).id
-      // check if the user exists
-      const user = await User.findByPk(reqUserId)
-      if (!user) {
-        return res.status(404).json({
-          status: 'error',
-          message: 'The user does not exist.'
+      const [user, userTweets] = await Promise.all([
+        User.findByPk(reqUserId),
+        Tweet.findAll({
+          where: { UserId: reqUserId },
+          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          attributes: [
+            'id', 'description', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+            [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
+          ],
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
         })
-      }
-      const userTweets = await Tweet.findAll({
-        where: { UserId: reqUserId },
-        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        attributes: [
-          'id', 'description', 'createdAt',
-          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
-          [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
-        ],
-        order: [['createdAt', 'DESC']],
-        nest: true,
-        raw: true
-      })
+      ])
+      // check if the user exists
+      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
+
       return res.json(userTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserReplies: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const [user, userReplies] = await Promise.all([
+        User.findByPk(reqUserId),
+        Reply.findAll({
+          where: { UserId: reqUserId },
+          attributes: ['id', 'comment', 'createdAt'],
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+            {
+              model: Tweet,
+              attributes: ['id'],
+              include: [{ model: User, attributes: ['id', 'account'] }]
+            }
+          ],
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+      // check if the user exists
+      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
+
+      return res.json(userReplies)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserLikedTweets: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const [user, likedTweets] = await Promise.all([
+        User.findByPk(reqUserId),
+        Like.findAll({
+          where: { UserId: reqUserId },
+          attributes: ['id', 'TweetId', 'createdAt'],
+          include: {
+            model: Tweet,
+            attributes: [
+              'id', 'description', 'createdAt',
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+              [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
+            ],
+            include: {
+              model: User,
+              attributes: ['id', 'name', 'account', 'avatar']
+            }
+          },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+      // check if the user exists
+      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
+
+      return res.json(likedTweets)
     } catch (err) {
       next(err)
     }
