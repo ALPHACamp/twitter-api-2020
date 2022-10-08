@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 const helpers = require('../_helpers')
 const imgurFileHandler = require('../helpers/file-helpers')
-const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -305,26 +305,29 @@ const userController = {
 
   getUserFollowings: async (req, res, next) => {
     try {
-      const followerId = Number(req.params.id)
+      const reqUserId = Number(req.params.id)
       const currentUserId = helpers.getUser(req).id
-      const user = await User.findByPk(followerId, {
-        include: [{
-          model: User,
-          as: 'Followings',
-          attributes: [
-            ['id', 'followingId'],
-            'account', 'name', 'introduction', 'avatar',
-            [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = Followings.id)`), 'isFollowed']
-          ]
-        }],
-        attributes: ['id', 'role'],
-        nest: true
-      })
+      const [user, followings] = await Promise.all([
+        User.findByPk(reqUserId),
+        Followship.findAll({
+          where: { followerId: reqUserId },
+          include: {
+            model: User,
+            as: 'Followings',
+            attributes: [
+              'id', 'account', 'name', 'introduction', 'avatar',
+              [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = Followings.id)`), 'isFollowed']
+            ]
+          },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
       // check if the user exists
       if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
 
-      user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
-      return res.json(user.Followings)
+      return res.json(followings)
     } catch (err) {
       next(err)
     }
@@ -332,26 +335,29 @@ const userController = {
 
   getUserFollowers: async (req, res, next) => {
     try {
-      const followingId = Number(req.params.id)
+      const reqUserId = Number(req.params.id)
       const currentUserId = helpers.getUser(req).id
-      const user = await User.findByPk(followingId, {
-        include: [{
-          model: User,
-          as: 'Followers',
-          attributes: [
-            ['id', 'followerId'],
-            'account', 'name', 'introduction', 'avatar',
-            [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = Followers.id)`), 'isFollowed']
-          ]
-        }],
-        attributes: ['id', 'role'],
-        nest: true
-      })
+      const [user, followers] = await Promise.all([
+        User.findByPk(reqUserId),
+        Followship.findAll({
+          where: { followingId: reqUserId },
+          include: {
+            model: User,
+            as: 'Followers',
+            attributes: [
+              'id', 'account', 'name', 'introduction', 'avatar',
+              [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = Followers.id)`), 'isFollowed']
+            ]
+          },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
       // check if the user exists
       if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
 
-      user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
-      return res.json(user.Followers)
+      return res.json(followers)
     } catch (err) {
       next(err)
     }
