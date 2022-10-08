@@ -103,7 +103,22 @@ const userController = {
     } else {
       id = UserId
     }
-    Promise.all([User.findByPk(id), Tweet.findAll({ where: { UserId: id } })])
+    Promise.all([User.findByPk(id),
+      Tweet.findAll({
+        where: { UserId: id },
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }],
+        attributes: {
+          include: [
+            [sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id )'
+            ), 'repliesCount'],
+            [sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweet.id )'
+            ), 'likesCount']
+          ]
+        }
+      })
+    ])
       .then(([user, tweets]) => {
         if (!user) throw new Error('使用者不存在')
         res.json(tweets)
