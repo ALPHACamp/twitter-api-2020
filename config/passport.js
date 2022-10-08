@@ -37,7 +37,9 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
       { model: User, as: 'Followings' }
     ]
   })
-    .then(user => cb(null, user.toJSON()))
+    .then(user => {
+      cb(null, user.toJSON())
+    })
     .catch(error => cb(error)) // callback(error) to error handler
 }))
 
