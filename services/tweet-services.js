@@ -94,6 +94,24 @@ const tweetServices = {
       })
       .then(reply => cb(null, reply))
       .catch(err => cb(err))
+  },
+  getReplies: (req, cb) => {
+    const TweetId = req.params.id
+    return Tweet.findByPk(TweetId, {
+      include: [{
+        model: Reply,
+        attributes: ['id', 'comment', 'createdAt'],
+        include: [{
+          raw: true,
+          nest: true,
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        }]
+      }],
+      order: [['Replies', 'createdAt', 'DESC']]
+    })
+      .then(replies => cb(null, replies))
+      .catch(err => cb(err))
   }
 }
 

@@ -9,6 +9,7 @@ const tweetController = require('../../controllers/tweet-controller')
 router.post('/signin', passport.authenticate('local', { failureRedirect: '/signin', failureFlash: true }), userController.signIn)
 
 // Tweets
+router.get('/tweets/:id/replies', tweetController.getReplies)
 router.post('/tweets/:id/replies', tweetController.postReply)
 router.post('/tweets/:id/like', tweetController.likeTweet)
 router.post('/tweets/:id/unlike', tweetController.unlikeTweet)

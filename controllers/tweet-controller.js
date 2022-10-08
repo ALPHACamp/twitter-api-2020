@@ -24,6 +24,9 @@ const tweetController = {
   },
   postReply: (req, res, next) => {
     tweetServices.postReply(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', data }))
+  },
+  getReplies: (req, res, next) => {
+    tweetServices.getReplies(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', data }))
   }
 }
 
