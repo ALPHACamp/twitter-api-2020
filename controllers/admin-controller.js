@@ -1,16 +1,17 @@
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
+const helpers = require('../_helpers')
 const bcrypt = require('bcryptjs')
 
 
 const adminController = {
   signIn: (req, res, next) => {
     try {
-      if (req.user && req.user.role !== 'admin') {
+      if (helpers.getUser(req) && helpers.getUser(req).role !== 'admin') {
         return res.status(403).json({ status: 'error', message: "此帳號不存在!" })
       }
       
-      const userData = req.user.toJSON()
+      const userData = helpers.getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
@@ -27,10 +28,22 @@ const adminController = {
   },
   getUsers: (req, res, next) => {
     User.findAll({
-      where: { role: null }
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' },
+        { model: Reply, include: Tweet },
+        { model: Like, include: Tweet }
+      ]
     })
-      .then(user => {
-        return res.json({ status: 'success', user })
+      .then(users => {
+        users = users.map(user => ({
+          ...user.toJSON(),
+          followerCount: user.Followers.length,
+          followingCount: user.Followings.length,
+          replyCount: user.Replies.length,
+          likeCount: user.Likes.length
+        }))
+        return res.status(200).json(users)
       })
       .catch(err => next(err))
   }
