@@ -1,4 +1,4 @@
-const { Tweet, User, Like, sequelize } = require('../models')
+const { Tweet, User, Like, Reply, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const tweetServices = {
@@ -80,6 +80,19 @@ const tweetServices = {
         return like.destroy()
       })
       .then(like => cb(null, like))
+      .catch(err => cb(err))
+  },
+  postReply: (req, cb) => {
+    return Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        return Reply.create({
+          comment: req.body.comment,
+          UserId: getUser(req).dataValues.id,
+          TweetId: req.params.id
+        })
+      })
+      .then(reply => cb(null, reply))
       .catch(err => cb(err))
   }
 }
