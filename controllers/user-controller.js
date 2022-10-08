@@ -94,6 +94,44 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  putUserSetting: (req, res, next) => {
+    const { account, name, email, password, checkPassword } = req.body
+    const [nameMin, nameMax] = [1, 50]
+    const id = req.params.id
+
+    if (password !== checkPassword) throw new Error('密碼不相符')
+    if (name.length < nameMin || name.length > nameMax) throw new Error(`暱稱字數限制需在 ${nameMin}~ ${nameMax} 字之內`)
+    if (!account || !name || !email || !password || !checkPassword) {
+      throw new Error('所有欄位都是必填的')
+    }
+
+    Promise.all([User.findAll({ raw: true }),
+      User.findByPk(id)
+    ])
+      .then(([users, currentUser]) => {
+        users.forEach(user => {
+          if (user.id !== currentUser.id) {
+            if (user.account === account) {
+              throw new Error('此帳號已被使用')
+            } else if (user.email === email) {
+              throw new Error('此Email已被使用')
+            }
+          }
+        })
+        return currentUser.update({
+          account,
+          name,
+          email,
+          password: bcrypt.hashSync(password, 10)
+        })
+      })
+      .then(newUser => {
+        const user = newUser.toJSON()
+        delete user.password
+        res.json(user)
+      })
+      .catch(err => next(err))
+  },
   getUserTweets: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id // 當前登入使用者id
     const UserId = Number(req.params.id) // 動態路由取得的id
@@ -176,7 +214,7 @@ const userController = {
         as: 'Followings',
         attributes: ['id', 'name', 'profilePhoto', 'introduction'],
         through: { attributes: [] }
-      }],
+      }]
     })
       .then(followings => {
         if (!followings) throw new Error('此頁面不存在')
@@ -198,7 +236,7 @@ const userController = {
         as: 'Followers',
         attributes: ['id', 'name', 'profilePhoto', 'introduction'],
         through: { attributes: [] }
-      }],
+      }]
     })
       .then(followers => {
         if (!followers) throw new Error('此頁面不存在')
@@ -212,7 +250,6 @@ const userController = {
       .catch(err => next(err))
   },
   getTopFollowings: (req, res, next) => {
-
     User.findAll({
       attributes:
       {
