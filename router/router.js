@@ -13,6 +13,7 @@ router.use('/users', userRoute)
 router.use('/admin', adminRoute)
 router.use('/tweets', tweetsRoute)
 router.use('/followships', followshipsRoute)
+
 router.use('/', apiErrorHandler)
 
 module.exports = router
