@@ -70,8 +70,8 @@ const userController = {
 
   getCurrentUser: (req, res, next) => {
     try {
-      const { id, email, account, name, avatar, role } = helpers.getUser(req)
-      return res.json({ id, email, account, name, avatar, role })
+      const currentUser = helpers.getUser(req)
+      return res.json(currentUser)
     } catch (err) {
       next(err)
     }
