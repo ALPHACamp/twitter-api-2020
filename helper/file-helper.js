@@ -5,7 +5,6 @@ const client = new ImgurClient({ clientId: process.env.IMGUR_CLIENT })
 const multerFilesHandler = (files) => {
   return new Promise((resolve, reject) => {
     if (!files) return resolve(null)
-    console.log('files', files)
     const encodeImage1 = files.buffer.toString('base64')
     return client
       .upload({

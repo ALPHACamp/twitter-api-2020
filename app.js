@@ -1,7 +1,6 @@
 const express = require('express')
-// const helpers = require('./_helpers');
+const helpers = require('./_helpers')
 const router = require('./router/router')
-
 const app = express()
 const port = 3000
 
@@ -16,7 +15,7 @@ require('dotenv').config()
 //   // passport.authenticate('jwt', { ses...
 // }
 
-app.use('/apis', router)
+app.use('/api', router)
 
 // app.get('/', (req, res) => res.send('Hello World!'))
 

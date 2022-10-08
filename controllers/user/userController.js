@@ -22,23 +22,14 @@ module.exports = {
     const { value, error } = userValidation(req.body)
     const { files } = req
     try {
-      // 對輸入的資料做檢查
-      if (error) throw new Error(error.details[0].message)
+      // 如若輸入的資料不合規範，丟出error
+      assert(!error, error?.details[0].message)
+
       const { account, name, email, password, introduction } = value
-      console.log(
-        'account, name, email, password, introduction',
-        account,
-        name,
-        email,
-        password,
-        introduction
-      )
       // 將圖片上傳至第三方圖庫
       // 若沒有傳入照片回傳null
-      // console.log(Object.keys(files).length === 0)
-      console.log(files?.cover)
       const cover = await multerFilesHandler(
-        files?.cover ? files.cover[0] : null
+        files.cover ? files.cover[0] : null
       )
       const avatar = await multerFilesHandler(
         files.avatar ? files.avatar[0] : null
@@ -50,12 +41,8 @@ module.exports = {
         User.findOne({ where: { account }, attributes: ['id'] }),
         User.findOne({ where: { email }, attributes: ['id'] })
       ])
-      if (accountCheck && accountCheck.id !== user.id) {
-        throw new Error('帳號已存在')
-      }
-      if (emailCheck && emailCheck.id !== user.id) {
-        throw new Error('這個email已被使用')
-      }
+      assert(!(accountCheck && accountCheck.id !== user.id), '帳號已存在')
+      assert(!(emailCheck && emailCheck.id !== user.id), '這個email已被使用')
       const updatedUser = await user.update({
         account,
         name,

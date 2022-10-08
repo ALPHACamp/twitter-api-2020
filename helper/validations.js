@@ -6,7 +6,7 @@ const userValidation = (data) => {
     account: joi.string().required(),
     introduction: joi.string().max(150),
     password: joi.string().required(),
-    email: joi.string().required()
+    email: joi.string().email().required()
   })
   return schema.validate(data)
 }
