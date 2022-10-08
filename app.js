@@ -5,6 +5,7 @@ const passport = require('./config/passport')
 const express = require('express')
 const bodyParser = require('body-parser')
 const session = require('express-session')
+const cors = require('cors')
 const helpers = require('./_helpers');
 const apis = require('./routes/apis')
 
@@ -24,6 +25,9 @@ app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(cors({
+  origin: ['http://localhost:8080' ]
+}))
 
 app.use('/api', apis)
 

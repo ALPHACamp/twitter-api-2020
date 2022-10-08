@@ -24,6 +24,7 @@ const adminController = {
     }
   },
   getUsers: (req, res, next) => {
+    console.log(req)
     User.findAll({
       where: { role: null }
     })
