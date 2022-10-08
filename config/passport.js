@@ -27,18 +27,17 @@ passport.use(new LocalStrategy(
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
-  passReqToCallback: true
+  secretOrKey: process.env.JWT_SECRET
 }
-passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
+passport.use(new JWTStrategy(jwtOptions, (jwtPayload, done) => {
   User.findByPk(jwtPayload.id, {
     include: [
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
   })
-    .then(user => cb(null, user))
-    .catch(err => cb(err))
+    .then(user => done(null, user))
+    .catch(err => done(err, false))
 }))
 /*
 passport.serializeUser((user, cb) => {

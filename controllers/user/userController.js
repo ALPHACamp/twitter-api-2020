@@ -1,4 +1,3 @@
-
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { User } = require('../../models')
@@ -48,7 +47,8 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  },getUser: async (req, res, next) => {
+  },
+  getUser: async (req, res, next) => {
     try {
       const userId = req.params.id
       const user = await User.findByPk(userId, {
