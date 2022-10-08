@@ -43,7 +43,7 @@ const adminController = {
           replyCount: user.Replies.length,
           likeCount: user.Likes.length
         }))
-        return res.json(users)
+        return res.status(200).json(users)
       })
       .catch(err => next(err))
   }
