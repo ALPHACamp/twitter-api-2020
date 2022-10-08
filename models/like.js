@@ -16,7 +16,6 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Like',
     tableName: 'Likes',
-    paranoid: true, // 軟刪除
     underscored: true
   })
   return Like
