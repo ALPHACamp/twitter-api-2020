@@ -25,7 +25,7 @@ const userController = {
         account,
         name,
         email,
-        password: bcrypt.hash(password, 10)
+        password: await bcrypt.hash(password, 10)
       })
       return res.json({ status: 'success', data: user })
     } catch (err) {
