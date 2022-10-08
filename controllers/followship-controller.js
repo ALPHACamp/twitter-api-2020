@@ -4,7 +4,7 @@ const followshipController = {
   addFollowing: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
-      const followingId = Number(req.body.followingId)
+      const followingId = Number(req.body.id)
 
       // 400 follow self
       if (followingId === currentUserId) throw new Error('User can not follow themself.')

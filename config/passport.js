@@ -31,11 +31,7 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, async (req, payload, cb) => {
   try {
     const user = await User.findByPk(payload.id, {
-      include: [
-        { model: User, as: 'Followings' },
-        { model: User, as: 'Followers' }
-      ],
-      attributes: { exclude: ['password'] }
+      attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }
     })
     if (user) {
       req.user = user.toJSON()
