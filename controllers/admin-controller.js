@@ -1,4 +1,4 @@
-const { User, Tweet, Like, sequelize } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 

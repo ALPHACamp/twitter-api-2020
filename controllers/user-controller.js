@@ -11,6 +11,7 @@ const userController = {
     const [nameMin, nameMax] = [1, 50]
 
     if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
+    if (!password || !checkPassword || !email || !account || !name) throw new Error('欄位皆為必填')
 
     User.findOne({
       attributes: ['email', 'account'],
@@ -175,7 +176,7 @@ const userController = {
         as: 'Followings',
         attributes: ['id', 'name', 'profilePhoto', 'introduction'],
         through: { attributes: [] }
-      }],
+      }]
     })
       .then(followings => {
         if (!followings) throw new Error('此頁面不存在')
@@ -197,7 +198,7 @@ const userController = {
         as: 'Followers',
         attributes: ['id', 'name', 'profilePhoto', 'introduction'],
         through: { attributes: [] }
-      }],
+      }]
     })
       .then(followers => {
         if (!followers) throw new Error('此頁面不存在')
@@ -211,7 +212,6 @@ const userController = {
       .catch(err => next(err))
   },
   getTopFollowings: (req, res, next) => {
-
     User.findAll({
       attributes:
       {
@@ -231,13 +231,13 @@ const userController = {
   },
   addFollowing: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id
-    const { userId } = req.body
+    const { id } = req.body
     Promise.all([
-      User.findByPk(userId),
+      User.findByPk(id),
       Followship.findOne({
         where: {
           followerId: currentUserId,
-          followingId: userId
+          followingId: id
         }
       })
     ])
@@ -247,7 +247,7 @@ const userController = {
         if (followship) throw new Error('已追蹤過這個使用者')
         return Followship.create({
           followerId: currentUserId,
-          followingId: Number(userId)
+          followingId: Number(id)
         })
       })
       .then(followingUser => res.json(followingUser))
