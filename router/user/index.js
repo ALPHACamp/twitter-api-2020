@@ -11,6 +11,6 @@ router.put('/:id',
   ]),
   userController.putUser
 )
-
+router.post('/', userController.signUp)
 
 module.exports = router

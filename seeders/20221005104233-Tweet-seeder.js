@@ -1,3 +1,4 @@
+
 'use strict'
 const faker = require('faker')
 const dayJs = require('dayjs')
@@ -6,10 +7,12 @@ const dayJsRandom = require('dayjs-random')
 dayJs.extend(dayJsRandom)
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+
     const user = await queryInterface.sequelize.query(
       'SELECT id FROM Users WHERE role = "user";',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
+
 
     await queryInterface.bulkInsert('Tweets', tweetGenerate(user, 10))
   },
@@ -35,3 +38,4 @@ function tweetGenerate (user, NumberOfTweetPerUser) {
   }
   return result
 }
+

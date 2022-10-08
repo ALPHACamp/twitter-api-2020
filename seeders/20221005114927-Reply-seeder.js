@@ -1,3 +1,4 @@
+
 'use strict'
 
 const faker = require('faker')
@@ -18,9 +19,11 @@ module.exports = {
 
       await queryInterface.bulkInsert('Replies', replyGenerate(user, tweet, 3))
     } catch (error) {
+
       console.log(error)
     }
   },
+
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Replies', {})
