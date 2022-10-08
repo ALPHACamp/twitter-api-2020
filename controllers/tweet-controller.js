@@ -50,8 +50,8 @@ const tweetController = {
         TweetId,
         UserId
       })
-    .then(likeRecord => res.json(likeRecord))
     })
+    .then(likeRecord => res.status(200).json(likeRecord))
     .catch(err => next(err))
   },
   unlikeTweet:(req, res, next) => {
