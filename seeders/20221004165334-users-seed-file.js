@@ -8,7 +8,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       name: 'root',
       account: 'root',
-      is_admin: true,
+      role: 'admin',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -20,7 +20,7 @@ module.exports = {
       avatar: `https://loremflickr.com/320/240/boy,girl/?random=${Math.random() * 100}`,
       cover_photo: '',
       introduction: faker.lorem.text(),
-      is_admin: false,
+      role: 'user',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -32,7 +32,7 @@ module.exports = {
       avatar: `https://loremflickr.com/320/240/boy,girl/?random=${Math.random() * 100}`,
       cover_photo: '',
       introduction: faker.lorem.text(),
-      is_admin: false,
+      role: 'user',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -44,7 +44,7 @@ module.exports = {
       avatar: `https://loremflickr.com/320/240/boy,girl/?random=${Math.random() * 100}`,
       cover_photo: '',
       introduction: faker.lorem.text(),
-      is_admin: false,
+      role: 'user',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -56,7 +56,7 @@ module.exports = {
       avatar: `https://loremflickr.com/320/240/boy,girl/?random=${Math.random() * 100}`,
       cover_photo: '',
       introduction: faker.lorem.text(),
-      is_admin: false,
+      role: 'user',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -68,7 +68,7 @@ module.exports = {
       avatar: `https://loremflickr.com/320/240/boy,girl/?random=${Math.random() * 100}`,
       cover_photo: '',
       introduction: faker.lorem.text(),
-      is_admin: false,
+      role: 'user',
       created_at: new Date(),
       updated_at: new Date()
     }], {})
