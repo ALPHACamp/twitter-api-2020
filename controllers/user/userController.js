@@ -8,10 +8,10 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
       if (password !== checkPassword) throw new Error('密碼輸入錯誤，請重新確認')
-  
-      const [ userEmail, userAccount ] = Promise.all([
+
+      const [userEmail, userAccount] = Promise.all([
         User.findOne({ where: { email } }),
-        User.findOne({ where: { account }})
+        User.findOne({ where: { account } })
       ])
 
       if (userEmail) throw new Error('email 已重複註冊！')
@@ -22,8 +22,8 @@ const userController = {
         email,
         password: bcrypt.hash(password, 10)
       })
-      return res.json({status: 'success', data: user})
-    } catch(err) {
+      return res.json({ status: 'success', data: user })
+    } catch (err) {
       next(err)
     }
   },
@@ -32,10 +32,13 @@ const userController = {
       const userData = helpers.getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.json({ status: 'success', data: {
-        token,
-        user: userData
-      }})
+      res.json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+      })
     } catch (err) {
       next(err)
     }
