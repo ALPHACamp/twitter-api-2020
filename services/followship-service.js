@@ -24,7 +24,21 @@ const followshipServices = {
           followingId: userId
         })
       })
-      .then(followship => cb(null, followship))
+      .then(newFollowship => cb(null, newFollowship))
+      .catch(err => cb(err))
+  },
+  removeFollowing: (req, cb) => {
+    Followship.findOne({
+      where: {
+        followerId: getUser(req).dataValues.id,
+        followingId: req.params.id
+      }
+    })
+      .then(followship => {
+        if (!followship) throw new Error("You haven't followed this user!")
+        return followship.destroy()
+      })
+      .then(removeFollowship => cb(null, removeFollowship))
       .catch(err => cb(err))
   }
 }

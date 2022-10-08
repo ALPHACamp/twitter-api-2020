@@ -10,8 +10,8 @@ const followshipController = {
         data
       }))
   },
-  deleteFollowing: (req, res, next) => {
-    followshipServices.deleteFollowing(req, (err, data) => err
+  removeFollowing: (req, res, next) => {
+    followshipServices.removeFollowing(req, (err, data) => err
       ? next(err)
       : res.status(200).json({
         status: 'success',

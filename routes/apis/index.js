@@ -20,6 +20,6 @@ router.get('/tweets', tweetController.getTweets)
 
 // Followship
 router.post('/followships/:userId', followshipController.addFollowing)
-router.delete('/followships/:userId', followshipController.deleteFollowing)
+router.delete('/followships/:userId', followshipController.removeFollowing)
 
 module.exports = router
