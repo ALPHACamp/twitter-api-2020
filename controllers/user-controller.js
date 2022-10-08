@@ -148,7 +148,7 @@ const userController = {
       }]
     })
       .then(likes => {
-        const currentUser = helpers.getUser(req).dataValues
+        const currentUser = helpers.getUser(req).id
         likes = likes.map(like => ({
           ...like.toJSON(),
         }))
@@ -156,12 +156,10 @@ const userController = {
         likes.forEach(like => {
           like.replyCounts = like.Tweet.Replies.length,
           like.likeCounts = like.Tweet.Likes.length,
-          like.isLiked = like.UserId === currentUser.id
+            like.isLiked = like.Tweet.Likes.map(u => u.UserId).includes(currentUser.id)
           delete like.Tweet.Replies
           delete like.Tweet.Likes
-          console.log('delete')
         })
-        console.log(likes)
         return res.status(200).json(likes)
       })
       .catch(err => next(err))
