@@ -33,9 +33,11 @@ const tweetController = {
   likeTweet:(req, res, next) => {
     // POST /api/tweets/:tweet_id/like - 喜歡一則推文
     const TweetId = req.params.id
-    const UserId = req.user.id
+    const UserId = req.user.dataValues.id
     return Promise.all([
-      Tweet.findByPK(TweetId),
+      Tweet.findOne({
+        where: { id: TweetId }
+      }),
       Like.findOne({
         where: {
           TweetId,
