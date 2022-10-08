@@ -17,7 +17,6 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Reply',
     tableName: 'Replies',
-    paranoid: false,
     underscored: true
   })
   return Reply
