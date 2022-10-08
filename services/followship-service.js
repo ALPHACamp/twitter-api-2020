@@ -1,11 +1,11 @@
-const { Followship, User } = require('../models')
+const { Followship, User, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const followshipServices = {
   addFollowing: (req, cb) => {
     const currentUserId = getUser(req).dataValues.id
     const userId = req.body.id
-    Promise.all([
+    return Promise.all([
       User.findByPk(userId),
       Followship.findOne({
         where: {
@@ -28,7 +28,7 @@ const followshipServices = {
       .catch(err => cb(err))
   },
   removeFollowing: (req, cb) => {
-    Followship.findOne({
+    return Followship.findOne({
       where: {
         followerId: getUser(req).dataValues.id,
         followingId: req.params.id
@@ -39,6 +39,17 @@ const followshipServices = {
         return followship.destroy()
       })
       .then(removeFollowship => cb(null, removeFollowship))
+      .catch(err => cb(err))
+  },
+  getTopFollowship: (req, cb) => {
+    return User.findAll({
+      attributes: {
+        include: [[sequelize.literal('( SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followshipCount']]
+      },
+      order: [[sequelize.literal('followshipCount'), 'Desc']],
+      limit: 10
+    })
+      .then(users => cb(null, users))
       .catch(err => cb(err))
   }
 }

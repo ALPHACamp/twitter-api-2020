@@ -18,6 +18,9 @@ const followshipController = {
         message: '取消追蹤',
         data
       }))
+  },
+  getTopFollowship: (req, res, next) => {
+    followshipServices.getTopFollowship(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', data }))
   }
 }
 
