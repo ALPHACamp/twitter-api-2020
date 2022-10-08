@@ -3,7 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 require('dotenv').config()
 const express = require('express')
-const helpers = require('./_helpers')
+// const helpers = require('./_helpers')
 
 const app = express()
 const port = 3000
@@ -21,7 +21,7 @@ app.use(express.json())
 
 app.use('/api', router)
 
-// app.get('/', (req, res) => res.send('Hello World!'))
+app.get('/', (req, res) => res.send('Hello welcome to ac-twiter-server'))
 
 app.use('*', (req, res) => {
   // return an error
