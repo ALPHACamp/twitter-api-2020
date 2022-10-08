@@ -176,7 +176,7 @@ const userController = {
         as: 'Followings',
         attributes: ['id', 'name', 'profilePhoto', 'introduction'],
         through: { attributes: [] }
-      }],
+      }]
     })
       .then(followings => {
         if (!followings) throw new Error('此頁面不存在')
@@ -198,7 +198,7 @@ const userController = {
         as: 'Followers',
         attributes: ['id', 'name', 'profilePhoto', 'introduction'],
         through: { attributes: [] }
-      }],
+      }]
     })
       .then(followers => {
         if (!followers) throw new Error('此頁面不存在')
@@ -212,7 +212,6 @@ const userController = {
       .catch(err => next(err))
   },
   getTopFollowings: (req, res, next) => {
-
     User.findAll({
       attributes:
       {
