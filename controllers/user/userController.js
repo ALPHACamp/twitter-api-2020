@@ -1,4 +1,3 @@
-
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { User } = require('../../models')
@@ -11,9 +10,11 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
-      if (password !== checkPassword) { throw new Error('密碼輸入錯誤，請重新確認') }
+      if (password !== checkPassword) {
+        throw new Error('密碼輸入錯誤，請重新確認')
+      }
 
-      const [userEmail, userAccount] = Promise.all([
+      const [userEmail, userAccount] = await Promise.all([
         User.findOne({ where: { email } }),
         User.findOne({ where: { account } })
       ])
@@ -48,7 +49,8 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  },getUser: async (req, res, next) => {
+  },
+  getUser: async (req, res, next) => {
     try {
       const userId = req.params.id
       const user = await User.findByPk(userId, {
