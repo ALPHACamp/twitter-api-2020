@@ -6,6 +6,7 @@ const tweetsRoute = require('./user/tweets')
 const followshipsRoute = require('./user/followships')
 const userController = require('../controllers/user/userController')
 const { apiErrorHandler } = require('../middleware/error-handler')
+const {authenticated} = require('../middleware/auth')
 
 router.post('/login', passport.authenticate('local', { session: false }), userController.signIn)
 router.use('/users', userRoute)
