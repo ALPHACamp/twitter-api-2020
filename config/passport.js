@@ -19,7 +19,7 @@ passport.use(new LocalStrategy(
       const passwordMatching = bcrypt.compare(password, user.password)
       if (!passwordMatching) throw new Error('Incorrect account or password.')
       return done(null, user)
-    } catch(err) {
+    } catch (err) {
       return done(err, false)
     }
   }
