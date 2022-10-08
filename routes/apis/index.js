@@ -3,6 +3,7 @@ const router = express.Router()
 const passport = require('../../config/passport')
 const userController = require('../../controllers/user-controller')
 const tweetController = require('../../controllers/tweet-controller')
+const followshipController = require('../../controllers/followship-controller')
 
 // const { authenticated } = require('../../middleware/api-auth')
 
@@ -16,5 +17,9 @@ router.post('/tweets/:id/unlike', tweetController.unlikeTweet)
 router.get('/tweets/:id', tweetController.getTweet)
 router.post('/tweets', tweetController.postTweet)
 router.get('/tweets', tweetController.getTweets)
+
+// Followship
+router.post('/followships/:userId', followshipController.addFollowing)
+router.delete('/followships/:userId', followshipController.deleteFollowing)
 
 module.exports = router
