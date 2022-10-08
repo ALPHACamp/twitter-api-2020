@@ -12,7 +12,7 @@ module.exports = {
       tweets.push(...Array.from({ length: TWEETS_PER_USERS }, () => ({
         UserId: user.id,
         description: faker.lorem.sentence(6),
-        createdAt: faker.date.between('2022-09-01T00:00:00.000Z', '2022-10-01T00:00:00.000Z'),
+        createdAt: faker.date.between('2022-09-01T00:00:00.000Z', '2022-09-15T00:00:00.000Z'),
         updatedAt: new Date()
       })))
     })
