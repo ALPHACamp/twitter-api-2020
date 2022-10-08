@@ -31,6 +31,7 @@ const userController = {
         email,
         role: 'user',
         password: hash,
+        introduction: '此人很神秘，什麼都沒有寫',
         profilePhoto: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
         coverPhoto: 'https://i.imgur.com/t0YRqQH.jpg'
       }))
@@ -142,7 +143,22 @@ const userController = {
     } else {
       id = UserId
     }
-    Promise.all([User.findByPk(id), Tweet.findAll({ where: { UserId: id } })])
+    Promise.all([User.findByPk(id),
+      Tweet.findAll({
+        where: { UserId: id },
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }],
+        attributes: {
+          include: [
+            [sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id )'
+            ), 'repliesCount'],
+            [sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweet.id )'
+            ), 'likesCount']
+          ]
+        }
+      })
+    ])
       .then(([user, tweets]) => {
         if (!user) throw new Error('使用者不存在')
         res.json(tweets)
@@ -158,7 +174,12 @@ const userController = {
     } else {
       id = UserId
     }
-    Promise.all([User.findByPk(id), Reply.findAll({ where: { UserId: id } })])
+    Promise.all([User.findByPk(id),
+      Reply.findAll({
+        where: { UserId: id },
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }]
+      })
+    ])
       .then(([user, replies]) => {
         if (!user) throw new Error('使用者不存在')
         res.json(replies)
