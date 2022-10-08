@@ -120,7 +120,10 @@ const tweetController = {
     const TweetId = Number(req.params.tweet_id)
     Promise.all([
       Tweet.findByPk(TweetId),
-      Reply.findAll({ where: { TweetId }, raw: true })
+      Reply.findAll({
+        where: { TweetId },
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }]
+      })
     ])
       .then(([tweet, replies]) => {
         if (!tweet) throw new Error('此推文不存在')
