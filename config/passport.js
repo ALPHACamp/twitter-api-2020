@@ -31,7 +31,7 @@ const jwtOptions = {
 }
 // check token
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  return User.findByPk(jwtPayload.id, {
+  User.findByPk(jwtPayload.id, {
     include: [
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
