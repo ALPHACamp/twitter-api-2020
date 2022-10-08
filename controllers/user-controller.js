@@ -119,7 +119,12 @@ const userController = {
     } else {
       id = UserId
     }
-    Promise.all([User.findByPk(id), Reply.findAll({ where: { UserId: id } })])
+    Promise.all([User.findByPk(id),
+      Reply.findAll({
+        where: { UserId: id },
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }]
+      })
+    ])
       .then(([user, replies]) => {
         if (!user) throw new Error('使用者不存在')
         res.json(replies)
