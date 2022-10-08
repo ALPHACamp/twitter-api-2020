@@ -43,7 +43,7 @@ const followShipsCotroller = {
         where: { followerId, followingId }
       })
       assert(followShip, '已不在追蹤清單')
-      const deleted = followShip.destroy()
+      const deleted = await followShip.destroy()
 
       res.status(200).json({
         staus: 'success',
