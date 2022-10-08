@@ -4,12 +4,13 @@ if (process.env.NODE_ENV !== 'production') {
 require('dotenv').config()
 const express = require('express')
 // const helpers = require('./_helpers')
-
+const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
 const router = require('./router/router')
 const passport = require('passport')
-
+// cors 的預設為全開放
+app.use(cors())
 // 可以解讀JSON資料
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
