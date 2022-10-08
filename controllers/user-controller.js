@@ -54,10 +54,21 @@ const userController = {
   },
   getUserProfile: (req, res, next) => {
     const id = Number(req.params.id)
-    User.findByPk(id, { raw: true })
+    User.findByPk(id, {
+      attributes: {
+        include: [[
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'FollowingsCount'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE follower_id = user.id )'), 'FollowerCount'
+        ]],
+        exclude: ['password', 'email', 'updatedAt']
+      }
+    })
       .then(user => {
         if (!user) throw new Error('該使用者不存在')
-        delete user.password
         return res.json(user)
       })
       .catch(err => next(err))
