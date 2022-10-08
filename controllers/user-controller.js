@@ -9,7 +9,7 @@ const userController = {
       if (req.user && req.user.role === 'admin') {
         return res.status(403).json({ status: 'error', message: "此帳號不存在!" })
       }
-
+      
       const userData = req.user.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })

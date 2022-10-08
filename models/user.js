@@ -6,24 +6,21 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
       // define association here
-      // User.hasMany(models.Tweet)
-      // User.hasMany(models.Reply)
-      // // User.hasMany(models.Like)
-      // User.belongsToMany(User, {
-      //   through: models.Followship,
-      //   foreignKey: 'followerId',
-      //   as: 'Followings'
-      // })
-      // User.belongsToMany(User, {
-      //   through: models.Followship,
-      //   foreignKey: 'followingId',
-      //   as: 'Followers'
-      // })
-      // User.belongsToMany(models.Tweet, {
-      //   through: models.Like,
-      //   foreignKey: 'UserId',
-      //   as: 'LikedTweets'
-      // })
+      User.hasMany(models.Tweet, { foreignKey: "userId" })
+      User.hasMany(models.Reply, { foreignKey: "userId" })
+      User.hasMany(models.Like, {
+        foreignKey: 'userId'
+      })
+      User.belongsToMany(User, {
+        through: models.Followship,
+        foreignKey: 'followingId',
+        as: 'Followers'
+      })
+      User.belongsToMany(User, {
+        through: models.Followship,
+        foreignKey: 'followerId',
+        as: 'Followings'
+      })
     }
   };
   User.init({

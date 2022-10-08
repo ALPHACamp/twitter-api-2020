@@ -1,11 +1,3 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const Like = sequelize.define('Like', {
-  }, {});
-  Like.associate = function(models) {
-  };
-  return Like;
-};
 'use strict'
 const {
   Model
@@ -14,15 +6,17 @@ module.exports = (sequelize, DataTypes) => {
   class Like extends Model {
     static associate(models) {
       // define association here
+      Like.belongsTo(models.User, { foreignKey: "userId" })
+      Like.belongsTo(models.Tweet, { foreignKey: "tweetId" })
     }
   };
   Like.init({
-    userId: DataTypes.STRING,
-    tweetId: DataTypes.STRING
+    userId: DataTypes.INTEGER,
+    tweetId: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Followship',
-    tableName: 'Followships',
+    modelName: 'Like',
+    tableName: 'Likes',
     underscored: true
   })
   return Like

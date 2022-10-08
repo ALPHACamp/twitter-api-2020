@@ -5,7 +5,8 @@ const passport = require('./config/passport')
 const express = require('express')
 const bodyParser = require('body-parser')
 const session = require('express-session')
-const helpers = require('./_helpers');
+const cors = require('cors')
+const { corsOptionsDelegate } = require('./_helpers');
 const apis = require('./routes/apis')
 
 const app = express()
@@ -24,6 +25,8 @@ app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(cors(corsOptionsDelegate))
+
 app.use('/api', apis)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
