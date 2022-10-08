@@ -11,6 +11,7 @@ const userController = {
     const [nameMin, nameMax] = [1, 50]
 
     if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
+    if (!password || !checkPassword || !email || !account || !name) throw new Error('欄位皆為必填')
 
     User.findOne({
       attributes: ['email', 'account'],
@@ -193,8 +194,7 @@ const userController = {
                     '(SELECT COUNT(*) FROM likes AS LikeUsers WHERE tweet_id = Tweet.id )'
                   ), 'LikeCount'
                 ]
-              ],
-            exclude: ['userId']
+              ]
           }
         }
       ],
@@ -269,13 +269,13 @@ const userController = {
   },
   addFollowing: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id
-    const { userId } = req.body
+    const { id } = req.body
     Promise.all([
-      User.findByPk(userId),
+      User.findByPk(id),
       Followship.findOne({
         where: {
           followerId: currentUserId,
-          followingId: userId
+          followingId: id
         }
       })
     ])
@@ -285,7 +285,7 @@ const userController = {
         if (followship) throw new Error('已追蹤過這個使用者')
         return Followship.create({
           followerId: currentUserId,
-          followingId: Number(userId)
+          followingId: Number(id)
         })
       })
       .then(followingUser => res.json(followingUser))
