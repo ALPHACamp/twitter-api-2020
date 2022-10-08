@@ -20,7 +20,7 @@ module.exports = {
           UserId: user.id,
           TweetId: tweets[Math.floor(Math.random() * tweets.length)].id,
           comment: faker.lorem.sentence(3),
-          createdAt: faker.date.between('2022-09-01T00:00:00.000Z', '2022-10-01T00:00:00.000Z'),
+          createdAt: faker.date.between('2022-09-16T00:00:00.000Z', '2022-10-01T00:00:00.000Z'),
           updatedAt: new Date()
         }))
       )
@@ -38,7 +38,7 @@ module.exports = {
             UserId,
             TweetId: tweet.id,
             comment: faker.lorem.sentence(3),
-            createdAt: faker.date.between('2022-09-01T00:00:00.000Z', '2022-10-01T00:00:00.000Z'),
+            createdAt: faker.date.between('2022-09-16T00:00:00.000Z', '2022-10-01T00:00:00.000Z'),
             updatedAt: new Date()
           }
         }))
