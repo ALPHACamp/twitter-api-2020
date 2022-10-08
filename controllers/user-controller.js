@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
+const sequelize = require('sequelize')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -129,6 +130,40 @@ const userController = {
         }))
         res.status(200).json(replies)
       }).catch(err => next(err))
+  },
+  getUserFollowings: (req, res, next) => {
+    const UserId = req.params.id
+    return User.findByPk(UserId, {
+      attributes: ['id',
+        'name',
+        'account',
+        'avatar',
+        'introduction'],
+      include:
+        [{
+          model: User,
+          as: 'Followings',
+          attributes: ['id',
+            'name',
+            'account',
+            'avatar',
+            'introduction']
+        }],
+      order:
+        [[sequelize.col('Followings.created_at', 'DESC')]]
+    })
+      .then(user => {
+        const userFollowings = helpers.getUser(req).Followings.map(user => user.id)
+
+        const followings = user.toJSON().Followings
+
+        followings.forEach(data => {
+          data.followingId = data.Followship.followingId
+          data.isFollowed = userFollowings.some(id => id === data.id)
+          delete data.Followship
+        })
+        res.status(200).json(followings)
+      })
   }
 
 
