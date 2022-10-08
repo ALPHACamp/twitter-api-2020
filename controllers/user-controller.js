@@ -11,6 +11,7 @@ const userController = {
     const [nameMin, nameMax] = [1, 50]
 
     if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
+    if (!password || !checkPassword || !email || !account || !name) throw new Error('欄位皆為必填')
 
     User.findOne({
       attributes: ['email', 'account'],
@@ -90,6 +91,44 @@ const userController = {
       })
       .then(updateUser => {
         const user = updateUser.toJSON()
+        delete user.password
+        res.json(user)
+      })
+      .catch(err => next(err))
+  },
+  putUserSetting: (req, res, next) => {
+    const { account, name, email, password, checkPassword } = req.body
+    const [nameMin, nameMax] = [1, 50]
+    const id = req.params.id
+
+    if (password !== checkPassword) throw new Error('密碼不相符')
+    if (name.length < nameMin || name.length > nameMax) throw new Error(`暱稱字數限制需在 ${nameMin}~ ${nameMax} 字之內`)
+    if (!account || !name || !email || !password || !checkPassword) {
+      throw new Error('所有欄位都是必填的')
+    }
+
+    Promise.all([User.findAll({ raw: true }),
+      User.findByPk(id)
+    ])
+      .then(([users, currentUser]) => {
+        users.forEach(user => {
+          if (user.id !== currentUser.id) {
+            if (user.account === account) {
+              throw new Error('此帳號已被使用')
+            } else if (user.email === email) {
+              throw new Error('此Email已被使用')
+            }
+          }
+        })
+        return currentUser.update({
+          account,
+          name,
+          email,
+          password: bcrypt.hashSync(password, 10)
+        })
+      })
+      .then(newUser => {
+        const user = newUser.toJSON()
         delete user.password
         res.json(user)
       })
@@ -176,8 +215,7 @@ const userController = {
                     '(SELECT COUNT(*) FROM likes AS LikeUsers WHERE tweet_id = Tweet.id )'
                   ), 'LikeCount'
                 ]
-              ],
-            exclude: ['userId']
+              ]
           }
         }
       ],
@@ -252,13 +290,13 @@ const userController = {
   },
   addFollowing: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id
-    const { userId } = req.body
+    const { id } = req.body
     Promise.all([
-      User.findByPk(userId),
+      User.findByPk(id),
       Followship.findOne({
         where: {
           followerId: currentUserId,
-          followingId: userId
+          followingId: id
         }
       })
     ])
@@ -268,7 +306,7 @@ const userController = {
         if (followship) throw new Error('已追蹤過這個使用者')
         return Followship.create({
           followerId: currentUserId,
-          followingId: Number(userId)
+          followingId: Number(id)
         })
       })
       .then(followingUser => res.json(followingUser))
