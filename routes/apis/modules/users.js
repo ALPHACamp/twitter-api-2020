@@ -11,6 +11,7 @@ router.get('/:id/replied_tweets', authenticated, userController.getUserReplies) 
 router.get('/:id/likes', authenticated, userController.getUserLikes)
 router.get('/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/:id/followers', authenticated, userController.getUserFollowers)
+router.put('/:id/setting', authenticated, userController.putUserSetting) // 使用者帳號更新
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn) // 使用者登入
 router.get('/:id', authenticated, userController.getUserProfile) // 取得使用者資料
 router.put('/:id', authenticated, userController.putUserProfile) // 更新使用者資料
