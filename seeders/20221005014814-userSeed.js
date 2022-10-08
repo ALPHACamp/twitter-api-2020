@@ -72,23 +72,33 @@ module.exports = {
           created_at: new Date(),
           updated_at: new Date()
         }
-      ]
-
-      // Array.from({ length: 10 }).map((_, i) => ({
-      //   account: `user${i}`,
-      //   email: `user${i}@example.com`,
-      //   password: await bcrypt.hash('12345678', 10),
-      //   name: `user${i}`,
-      //   avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
-      //   cover: `https://loremflickr.com/320/240/scenery/?random=${Math.random() * 100}`,
-      //   introduction: "introdution",
-      //   created_at: new Date(),
-      //   updated_at: new Date()
-      // }))
-    
-    , {})
+        ,
+        {
+          account: `user6`,
+          email: `user6@example.com`,
+          password: await bcrypt.hash('12345678', 10),
+          name: `user6`,
+          avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
+          cover: `https://loremflickr.com/320/240/scenery/?random=${Math.random() * 100}`,
+          introduction: "introdution",
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+        ,
+        {
+          account: `user7`,
+          email: `user7@example.com`,
+          password: await bcrypt.hash('12345678', 10),
+          name: `user7`,
+          avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
+          cover: `https://loremflickr.com/320/240/scenery/?random=${Math.random() * 100}`,
+          introduction: "introdution",
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      ], {})
    
-  },
+  }, 
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Users', {})

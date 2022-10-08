@@ -19,14 +19,14 @@ passport.use(new LocalStrategy(
     User.findOne({ where: { account } })
       .then(user => {
         if (!user) {
-          req.authError = "This account didn't exist!"
+          req.authError = "此帳號不存在!"
           return cb(null, false)
         }
 
         return bcrypt.compare(password, user.password)
           .then(res => {
             if (!res) {
-              req.authError = "password is incorrect！"
+              req.authError = "密碼錯誤!"
               return cb(null, false)
             }
 
@@ -42,12 +42,7 @@ const jwtOptions = {
 }
 
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
-    include: [
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
-    ]
-  })
+  User.findByPk(jwtPayload.id)
     .then(user => {
       cb(null, user)
     })
@@ -62,7 +57,6 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser((id, cb) => {
   User.findByPk(id, {
     include: [
-      { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]

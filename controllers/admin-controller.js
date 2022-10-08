@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { User } = require('../models')
+const bcrypt = require('bcryptjs')
+
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -24,7 +26,6 @@ const adminController = {
     }
   },
   getUsers: (req, res, next) => {
-    console.log(req)
     User.findAll({
       where: { role: null }
     })
