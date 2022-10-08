@@ -9,7 +9,7 @@ const ExtractJWT = require('passport-jwt').ExtractJwt
 passport.use(new LocalStrategy({
   usernameField: 'account'
 }, (account, password, cb) => {
-  // authenticate
+  // signin authenticate
   User.findOne({ where: { account } })
     .then(user => {
       if (!user) throw new Error('尚未註冊')
@@ -38,9 +38,9 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
     ]
   })
     .then(user => {
-      cb(null, user.toJSON())
+      cb(null, user)
     })
-    .catch(error => cb(error)) // callback(error) to error handler
+    .catch(error => cb(error))
 }))
 
 module.exports = passport
