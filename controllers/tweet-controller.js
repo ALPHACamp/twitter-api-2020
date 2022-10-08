@@ -32,6 +32,27 @@ const tweetController = {
   },
   likeTweet:(req, res, next) => {
     // POST /api/tweets/:tweet_id/like - 喜歡一則推文
+    const TweetId = req.params.id
+    const UserId = req.user.id
+    return Promise.all([
+      Tweet.findByPK(TweetId),
+      Like.findOne({
+        where: {
+          TweetId,
+          UserId
+        }
+      })
+    ])
+    .then(([tweet, likedTweet]) => {
+      if (!tweet) throw new Error('Tweet does not exist!')
+      if (likedTweet) throw new Error('You hav liked this Tweet!')
+      return Like.create({
+        TweetId,
+        UserId
+      })
+    .then(likeRecord => res.json(likeRecord))
+    })
+    .catch(err => next(err))
   },
   unlikeTweet:(req, res, next) => {
     // POST /api/tweets/:tweet_id/unlike - 取消喜歡一則推文
@@ -41,8 +62,7 @@ const tweetController = {
   },
   postReply:(req, res, next) => {
     // POST /tweets/:tweet_id/replies - 新增回覆
-  },
-
+  }
 }
 
 module.exports = tweetController
