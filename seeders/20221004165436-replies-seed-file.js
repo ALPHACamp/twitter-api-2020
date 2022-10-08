@@ -7,7 +7,7 @@ module.exports = {
     await queryInterface.bulkInsert('Replies', Array.from({ length: 180 }, (_, i) => ({
       user_id: users[Math.floor(Math.random() * users.length)].id, // 每篇貼文有3個使用者隨機留言
       tweet_id: tweets[(i % tweets.length)].id, // 每篇貼文有3個留言
-      text: faker.lorem.text(),
+      comment: faker.lorem.text(),
       created_at: new Date(),
       updated_at: new Date()
     })), {})

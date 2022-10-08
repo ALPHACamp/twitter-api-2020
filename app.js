@@ -1,21 +1,20 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+
 const path = require('path')
 const express = require('express')
 const methodOverride = require('method-override')
 const session = require('express-session')
 
-// const { getUser } = require('./_helpers')
-
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-}
-
 const passport = require('./config/passport')
 const { apis } = require('./routes')
+
 const app = express()
 const PORT = process.env.PORT
 
-app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(express.urlencoded({ extended: true }))
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(express.json())
 app.use(methodOverride('_method'))
 app.use(session({
