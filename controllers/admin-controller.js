@@ -51,6 +51,7 @@ const adminController = {
     const id = req.params.id
     Tweet.findByPk(id)
       .then(tweet => {
+        if (!tweet) return res.status(404).json({ status: 'error', message: '此貼文不存在' })
         return tweet.destroy()
       })
       .then(deletetweet => { res.json(deletetweet) })
