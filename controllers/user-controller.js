@@ -54,6 +54,15 @@ const userController = {
       next(err)
     }
   },
+  getCurrentUser: (req, res, next) => {
+    const currentUser = helpers.getUser(req)?.id
+
+    User.findByPk(currentUser, {
+      attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }
+    })
+      .then(user => res.json(user))
+      .catch(err => next(err))
+  },
   getUserProfile: (req, res, next) => {
     const id = Number(req.params.id)
     User.findByPk(id, {
