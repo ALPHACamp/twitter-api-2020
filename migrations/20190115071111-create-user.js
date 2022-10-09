@@ -31,10 +31,10 @@ module.exports = {
         defaultValue: '請輸入自我介紹',
         type: Sequelize.STRING
       },
-      is_admin: {
+      role: {
         allowNull: false,
-        defaultValue: false,
-        type: Sequelize.BOOLEAN
+        defaultValue: 'user',
+        type: Sequelize.STRING
       },
       created_at: {
         allowNull: false,

@@ -9,7 +9,7 @@ const ExtractJWT = require('passport-jwt').ExtractJwt
 passport.use(new LocalStrategy({
   usernameField: 'account'
 }, (account, password, cb) => {
-  // authenticate
+  // signin authenticate
   User.findOne({ where: { account } })
     .then(user => {
       if (!user) throw new Error('尚未註冊')
@@ -31,14 +31,16 @@ const jwtOptions = {
 }
 // check token
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  return User.findByPk(jwtPayload.id, {
+  User.findByPk(jwtPayload.id, {
     include: [
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
   })
-    .then(user => cb(null, user.toJSON()))
-    .catch(error => cb(error)) // callback(error) to error handler
+    .then(user => {
+      cb(null, user)
+    })
+    .catch(error => cb(error))
 }))
 
 module.exports = passport
