@@ -7,39 +7,50 @@ const { User } = require('../models')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 
-passport.use(new LocalStrategy(
-  {
-    usernameField: 'account',
-    passwordField: 'password'
-  },
-  async (account, password, done) => {
-    try {
-      const user = await User.findOne({ where: { account } })
-      if (!user) throw new Error('Incorrect account or password.')
-      const passwordMatching = bcrypt.compare(password, user.password)
-      if (!passwordMatching) throw new Error('Incorrect account or password.')
-      return done(null, user)
-    } catch(err) {
-      return done(err, false)
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: 'account',
+      passwordField: 'password'
+    },
+    async (account, password, done) => {
+      try {
+        const user = await User.findOne({ where: { account } })
+        if (!user) throw new Error('Incorrect account or password.')
+        const passwordMatching = bcrypt.compare(password, user.password)
+        if (!passwordMatching) throw new Error('Incorrect account or password.')
+        return done(null, user)
+      } catch (err) {
+        return done(err, false)
+      }
     }
-  }
-))
+  )
+)
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
-  passReqToCallback: true
+  secretOrKey: process.env.JWT_SECRET
 }
-passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
-    include: [
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
-    ]
+
+passport.use(
+  new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
+    User.findByPk(jwtPayload.id, {
+      raw: true,
+      nest: true,
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+      .then((user) => {
+        cb(null, user)
+      })
+      .catch((err) => {
+        cb(err, false)
+      })
   })
-    .then(user => cb(null, user))
-    .catch(err => cb(err))
-}))
+)
+
 /*
 passport.serializeUser((user, cb) => {
   cb(null, user.id)

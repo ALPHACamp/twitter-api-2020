@@ -7,14 +7,17 @@ module.exports = (sequelize, DataTypes) => {
       Like.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
     }
   }
-  Like.init({
-    UserId: DataTypes.INTEGER,
-    TweetId: DataTypes.INTEGER,
-    isLike: DataTypes.BOOLEAN
-  }, {
-    sequelize,
-    tableName: 'Likes',
-    modelName: 'Like'
-  })
+  Like.init(
+    {
+      UserId: DataTypes.INTEGER,
+      TweetId: DataTypes.INTEGER,
+      isLike: DataTypes.BOOLEAN
+    },
+    {
+      sequelize,
+      tableName: 'Likes',
+      modelName: 'Like'
+    }
+  )
   return Like
 }
