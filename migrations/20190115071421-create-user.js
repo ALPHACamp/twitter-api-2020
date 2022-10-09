@@ -29,11 +29,11 @@ module.exports = {
       cover_photo: {
         type: Sequelize.STRING
       },
-      intro: {
+      introduction: {
         type: Sequelize.TEXT
       },
-      is_admin: {
-        type: Sequelize.BOOLEAN
+      role: {
+        type: Sequelize.STRING
       },
       created_at: {
         allowNull: false,
