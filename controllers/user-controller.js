@@ -59,6 +59,7 @@ const userController = {
         account,
         name,
         email,
+        role: 'user',
         password:bcrypt.hashSync(
           password,
           bcrypt.genSaltSync(10),
@@ -76,7 +77,7 @@ const userController = {
     
   },
   getCurrentUser: (req, res, next) => {
-    
+
     return res.status(200).json({
       id: req.user.id,
       name: req.user.name,
@@ -129,7 +130,6 @@ const userController = {
         account,
         name,
         email,
-        role: 'user',
         password: bcrypt.hashSync(
           password,
           bcrypt.genSaltSync(10),
