@@ -92,9 +92,9 @@ const userController = {
       .catch(err => next(err))
   },
   getUserTweets: (req, res, next) => {
-    const { id } = req.params
+    const UserId = req.params.id
     return Tweet.findAll({
-      where: { UserId: id },
+      where: { UserId },
       order: [['createdAt', 'DESC']],
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }, { model: Reply, attributes: ['id'] }, { model: Like, attributes: ['UserId'] }]
     })
@@ -109,10 +109,28 @@ const userController = {
           likeCounts: tweet.Likes.length,
           isLiked: tweet.Likes.some(l => l.UserId === currentUser.id),
         }
-         ))
-        
+        ))
         res.status(200).json(tweets)
-      })
+      }).catch(err => next(err))
+  },
+  getUserReply: (req, res, next) => {
+    const UserId = req.params.id
+    return Reply.findAll({
+      where: { UserId },
+      order: [['createdAt', 'DESC']],
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+      { model: Tweet, attributes: ['id', 'description'], include: [{ model: User, attributes: ['id', 'account'] }] }]
+    })
+      .then(replies => {
+        replies = replies.map(reply => ({
+          id: reply.id,
+          comment: reply.comment,
+          createdAt: reply.createdAt,
+          User: reply.User,
+          Tweet: reply.Tweet
+        }))
+        res.status(200).json(replies)
+      }).catch(err => next(err))
   }
 
 
