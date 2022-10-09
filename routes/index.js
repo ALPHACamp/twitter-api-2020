@@ -1,10 +1,16 @@
 const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
+const admin = require('./modules/admin')
+const adminController = require('../controllers/admin-controller')
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
 const { errorHandler } = require('../middleware/error-handler')
 const { authenticated, authAdmin, authUser } = require('../middleware/auth')
+
+// admin
+router.post('/admin/signin', passport.authenticate('local', { session: false }), adminController.signin)
+router.use('/admin', authenticated, authAdmin, admin)
 
 // user
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
