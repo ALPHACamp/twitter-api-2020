@@ -15,10 +15,10 @@ passport.use(new LocalStrategy({
   User.findOne({ where: { account } })
     .then(user => {
       // if user不存在
-      if (!user) return cb(Error('查無此帳號!'), false)
+      if (!user) return cb(Error('The account is incorrect!'), false)
       // 驗證密碼是否正確
       bcrypt.compare(password, user.password).then(res => {
-        if (!res) return cb(Error('密碼輸入錯誤！'), false)
+        if (!res) return cb(Error('The password is incorrect!'), false)
         // 密碼正確回傳資料
         return cb(null, user)
       })
