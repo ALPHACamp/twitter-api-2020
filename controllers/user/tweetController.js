@@ -1,4 +1,3 @@
-
 const { Tweet, User, Like, Reply } = require('../../models')
 const { tweetValidation } = require('../../helper/validations')
 const helpers = require('../../_helpers')
@@ -12,12 +11,12 @@ const tweetController = {
       const { description } = value
       assert(!error, error?.details[0].message)
       if (!description.trim()) throw new Error('內容不可空白')
-      const data = await Tweet.create({ 
+      const data = await Tweet.create({
         UserId,
         description
-       })
+      })
       return res.json({ status: 'success', data })
-    } catch(error) {
+    } catch (error) {
       next(error)
     }
   },
@@ -25,7 +24,7 @@ const tweetController = {
     try {
       const data = await Tweet.findAll({
         include: User,
-        order: [['createdAt', 'DESC']], 
+        order: [['createdAt', 'DESC']],
         nest: true,
         raw: true
       })
@@ -37,7 +36,7 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     try {
       const tweetId = req.params.tweet_id
-      const [ tweetData, likeData, replyData ] = await Promise.all([
+      const [tweetData, likeData, replyData] = await Promise.all([
         Tweet.findByPk(tweetId, {
           include: User,
           nest: true,
@@ -50,7 +49,7 @@ const tweetController = {
       tweetData.replyCount = replyData.length
       // return res.json({ status: 'success', data: tweetData })
       return res.json(tweetData)
-    } catch(error) {
+    } catch (error) {
       next(error)
     }
   },
@@ -93,7 +92,7 @@ const tweetController = {
 
       const like = await Like.findOne({ where: { TweetId, UserId } })
       assert(like, '不可不重複喜歡')
-      const deletedLike = like.destroy()
+      const deletedLike = await like.destroy()
       return res.status(200).json({
         status: 'success',
         data: deletedLike
