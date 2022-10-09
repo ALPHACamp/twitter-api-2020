@@ -5,21 +5,23 @@ const tweetController = {
   getTweets: (req, res, next) => {
     // GET /api/tweets - 瀏覽所有推文
     return Tweet.findAll({
-      attributes: { exclude:[ 'updatedAt' ] },
+      attributes: { exclude:[ 'UserId', 'updatedAt' ] },
       include: [{
         model: User,
         as: 'tweetAuthor',
         attributes: [ 'id', 'account', 'name', 'avatar' ]
       }, 
-      {model: Like},
-      {model: Reply},
+      {model: Like,
+      attributes: ['TweetId', 'UserId']},
+      {model: Reply,
+      attributes: ['id']},
     ]
     })
     .then(tweets => {
       const data = tweets.map(tweet => ({
         ...tweet.toJSON(),
-        likeCount: tweet.Likes.length,
-        replyCount: tweet.Replies.length
+        likeCounts: tweet.Likes.length,
+        replyCounts: tweet.Replies.length
       }))
       .sort((a, b) => b.createdAt - a.createdAt)
       res.status(200).json(data)
@@ -27,12 +29,22 @@ const tweetController = {
     .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
+    // GET /api/tweets/:id - 瀏覽一則推文
     return Tweet.findByPk(req.params.id, {
-      include: [{
+      attributes: { exclude: ['updatedAt', 'UserId'] },
+      include: [
+        {
         model: User,
         as: 'tweetAuthor',
-        attributes: { exclude:[ 'password' ] },
-       }]
+        attributes: ['id', 'avatar', 'name', 'account']
+        },
+        { model: Like,
+          attributes: ['UserId']
+        },
+        { model: Reply,
+          attributes: ['UserId']
+        }
+      ]
     })
     .then(tweet => res.status(200).json(tweet))
     .catch(err => next(err))
