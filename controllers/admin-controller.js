@@ -36,7 +36,7 @@ const adminController = {
             '(SELECT COUNT(*) FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweet_id WHERE Tweets.User_id = User.id)'
           ), 'likesCount']
         ],
-        exclude: ['password', 'email', 'role', 'introduction', 'updatedAt']
+        exclude: ['password', 'email', 'introduction', 'updatedAt']
       },
       order: [
         [sequelize.literal('tweetsCount'), 'DESC'],
@@ -51,6 +51,7 @@ const adminController = {
     const id = req.params.id
     Tweet.findByPk(id)
       .then(tweet => {
+        if (!tweet) return res.status(404).json({ status: 'error', message: '此貼文不存在' })
         return tweet.destroy()
       })
       .then(deletetweet => { res.json(deletetweet) })

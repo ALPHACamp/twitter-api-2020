@@ -10,7 +10,7 @@ const userController = {
     const { password, checkPassword, email, account, name } = req.body
     const [nameMin, nameMax] = [1, 50]
 
-    if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
+    if (password !== checkPassword) throw new Error('密碼與驗證密碼不符')
     if (!password || !checkPassword || !email || !account || !name) throw new Error('欄位皆為必填')
 
     User.findOne({
@@ -110,7 +110,7 @@ const userController = {
   putUserSetting: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     const [nameMin, nameMax] = [1, 50]
-    const id = req.params.id
+    const id = Number(req.params.id)
 
     if (password !== checkPassword) throw new Error('密碼不相符')
     if (name.length < nameMin || name.length > nameMax) throw new Error(`暱稱字數限制需在 ${nameMin}~ ${nameMax} 字之內`)
@@ -118,6 +118,7 @@ const userController = {
       throw new Error('所有欄位都是必填的')
     }
 
+    if (id !== helpers.getUser(req).id) return res.status(401).json({ status: 'error', message: '未經授權' })
     Promise.all([
       User.findAll({ raw: true }),
       User.findByPk(id)
