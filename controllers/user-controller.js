@@ -129,6 +129,7 @@ const userController = {
         account,
         name,
         email,
+        role: 'user',
         password: bcrypt.hashSync(
           password,
           bcrypt.genSaltSync(10),

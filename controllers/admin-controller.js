@@ -46,6 +46,27 @@ const adminController = {
         return res.status(200).json(users)
       })
       .catch(err => next(err))
+  },
+  getUsers: (req, res, next) => {
+    User.findAll({
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' },
+        { model: Reply, include: Tweet },
+        { model: Like, include: Tweet }
+      ]
+    })
+      .then(users => {
+        users = users.map(user => ({
+          ...user.toJSON(),
+          followerCount: user.Followers.length,
+          followingCount: user.Followings.length,
+          replyCount: user.Replies.length,
+          likeCount: user.Likes.length
+        }))
+        return res.status(200).json(users)
+      })
+      .catch(err => next(err))
   }
 
 }
