@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
+
 const { User, Tweet, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 
@@ -53,6 +54,7 @@ const userController = {
   },
   getUser: (req, res, next) => {
     const currentUser = helpers.getUser(req).dataValues
+    console.log(currentUser)
     const { id } = req.params
     return User.findByPk(id, {
       include:
