@@ -5,7 +5,6 @@ if (process.env.NODE_ENV !== 'production') {
 const path = require('path')
 const express = require('express')
 const methodOverride = require('method-override')
-const session = require('express-session')
 
 const passport = require('./config/passport')
 const { apis } = require('./routes')
@@ -17,13 +16,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(express.json())
 app.use(methodOverride('_method'))
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false
-}))
 app.use(passport.initialize())
-app.use(passport.session())
 // use helpers.getUser(req) to replace req.user
 // function authenticated (req, res, next) {
 //   // passport.authenticate('jwt', { ses...
