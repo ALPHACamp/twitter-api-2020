@@ -105,7 +105,7 @@ const userController = {
         tweetCount: user.Tweets.length,
         followerCount: user.Followers.length,
         followingCount: user.Followings.length,
-        isFollowed: user.Followers.map(el => el.id).include(req.user.id)
+        isFollowed: user.Followers.map(u => u.id).include(req.user.id)
       }
         return res.status(200).json(userData)
       }
@@ -113,7 +113,43 @@ const userController = {
           next(error)
         }
     },
-    
+    getUserTweets: async (req, res, next) =>{
+      try{
+        const UserId = req.params.id
+        const user = await User.findByPK(UserId)
+
+        const tweets = await Tweet.findAll({
+          where: { UserId},
+          include: [
+            User,
+            Like,
+            Reply,
+            { model: User, as:'LikedUsers' }
+          ],
+          order: [['createdAt','DESC']]
+        })
+        if(!user || user.role === 'admin') {
+          return res.status(404).json({ status: 'error',message:'使用者不存在'})
+        }
+        tweets = tweets.map(tweet => {
+          return{
+            id:tweet.id,
+            UserId:tweet.UserId,
+            description:tweet.description,
+            account:tweet.User.account,
+            name:tweet.User.name,
+            avatar:tweet.User.avatar,
+            createdAt:tweet.createdAt,
+            likedCount:tweet.Likes.length,
+            repliedCount:tweet.Replies.length,
+            isLike: tweet.LikeUsers.map(t =>t.id).include(req.user.id)
+          }
+        })
+        return res.status(200).json(tweets)
+      } catch(err) {
+        next(err)
+      }
+    }
 }
 
 module.exports = userController
