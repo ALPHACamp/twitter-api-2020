@@ -31,6 +31,7 @@ const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET
 }
+
 passport.use(
   new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
     User.findByPk(jwtPayload.id, {
@@ -49,6 +50,7 @@ passport.use(
       })
   })
 )
+
 /*
 passport.serializeUser((user, cb) => {
   cb(null, user.id)

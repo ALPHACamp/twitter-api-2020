@@ -11,6 +11,14 @@ const userValidation = (data) => {
   return schema.validate(data)
 }
 
+const tweetValidation = (data) => {
+  const schema = joi.object({
+    description: joi.string().max(140)
+  })
+  return schema.validate(data)
+}
+
 module.exports = {
-  userValidation
+  userValidation,
+  tweetValidation
 }
