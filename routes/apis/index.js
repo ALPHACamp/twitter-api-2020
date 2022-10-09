@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const passport = require('../../config/passport')
+// const passport = require('../../config/passport')
 
 const admin = require('./modules/admin')
 const userController = require('../../controllers/user-controller')
@@ -13,7 +13,7 @@ const { apiErrorHandler } = require('../../middleware/error-handler')
 router.use('/admin', admin)
 
 // Users
-router.post('/signin', passport.authenticate('local', { failureRedirect: '/signin', failureFlash: true }), userController.signIn)
+router.post('/users', userController.signUp)
 
 // Tweets
 router.get('/tweets/:id/replies', tweetController.getReplies)
