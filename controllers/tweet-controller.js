@@ -1,4 +1,5 @@
 const { Tweet, User, Reply, Like } = require('../models')
+const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: (req, res, next) => {
@@ -22,15 +23,13 @@ const tweetController = {
             image: tweet.User.image
           }
         }))
-        console.log(tweets.description)
-        console.log(tweets)
-        return res.status(200).json({ data: tweets })
+        return res.status(200).json(tweets)
       })
       .catch(error => next(error))
   },
   postTweet: (req, res, next) => {
     const { description } = req.body
-    const UserId = req.user.id
+    const UserId = helpers.getUser(req).id
     if (!description.trim()) throw new Error('內容不可空白')
     if (description.length > 140) throw new Error('推文的字數超過上限 140 個字!')
     return User.findByPk(UserId)
@@ -51,7 +50,8 @@ const tweetController = {
       .catch(error => next(error))
   },
   getTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.id, { include: [User, Like, Reply] })
+    const TweetId = req.params.id
+    return Tweet.findByPk(TweetId, { include: [User, Like, Reply] })
       .then(tweetData => {
         if (!tweetData) throw new Error('推文不存在')
         const tweet = {
@@ -69,15 +69,13 @@ const tweetController = {
             image: tweetData.User.image
           }
         }
-        console.log(tweet.description)
-        console.log(tweet)
-        return res.status(200).json({ data: tweet })
+        return res.status(200).json(tweet)
       })
       .catch(error => next(error))
   },
   postRepliedTweet: (req, res, next) => {
     const { comment } = req.body
-    const UserId = req.user.id
+    const UserId = helpers.getUser(req).id
     const TweetId = req.params.tweet_id
     if (!comment.trim()) throw new Error('內容不可空白')
     return Promise.all([
@@ -108,30 +106,31 @@ const tweetController = {
       Tweet.findByPk(TweetId),
       Reply.findAll({
         where: { TweetId },
-        include: [{ model: User, attributes: ['name', 'account', 'image'] }],
-        order: [['createdAt', 'DESC']],
-        attributes: ['id', 'comment', 'UserId', 'TweetId', 'createdAt', 'updatedAt'],
-        nest: true,
-        raw: true
+        include: [User],
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([tweet, replies]) => {
         if (!tweet) throw new Error('推文不存在')
         const repliedTweets = replies.map(reply => ({
-          ...reply,
-          name: reply.User.name,
-          account: reply.User.account,
-          image: reply.User.image
+          id: reply.id,
+          comment: reply.comment,
+          UserId: reply.UserId,
+          TweetId: reply.TweetId,
+          createdAt: reply.createdAt,
+          updatedAt: reply.updatedAt,
+          user: {
+            name: reply.User.name,
+            account: reply.User.account,
+            image: reply.User.image
+          }
         }))
-        console.log(repliedTweets[0].comment)
-        console.log(repliedTweets)
-        console.log(repliedTweets.length)
-        return res.status(200).json({ data: repliedTweets })
+        return res.status(200).json(repliedTweets)
       })
       .catch(error => next(error))
   },
   likeTweet: (req, res, next) => {
-    const UserId = req.user.id
+    const UserId = helpers.getUser(req).id
     const TweetId = req.params.id
     return Promise.all([
       Tweet.findByPk(TweetId),
@@ -156,7 +155,7 @@ const tweetController = {
       .catch(error => next(error))
   },
   unlikeTweet: (req, res, next) => {
-    const UserId = req.user.id
+    const UserId = helpers.getUser(req).id
     const TweetId = req.params.id
     return Promise.all([
       Tweet.findByPk(TweetId),
