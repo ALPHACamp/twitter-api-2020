@@ -1,5 +1,6 @@
 const { Like, Reply, Tweet, User } = require('../models')
 const { getUser } = require('../_helpers')
+
 const tweetController = {
   getTweets: (req, res, next) => {
     // GET /api/tweets - 瀏覽所有推文
@@ -27,22 +28,22 @@ const tweetController = {
   },
   getTweet: (req, res, next) => {
     return Tweet.findByPk(req.params.id, {
-      include: [{ model: User }],
-      nest: true,
-      raw: true
+      include: [{
+        model: User,
+        as: 'tweetAuthor',
+        attributes: { exclude:[ 'password' ] },
+       }]
     })
-    .then(tweet => {
-      return res.json(tweet)
-    })
+    .then(tweet => res.status(200).json(tweet))
     .catch(err => next(err))
   },
   postTweet:(req, res, next) => {
     // POST /api/tweets - 發布一筆推文
-    const UserId = req.user.dataValues.id
+    const UserId = getUser(req).dataValues.id
     const { description } = req.body
     if (!description) throw new Error('Description is required!')
     return User.findByPk(UserId)
-    .then((user) => {
+    .then(user => {
       if (!user) throw new Error("User didn't exist!")
       return Tweet.create({
         UserId,
