@@ -2,9 +2,9 @@ const { Like, Tweet, User } = require('../models')
 
 const adminController = {
   getUsers: (req, res, next) => {
-    // GET /api/admin/users - 瀏覽使用者清單
+    // GET /api/admin/users - 瀏覽使用者清單  
     return User.findAll({
-      attributes:['id', 'account', 'name', 'avatar'],
+      attributes:['id', 'account', 'name', 'avatar', 'backgroundImage'],
       include:[{
         model: Tweet,
         as: 'Tweets',
@@ -38,7 +38,10 @@ const adminController = {
         Followings: ['omit']
       }))
       .sort((a, b) => ( b.tweetCount - a.tweetCount ))
-      res.status(200).json(users)
+      res.status(200).json({
+        status: 'success',
+        users
+      })
     })
     .catch(err => next(err))
   },
@@ -48,6 +51,7 @@ const adminController = {
       attributes: { exclude: ['updatedAt', 'UserId'] },
       include: [{
         model: User,
+        as: 'tweetAuthor',
         attributes: ['id', 'account', 'avatar', 'name']
       }],
       nest: true,
@@ -65,15 +69,18 @@ const adminController = {
   },
   deleteTweet: (req, res, next) => {
     // DELETE /api/admin/tweets/:id - 刪除使用者的推文
+    console.log('太空戰士', req.par)
     return Tweet.findByPk(req.params.id)
     .then(tweet => {
-      if(!tweet) throw new Error("The tweet does not exist!")
+      console.log('太空戰士', tweet)
+      if(!tweet) throw new Error("Tweet does not exist!")
       return tweet.destroy()
     })
-    .then(data => res.json({
+    .then(data => {
+    res.json({
       status: 'success',
       deleted_tweet: data
-    }))
+    })})
     .catch(err => next(err))
   } 
 }

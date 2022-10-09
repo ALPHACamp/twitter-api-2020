@@ -9,7 +9,7 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user && (req.user.role === 'admin')) return next() // 需除錯
+  if (req.user && req.user.dataValues.role === 'admin') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 
