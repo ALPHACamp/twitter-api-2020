@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Reply.associate = function(models) {
     Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId'})
-    Reply.belongsTo(models.User, { foreignKey: 'UserId'})
+    Reply.belongsTo(models.User, { foreignKey: 'UserId', as: 'replyUser'})
   }
   Reply.init({
     comment: DataTypes.TEXT,
