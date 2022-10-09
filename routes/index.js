@@ -8,6 +8,7 @@ const { authenticated, authAdmin, authUser } = require('../middleware/auth')
 // user
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
 router.post('/users', userController.signup)
+router.get('/users/:id', authenticated, authUser, userController.getUser)
 
 // error handler
 router.use('/', errorHandler)

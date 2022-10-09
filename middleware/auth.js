@@ -1,20 +1,30 @@
 const passport = require('../config/passport')
+const helpers = require('../_helpers')
 
 // check all routes' token
-const authenticated = passport.authenticate('jwt', { session: false })
+const authenticated = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (error, user) => {
+    if (error || !user) {
+      return res.status(401).json({
+        status: 'error',
+        message: '尚未授權，請先登入'
+      })
+    }
+    req.user = user // user -> js obj
+    next()
+  })(req, res, next)
+}
 
 // check user's auth to right route
 const authAdmin = (req, res, next) => {
-  // 若使用管理帳號登入前台，等同於「帳號不存在」
-  if (!req.user.isAdmin) throw new Error('無權限進入後台')
-  return next()
+  if (helpers.getUser(req)?.role === 'admin') return next()
+  return res.status(403).json({ status: 'error', message: 'Error: 無權限進入後台' })
 }
 
 // check user's auth to right route
 const authUser = (req, res, next) => {
-  // 使用一般使用者帳號登入後台，等同於「帳號不存在」
-  if (req.user.isAdmin) throw new Error('無權限進入前台')
-  return next()
+  if (helpers.getUser(req)?.role === 'user') return next()
+  return res.status(403).json({ status: 'error', message: 'Error: 無權限進入前台' })
 }
 
 module.exports = {
