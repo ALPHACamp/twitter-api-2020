@@ -10,20 +10,23 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
-      if (password !== checkPassword) { throw new Error('密碼輸入錯誤，請重新確認') }
+      if (password !== checkPassword) {
+        throw new Error('密碼輸入錯誤，請重新確認')
+      }
 
-      const [userEmail, userAccount] = Promise.all([
+      const [userEmail, userAccount] = await Promise.all([
         User.findOne({ where: { email } }),
         User.findOne({ where: { account } })
       ])
 
-      if (userEmail) throw new Error('email 已重複註冊！')
-      if (userAccount) throw new Error('account 已重複註冊！')
+      assert(!userEmail, 'email 已重複註冊！')
+      assert(!userAccount, 'account 已重複註冊！')
       const user = await User.create({
         account,
         name,
         email,
-        password: bcrypt.hash(password, 10)
+        password: await bcrypt.hash(password, 10),
+        role: 'user'
       })
       return res.json({ status: 'success', data: user })
     } catch (err) {
