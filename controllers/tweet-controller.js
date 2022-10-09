@@ -5,10 +5,36 @@ const tweetController = {
     // GET /api/tweets - 瀏覽所有推文
   },
   getTweet: (req, res, next) => {
-    // GET /api/tweets/:tweet_id - 讀取特定推文
+    return Tweet.findByPk(req.params.id, {
+      include: [{ model: User }],
+      nest: true,
+      raw: true
+    })
+    .then(tweet => {
+      return res.json(tweet)
+    })
+    .catch(err => next(err))
   },
   postTweet:(req, res, next) => {
     // POST /api/tweets - 發布一筆推文
+    const UserId = req.user.dataValues.id
+    const { description } = req.body
+    if (!description) throw new Error('Description is required!')
+    return User.findByPk(UserId)
+    .then((user) => {
+      if (!user) throw new Error("User didn't exist!")
+      return Tweet.create({
+        UserId,
+        description
+      })
+    })
+    .then(data => {
+      res.json({ 
+        status: 'success',
+        data
+      })
+    })
+    .catch(err => next(err))
   },
   likeTweet:(req, res, next) => {
     // POST /api/tweets/:tweet_id/like - 喜歡一則推文
