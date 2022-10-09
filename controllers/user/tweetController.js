@@ -1,13 +1,15 @@
 const { Tweet, User, Like, Reply } = require('../../models')
 const { tweetValidation } = require('../../helper/validations')
 const helpers = require('../../_helpers')
+const assert = require('assert')
 
 const tweetController = {
   addTweet: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
-      const { value } = tweetValidation(req.body)
+      const { value, error } = tweetValidation(req.body)
       const { description } = value
+      assert(!error, error?.details[0].message)
       if (!description.trim()) throw new Error('內容不可空白')
       const data = await Tweet.create({ 
         UserId,
