@@ -1,8 +1,8 @@
 const bcrypt = require('bcryptjs')
-// const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const { Op } = require('sequelize')
-// const { getUser } = require('../_helpers')
+const { getUser } = require('../_helpers')
 // const { imgurFileHandler } = require('../helpers/file-helper')
 
 const userServices = {
@@ -30,6 +30,22 @@ const userServices = {
       }))
       .then(newUser => cb(null, { newUser }))
       .catch(err => cb(err))
+  },
+  signIn: (req, cb) => {
+    try {
+      const userData = getUser(req).toJSON()
+      if (userData.role !== 'user') throw new Error('user permission denied')
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      return cb(null, {
+        status: 'success',
+        message: '成功登入',
+        token,
+        user: userData
+      })
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 
