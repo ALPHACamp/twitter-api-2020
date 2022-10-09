@@ -4,9 +4,9 @@ const helpers = require('../_helpers')
 
 const followshipController = {
   postFollow: (req, res, next) => {
-    const { id } = req.body
-    const currentUser = helpers.getUser(req).id
-    console.log(currentUser)
+    const id = Number(req.body.id)
+    const currentUser = Number(helpers.getUser(req).id)
+
     if (id === currentUser) throw new Error ("You couldn't follow yourself")
 
     return Followship.findOrCreate({ where: { followerId: currentUser, followingId: id }, raw: true })
