@@ -16,6 +16,10 @@ router.get('/tweets', authenticated, authUser, tweetController.getTweets)
 router.post('/tweets', authenticated, authUser, tweetController.postTweet)
 router.get('/tweets/:id', authenticated, authUser, tweetController.getTweet)
 
+// replies
+router.post('/tweets/:tweet_id/replies', authenticated, authUser, tweetController.postRepliedTweet)
+router.get('/tweets/:tweet_id/replies', authenticated, authUser, tweetController.getRepliedTweet)
+
 // error handler
 router.use('/', errorHandler)
 

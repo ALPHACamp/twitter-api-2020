@@ -74,6 +74,61 @@ const tweetController = {
         return res.status(200).json({ data: tweet })
       })
       .catch(error => next(error))
+  },
+  postRepliedTweet: (req, res, next) => {
+    const { comment } = req.body
+    const UserId = req.user.id
+    const TweetId = req.params.tweet_id
+    if (!comment.trim()) throw new Error('內容不可空白')
+    return Promise.all([
+      User.findByPk(UserId),
+      Tweet.findByPk(TweetId)
+    ])
+      .then(([user, tweet]) => {
+        if (!user) throw new Error('使用者不存在')
+        if (!tweet) throw new Error('推文不存在')
+        return Reply.create({
+          comment,
+          UserId,
+          TweetId
+        })
+      })
+      .then(repliedTweet => {
+        return res.status(200).json({
+          status: 'success',
+          message: '新增回覆成功',
+          data: repliedTweet
+        })
+      })
+      .catch(error => next(error))
+  },
+  getRepliedTweet: (req, res, next) => {
+    const TweetId = req.params.tweet_id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Reply.findAll({
+        where: { TweetId },
+        include: [{ model: User, attributes: ['name', 'account', 'image'] }],
+        order: [['createdAt', 'DESC']],
+        attributes: ['id', 'comment', 'UserId', 'TweetId', 'createdAt', 'updatedAt'],
+        nest: true,
+        raw: true
+      })
+    ])
+      .then(([tweet, replies]) => {
+        if (!tweet) throw new Error('推文不存在')
+        const repliedTweets = replies.map(reply => ({
+          ...reply,
+          name: reply.User.name,
+          account: reply.User.account,
+          image: reply.User.image
+        }))
+        console.log(repliedTweets[0].comment)
+        console.log(repliedTweets)
+        console.log(repliedTweets.length)
+        return res.status(200).json({ data: repliedTweets })
+      })
+      .catch(error => next(error))
   }
 }
 
