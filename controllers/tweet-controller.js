@@ -35,6 +35,25 @@ const tweetController = {
     .catch(err => next(err))
   },
   postTweet:(req, res, next) => {
+    // POST /api/tweets - 發布一筆推文
+    const UserId = req.user.dataValues.id
+    const { description } = req.body
+    if (!description) throw new Error('Description is required!')
+    return User.findByPk(UserId)
+    .then((user) => {
+      if (!user) throw new Error("User didn't exist!")
+      return Tweet.create({
+        UserId,
+        description
+      })
+    })
+    .then(data => {
+      res.json({ 
+        status: 'success',
+        data
+      })
+    })
+    .catch(err => next(err))
   },
   likeTweet:(req, res, next) => {
   },
