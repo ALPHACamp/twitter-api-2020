@@ -58,6 +58,15 @@ const adminServices = {
         return cb(null, data)
       })
       .catch(err => cb(err))
+  },
+  deleteTweet: (req, cb) => {
+    return Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        return tweet.destroy()
+      })
+      .then(deleteTweet => cb(null, deleteTweet))
+      .catch(err => cb(err))
   }
 }
 
