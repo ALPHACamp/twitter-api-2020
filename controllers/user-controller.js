@@ -142,13 +142,40 @@ const userController = {
             createdAt:tweet.createdAt,
             likedCount:tweet.Likes.length,
             repliedCount:tweet.Replies.length,
-            isLike: tweet.LikeUsers.map(t =>t.id).include(req.user.id)
+            isLike: tweet.LikeUsers.map(t =>t.id).includes(req.user.id)
           }
         })
         return res.status(200).json(tweets)
       } catch(err) {
         next(err)
       }
+    },
+    getUserFollowers: async (req,res,next) => {
+
+      try{
+        const user = await User.findByPK(req.params.id,{
+          include:[
+            { model:User, as:'Followers'}
+          ],
+          order: [['Followers',Followship,'createdAT','DESC']]
+        })
+        if (!user || user.role === 'admin') {
+          return res.status(404).json({ status: 'error', message: '使用者不存在' })
+        }
+        user = user.Followers.map(follower =>({
+          followerId: follower.id,
+          account: follower.account,
+          name:follower.name,
+          avatar: follower.avatar,
+          introduction: follower.introduction,
+          followshipCreatedAt: follower.Followship.createdAt,
+          isFollowed: helpers.getUser(req).Followings.map(f => f.id).includes(follower.id)
+        }))
+        return res.status(200).json(user)
+      }
+        catch(err) {
+          next(err)
+        }
     }
 }
 

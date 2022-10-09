@@ -16,8 +16,8 @@ router.post('/users', userController.signUp)
 router.get('/users', userController.getUser)
 router.use('/users', authenticated, users)
 
-router.get('/users/:id/tweets',userController.getUserTweets)
-
+router.get('/users/:id/tweets',authenticated,userController.getUserTweets)
+router.get('users/:id/followers', authenticated,userController.getUserFollowers)
 
 
 router.use('/', (req, res) => res.redirect('/api/users'))
