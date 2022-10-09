@@ -165,7 +165,7 @@ const userController = {
         return res.status(200).json(likes)
       })
       .catch(err => next(err))
-  }
+  },
 
   getUserFollowers: (req, res, next) => {
     const UserId = req.params.id
