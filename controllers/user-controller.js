@@ -2,7 +2,9 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
 const helpers = require('../_helpers')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { en_IND } = require('faker/lib/locales')
+const e = require('connect-flash')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -74,14 +76,44 @@ const userController = {
         console.log(err)
     }
   },
-  getUser: (req, res, next) => {
-    User.findOne({ 
-      account: "root",
-      raw: true
-   })
-    .then(user => console.log(user))
-    .catch(err => next(err))
-  }
+  getUser: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const user = await User.findOne({
+        where: { id:id},
+        include: [
+          Tweet,
+          { model: User, as: 'Followers'},
+          { model: User, as: 'Followings'}
+        ]
+      })
+      if (!user || user.role === 'admin'){
+        return res.status(404).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      const userData = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        account: user.account,
+        avatar: user.avatar,
+        introduction: user.introduction,
+        cover: user.cover,
+        role: user.role,
+        tweetCount: user.Tweets.length,
+        followerCount: user.Followers.length,
+        followingCount: user.Followings.length,
+        isFollowed: user.Followers.map(el => el.id).include(req.user.id)
+      }
+        return res.status(200).json(userData)
+      }
+        catch(error){
+          next(error)
+        }
+    },
+    
 }
 
 module.exports = userController
