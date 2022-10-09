@@ -34,7 +34,6 @@ const adminController = {
         Tweet,
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
-        { model: Reply, include: Tweet },
         { model: Like, include: Tweet }
       ]
     })
@@ -44,7 +43,7 @@ const adminController = {
             ...user.toJSON(),
             followerCount: user.Followers.length,
             followingCount: user.Followings.length,
-            replyCount: user.Replies.length,
+            tewwtCount: user.Tweets.length,
             likeCount: user.Likes.length
           }))
           .map(user => {
