@@ -17,7 +17,7 @@ const followshipServices = {
       .then(([user, followship]) => {
         if (!user) throw new Error("User didn't exist!")
         if (followship) throw new Error('You are already following this user!')
-        if (user.id === currentUserId) throw new Error("You can't yourself!")
+        if (user.id === currentUserId) throw new Error("You can't follow yourself!")
 
         return Followship.create({
           followerId: currentUserId,
@@ -31,7 +31,7 @@ const followshipServices = {
     return Followship.findOne({
       where: {
         followerId: getUser(req).dataValues.id,
-        followingId: req.params.id
+        followingId: req.params.followingId
       }
     })
       .then(followship => {
