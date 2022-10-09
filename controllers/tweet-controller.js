@@ -129,6 +129,52 @@ const tweetController = {
         return res.status(200).json({ data: repliedTweets })
       })
       .catch(error => next(error))
+  },
+  likeTweet: (req, res, next) => {
+    const UserId = req.user.id
+    const TweetId = req.params.id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({ where: { UserId, TweetId } })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error('推文不存在')
+        if (like) throw new Error('已經對推文表示喜歡')
+        return Like.create({
+          isLiked: true,
+          UserId,
+          TweetId
+        })
+      })
+      .then(likedTweet => {
+        return res.status(200).json({
+          status: 'success',
+          message: '新增喜歡成功',
+          data: likedTweet
+        })
+      })
+      .catch(error => next(error))
+  },
+  unlikeTweet: (req, res, next) => {
+    const UserId = req.user.id
+    const TweetId = req.params.id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({ where: { UserId, TweetId } })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error('推文不存在')
+        if (!like) throw new Error('尚未對推文表示喜歡')
+        return like.destroy()
+      })
+      .then(unlikedTweet => {
+        return res.status(200).json({
+          status: 'success',
+          message: '取消喜歡成功',
+          data: unlikedTweet
+        })
+      })
+      .catch(error => next(error))
   }
 }
 

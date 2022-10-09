@@ -20,6 +20,10 @@ router.get('/tweets/:id', authenticated, authUser, tweetController.getTweet)
 router.post('/tweets/:tweet_id/replies', authenticated, authUser, tweetController.postRepliedTweet)
 router.get('/tweets/:tweet_id/replies', authenticated, authUser, tweetController.getRepliedTweet)
 
+// likes
+router.post('/tweets/:id/like', authenticated, authUser, tweetController.likeTweet)
+router.post('/tweets/:id/unlike', authenticated, authUser, tweetController.unlikeTweet)
+
 // error handler
 router.use('/', errorHandler)
 
