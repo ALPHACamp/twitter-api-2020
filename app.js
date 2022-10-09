@@ -15,6 +15,7 @@ app.use(express.json())
 app.use(passport.initialize())
 app.use(passport.session())
 
+
 app.use(router)
 
 // use helpers.getUser(req) to replace req.user

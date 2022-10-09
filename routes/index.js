@@ -9,6 +9,7 @@ const user = require('./modules/user')
 router.use('/api/admin', authenticated, admin)
 router.use('/api/tweets', tweets)
 router.use('/api/users', user)
-router.use('/', apiErrorHandler)
+router.use('/', (req, res) => res.send('Hello World!'))
+// router.use('/', apiErrorHandler)
 
 module.exports = router

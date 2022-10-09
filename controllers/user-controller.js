@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt-nodejs')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
-const sequelize = require('sequelize')
 
 const userController = {
   signIn: (req, res, next) => {
