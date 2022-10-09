@@ -13,10 +13,6 @@ const passport = require('passport')
 // cors 的預設為全開放
 app.use(cors())
 
-// 可以解讀JSON資料
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
-
 // // use helpers.getUser(req) to replace req.user
 // function authenticated(req, res, next){
 //   // passport.authenticate('jwt', { ses...
@@ -26,6 +22,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
 app.use('/api', router)
+
 app.get('/', (req, res) => res.send('Hello welcome to ac-twiter-server'))
 app.use('*', (req, res) => {
   // return an error
