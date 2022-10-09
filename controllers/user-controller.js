@@ -75,7 +75,7 @@ const userController = {
           sequelize.literal(
             '(SELECT COUNT(*) FROM Followships WHERE follower_id = user.id )'), 'FollowerCount'
         ]],
-        exclude: ['password', 'email', 'updatedAt']
+        exclude: ['password', 'updatedAt']
       }
     })
       .then(user => {
