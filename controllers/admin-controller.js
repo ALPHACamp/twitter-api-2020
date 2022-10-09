@@ -1,8 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
-const dayjs = require('dayjs')
-const bcrypt = require('bcryptjs')
 
 
 const adminController = {
