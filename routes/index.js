@@ -14,13 +14,13 @@ router.use('/admin', authenticated, authAdmin, admin)
 
 // user
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
-router.post('/users', userController.signup)
 router.get('/users/:id', authenticated, authUser, userController.getUser)
+router.post('/users', userController.signup)
 
 // tweet
+router.get('/tweets/:id', authenticated, authUser, tweetController.getTweet)
 router.get('/tweets', authenticated, authUser, tweetController.getTweets)
 router.post('/tweets', authenticated, authUser, tweetController.postTweet)
-router.get('/tweets/:id', authenticated, authUser, tweetController.getTweet)
 
 // replies
 router.post('/tweets/:tweet_id/replies', authenticated, authUser, tweetController.postRepliedTweet)
