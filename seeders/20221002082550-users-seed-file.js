@@ -63,6 +63,56 @@ module.exports = {
       cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
+    }, {
+      name: 'user6',
+      account: 'user6',
+      email: 'user6@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
+      created_at: new Date(),
+      updated_at: new Date()
+    }, {
+      name: 'user7',
+      account: 'user7',
+      email: 'user7@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
+      created_at: new Date(),
+      updated_at: new Date()
+    }, {
+      name: 'user8',
+      account: 'user8',
+      email: 'user8@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
+      created_at: new Date(),
+      updated_at: new Date()
+    }, {
+      name: 'user9',
+      account: 'user9',
+      email: 'user9@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
+      created_at: new Date(),
+      updated_at: new Date()
+    }, {
+      name: 'user10',
+      account: 'user10',
+      email: 'user10@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
+      created_at: new Date(),
+      updated_at: new Date()
     }], {})
   },
 

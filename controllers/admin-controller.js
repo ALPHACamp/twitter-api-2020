@@ -36,7 +36,7 @@ const adminController = {
             '(SELECT COUNT(*) FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweet_id WHERE Tweets.User_id = User.id)'
           ), 'likesCount']
         ],
-        exclude: ['password', 'email', 'role', 'introduction', 'updatedAt']
+        exclude: ['password', 'email', 'introduction', 'updatedAt']
       },
       order: [
         [sequelize.literal('tweetsCount'), 'DESC'],
