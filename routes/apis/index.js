@@ -19,7 +19,14 @@ router.get('/current_user',userController.getCurrentUser)
 router.put('/current_user/:id',userController.editCurrentUser)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
+
+router.post('/users/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn, authErrorHandler)
+router.post('/users', userController.signUp)
+router.get('/users', userController.getUser)
 router.use('/users', authenticated, users)
+
+
+
 
 
 router.use('/', (req, res) => res.redirect('/api/users'))

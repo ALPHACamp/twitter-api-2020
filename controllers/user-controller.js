@@ -1,16 +1,17 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
+const helpers = require('../_helpers')
 const { User } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
     try {
-      if (req.user && req.user.role === 'admin') {
+      if (helpers.getUser(req) && helpers.getUser(req).role === 'admin') {
         return res.status(403).json({ status: 'error', message: "此帳號不存在!" })
       }
       
-      const userData = req.user.toJSON()
+      const userData = helpers.getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
