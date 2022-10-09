@@ -162,34 +162,29 @@ const tweetController = {
 
   deleteTweet: async (req, res, next) => {
     try {
-      const currentUserId = helpers.getUser(req).id
       const TweetId = Number(req.params.id)
-      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+
+      // 403 wanna delete others tweet
+      // 這段可能是不需要的
+      // if (tweet.UserId !== currentUserId) {
+      //   return res.status(403).json({
+      //     status: 'error',
+      //     message: 'User can only delete their own tweet.'
+      //   })
+      // }
+
+      // delete tweet
+      // delete replies of tweet
+      // delete likes of tweet
+      const deletedTweet = await Tweet.destroy({ where: { id: TweetId } })
 
       // 404 find no tweet
-      if (!tweet) {
+      if (!deletedTweet) {
         return res.status(404).json({
           status: 'error',
           message: 'The tweet does not exist.'
         })
       }
-
-      // 403 wanna delete others tweet
-      if (tweet.UserId !== currentUserId) {
-        return res.status(403).json({
-          status: 'error',
-          message: 'User can only delete their own tweet.'
-        })
-      }
-
-      // delete tweet
-      // delete replies of tweet
-      // delete likes of tweet
-      await Promise.all([
-        Tweet.destroy({ where: { id: TweetId } }),
-        Reply.destroy({ where: { TweetId } }),
-        Like.destroy({ where: { TweetId } })
-      ])
 
       // status 200 success
       return res.status(200).json({ status: 'success' })
