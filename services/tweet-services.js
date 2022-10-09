@@ -17,7 +17,7 @@ const tweetServices = {
       },
       order: [['createdAt', 'DESC']]
     })
-      .then(tweets => cb(null, { tweets }))
+      .then(tweets => cb(null, tweets))
       .catch(err => cb(err))
   },
   getTweet: (req, cb) => {
@@ -33,7 +33,7 @@ const tweetServices = {
       },
       order: [['createdAt', 'DESC']]
     })
-      .then(tweet => cb(null, { tweet }))
+      .then(tweet => cb(null, tweet))
       .catch(err => cb(err))
   },
   postTweet: (req, cb) => {
@@ -97,20 +97,19 @@ const tweetServices = {
   },
   getReplies: (req, cb) => {
     const TweetId = req.params.id
-    return Tweet.findByPk(TweetId, {
-      include: [{
-        model: Reply,
-        attributes: ['id', 'comment', 'createdAt'],
-        include: [{
-          raw: true,
-          nest: true,
-          model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
-        }]
-      }],
-      order: [['Replies', 'createdAt', 'DESC']]
-    })
-      .then(replies => cb(null, replies))
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Reply.findAll({
+        nest: true,
+        where: { TweetId },
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([tweet, replies]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        return cb(null, replies)
+      })
       .catch(err => cb(err))
   }
 }
