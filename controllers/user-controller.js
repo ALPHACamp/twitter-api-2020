@@ -10,7 +10,7 @@ const userController = {
     const { password, checkPassword, email, account, name } = req.body
     const [nameMin, nameMax] = [1, 50]
 
-    if (password !== checkPassword) return res.status(401).json({ status: 'error', message: 'unauthorized' })
+    if (password !== checkPassword) throw new Error('密碼與驗證密碼不符')
     if (!password || !checkPassword || !email || !account || !name) throw new Error('欄位皆為必填')
 
     User.findOne({

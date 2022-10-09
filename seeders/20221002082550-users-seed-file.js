@@ -9,7 +9,7 @@ module.exports = {
       email: 'root@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'admin',
-      profile_photo: 'https://fakeimg.pl/140/',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
       cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
@@ -19,7 +19,7 @@ module.exports = {
       email: 'user1@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
-      profile_photo: 'https://fakeimg.pl/140/',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
       cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
@@ -29,7 +29,7 @@ module.exports = {
       email: 'user2@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
-      profile_photo: 'https://fakeimg.pl/140/',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
       cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
@@ -39,7 +39,7 @@ module.exports = {
       email: 'user3@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
-      profile_photo: 'https://fakeimg.pl/140/',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
       cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
@@ -49,7 +49,7 @@ module.exports = {
       email: 'user4@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
-      profile_photo: 'https://fakeimg.pl/140/',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
       cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
@@ -59,7 +59,7 @@ module.exports = {
       email: 'user5@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
-      profile_photo: 'https://fakeimg.pl/140/',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
       cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
