@@ -8,6 +8,7 @@ const { apiErrorHandler, authErrorHandler } = require('../../middleware/error-ha
 const userController = require('../../controllers/user-controller')
 const adminController = require('../../controllers/admin-controller')
 
+
 router.post('/users', userController.signUp)
 
 router.get('/users', userController.getUser)
@@ -15,8 +16,8 @@ router.get('/users', userController.getUser)
 router.post('/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn, authErrorHandler)
 router.post('/users/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn, authErrorHandler)
 
-router.get('/current_user',userController.getCurrentUser)
-router.put('/current_user/:id',userController.editCurrentUser)
+router.get('/current_user', authenticated, userController.getCurrentUser)
+router.put('/current_user/:id', authenticated, userController.editCurrentUser)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 
