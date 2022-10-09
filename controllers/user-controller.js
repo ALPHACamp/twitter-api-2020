@@ -11,6 +11,7 @@ const userController = {
     const [nameMin, nameMax] = [1, 50]
 
     if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
+    if (!password || !checkPassword || !email || !account || !name) throw new Error('欄位皆為必填')
 
     User.findOne({
       attributes: ['email', 'account'],
@@ -30,6 +31,7 @@ const userController = {
         email,
         role: 'user',
         password: hash,
+        introduction: '此人很神秘，什麼都沒有寫',
         profilePhoto: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
         coverPhoto: 'https://i.imgur.com/t0YRqQH.jpg'
       }))
@@ -153,7 +155,22 @@ const userController = {
     } else {
       id = UserId
     }
-    Promise.all([User.findByPk(id), Tweet.findAll({ where: { UserId: id } })])
+    Promise.all([User.findByPk(id),
+      Tweet.findAll({
+        where: { UserId: id },
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }],
+        attributes: {
+          include: [
+            [sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id )'
+            ), 'repliesCount'],
+            [sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweet.id )'
+            ), 'likesCount']
+          ]
+        }
+      })
+    ])
       .then(([user, tweets]) => {
         if (!user) throw new Error('使用者不存在')
         res.json(tweets)
@@ -169,7 +186,12 @@ const userController = {
     } else {
       id = UserId
     }
-    Promise.all([User.findByPk(id), Reply.findAll({ where: { UserId: id } })])
+    Promise.all([User.findByPk(id),
+      Reply.findAll({
+        where: { UserId: id },
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }]
+      })
+    ])
       .then(([user, replies]) => {
         if (!user) throw new Error('使用者不存在')
         res.json(replies)
@@ -297,13 +319,13 @@ const userController = {
   },
   addFollowing: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id
-    const { userId } = req.body
+    const { id } = req.body
     Promise.all([
-      User.findByPk(userId),
+      User.findByPk(id),
       Followship.findOne({
         where: {
           followerId: currentUserId,
-          followingId: userId
+          followingId: id
         }
       })
     ])
@@ -313,7 +335,7 @@ const userController = {
         if (followship) throw new Error('已追蹤過這個使用者')
         return Followship.create({
           followerId: currentUserId,
-          followingId: Number(userId)
+          followingId: Number(id)
         })
       })
       .then(followingUser => res.json(followingUser))
