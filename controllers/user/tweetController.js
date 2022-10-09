@@ -47,7 +47,6 @@ const tweetController = {
       ])
       tweetData.likeCount = likeData.length
       tweetData.replyCount = replyData.length
-      // return res.json({ status: 'success', data: tweetData })
       return res.json(tweetData)
     } catch (error) {
       next(error)
@@ -91,12 +90,44 @@ const tweetController = {
       assert(user, '使用者不存在')
 
       const like = await Like.findOne({ where: { TweetId, UserId } })
-      assert(like, '不可不重複喜歡')
-      const deletedLike = await like.destroy()
+      assert(like, '不可重複不喜歡')
+      const deletedLike = like.destroy()
       return res.status(200).json({
         status: 'success',
         data: deletedLike
       })
+    } catch (error) {
+      next(error)
+    }
+  },
+  addReply: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = req.params.tweet_id
+      const { comment } = req.body
+      if (!comment.trim()) throw new Error('內容不可空白')
+      const data = await Reply.create({
+        UserId,
+        TweetId,
+        comment
+      })
+      return res.json(data)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const TweetId = req.params.tweet_id
+      const data = await Reply.findAll({
+        raw: true,
+        nest: true,
+        where: {
+          TweetId
+        },
+        include: User
+      })
+      return res.json(data)
     } catch (error) {
       next(error)
     }

@@ -10,7 +10,9 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
-      if (password !== checkPassword) throw new Error('密碼輸入錯誤，請重新確認')
+      if (password !== checkPassword) {
+        throw new Error('密碼輸入錯誤，請重新確認')
+      }
       const [userEmail, userAccount] = await Promise.all([
         User.findOne({ where: { email } }),
         User.findOne({ where: { account } })
@@ -34,7 +36,9 @@ const userController = {
     try {
       const userData = helpers.getUser(req).toJSON()
       delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const token = jwt.sign(userData, process.env.JWT_SECRET, {
+        expiresIn: '30d'
+      })
       res.json({
         status: 'success',
         data: {
@@ -71,10 +75,10 @@ const userController = {
       // 將圖片上傳至第三方圖庫
       // 若沒有傳入照片回傳null
       const cover = await multerFilesHandler(
-        files.cover ? files.cover[0] : null
+        files?.cover ? files.cover[0] : null
       )
       const avatar = await multerFilesHandler(
-        files.avatar ? files.avatar[0] : null
+        files?.avatar ? files.avatar[0] : null
       )
       const user = await User.findByPk(userId)
       assert(user, '使用者不存在')
@@ -91,8 +95,8 @@ const userController = {
         email,
         introduction,
         password: await bcrypt.hash(password, 10),
-        cover,
-        avatar
+        cover: cover || user.cover,
+        avatar: avatar || user.avatar
       })
       res.json({
         status: 'success',
