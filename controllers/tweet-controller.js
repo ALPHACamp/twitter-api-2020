@@ -12,11 +12,55 @@ const tweetController = {
   },
   likeTweet:(req, res, next) => {
     // POST /api/tweets/:tweet_id/like - 喜歡一則推文
+      const TweetId = req.params.id
+    const UserId = req.user.dataValues.id
+    return Promise.all([
+      Tweet.findOne({
+        where: { id: TweetId }
+      }),
+      Like.findOne({
+        where: {
+          TweetId,
+          UserId
+        }
+      })
+    ])
+    .then(([tweet, likedTweet]) => {
+      if (!tweet) throw new Error('Tweet does not exist!')
+      if (likedTweet) throw new Error('You have liked this Tweet!')
+      return Like.create({
+        TweetId,
+        UserId
+      })
+    })
+    .then(likeRecord => res.status(200).json(likeRecord))
+    .catch(err => next(err))
   },
+ 
   unlikeTweet:(req, res, next) => {
     // POST /api/tweets/:tweet_id/unlike - 取消喜歡一則推文
+    const TweetId = req.params.id
+    const UserId = req.user.dataValues.id
+    return Promise.all([
+      Tweet.findOne({
+        where: { id: TweetId }
+      }),
+      Like.findOne({
+        where: {
+          TweetId,
+          UserId
+        }
+      })
+    ])
+    .then(([tweet, likedTweet]) => {
+      if (!tweet) throw new Error('Tweet does not exist!')
+      if (!likedTweet) throw new Error('You have not liked this Tweet!')
+      return likedTweet.destroy()
+    })
+    .then(destroyedRecord => res.status(200).json({ destroyedRecord }))
+    .catch(err => next(err))
   },
-  getReplies:(req, res, next) => {
+   getReplies:(req, res, next) => {
     // GET /api/tweets/:tweet_id/replies - 讀取回覆串
     return Promise.all([
       Tweet.findByPk(req.params.id, {
@@ -51,7 +95,7 @@ const tweetController = {
     })
     .catch(err => next(err))
   },
-  postReply:(req, res, next) => {
+   postReply:(req, res, next) => {
     // POST /api/tweets/:tweet_id/replies - 新增回覆
     const { comment } = req.body
     const targetTweetId = req.params.id
@@ -74,7 +118,7 @@ const tweetController = {
       res.status(200).json(reply)
     })
     .catch(err => next(err))
-  },
+  }
 }
 
 module.exports = tweetController
