@@ -125,9 +125,19 @@ const tweetController = {
       .then(data => res.status(200).json(data))
       .catch(err => next(err))   
   },
-  addReply: (req, res, next) => {
+  addReply: async (req, res, next) => {
     const { comment } = req.body
     const tweetId = req.params.tweet_id
+
+   await Tweet.findByPk(tweetId)
+    .then(tweet => {
+      if (!tweet) {
+        return res.status(403).json({
+          status: 'error',
+          message: '此推文已消失在這世上'
+        })
+      }
+    })
 
     if (comment.length === 0) {
       return res.status(403).json({
@@ -136,7 +146,7 @@ const tweetController = {
       })
     }
 
-    Reply.create({
+  await Reply.create({
       userId: helpers.getUser(req).id,
       tweetId,
       comment
