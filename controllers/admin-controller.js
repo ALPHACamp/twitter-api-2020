@@ -1,8 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
-const dayjs = require('dayjs')
-const bcrypt = require('bcryptjs')
 
 
 const adminController = {
@@ -43,7 +41,7 @@ const adminController = {
             ...user.toJSON(),
             followerCount: user.Followers.length,
             followingCount: user.Followings.length,
-            tewwtCount: user.Tweets.length,
+            tweetCount: user.Tweets.length,
             likeCount: user.Likes.length
           }))
           .map(user => {

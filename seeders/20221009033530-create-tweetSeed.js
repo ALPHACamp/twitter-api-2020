@@ -1,5 +1,4 @@
-'use strict';
-const { User } = require('../models')
+'use strict'
 const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -9,7 +8,7 @@ module.exports = {
     )
     await queryInterface.bulkInsert('Tweets',
       Array.from({ length: users.length*10 }).map((_, i) => ({
-        user_id: users[Math.floor(i/10)].id,
+        user_id: users[Math.floor(i % users.length)].id,
         description: faker.lorem.text(),
         created_at: new Date(),
         updated_at: new Date()
@@ -21,4 +20,4 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Tweets', {})
   }
-};
+}
