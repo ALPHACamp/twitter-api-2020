@@ -94,53 +94,53 @@ const userController = {
       const userID = req.user.id
       const id = req.params.id
       const{ account, name, email, password, checkPassword }= req.body
-      const{ account:currentAccount, email:currentEmail }= req.user
+      const{ account: currentAccount, email: currentEmail }= req.user
       
       if(userID !== Number(id)) {
         return res.status(401).json({status:'error',message:'無法編輯其他使用者'})
       }
       if (!account || !name || !email || !password || !checkPassword) {
-        res.status(403).json({ status: 'error', message: '所有欄位都是必填' })
+        return res.status(403).json({ status: 'error', message: '所有欄位都是必填' })
       }
       if (email && !validator.isEmail(email)) {
-        res.status(403).json({ status: 'error', message: '請輸入正確信箱地址' })
+        return res.status(403).json({ status: 'error', message: '請輸入正確信箱地址' })
       }
       if (password !== checkPassword) {
-        res.status(403).json({ status: 'error', message: '密碼與確認密碼不相符' })
+        return res.status(403).json({ status: 'error', message: '密碼與確認密碼不相符' })
       }
       if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
-        res.status(403).json({ status: 'error', message: '名稱長度不可超過50字' })
+        return res.status(403).json({ status: 'error', message: '名稱長度不可超過50字' })
       }
       if (account && !validator.isByteLength(account, { min: 0, max: 15 })) {
-        res.status(403).json({ status: 'error', message: '帳號長度不可超過15字' })
+        return res.status(403).json({ status: 'error', message: '帳號長度不可超過15字' })
       }
       
       if (account !== currentAccount) {
-        const userAccount = await User.findOne({ where:account})
+        const userAccount = await User.findOne({ where: { account } })
         if(userAccount){
-          res.status(403).json({ status: 'error', message: '此帳號已有人使用！' })
+          return res.status(403).json({ status: 'error', message: '此帳號已有人使用！' })
         }
       }
 
-      if(email !== currentEmail) { 
-        const userEmail = await User.findOne({ where:email })
-        if(userEmail){
-          res.status(403).json({ status: 'error', message: '此信箱已有人使用！' })
+      if (email !== currentEmail) {
+        const userEmail = await User.findOne({ where: { email } })
+        if (userEmail) {
+          return res.status(403).json({ status: 'error', message: '此信箱已有人使用！' })
         }
       }
-      
-      await User.findByPk(userID)
-        .then(user => 
-          user.update({
-          account,
-          name,
-          email,
-          password: bcrypt.hashSync(
-            password,
-            bcrypt.genSaltSync(10),
-            null
-          )
-        }))
+
+      let user = await User.findByPk(userID)
+      await user.update({ 
+        account,
+        name,
+        email,
+        password: bcrypt.hashSync(
+          password,
+          bcrypt.genSaltSync(10),
+          null
+        )
+      })
+
       return res.status(200).json({
         status: 'success',
         message: '帳號更新成功！'
