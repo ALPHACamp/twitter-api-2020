@@ -5,6 +5,7 @@ const helpers = require('../_helpers')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { en_IND } = require('faker/lib/locales')
 const e = require('connect-flash')
+const { captureRejectionSymbol } = require('mysql2/lib/connection')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -248,7 +249,35 @@ const userController = {
         catch(err) {
           next(err)
         }
-    }
+    },
+    getUserFollowings: async (req,res,next) => {
+
+      try{
+        const user = await User.findByPk(req.params.id,{
+          include:[
+            { model:User, as:'Followings'}
+          ],
+          order: [['Followeings', Followship, 'createdAT', 'DESC']]
+        })
+        if (!user || user.role === 'admin') {
+          return res.status(404).json({ status: 'error', message: '使用者不存在' })
+        }
+        user = user.Followings.map(following => ({
+          followingId: following.id,
+          account: following.account,
+          name: following.name,
+          avatar: following.avatar,
+          introduction: following.introduction,
+          followshipCreatedAt: following.Followship.createdAt,
+          isFollowed: helpers.getUser(req).Followings.map(f =>f.id).includes(following.id)
+        }))
+          return res.status(200).json(user)
+      }
+        catch(err){
+          next(err)
+        }
+    },
+    
 }
 
 module.exports = userController
