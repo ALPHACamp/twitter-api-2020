@@ -13,11 +13,12 @@ const tweetController = {
     })
       .then(tweets => {
 
-        const result = tweets.map(tweet => ({
-          ...tweet.toJSON(),
-          likeCount: tweet.Likes.length,
-          commentCount: tweet.Replies.length
-        }))
+        const result = tweets
+          .map(tweet => ({
+            ...tweet.toJSON(),
+            likeCount: tweet.Likes.length,
+            commentCount: tweet.Replies.length
+          }))
           .map(tweet => {
             if (tweet.Replies.length !== 0) {
               tweet.Replies.map(
@@ -109,35 +110,37 @@ const tweetController = {
       order: [['createdAt', 'DESC']]
     })
       .then(replies => {
-        const result = replies.map(reply => ({
-          ...reply.toJSON()
-        }))
-        .filter(replyTweet => 
-          replyTweet.tweetId === Number(tweetId))
+        const result = replies
+          .map(reply => ({
+            ...reply.toJSON()
+          }))
+          .filter(replyTweet =>
+            replyTweet.tweetId === Number(tweetId))
 
         if (result) {
           result.map(
             reply => delete reply.User.password
-          )}
+          )
+        }
         return result
       }
       )
       .then(data => res.status(200).json(data))
-      .catch(err => next(err))   
+      .catch(err => next(err))
   },
   addReply: async (req, res, next) => {
     const { comment } = req.body
     const tweetId = req.params.tweet_id
 
-   await Tweet.findByPk(tweetId)
-    .then(tweet => {
-      if (!tweet) {
-        return res.status(403).json({
-          status: 'error',
-          message: '此推文已消失在這世上'
-        })
-      }
-    })
+    await Tweet.findByPk(tweetId)
+      .then(tweet => {
+        if (!tweet) {
+          return res.status(403).json({
+            status: 'error',
+            message: '此推文已消失在這世上'
+          })
+        }
+      })
 
     if (comment.length === 0) {
       return res.status(403).json({
@@ -146,7 +149,7 @@ const tweetController = {
       })
     }
 
-  await Reply.create({
+    await Reply.create({
       userId: helpers.getUser(req).id,
       tweetId,
       comment
