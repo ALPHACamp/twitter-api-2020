@@ -128,6 +128,7 @@ const tweetController = {
         },
         include: User
       })
+      if (data.length === 0) throw new Error('貼文不存在')
       return res.json(data)
     } catch (error) {
       next(error)
