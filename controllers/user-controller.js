@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
@@ -13,7 +13,6 @@ const userController = {
       if (user?.role === 'admin') throw new Error('此帳號不存在')
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
       delete user.password
-      console.log(user)
       res.json({
         status: 'success',
         data:
@@ -115,6 +114,94 @@ const userController = {
         })
         .catch(error => next(error))
     }
+  },
+  getTweets: (req, res, next) => {
+    const UserId = req.params.id
+    return Tweet.findAll({
+      where: { UserId },
+      include: [User, Reply, Like],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => {
+        if (tweets.length === 0) throw new Error('使用者沒有推文')
+        const tweetData = tweets.map(tweet => ({
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          updatedAt: tweet.updatedAt,
+          replyNum: tweet.Replies.length,
+          likeNum: tweet.Likes.length,
+          isLiked: tweet.Likes.some(like => like.UserId === req.user.id),
+          user: {
+            name: tweet.User.name,
+            account: tweet.User.account,
+            image: tweet.User.image
+          }
+        }))
+        return res.status(200).json(tweetData)
+      })
+      .catch(error => next(error))
+  },
+  getRepliedTweets: (req, res, next) => {
+    const UserId = req.params.id
+    return Reply.findAll({
+      where: { UserId },
+      include: [User],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => {
+        if (replies.length === 0) throw new Error('使用者沒有回覆過的內容')
+        const repliedData = replies.map(reply => ({
+          id: reply.id,
+          comment: reply.comment,
+          UserId: reply.UserId,
+          TweetId: reply.TweetId,
+          createdAt: reply.createdAt,
+          updatedAt: reply.updatedAt,
+          user: {
+            name: reply.User.name,
+            account: reply.User.account,
+            image: reply.User.image
+          }
+        }))
+        return res.status(200).json(repliedData)
+      })
+      .catch(error => next(error))
+  },
+  getLikes: (req, res, next) => {
+    const UserId = req.params.id
+    return Like.findAll({
+      where: { UserId },
+      include: [{
+        model: Tweet,
+        include: [User, Reply, Like]
+      }],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(likes => {
+        if (likes.length === 0) throw new Error('使用者沒有喜歡的推文')
+        const likedData = likes.map(like => ({
+          id: like.id,
+          UserId: like.UserId,
+          TweetId: like.TweetId,
+          isLiked: like.isLiked,
+          createdAt: like.createdAt,
+          updatedAt: like.updatedAt,
+          tweet: {
+            TweetId: like.Tweet.id,
+            description: like.Tweet.description,
+            replyNum: like.Tweet.Replies.length,
+            likeNum: like.Tweet.Likes.length,
+            postTweetUserId: like.Tweet.User.id,
+            name: like.Tweet.User.name,
+            account: like.Tweet.User.account,
+            image: like.Tweet.User.image
+          }
+        }))
+        return res.status(200).json(likedData)
+      })
+      .catch(error => next(error))
   }
 }
 
