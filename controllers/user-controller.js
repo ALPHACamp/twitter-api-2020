@@ -287,6 +287,9 @@ const userController = {
           include: [User, { model:Tweet, include:User}],
           order: [['createdAT','DESC']]
         })
+        if (!user || user.role === 'admin') {
+          return res.status(404).json({ status: 'error', message: '使用者不存在' })
+        }
         replies = replies.map(reply => {
           return {
             replyId: reply.id,
@@ -309,9 +312,46 @@ const userController = {
         catch(err) {
           next(err)
         }
-
     },
+    getUserLikes: async (req,res,next) => {
+      try{
+        const UserId = req.params.id
+        const user = await User.findByPK(UserId)
 
+        const likes = await Like.findAll({
+          where:{UserId},
+          include: [{
+            model:Tweet,
+            include: [{ model:User },{ model: Reply, include:[{ model:User}]}, Like]
+          }],
+          order: [['createdAt','DESC']]
+        })
+        if (!user || user.role === 'admin') {
+          return res.status(404).json({ status: 'error', message: '使用者不存在' })
+        }
+        likes = likes.map(like => {
+          return {
+            id: like.id,
+            UserId: like.UserId,
+            tweetId: like.TweetId,
+            likeCreatedAt: like.createdAt,
+            likedTweetUserId: like.Tweet.UserId,
+            name: like.Tweet.User.name,
+            account: like.Tweet.User.account,
+            avatar: like.Tweet.User.avatar,
+            description: like.Tweet.description,
+            tweetCreatedAt: like.Tweet.createdAt,
+            likedCount: like.Tweet.Likes.length,
+            repliedCount: like.Tweet.Replies.length,
+            isLike: like.Tweet.Likes.some((t) => t.UserId === req.user.id)
+          }
+        })
+        return res.status(200).json(likes)
+      }
+      catch(err){
+        next(err)
+      }
+    }
 }
 
 module.exports = userController
