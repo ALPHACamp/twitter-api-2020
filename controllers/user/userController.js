@@ -186,14 +186,14 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     const userId = req.params.id
     try {
-      const followers = await Followship.findAll({
+      const followings = await Followship.findAll({
         raw: true,
         nest: true,
         where: { followerId: userId },
         attributes: ['followingId']
       })
-      assert(followers.length, '這個使用者還沒有任何追隨者')
-      res.json(followers)
+      assert(followings.length, '這個使用者還沒有任何追隨者')
+      res.json(followings)
     } catch (error) {
       next(error)
     }
