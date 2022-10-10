@@ -7,6 +7,7 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../../
 const { apiErrorHandler, authErrorHandler } = require('../../middleware/error-handler')
 const userController = require('../../controllers/user-controller')
 const adminController = require('../../controllers/admin-controller')
+const upload = require('../../middleware/multer')
 
 
 router.post('/users', userController.signUp)
@@ -26,6 +27,7 @@ router.post('/users', userController.signUp)
 
 
 router.get('/users/:id', authenticated ,userController.getUser)
+router.put('/users/:id', upload.single('image'), authenticated, userController.editUser)
 router.get('/users/:id/tweets',authenticated,userController.getUserTweets)
 router.get('/users/:id/followers', authenticated,userController.getUserFollowers)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)

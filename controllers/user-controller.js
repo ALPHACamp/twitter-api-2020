@@ -6,6 +6,7 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { en_IND } = require('faker/lib/locales')
 const e = require('connect-flash')
 const { captureRejectionSymbol } = require('mysql2/lib/connection')
+const { localFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -93,12 +94,12 @@ const userController = {
   },
   editCurrentUser: async (req, res, next) => {
     try {
-      const userId = req.user.id
+      const UserId = req.user.id
       const id = req.params.id
       const { account, name, email, password, checkPassword } = req.body
       const { account: currentAccount, email: currentEmail } = req.user
 
-      if (userId !== Number(id)) {
+      if (UserId !== Number(id)) {
         return res.status(401).json({ status: 'error', message: '無法編輯其他使用者' })
       }
       if (!account || !name || !email || !password || !checkPassword) {
@@ -185,6 +186,38 @@ const userController = {
         catch(error){
           next(error)
         }
+    },
+    editUser: async (req,res,next) => {
+      
+        const UserId = req.user.id
+        const id = req.params.id
+        const { name , introduction } = req.body
+        if (UserId !== Number(id)) {
+          return res.status(401).json({ status: 'error', message: '無法編輯其他使用者' })
+        }
+        if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
+          return res.status(403).json({ status: 'error', message: '名稱長度不可超過50字' })
+        }
+        if (introduction && !validator.isByteLength(introduction, { min: 0, max: 160 })) {
+          return res.status(403).json({ status: 'error', message: '自我介紹長度不可超過160字' })
+        }
+        const { file } = req
+        return Promise.all([User.findByPk(req.params.id), localFileHandler(file)])
+          .then(([user, filePath]) => {
+            return user.update({
+              name,
+              introduction,
+              avatar: filePath || user.avatar,
+              cover: filePath || user.cover,
+             })
+          })
+              .then(() => {
+                return res.status(200).json({
+                  status:'success',
+                  message:'個人資料更新成功'
+                }) 
+              })
+              .catch(err => next(err))          
     },
     getUserTweets: async (req, res, next) =>{
       try{
