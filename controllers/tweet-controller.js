@@ -22,19 +22,30 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
-    Tweet.findAll({
-      include: [
-        { model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }
-      ],
-      attributes: {
-        include:
-        [[sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'repliesCount'], [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likedCount']
-        ]
-      },
-      order: [['createdAt', 'DESC']]
-    })
-      .then(tweets => {
-        res.json(tweets)
+    const currentUserId = helpers.getUser(req)?.id
+    Promise.all([
+      Tweet.findAll({
+        raw: true,
+        nest: true,
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }
+        ],
+        attributes: {
+          include:
+          [[sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'repliesCount'], [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likedCount']
+          ]
+        },
+        order: [['createdAt', 'DESC']]
+      }),
+      Like.findAll({})
+    ])
+      .then(([tweets, likes]) => {
+        console.log(tweets)
+        const result = tweets.map(tweet => ({
+          ...tweet,
+          isLiked: likes.some(like => like.TweetId === tweet.id && currentUserId === like.UserId)
+        }))
+        res.json(result)
       })
       .catch(err => next(err))
   },
