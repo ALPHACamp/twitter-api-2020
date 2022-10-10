@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
+const sequelize = require('sequelize')
 const helpers = require('../_helpers')
+const sequelize = require('sequelize')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -54,6 +56,7 @@ const userController = {
   },
   getUser: (req, res, next) => {
     const currentUser = helpers.getUser(req).dataValues
+    console.log(currentUser)
     const { id } = req.params
     return User.findByPk(id, {
       include:
@@ -91,9 +94,9 @@ const userController = {
       .catch(err => next(err))
   },
   getUserTweets: (req, res, next) => {
-    const { id } = req.params
+    const UserId = req.params.id
     return Tweet.findAll({
-      where: { UserId: id },
+      where: { UserId },
       order: [['createdAt', 'DESC']],
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }, { model: Reply, attributes: ['id'] }, { model: Like, attributes: ['UserId'] }]
     })
@@ -108,14 +111,135 @@ const userController = {
           likeCounts: tweet.Likes.length,
           isLiked: tweet.Likes.some(l => l.UserId === currentUser.id),
         }
-         ))
-        
+        ))
         res.status(200).json(tweets)
+      }).catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    const UserId = req.params.id
+    return Reply.findAll({
+      where: { UserId },
+      order: [['createdAt', 'DESC']],
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+      { model: Tweet, attributes: ['id', 'description'], include: [{ model: User, attributes: ['id', 'account'] }] }]
+    })
+      .then(replies => {
+        replies = replies.map(reply => ({
+          id: reply.id,
+          comment: reply.comment,
+          createdAt: reply.createdAt,
+          User: reply.User,
+          Tweet: reply.Tweet
+        }))
+        res.status(200).json(replies)
+      }).catch(err => next(err))
+  },
+    getUserLikes: (req, res, next) => {
+    const UserId = req.params.id
+    return Like.findAll({
+      where: { UserId },
+      order: [['createdAt', 'DESC']],
+      include: [{
+        model: Tweet,
+        attributes:
+          ['id', 'description', 'createdAt'],
+        include: [{
+          model: User,
+          attributes:
+            ['id', 'account', 'name',
+              'avatar'], 
+        }, { model: Reply }, { model: Like }]
+      }]
+    })
+      .then(likes => {
+        const currentUser = helpers.getUser(req).id
+        likes = likes.map(like => ({
+          ...like.toJSON(),
+        }))
+        likes.forEach(like => {
+          like.replyCounts = like.Tweet.Replies.length,
+          like.likeCounts = like.Tweet.Likes.length,
+            like.isLiked = like.Tweet.Likes.map(u => u.UserId).includes(currentUser.id)
+          delete like.Tweet.Replies
+          delete like.Tweet.Likes
+        })
+        return res.status(200).json(likes)
+      })
+      .catch(err => next(err))
+  }
+
+  getUserFollowers: (req, res, next) => {
+    const UserId = req.params.id
+    return User.findByPk(UserId, {
+      attributes: ['id',
+        'name',
+        'account',
+        'avatar',
+        'introduction'],
+      include:
+        [{
+          model: User,
+          as: 'Followers',
+          attributes: ['id',
+            'name',
+            'account',
+            'avatar',
+            'introduction']
+        }],
+      order:
+        [[sequelize.col('Followers.created_at', 'DESC')]]
+    })
+      .then(user => {
+        const userFollowings = helpers.getUser(req).Followings.map(user => user.id)
+        const followers = user.toJSON().Followers
+
+        followers.forEach(data => {
+          data.followerId = data.Followship.followerId
+          data.isFollowed = userFollowings.some(id => id === data.id)
+          delete data.Followship
+        })
+        res.status(200).json(followers)
+      })
+  },
+   getUserFollowings: (req, res, next) => {
+    const UserId = req.params.id
+    return User.findByPk(UserId, {
+      attributes: ['id',
+        'name',
+        'account',
+        'avatar',
+        'introduction'],
+      include:
+        [{
+          model: User,
+          as: 'Followings',
+          attributes: ['id',
+            'name',
+            'account',
+            'avatar',
+            'introduction']
+        }],
+      order:
+        [[sequelize.col('Followings.created_at', 'DESC')]]
+    })
+      .then(user => {
+        const userFollowings = helpers.getUser(req).Followings.map(user => user.id)
+
+        const followings = user.toJSON().Followings
+
+        followings.forEach(data => {
+          data.followingId = data.Followship.followingId
+          data.isFollowed = userFollowings.some(id => id === data.id)
+          delete data.Followship
+        })
+        res.status(200).json(followings)
       })
   }
 
-
-
-
 }
+
+
+
+
+
 module.exports = userController
