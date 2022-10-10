@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt-nodejs')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
+const { localFileHandler } = require('../file-helpers')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -255,7 +256,21 @@ const userController = {
 
         res.status(200).json(users)
       }).catch(err => next(err))
+  },
+  putUser: (req, res, next)  => {
+    const { id } = req.params
+    const currentUser = String(helpers.getUser(req).id)
+    if (id !== currentUser) throw new Error ('permission denied')
+
+    const profile = req.body
+    const { files } = req 
+    localFileHandler(files)
+    console.log(files)
+    res.status(200).json(files)
+
+
   }
+
 
 }
 
