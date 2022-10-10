@@ -25,6 +25,8 @@ app.use(passport.initialize())
 
 app.use(cors())
 app.use('/api', apis)
+
+app.get('/', (req, res) => res.send('This is simple twitter api'))
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
 
 module.exports = app
