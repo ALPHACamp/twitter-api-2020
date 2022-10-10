@@ -14,6 +14,7 @@ const userController = {
         if (!user) throw new Error('帳號不存在！')
         if (user.role === 'admin') throw new Error('帳號不存在！')
         if (!bcrypt.compareSync(password, user.password)) throw new Error('incorrect account or password!')
+        console.log('使用者', user)
         const userData = user.toJSON()
         delete userData.password
         const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })

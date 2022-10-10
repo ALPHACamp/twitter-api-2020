@@ -3,6 +3,7 @@ const sequelize = require('sequelize')
 const helpers = require('../_helpers')
 const { Op } = require("sequelize");
 
+
 const followshipController = {
   postFollow: (req, res, next) => {
     const id = Number(req.body.id)
