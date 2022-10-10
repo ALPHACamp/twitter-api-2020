@@ -258,6 +258,26 @@ const userController = {
         return res.status(200).json(followerData)
       })
       .catch(error => next(error))
+  },
+  getTopUsers: (req, res, next) => {
+    const getUser = helpers.getUser(req)
+    return User.findAll({
+      include: [{ model: User, as: 'Followers' }]
+    })
+      .then(users => {
+        const topUsers = users.map(user => ({
+          id: user.id,
+          name: user.name,
+          account: user.account,
+          image: user.image,
+          isFollowing: getUser.Followings.some(f => f.id === user.id),
+          followerNum: user.Followers.length
+        }))
+          .sort((a, b) => b.followerNum - a.followerNum)
+          .slice(0, 10)
+        return res.status(200).json(topUsers)
+      })
+      .catch(error => next(error))
   }
 }
 
