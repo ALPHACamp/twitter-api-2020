@@ -69,11 +69,11 @@ const userController = {
       attributes: {
         include: [[
           sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'FollowingsCount'
+            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'followerCount'
         ],
         [
           sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships WHERE follower_id = user.id )'), 'FollowerCount'
+            '(SELECT COUNT(*) FROM Followships WHERE follower_id = user.id )'), 'followingCount'
         ]],
         exclude: ['password', 'updatedAt']
       }
@@ -230,11 +230,11 @@ const userController = {
         attributes: {
           include: [[
             sequelize.literal(
-              '(SELECT COUNT(*) FROM Replies AS ReplyUsers WHERE tweet_id = Tweet.id )'), 'ReplyCount'
+              '(SELECT COUNT(*) FROM Replies AS ReplyUsers WHERE tweet_id = Tweet.id )'), 'replyCount'
           ],
           [
             sequelize.literal(
-              '(SELECT COUNT(*) FROM likes AS LikeUsers WHERE tweet_id = Tweet.id )'), 'LikeCount'
+              '(SELECT COUNT(*) FROM likes AS LikeUsers WHERE tweet_id = Tweet.id )'), 'likeCount'
           ]]
         }
       }],
@@ -312,7 +312,7 @@ const userController = {
       attributes: {
         include: [[
           sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'FollowingsCount'
+            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'followerCount'
         ]],
         exclude: ['password', 'email', 'coverPhoto', 'role', 'createdAt', 'updatedAt']
       },
@@ -321,7 +321,7 @@ const userController = {
         as: 'Followers',
         attributes: ['id', 'name']
       }],
-      order: [[sequelize.literal('FollowingsCount'), 'Desc']]
+      order: [[sequelize.literal('followerCount'), 'Desc']]
     })
       .then(users => {
         const result = users
