@@ -120,7 +120,7 @@ const tweetController = {
     .then(destroyedRecord => res.status(200).json({ destroyedRecord }))
     .catch(err => next(err))
   },
-   getReplies:(req, res, next) => {
+  getReplies:(req, res, next) => {
     // GET /api/tweets/:tweet_id/replies - 讀取回覆串
     return Promise.all([
       Tweet.findByPk(req.params.id, {
@@ -135,6 +135,7 @@ const tweetController = {
       include: [{
         model: Reply, include: [{
           model: User,
+          as: 'replyUser',
           attributes: ['id', 'account', 'avatar', 'name']
         }],
         attributes: { exclude: ['UserId', 'updatedAt'] }
