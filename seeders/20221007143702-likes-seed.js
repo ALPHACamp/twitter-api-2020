@@ -2,43 +2,16 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkInsert('Likes',[{
-      user_id: 2,
-      tweet_id: 3,
+    const users = await queryInterface.sequelize.query('SELECT id FROM Users;', { type: queryInterface.sequelize.QueryTypes.SELECT })
+
+    const tweets = await queryInterface.sequelize.query('SELECT id FROM Tweets;', { type: queryInterface.sequelize.QueryTypes.SELECT })
+
+    await queryInterface.bulkInsert('Likes', Array.from({ length: users.length *10 }, (_, i) => ({
+      user_id: users[i % users.length].id,
+      tweet_id: tweets[Math.floor(Math.random() * tweets.length)]?.id,
       created_at: new Date(),
-      updated_at: new Date(),
-    },
-    {
-      user_id: 2,
-      tweet_id: 4,
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
-    {
-      user_id: 3,
-      tweet_id: 4,
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
-    {
-      user_id: 2,
-      tweet_id: 5,
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
-    {
-      user_id: 4,
-      tweet_id: 3,
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
-    {
-      user_id: 5,
-      tweet_id: 2,
-      created_at: new Date(),
-      updated_at: new Date(),
-    }
-  ])},
+      updated_at: new Date()
+    })))},
   down: async (queryInterface, Sequelize) => {
       await queryInterface.bulkDelete('Likes', {});
   }
