@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
@@ -200,6 +200,62 @@ const userController = {
           }
         }))
         return res.status(200).json(likedData)
+      })
+      .catch(error => next(error))
+  },
+  getFollowings: (req, res, next) => {
+    const UserId = req.params.id
+    const getUser = helpers.getUser(req)
+    return Promise.all([
+      User.findByPk(UserId, {
+        include: [{ model: User, as: 'Followings' }],
+        order: [['Followings', Followship, 'createdAt', 'DESC']]
+      }),
+      Followship.findAll({
+        where: { followerId: UserId },
+        raw: true
+      })
+    ])
+      .then(([user, followings]) => {
+        if (!followings.length) throw new Error('使用者沒有跟隨中的人(followings)')
+        const followingData = user.Followings.map(fg => ({
+          id: fg.id,
+          name: fg.name,
+          account: fg.account,
+          introduction: fg.introduction,
+          followingId: fg.id,
+          followerId: UserId,
+          isFollowing: getUser.Followings.some(f => f.id === fg.id)
+        }))
+        return res.status(200).json(followingData)
+      })
+      .catch(error => next(error))
+  },
+  getFollowers: (req, res, next) => {
+    const UserId = req.params.id
+    const getUser = helpers.getUser(req)
+    return Promise.all([
+      User.findByPk(UserId, {
+        include: [{ model: User, as: 'Followers' }],
+        order: [['Followers', Followship, 'createdAt', 'DESC']]
+      }),
+      Followship.findAll({
+        where: { followingId: UserId },
+        raw: true
+      })
+    ])
+      .then(([user, followers]) => {
+        if (!followers.length) throw new Error('使用者沒有跟隨者(followers)')
+        const followerData = user.Followers.map(fr => ({
+          id: fr.id,
+          name: fr.name,
+          account: fr.account,
+          introduction: fr.introduction,
+          followingId: UserId,
+          followerId: fr.id,
+          isFollowing: getUser.Followings.some(f => f.id === fr.id)
+        }))
+        return res.status(200).json(followerData)
       })
       .catch(error => next(error))
   }
