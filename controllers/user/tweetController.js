@@ -2,7 +2,7 @@ const { Tweet, User, Like, Reply } = require('../../models')
 const { tweetValidation } = require('../../helper/validations')
 const helpers = require('../../_helpers')
 const assert = require('assert')
-
+const sequelize = require('sequelize')
 const tweetController = {
   addTweet: async (req, res, next) => {
     try {
@@ -91,8 +91,8 @@ const tweetController = {
 
       const like = await Like.findOne({ where: { TweetId, UserId } })
       assert(like, '不可重複不喜歡')
-      const deletedLike = like.destroy()
-      return res.status(200).json({
+      const deletedLike = await like.destroy()
+      res.status(200).json({
         status: 'success',
         data: deletedLike
       })
@@ -129,6 +129,31 @@ const tweetController = {
       })
       return res.json(data)
     } catch (error) {
+      next(error)
+    }
+  }, // 追蹤者前10名名單
+  getTop10FollowerUser: async (req, res, next) => {
+    try {
+      const top10User = await User.findAll({
+        raw: true,
+        attributes: {
+          // 自定義一個欄位
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId=User.id)'
+              ),
+              'followerCount'
+            ]
+          ]
+        },
+        // 以自定義的欄位進行排序
+        order: [[sequelize.literal('followerCount'), 'DESC']],
+        limit: 10
+      })
+      res.json(top10User)
+    } catch (error) {
+      console.log(error)
       next(error)
     }
   }
