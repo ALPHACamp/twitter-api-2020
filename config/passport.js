@@ -14,10 +14,11 @@ passport.use(
       passwordField: 'password'
     },
     async (account, password, done) => {
+      console.log('account', account, 'password', password)
       try {
         const user = await User.findOne({ where: { account } })
         if (!user) throw new Error('Incorrect account or password.')
-        const passwordMatching = bcrypt.compare(password, user.password)
+        const passwordMatching = await bcrypt.compare(password, user.password)
         if (!passwordMatching) throw new Error('Incorrect account or password.')
         return done(null, user)
       } catch (err) {
