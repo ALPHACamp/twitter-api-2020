@@ -21,6 +21,8 @@ const followshipController = {
       })
       .then(([data, isCreated]) => {
         if (!isCreated) throw new Error("You have followed this user")
+        data = data.toJSON()
+        data.isFollowed = true
         res.status(200).json(data)
       }).catch(err => next(err))
   },
@@ -39,8 +41,10 @@ const followshipController = {
       })
     }).then(deletedData => {
       if (!deletedData) throw new Error("you haven't follow this user")
+
       res.status(200).json({
         status: 'success',
+        isFollowed: false,
         message: 'Deleted successfully'
       })
     }).catch(err => next(err))
