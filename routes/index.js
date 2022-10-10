@@ -7,6 +7,7 @@ const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
 const { errorHandler } = require('../middleware/error-handler')
 const { authenticated, authAdmin, authUser } = require('../middleware/auth')
+const upload = require('../middleware/multer')
 
 // admin
 router.post('/admin/signin', passport.authenticate('local', { session: false }), adminController.signin)
@@ -14,7 +15,14 @@ router.use('/admin', authenticated, authAdmin, admin)
 
 // user
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
+router.get('/users/top', authenticated, authUser, userController.getTopUsers)
+router.get('/users/:id/tweets', authenticated, authUser, userController.getTweets)
+router.get('/users/:id/replied_tweets', authenticated, authUser, userController.getRepliedTweets)
+router.get('/users/:id/likes', authenticated, authUser, userController.getLikes)
+router.get('/users/:id/followings', authenticated, authUser, userController.getFollowings)
+router.get('/users/:id/followers', authenticated, authUser, userController.getFollowers)
 router.get('/users/:id', authenticated, authUser, userController.getUser)
+router.put('/users/:id', authenticated, authUser, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'backgroundImage', maxCount: 1 }]), userController.putUser)
 router.post('/users', userController.signup)
 
 // tweet
