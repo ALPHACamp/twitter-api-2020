@@ -1,3 +1,4 @@
+/* eslint-disable array-callback-return */
 'use strict'
 const faker = require('faker')
 
