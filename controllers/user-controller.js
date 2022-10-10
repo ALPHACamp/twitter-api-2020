@@ -167,6 +167,8 @@ const userController = {
     }
     Promise.all([User.findByPk(id),
       Tweet.findAll({
+        raw: true,
+        nest: true,
         where: { UserId: id },
         include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }],
         attributes: {
@@ -179,11 +181,16 @@ const userController = {
             ), 'likesCount']
           ]
         }
-      })
+      }),
+      Like.findAll({ where: { UserId: currentUserId } })
     ])
-      .then(([user, tweets]) => {
+      .then(([user, tweets, likes]) => {
         if (!user) throw new Error('使用者不存在')
-        res.json(tweets)
+        const result = tweets.map(tweet => ({
+          ...tweet,
+          isLiked: likes.some(like => like.TweetId === tweet.id && like.UserId === currentUserId)
+        }))
+        res.json(result)
       })
       .catch(err => next(err))
   },
