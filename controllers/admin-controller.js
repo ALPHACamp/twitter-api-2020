@@ -1,4 +1,4 @@
-const { User, Tweet, sequelize } = require('../models')
+const { User, Tweet, sequelize, Like, Reply } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 
@@ -48,9 +48,13 @@ const adminController = {
       .catch(err => next(err))
   },
   deleteTweet: (req, res, next) => {
-    const id = req.params.id
-    Tweet.findByPk(id)
-      .then(tweet => {
+    const TweetId = req.params.id
+    Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.destroy({ where: { TweetId } }),
+      Reply.destroy({ where: { TweetId } })
+    ])
+      .then(([tweet, likes, replies]) => {
         if (!tweet) return res.status(404).json({ status: 'error', message: '此貼文不存在' })
         return tweet.destroy()
       })
