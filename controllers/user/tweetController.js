@@ -23,13 +23,26 @@ const tweetController = {
   },
   getAllTweets: async (req, res, next) => {
     try {
-      const data = await Tweet.findAll({
-        include: User,
-        order: [['createdAt', 'DESC']],
-        nest: true,
-        raw: true
+      const [tweetData, replyData, likeData] = await Promise.all([
+        Tweet.findAll({
+          include: User,
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        }),
+        Reply.findAll({
+          raw: true
+        }),
+        Like.findAll({
+          raw: true
+        })
+      ])
+      tweetData.forEach(tweet => {
+        const tid = tweet.id
+        tweet.replyCount = replyData.filter(reply => reply.TweetId === tid).length
+        tweet.likeCount = likeData.filter(like => like.TweetId === tid).length
       })
-      return res.json(data)
+      return res.json(tweetData)
     } catch (error) {
       next(error)
     }
