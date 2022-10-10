@@ -135,8 +135,7 @@ const tweetController = {
       include: [{
         model: Reply, include: [{
           model: User,
-          as: 'replyUser',
-          attributes: ['id', 'account', 'avatar', 'name']
+          attributes: ['id', 'account', 'avatar', 'name'], as: 'replyUser'
         }],
         attributes: { exclude: ['UserId', 'updatedAt'] }
       },
