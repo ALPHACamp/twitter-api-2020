@@ -8,7 +8,8 @@ const tweetController = {
         User,
         { model: Like, include: User },
         { model: Reply, include: User }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
 
@@ -22,7 +23,7 @@ const tweetController = {
               tweet.Replies.map(
                 reply => delete reply.User.password
               )}
-              
+
             if (tweet.User) delete tweet.User.password
 
             return tweet
