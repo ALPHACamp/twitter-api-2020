@@ -1,43 +1,21 @@
 'use strict';
+const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkInsert('Replies',[{
-      user_id: 2,
-      tweet_id: 3,
-      comment: 'GG',
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
-    {
-      user_id: 2,
-      tweet_id: 4,
-      comment: 'AA',
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
-    {
-      user_id: 3,
-      tweet_id: 4,
-      comment: 'BB',
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
-    {
-      user_id: 2,
-      tweet_id: 5,
-      comment: 'DD',
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
-    {
-      user_id: 4,
-      tweet_id: 3,
-      comment: 'EE',
-      created_at: new Date(),
-      updated_at: new Date(),
-    }
-  ])},
+    const users = await queryInterface.sequelize.query('SELECT id FROM Users;', { type: queryInterface.sequelize.QueryTypes.SELECT })
+
+    const tweets = await queryInterface.sequelize.query('SELECT id FROM Tweets;', { type: queryInterface.sequelize.QueryTypes.SELECT })
+
+    await queryInterface.bulkInsert('Replies',
+      Array.from({ length: tweets.length * 3 }, (_, i) => ({
+        user_id: users[Math.floor(Math.random() * users.length)].id,
+        tweet_id: tweets[i % tweets.length].id,
+        comment: faker.lorem.sentences(2, '\n'),
+        created_at: new Date(),
+        updated_at: new Date()
+      }))
+  )},
   down: async (queryInterface, Sequelize) => {
       await queryInterface.bulkDelete('Replies', {});
   }
