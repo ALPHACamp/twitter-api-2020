@@ -56,7 +56,6 @@ const tweetController = {
             reply => delete reply.User.toJSON().password
           )
         }
-        console.log(tweet.toJSON().User)
         delete tweet.toJSON().User.password
 
         const isLike = tweet.Likes.some(l => l.id === helpers.getUser(req).id)
