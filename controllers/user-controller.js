@@ -1,18 +1,11 @@
-const jwt = require('jsonwebtoken')
+const userServices = require('../services/user-services')
+
 const userController = {
+  signUp: (req, res, next) => {
+    userServices.signUp(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
   signIn: (req, res, next) => {
-    try {
-      const token = jwt.sign(req.user, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.jason({
-        status: 'success',
-        data: {
-          token,
-          user: req.user
-        }
-      })
-    } catch (err) {
-      next(err)
-    }
+    userServices.signIn(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 module.exports = userController
