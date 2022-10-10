@@ -96,6 +96,7 @@ const tweetController = {
     .then(likeRecord => res.status(200).json(likeRecord))
     .catch(err => next(err))
   },
+ 
   unlikeTweet:(req, res, next) => {
     // POST /api/tweets/:tweet_id/unlike - 取消喜歡一則推文
     const TweetId = req.params.id
@@ -134,6 +135,7 @@ const tweetController = {
       include: [{
         model: Reply, include: [{
           model: User,
+          as: 'replyUser',
           attributes: ['id', 'account', 'avatar', 'name']
         }],
         attributes: { exclude: ['UserId', 'updatedAt'] }
@@ -154,7 +156,7 @@ const tweetController = {
     })
     .catch(err => next(err))
   },
-  postReply:(req, res, next) => {
+   postReply:(req, res, next) => {
     // POST /api/tweets/:tweet_id/replies - 新增回覆
     const { comment } = req.body
     const targetTweetId = req.params.id
@@ -177,7 +179,7 @@ const tweetController = {
       res.status(200).json(reply)
     })
     .catch(err => next(err))
-  },
+  }
 }
 
 module.exports = tweetController
