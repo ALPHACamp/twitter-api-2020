@@ -41,7 +41,7 @@ const adminController = {
             ...user.toJSON(),
             followerCount: user.Followers.length,
             followingCount: user.Followings.length,
-            tewwtCount: user.Tweets.length,
+            tweetCount: user.Tweets.length,
             likeCount: user.Likes.length
           }))
           .map(user => {

@@ -114,28 +114,33 @@ const userController = {
       if (account && !validator.isByteLength(account, { min: 0, max: 15 })) {
         res.status(403).json({ status: 'error', message: '帳號長度不可超過15字' })
       }
+      
       if (account !== currentAccount) {
         const userAccount = await User.findOne({ where:account})
         if(userAccount){
           res.status(403).json({ status: 'error', message: '此帳號已有人使用！' })
         }
       }
+
       if(email !== currentEmail) { 
         const userEmail = await User.findOne({ where:email })
         if(userEmail){
           res.status(403).json({ status: 'error', message: '此信箱已有人使用！' })
         }
       }
-      await User.update({ 
-        account,
-        name,
-        email,
-        password: bcrypt.hashSync(
-          password,
-          bcrypt.genSaltSync(10),
-          null
-        )
-      })
+      
+      await User.findByPk(userID)
+        .then(user => 
+          user.update({
+          account,
+          name,
+          email,
+          password: bcrypt.hashSync(
+            password,
+            bcrypt.genSaltSync(10),
+            null
+          )
+        }))
       return res.status(200).json({
         status: 'success',
         message: '帳號更新成功！'
