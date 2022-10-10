@@ -1,8 +1,10 @@
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt-nodejs')
 const { Like, Tweet, User } = require('../models')
 
 const adminController = {
   getUsers: (req, res, next) => {
-    // GET /api/admin/users - 瀏覽使用者清單  
+    // GET /api/admin/users - 瀏覽使用者清單
     return User.findAll({
       attributes:['id', 'account', 'name', 'avatar', 'backgroundImage'],
       include:[{
@@ -38,10 +40,7 @@ const adminController = {
         Followings: ['omit']
       }))
       .sort((a, b) => ( b.tweetCount - a.tweetCount ))
-      res.status(200).json({
-        status: 'success',
-        users
-      })
+      res.status(200).json(users)
     })
     .catch(err => next(err))
   },
@@ -69,20 +68,41 @@ const adminController = {
   },
   deleteTweet: (req, res, next) => {
     // DELETE /api/admin/tweets/:id - 刪除使用者的推文
-    console.log('太空戰士', req.par)
     return Tweet.findByPk(req.params.id)
     .then(tweet => {
-      console.log('太空戰士', tweet)
       if(!tweet) throw new Error("Tweet does not exist!")
       return tweet.destroy()
     })
     .then(data => {
-    res.json({
+    res.status(200).json({
       status: 'success',
       deleted_tweet: data
-    })})
+    })
+  })
     .catch(err => next(err))
-  } 
+  },
+  adminSignin: (req, res, next) => {
+    // POST /api/admin/signin - 管理者登入
+    const { account, password } = req.body
+    if (!account || !password) throw new Error('account and password are required!')
+    return User.findOne({ where: { account } })
+      .then(user => {
+        if (!user) throw new Error('帳號不存在！')
+        if (user.role !== 'admin') throw new Error('帳號不存在！')
+        if (!bcrypt.compareSync(password, user.password)) throw new Error('incorrect account or password!')
+        const userData = user.toJSON()
+        delete userData.password
+        const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+        res.status(200).json({
+          status: 'success',
+          data: {
+            token,
+            user: userData
+          }
+        })
+      })
+      .catch(err => next(err))
+  }
 }
 
 module.exports = adminController
