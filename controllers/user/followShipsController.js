@@ -31,6 +31,7 @@ const followShipsCotroller = {
   removeFollow: async (req, res, next) => {
     const followerId = helpers.getUser(req).id
     const followingId = req.params.followingId
+    assert(!(followerId === followingId), '不能追蹤自己')
     try {
       const [follower, following] = await Promise.all([
         User.findByPk(followerId),
