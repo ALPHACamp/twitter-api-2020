@@ -20,7 +20,15 @@ const authenticatedAdmin = (req, res, next) => {
   next()
 }
 
+const authenticatedUser = (req, res, next) => {
+  if (helpers.getUser(req).role !== 'user') {
+    return res.status(403).json({ status: 'error', message: 'permission denied' })
+  }
+  next()
+}
+
 module.exports = {
   authenticated,
-  authenticatedAdmin
+  authenticatedAdmin,
+  authenticatedUser
 }

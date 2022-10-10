@@ -1,13 +1,8 @@
 const router = require('express').Router()
-const passport = require('../../config/passport')
 const adminController = require('../../controllers/admin/adminController')
-const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 
-router.post('/login',
-  passport.authenticate('local', { session: false }),
-  adminController.adminSignIn)
-router.get('/users', authenticated, authenticatedAdmin, adminController.getAllUsers)
-router.delete('/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
-router.get('/tweets', authenticated, authenticatedAdmin, adminController.getAllTweets)
+router.get('/users', adminController.getAllUsers)
+router.delete('/tweets/:id', adminController.deleteTweet)
+router.get('/tweets', adminController.getAllTweets)
 
 module.exports = router
