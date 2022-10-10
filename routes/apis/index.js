@@ -23,14 +23,16 @@ router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 router.post('/users/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn, authErrorHandler)
 router.post('/users', userController.signUp)
-router.get('/users', userController.getUser)
-router.use('/users', authenticated, users)
 
+
+router.get('/users/:id', authenticated ,userController.getUser)
 router.get('/users/:id/tweets',authenticated,userController.getUserTweets)
-router.get('users/:id/followers', authenticated,userController.getUserFollowers)
-router.get('users/:id/followings', authenticated, userController.getUserFollowers)
-router.get('users/:id/likes', authenticated, userController.getUserLikes)
+router.get('/users/:id/followers', authenticated,userController.getUserFollowers)
+router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 
+router.use('/users', authenticated, users)
 router.use('/', (req, res) => res.redirect('/api/users'))
 router.use('/', apiErrorHandler)
 module.exports = router
