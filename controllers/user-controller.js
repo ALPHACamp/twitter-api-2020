@@ -93,12 +93,12 @@ const userController = {
   },
   editCurrentUser: async (req, res, next) => {
     try {
-      const userID = req.user.id
+      const userId = req.user.id
       const id = req.params.id
       const { account, name, email, password, checkPassword } = req.body
       const { account: currentAccount, email: currentEmail } = req.user
 
-      if (userID !== Number(id)) {
+      if (userId !== Number(id)) {
         return res.status(401).json({ status: 'error', message: '無法編輯其他使用者' })
       }
       if (!account || !name || !email || !password || !checkPassword) {
@@ -277,7 +277,41 @@ const userController = {
           next(err)
         }
     },
-    
+    getUserReplies: async(req,res,next) =>{
+      try{
+        const UserId = req.params.id
+        const user = await User.findByPK(UserId)
+
+        const replies = await Reply.findAll({
+          where: { UserId},
+          include: [User, { model:Tweet, include:User}],
+          order: [['createdAT','DESC']]
+        })
+        replies = replies.map(reply => {
+          return {
+            replyId: reply.id,
+            replyUserId: reply.UserId,
+            replyComment: reply.comment,
+            replyCreatedAt: reply.createdAT,
+            replyAccount: reply.User.account,
+            replyName: reply.User.name,
+            replyAvatar: reply.User.avatar,
+            tweetId: reply.Tweet.id,
+            tweetDescription: reply.Tweet.description,
+            tweetCreatedAt: reply.Tweet.createdAt,
+            tweetAuthorAccount:reply.Tweet.User.account,
+            tweetAuthorName: reply.Tweet.User.name,
+            tweetAuthorAvatar: reply.Tweet.User.avatar
+          }
+        })
+        return res.status(200).json(replies)
+        }
+        catch(err) {
+          next(err)
+        }
+
+    },
+
 }
 
 module.exports = userController
