@@ -12,8 +12,14 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  console.log(helpers.getUser(req))
   if (helpers.getUser(req).role !== 'admin') {
+    return res.status(403).json({ status: 'error', message: 'permission denied' })
+  }
+  next()
+}
+
+const authenticatedUser = (req, res, next) => {
+  if (helpers.getUser(req).role !== 'user') {
     return res.status(403).json({ status: 'error', message: 'permission denied' })
   }
   next()
@@ -21,5 +27,6 @@ const authenticatedAdmin = (req, res, next) => {
 
 module.exports = {
   authenticated,
-  authenticatedAdmin
+  authenticatedAdmin,
+  authenticatedUser
 }

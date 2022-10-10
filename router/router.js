@@ -5,18 +5,27 @@ const adminRoute = require('./admin')
 const tweetsRoute = require('./user/tweets')
 const followshipsRoute = require('./user/followships')
 const userController = require('../controllers/user/userController')
+const adminController = require('../controllers/admin/adminController')
 const { apiErrorHandler } = require('../middleware/error-handler')
-const { authenticated } = require('../middleware/auth')
+const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 
-router.post(
-  '/login',
+// user login
+router.post('/login',
   passport.authenticate('local', { session: false }),
   userController.signIn
 )
-router.use('/users', userRoute)
-router.use('/admin', adminRoute)
-router.use('/tweets', authenticated, tweetsRoute)
-router.use('/followships', authenticated, followshipsRoute)
+// admin login
+router.post('/admin/login',
+  passport.authenticate('local', { session: false }),
+  adminController.adminSignIn
+)
+// user register
+router.post('/users', userController.signUp)
+
+router.use('/admin', authenticated, authenticatedAdmin, adminRoute)
+router.use('/users', authenticated, authenticatedUser, userRoute)
+router.use('/tweets', authenticated, authenticatedUser, tweetsRoute)
+router.use('/followships', authenticated, authenticatedUser, followshipsRoute)
 
 router.get('/test', (req, res) => {
   console.log('GET:test: req.query', req?.query)
