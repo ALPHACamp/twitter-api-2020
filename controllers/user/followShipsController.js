@@ -1,12 +1,13 @@
 const { User, Followship } = require('../../models')
 const helpers = require('../../_helpers')
 const assert = require('assert')
-
+const sequelize = require('sequelize')
 const followShipsCotroller = {
   addFollow: async (req, res, next) => {
-    const followerId = helpers.getUser(req).id
-    const followingId = req.body.id
+    const followerId = Number(helpers.getUser(req).id)
+    const followingId = Number(req.body.id)
     try {
+      assert(!(followerId === followingId), '不能追隨自己')
       const [follower, following] = await Promise.all([
         User.findByPk(followerId),
         User.findByPk(followingId)
@@ -31,6 +32,7 @@ const followShipsCotroller = {
   removeFollow: async (req, res, next) => {
     const followerId = helpers.getUser(req).id
     const followingId = req.params.followingId
+    assert(!(followerId === followingId), '不能追蹤自己')
     try {
       const [follower, following] = await Promise.all([
         User.findByPk(followerId),
@@ -49,6 +51,30 @@ const followShipsCotroller = {
         staus: 'success',
         data: deleted
       })
+    } catch (error) {
+      next(error)
+    }
+  }, // 追蹤者前10名名單
+  getTop10FollowerUser: async (req, res, next) => {
+    try {
+      const top10User = await User.findAll({
+        raw: true,
+        attributes: {
+          // 自定義一個欄位
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId=User.id)'
+              ),
+              'followerCount'
+            ]
+          ]
+        },
+        // 以自定義的欄位進行排序
+        order: [[sequelize.literal('followerCount'), 'DESC']],
+        limit: 10
+      })
+      res.json(top10User)
     } catch (error) {
       next(error)
     }
