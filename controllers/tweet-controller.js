@@ -22,7 +22,8 @@ const tweetController = {
             if (tweet.Replies.length !== 0) {
               tweet.Replies.map(
                 reply => delete reply.User.password
-              )}
+              )
+            }
 
             if (tweet.User) delete tweet.User.password
 
@@ -56,11 +57,12 @@ const tweetController = {
       userId: helpers.getUser(req).id,
       description
     })
-
-    return res.status(200).json({
-      status: 'success',
-      message: '推文已成功新增'
-    })
+      .then(data => res.status(200).json({
+        status: 'success',
+        message: '推文已成功新增',
+        data
+      }))
+      .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
     Tweet.findByPk(req.params.id,
@@ -100,13 +102,51 @@ const tweetController = {
       .then(data => res.status(200).json(data))
       .catch(err => next(err))
   },
-  getReplies: (req, res, next) => {
-    Promise.all([
-      Tweet.findByPk(req.params.id,)
-    ])
+  getReplies: async (req, res, next) => {
+    const tweetId = req.params.tweet_id
+    Reply.findAll({
+      include: User,
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => {
+        const result = replies.map(reply => ({
+          ...reply.toJSON()
+        }))
+        .filter(replyTweet => 
+          replyTweet.tweetId === Number(tweetId))
+
+        if (result) {
+          result.map(
+            reply => delete reply.User.password
+          )}
+        return result
+      }
+      )
+      .then(data => res.status(200).json(data))
+      .catch(err => next(err))   
   },
   addReply: (req, res, next) => {
+    const { comment } = req.body
+    const tweetId = req.params.tweet_id
 
+    if (comment.length === 0) {
+      return res.status(403).json({
+        status: 'error',
+        message: '請輸入你想留言的內容'
+      })
+    }
+
+    Reply.create({
+      userId: helpers.getUser(req).id,
+      tweetId,
+      comment
+    })
+      .then(data => res.status(200).json({
+        status: 'success',
+        message: '留言已成功新增',
+        data
+      }))
+      .catch(err => next(err))
   }
 }
 
