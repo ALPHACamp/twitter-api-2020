@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
+const path = require('path')
 const express = require('express')
 const routes = require('./routes')
 const passport = require('./config/passport')
@@ -24,6 +25,7 @@ app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json()) // set response format
 app.use(passport.initialize()) // init passport.js
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use((req, res, next) => {
   req.user = helpers.getUser(req) // global req.user
   next()
