@@ -28,7 +28,7 @@ router.use('/users', authenticated, users)
 
 router.get('/users/:id/tweets',authenticated,userController.getUserTweets)
 router.get('users/:id/followers', authenticated,userController.getUserFollowers)
-
+router.get('users/:id/followings', authenticated, userController.getUserFollowers)
 
 router.use('/', (req, res) => res.redirect('/api/users'))
 router.use('/', apiErrorHandler)
