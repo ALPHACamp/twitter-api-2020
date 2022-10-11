@@ -53,7 +53,7 @@ const adminController = {
             user.Followings.map(following => {
               delete following.password
             })
-            
+
             delete user.password
             return user
           })
@@ -80,9 +80,18 @@ const adminController = {
       .catch(err => next(err))
   },
   deleteTweet: (req, res, next) => {
-    Tweet.findByPk(req.params.id)
+    Tweet.findByPk(req.params.id, {
+      include: [
+        Reply,
+        Like
+      ]
+    })
       .then(tweet => {
+        console.log(tweet)
         if (!tweet) throw new Error('此推文已不存在！')
+        
+        tweet.Replies.map(reply => reply.destroy())
+        tweet.Likes.map(like => like.destroy({ force: true }))
         
         return tweet.destroy()
       })

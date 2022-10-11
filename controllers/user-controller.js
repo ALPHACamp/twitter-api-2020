@@ -156,7 +156,7 @@ const userController = {
     try {
       const id = req.params.id
       const user = await User.findOne({
-        where: { id:id},
+        where: { id },
         include: [
           Tweet,
           { model: User, as: 'Followers'},
@@ -227,18 +227,18 @@ const userController = {
         const user = await User.findByPk(UserId)
 
         let tweets = await Tweet.findAll({
-          where: { id:UserId },
+          where: { UserId },
           include: [
             User,
             Like,
-            Reply,
-            { model: User, as:'LikedUsers' }
+            Reply
           ],
           order: [['createdAt','DESC']]
         })
         if(!user || user.role === 'admin') {
           return res.status(404).json({ status: 'error',message:'使用者不存在'})
         }
+        
         tweets = tweets.map(tweet => {
           return{
             id:tweet.id,
@@ -250,7 +250,7 @@ const userController = {
             createdAt:tweet.createdAt,
             likedCount:tweet.Likes.length,
             repliedCount:tweet.Replies.length,
-            isLike: tweet.LikeUsers.map(t =>t.id).includes(req.user.id)
+            isLike: tweet.Likes.map(t => t.id).includes(req.user.id)
           }
         })
         return res.status(200).json(tweets)
@@ -318,18 +318,19 @@ const userController = {
         const user = await User.findByPk(UserId)
 
         let replies = await Reply.findAll({
-          where: { id:UserId },
+          where: { UserId },
           include: [User, { model:Tweet, include:User}],
           order: [['createdAt','DESC']]
         })
         if (!user || user.role === 'admin') {
           return res.status(404).json({ status: 'error', message: '使用者不存在' })
         }
+        console.log(replies)
         replies = replies.map(reply => {
           return {
             replyId: reply.id,
             replyUserId: reply.UserId,
-            replyComment: reply.comment,
+            comment: reply.comment,
             replyCreatedAt: reply.createdAt,
             replyAccount: reply.User.account,
             replyName: reply.User.name,
@@ -354,7 +355,7 @@ const userController = {
         const user = await User.findByPk(UserId)
 
         let likes = await Like.findAll({
-          where:{id:UserId},
+          where:{ UserId },
           include: [{
             model:Tweet,
             include: [{ model:User },{ model: Reply, include:[{ model:User}]}, Like]
@@ -368,7 +369,7 @@ const userController = {
           return {
             id: like.id,
             UserId: like.UserId,
-            tweetId: like.TweetId,
+            TweetId: like.TweetId,
             likeCreatedAt: like.createdAt,
             likedTweetUserId: like.Tweet.UserId,
             name: like.Tweet.User.name,
@@ -378,7 +379,7 @@ const userController = {
             tweetCreatedAt: like.Tweet.createdAt,
             likedCount: like.Tweet.Likes.length,
             repliedCount: like.Tweet.Replies.length,
-            isLike: like.Tweet.Likes.some((t) => t.UserId === req.user.id)
+            isLike: like.Tweet.Likes.some((t) => t.UserId === helpers.getUser(req).id)
           }
         })
         return res.status(200).json(likes)
