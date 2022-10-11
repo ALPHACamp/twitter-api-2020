@@ -15,6 +15,7 @@ router.post('/', (req, res) => {
   console.log('POST:test: req.query', req?.query)
   console.log('POST:test: req.params', req?.params)
   console.log('POST:test req.body', req.body)
+  console.log('POST:test req', req)
   res.json({
     status: 'seccess',
     message: 'get data'
@@ -31,6 +32,8 @@ router.put(
     console.log('POST:test: req.query', req?.query)
     console.log('POST:test: req.params', req?.params)
     console.log('POST:test req.body', req.body)
+    console.log('POST:test req', req)
+    console.log('contentType', req.headers['content-type'])
     res.json({
       status: 'seccess',
       message: 'get data'
