@@ -303,7 +303,7 @@ const userController = {
     Promise.all(Array.from(Object.keys(files), (key, index) => {
       return imgur.uploadFile(files[key][0].path)
         .then(uploadFile => {
-          uploadFiles[key] = uploadFile
+          uploadFiles[key] = uploadFile?.link || null
         })
         .catch(err => next(err))
     }))
@@ -315,12 +315,20 @@ const userController = {
         return user.update({
           name,
           introduction,
-          avatar: uploadFiles?.avatar?.link || user.avatar,
-          backgroundImage: uploadFiles?.backgroundImage?.link || user.backgroundImage
+          avatar: uploadFiles?.avatar || user.avatar,
+          backgroundImage: uploadFiles?.backgroundImage || user.backgroundImage
         })
       })
       .then(updatedUser => res.status(200).json(updatedUser))
       .catch(err => next(err))
+  },
+  getCurrentUser: (req, res, next) => {
+    const currentUser = helpers.getUser(req).toJSON()
+  
+    delete currentUser.password
+    delete currentUser.Followings
+    console.log(currentUser)
+    res.status(200).json(currentUser)
   }
 
 }

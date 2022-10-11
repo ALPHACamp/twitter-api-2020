@@ -8,6 +8,7 @@ const uploadFields = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'ba
 
 router.post('/signin', userController.signIn)
 router.get('/popularUsers', authenticated, userController.getPopularUsers)
+router.get('/currentUser', authenticated, userController.getCurrentUser)
 router.get('/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/:id/followers', authenticated, userController.getUserFollowers)
