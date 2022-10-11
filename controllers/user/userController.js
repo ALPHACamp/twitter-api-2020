@@ -160,7 +160,9 @@ const userController = {
       const liked = await Like.findAll({
         raw: true,
         nest: true,
-        where: { userId }
+        include: [Tweet],
+        where: { userId },
+        order: [['crea']]
       })
       assert(liked.length > 0, '該使用者還沒有按喜歡')
       res.json(liked)
@@ -175,7 +177,8 @@ const userController = {
         raw: true,
         nest: true,
         where: { followingId: userId },
-        attributes: ['followerId']
+        attributes: ['followerId'],
+        order: [['createdAt', 'DESC']]
       })
       assert(followers.length, '這個使用者還沒有任何追隨者')
       res.json(followers)
@@ -190,7 +193,8 @@ const userController = {
         raw: true,
         nest: true,
         where: { followerId: userId },
-        attributes: ['followingId']
+        attributes: ['followingId'],
+        order: [['createdAt', 'DESC']]
       })
       assert(followings.length, '這個使用者還沒有任何追隨者')
       res.json(followings)
