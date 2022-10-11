@@ -41,11 +41,7 @@ const tweetController = {
         })
       })
       .then(newTweet => {
-        res.status(200).json({
-          status: 'success',
-          message: '新增推文成功',
-          data: newTweet
-        })
+        res.status(200).json(newTweet)
       })
       .catch(error => next(error))
   },
@@ -92,11 +88,7 @@ const tweetController = {
         })
       })
       .then(repliedTweet => {
-        return res.status(200).json({
-          status: 'success',
-          message: '新增回覆成功',
-          data: repliedTweet
-        })
+        return res.status(200).json(repliedTweet)
       })
       .catch(error => next(error))
   },
