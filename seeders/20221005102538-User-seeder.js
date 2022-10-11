@@ -1,4 +1,3 @@
-
 'use strict'
 const bcrypt = require('bcrypt-nodejs')
 module.exports = {
@@ -8,8 +7,8 @@ module.exports = {
         'Users',
         [
           {
-            name: 'admin',
-            account: 'admin',
+            name: 'root',
+            account: 'root',
             email: 'root@example.com',
             password: bcrypt.hashSync('12345678'),
             role: 'admin',

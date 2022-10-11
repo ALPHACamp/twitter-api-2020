@@ -21,6 +21,7 @@ const tweetController = {
     }
   },
   getAllTweets: async (req, res, next) => {
+    const UserId = Number(helpers.getUser(req).id)
     try {
       const [tweetData, replyData, likeData] = await Promise.all([
         Tweet.findAll({
@@ -42,6 +43,9 @@ const tweetController = {
           (reply) => reply.TweetId === tid
         ).length
         tweet.likeCount = likeData.filter((like) => like.TweetId === tid).length
+        tweet.islike = likeData.some(
+          (like) => like.TweetId === tid && like.UserId === UserId
+        )
       })
       return res.json(tweetData)
     } catch (error) {
@@ -88,7 +92,6 @@ const tweetController = {
         data: liked
       })
     } catch (error) {
-      console.log(error.message)
       next(error)
     }
   },
@@ -142,7 +145,7 @@ const tweetController = {
         },
         include: User
       })
-      if (data.length === 0) throw new Error('貼文不存在')
+      if (data.length === 0) throw new Error('這則貼文還沒有任何人回覆')
       return res.json(data)
     } catch (error) {
       next(error)

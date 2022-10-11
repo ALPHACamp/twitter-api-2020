@@ -23,6 +23,7 @@ router.post(
 // admin login
 router.post(
   '/admin/login',
+
   passport.authenticate('local', { session: false }),
   adminController.adminSignIn
 )
