@@ -28,17 +28,20 @@ const adminController = {
     ]
     })
     .then(users => {
-      users = users.map(user => ({
-        ...user.toJSON(),
-        tweetCount: user.Tweets.length,
-        likeCount: user.Likes.length,
-        followerCount: user.Followers.length,
-        followingCount: user.Followings.length,
-        Tweets: ['omit'],
-        Likes: ['omit'],
-        Followers: ['omit'],
-        Followings: ['omit']
-      }))
+      console.log('map 前的 users', users[0].toJSON())
+      users = users.map(user => {
+        user = user.toJSON()
+        user.tweetCount = user.Tweets.length
+        console.log('map中', user.tweetCount)
+        user.likeCount = user.Likes.length
+        user.followerCount = user.Followers.length
+        user.followingCount = user.Followings.length
+        delete user.Tweets
+        delete user.Likes
+        delete user.Followers
+        delete user.Followings
+        return user
+      })
       .sort((a, b) => ( b.tweetCount - a.tweetCount ))
       res.status(200).json(users)
     })
