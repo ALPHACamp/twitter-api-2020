@@ -1,4 +1,4 @@
-const { User, Tweet, Like, Reply } = require('../models')
+const { User, Tweet, Like, Reply, Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -20,9 +20,16 @@ const tweetController = {
             commentCount: tweet.Replies.length
           }))
           .map(tweet => {
-            if (tweet.Replies.length !== 0) {
+
+            if (tweet.Replies.length) {
               tweet.Replies.map(
                 reply => delete reply.User.password
+              )
+            }
+
+            if (tweet.Likes.length) {
+              tweet.Likes.map(
+                like => delete like.User.password
               )
             }
 
@@ -55,7 +62,7 @@ const tweetController = {
     }
 
     Tweet.create({
-      userId: helpers.getUser(req).id,
+      UserId: helpers.getUser(req).id,
       description
     })
       .then(data => res.status(200).json({
@@ -76,13 +83,8 @@ const tweetController = {
       })
       .then(tweet => {
 
-        if (!tweet) {
-          return res.status(403).json({
-            status: 'error',
-            message: '此推文已消失在這世上'
-          })
-        }
-        console.log(tweet)
+        if (!tweet) throw new Error('此推文已消失在這世上')
+
         const isLike = tweet.Likes.some(l =>
           l.UserId === helpers.getUser(req).id
         )
@@ -101,8 +103,9 @@ const tweetController = {
         }
 
         if (result.Likes.length) {
+          console.log(result.Likes)
           result.Likes.map(
-            reply => delete reply.User.password
+            like => delete like.User.password
           )
         }
 
@@ -125,8 +128,8 @@ const tweetController = {
             ...reply.toJSON()
           }))
           .filter(replyTweet =>
-            replyTweet.tweetId === Number(tweetId))
-
+            replyTweet.TweetId === Number(tweetId))
+        
         if (result) {
           result.map(
             reply => delete reply.User.password
@@ -139,37 +142,41 @@ const tweetController = {
       .catch(err => next(err))
   },
   addReply: async (req, res, next) => {
-    const { comment } = req.body
-    const tweetId = req.params.tweet_id
+    try {
+      const { comment } = req.body
+      const tweetId = req.params.tweet_id
 
-    await Tweet.findByPk(tweetId)
-      .then(tweet => {
-        if (!tweet) {
-          return res.status(403).json({
-            status: 'error',
-            message: '此推文已消失在這世上'
-          })
-        }
+      await Tweet.findByPk(tweetId)
+        .then(tweet => {
+          if (!tweet) {
+            return res.status(403).json({
+              status: 'error',
+              message: '此推文已消失在這世上'
+            })
+          }
+        })
+
+      if (comment.length === 0) {
+        return res.status(403).json({
+          status: 'error',
+          message: '請輸入你想留言的內容'
+        })
+      }
+
+      await Reply.create({
+        userId: helpers.getUser(req).id,
+        tweetId,
+        comment
       })
+        .then(data => res.status(200).json({
+          status: 'success',
+          message: '留言已成功新增',
+          data
+        }))
+        .catch(err => next(err))
 
-    if (comment.length === 0) {
-      return res.status(403).json({
-        status: 'error',
-        message: '請輸入你想留言的內容'
-      })
-    }
+    } catch (err) { console.log(err) }
 
-    await Reply.create({
-      userId: helpers.getUser(req).id,
-      tweetId,
-      comment
-    })
-      .then(data => res.status(200).json({
-        status: 'success',
-        message: '留言已成功新增',
-        data
-      }))
-      .catch(err => next(err))
   },
   likeTweet: (req, res, next) => {
     const TweetId = req.params.id
@@ -185,19 +192,9 @@ const tweetController = {
       })
     ])
       .then(([tweet, like]) => {
-        if (!tweet) {
-          return res.status(403).json({
-            status: 'error',
-            message: '此推文已消失在這世上'
-          })
-        }
+        if (!tweet) throw new Error('此推文已消失在這世上')
 
-        if (like && !like.toJSON().deletedAt) {
-          return res.status(403).json({
-            status: 'error',
-            message: '已經喜歡這篇推文'
-          })
-        }
+        if (like && !like.toJSON().deletedAt) throw new Error('已經喜歡這篇推文')
 
         if (like) {
           return like.restore()
@@ -230,25 +227,78 @@ const tweetController = {
       })
     ])
       .then(([tweet, like]) => {
-        if (!tweet) {
-          return res.status(403).json({
-            status: 'error',
-            message: '此推文已消失在這世上'
-          })
-        }
+        if (!tweet) throw new Error('此推文已消失在這世上')
 
-        if (!like) {
-          return res.status(403).json({
-            status: 'error',
-            message: '已經不喜歡這篇推文'
-          })
-        }
+        if (!like) throw new Error('你已經不喜歡這篇推文')
 
         return like.destroy()
+
       })
       .then(data => res.status(200).json({
         status: 'success',
         message: '不喜歡這篇推文',
+        data
+      }))
+      .catch(err => next(err))
+  },
+  addFollow: (req, res, next) => {
+    const { id } = req.body
+
+    Promise.all([
+      User.findByPk(id),
+      Followship.findOne({
+        where: {
+          followerId: helpers.getUser(req).id,
+          followingId: id
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+
+        if (!user) throw new Error('使用者不存在')
+
+        if (helpers.getUser(req).id === Number(id)) throw new Error('你無法追蹤自己')
+
+        if (followship) throw new Error('你已經追蹤此使用者')
+
+
+        return Followship.create({
+          followerId: helpers.getUser(req).id,
+          followingId: id
+        })
+
+      })
+      .then(data => res.status(200).json({
+        status: 'success',
+        message: '追蹤中',
+        data
+      }))
+      .catch(err => next(err))
+  },
+  removeFollow: (req, res, next) => {
+    const { followingId } = req.params
+
+    Promise.all([
+      User.findByPk(followingId),
+      Followship.findOne({
+        where: {
+          followerId: helpers.getUser(req).id,
+          followingId: followingId
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+
+        if (!user) throw new Error('使用者不存在')
+
+        if (!followship) throw new Error('你未追蹤此使用者')
+
+        return followship.destroy()
+
+      })
+      .then(data => res.status(200).json({
+        status: 'success',
+        message: '取消追蹤',
         data
       }))
       .catch(err => next(err))

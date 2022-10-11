@@ -45,6 +45,15 @@ const adminController = {
             likeCount: user.Likes.length
           }))
           .map(user => {
+
+            user.Followers.map(follower => {
+              delete follower.password
+            })
+
+            user.Followings.map(following => {
+              delete following.password
+            })
+            
             delete user.password
             return user
           })
@@ -64,8 +73,6 @@ const adminController = {
         }))
           .map(tweet => {
             delete tweet.User.password
-            delete tweet.User.createdAt
-            delete tweet.User.updatedAt
             return tweet
           })
         return res.status(200).json(result)
@@ -75,12 +82,8 @@ const adminController = {
   deleteTweet: (req, res, next) => {
     Tweet.findByPk(req.params.id)
       .then(tweet => {
-        if (!tweet) {
-          return res.status(403).json({
-            status: 'error',
-            message: '此推文已不存在！'
-          })
-        }
+        if (!tweet) throw new Error('此推文已不存在！')
+        
         return tweet.destroy()
       })
 
