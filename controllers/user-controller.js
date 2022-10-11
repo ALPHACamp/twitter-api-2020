@@ -6,7 +6,7 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { en_IND } = require('faker/lib/locales')
 const e = require('connect-flash')
 const { captureRejectionSymbol } = require('mysql2/lib/connection')
-const { localFileHandler } = require('../helpers/file-helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -202,7 +202,7 @@ const userController = {
           return res.status(403).json({ status: 'error', message: '自我介紹長度不可超過160字' })
         }
         const { file } = req
-        return Promise.all([User.findByPk(req.params.id), localFileHandler(file)])
+        return Promise.all([User.findByPk(req.params.id), imgurFileHandler(file)])
           .then(([user, filePath]) => {
             return user.update({
               name,
