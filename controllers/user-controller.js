@@ -282,28 +282,42 @@ const userController = {
 
     })
       .then(users => {
-        users.forEach(user => {
+        populatUser = users.map(user => {
           user = user.dataValues
           user.followerCounts = user.Followers.length
           user.isFollowed = user.Followers.some(u => u.id === currentUser)
           delete user.Followers
+          return user
         })
-        users.sort((a, b) => b.followerCounts - a.followedCount)
+        populatUser.sort((a, b) => b.followerCounts - a.followerCounts).slice(0,10)
 
-        res.status(200).json(users)
+        res.status(200).json(populatUser)
       }).catch(err => next(err))
   },
   putUser: (req, res, next) => {
-    const { id } = req.params
-    const currentUser = String(helpers.getUser(req).id)
+
+    const id = Number(req.params.id)
+    const currentUser = helpers.getUser(req).id
+  
     if (id !== currentUser) throw new Error('permission denied')
 
     const { name, introduction } = req.body
+    if (!name) throw new Error ('name is required!')
     const { files } = req
+
+    if (!files) {
+      return User.update({ name, introduction }, { where: { id } })
+        .then(user => {
+          res.status(200).json(user)
+        })
+        .catch(err => next(err))
+    }
+
+
     const uploadFiles = {}
 
     Promise.all(Array.from(Object.keys(files), (key, index) => {
-      return imgur.uploadFile(files[key][0].path)
+      return imgur.uploadFile(files[key][0]?.path)
         .then(uploadFile => {
           uploadFiles[key] = uploadFile?.link || null
         })
@@ -321,7 +335,8 @@ const userController = {
           backgroundImage: uploadFiles?.backgroundImage || user.backgroundImage
         })
       })
-      .then(updatedUser => res.status(200).json(updatedUser))
+      .then(updatedUser => res.status(200).json(updatedUser.toJSON()
+      ))
       .catch(err => next(err))
   },
   getCurrentUser: (req, res, next) => {
