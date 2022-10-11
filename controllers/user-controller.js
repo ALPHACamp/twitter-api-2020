@@ -131,7 +131,7 @@ const userController = {
         }
       }
 
-      let user = await User.findByPk(userId)
+      let user = await User.findByPk(UserId)
       await user.update({
         account,
         name,
