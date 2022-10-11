@@ -17,6 +17,7 @@ const userController = {
         if (!user) throw new Error('帳號不存在！')
         if (user.role === 'admin') throw new Error('帳號不存在！')
         if (!bcrypt.compareSync(password, user.password)) throw new Error('incorrect account or password!')
+        console.log('使用者', user)
         const userData = user.toJSON()
         delete userData.password
         const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -80,7 +81,7 @@ const userController = {
         }, {
           where: { id }, returning: true,
           plain: true
-        } )
+        })
       }).then(() => res.status(200).json({
         status: 'success'
       }))
@@ -155,6 +156,7 @@ const userController = {
       { model: Tweet, attributes: ['id', 'description'], include: [{ model: User, attributes: ['id', 'account'], as: 'tweetAuthor' }] }]
     })
       .then(replies => {
+        console.log(replies)
         replies.forEach(reply => {
           reply = reply.dataValues
           reply.tweetAuthorAccount = reply.Tweet.tweetAuthor.account
@@ -187,7 +189,7 @@ const userController = {
           ...like.toJSON(),
         }))
         likes.forEach(like => {
-
+          console.log(like)
           like.replyCounts = like.Tweet.Replies.length,
             like.likeCounts = like.Tweet.Likes.length,
             like.isLiked = like.Tweet.Likes.map(u => u.UserId).includes(currentUser.id)
@@ -280,35 +282,49 @@ const userController = {
 
     })
       .then(users => {
-        users.forEach(user => {
+        populatUser = users.map(user => {
           user = user.dataValues
           user.followerCounts = user.Followers.length
           user.isFollowed = user.Followers.some(u => u.id === currentUser)
           delete user.Followers
+          return user
         })
-        users.sort((a, b) => b.followerCounts - a.followedCount).slice(0, 10)
+        populatUser.sort((a, b) => b.followerCounts - a.followerCounts).slice(0,10)
 
-        res.status(200).json(users)
+        res.status(200).json(populatUser)
       }).catch(err => next(err))
   },
   putUser: (req, res, next) => {
-    const { id } = req.params
-    const currentUser = String(helpers.getUser(req).id)
+
+    const id = Number(req.params.id)
+    const currentUser = helpers.getUser(req).id
+  
     if (id !== currentUser) throw new Error('permission denied')
 
     const { name, introduction } = req.body
+    if (!name) throw new Error ('name is required!')
     const { files } = req
+
+    if (!files) {
+      return User.update({ name, introduction }, { where: { id } })
+        .then(user => {
+          res.status(200).json(user)
+        })
+        .catch(err => next(err))
+    }
+
+
     const uploadFiles = {}
 
     Promise.all(Array.from(Object.keys(files), (key, index) => {
-      return imgur.uploadFile(files[key][0].path)
+      return imgur.uploadFile(files[key][0]?.path)
         .then(uploadFile => {
           uploadFiles[key] = uploadFile?.link || null
         })
         .catch(err => next(err))
     }))
       .then(() => {
-        return User.findByPk(id)
+        return User.findByPk(currentUser)
       })
       .then((user) => {
         if (!user) throw new Error('user not exist')
@@ -319,15 +335,14 @@ const userController = {
           backgroundImage: uploadFiles?.backgroundImage || user.backgroundImage
         })
       })
-      .then(updatedUser => res.status(200).json(updatedUser))
+      .then(updatedUser => res.status(200).json(updatedUser.toJSON()
+      ))
       .catch(err => next(err))
   },
   getCurrentUser: (req, res, next) => {
     const currentUser = helpers.getUser(req).toJSON()
-  
     delete currentUser.password
     delete currentUser.Followings
-    console.log(currentUser)
     res.status(200).json(currentUser)
   }
 
