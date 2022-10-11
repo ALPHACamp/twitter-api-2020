@@ -12,10 +12,7 @@ const router = require('./router/router')
 const passport = require('passport')
 // cors 設定
 const corsOptions = {
-  origin: [
-    'https://yoyo030.github.io/',
-    'https://ac-twitter-project.herokuapp.com/'
-  ],
+  origin: process.env.CORS_ORIGIN_OPTION,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: ['Content-Type', 'Authorization']
 }
