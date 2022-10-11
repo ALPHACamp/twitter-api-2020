@@ -180,7 +180,8 @@ const userController = {
               '(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweet.id )'
             ), 'likesCount']
           ]
-        }
+        },
+        order: [['createdAt', 'DESC']]
       }),
       Like.findAll({ where: { UserId: currentUserId } })
     ])
@@ -206,7 +207,8 @@ const userController = {
     Promise.all([User.findByPk(id),
       Reply.findAll({
         where: { UserId: id },
-        include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }]
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }],
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, replies]) => {
