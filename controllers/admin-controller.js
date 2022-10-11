@@ -84,7 +84,7 @@ const adminController = {
       ]
     })
       .then(tweet => {
-        console.log(tweet)
+  
         if (!tweet) throw new Error('此推文已不存在！')
         
         tweet.Replies.map(reply => reply.destroy())
