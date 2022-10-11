@@ -3,7 +3,11 @@ const bcrypt = require('bcrypt-nodejs')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
-const { localFileHandler } = require('../file-helpers')
+const { imgurFileHandler } = require('../file-helpers')
+
+const imgur = require('imgur')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+imgur.setClientId(IMGUR_CLIENT_ID)
 
 const userController = {
   signIn: (req, res, next) => {
@@ -154,6 +158,7 @@ const userController = {
           ...like.toJSON(),
         }))
         likes.forEach(like => {
+
           like.replyCounts = like.Tweet.Replies.length,
             like.likeCounts = like.Tweet.Likes.length,
             like.isLiked = like.Tweet.Likes.map(u => u.UserId).includes(currentUser.id)
@@ -264,10 +269,17 @@ const userController = {
 
     const profile = req.body
     const { files } = req 
-    localFileHandler(files)
+    imgurFileHandler(files?.avatar[0])
+    console.log(imgurFileHandler(files?.avatar[0]))
     console.log(files)
-    res.status(200).json(files)
-
+    return imgur.uploadFile(files?.avatar[0]?.path)
+      .then(img => { 
+        console.log(img)
+        res.status(200).json(img?.link || null)
+       })
+        
+        
+      .catch(err => next(err))
 
   }
 

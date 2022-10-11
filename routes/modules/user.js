@@ -14,7 +14,7 @@ router.get('/:id/followers', authenticated, userController.getUserFollowers)
 router.get('/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/:id/likes', authenticated, userController.getUserLikes)
 
-router.put('/:id', authenticated, uploadFields.apply,userController.putUser)
+router.put('/:id', authenticated, uploadFields, userController.putUser)
 router.get('/:id', authenticated, userController.getUser)
 router.post('/', userController.postUser)
 router.use('/', apiErrorHandler)
