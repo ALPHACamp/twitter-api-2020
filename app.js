@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const passport = require('./config/passport')
+const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 const session = require('express-session')
@@ -26,6 +27,7 @@ app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: fals
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(cors(helpers.corsOptionsDelegate))
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use('/api', apis)
 

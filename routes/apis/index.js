@@ -8,6 +8,7 @@ const { authenticated, authenticatedAdmin, authenticateUser } = require('../../m
 const { apiErrorHandler, authErrorHandler } = require('../../middleware/error-handler')
 const userController = require('../../controllers/user-controller')
 const adminController = require('../../controllers/admin-controller')
+const imageUpload = require('../../middleware/multer')
 
 
 router.post('/users', userController.signUp)
@@ -25,13 +26,17 @@ router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 router.post('/users/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn, authErrorHandler)
 router.post('/users', userController.signUp)
-router.get('/users', userController.getUser)
+
+
+router.get('/users/:id', authenticated ,userController.getUser)
+router.put('/users/:id', imageUpload, authenticated, userController.editUser)
+router.get('/users/:id/tweets',authenticated,userController.getUserTweets)
+router.get('/users/:id/followers', authenticated,userController.getUserFollowers)
+router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+
 router.use('/users', authenticated, users)
-
-
-
-
-
 router.use('/', (req, res) => res.redirect('/api/users'))
 router.use('/', apiErrorHandler)
 module.exports = router
