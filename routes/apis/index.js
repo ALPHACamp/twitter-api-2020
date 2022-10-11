@@ -9,7 +9,7 @@ const followshipController = require('../../controllers/followship-controller')
 
 const { authenticated } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
-
+const upload = require('../../middleware/multer')
 // Admin
 router.use('/admin', admin)
 
@@ -20,7 +20,7 @@ router.get('/users/:id/likes', authenticated, userController.getLikes)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, userController.getFollowers)
 router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id', authenticated, userController.putUser)
+router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'coverPhoto', maxCount: 1 }]), userController.putUser)
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/users', userController.signUp)
 

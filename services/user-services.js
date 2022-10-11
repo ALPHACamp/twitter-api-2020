@@ -60,18 +60,6 @@ const userServices = {
       .then(tweets => cb(null, tweets))
       .catch(err => cb(err))
   },
-  // getUser: (req, cb) => {
-  //   return User.findByPk(req.params.id)
-  //     .then(user => {
-  //       if (!user) {
-  //         const err = new Error("User didn't exist!")
-  //         err.status = 404
-  //         throw err
-  //       }
-  //       return cb(null, user)
-  //     })
-  //     .catch(err => cb(err))
-  // },
   getUser: (req, cb) => {
     return User.findByPk(req.params.id, {
       include: [
@@ -92,29 +80,24 @@ const userServices = {
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
-    // if (Number(req.params.id) !== Number(req.user.id)) {
-    //   const err = new Error('User not authorized to edit.')
-    //   err.status = 404
-    //   throw err
-    // }
-    const { file } = req
     const { account, name, email, password, introduction } = req.body
+    const avatarUploaded = req.files?.avatar[0]
+    const coverPhotoUploaded = req.files?.coverPhoto[0]
     return Promise.all([
       User.findByPk(req.params.id),
-      imgurFileHandler(file)
+      imgurFileHandler(avatarUploaded),
+      imgurFileHandler(coverPhotoUploaded)
     ])
-      .then(([user, filePath]) => {
-        console.log('file path:', filePath)
+      .then(([user, avatarFilePath, coverPhotoFilePath]) => {
         if (!user) throw new Error("User didn't exist.")
-        // console.log('user', user)
         return user.update({
           account: account || user.account,
           name: name || user.name,
           email: email || user.email,
           password: password || user.password,
           introduction: introduction || user.introduction,
-          avatar: filePath || user.avatar,
-          coverPhoto: filePath || user.coverPhoto
+          avatar: avatarFilePath || user.avatar,
+          coverPhoto: coverPhotoFilePath || user.coverPhoto
         })
       })
       .then(user => {
