@@ -15,6 +15,16 @@ const uniqueConstraintErrorHandler = (err, req, res, next) => {
   next(err)
 }
 
+const fkConstraintErrorHandler = (err, req, res, next) => {
+  if (err.fields && err.name === 'SequelizeForeignKeyConstraintError') {
+    return res.status(404).json({
+      status: 'error',
+      message: `${err.fields[0]} dose not exist.`
+    })
+  }
+  next(err)
+}
+
 const generalErrorHandler = (err, req, res, next) => {
   if (err instanceof Error) {
     return res.status(err.status || 400).json({
@@ -32,5 +42,6 @@ const generalErrorHandler = (err, req, res, next) => {
 
 module.exports = {
   uniqueConstraintErrorHandler,
+  fkConstraintErrorHandler,
   generalErrorHandler
 }

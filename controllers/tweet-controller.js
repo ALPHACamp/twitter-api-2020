@@ -17,7 +17,7 @@ const tweetController = {
         nest: true,
         raw: true
       })
-      return res.json(tweets)
+      return res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
@@ -84,13 +84,6 @@ const tweetController = {
     try {
       const TweetId = Number(req.params.id)
       const currentUserId = helpers.getUser(req).id
-      const tweet = await Tweet.findByPk(TweetId, { raw: true })
-      if (!tweet) {
-        return res.status(404).json({
-          status: 'error',
-          message: 'The tweet does not exist.'
-        })
-      }
       const like = await Like.findOrCreate({ where: { TweetId, UserId: currentUserId } })
       // like already exist
       if (like[1] === false) {
@@ -135,11 +128,7 @@ const tweetController = {
       // status 400 wile description is empty
       if (!description) throw new Error('Tweet description is required.')
 
-      await Tweet.create({
-        UserId: currentUserId,
-        description
-      })
-      // success 200
+      await Tweet.create({ UserId: currentUserId, description })
       return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
@@ -171,7 +160,6 @@ const tweetController = {
       const currentUserId = helpers.getUser(req).id
       const comment = req.body.comment?.trim()
       const TweetId = req.params.tweet_id
-      const tweet = await Tweet.findByPk(TweetId, { raw: true })
 
       // status 400 no comment
       if (!comment) throw new Error('Reply comment is required.')
@@ -179,15 +167,6 @@ const tweetController = {
       // status 400 comment too long
       if (comment.length > 140) throw new Error('Reply comment must be less than 140 characters long.')
 
-      // status 404 tweet not exist.
-      if (!tweet) {
-        res.status(404).json({
-          status: 'error',
-          message: 'The tweet you want to reply does not exist.'
-        })
-      }
-
-      // status 200 success comment
       await Reply.create({ comment, UserId: currentUserId, TweetId })
       return res.status(200).json({ status: 'success' })
     } catch (err) {
