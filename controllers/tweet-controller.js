@@ -82,8 +82,11 @@ const tweetController = {
             message: '此推文已消失在這世上'
           })
         }
+        console.log(tweet)
+        const isLike = tweet.Likes.some(l =>
+          l.UserId === helpers.getUser(req).id
+        )
 
-        const isLike = tweet.Likes.some(l => l.id === helpers.getUser(req).id)
         const result = ({
           ...tweet.toJSON(),
           likeCount: tweet.Likes.length,
@@ -91,11 +94,18 @@ const tweetController = {
           isLike
         })
 
-        if (result.Replies) {
+        if (result.Replies.length) {
           result.Replies.map(
             reply => delete reply.User.password
           )
         }
+
+        if (result.Likes.length) {
+          result.Likes.map(
+            reply => delete reply.User.password
+          )
+        }
+
         if (result.User) delete result.User.password
 
         return result
@@ -157,6 +167,88 @@ const tweetController = {
       .then(data => res.status(200).json({
         status: 'success',
         message: '留言已成功新增',
+        data
+      }))
+      .catch(err => next(err))
+  },
+  likeTweet: (req, res, next) => {
+    const TweetId = req.params.id
+
+    Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId
+        },
+        paranoid: false
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) {
+          return res.status(403).json({
+            status: 'error',
+            message: '此推文已消失在這世上'
+          })
+        }
+
+        if (like && !like.toJSON().deletedAt) {
+          return res.status(403).json({
+            status: 'error',
+            message: '已經喜歡這篇推文'
+          })
+        }
+
+        if (like) {
+          return like.restore()
+        } else {
+          return Like.create({
+            UserId: helpers.getUser(req).id,
+            TweetId
+          })
+        }
+
+      })
+      .then(data => res.status(200).json({
+        status: 'success',
+        message: '喜歡這篇推文',
+        data
+      }))
+      .catch(err => next(err))
+
+  },
+  unlikeTweet: async (req, res, next) => {
+    const TweetId = req.params.id
+
+    Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) {
+          return res.status(403).json({
+            status: 'error',
+            message: '此推文已消失在這世上'
+          })
+        }
+
+        if (!like) {
+          return res.status(403).json({
+            status: 'error',
+            message: '已經不喜歡這篇推文'
+          })
+        }
+
+        return like.destroy()
+      })
+      .then(data => res.status(200).json({
+        status: 'success',
+        message: '不喜歡這篇推文',
         data
       }))
       .catch(err => next(err))

@@ -7,7 +7,7 @@ const adminController = {
   signIn: (req, res, next) => {
     try {
       if (helpers.getUser(req) && helpers.getUser(req).role !== 'admin') {
-        return res.status(403).json({ status: 'error', message: "此帳號不存在!" })
+        return res.status(403).json({ status: 'error', message: "此帳號不存在！" })
       }
 
       const userData = helpers.getUser(req).toJSON()
