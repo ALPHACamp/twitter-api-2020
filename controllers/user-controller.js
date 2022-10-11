@@ -175,10 +175,10 @@ const userController = {
           include: [
             [sequelize.literal(
               '(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id )'
-            ), 'repliesCount'],
+            ), 'replyCounts'],
             [sequelize.literal(
               '(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweet.id )'
-            ), 'likesCount']
+            ), 'likeCounts']
           ]
         },
         order: [['createdAt', 'DESC']]
