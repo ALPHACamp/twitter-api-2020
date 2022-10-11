@@ -22,7 +22,6 @@ const tweetController = {
   },
   getAllTweets: async (req, res, next) => {
     const UserId = Number(helpers.getUser(req).id)
-    console.log(UserId)
     try {
       const [tweetData, replyData, likeData] = await Promise.all([
         Tweet.findAll({
@@ -93,7 +92,6 @@ const tweetController = {
         data: liked
       })
     } catch (error) {
-      console.log(error.message)
       next(error)
     }
   },
