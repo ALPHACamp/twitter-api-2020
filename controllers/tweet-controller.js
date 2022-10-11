@@ -140,7 +140,10 @@ const tweetController = {
       Tweet.findByPk(TweetId),
       Reply.findAll({
         where: { TweetId },
-        include: [{ model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] }]
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] },
+          { model: Tweet, attributes: { exclude: ['id', 'description', 'createdAt', 'updatedAt'] }, include: { model: User, attributes: ['id', 'account'] } }
+        ]
       })
     ])
       .then(([tweet, replies]) => {
