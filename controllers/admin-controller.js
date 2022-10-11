@@ -24,18 +24,16 @@ const adminController = {
   deleteTweet: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
-
       // delete tweet and it's replies and likes
-      const deletedTweet = await Tweet.destroy({ where: { id } })
-
-      // status 404 can not find tweet
-      if (!deletedTweet) {
+      const result = await Tweet.destroy({ where: { id } })
+      // if result = 0, return 404 for not found tweet
+      if (!result) {
         return res.status(404).json({
           status: 'error',
           message: 'The tweet you want to delete does not exist.'
         })
       }
-
+      // if result = 1, return status 200 for success
       return res.status(200).json({ status: 'success' })
     } catch (err) { next(err) }
   }
