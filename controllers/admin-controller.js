@@ -25,22 +25,22 @@ const adminController = {
         include: [
           [sequelize.literal(
             '(SELECT COUNT(*) FROM Followships AS Followers WHERE following_id = user.id )'
-          ), 'followerCount'],
+          ), 'followerCounts'],
           [sequelize.literal(
             '(SELECT COUNT(*) FROM Followships AS Followings WHERE follower_id = user.id )'
-          ), 'followingCount'],
+          ), 'followingCounts'],
           [sequelize.literal(
             '(SELECT COUNT(*) FROM Tweets WHERE User_id = user.id)'
-          ), 'tweetsCount'],
+          ), 'tweetCounts'],
           [sequelize.literal(
             '(SELECT COUNT(*) FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweet_id WHERE Tweets.User_id = User.id)'
-          ), 'likesCount']
+          ), 'likeCounts']
         ],
         exclude: ['password', 'email', 'introduction', 'updatedAt']
       },
       order: [
-        [sequelize.literal('tweetsCount'), 'DESC'],
-        [sequelize.literal('likesCount'), 'DESC']]
+        [sequelize.literal('tweetCounts'), 'DESC'],
+        [sequelize.literal('likeCounts'), 'DESC']]
     })
       .then(users => {
         res.json(users)
