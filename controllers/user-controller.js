@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const sequelize = require('sequelize')
+const { Op } = require("sequelize");
 const helpers = require('../_helpers')
 const imgur = require('imgur')
 imgur.setClientId(process.env.IMGUR_CLIENT_ID)
@@ -53,6 +54,37 @@ const userController = {
           user: user.toJSON()
         }
       })).catch(err => next(err))
+  },
+  putUserAccount: (req, res, next) => {
+    const { id } = req.params
+    const currentUser = String(helpers.getUser(req).id)
+    if (id !== currentUser) throw new Error('permission denied')
+
+    const { account, name, email, password, checkPassword } = req.body
+
+    if (!account || !name || !email || !password || !checkPassword) throw new Error('all fields are required')
+    if (password !== checkPassword) throw new Error('Two password need to be same.')
+
+    return User.findAll({ where: { [Op.or]: [{ account }, { email }] } })
+      .then(users => {
+        users.map(user => {
+          if (user.account === account) throw new Error('account 已重複註冊！')
+          if (user.email === email) throw new Error('email 已重複註冊！')
+        })
+
+        return User.update({
+          account,
+          name,
+          email,
+          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+        }, {
+          where: { id }, returning: true,
+          plain: true
+        } )
+      }).then(() => res.status(200).json({
+        status: 'success'
+      }))
+      .catch(err => next(err))
   },
   getUser: (req, res, next) => {
     const currentUser = helpers.getUser(req).dataValues
@@ -280,7 +312,6 @@ const userController = {
       })
       .then((user) => {
         if (!user) throw new Error('user not exist')
-        console.log(user)
         return user.update({
           name,
           introduction,
@@ -290,8 +321,8 @@ const userController = {
       })
       .then(updatedUser => res.status(200).json(updatedUser))
       .catch(err => next(err))
-
   }
+
 }
 
 
