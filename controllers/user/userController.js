@@ -162,7 +162,7 @@ const userController = {
         nest: true,
         include: [Tweet],
         where: { userId },
-        order: [['crea']]
+        order: [['createdAt', 'DESC']]
       })
       assert(liked.length > 0, '該使用者還沒有按喜歡')
       res.json(liked)
