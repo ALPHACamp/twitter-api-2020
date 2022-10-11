@@ -3,11 +3,8 @@ const bcrypt = require('bcrypt-nodejs')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
-const { imgurFileHandler } = require('../file-helpers')
-
 const imgur = require('imgur')
-const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-imgur.setClientId(IMGUR_CLIENT_ID)
+imgur.setClientId(process.env.IMGUR_CLIENT_ID)
 
 const userController = {
   signIn: (req, res, next) => {
@@ -100,7 +97,7 @@ const userController = {
     const UserId = req.params.id
     return Tweet.findAll({
       where: { UserId },
-      attributes: ['id','description', 'createdAt'],
+      attributes: ['id', 'description', 'createdAt'],
       order: [['createdAt', 'DESC']],
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'], as: 'tweetAuthor' }, { model: Reply, attributes: ['id'] }, { model: Like, attributes: ['UserId'] }]
     })
@@ -109,8 +106,8 @@ const userController = {
         tweets.forEach(tweet => {
           tweet = tweet.dataValues
           tweet.replyCounts = tweet.Replies.length,
-          tweet.likeCounts = tweet.Likes.length,
-          tweet.isLiked = tweet.Likes.some(l => l.UserId === currentUser.id)  
+            tweet.likeCounts = tweet.Likes.length,
+            tweet.isLiked = tweet.Likes.some(l => l.UserId === currentUser.id)
           delete tweet.Replies
           delete tweet.Likes
         })
@@ -262,28 +259,39 @@ const userController = {
         res.status(200).json(users)
       }).catch(err => next(err))
   },
-  putUser: (req, res, next)  => {
+  putUser: (req, res, next) => {
     const { id } = req.params
     const currentUser = String(helpers.getUser(req).id)
-    if (id !== currentUser) throw new Error ('permission denied')
+    if (id !== currentUser) throw new Error('permission denied')
 
-    const profile = req.body
-    const { files } = req 
-    imgurFileHandler(files?.avatar[0])
-    console.log(imgurFileHandler(files?.avatar[0]))
-    console.log(files)
-    return imgur.uploadFile(files?.avatar[0]?.path)
-      .then(img => { 
-        console.log(img)
-        res.status(200).json(img?.link || null)
-       })
-        
-        
+    const { name, introduction } = req.body
+    const { files } = req
+    const uploadFiles = {}
+
+    Promise.all(Array.from(Object.keys(files), (key, index) => {
+      return imgur.uploadFile(files[key][0].path)
+        .then(uploadFile => {
+          uploadFiles[key] = uploadFile
+        })
+        .catch(err => next(err))
+    }))
+      .then(() => {
+        return User.findByPk(id)
+      })
+      .then((user) => {
+        if (!user) throw new Error('user not exist')
+        console.log(user)
+        return user.update({
+          name,
+          introduction,
+          avatar: uploadFiles?.avatar?.link || user.avatar,
+          backgroundImage: uploadFiles?.backgroundImage?.link || user.backgroundImage
+        })
+      })
+      .then(updatedUser => res.status(200).json(updatedUser))
       .catch(err => next(err))
 
   }
-
-
 }
 
 
