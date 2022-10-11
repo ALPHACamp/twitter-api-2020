@@ -116,7 +116,6 @@ const tweetController = {
     .then(likeRecord => res.status(200).json(likeRecord))
     .catch(err => next(err))
   },
- 
   unlikeTweet:(req, res, next) => {
     // POST /api/tweets/:tweet_id/unlike - 取消喜歡一則推文
     const TweetId = req.params.id
@@ -151,19 +150,20 @@ const tweetController = {
           attributes: ['account']
         }]
       }),
-      Tweet.findByPk(req.params.id,{
-      include: [{
-        model: Reply, include: [{
+      Tweet.findByPk(req.params.id, {
+        attributes: { exclude: ['UserId', 'updatedAt'] },
+        include: [{
+          model: Reply, include: [{
           model: User,
-          attributes: ['id', 'account', 'avatar', 'name'], as: 'replyUser'
-        }],
-        attributes: { exclude: ['UserId', 'updatedAt'] }
+          as: 'replyUser',
+          attributes: ['id', 'account', 'avatar', 'name']
+        }]
       },
     ]
       })
     ])
     .then(([author, result]) => {
-      if (!result) throw new Error('The tweet does not exist')
+      if (!result) throw new Error('Tweet does not exist!')
       result = result.Replies.map(reply => ({
         ...reply.toJSON(),
         tweetAuthorAccount: author.tweetAuthor.account
@@ -175,7 +175,7 @@ const tweetController = {
     })
     .catch(err => next(err))
   },
-   postReply:(req, res, next) => {
+  postReply:(req, res, next) => {
     // POST /api/tweets/:tweet_id/replies - 新增回覆
     const { comment } = req.body
     const targetTweetId = req.params.id
