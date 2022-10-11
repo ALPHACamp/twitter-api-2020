@@ -113,6 +113,16 @@ module.exports = {
       cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
       created_at: new Date(),
       updated_at: new Date()
+    }, {
+      name: 'user11',
+      account: 'user11',
+      email: 'user11@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      profile_photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
+      cover_photo: 'https://i.imgur.com/t0YRqQH.jpg',
+      created_at: new Date(),
+      updated_at: new Date()
     }], {})
   },
 
