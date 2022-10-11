@@ -127,7 +127,6 @@ describe('# user requests', () => {
           .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
-
             expect(res.body).to.be.an('array');
             // 有回傳某使用者的推文資料
             res.body[0].description.should.equal('User1 的 Tweet1');
@@ -178,7 +177,6 @@ describe('# user requests', () => {
           .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
-
             expect(res.body).to.be.an('array');
             // 有回傳 Tweet1 的 comment 這筆資料
             res.body[0].comment.should.equal('Tweet1 的 comment');

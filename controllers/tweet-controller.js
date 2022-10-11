@@ -15,28 +15,16 @@ const tweetController = {
 
         const result = tweets
           .map(tweet => ({
-            ...tweet.toJSON(),
+            id: tweet.id,
+            UserId: tweet.UserId,
+            description: tweet.description,
+            account: tweet.User.account,
+            name: tweet.User.name,
+            avatar: tweet.avatar,
+            createdAt: tweet.createdAt,
             likeCount: tweet.Likes.length,
             commentCount: tweet.Replies.length
           }))
-          .map(tweet => {
-
-            if (tweet.Replies.length) {
-              tweet.Replies.map(
-                reply => delete reply.User.password
-              )
-            }
-
-            if (tweet.Likes.length) {
-              tweet.Likes.map(
-                like => delete like.User.password
-              )
-            }
-
-            if (tweet.User) delete tweet.User.password
-
-            return tweet
-          })
 
         return result
       })
@@ -90,26 +78,17 @@ const tweetController = {
         )
 
         const result = ({
-          ...tweet.toJSON(),
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.avatar,
+          createdAt: tweet.createdAt,
           likeCount: tweet.Likes.length,
           commentCount: tweet.Replies.length,
           isLike
         })
-
-        if (result.Replies.length) {
-          result.Replies.map(
-            reply => delete reply.User.password
-          )
-        }
-
-        if (result.Likes.length) {
-          console.log(result.Likes)
-          result.Likes.map(
-            like => delete like.User.password
-          )
-        }
-
-        if (result.User) delete result.User.password
 
         return result
       })
@@ -119,22 +98,28 @@ const tweetController = {
   getReplies: async (req, res, next) => {
     const tweetId = req.params.tweet_id
     Reply.findAll({
-      include: User,
+      include: [
+        User,
+        {model: Tweet, include: User}
+      ],
       order: [['createdAt', 'DESC']]
     })
       .then(replies => {
         const result = replies
           .map(reply => ({
-            ...reply.toJSON()
+            id: reply.id,
+            UserId: reply.UserId,
+            TweetId: reply.TweetId,
+            comment: reply.comment,
+            account: reply.User.account,
+            name: reply.User.name,
+            avatar: reply.User.avatar,
+            TweetUserAccount: reply.Tweet.User.account,
+            createdAt: reply.createdAt
           }))
           .filter(replyTweet =>
             replyTweet.TweetId === Number(tweetId))
         
-        if (result) {
-          result.map(
-            reply => delete reply.User.password
-          )
-        }
         return result
       }
       )
@@ -144,9 +129,9 @@ const tweetController = {
   addReply: async (req, res, next) => {
     try {
       const { comment } = req.body
-      const tweetId = req.params.tweet_id
+      const TweetId = req.params.tweet_id
 
-      await Tweet.findByPk(tweetId)
+      await Tweet.findByPk(TweetId)
         .then(tweet => {
           if (!tweet) {
             return res.status(403).json({
@@ -164,8 +149,8 @@ const tweetController = {
       }
 
       await Reply.create({
-        userId: helpers.getUser(req).id,
-        tweetId,
+        UserId: helpers.getUser(req).id,
+        TweetId,
         comment
       })
         .then(data => res.status(200).json({
@@ -237,68 +222,6 @@ const tweetController = {
       .then(data => res.status(200).json({
         status: 'success',
         message: '不喜歡這篇推文',
-        data
-      }))
-      .catch(err => next(err))
-  },
-  addFollow: (req, res, next) => {
-    const { id } = req.body
-
-    Promise.all([
-      User.findByPk(id),
-      Followship.findOne({
-        where: {
-          followerId: helpers.getUser(req).id,
-          followingId: id
-        }
-      })
-    ])
-      .then(([user, followship]) => {
-
-        if (!user) throw new Error('使用者不存在')
-
-        if (helpers.getUser(req).id === Number(id)) throw new Error('你無法追蹤自己')
-
-        if (followship) throw new Error('你已經追蹤此使用者')
-
-
-        return Followship.create({
-          followerId: helpers.getUser(req).id,
-          followingId: id
-        })
-
-      })
-      .then(data => res.status(200).json({
-        status: 'success',
-        message: '追蹤中',
-        data
-      }))
-      .catch(err => next(err))
-  },
-  removeFollow: (req, res, next) => {
-    const { followingId } = req.params
-
-    Promise.all([
-      User.findByPk(followingId),
-      Followship.findOne({
-        where: {
-          followerId: helpers.getUser(req).id,
-          followingId: followingId
-        }
-      })
-    ])
-      .then(([user, followship]) => {
-
-        if (!user) throw new Error('使用者不存在')
-
-        if (!followship) throw new Error('你未追蹤此使用者')
-
-        return followship.destroy()
-
-      })
-      .then(data => res.status(200).json({
-        status: 'success',
-        message: '取消追蹤',
         data
       }))
       .catch(err => next(err))
