@@ -69,11 +69,11 @@ const userController = {
       attributes: {
         include: [[
           sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'FollowingsCount'
+            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'followerCounts'
         ],
         [
           sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships WHERE follower_id = user.id )'), 'FollowerCount'
+            '(SELECT COUNT(*) FROM Followships WHERE follower_id = user.id )'), 'followingCounts'
         ]],
         exclude: ['password', 'updatedAt']
       }
@@ -216,32 +216,40 @@ const userController = {
       .catch(err => next(err))
   },
   getUserLikes: (req, res, next) => {
+    const currentUser = helpers.getUser(req)?.id
     const UserId = req.params.id
 
     Like.findAll({
       where: { UserId },
-      attributes: ['id', 'UserId', 'TweetId'],
       include: [{
         model: Tweet,
         include: [{
           model: User,
           attributes: ['id', 'name', 'account', 'profilePhoto']
-        }],
+        }, { model: Like }],
         attributes: {
           include: [[
             sequelize.literal(
-              '(SELECT COUNT(*) FROM Replies AS ReplyUsers WHERE tweet_id = Tweet.id )'), 'ReplyCount'
+              '(SELECT COUNT(*) FROM Replies AS ReplyUsers WHERE Tweet_id = Tweet.id )'), 'replyCounts'
           ],
           [
             sequelize.literal(
-              '(SELECT COUNT(*) FROM likes AS LikeUsers WHERE tweet_id = Tweet.id )'), 'LikeCount'
+              '(SELECT COUNT(*) FROM likes AS LikeUsers WHERE Tweet_id = Tweet.id )'), 'likeCounts'
           ]]
         }
       }],
       order: [['createdAt', 'Desc']]
     })
       .then(likes => {
-        res.json(likes)
+        const result = likes
+          .map(likes => {
+            const likeUsers = likes.Tweet.toJSON().Likes
+            const { Likes, ...data } = likes.Tweet.toJSON()
+            data.isLiked = likeUsers.some(like => like.UserId === currentUser)
+            data.TweetId = likes.Tweet.toJSON().id
+            return data
+          })
+        res.json(result)
       })
       .catch(err => next(err))
   },
@@ -264,10 +272,10 @@ const userController = {
       .then(followings => {
         if (!followings) throw new Error('該使用者不存在')
         const result = followings.Followings
-          .map(followings => {
-            const { Followers, ...data } = followings.toJSON()
-            data.followingId = followings.id
-            data.isFollowed = followings.Followers.some(one => one.id === currentUserId)
+          .map(following => {
+            const { Followers, ...data } = following.toJSON()
+            data.followingId = following.id
+            data.isFollowed = following.Followers.some(follower => follower.id === currentUserId)
             return data
           })
         res.json(result)
@@ -293,10 +301,10 @@ const userController = {
       .then(followers => {
         if (!followers) throw new Error('該使用者不存在')
         const result = followers.Followers
-          .map(followers => {
-            const { Followers, ...data } = followers.toJSON()
-            data.followerId = followers.id
-            data.isFollowed = followers.Followers.some(one => one.id === currentUserId)
+          .map(follower => {
+            const { Followers, ...data } = follower.toJSON()
+            data.followerId = follower.id
+            data.isFollowed = follower.Followers.some(follower => follower.id === currentUserId)
             return data
           })
         res.json(result)
@@ -305,14 +313,15 @@ const userController = {
   },
   getTopFollowings: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id
-    const topUserLimit = 10
+    const topUserLimit = 11
 
     User.findAll({
+      where: { role: 'user' },
       limit: topUserLimit,
       attributes: {
         include: [[
           sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'FollowingsCount'
+            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'followerCounts'
         ]],
         exclude: ['password', 'email', 'coverPhoto', 'role', 'createdAt', 'updatedAt']
       },
@@ -321,7 +330,7 @@ const userController = {
         as: 'Followers',
         attributes: ['id', 'name']
       }],
-      order: [[sequelize.literal('FollowingsCount'), 'Desc']]
+      order: [[sequelize.literal('followerCounts'), 'Desc']]
     })
       .then(users => {
         const result = users
