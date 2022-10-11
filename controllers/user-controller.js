@@ -82,7 +82,6 @@ const userController = {
         User.findOne({ where: { email } })
       ])
         .then(([user, userAccount, userEmail]) => {
-          console.log(user.toJSON())
           const existedAccount = userAccount ? Number(userAccount.dataValues.id) : Number(UserId)
           const existedEmail = userEmail ? Number(userEmail.dataValues.id) : Number(UserId)
           if (user?.role === 'admin') throw new Error('此帳號不存在')
@@ -107,7 +106,7 @@ const userController = {
         imgurFileHandler(backgroundImage)
       ])
         .then(([user, imageFilePath, backgroundFilePath]) => {
-          if (!user) throw new Error('此帳號不存在')
+          if (user?.role === 'admin') throw new Error('此帳號不存在')
           return user.update({ name, introduction, image: imageFilePath || user.image, backgroundImage: backgroundFilePath || user.backgroundImage })
             .then(user => res.status(200).json(user))
             .catch(error => next(error))
@@ -123,7 +122,6 @@ const userController = {
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
-        if (tweets.length === 0) throw new Error('使用者沒有推文')
         const tweetData = tweets.map(tweet => ({
           id: tweet.id,
           UserId: tweet.UserId,
@@ -151,7 +149,6 @@ const userController = {
       order: [['createdAt', 'DESC']]
     })
       .then(replies => {
-        if (replies.length === 0) throw new Error('使用者沒有回覆過的內容')
         const repliedData = replies.map(reply => ({
           id: reply.id,
           comment: reply.comment,
@@ -180,7 +177,6 @@ const userController = {
       order: [['createdAt', 'DESC']]
     })
       .then(likes => {
-        if (likes.length === 0) throw new Error('使用者沒有喜歡的推文')
         const likedData = likes.map(like => ({
           id: like.id,
           UserId: like.UserId,
@@ -188,12 +184,11 @@ const userController = {
           isLiked: like.isLiked,
           createdAt: like.createdAt,
           updatedAt: like.updatedAt,
-          tweet: {
-            TweetId: like.Tweet.id,
-            description: like.Tweet.description,
-            replyNum: like.Tweet.Replies.length,
-            likeNum: like.Tweet.Likes.length,
-            postTweetUserId: like.Tweet.User.id,
+          description: like.Tweet.description,
+          replyNum: like.Tweet.Replies.length,
+          likeNum: like.Tweet.Likes.length,
+          user: {
+            id: like.Tweet.User.id,
             name: like.Tweet.User.name,
             account: like.Tweet.User.account,
             image: like.Tweet.User.image
@@ -204,7 +199,7 @@ const userController = {
       .catch(error => next(error))
   },
   getFollowings: (req, res, next) => {
-    const UserId = req.params.id
+    const UserId = Number(req.params.id)
     const getUser = helpers.getUser(req)
     return Promise.all([
       User.findByPk(UserId, {
@@ -217,7 +212,8 @@ const userController = {
       })
     ])
       .then(([user, followings]) => {
-        if (!followings.length) throw new Error('使用者沒有跟隨中的人(followings)')
+        if (user?.role === 'admin') throw new Error('此帳號不存在')
+        if (!followings.length) res.status(200).json(followings)
         const followingData = user.Followings.map(fg => ({
           id: fg.id,
           name: fg.name,
@@ -232,7 +228,7 @@ const userController = {
       .catch(error => next(error))
   },
   getFollowers: (req, res, next) => {
-    const UserId = req.params.id
+    const UserId = Number(req.params.id)
     const getUser = helpers.getUser(req)
     return Promise.all([
       User.findByPk(UserId, {
@@ -245,7 +241,8 @@ const userController = {
       })
     ])
       .then(([user, followers]) => {
-        if (!followers.length) throw new Error('使用者沒有跟隨者(followers)')
+        if (user?.role === 'admin') throw new Error('此帳號不存在')
+        if (!followers.length) res.status(200).json(followers)
         const followerData = user.Followers.map(fr => ({
           id: fr.id,
           name: fr.name,
