@@ -5,6 +5,7 @@ if (process.env.NODE_ENV !== 'production') {
 const path = require('path')
 const express = require('express')
 const methodOverride = require('method-override')
+const cors = require('cors')
 
 const passport = require('./config/passport')
 const { apis } = require('./routes')
@@ -22,7 +23,10 @@ app.use(passport.initialize())
 //   // passport.authenticate('jwt', { ses...
 // };
 
+app.use(cors())
 app.use('/api', apis)
+
+app.get('/', (req, res) => res.send('This is simple twitter api'))
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
 
 module.exports = app
