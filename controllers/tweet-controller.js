@@ -31,7 +31,7 @@ const tweetController = {
         delete tweet.Replies
         result.push(tweet)
       })
-      
+
       result.sort((a, b) => b.createdAt - a.createdAt)
       res.status(200).json(result)
     })
@@ -72,7 +72,8 @@ const tweetController = {
     // POST /api/tweets - 發布一筆推文
     const UserId = getUser(req).dataValues.id
     const { description } = req.body
-    if (!description) throw new Error('Description is required!')
+    if (!description) throw new Error('內容不可空白!')
+    if (description.length > 140) throw new Error('推文不可超過 140 字元')
     return User.findByPk(UserId)
     .then(user => {
       if (!user) throw new Error("User didn't exist!")
