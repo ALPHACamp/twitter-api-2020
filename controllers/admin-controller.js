@@ -33,7 +33,8 @@ const adminController = {
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
         { model: Like, include: Tweet }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(users => {
         const result = users
