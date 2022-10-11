@@ -36,10 +36,12 @@ const tweetController = {
           raw: true
         })
       ])
-      tweetData.forEach(tweet => {
+      tweetData.forEach((tweet) => {
         const tid = tweet.id
-        tweet.replyCount = replyData.filter(reply => reply.TweetId === tid).length
-        tweet.likeCount = likeData.filter(like => like.TweetId === tid).length
+        tweet.replyCount = replyData.filter(
+          (reply) => reply.TweetId === tid
+        ).length
+        tweet.likeCount = likeData.filter((like) => like.TweetId === tid).length
       })
       return res.json(tweetData)
     } catch (error) {

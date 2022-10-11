@@ -10,8 +10,14 @@ const app = express()
 const port = process.env.PORT || 3000
 const router = require('./router/router')
 const passport = require('passport')
-// cors 的預設為全開放
-app.use(cors())
+// cors 設定
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN_OPTION,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
+
+app.use(cors(corsOptions))
 
 // // use helpers.getUser(req) to replace req.user
 // function authenticated(req, res, next){

@@ -35,6 +35,7 @@ const userController = {
   signIn: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
+      if (userData.role !== 'user') throw new Error('permission denied')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
@@ -111,7 +112,6 @@ const userController = {
         data: updatedUser
       })
     } catch (error) {
-      console.log(error)
       next(error)
     }
   }, // 獲取某使用者發過的推文
@@ -121,6 +121,7 @@ const userController = {
       assert(await User.findByPk(userId), '使用者不存在')
       const tweet = await Tweet.findAll({
         raw: true,
+        nest: true,
         where: { userId },
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
@@ -135,8 +136,8 @@ const userController = {
   }, // 獲取某使用者發過回覆的推文
   getUserRepliedTweet: async (req, res, next) => {
     const userId = req.params.id
-    assert(await User.findByPk(userId), '使用者不存在')
     try {
+      assert(await User.findByPk(userId), '使用者不存在')
       const reliedTweet = await Reply.findAll({
         raw: true,
         nest: true,
@@ -174,9 +175,9 @@ const userController = {
         raw: true,
         nest: true,
         where: { followingId: userId },
-        attributes: ['followerId', 'followingId']
+        attributes: ['followerId']
       })
-      assert(followers, '這個使用者還沒有任何追隨者')
+      assert(followers.length, '這個使用者還沒有任何追隨者')
       res.json(followers)
     } catch (error) {
       next(error)
@@ -185,17 +186,15 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     const userId = req.params.id
     try {
-      const followers = await Followship.findAll({
+      const followings = await Followship.findAll({
         raw: true,
         nest: true,
         where: { followerId: userId },
-        attributes: ['followerId', 'followingId']
+        attributes: ['followingId']
       })
-      assert(followers, '這個使用者還沒有任何追隨者')
-      console.log(followers)
-      res.json(followers)
+      assert(followings.length, '這個使用者還沒有任何追隨者')
+      res.json(followings)
     } catch (error) {
-      console.log(error)
       next(error)
     }
   }

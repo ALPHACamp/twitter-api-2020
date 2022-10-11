@@ -4,9 +4,10 @@ const assert = require('assert')
 const sequelize = require('sequelize')
 const followShipsCotroller = {
   addFollow: async (req, res, next) => {
-    const followerId = helpers.getUser(req).id
-    const followingId = req.body.id
+    const followerId = Number(helpers.getUser(req).id)
+    const followingId = Number(req.body.id)
     try {
+      assert(!(followerId === followingId), '不能追隨自己')
       const [follower, following] = await Promise.all([
         User.findByPk(followerId),
         User.findByPk(followingId)
@@ -75,7 +76,6 @@ const followShipsCotroller = {
       })
       res.json(top10User)
     } catch (error) {
-      console.log(error)
       next(error)
     }
   }
