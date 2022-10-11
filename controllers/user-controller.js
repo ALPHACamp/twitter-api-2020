@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
 const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { en_IND } = require('faker/lib/locales')
 const e = require('connect-flash')
 const { captureRejectionSymbol } = require('mysql2/lib/connection')
@@ -189,6 +189,37 @@ const userController = {
           next(error)
         }
     },
+  getTopUsers: async (req, res, next) => {
+    try {
+      let users = await User.findAll({
+        where: { role: 'user' },
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ],
+        attributes: {
+          include: [[
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followCount'
+          ]]
+        },
+        order: [[sequelize.literal('followCount'), 'DESC']],
+        limit: 10
+      })
+      users = users.map(user => ({
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        avatar: user.avatar,
+        followerCount: user.Followers.length,
+        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+      }))
+      return res.status(200), json(users)
+    }
+    catch (error) {
+      next(error)
+    }
+  },
     editUser: async (req,res,next) => {
       
         const UserId = req.user.id
@@ -386,7 +417,7 @@ const userController = {
       catch(err){
         next(err)
       }
-    }
+    } 
 }
 
 module.exports = userController
