@@ -15,28 +15,16 @@ const tweetController = {
 
         const result = tweets
           .map(tweet => ({
-            ...tweet.toJSON(),
+            id: tweet.id,
+            UserId: tweet.UserId,
+            description: tweet.description,
+            account: tweet.User.account,
+            name: tweet.User.name,
+            avatar: tweet.avatar,
+            createdAt: tweet.createdAt,
             likeCount: tweet.Likes.length,
             commentCount: tweet.Replies.length
           }))
-          .map(tweet => {
-
-            if (tweet.Replies.length) {
-              tweet.Replies.map(
-                reply => delete reply.User.password
-              )
-            }
-
-            if (tweet.Likes.length) {
-              tweet.Likes.map(
-                like => delete like.User.password
-              )
-            }
-
-            if (tweet.User) delete tweet.User.password
-
-            return tweet
-          })
 
         return result
       })
@@ -90,26 +78,17 @@ const tweetController = {
         )
 
         const result = ({
-          ...tweet.toJSON(),
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.avatar,
+          createdAt: tweet.createdAt,
           likeCount: tweet.Likes.length,
           commentCount: tweet.Replies.length,
           isLike
         })
-
-        if (result.Replies.length) {
-          result.Replies.map(
-            reply => delete reply.User.password
-          )
-        }
-
-        if (result.Likes.length) {
-          console.log(result.Likes)
-          result.Likes.map(
-            like => delete like.User.password
-          )
-        }
-
-        if (result.User) delete result.User.password
 
         return result
       })
@@ -119,22 +98,28 @@ const tweetController = {
   getReplies: async (req, res, next) => {
     const tweetId = req.params.tweet_id
     Reply.findAll({
-      include: User,
+      include: [
+        User,
+        {model: Tweet, include: User}
+      ],
       order: [['createdAt', 'DESC']]
     })
       .then(replies => {
         const result = replies
           .map(reply => ({
-            ...reply.toJSON()
+            id: reply.id,
+            UserId: reply.UserId,
+            TweetId: reply.TweetId,
+            comment: reply.comment,
+            account: reply.User.account,
+            name: reply.User.name,
+            avatar: reply.User.avatar,
+            TweetUserAccount: reply.Tweet.User.account,
+            createdAt: reply.createdAt
           }))
           .filter(replyTweet =>
             replyTweet.TweetId === Number(tweetId))
         
-        if (result) {
-          result.map(
-            reply => delete reply.User.password
-          )
-        }
         return result
       }
       )

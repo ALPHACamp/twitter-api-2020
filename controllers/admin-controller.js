@@ -37,29 +37,22 @@ const adminController = {
     })
       .then(users => {
         const result = users
-          .map(user => ({
-            ...user.toJSON(),
+          .map(user => {
+            return {
+            id: user.id,
+            account: user.account,
+            name: user.name,
+            avatar: user.avatar,
+            cover: user.cover,
             followerCount: user.Followers.length,
             followingCount: user.Followings.length,
             tweetCount: user.Tweets.length,
             likeCount: user.Likes.length
-          }))
-          .map(user => {
-
-            user.Followers.map(follower => {
-              delete follower.password
-            })
-
-            user.Followings.map(following => {
-              delete following.password
-            })
-
-            delete user.password
-            return user
-          })
-          .sort((a, b) => b.Tweets.length - a.Tweets.length)
-        return res.status(200).json(result)
+          }})
+          .sort((a, b) => b.tweetCount.length - a.tweetCount.length)
+        return result
       })
+      .then(data => res.status(200).json(data))
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
@@ -68,15 +61,16 @@ const adminController = {
     })
       .then(tweets => {
         const result = tweets.map(tweet => ({
-          ...tweet.toJSON(),
-          description: tweet.description.substring(0, 50)
+          id: tweet.id,
+          UserId: tweet.UserId,
+          account: tweet.User.account,
+          name: tweet.User.name,
+          description: tweet.description.substring(0, 50),
+          createdAt: tweet.createdAt
         }))
-          .map(tweet => {
-            delete tweet.User.password
-            return tweet
-          })
-        return res.status(200).json(result)
+        return result
       })
+      .then(data => res.status(200).json(data))
       .catch(err => next(err))
   },
   deleteTweet: (req, res, next) => {
