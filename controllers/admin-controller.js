@@ -1,31 +1,18 @@
-const jwt = require('jsonwebtoken')
 const adminServices = require('../services/admin-services')
+
 const adminController = {
   signIn: (req, res, next) => {
-    try {
-      const userData = req.user.toJSON()
-      delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.json({
-        status: 'success',
-        data: {
-          token,
-          user: userData
-        }
-      })
-    } catch (err) {
-      next(err)
-    }
+    adminServices.signIn(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   getUsers: (req, res, next) => {
-    return adminServices.getUsers(req, (err, data) => {
-      err ? next(err) : res.json({ status: 'success', data })
-    })
+    adminServices.getUsers(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
-  deleteTweets: (req, res, next) => {
-    return adminServices.deleteTweets(req, (err, data) => {
-      err ? next(err) : res.json({ status: 'success', data })
-    })
+  getTweets: (req, res, next) => {
+    adminServices.getTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  deleteTweet: (req, res, next) => {
+    adminServices.deleteTweet(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
+
 module.exports = adminController

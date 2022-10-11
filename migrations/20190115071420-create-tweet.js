@@ -11,7 +11,7 @@ module.exports = {
       user_id: {
         type: Sequelize.INTEGER
       },
-      content: {
+      description: {
         type: Sequelize.TEXT
       },
       created_at: {
