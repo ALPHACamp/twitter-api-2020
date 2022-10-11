@@ -204,8 +204,9 @@ const userController = {
           return res.status(403).json({ status: 'error', message: '自我介紹長度不可超過160字' })
         }
         const { file } = req
-        return Promise.all([User.findByPk(req.params.id), imgurFileHandler(file)])
+      return Promise.all([User.findByPk(req.params.id), imgurFileHandler(file)])
           .then(([user, filePath]) => {
+            
             return user.update({
               name,
               introduction,

@@ -8,7 +8,7 @@ const { authenticated, authenticatedAdmin, authenticateUser } = require('../../m
 const { apiErrorHandler, authErrorHandler } = require('../../middleware/error-handler')
 const userController = require('../../controllers/user-controller')
 const adminController = require('../../controllers/admin-controller')
-const imageUpload = require('../../middleware/multer')
+const  { imageUpload } = require('../../middleware/multer')
 
 
 router.post('/users', userController.signUp)
