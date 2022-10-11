@@ -28,11 +28,9 @@ const adminController = {
     ]
     })
     .then(users => {
-      console.log('map 前的 users', users[0].toJSON())
       users = users.map(user => {
         user = user.toJSON()
         user.tweetCount = user.Tweets.length
-        console.log('map中', user.tweetCount)
         user.likeCount = user.Likes.length
         user.followerCount = user.Followers.length
         user.followingCount = user.Followings.length

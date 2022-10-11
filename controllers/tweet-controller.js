@@ -18,19 +18,22 @@ const tweetController = {
     ]
     })
     .then(tweets => {
-      const data = tweets.map(tweet => ({
-        ...tweet.toJSON(),
-        likeCounts: tweet.Likes.length,
-        replyCounts: tweet.Replies.length
-      }))
-      .sort((a, b) => b.createdAt - a.createdAt)
+      const result = []
 
-      data.forEach(element => {
-        const isLiked = element.Likes.some(like => like.UserId === getUser(req).dataValues.id)
-        if (isLiked) { element.isLiked = true } 
-        else if (!isLiked) { element.isLiked = false }
+      tweets.forEach(tweet => {
+        tweet = tweet.toJSON()
+        tweet.likeCounts = tweet.Likes.length
+        tweet.replyCounts = tweet.Replies.length
+        const isLiked = tweet.Likes.some(like => like.UserId === getUser(req).dataValues.id)
+        if (isLiked) { tweet.isLiked = true } 
+        else if (!isLiked) { tweet.isLiked = false }
+        delete tweet.Likes
+        delete tweet.Replies
+        result.push(tweet)
       })
-      res.status(200).json(data)
+      
+      result.sort((a, b) => b.createdAt - a.createdAt)
+      res.status(200).json(result)
     })
     .catch(err => next(err))
   },
