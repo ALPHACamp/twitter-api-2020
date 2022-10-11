@@ -10,7 +10,7 @@ module.exports = {
     const bulkAmount = usersLength * 10 // tweets per user
     await queryInterface.bulkInsert('Tweets',
       Array.from({ length: bulkAmount }, (_element, index) => ({
-        description: faker.lorem.sentence(Math.floor(Math.random() * 140) + 1),
+        description: faker.lorem.sentence(Math.floor(Math.random() * 5) + 1),
         created_at: new Date(),
         updated_at: new Date(),
         user_id: users[index % usersLength].id

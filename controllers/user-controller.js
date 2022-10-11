@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const helpers = require('../_helpers')
-const sequelize = require('sequelize')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -14,6 +13,7 @@ const userController = {
         if (!user) throw new Error('帳號不存在！')
         if (user.role === 'admin') throw new Error('帳號不存在！')
         if (!bcrypt.compareSync(password, user.password)) throw new Error('incorrect account or password!')
+        console.log('使用者', user)
         const userData = user.toJSON()
         delete userData.password
         const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -81,7 +81,7 @@ const userController = {
           tweetCount: user.Tweets.length,
           followerCount: user.Followers.length,
           followingCount: user.Followings.length,
-          isFollow: user.Followers.some(u => u.id === currentUser.id)
+          isFollowed: user.Followers.some(u => u.id === currentUser.id)
         }
 
         delete user.password
@@ -95,21 +95,20 @@ const userController = {
     const UserId = req.params.id
     return Tweet.findAll({
       where: { UserId },
+      attributes: ['id','description', 'createdAt'],
       order: [['createdAt', 'DESC']],
-      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }, { model: Reply, attributes: ['id'] }, { model: Like, attributes: ['UserId'] }]
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'], as: 'tweetAuthor' }, { model: Reply, attributes: ['id'] }, { model: Like, attributes: ['UserId'] }]
     })
       .then(tweets => {
-        const currentUser = helpers.getUser(req).dataValues
-        tweets = tweets.map(tweet => ({
-          id: tweet.id,
-          description: tweet.description,
-          createdAt: tweet.createdAt,
-          User: tweet.User.dataValues,
-          replyCounts: tweet.Replies.length,
-          likeCounts: tweet.Likes.length,
-          isLiked: tweet.Likes.some(l => l.UserId === currentUser.id),
-        }
-        ))
+        const currentUser = helpers.getUser(req)
+        tweets.forEach(tweet => {
+          tweet = tweet.dataValues
+          tweet.replyCounts = tweet.Replies.length,
+          tweet.likeCounts = tweet.Likes.length,
+          tweet.isLiked = tweet.Likes.some(l => l.UserId === currentUser.id)  
+          delete tweet.Replies
+          delete tweet.Likes
+        })
         res.status(200).json(tweets)
       }).catch(err => next(err))
   },
@@ -118,25 +117,24 @@ const userController = {
     return Reply.findAll({
       where: { UserId },
       order: [['createdAt', 'DESC']],
-      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-      { model: Tweet, attributes: ['id', 'description'], include: [{ model: User, attributes: ['id', 'account'] }] }]
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'], foreignKey: 'UserId', as: 'replyUser' },
+      { model: Tweet, attributes: ['id', 'description'], include: [{ model: User, attributes: ['id', 'account'], as: 'tweetAuthor' }] }]
     })
       .then(replies => {
-        replies = replies.map(reply => ({
-          id: reply.id,
-          comment: reply.comment,
-          createdAt: reply.createdAt,
-          User: reply.User,
-          Tweet: reply.Tweet
-        }))
+        replies.forEach(reply => {
+          reply = reply.dataValues
+          reply.tweetAuthorAccount = reply.Tweet.tweetAuthor.account
+          delete reply.Tweet.dataValues.tweetAuthor
+        })
         res.status(200).json(replies)
       }).catch(err => next(err))
   },
-    getUserLikes: (req, res, next) => {
+  getUserLikes: (req, res, next) => {
     const UserId = req.params.id
     return Like.findAll({
       where: { UserId },
       order: [['createdAt', 'DESC']],
+      attributes: ['TweetId'],
       include: [{
         model: Tweet,
         attributes:
@@ -145,18 +143,18 @@ const userController = {
           model: User,
           attributes:
             ['id', 'account', 'name',
-              'avatar'], 
+              'avatar'], as: 'tweetAuthor'
         }, { model: Reply }, { model: Like }]
       }]
     })
       .then(likes => {
-        const currentUser = helpers.getUser(req).id
+        const currentUser = helpers.getUser(req)
         likes = likes.map(like => ({
           ...like.toJSON(),
         }))
         likes.forEach(like => {
           like.replyCounts = like.Tweet.Replies.length,
-          like.likeCounts = like.Tweet.Likes.length,
+            like.likeCounts = like.Tweet.Likes.length,
             like.isLiked = like.Tweet.Likes.map(u => u.UserId).includes(currentUser.id)
           delete like.Tweet.Replies
           delete like.Tweet.Likes
@@ -196,9 +194,9 @@ const userController = {
           delete data.Followship
         })
         res.status(200).json(followers)
-      })
+      }).catch(err => next(err))
   },
-   getUserFollowings: (req, res, next) => {
+  getUserFollowings: (req, res, next) => {
     const UserId = req.params.id
     return User.findByPk(UserId, {
       attributes: ['id',
@@ -230,7 +228,32 @@ const userController = {
           delete data.Followship
         })
         res.status(200).json(followings)
-      })
+      }).catch(err => next(err))
+  },
+  getPopularUsers: (req, res, next) => {
+    const currentUser = helpers.getUser(req).id
+    return User.findAll({
+      include: {
+        model: User, as: 'Followers', attributes: ['id']
+      },
+      attributes: ['id',
+        'name',
+        'avatar',
+        'account'],
+      where: { role: 'user' }
+
+    })
+      .then(users => {
+        users.forEach(user => {
+          user = user.dataValues
+          user.followerCounts = user.Followers.length
+          user.isFollowed = user.Followers.some(u => u.id === currentUser)
+          delete user.Followers
+        })
+        users.sort((a, b) => b.followerCounts - a.followedCount).slice(0, 10)
+
+        res.status(200).json(users)
+      }).catch(err => next(err))
   }
 
 }

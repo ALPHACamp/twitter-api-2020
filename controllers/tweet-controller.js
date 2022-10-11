@@ -1,18 +1,94 @@
 const { Like, Reply, Tweet, User } = require('../models')
 const { getUser } = require('../_helpers')
+
 const tweetController = {
   getTweets: (req, res, next) => {
     // GET /api/tweets - 瀏覽所有推文
+    return Tweet.findAll({
+      attributes: { exclude:[ 'UserId', 'updatedAt' ] },
+      include: [{
+        model: User,
+        as: 'tweetAuthor',
+        attributes: [ 'id', 'account', 'name', 'avatar' ]
+      }, 
+      {model: Like,
+      attributes: ['TweetId', 'UserId']},
+      {model: Reply,
+      attributes: ['id']},
+    ]
+    })
+    .then(tweets => {
+      const data = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        likeCounts: tweet.Likes.length,
+        replyCounts: tweet.Replies.length
+      }))
+      .sort((a, b) => b.createdAt - a.createdAt)
+
+      data.forEach(element => {
+        const isLiked = element.Likes.some(like => like.UserId === getUser(req).dataValues.id)
+        if (isLiked) { element.isLiked = true } 
+        else if (!isLiked) { element.isLiked = false }
+      })
+      res.status(200).json(data)
+    })
+    .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
-    // GET /api/tweets/:tweet_id - 讀取特定推文
+    // GET /api/tweets/:id - 瀏覽一則推文
+    return Tweet.findByPk(req.params.id, {
+      attributes: { exclude: ['updatedAt', 'UserId'] },
+      include: [
+        {
+        model: User,
+        as: 'tweetAuthor',
+        attributes: ['id', 'avatar', 'name', 'account']
+        },
+        { model: Like,
+          attributes: ['UserId']
+        },
+        { model: Reply,
+          attributes: ['UserId']
+        }
+      ]
+    })
+    .then(tweet => {
+      if (!tweet) throw new Error('Tweet does not exist!')
+      const isLiked = tweet.dataValues.Likes.some(element => element.UserId === getUser(req).dataValues.id)
+      if (isLiked) { tweet.dataValues.isLiked = true } 
+      else if (!isLiked) { tweet.dataValues.isLiked = false }
+      tweet.dataValues.likeCounts = tweet.dataValues.Likes.length
+      tweet.dataValues.replyCounts = tweet.dataValues.Replies.length
+      delete tweet.dataValues.Likes
+      delete tweet.dataValues.Replies
+      res.status(200).json(tweet)
+      })
+    .catch(err => next(err))
   },
   postTweet:(req, res, next) => {
     // POST /api/tweets - 發布一筆推文
+    const UserId = getUser(req).dataValues.id
+    const { description } = req.body
+    if (!description) throw new Error('Description is required!')
+    return User.findByPk(UserId)
+    .then(user => {
+      if (!user) throw new Error("User didn't exist!")
+      return Tweet.create({
+        UserId,
+        description
+      })
+    })
+    .then(data => {
+      res.json({ 
+        status: 'success',
+        data
+      })
+    })
+    .catch(err => next(err))
   },
   likeTweet:(req, res, next) => {
     // POST /api/tweets/:tweet_id/like - 喜歡一則推文
-      const TweetId = req.params.id
+    const TweetId = req.params.id
     const UserId = req.user.dataValues.id
     return Promise.all([
       Tweet.findOne({
@@ -60,7 +136,7 @@ const tweetController = {
     .then(destroyedRecord => res.status(200).json({ destroyedRecord }))
     .catch(err => next(err))
   },
-   getReplies:(req, res, next) => {
+  getReplies:(req, res, next) => {
     // GET /api/tweets/:tweet_id/replies - 讀取回覆串
     return Promise.all([
       Tweet.findByPk(req.params.id, {
@@ -75,7 +151,7 @@ const tweetController = {
       include: [{
         model: Reply, include: [{
           model: User,
-          attributes: ['id', 'account', 'avatar', 'name']
+          attributes: ['id', 'account', 'avatar', 'name'], as: 'replyUser'
         }],
         attributes: { exclude: ['UserId', 'updatedAt'] }
       },

@@ -6,6 +6,7 @@ const { authenticated } = require('../../middleware/auth')
 
 router.post('/signin', userController.signIn)
 router.get('/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/popularUsers', authenticated, userController.getPopularUsers)
 router.get('/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/:id/followers', authenticated, userController.getUserFollowers)
 router.get('/:id/followings', authenticated, userController.getUserFollowings)

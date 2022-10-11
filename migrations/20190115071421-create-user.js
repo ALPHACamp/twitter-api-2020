@@ -13,7 +13,6 @@ module.exports = {
       },
       email: {
         type: Sequelize.STRING,
-        allowNull: false,
         validate: {
           isEmail: {
             msg: "The email doesn't fit the email format"
