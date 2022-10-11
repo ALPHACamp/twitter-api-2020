@@ -20,7 +20,7 @@ router.get('/users/:id/likes', authenticated, authenticatedUser, userController.
 router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getFollowers)
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
-router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'coverPhoto', maxCount: 1 }]), userController.putUser)
+router.put('/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'coverPhoto', maxCount: 1 }]), userController.putUser)
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/users', userController.signUp)
 
