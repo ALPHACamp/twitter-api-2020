@@ -144,9 +144,9 @@ const tweetController = {
   addReply: async (req, res, next) => {
     try {
       const { comment } = req.body
-      const TweetId = req.params.tweet_id
+      const tweetId = req.params.tweet_id
 
-      await Tweet.findByPk(TweetId)
+      await Tweet.findByPk(tweetId)
         .then(tweet => {
           if (!tweet) {
             return res.status(403).json({
@@ -164,8 +164,8 @@ const tweetController = {
       }
 
       await Reply.create({
-        UserId: helpers.getUser(req).id,
-        TweetId,
+        userId: helpers.getUser(req).id,
+        tweetId,
         comment
       })
         .then(data => res.status(200).json({
