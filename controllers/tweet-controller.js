@@ -109,30 +109,17 @@ const tweetController = {
   deleteTweetLike: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
-      const TweetId = req.params.id
-      const tweet = await Tweet.findByPk(TweetId, { raw: true })
-
-      // status 404 tweets not found
-      if (!tweet) {
+      const TweetId = Number(req.params.id)
+      const result = await Like.destroy({ where: { TweetId, UserId: currentUserId } })
+      // if result = 0, return 404 for not found like
+      if (!result) {
         return res.status(404).json({
           status: 'error',
-          message: 'The tweet does not exist.'
+          message: 'You have not liked the tweet or the tweet dose not exist.'
         })
       }
-
-      const like = await Like.findOne({
-        where: { TweetId, UserId: currentUserId },
-        raw: true
-      })
-
-      // status 400 have not liked the tweet
-      if (!like) throw new Error('You have not liked the tweet.')
-
-      // destroy like
-      await Like.destroy({ where: { id: like.id } })
-
-      // status 200 success
-      res.status(200).json({ status: 'success' })
+      // if result = 1, return status 200 for success
+      return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }
@@ -163,30 +150,17 @@ const tweetController = {
   deleteTweet: async (req, res, next) => {
     try {
       const TweetId = Number(req.params.id)
-
-      // 403 wanna delete others tweet
-      // 這段可能是不需要的
-      // if (tweet.UserId !== currentUserId) {
-      //   return res.status(403).json({
-      //     status: 'error',
-      //     message: 'User can only delete their own tweet.'
-      //   })
-      // }
-
-      // delete tweet
-      // delete replies of tweet
-      // delete likes of tweet
-      const deletedTweet = await Tweet.destroy({ where: { id: TweetId } })
-
-      // 404 find no tweet
-      if (!deletedTweet) {
+      const currentUserId = helpers.getUser(req).id
+      // delete tweet and it's replies and likes
+      const result = await Tweet.destroy({ where: { id: TweetId, UserId: currentUserId } })
+      // if result = 0, return 404 for not found tweet
+      if (!result) {
         return res.status(404).json({
           status: 'error',
-          message: 'The tweet does not exist.'
+          message: 'User dose not own the tweet or the tweet does not exist.'
         })
       }
-
-      // status 200 success
+      // if result = 1, return status 200 for success
       return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
@@ -225,31 +199,18 @@ const tweetController = {
   deleteTweetReply: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
-      const TweetId = req.params.tweet_id
-      const replyId = req.params.reply_id
-      const reply = await Reply.findOne({ where: { TweetId, id: replyId }, raw: true })
-
-      // status 404 tweet not found
-      if (!reply) {
+      const TweetId = Number(req.params.tweet_id)
+      const replyId = Number(req.params.reply_id)
+      const result = await Reply.destroy({ where: { id: replyId, TweetId, UserId: currentUserId } })
+      // if result = 0, return 404 for not found reply
+      if (!result) {
         return res.status(404).json({
           status: 'error',
-          message: 'The reply does not exist.'
+          message: 'User dose not own the reply or the reply does not exist.'
         })
       }
-
-      // status 403 wanna delete others reply
-      if (currentUserId !== reply.UserId) {
-        return res.status(403).json({
-          status: 'error',
-          message: 'User can only delete their own reply.'
-        })
-      }
-
-      // success 200 delete the reply
-      await Reply.destroy({ where: { id: replyId } })
-      return res.status(200).json({
-        status: 'success'
-      })
+      // if result = 1, return status 200 for success
+      return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }

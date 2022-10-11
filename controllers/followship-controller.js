@@ -39,28 +39,17 @@ const followshipController = {
   deleteFollowing: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
-      const followingId = req.params.followingId
-      const followship = await Followship.findOne({
-        where: { followingId, followerId: currentUserId },
-        raw: true,
-        attributes: ['id']
-      })
-
-      // status 404 for non followShip
-      if (!followship) {
+      const followingId = Number(req.params.followingId)
+      const result = await Followship.destroy({ where: { followingId, followerId: currentUserId } })
+      // if result = 0, return status 404 for not found followship
+      if (!result) {
         res.status(404).json({
           status: 'error',
-          message: 'You have not followed the user.'
+          message: 'You have not followed the user or the user dose not exist.'
         })
       }
-
-      // destroy followShip
-      await Followship.destroy({ where: { id: followship.id } })
-
-      // status 200 success
-      res.status(200).json({
-        status: 'success'
-      })
+      // if result = 1, return status 200 for success
+      return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }
