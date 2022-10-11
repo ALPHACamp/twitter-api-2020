@@ -61,11 +61,7 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
-    return User.findByPk(req.params.id, {
-      attributes: [
-        'id', 'account', 'name', 'email', 'password'
-      ]
-    })
+    return User.findByPk(req.params.id)
       .then(user => {
         if (!user) {
           const err = new Error("User didn't exist!")
@@ -93,7 +89,6 @@ const userServices = {
           account: req.body.account,
           name: req.body.name,
           email: req.body.email,
-          nickname: req.body.nickname,
           password: req.body.password,
           introduction: req.body.introduction,
           avatar: filePath || user.avatar
