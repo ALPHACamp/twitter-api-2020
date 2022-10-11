@@ -82,8 +82,11 @@ const tweetController = {
             message: '此推文已消失在這世上'
           })
         }
+        console.log(tweet)
+        const isLike = tweet.Likes.some(l =>
+          l.UserId === helpers.getUser(req).id
+        )
 
-        const isLike = tweet.Likes.some(l => l.id === helpers.getUser(req).id)
         const result = ({
           ...tweet.toJSON(),
           likeCount: tweet.Likes.length,
@@ -96,6 +99,13 @@ const tweetController = {
             reply => delete reply.User.password
           )
         }
+
+        if (result.Likes.length) {
+          result.Likes.map(
+            reply => delete reply.User.password
+          )
+        }
+
         if (result.User) delete result.User.password
 
         return result
@@ -226,7 +236,7 @@ const tweetController = {
             message: '此推文已消失在這世上'
           })
         }
-        
+
         if (!like) {
           return res.status(403).json({
             status: 'error',
