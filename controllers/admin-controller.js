@@ -49,7 +49,8 @@ const adminController = {
             tweetCount: user.Tweets.length,
             likeCount: user.Likes.length
           }})
-          .sort((a, b) => b.tweetCount.length - a.tweetCount.length)
+          .sort((a, b) => b.tweetCount - a.tweetCount)
+
         return result
       })
       .then(data => res.status(200).json(data))
@@ -57,7 +58,8 @@ const adminController = {
   },
   getTweets: (req, res, next) => {
     Tweet.findAll({
-      include: User
+      include: User,
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         const result = tweets.map(tweet => ({

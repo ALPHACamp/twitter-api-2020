@@ -325,7 +325,7 @@ const userController = {
         if (!user || user.role === 'admin') {
           return res.status(404).json({ status: 'error', message: '使用者不存在' })
         }
-        console.log(replies)
+    
         replies = replies.map(reply => {
           return {
             replyId: reply.id,
