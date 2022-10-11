@@ -9,7 +9,7 @@ const router = express.Router()
 const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
-const { generalErrorHandler } = require('../middleware/error-handler')
+const { uniqueConstraintErrorHandler, generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 
 // signin for admin
@@ -35,6 +35,7 @@ router.use('/api/users', authenticated, authenticatedUser, user)
 router.get('/', (req, res) => res.send('Hello World!'))
 
 // error handler
+router.use(uniqueConstraintErrorHandler)
 router.use(generalErrorHandler)
 
 module.exports = router

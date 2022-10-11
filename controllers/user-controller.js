@@ -45,13 +45,6 @@ const userController = {
       if (!validator.isEmail(email)) throw new Error('Email address is invalid.')
       // check length of name
       if (name?.length > 50) throw new Error('Name must be less than 50 characters long.')
-      // check account and email existence
-      const [userAccount, userEmail] = await Promise.all([
-        User.findOne({ where: { account } }),
-        User.findOne({ where: { email } })
-      ])
-      if (userAccount) throw new Error('Account already exists.')
-      if (userEmail) throw new Error('Email already exists.')
 
       const user = await User.create({
         account,
@@ -161,17 +154,8 @@ const userController = {
       if (!account?.trim() || !name?.trim() || !email?.trim()) throw new Error('Account, name, email are required')
       // check length of name
       if (name?.length > 50) throw new Error('Name must be less than 50 characters long.')
-      // check account existence
-      if (account !== user.account) {
-        const userAccount = await User.findOne({ where: { account } })
-        if (userAccount) throw new Error('Account already exists.')
-      }
-      // check email format and existence
-      if (email !== user.email) {
-        if (!validator.isEmail(email)) throw new Error('Email address is invalid.')
-        const userEmail = await User.findOne({ where: { email } })
-        if (userEmail) throw new Error('Email already exists.')
-      }
+      // check email format
+      if (email !== user.email && !validator.isEmail(email)) throw new Error('Email address is invalid.')
       // check password
       if ((password || checkPassword) && password !== checkPassword) throw new Error('The password confirmation does not match.')
 
