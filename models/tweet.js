@@ -6,10 +6,10 @@ module.exports = (sequelize, DataTypes) => {
   class Tweet extends Model {
     static associate(models) {
       // define association here
-      Tweet.belongsTo(models.User, { foreignKey: "userId" })
-      Tweet.hasMany(models.Reply, { foreignKey: "tweetId" })
+      Tweet.belongsTo(models.User, { foreignKey: "UserId" })
+      Tweet.hasMany(models.Reply, { foreignKey: "TweetId" })
       Tweet.hasMany(models.Like, {
-        foreignKey: 'tweetId'
+        foreignKey: "TweetId"
       })
       Tweet.belongsToMany(models.User,{
         through: models.Like,

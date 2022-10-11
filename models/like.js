@@ -6,18 +6,19 @@ module.exports = (sequelize, DataTypes) => {
   class Like extends Model {
     static associate(models) {
       // define association here
-      Like.belongsTo(models.User, { foreignKey: "userId" })
-      Like.belongsTo(models.Tweet, { foreignKey: "tweetId" })
+      Like.belongsTo(models.User, { foreignKey: "UserId" })
+      Like.belongsTo(models.Tweet, { foreignKey: "TweetId" })
     }
   };
   Like.init({
-    userId: DataTypes.INTEGER,
-    tweetId: DataTypes.INTEGER
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER
   }, {
     sequelize,
+    paranoid: true,
     modelName: 'Like',
     tableName: 'Likes',
-    underscored: true
+    underscored: true,
   })
   return Like
 }

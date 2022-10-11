@@ -1,15 +1,13 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
-const dayjs = require('dayjs')
-const bcrypt = require('bcryptjs')
 
 
 const adminController = {
   signIn: (req, res, next) => {
     try {
       if (helpers.getUser(req) && helpers.getUser(req).role !== 'admin') {
-        return res.status(403).json({ status: 'error', message: "此帳號不存在!" })
+        return res.status(403).json({ status: 'error', message: "此帳號不存在！" })
       }
 
       const userData = helpers.getUser(req).toJSON()
@@ -43,7 +41,7 @@ const adminController = {
             ...user.toJSON(),
             followerCount: user.Followers.length,
             followingCount: user.Followings.length,
-            tewwtCount: user.Tweets.length,
+            tweetCount: user.Tweets.length,
             likeCount: user.Likes.length
           }))
           .map(user => {
