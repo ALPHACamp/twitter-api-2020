@@ -81,11 +81,12 @@ const userServices = {
   },
   putUser: (req, cb) => {
     const { account, name, email, password, introduction } = req.body
+    // 找到圖檔的path
     const avatarUploaded = req.files?.avatar[0]
     const coverPhotoUploaded = req.files?.coverPhoto[0]
     return Promise.all([
       User.findByPk(req.params.id),
-      imgurFileHandler(avatarUploaded),
+      imgurFileHandler(avatarUploaded), // 上傳至imgur
       imgurFileHandler(coverPhotoUploaded)
     ])
       .then(([user, avatarFilePath, coverPhotoFilePath]) => {
