@@ -5,6 +5,7 @@ const admin = require('./modules/admin')
 const adminController = require('../controllers/admin-controller')
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
+const followshipController = require('../controllers/followship-controller')
 const { errorHandler } = require('../middleware/error-handler')
 const { authenticated, authAdmin, authUser } = require('../middleware/auth')
 const upload = require('../middleware/multer')
@@ -37,6 +38,10 @@ router.get('/tweets/:tweet_id/replies', authenticated, authUser, tweetController
 // likes
 router.post('/tweets/:id/like', authenticated, authUser, tweetController.likeTweet)
 router.post('/tweets/:id/unlike', authenticated, authUser, tweetController.unlikeTweet)
+
+// followship
+router.post('/followships', authenticated, authUser, followshipController.postFollowing)
+router.delete('/followships/:followingId', authenticated, authUser, followshipController.deleteFollowing)
 
 // error handler
 router.use('/', errorHandler)

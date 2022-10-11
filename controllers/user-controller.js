@@ -45,7 +45,7 @@ const userController = {
         if (!created && user) {
           res.status(404).json({
             status: 'error',
-            message: 'Error: account 已重複註冊、或 email 已重複註冊！',
+            message: 'Error: account 或 email 已重複註冊！',
             data: req.body
           })
         }
