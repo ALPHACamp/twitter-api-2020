@@ -56,6 +56,7 @@ const adminController = {
         as: 'tweetAuthor',
         attributes: ['id', 'account', 'avatar', 'name']
       }],
+      order: [['createdAt', 'DESC']],
       nest: true,
       raw: true
     })
