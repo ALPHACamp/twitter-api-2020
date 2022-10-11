@@ -7,7 +7,7 @@ module.exports = {
       for (let j = 1; j <= 10; j++) {
         tweetArray.push({
           id: tweetId,
-          description: `user${i}，推文測試第 ${j} 篇文章`,
+          description: `user${i - 1}，推文測試第 ${j} 篇文章`,
           User_id: i,
           created_at: new Date(),
           updated_at: new Date()
