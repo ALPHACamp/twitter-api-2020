@@ -60,8 +60,27 @@ const userServices = {
       .then(tweets => cb(null, tweets))
       .catch(err => cb(err))
   },
+  // getUser: (req, cb) => {
+  //   return User.findByPk(req.params.id)
+  //     .then(user => {
+  //       if (!user) {
+  //         const err = new Error("User didn't exist!")
+  //         err.status = 404
+  //         throw err
+  //       }
+  //       return cb(null, user)
+  //     })
+  //     .catch(err => cb(err))
+  // },
   getUser: (req, cb) => {
-    return User.findByPk(req.params.id)
+    return User.findByPk(req.params.id, {
+      include: [
+        Tweet,
+        { model: Reply, include: Tweet },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
       .then(user => {
         if (!user) {
           const err = new Error("User didn't exist!")
@@ -79,20 +98,23 @@ const userServices = {
     //   throw err
     // }
     const { file } = req
+    const { account, name, email, password, introduction } = req.body
     return Promise.all([
       User.findByPk(req.params.id),
       imgurFileHandler(file)
     ])
       .then(([user, filePath]) => {
+        console.log('file path:', filePath)
         if (!user) throw new Error("User didn't exist.")
+        // console.log('user', user)
         return user.update({
-          account: req.body.account,
-          name: req.body.name,
-          email: req.body.email,
-          // nickname: req.body.nickname,
-          password: req.body.password,
-          introduction: req.body.introduction,
-          avatar: filePath || user.avatar
+          account: account || user.account,
+          name: name || user.name,
+          email: email || user.email,
+          password: password || user.password,
+          introduction: introduction || user.introduction,
+          avatar: filePath || user.avatar,
+          coverPhoto: filePath || user.coverPhoto
         })
       })
       .then(user => {

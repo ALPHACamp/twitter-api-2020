@@ -17,6 +17,7 @@ const localFileHandler = file => {
 const imgurFileHandler = file => {
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null)
+    console.log('imgur fileHandler:', file)
     return imgur.uploadFile(file.path)
       .then(img => {
         resolve(img?.link || null)
