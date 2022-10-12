@@ -64,7 +64,6 @@ const userServices = {
         ]
       },
       order: [['createdAt', 'DESC']],
-      raw: true,
       nest: true
     })
       .then(tweets => cb(null, tweets))
