@@ -64,6 +64,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserProfile: (req, res, next) => {
+    const currentUser = helpers.getUser(req)?.id
     const id = Number(req.params.id)
     User.findByPk(id, {
       attributes: {
@@ -76,11 +77,16 @@ const userController = {
             '(SELECT COUNT(*) FROM Followships WHERE follower_id = user.id )'), 'followingCounts'
         ]],
         exclude: ['password', 'updatedAt']
-      }
+      },
+      include: [{ model: User, as: 'Followers' }]
     })
       .then(user => {
         if (!user) throw new Error('該使用者不存在')
-        return res.json(user)
+        const { Followers, ...data } = {
+          ...user.toJSON(),
+          isFollowed: user.Followers.some(user => user.id === currentUser)
+        }
+        res.json({ ...data })
       })
       .catch(err => next(err))
   },
