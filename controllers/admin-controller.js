@@ -68,7 +68,6 @@ const adminController = {
           UserId: tweet.UserId,
           account: tweet.User.account,
           name: tweet.User.name,
-          avatar: tweet.User.avatar,
           description: tweet.description.substring(0, 50),
           createdAt: tweet.createdAt
         }))
