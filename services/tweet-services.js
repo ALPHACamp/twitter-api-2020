@@ -4,10 +4,11 @@ const { getUser } = require('../_helpers')
 const tweetServices = {
   getTweets: (req, cb) => {
     return Tweet.findAll({
-      raw: true,
       nest: true,
       include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Like, include: User },
+        { model: Reply }
       ],
       attributes: {
         include: [

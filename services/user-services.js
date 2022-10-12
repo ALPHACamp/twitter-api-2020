@@ -52,9 +52,18 @@ const userServices = {
       where: {
         UserId: req.params.id
       },
-      include: User,
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        Reply,
+        { model: Like, include: User }
+      ],
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
+          [sequelize.literal('( SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'repliedCount']
+        ]
+      },
       order: [['createdAt', 'DESC']],
-      raw: true,
       nest: true
     })
       .then(tweets => cb(null, tweets))
