@@ -66,7 +66,8 @@ const userServices = {
         Tweet,
         { model: Reply, include: Tweet },
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
+        { model: User, as: 'Followings' },
+        { model: Like, include: Tweet }
       ]
     })
       .then(user => {
