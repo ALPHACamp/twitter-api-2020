@@ -97,9 +97,8 @@ const userController = {
       if (!name || !introduction) throw new Error('名稱、自我介紹皆須填寫')
       if (name.length > 50) throw new Error('名稱的字數超過上限 50 個字!')
       if (introduction.length > 160) throw new Error('自我介紹的字數超過上限 160 個字!')
-      const { file } = req
-      const image = file?.image || null
-      const backgroundImage = file?.backgroundImage || null
+      const image = req.files?.image ? req.files.image[0] : null
+      const backgroundImage = req.files?.backgroundImage ? req.files.backgroundImage[0] : null
       return Promise.all([
         User.findByPk(UserId),
         imgurFileHandler(image),
