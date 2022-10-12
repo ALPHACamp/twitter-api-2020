@@ -4,13 +4,13 @@ const { getUser } = require('../_helpers')
 const followshipServices = {
   addFollowing: (req, cb) => {
     const currentUserId = getUser(req).dataValues.id
-    const userId = req.body.id
+    const followingId = req.body.id
     return Promise.all([
-      User.findByPk(userId),
+      User.findByPk(followingId),
       Followship.findOne({
         where: {
           followerId: currentUserId,
-          followingId: userId
+          followingId
         }
       })
     ])
@@ -21,7 +21,7 @@ const followshipServices = {
 
         return Followship.create({
           followerId: currentUserId,
-          followingId: userId
+          followingId
         })
       })
       .then(newFollowship => cb(null, newFollowship))
