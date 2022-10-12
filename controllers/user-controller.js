@@ -64,6 +64,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserProfile: (req, res, next) => {
+    const currentUser = helpers.getUser(req)?.id
     const id = Number(req.params.id)
     User.findByPk(id, {
       attributes: {
@@ -76,11 +77,16 @@ const userController = {
             '(SELECT COUNT(*) FROM Followships WHERE follower_id = user.id )'), 'followingCounts'
         ]],
         exclude: ['password', 'updatedAt']
-      }
+      },
+      include: [{ model: User, as: 'Followers' }]
     })
       .then(user => {
         if (!user) throw new Error('該使用者不存在')
-        return res.json(user)
+        const { Followers, ...data } = {
+          ...user.toJSON(),
+          isFollowed: user.Followers.some(user => user.id === currentUser)
+        }
+        res.json({ ...data })
       })
       .catch(err => next(err))
   },
@@ -88,15 +94,18 @@ const userController = {
     const id = Number(req.params.id)
     const userId = helpers.getUser(req)?.id
     const { name, introduction } = req.body
-    const { file } = req
+    const { files } = req
     const [nameMin, nameMax] = [1, 50]
     const [introductionMin, introductionMax] = [1, 160]
+    const profilePhoto = files?.profilePhoto ? files.profilePhoto[0] : null
+    const coverPhoto = files?.coverPhoto ? files.coverPhoto[0] : null
 
     return Promise.all([
       User.findByPk(id),
-      imgurFileHandler(file)
+      imgurFileHandler(profilePhoto),
+      imgurFileHandler(coverPhoto)
     ])
-      .then(([user, filePath]) => {
+      .then(([user, profilePhoto, coverPhoto]) => {
         if (userId !== id) throw new Error('不具有權限')
         if (name.length < nameMin || name.length > nameMax) throw new Error(`暱稱字數限制需在 ${nameMin}~ ${nameMax} 字之內`)
 
@@ -105,8 +114,8 @@ const userController = {
         return user.update({
           name,
           introduction,
-          profilePhoto: filePath || user.profilePhoto,
-          coverPhoto: filePath || user.coverPhoto
+          profilePhoto: profilePhoto || user.profilePhoto,
+          coverPhoto: coverPhoto || user.coverPhoto
         })
       })
       .then(updateUser => {
