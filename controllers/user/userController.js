@@ -52,12 +52,39 @@ const userController = {
     }
   },
   getUser: async (req, res, next) => {
+    const currentUserId = helpers.getUser(req).id
     try {
       const userId = req.params.id
-      const user = await User.findByPk(userId, {
-        raw: true,
-        nest: true
-      })
+      const [user, currentUserFollowings] = await Promise.all([
+        User.findByPk(userId, {
+          raw: true,
+          nest: true,
+          attributes: {
+            include: [
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+                ),
+                'FollowerCount'
+              ],
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
+                ),
+                'FollowingCount'
+              ]
+            ]
+          }
+        }),
+        Followship.findAll({
+          raw: true,
+          where: { followerId: currentUserId },
+          attributes: ['followingId']
+        })
+      ])
+      user.isFollowing = currentUserFollowings.some(
+        (item) => item.followingId === user.id
+      )
       assert(user, '使用者不存在')
       res.json(user)
     } catch (error) {
@@ -116,6 +143,7 @@ const userController = {
     }
   }, // 獲取某使用者發過的推文
   getUserTweets: async (req, res, next) => {
+    const currentUser = helpers.getUser(req).id
     const userId = req.params.id
     try {
       assert(await User.findByPk(userId), '使用者不存在')
@@ -143,6 +171,14 @@ const userController = {
           ]
         },
         order: [['createdAt', 'DESC']]
+      })
+      const userLikeList = await Like.findAll({
+        raw: true,
+        where: { UserId: currentUser },
+        attributes: ['TweetId']
+      })
+      tweet.forEach((tweet) => {
+        tweet.isLike = userLikeList.some((like) => like.TweetId === tweet.id)
       })
       assert(tweet.length > 0, '該使用者沒有推文')
       res.json(tweet)
@@ -198,33 +234,84 @@ const userController = {
     }
   }, // 獲取某使用者跟隨中的人
   getUserFollowers: async (req, res, next) => {
+    const currentUserId = helpers.getUser(req).id
     const userId = req.params.id
     try {
-      const followers = await Followship.findAll({
-        raw: true,
-        nest: true,
-        where: { followingId: userId },
-        attributes: ['followerId'],
-        order: [['createdAt', 'DESC']]
-      })
+      // 查詢某使用者的追隨者ID陣列
+      // 查詢當前使用者正在追隨的ID陣列
+      const [followers, currentUserFollowings] = await Promise.all([
+        Followship.findAll({
+          raw: true,
+          nest: true,
+          where: { followingId: userId },
+          attributes: ['followerId'],
+          order: [['createdAt', 'DESC']]
+        }),
+        Followship.findAll({
+          raw: true,
+          where: { followerId: currentUserId },
+          attributes: ['followingId']
+        })
+      ])
+
       assert(followers.length, '這個使用者還沒有任何追隨者')
-      res.json(followers)
+      // 拿某使用者的追隨者ID陣列，去拿到每個追隨者的資料
+      const followersData = await Promise.all(
+        followers.map((item) =>
+          User.findByPk(item.followerId, {
+            raw: true,
+            attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+          })
+        )
+      )
+      // 比對 userid 看當前使用者是否有跟隨
+      followersData.forEach((data) => {
+        data.isFollowing = currentUserFollowings.some(
+          (item) => item.followingId === data.id
+        )
+      })
+      res.json(followersData)
     } catch (error) {
       next(error)
     }
   }, // 獲取某使用者的跟隨者
   getUserFollowings: async (req, res, next) => {
+    const currentUserId = helpers.getUser(req).id
     const userId = req.params.id
     try {
-      const followings = await Followship.findAll({
-        raw: true,
-        nest: true,
-        where: { followerId: userId },
-        attributes: ['followingId'],
-        order: [['createdAt', 'DESC']]
+      const [followings, currentUserFollowings] = await Promise.all([
+        Followship.findAll({
+          raw: true,
+          nest: true,
+          where: { followerId: userId },
+          attributes: ['followingId'],
+          order: [['createdAt', 'DESC']]
+        }),
+        Followship.findAll({
+          raw: true,
+          where: { followerId: currentUserId },
+          attributes: ['followingId']
+        })
+      ])
+      assert(followings.length, '這個使用者還沒有追隨任何人')
+      const followingsList = followings.map(
+        (followings) => followings.followingId
+      )
+      const followingsData = await Promise.all(
+        followingsList.map((item) =>
+          User.findByPk(item, {
+            raw: true,
+            attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+          })
+        )
+      )
+      followingsData.forEach((data) => {
+        data.isFollowing = currentUserFollowings.some(
+          (item) => item.followingId === data.id
+        )
       })
-      assert(followings.length, '這個使用者還沒有任何追隨者')
-      res.json(followings)
+
+      res.json(followingsData)
     } catch (error) {
       next(error)
     }

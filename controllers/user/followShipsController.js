@@ -56,23 +56,36 @@ const followShipsCotroller = {
     }
   }, // 追蹤者前10名名單
   getTop10FollowerUser: async (req, res, next) => {
+    const currentUserId = helpers.getUser(req).id
     try {
-      const top10User = await User.findAll({
-        raw: true,
-        attributes: {
-          // 自定義一個欄位
-          include: [
-            [
-              sequelize.literal(
-                '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId=User.id)'
-              ),
-              'followerCount'
+      const [top10User, currentUserFollowings] = await Promise.all([
+        User.findAll({
+          raw: true,
+          attributes: {
+            // 自定義一個欄位
+            include: [
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId=User.id)'
+                ),
+                'followerCount'
+              ]
             ]
-          ]
-        },
-        // 以自定義的欄位進行排序
-        order: [[sequelize.literal('followerCount'), 'DESC']],
-        limit: 10
+          },
+          // 以自定義的欄位進行排序
+          order: [[sequelize.literal('followerCount'), 'DESC']],
+          limit: 10
+        }),
+        Followship.findAll({
+          raw: true,
+          where: { followerId: currentUserId },
+          attributes: ['followingId']
+        })
+      ])
+      top10User.forEach((user) => {
+        user.isFollowing = currentUserFollowings.some(
+          (item) => item.followingId === user.id
+        )
       })
       res.json(top10User)
     } catch (error) {
