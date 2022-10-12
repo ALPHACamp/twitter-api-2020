@@ -100,7 +100,6 @@ describe('# followship requests', () => {
             if (err) return done(err);
             // 檢查 Followship 的資料是否已空，表示已被刪除
             db.Followship.findByPk(1).then(followship => {
-              console.log(followship)
               expect(followship).to.be.null
               return done();
             })
