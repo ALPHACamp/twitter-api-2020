@@ -215,7 +215,6 @@ const userController = {
       })
       .catch(err => next(err))
   },
-
   getUserFollowers: (req, res, next) => {
     const UserId = req.params.id
     return User.findByPk(UserId, {
