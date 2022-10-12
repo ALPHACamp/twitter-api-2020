@@ -27,17 +27,16 @@ const fkConstraintErrorHandler = (err, req, res, next) => {
 
 const generalErrorHandler = (err, req, res, next) => {
   if (err instanceof Error) {
-    return res.status(err.status || 400).json({
+    return res.status(err.status || 500).json({
       status: 'error',
       message: `${err.message}`
     })
   } else {
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
       message: `${err}`
     })
   }
-  next(err)
 }
 
 module.exports = {

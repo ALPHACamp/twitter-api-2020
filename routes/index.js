@@ -32,7 +32,6 @@ router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 router.use('/api/followships', authenticated, authenticatedUser, followship)
 router.use('/api/tweets', authenticated, authenticatedUser, tweet)
 router.use('/api/users', authenticated, authenticatedUser, user)
-router.get('/', (req, res) => res.send('Hello World!'))
 
 // error handler
 router.use(uniqueConstraintErrorHandler)

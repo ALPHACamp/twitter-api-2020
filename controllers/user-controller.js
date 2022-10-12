@@ -11,21 +11,21 @@ const userController = {
       const userData = helpers.getUser(req).toJSON()
       switch (true) {
         case (req.originalUrl === '/api/users/signin' && userData.role !== 'user'):
-          res.status(403).json({
+          return res.status(403).json({
             status: 'error',
             message: 'Permission denied.'
           })
-          break
         case (req.originalUrl === '/api/admin/signin' && userData.role !== 'admin'):
-          res.status(403).json({
+          return res.status(403).json({
             status: 'error',
             message: 'Permission denied.'
           })
-          break
         default: {
           const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '15d' })
-          return res.json({
-            status: 'success', token, user: userData
+          return res.status(200).json({
+            status: 'success',
+            token,
+            user: userData
           })
         }
       }
@@ -37,14 +37,30 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
-      // check required fields
-      if (!account?.trim() || !name?.trim() || !email?.trim() || !password || !checkPassword) throw new Error('All the fields are required.')
-      // check password
-      if (password !== checkPassword) throw new Error('The password confirmation does not match.')
-      // check email format
-      if (!validator.isEmail(email)) throw new Error('Email address is invalid.')
-      // check length of name
-      if (name?.length > 50) throw new Error('Name must be less than 50 characters long.')
+      if (!account?.trim() || !name?.trim() || !email?.trim() || !password || !checkPassword) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'All the fields are required.'
+        })
+      }
+      if (password !== checkPassword) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'The password confirmation does not match.'
+        })
+      }
+      if (!validator.isEmail(email)) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Email address is invalid.'
+        })
+      }
+      if (name?.length > 50) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Name must be less than 50 characters long.'
+        })
+      }
 
       const user = await User.create({
         account,
@@ -52,7 +68,7 @@ const userController = {
         email,
         password: bcrypt.hashSync(password, 10)
       })
-      return res.json({
+      return res.status(200).json({
         id: user.id,
         account: user.account
       })
@@ -64,7 +80,7 @@ const userController = {
   getCurrentUser: (req, res, next) => {
     try {
       const currentUser = helpers.getUser(req)
-      return res.json(currentUser)
+      return res.status(200).json(currentUser)
     } catch (err) {
       next(err)
     }
@@ -81,8 +97,13 @@ const userController = {
         ]
       })
       // check if the user exists
-      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
-      return res.json(user)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+      return res.status(200).json(user)
     } catch (err) {
       next(err)
     }
@@ -93,23 +114,32 @@ const userController = {
       const { name, introduction } = req.body
       const { files } = req
       const reqUserId = Number(req.params.id)
-      // check required fields
-      if (!name?.trim()) throw new Error('Name is required')
-      // check length of name
-      if (name?.length > 50) throw new Error('Name must be less than 50 characters long.')
-      // check length of introduction
-      if (introduction?.length > 160) throw new Error('Introduction must be less than 160 characters long.')
+      if (!name?.trim()) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Name is required.'
+        })
+      }
+      if (name?.length > 50) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Name must be less than 50 characters long.'
+        })
+      }
+      if (introduction?.length > 160) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Introduction must be less than 160 characters long.'
+        })
+      }
+      // create the update option
+      const option = { name, introduction }
+      if (files?.avatar) option.avatar = await imgurFileHandler(files.avatar[0])
+      if (files?.cover) option.cover = await imgurFileHandler(files.cover[0])
 
       const user = await User.findByPk(reqUserId)
-      const avatarPath = files?.avatar ? await imgurFileHandler(files.avatar[0]) : user.avatar
-      const coverPath = files?.cover ? await imgurFileHandler(files.cover[0]) : user.cover
-      await user.update({
-        name,
-        introduction,
-        avatar: avatarPath,
-        cover: coverPath
-      })
-      return res.json({ status: 'success' })
+      await user.update(option)
+      return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }
@@ -119,24 +149,37 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
       const reqUserId = Number(req.params.id)
-      // check required fields
-      if (!account?.trim() || !name?.trim() || !email?.trim()) throw new Error('Account, name, email are required')
-      // check length of name
-      if (name?.length > 50) throw new Error('Name must be less than 50 characters long.')
-      // check password
-      if ((password || checkPassword) && password !== checkPassword) throw new Error('The password confirmation does not match.')
+      if (!account?.trim() || !name?.trim() || !email?.trim()) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Account, name, email are required.'
+        })
+      }
+      if (name?.length > 50) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Name must be less than 50 characters long.'
+        })
+      }
+      if ((password || checkPassword) && password !== checkPassword) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'The password confirmation does not match.'
+        })
+      }
+      if (!validator.isEmail(email)) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Email address is invalid.'
+        })
+      }
+      // create the update option
+      const option = { account, name, email }
+      if (password) option.password = bcrypt.hashSync(password, 10)
 
       const user = await User.findByPk(reqUserId)
-      // check email format
-      if (email !== user.email && !validator.isEmail(email)) throw new Error('Email address is invalid.')
-
-      await user.update({
-        account,
-        name,
-        email,
-        password: password ? bcrypt.hashSync(password, 10) : user.password
-      })
-      return res.json({ status: 'success' })
+      await user.update(option)
+      return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }
@@ -157,7 +200,7 @@ const userController = {
         limit: LIMIT,
         raw: true
       })
-      return res.json(topUsers)
+      return res.status(200).json(topUsers)
     } catch (err) {
       next(err)
     }
@@ -184,9 +227,13 @@ const userController = {
         })
       ])
       // check if the user exists
-      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
-
-      return res.json(userTweets)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+      return res.status(200).json(userTweets)
     } catch (err) {
       next(err)
     }
@@ -214,9 +261,13 @@ const userController = {
         })
       ])
       // check if the user exists
-      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
-
-      return res.json(userReplies)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+      return res.status(200).json(userReplies)
     } catch (err) {
       next(err)
     }
@@ -250,9 +301,13 @@ const userController = {
         })
       ])
       // check if the user exists
-      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
-
-      return res.json(likedTweets)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+      return res.status(200).json(likedTweets)
     } catch (err) {
       next(err)
     }
@@ -280,9 +335,13 @@ const userController = {
         })
       ])
       // check if the user exists
-      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
-
-      return res.json(followings)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+      return res.status(200).json(followings)
     } catch (err) {
       next(err)
     }
@@ -310,9 +369,13 @@ const userController = {
         })
       ])
       // check if the user exists
-      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'The user does not exist.' })
-
-      return res.json(followers)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+      return res.status(200).json(followers)
     } catch (err) {
       next(err)
     }
