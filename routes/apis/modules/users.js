@@ -15,7 +15,7 @@ router.put('/:id/setting', authenticated, authenticatedUser, userController.putU
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn) // 使用者登入
 router.get('/:id', authenticated, authenticatedUser, userController.getUserProfile) // 取得使用者資料
 router.put('/:id', authenticated, authenticatedUser, userController.putUserProfile) // 更新使用者資料
-router.get('/', authenticated, authenticatedUser, userController.getCurrentUser)
+router.get('/', authenticated, userController.getCurrentUser)
 router.post('/', userController.signUp) // 使用者註冊
 
 module.exports = router
