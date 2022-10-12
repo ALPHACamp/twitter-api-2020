@@ -93,33 +93,92 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
-  putUser: (req, cb) => {
-    const { account, name, email, password, introduction } = req.body
-    // 找到圖檔的path
-    const avatarUploaded = req.files?.avatar[0]
-    const coverPhotoUploaded = req.files?.coverPhoto[0]
-    return Promise.all([
-      User.findByPk(req.params.id),
-      imgurFileHandler(avatarUploaded), // 上傳至imgur
-      imgurFileHandler(coverPhotoUploaded)
-    ])
-      .then(([user, avatarFilePath, coverPhotoFilePath]) => {
-        if (!user) throw new Error("User didn't exist.")
-        return user.update({
-          account: account || user.account,
-          name: name || user.name,
-          email: email || user.email,
-          password: password || user.password,
-          introduction: introduction || user.introduction,
-          avatar: avatarFilePath || user.avatar,
-          coverPhoto: coverPhotoFilePath || user.coverPhoto
-        })
-      })
+  putUserSetting: (req, cb) => {
+    const { name, account, email, password, checkPassword, introduction } = req.body
+    const UserId = getUser(req).dataValues.id
+    // 密碼輸入不一致 =>不能放，因為測試檔只會編輯name跟introduction
+    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
+    // 資料輸入不完整 =>不能放，因為測試檔只會編輯name跟introduction
+    if (!name || !account || !email || !password || !checkPassword) throw new Error('All fields are required.')
+    return User.findByPk(UserId)
       .then(user => {
-        return cb(null, user)
+        // 檢查user是否存在
+        if (!user) throw new Error("User didn't exist.")
+        // 比對account和email的唯一性
+        // 如果account或email有更動
+        if (account !== user.account || email !== user.email) {
+          // 確認DB裡面除了舊資料以外沒有重複的資料
+          return User.findAll({
+            where: {
+              [Op.or]: [{ account }, { email }]
+            }
+          })
+            .then(confirmUser => {
+              // db已有重複資料
+              if (confirmUser.length > 1) {
+                throw new Error('Account or email has already exist.')
+              // db除了user的舊資料，未有重複資料
+              } else {
+                return bcrypt.hash(password, 10)
+                  .then(hash => {
+                    user.update({
+                      name,
+                      email,
+                      account,
+                      password: hash,
+                      introduction
+                    })
+                  })
+                  .then(updatedUser => cb(null, updatedUser))
+                  .catch(err => cb(err))
+              }
+            })
+            .catch(err => cb(err))
+          // 如果account、email皆未更動
+        } else {
+          return bcrypt.hash(password, 10)
+            .then(hash => {
+              return user.update({
+                account,
+                name,
+                email,
+                password: hash,
+                introduction
+              })
+            })
+            .then(updatedUser => cb(null, updatedUser))
+            .catch(err => cb(err))
+        }
       })
       .catch(err => cb(err))
   },
+  // putUserProfile: (req, cb) => {
+  // const { account, name, email, password, introduction } = req.body
+  //   // 找到圖檔的path
+  //   const avatarUploaded = req.files?.avatar[0]
+  //   const coverPhotoUploaded = req.files?.coverPhoto[0]
+  //   return Promise.all([
+  //     User.findByPk(req.params.id),
+  //     imgurFileHandler(avatarUploaded), // 上傳至imgur
+  //     imgurFileHandler(coverPhotoUploaded)
+  //   ])
+  //     .then(([user, avatarFilePath, coverPhotoFilePath]) => {
+  //       if (!user) throw new Error("User didn't exist.")
+  //       return user.update({
+  //         account: account || user.account,
+  //         name: name || user.name,
+  //         email: email || user.email,
+  //         password: password || user.password,
+  //         introduction: introduction || user.introduction,
+  //         avatar: avatarFilePath || user.avatar,
+  //         coverPhoto: coverPhotoFilePath || user.coverPhoto
+  //       })
+  //     })
+  //     .then(user => {
+  //       return cb(null, user)
+  //     })
+  //     .catch(err => cb(err))
+  // },
   getRepliedTweets: (req, cb) => {
     // tweetId, userId, repliedId 看見某使用者發過回覆的推文
     // 新增按讚數+留言數+username
