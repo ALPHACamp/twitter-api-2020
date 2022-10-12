@@ -61,7 +61,14 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
-    return User.findByPk(req.params.id)
+    return User.findByPk(req.params.id, {
+      include: [
+        Tweet,
+        { model: Reply, include: Tweet },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
       .then(user => {
         if (!user) {
           const err = new Error("User didn't exist!")
@@ -73,25 +80,25 @@ const userServices = {
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
-    // if (Number(req.params.id) !== Number(req.user.id)) {
-    //   const err = new Error('User not authorized to edit.')
-    //   err.status = 404
-    //   throw err
-    // }
-    const { file } = req
+    const { account, name, email, password, introduction } = req.body
+    // 找到圖檔的path
+    const avatarUploaded = req.files?.avatar[0]
+    const coverPhotoUploaded = req.files?.coverPhoto[0]
     return Promise.all([
       User.findByPk(req.params.id),
-      imgurFileHandler(file)
+      imgurFileHandler(avatarUploaded), // 上傳至imgur
+      imgurFileHandler(coverPhotoUploaded)
     ])
-      .then(([user, filePath]) => {
+      .then(([user, avatarFilePath, coverPhotoFilePath]) => {
         if (!user) throw new Error("User didn't exist.")
         return user.update({
-          account: req.body.account,
-          name: req.body.name,
-          email: req.body.email,
-          password: req.body.password,
-          introduction: req.body.introduction,
-          avatar: filePath || user.avatar
+          account: account || user.account,
+          name: name || user.name,
+          email: email || user.email,
+          password: password || user.password,
+          introduction: introduction || user.introduction,
+          avatar: avatarFilePath || user.avatar,
+          coverPhoto: coverPhotoFilePath || user.coverPhoto
         })
       })
       .then(user => {
