@@ -96,6 +96,7 @@ const userServices = {
   putUserSetting: (req, cb) => {
     const { name, account, email, password, checkPassword } = req.body
     const UserId = getUser(req).dataValues.id
+    if (Number(req.params.id) !== Number(UserId)) throw new Error('Not authorized to edit.')
     // 密碼輸入不一致
     if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
     // 資料輸入不完整
@@ -152,9 +153,11 @@ const userServices = {
   },
   putUser: (req, cb) => {
     const { name, introduction } = req.body
+    const UserId = getUser(req).dataValues.id
     // 找到圖檔的path
     const avatarUploaded = req.body.avatar
     const coverPhotoUploaded = req.body.coverPhoto
+    if (Number(req.params.id) !== Number(UserId)) throw new Error('Not authorized to edit.')
     return Promise.all([
       User.findByPk(req.params.id),
       imgurFileHandler(avatarUploaded), // 上傳至imgur
