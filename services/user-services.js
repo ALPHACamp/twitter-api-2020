@@ -113,11 +113,21 @@ const userServices = {
   },
   getRepliedTweets: (req, cb) => {
     // tweetId, userId, repliedId 看見某使用者發過回覆的推文
+    // 新增按讚數+留言數+username
     return Promise.all([User.findByPk(req.params.id), Reply.findAll({
       where: {
         UserId: req.params.id
       },
-      include: Tweet,
+      include: [
+        Tweet,
+        { model: User, attributes: ['name', 'account', 'avatar'] }
+      ],
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'repliedCount']
+        ]
+      },
       raw: true,
       nest: true,
       order: [['createdAt', 'DESC']]
