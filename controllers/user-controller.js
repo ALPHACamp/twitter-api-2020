@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
-const sequelize = require('sequelize')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -164,7 +163,6 @@ const userController = {
       })
       .catch(err => next(err))
   },
-
   getUserFollowers: (req, res, next) => {
     const UserId = req.params.id
     return User.findByPk(UserId, {
