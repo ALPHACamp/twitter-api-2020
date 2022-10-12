@@ -176,7 +176,18 @@ const userController = {
       const liked = await Like.findAll({
         raw: true,
         nest: true,
-        include: [Tweet],
+        include: {
+          model: Tweet,
+          attributes: [
+            'id', 'description', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount']
+          ],
+          include: {
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          }
+        },
         where: { userId },
         order: [['createdAt', 'DESC']]
       })
