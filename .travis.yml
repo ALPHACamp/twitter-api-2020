@@ -7,7 +7,7 @@ services:
 
 # 設定參數(Travis CI 會按照參數分別執行)
 env:
-  - NODE_ENV=travis
+  - NODE_ENV=travis JWT_SECRET=JWT_SECRET
 
 # 在 install 前執行的指令
 before_install:
