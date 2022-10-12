@@ -5,7 +5,9 @@ const upload = multer({
   fileFilter (req, file, cb) {
     // user can only upload image
     if (!file.originalname.match(/\.(jpg|jpeg|png|JPG|JPEG|PNG)$/)) {
-      cb(new Error('Please upload an image.'))
+      const err = new Error('Please upload an image.')
+      err.status = 400
+      cb(err)
     }
     cb(null, true)
   }

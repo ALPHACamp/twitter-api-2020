@@ -13,9 +13,17 @@ passport.use(new LocalStrategy({
 }, async (account, password, cb) => {
   try {
     const user = await User.findOne({ where: { account } })
-    if (!user) throw new Error('Incorrect account or password.')
+    if (!user) {
+      const err = new Error('Incorrect account or password.')
+      err.status = 401
+      throw err
+    }
     const isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) throw new Error('Incorrect account or password.')
+    if (!isMatch) {
+      const err = new Error('Incorrect account or password.')
+      err.status = 401
+      throw err
+    }
     return cb(null, user)
   } catch (err) {
     return cb(err, false)

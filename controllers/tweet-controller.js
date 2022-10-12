@@ -38,7 +38,6 @@ const tweetController = {
         raw: true,
         nest: true
       })
-      // error code 404
       if (!tweet) {
         return res.status(404).json({
           status: 'error',
@@ -121,13 +120,18 @@ const tweetController = {
     try {
       const currentUserId = helpers.getUser(req).id
       const description = req.body.description?.trim()
-
-      // status 400 while description length > 140
-      if (description.length > 140) throw new Error('Tweet description must be less than 140 characters long.')
-
-      // status 400 wile description is empty
-      if (!description) throw new Error('Tweet description is required.')
-
+      if (!description) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Tweet description is required.'
+        })
+      }
+      if (description.length > 140) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Tweet description must be less than 140 characters long.'
+        })
+      }
       await Tweet.create({ UserId: currentUserId, description })
       return res.status(200).json({ status: 'success' })
     } catch (err) {
@@ -160,13 +164,18 @@ const tweetController = {
       const currentUserId = helpers.getUser(req).id
       const comment = req.body.comment?.trim()
       const TweetId = req.params.tweet_id
-
-      // status 400 no comment
-      if (!comment) throw new Error('Reply comment is required.')
-
-      // status 400 comment too long
-      if (comment.length > 140) throw new Error('Reply comment must be less than 140 characters long.')
-
+      if (!comment) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Reply comment is required.'
+        })
+      }
+      if (comment.length > 140) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Reply comment must be less than 140 characters long.'
+        })
+      }
       await Reply.create({ comment, UserId: currentUserId, TweetId })
       return res.status(200).json({ status: 'success' })
     } catch (err) {
