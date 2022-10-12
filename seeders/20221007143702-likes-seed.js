@@ -2,13 +2,29 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const users = await queryInterface.sequelize.query('SELECT id FROM Users;', { type: queryInterface.sequelize.QueryTypes.SELECT })
+    const users = await queryInterface.sequelize.query('SELECT id, role FROM Users;', { type: queryInterface.sequelize.QueryTypes.SELECT })
 
     const tweets = await queryInterface.sequelize.query('SELECT id FROM Tweets;', { type: queryInterface.sequelize.QueryTypes.SELECT })
 
-    await queryInterface.bulkInsert('Likes', Array.from({ length: users.length *10 }, (_, i) => ({
-      user_id: users[i % users.length].id,
-      tweet_id: tweets[Math.floor(Math.random() * tweets.length)]?.id,
+    const evenUsers = []
+    const evenTweets = []
+    const likeRecords = []
+
+    users.forEach(user => {
+      if (user.id % 2 === 0 && user.role === 'user') { evenUsers.push(user) }
+    })
+    tweets.forEach(tweet => {
+      if (tweet.id % 2 === 0) { evenTweets.push(tweet) }
+    })
+    for (let user of evenUsers){
+      for (let tweet of evenTweets){
+        likeRecords.push({ userId: user.id, tweetId: tweet.id})
+      }
+    }
+
+    await queryInterface.bulkInsert('Likes', Array.from(likeRecords, value => ({
+      user_id: value.userId,
+      tweet_id: value.tweetId,
       created_at: new Date(),
       updated_at: new Date()
     })))},
