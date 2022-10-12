@@ -24,13 +24,13 @@ const adminController = {
       attributes: {
         include: [
           [sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships AS Followers WHERE following_id = user.id )'
+            '(SELECT COUNT(*) FROM Followships AS Followers WHERE following_id = User.id )'
           ), 'followerCounts'],
           [sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships AS Followings WHERE follower_id = user.id )'
+            '(SELECT COUNT(*) FROM Followships AS Followings WHERE follower_id = User.id )'
           ), 'followingCounts'],
           [sequelize.literal(
-            '(SELECT COUNT(*) FROM Tweets WHERE User_id = user.id)'
+            '(SELECT COUNT(*) FROM Tweets WHERE User_id = User.id)'
           ), 'tweetCounts'],
           [sequelize.literal(
             '(SELECT COUNT(*) FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweet_id WHERE Tweets.User_id = User.id)'
