@@ -94,11 +94,11 @@ const userServices = {
       .catch(err => cb(err))
   },
   putUserSetting: (req, cb) => {
-    const { name, account, email, password, checkPassword, introduction } = req.body
+    const { name, account, email, password, checkPassword } = req.body
     const UserId = getUser(req).dataValues.id
-    // 密碼輸入不一致 =>不能放，因為測試檔只會編輯name跟introduction
+    // 密碼輸入不一致
     if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
-    // 資料輸入不完整 =>不能放，因為測試檔只會編輯name跟introduction
+    // 資料輸入不完整
     if (!name || !account || !email || !password || !checkPassword) throw new Error('All fields are required.')
     return User.findByPk(UserId)
       .then(user => {
@@ -125,8 +125,7 @@ const userServices = {
                       name,
                       email,
                       account,
-                      password: hash,
-                      introduction
+                      password: hash
                     })
                   })
                   .then(updatedUser => cb(null, updatedUser))
@@ -142,8 +141,7 @@ const userServices = {
                 account,
                 name,
                 email,
-                password: hash,
-                introduction
+                password: hash
               })
             })
             .then(updatedUser => cb(null, updatedUser))
