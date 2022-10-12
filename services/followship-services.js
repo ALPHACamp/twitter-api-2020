@@ -1,5 +1,6 @@
 const { Followship, User, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
+const { Op } = require('sequelize')
 
 const followshipServices = {
   addFollowing: (req, cb) => {
@@ -43,7 +44,10 @@ const followshipServices = {
   },
   getTopFollowship: (req, cb) => {
     return User.findAll({
-      where: { role: 'user' },
+      where: {
+        role: 'user',
+        id: { [Op.not]: getUser(req).dataValues.id }
+      },
       attributes: {
         include: [[sequelize.literal('( SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followshipCount']]
       },
