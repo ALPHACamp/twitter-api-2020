@@ -5,7 +5,7 @@ const helpers = require('../../_helpers')
 const { userValidation } = require('../../helper/validations')
 const { multerFilesHandler } = require('../../helper/file-helper')
 const assert = require('assert')
-
+const sequelize = require('sequelize')
 const userController = {
   signUp: async (req, res, next) => {
     try {
@@ -126,6 +126,22 @@ const userController = {
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         ],
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+              ),
+              'likeCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+              ),
+              'replyCount'
+            ]
+          ]
+        },
         order: [['createdAt', 'DESC']]
       })
       assert(tweet.length > 0, '該使用者沒有推文')
