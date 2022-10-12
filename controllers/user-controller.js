@@ -258,7 +258,14 @@ const userController = {
   getTopUsers: (req, res, next) => {
     const getUser = helpers.getUser(req)
     return User.findAll({
-      include: [{ model: User, as: 'Followers' }]
+      include: [{ model: User, as: 'Followers' }],
+      attributes:
+        { exclude: ['createdAt', 'updatedAt'] },
+      where: {
+        account: {
+          [Op.notIn]: [getUser.account, 'root']
+        }
+      }
     })
       .then(users => {
         const topUsers = users.map(user => ({
@@ -274,6 +281,22 @@ const userController = {
         return res.status(200).json(topUsers)
       })
       .catch(error => next(error))
+  },
+  currentUser: (req, res, next) => {
+    try {
+      const { id, account, email, name, role } = helpers.getUser(req)
+      if (role === 'admin') throw new Error('此帳號不存在')
+      const currentUser = {
+        id, account, email, name, role
+      }
+
+      res.status(200).json({
+        status: 'success',
+        data: currentUser
+      })
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
