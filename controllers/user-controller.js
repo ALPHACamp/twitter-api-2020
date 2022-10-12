@@ -31,7 +31,6 @@ const userController = {
         email,
         role: 'user',
         password: hash,
-        introduction: '此人很神秘，什麼都沒有寫',
         profilePhoto: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
         coverPhoto: 'https://i.imgur.com/t0YRqQH.jpg'
       }))
