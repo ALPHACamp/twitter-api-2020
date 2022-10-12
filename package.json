@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node app.js",
+    "start:local":"cross-env NODE_ENV=development node app.js",
     "dev": "cross-env NODE_ENV=development nodemon app.js",
-    "test": "cross-env NODE_ENV=test mocha test --exit --recursive --timeout 5000"
+    "test": "mocha test --exit --recursive --timeout 5000",
+    "test:local" :"cross-env NODE_ENV=test mocha test --exit --recursive --timeout 5000"
   },
   "author": "",
   "license": "ISC",
