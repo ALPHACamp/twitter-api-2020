@@ -156,7 +156,7 @@ const userController = {
     try {
       const id = req.params.id
       const user = await User.findOne({
-        where: { id:id},
+        where: { id },
         include: [
           Tweet,
           { model: User, as: 'Followers'},
@@ -204,8 +204,9 @@ const userController = {
           return res.status(403).json({ status: 'error', message: '自我介紹長度不可超過160字' })
         }
         const { file } = req
-        return Promise.all([User.findByPk(req.params.id), imgurFileHandler(file)])
+      return Promise.all([User.findByPk(req.params.id), imgurFileHandler(file)])
           .then(([user, filePath]) => {
+            
             return user.update({
               name,
               introduction,
@@ -227,18 +228,18 @@ const userController = {
         const user = await User.findByPk(UserId)
 
         let tweets = await Tweet.findAll({
-          where: { id:UserId },
+          where: { UserId },
           include: [
             User,
             Like,
-            Reply,
-            { model: User, as:'LikedUsers' }
+            Reply
           ],
           order: [['createdAt','DESC']]
         })
         if(!user || user.role === 'admin') {
           return res.status(404).json({ status: 'error',message:'使用者不存在'})
         }
+        
         tweets = tweets.map(tweet => {
           return{
             id:tweet.id,
@@ -250,7 +251,7 @@ const userController = {
             createdAt:tweet.createdAt,
             likedCount:tweet.Likes.length,
             repliedCount:tweet.Replies.length,
-            isLike: tweet.LikeUsers.map(t =>t.id).includes(req.user.id)
+            isLike: tweet.Likes.map(t => t.id).includes(req.user.id)
           }
         })
         return res.status(200).json(tweets)
@@ -318,18 +319,19 @@ const userController = {
         const user = await User.findByPk(UserId)
 
         let replies = await Reply.findAll({
-          where: { id:UserId },
+          where: { UserId },
           include: [User, { model:Tweet, include:User}],
           order: [['createdAt','DESC']]
         })
         if (!user || user.role === 'admin') {
           return res.status(404).json({ status: 'error', message: '使用者不存在' })
         }
+    
         replies = replies.map(reply => {
           return {
             replyId: reply.id,
             replyUserId: reply.UserId,
-            replyComment: reply.comment,
+            comment: reply.comment,
             replyCreatedAt: reply.createdAt,
             replyAccount: reply.User.account,
             replyName: reply.User.name,
@@ -354,7 +356,7 @@ const userController = {
         const user = await User.findByPk(UserId)
 
         let likes = await Like.findAll({
-          where:{id:UserId},
+          where:{ UserId },
           include: [{
             model:Tweet,
             include: [{ model:User },{ model: Reply, include:[{ model:User}]}, Like]
@@ -368,7 +370,7 @@ const userController = {
           return {
             id: like.id,
             UserId: like.UserId,
-            tweetId: like.TweetId,
+            TweetId: like.TweetId,
             likeCreatedAt: like.createdAt,
             likedTweetUserId: like.Tweet.UserId,
             name: like.Tweet.User.name,
@@ -378,7 +380,7 @@ const userController = {
             tweetCreatedAt: like.Tweet.createdAt,
             likedCount: like.Tweet.Likes.length,
             repliedCount: like.Tweet.Replies.length,
-            isLike: like.Tweet.Likes.some((t) => t.UserId === req.user.id)
+            isLike: like.Tweet.Likes.some((t) => t.UserId === helpers.getUser(req).id)
           }
         })
         return res.status(200).json(likes)
@@ -386,7 +388,69 @@ const userController = {
       catch(err){
         next(err)
       }
-    }
+  },
+  addFollow: (req, res, next) => {
+    const { id } = req.body
+
+    Promise.all([
+      User.findByPk(id),
+      Followship.findOne({
+        where: {
+          followerId: helpers.getUser(req).id,
+          followingId: id
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+
+        if (!user) throw new Error('使用者不存在')
+
+        if (helpers.getUser(req).id === Number(id)) throw new Error('你無法追蹤自己')
+
+        if (followship) throw new Error('你已經追蹤此使用者')
+
+
+        return Followship.create({
+          followerId: helpers.getUser(req).id,
+          followingId: id
+        })
+
+      })
+      .then(data => res.status(200).json({
+        status: 'success',
+        message: '追蹤中',
+        data
+      }))
+      .catch(err => next(err))
+  },
+  removeFollow: (req, res, next) => {
+    const { followingId } = req.params
+
+    Promise.all([
+      User.findByPk(followingId),
+      Followship.findOne({
+        where: {
+          followerId: helpers.getUser(req).id,
+          followingId: followingId
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+
+        if (!user) throw new Error('使用者不存在')
+
+        if (!followship) throw new Error('你未追蹤此使用者')
+
+        return followship.destroy()
+
+      })
+      .then(data => res.status(200).json({
+        status: 'success',
+        message: '取消追蹤',
+        data
+      }))
+      .catch(err => next(err))
+  }
 }
 
 module.exports = userController
