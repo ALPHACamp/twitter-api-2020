@@ -73,7 +73,7 @@ const tweetController = {
           message: 'The tweet does not exist.'
         })
       }
-      res.status(200).json(replies)
+      return res.status(200).json(replies)
     } catch (err) {
       next(err)
     }

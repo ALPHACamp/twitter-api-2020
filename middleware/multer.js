@@ -7,7 +7,7 @@ const upload = multer({
     if (!file.originalname.match(/\.(jpg|jpeg|png|JPG|JPEG|PNG)$/)) {
       const err = new Error('Please upload an image.')
       err.status = 400
-      cb(err)
+      return cb(err)
     }
     cb(null, true)
   }
