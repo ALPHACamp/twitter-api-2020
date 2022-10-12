@@ -54,6 +54,7 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
+      const currentUserId = Number(helpers.getUser(req).id)
       const tweetId = req.params.tweet_id
       const [tweetData, likeData, replyData] = await Promise.all([
         Tweet.findByPk(tweetId, {
@@ -66,6 +67,7 @@ const tweetController = {
       ])
       tweetData.likeCount = likeData.length
       tweetData.replyCount = replyData.length
+      tweetData.isLike = likeData.some(like => like.UserId === currentUserId)
       return res.json(tweetData)
     } catch (error) {
       next(error)
