@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { Op } = require('sequelize')
 const { getUser } = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helper')
@@ -68,7 +68,11 @@ const userServices = {
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
         { model: Like, include: Tweet }
-      ]
+      ],
+      attributes: {
+        include: [[sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount']]
+      }
     })
       .then(user => {
         if (!user) {
