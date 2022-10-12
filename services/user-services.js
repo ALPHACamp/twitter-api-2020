@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { Op } = require('sequelize')
 const { getUser } = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helper')
@@ -68,7 +68,11 @@ const userServices = {
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
         { model: Like, include: Tweet }
-      ]
+      ],
+      attributes: {
+        include: [[sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount']]
+      }
     })
       .then(user => {
         if (!user) {
@@ -109,11 +113,21 @@ const userServices = {
   },
   getRepliedTweets: (req, cb) => {
     // tweetId, userId, repliedId 看見某使用者發過回覆的推文
+    // 新增按讚數+留言數+username
     return Promise.all([User.findByPk(req.params.id), Reply.findAll({
       where: {
         UserId: req.params.id
       },
-      include: Tweet,
+      include: [
+        Tweet,
+        { model: User, attributes: ['name', 'account', 'avatar'] }
+      ],
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'repliedCount']
+        ]
+      },
       raw: true,
       nest: true,
       order: [['createdAt', 'DESC']]
