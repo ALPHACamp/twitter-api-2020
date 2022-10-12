@@ -4,11 +4,10 @@ const { User, Tweet, Reply, Like } = require('../models')
 const sequelize = require('sequelize')
 const { Op } = require("sequelize");
 const helpers = require('../_helpers')
-const { validateData, validateId } = require('../vaildate-function')
+const { validateData } = require('../vaildate-function')
 
 const imgur = require('imgur')
 imgur.setClientId(process.env.IMGUR_CLIENT_ID)
-
 
 const userController = {
   signIn: (req, res, next) => {
@@ -63,7 +62,6 @@ const userController = {
 
     const data = validateData(req.body)
     const { account, name, email, password, checkPassword } = data
-
 
     return User.findAll({ where: { [Op.or]: [{ account }, { email }] } })
       .then(users => {

@@ -9,7 +9,6 @@ const followshipController = {
     const currentUser = Number(helpers.getUser(req).id)
 
     if (id === currentUser) throw new Error("You couldn't follow yourself")
-
     return User.findAll({
       where:
         { id: { [Op.in]: [id, currentUser] } }
@@ -41,7 +40,6 @@ const followshipController = {
       })
     }).then(deletedData => {
       if (!deletedData) throw new Error("you haven't follow this user")
-
       res.status(200).json({
         status: 'success',
         isFollowed: false,
