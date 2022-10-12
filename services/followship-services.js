@@ -4,13 +4,13 @@ const { getUser } = require('../_helpers')
 const followshipServices = {
   addFollowing: (req, cb) => {
     const currentUserId = getUser(req).dataValues.id
-    const userId = req.body.id
+    const followingId = req.body.id
     return Promise.all([
-      User.findByPk(userId),
+      User.findByPk(followingId),
       Followship.findOne({
         where: {
           followerId: currentUserId,
-          followingId: userId
+          followingId
         }
       })
     ])
@@ -21,7 +21,7 @@ const followshipServices = {
 
         return Followship.create({
           followerId: currentUserId,
-          followingId: userId
+          followingId
         })
       })
       .then(newFollowship => cb(null, newFollowship))
@@ -43,13 +43,27 @@ const followshipServices = {
   },
   getTopFollowship: (req, cb) => {
     return User.findAll({
+      where: { role: 'user' },
       attributes: {
         include: [[sequelize.literal('( SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followshipCount']]
       },
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: ['id', 'name']
+      }],
       order: [[sequelize.literal('followshipCount'), 'Desc']],
       limit: 10
     })
-      .then(users => cb(null, users))
+      .then(users => {
+        const userData = users
+          .map(users => {
+            const { Followers, ...data } = users.toJSON()
+            data.isFollowed = Followers.some(i => i.id === getUser(req).dataValues.id)
+            return data
+          })
+        return cb(null, userData)
+      })
       .catch(err => cb(err))
   }
 }
