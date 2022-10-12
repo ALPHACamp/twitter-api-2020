@@ -24,7 +24,9 @@ const tweetServices = {
   getTweet: (req, cb) => {
     return Tweet.findByPk(req.params.id, {
       include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Like, include: User },
+        { model: Reply, include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] } }
       ],
       attributes: {
         include: [
