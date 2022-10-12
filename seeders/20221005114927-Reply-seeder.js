@@ -1,4 +1,3 @@
-
 'use strict'
 
 const faker = require('faker')
@@ -19,11 +18,9 @@ module.exports = {
 
       await queryInterface.bulkInsert('Replies', replyGenerate(user, tweet, 3))
     } catch (error) {
-
       console.log(error)
     }
   },
-
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Replies', {})
@@ -44,7 +41,7 @@ function replyGenerate (user, tweet, NumberOfReplyPerTweet) {
         TweetId: tweet[i].id,
         comment: faker.lorem.text(),
         createdAt: dayJs
-          .between('2022-10-05', '2022-11-05')
+          .between('2022-10-01', '2022-10-10')
           .format('YYYY-MM-DD HH:MM:ss'),
         updatedAt: new Date()
       })
