@@ -222,11 +222,10 @@ const userController = {
         })
 
       })
-      .then(data =>
+      .then(() =>
         res.status(200).json({
           status: 'success',
-          message: '個人資料更新成功',
-          data
+          message: '個人資料更新成功'
         })
       )
       .catch(err => next(err))
