@@ -65,7 +65,7 @@ const userController = {
   getUserProfile: (req, res, next) => {
     const currentUser = helpers.getUser(req)?.id
     const id = Number(req.params.id)
-    return User.findByPk(id, {
+    User.findByPk(id, {
       attributes: {
         include: [[
           sequelize.literal(
@@ -85,7 +85,7 @@ const userController = {
           ...user.toJSON(),
           isFollowed: user.Followers.some(user => user.id === currentUser)
         }
-        return res.json({ ...data })
+        res.json({ ...data })
       })
       .catch(err => {
         console.log(err)
@@ -235,7 +235,7 @@ const userController = {
     const currentUser = helpers.getUser(req)?.id
     const UserId = req.params.id
 
-    return Like.findAll({
+    Like.findAll({
       where: { UserId },
       include: [{
         model: Tweet,
@@ -265,7 +265,7 @@ const userController = {
             data.TweetId = likes.Tweet.toJSON().id
             return data
           })
-        return res.json(result)
+        res.json(result)
       })
       .catch(err => {
         console.log(err)

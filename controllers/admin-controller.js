@@ -20,7 +20,7 @@ const adminController = {
     }
   },
   getUsers: (req, res, next) => {
-    return User.findAll({
+    User.findAll({
       attributes: {
         include: [
           [sequelize.literal(
@@ -43,7 +43,7 @@ const adminController = {
         [sequelize.literal('likeCounts'), 'DESC']]
     })
       .then(users => {
-        return res.json(users)
+        res.json(users)
       })
       .catch(err => {
         console.log(err)
