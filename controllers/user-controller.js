@@ -13,6 +13,9 @@ const userController = {
   getUser: (req, res, next) => {
     return userServices.getUser(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
+  putUserSetting: (req, res, next) => {
+    return userServices.putUserSetting(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
   putUser: (req, res, next) => {
     return userServices.putUser(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },

@@ -10,6 +10,7 @@ const followshipController = require('../../controllers/followship-controller')
 const { authenticated, authenticatedUser } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const upload = require('../../middleware/multer')
+const { uploadFileHandler } = require('../../middleware/upload-handler')
 // Admin
 router.use('/admin', admin)
 
@@ -19,8 +20,9 @@ router.get('/users/:id/tweets', authenticated, authenticatedUser, userController
 router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getLikes)
 router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getFollowers)
+router.put('/users/:id/account', authenticated, authenticatedUser, userController.putUserSetting) // 帳戶設定
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
-router.put('/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'coverPhoto', maxCount: 1 }]), userController.putUser)
+router.put('/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'coverPhoto', maxCount: 1 }]), uploadFileHandler, userController.putUser)
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/users', userController.signUp)
 
