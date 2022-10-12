@@ -162,8 +162,6 @@ const userServices = {
     ])
       .then(([user, avatarFilePath, coverPhotoFilePath]) => {
         if (!user) throw new Error("User didn't exist.")
-        console.log('avatarFilePath', avatarFilePath)
-        console.log('coverPhotoFilePath', coverPhotoFilePath)
         return user.update({
           name: name || user.name,
           introduction: introduction || user.introduction,
