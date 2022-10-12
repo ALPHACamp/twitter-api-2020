@@ -150,33 +150,32 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
-  // putUserProfile: (req, cb) => {
-  // const { account, name, email, password, introduction } = req.body
-  //   // 找到圖檔的path
-  //   const avatarUploaded = req.files?.avatar[0]
-  //   const coverPhotoUploaded = req.files?.coverPhoto[0]
-  //   return Promise.all([
-  //     User.findByPk(req.params.id),
-  //     imgurFileHandler(avatarUploaded), // 上傳至imgur
-  //     imgurFileHandler(coverPhotoUploaded)
-  //   ])
-  //     .then(([user, avatarFilePath, coverPhotoFilePath]) => {
-  //       if (!user) throw new Error("User didn't exist.")
-  //       return user.update({
-  //         account: account || user.account,
-  //         name: name || user.name,
-  //         email: email || user.email,
-  //         password: password || user.password,
-  //         introduction: introduction || user.introduction,
-  //         avatar: avatarFilePath || user.avatar,
-  //         coverPhoto: coverPhotoFilePath || user.coverPhoto
-  //       })
-  //     })
-  //     .then(user => {
-  //       return cb(null, user)
-  //     })
-  //     .catch(err => cb(err))
-  // },
+  putUser: (req, cb) => {
+    const { name, introduction } = req.body
+    // 找到圖檔的path
+    const avatarUploaded = req.body.avatar
+    const coverPhotoUploaded = req.body.coverPhoto
+    return Promise.all([
+      User.findByPk(req.params.id),
+      imgurFileHandler(avatarUploaded), // 上傳至imgur
+      imgurFileHandler(coverPhotoUploaded)
+    ])
+      .then(([user, avatarFilePath, coverPhotoFilePath]) => {
+        if (!user) throw new Error("User didn't exist.")
+        console.log('avatarFilePath', avatarFilePath)
+        console.log('coverPhotoFilePath', coverPhotoFilePath)
+        return user.update({
+          name: name || user.name,
+          introduction: introduction || user.introduction,
+          avatar: avatarFilePath || user.avatar,
+          coverPhoto: coverPhotoFilePath || user.coverPhoto
+        })
+      })
+      .then(user => {
+        return cb(null, user)
+      })
+      .catch(err => cb(err))
+  },
   getRepliedTweets: (req, cb) => {
     // tweetId, userId, repliedId 看見某使用者發過回覆的推文
     // 新增按讚數+留言數+username
