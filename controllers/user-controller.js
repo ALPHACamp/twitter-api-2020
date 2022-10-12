@@ -132,17 +132,13 @@ const userController = {
           message: 'Introduction must be less than 160 characters long.'
         })
       }
+      // create the update option
+      const option = { name, introduction }
+      if (files?.avatar) option.avatar = await imgurFileHandler(files.avatar[0])
+      if (files?.cover) option.cover = await imgurFileHandler(files.cover[0])
 
       const user = await User.findByPk(reqUserId)
-      const avatarPath = files?.avatar ? await imgurFileHandler(files.avatar[0]) : user.avatar
-      const coverPath = files?.cover ? await imgurFileHandler(files.cover[0]) : user.cover
-
-      await user.update({
-        name,
-        introduction,
-        avatar: avatarPath,
-        cover: coverPath
-      })
+      await user.update(option)
       return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
@@ -171,21 +167,18 @@ const userController = {
           message: 'The password confirmation does not match.'
         })
       }
-
-      const user = await User.findByPk(reqUserId)
-      if (email !== user.email && !validator.isEmail(email)) {
+      if (!validator.isEmail(email)) {
         return res.status(422).json({
           status: 'error',
           message: 'Email address is invalid.'
         })
       }
+      // create the update option
+      const option = { account, name, email }
+      if (password) option.password = bcrypt.hashSync(password, 10)
 
-      await user.update({
-        account,
-        name,
-        email,
-        password: password ? bcrypt.hashSync(password, 10) : user.password
-      })
+      const user = await User.findByPk(reqUserId)
+      await user.update(option)
       return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
