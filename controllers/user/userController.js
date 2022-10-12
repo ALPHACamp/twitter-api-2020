@@ -116,6 +116,7 @@ const userController = {
     }
   }, // 獲取某使用者發過的推文
   getUserTweets: async (req, res, next) => {
+    const currentUser = helpers.getUser(req).id
     const userId = req.params.id
     try {
       assert(await User.findByPk(userId), '使用者不存在')
@@ -143,6 +144,14 @@ const userController = {
           ]
         },
         order: [['createdAt', 'DESC']]
+      })
+      const userLikeList = await Like.findAll({
+        raw: true,
+        where: { UserId: currentUser },
+        attributes: ['TweetId']
+      })
+      tweet.forEach((tweet) => {
+        tweet.isLike = userLikeList.some((like) => like.TweetId === tweet.id)
       })
       assert(tweet.length > 0, '該使用者沒有推文')
       res.json(tweet)
@@ -176,7 +185,14 @@ const userController = {
       const liked = await Like.findAll({
         raw: true,
         nest: true,
-        include: [Tweet],
+        include: [
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+            ]
+          }
+        ],
         where: { userId },
         order: [['createdAt', 'DESC']]
       })
