@@ -4,8 +4,11 @@ const { User, Tweet, Reply, Like } = require('../models')
 const sequelize = require('sequelize')
 const { Op } = require("sequelize");
 const helpers = require('../_helpers')
+const { validateData, validateId } = require('../vaildate-function')
+
 const imgur = require('imgur')
 imgur.setClientId(process.env.IMGUR_CLIENT_ID)
+
 
 const userController = {
   signIn: (req, res, next) => {
@@ -17,7 +20,6 @@ const userController = {
         if (!user) throw new Error('帳號不存在！')
         if (user.role === 'admin') throw new Error('帳號不存在！')
         if (!bcrypt.compareSync(password, user.password)) throw new Error('incorrect account or password!')
-        console.log('使用者', user)
         const userData = user.toJSON()
         delete userData.password
         const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -32,10 +34,8 @@ const userController = {
       .catch(err => next(err))
   },
   postUser: (req, res, next) => {
-    const { account, name, email, password, checkPassword } = req.body
-    if (!account || !name || !email || !password || !checkPassword) throw new Error('all fields are required')
-
-    if (password !== checkPassword) throw new Error('Two password need to be same.')
+    const userData = validateData(req.body)
+    const { account, name, email, password } = userData
 
     return Promise.all([User.findOne({ where: { account } }), User.findOne({ where: { email } })])
       .then(([accountUsed, emailUsed]) => {
@@ -58,18 +58,18 @@ const userController = {
   },
   putUserAccount: (req, res, next) => {
     const { id } = req.params
-    const currentUser = String(helpers.getUser(req).id)
-    if (id !== currentUser) throw new Error('permission denied')
+    const currentUser = (helpers.getUser(req).id)
+    if (id !== String(currentUser)) throw new Error('permission denied')
 
-    const { account, name, email, password, checkPassword } = req.body
+    const data = validateData(req.body)
+    const { account, name, email, password, checkPassword } = data
 
-    if (!account || !name || !email || !password || !checkPassword) throw new Error('all fields are required')
-    if (password !== checkPassword) throw new Error('Two password need to be same.')
 
     return User.findAll({ where: { [Op.or]: [{ account }, { email }] } })
       .then(users => {
         users.map(user => {
-          if (user.account === account) throw new Error('account 已重複註冊！')
+          if (user.id === currentUser) return 
+          if (user.account === account ) throw new Error('account 已重複註冊！')
           if (user.email === email) throw new Error('email 已重複註冊！')
         })
 
@@ -113,10 +113,10 @@ const userController = {
         if (!user) throw new Error('帳號不存在！')
         user = {
           ...user.toJSON(),
-          tweetCount: user.Tweets.length,
-          followerCount: user.Followers.length,
-          followingCount: user.Followings.length,
-          isFollowed: user.Followers.some(u => u.id === currentUser.id)
+          tweetCount: user.Tweets?.length,
+          followerCount: user.Followers?.length,
+          followingCount: user.Followings?.length,
+          isFollowed: user.Followers?.some(u => u.id === currentUser.id)
         }
 
         delete user.password
@@ -128,6 +128,11 @@ const userController = {
   },
   getUserTweets: (req, res, next) => {
     const UserId = req.params.id
+    User.findByPk(UserId)
+      .then(user => {
+        if (!user) throw new Error('user does not exist')
+      }).catch(err => next(err))
+
     return Tweet.findAll({
       where: { UserId },
       attributes: ['id', 'description', 'createdAt'],
@@ -138,9 +143,9 @@ const userController = {
         const currentUser = helpers.getUser(req)
         tweets.forEach(tweet => {
           tweet = tweet.dataValues
-          tweet.replyCounts = tweet.Replies.length,
-            tweet.likeCounts = tweet.Likes.length,
-            tweet.isLiked = tweet.Likes.some(l => l.UserId === currentUser.id)
+          tweet.replyCounts = tweet.Replies?.length,
+            tweet.likeCounts = tweet.Likes?.length,
+            tweet.isLiked = tweet.Likes?.some(l => l.UserId === currentUser.id)
           delete tweet.Replies
           delete tweet.Likes
         })
@@ -149,6 +154,11 @@ const userController = {
   },
   getUserReplies: (req, res, next) => {
     const UserId = req.params.id
+    User.findByPk(UserId)
+      .then(user => {
+        if (!user) throw new Error('user does not exist')
+      })
+
     return Reply.findAll({
       where: { UserId },
       order: [['createdAt', 'DESC']],
@@ -159,7 +169,7 @@ const userController = {
         console.log(replies)
         replies.forEach(reply => {
           reply = reply.dataValues
-          reply.tweetAuthorAccount = reply.Tweet.tweetAuthor.account
+          reply.tweetAuthorAccount = reply.Tweet?.tweetAuthor?.account
           delete reply.Tweet.dataValues.tweetAuthor
         })
         res.status(200).json(replies)
@@ -167,6 +177,11 @@ const userController = {
   },
   getUserLikes: (req, res, next) => {
     const UserId = req.params.id
+     User.findByPk(UserId)
+      .then(user => {
+        if (!user) throw new Error('user does not exist')
+      }).catch(err => next(err))
+
     return Like.findAll({
       where: { UserId },
       order: [['createdAt', 'DESC']],
@@ -190,9 +205,9 @@ const userController = {
         }))
         likes.forEach(like => {
           console.log(like)
-          like.replyCounts = like.Tweet.Replies.length,
-          like.likeCounts = like.Tweet.Likes.length,
-          like.isLiked = like.Tweet.Likes.map(u => u.UserId).includes(currentUser.id)
+          like.replyCounts = like.Tweet?.Replies?.length,
+            like.likeCounts = like.Tweet?.Likes?.length,
+            like.isLiked = like.Tweet?.Likes.includes(currentUser.id)
           delete like.Tweet.Replies
           delete like.Tweet.Likes
         })
@@ -223,6 +238,8 @@ const userController = {
         [[sequelize.col('Followers.created_at', 'DESC')]]
     })
       .then(user => {
+        if (!user) throw new Error('user does not exist')
+
         const userFollowings = helpers.getUser(req).Followings.map(user => user.id)
         const followers = user.toJSON().Followers
 
@@ -256,13 +273,14 @@ const userController = {
         [[sequelize.col('Followings.created_at', 'DESC')]]
     })
       .then(user => {
+        if (!user) throw new Error('user does not exist')
         const userFollowings = helpers.getUser(req).Followings.map(user => user.id)
 
         const followings = user.toJSON().Followings
 
         followings.forEach(data => {
-          data.followingId = data.Followship.followingId
-          data.isFollowed = userFollowings.some(id => id === data.id)
+          data.followingId = data.Followship?.followingId
+          data.isFollowed = userFollowings?.some(id => id === data.id)
           delete data.Followship
         })
         res.status(200).json(followings)
@@ -282,29 +300,28 @@ const userController = {
 
     })
       .then(users => {
-        populatUser = users.map(user => {
+        popularUser = users.map(user => {
           user = user.dataValues
-          user.followerCounts = user.Followers.length
-          user.isFollowed = user.Followers.some(u => u.id === currentUser)
+          user.followerCounts = user.Followers?.length
+          user.isFollowed = user.Followers?.some(u => u.id === currentUser)
           delete user.Followers
           return user
         })
-        populatUser.sort((a, b) => b.followerCounts - a.followerCounts).slice(0,10)
+        popularUser.sort((a, b) => b.followerCounts - a.followerCounts).slice(0, 10)
 
-        res.status(200).json(populatUser)
+        res.status(200).json(popularUser)
       }).catch(err => next(err))
   },
   putUser: (req, res, next) => {
 
     const id = Number(req.params.id)
     const currentUser = helpers.getUser(req).id
-  
+
     if (id !== currentUser) throw new Error('permission denied')
+    const data = validateData(req.body)
+    const { name, introduction } = data
 
-    const { name, introduction } = req.body
-    if (!name) throw new Error ('name is required!')
     const { files } = req
-
     if (!files) {
       return User.update({ name, introduction }, { where: { id } })
         .then(user => {
@@ -312,7 +329,6 @@ const userController = {
         })
         .catch(err => next(err))
     }
-
 
     const uploadFiles = {}
 
@@ -339,7 +355,7 @@ const userController = {
       ))
       .catch(err => next(err))
   },
-  getCurrentUser: (req, res, next) => {
+  getCurrentUser: (req, res) => {
     const currentUser = helpers.getUser(req).toJSON()
     delete currentUser.password
     delete currentUser.Followings
@@ -347,9 +363,5 @@ const userController = {
   }
 
 }
-
-
-
-
 
 module.exports = userController
