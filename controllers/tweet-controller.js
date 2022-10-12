@@ -181,7 +181,8 @@ const tweetController = {
     const targetTweetId = req.params.id
     const replierId = req.user.dataValues.id
     if (!comment) throw new Error('Comment text is required!')
-    return Promise.allSettled([
+    if (comment.length > 140) throw new Error('回覆不可超過 140 字元')
+    return Promise.all([
       Tweet.findByPk(targetTweetId),
       User.findByPk(replierId)
     ])
