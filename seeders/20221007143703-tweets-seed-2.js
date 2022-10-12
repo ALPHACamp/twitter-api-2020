@@ -6,6 +6,7 @@ module.exports = {
       'SELECT id FROM Users;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
+
     await queryInterface.bulkInsert('Tweets',[{
       user_id: users[ users.length - 1 ].id,
       description: '這是種子檔產生的，用以凸顯時間順序的假文，來自未來的文章。',
