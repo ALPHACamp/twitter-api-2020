@@ -83,7 +83,7 @@ const adminController = {
   })
     .catch(err => next(err))
   },
-  adminSignin: (req, res, next) => {
+  adminSignIn: (req, res, next) => {
     // POST /api/admin/signin - 管理者登入
     const { account, password } = req.body
     if (!account || !password) throw new Error('account and password are required!')
