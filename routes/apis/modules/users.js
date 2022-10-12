@@ -19,7 +19,7 @@ router.put('/:id', upload.fields([
   { name: 'profilePhoto', maxCount: 1 },
   { name: 'coverPhoto', maxCount: 1 }
 ]), authenticated, authenticatedUser, userController.putUserProfile) // 更新使用者資料
-router.get('/', authenticated, authenticatedUser, userController.getCurrentUser)
+router.get('/', authenticated, userController.getCurrentUser)
 router.post('/', userController.signUp) // 使用者註冊
 
 module.exports = router
