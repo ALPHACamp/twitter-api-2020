@@ -87,7 +87,10 @@ const userController = {
         }
         return res.json({ ...data })
       })
-      .catch(err => next(err))
+      .catch(err => {
+        console.log(err)
+        next(err)
+      })
   },
   putUserProfile: (req, res, next) => {
     const id = Number(req.params.id)
@@ -264,7 +267,10 @@ const userController = {
           })
         return res.json(result)
       })
-      .catch(err => next(err))
+      .catch(err => {
+        console.log(err)
+        next(err)
+      })
   },
   getUserFollowings: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id

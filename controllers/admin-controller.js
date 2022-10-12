@@ -45,7 +45,10 @@ const adminController = {
       .then(users => {
         return res.json(users)
       })
-      .catch(err => next(err))
+      .catch(err => {
+        console.log(err)
+        next(err)
+      })
   },
   deleteTweet: (req, res, next) => {
     const TweetId = req.params.id
