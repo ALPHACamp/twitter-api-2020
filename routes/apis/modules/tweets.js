@@ -1,13 +1,13 @@
 const express = require('express')
 const router = express.Router()
 const tweetController = require('../../../controllers/tweet-controller')
-const { authenticateUser } = require('../../../middleware/auth')
 
-router.get('/:tweet_id/replies', authenticateUser, tweetController.getReplies)
-router.post('/:tweet_id/replies', authenticateUser, tweetController.addReply)
-router.post('/:id/unlike', authenticateUser, tweetController.unlikeTweet)
-router.post('/:id/like', authenticateUser, tweetController.likeTweet)
-router.get('/:id', authenticateUser, tweetController.getTweet)
-router.post('/', authenticateUser,tweetController.addTweet)
+router.get('/:tweet_id/replies', tweetController.getReplies)
+router.post('/:tweet_id/replies', tweetController.addReply)
+router.post('/:id/unlike', tweetController.unlikeTweet)
+router.post('/:id/like', tweetController.likeTweet)
+router.get('/:id', tweetController.getTweet)
+router.post('/', tweetController.addTweet)
 router.get('/', tweetController.getTweets)
+
 module.exports = router
