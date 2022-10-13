@@ -72,6 +72,12 @@ const userController = {
                   '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
                 ),
                 'FollowingCount'
+              ],
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'
+                ),
+                'TweetCount'
               ]
             ]
           }
@@ -195,7 +201,14 @@ const userController = {
         nest: true,
         where: { userId },
         include: [
-          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: ['id'],
+            include: [
+              { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+            ]
+          }
         ],
         order: [['createdAt', 'DESC']]
       })
