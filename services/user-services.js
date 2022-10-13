@@ -88,7 +88,8 @@ const userServices = {
     return User.findByPk(req.params.id, {
       include: [
         Tweet,
-        { model: User, as: 'Followers' }
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
       ],
       attributes: {
         include: [[sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
@@ -97,7 +98,7 @@ const userServices = {
     })
       .then(user => {
         if (!user) throw new Error("User didn't exist!")
-        const { Followers, ...userData } = {
+        const { ...userData } = {
           ...user.toJSON(),
           isFollowed: user.Followers.some(user => user.id === getUser(req).dataValues.id)
         }
