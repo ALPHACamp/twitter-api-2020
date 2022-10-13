@@ -72,6 +72,12 @@ const userController = {
                   '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
                 ),
                 'FollowingCount'
+              ],
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'
+                ),
+                'TweetCount'
               ]
             ]
           }
