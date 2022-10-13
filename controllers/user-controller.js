@@ -86,10 +86,6 @@ const userController = {
       name: req.user.name,
       account: req.user.account,
       email: req.user.email,
-      avatar: req.user.avatar,
-      role: req.user.role,
-      cover: req.user.cover,
-      introduction: req.user.introduction
     })
   },
   editCurrentUser: async (req, res, next) => {
