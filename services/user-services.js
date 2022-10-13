@@ -73,10 +73,8 @@ const userServices = {
     return User.findByPk(req.params.id, {
       include: [
         Tweet,
-        { model: Reply, include: Tweet },
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' },
-        { model: Like, include: Tweet }
+        { model: User, as: 'Followings' }
       ],
       attributes: {
         include: [[sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
@@ -98,7 +96,7 @@ const userServices = {
     const UserId = getUser(req).dataValues.id
     if (Number(req.params.id) !== Number(UserId)) throw new Error('Not authorized to edit.')
     // 密碼輸入不一致
-    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
+    if (password !== checkPassword) throw new Error('Passwords do not match!')
     // 資料輸入不完整
     if (!name || !account || !email || !password || !checkPassword) throw new Error('All fields are required.')
     return User.findByPk(UserId)
@@ -186,18 +184,16 @@ const userServices = {
       },
       include: [
         Tweet,
-        { model: User, attributes: ['name', 'account', 'avatar'] }
+        { model: User, attributes: ['name', 'avatar', 'account', 'id'] }
       ],
-      attributes: {
-        include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'repliedCount']
-        ]
-      },
-      raw: true,
-      nest: true,
-      order: [['createdAt', 'DESC']]
-    })])
+      attributes: [
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'repliedCount']
+      ],
+      order: [['createdAt', 'DESC']],
+      nest: true
+    })
+    ])
       .then(([user, replies]) => {
         if (!user) throw new Error("User didn't exist.")
         return cb(null, replies)
