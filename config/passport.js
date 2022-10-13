@@ -1,6 +1,5 @@
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-}
+require('dotenv').config()
+
 const passport = require('passport')
 const bcrypt = require('bcryptjs')
 const { User } = require('../models')
@@ -31,7 +30,7 @@ passport.use(new LocalStrategy({
 // set jwt options
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: 'secretKey'
+  secretOrKey: process.env.JWT_SECRET
 }
 // check token
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
