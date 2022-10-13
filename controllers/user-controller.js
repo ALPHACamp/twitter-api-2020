@@ -193,17 +193,16 @@ const userController = {
     try {
       let users = await User.findAll({
         where: { role: 'user' },
-        include: [
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
-        ],
-        attributes: {
-          include: [[
+        include: { model: User, as: 'Followers' },
+        attributes:[
+          'id', 'name', 'account', 'avatar',
+          [
             sequelize.literal(
-              '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followCount'
-          ]]
-        },
-        order: [[sequelize.literal('followCount'), 'DESC']],
+              `(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)`
+            ),
+            'followersCount'
+          ]],
+        order: [[sequelize.literal('followersCount'), 'DESC']],
         limit: 10
       })
       users = users.map(user => ({
@@ -214,7 +213,7 @@ const userController = {
         followerCount: user.Followers.length,
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
-      return res.status(200), json(users)
+      return res.status(200).json(users)
     }
     catch (error) {
       next(error)

@@ -22,7 +22,7 @@ router.post('/users/signin', passport.authenticate('local', { session: false, fa
 router.post('/followships', authenticated, authenticateUser, tweetController.addFollow)
 router.delete('/followships/:followingId', authenticated, authenticateUser, tweetController.removeFollow)
 
-router.get('/users',authenticated,userController.getTopUsers)
+router.get('/users/:id/top_followers',authenticated,userController.getTopUsers)
 router.get('/current_user', authenticated, userController.getCurrentUser)
 router.put('/current_user/:id', authenticated, userController.editCurrentUser)
 
