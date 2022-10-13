@@ -4,21 +4,19 @@ const { User, Tweet, Reply, Like } = require('../models')
 const sequelize = require('sequelize')
 const { Op } = require("sequelize");
 const helpers = require('../_helpers')
-const { validateData } = require('../vaildate-function')
+const { validateData, validateUser, validateUnique } = require('../vaildate-function')
 
 const imgur = require('imgur')
 imgur.setClientId(process.env.IMGUR_CLIENT_ID)
 
 const userController = {
   signIn: (req, res, next) => {
-    const { account, password } = req.body
-    if (!account || !password) throw new Error('account and password are required!')
+    const { account, password } = validateData(req.body)
 
     return User.findOne({ where: { account } })
       .then(user => {
-        if (!user) throw new Error('帳號不存在！')
-        if (user.role === 'admin') throw new Error('帳號不存在！')
-        if (!bcrypt.compareSync(password, user.password)) throw new Error('incorrect account or password!')
+        validateUser(user, password)
+
         const userData = user.toJSON()
         delete userData.password
         const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -33,13 +31,16 @@ const userController = {
       .catch(err => next(err))
   },
   postUser: (req, res, next) => {
-    const userData = validateData(req.body)
-    const { account, name, email, password } = userData
+    const { account, name, email, password } = validateData(req.body)
 
-    return Promise.all([User.findOne({ where: { account } }), User.findOne({ where: { email } })])
-      .then(([accountUsed, emailUsed]) => {
-        if (accountUsed) throw new Error('account 已重複註冊！')
-        if (emailUsed) throw new Error('email 已重複註冊！')
+    return User.findAll({ where: 
+  { [Op.or]: [{ account }, { email }] } })
+      .then(users => {
+        const UniqueData = {
+          account,
+          email
+        }
+        validateUnique(users, UniqueData)
 
         return User.create({
           account,
@@ -47,6 +48,7 @@ const userController = {
           email,
           password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
         })
+
       })
       .then(user => res.status(200).json({
         status: 'success',
@@ -57,19 +59,21 @@ const userController = {
   },
   putUserAccount: (req, res, next) => {
     const { id } = req.params
-    const currentUser = (helpers.getUser(req).id)
+    const currentUser = helpers.getUser(req).id
     if (id !== String(currentUser)) throw new Error('permission denied')
 
-    const data = validateData(req.body)
-    const { account, name, email, password, checkPassword } = data
+    const { account, name, email, password } = validateData(req.body)
 
     return User.findAll({ where: { [Op.or]: [{ account }, { email }] } })
       .then(users => {
-        users.map(user => {
-          if (user.id === currentUser) return 
-          if (user.account === account ) throw new Error('account 已重複註冊！')
-          if (user.email === email) throw new Error('email 已重複註冊！')
-        })
+
+        const Unique = {
+          currentUser,
+          account,
+          email
+        }
+        console.log(Unique)
+        validateUnique(users, Unique)
 
         return User.update({
           account,
@@ -87,7 +91,6 @@ const userController = {
   },
   getUser: (req, res, next) => {
     const currentUser = helpers.getUser(req).dataValues
-    console.log(currentUser)
     const { id } = req.params
     return User.findByPk(id, {
       include:
@@ -108,7 +111,7 @@ const userController = {
         ]
     })
       .then(user => {
-        if (!user) throw new Error('帳號不存在！')
+        validateUser(user)
         user = {
           ...user.toJSON(),
           tweetCount: user.Tweets?.length,
@@ -128,7 +131,7 @@ const userController = {
     const UserId = req.params.id
     User.findByPk(UserId)
       .then(user => {
-        if (!user) throw new Error('user does not exist')
+        validateUser(user)
       }).catch(err => next(err))
 
     return Tweet.findAll({
@@ -152,10 +155,11 @@ const userController = {
   },
   getUserReplies: (req, res, next) => {
     const UserId = req.params.id
+
     User.findByPk(UserId)
       .then(user => {
-        if (!user) throw new Error('user does not exist')
-      })
+        validateUser(user)
+      }).catch(err => next(err))
 
     return Reply.findAll({
       where: { UserId },
@@ -164,7 +168,6 @@ const userController = {
       { model: Tweet, attributes: ['id', 'description'], include: [{ model: User, attributes: ['id', 'account'], as: 'tweetAuthor' }] }]
     })
       .then(replies => {
-        console.log(replies)
         replies.forEach(reply => {
           reply = reply.dataValues
           reply.tweetAuthorAccount = reply.Tweet?.tweetAuthor?.account
@@ -175,9 +178,9 @@ const userController = {
   },
   getUserLikes: (req, res, next) => {
     const UserId = req.params.id
-     User.findByPk(UserId)
+    User.findByPk(UserId)
       .then(user => {
-        if (!user) throw new Error('user does not exist')
+        validateUser(user)
       }).catch(err => next(err))
 
     return Like.findAll({
@@ -198,17 +201,17 @@ const userController = {
     })
       .then(likes => {
         const currentUser = helpers.getUser(req)
-        likes = likes.map(like => ({
-          ...like.toJSON(),
-        }))
-        likes.forEach(like => {
-          console.log(like)
+
+        likes = likes.map(like => {
+          like = like.toJSON()
           like.replyCounts = like.Tweet?.Replies?.length,
             like.likeCounts = like.Tweet?.Likes?.length,
-            like.isLiked = like.Tweet?.Likes.includes(currentUser.id)
+            like.isLiked = like.Tweet?.Likes.some(l => l.UserId === currentUser.id)
           delete like.Tweet.Replies
           delete like.Tweet.Likes
+          return like
         })
+
         return res.status(200).json(likes)
       })
       .catch(err => next(err))
@@ -235,7 +238,7 @@ const userController = {
         [[sequelize.col('Followers.created_at', 'DESC')]]
     })
       .then(user => {
-        if (!user) throw new Error('user does not exist')
+        validateUser(user)
 
         const userFollowings = helpers.getUser(req).Followings.map(user => user.id)
         const followers = user.toJSON().Followers
@@ -270,7 +273,8 @@ const userController = {
         [[sequelize.col('Followings.created_at', 'DESC')]]
     })
       .then(user => {
-        if (!user) throw new Error('user does not exist')
+        validateUser(user)
+
         const userFollowings = helpers.getUser(req).Followings.map(user => user.id)
 
         const followings = user.toJSON().Followings
@@ -284,7 +288,7 @@ const userController = {
       }).catch(err => next(err))
   },
   getPopularUsers: (req, res, next) => {
-    const currentUser = helpers.getUser(req).id
+    const currentUser = helpers.getUser(req)
     return User.findAll({
       include: {
         model: User, as: 'Followers', attributes: ['id']
@@ -298,9 +302,9 @@ const userController = {
     })
       .then(users => {
         popularUser = users.map(user => {
-          user = user.dataValues
+          user = user.toJSON()
           user.followerCounts = user.Followers?.length
-          user.isFollowed = user.Followers?.some(u => u.id === currentUser)
+          user.isFollowed = user.Followers?.some(u => u.id === currentUser.id)
           delete user.Followers
           return user
         })
@@ -315,8 +319,7 @@ const userController = {
     const currentUser = helpers.getUser(req).id
 
     if (id !== currentUser) throw new Error('permission denied')
-    const data = validateData(req.body)
-    const { name, introduction } = data
+    const { name, introduction } = validateData(req.body)
 
     const { files } = req
     if (!files) {
@@ -340,7 +343,7 @@ const userController = {
         return User.findByPk(id)
       })
       .then((user) => {
-        if (!user) throw new Error('user not exist')
+        validateUser(user)
         return user.update({
           name,
           introduction,

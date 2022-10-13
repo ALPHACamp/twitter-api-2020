@@ -1,14 +1,14 @@
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Followship } = require('../models')
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
 const { Op } = require("sequelize");
 
 const followshipController = {
   postFollow: (req, res, next) => {
-    const id = Number(req.body.id)
-    const currentUser = Number(helpers.getUser(req).id)
-
+    const id = req.body.id
+    const currentUser = String(helpers.getUser(req).id)
     if (id === currentUser) throw new Error("You couldn't follow yourself")
+
     return User.findAll({
       where:
         { id: { [Op.in]: [id, currentUser] } }
@@ -26,8 +26,8 @@ const followshipController = {
       }).catch(err => next(err))
   },
   deleteFollow: (req, res, next) => {
-    const followingId = Number(req.params.followingId)
-    const followerId = Number(helpers.getUser(req).id)
+    const followingId = req.params.followingId
+    const followerId = String(helpers.getUser(req).id)
 
     return User.findAll({
       where:
