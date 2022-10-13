@@ -1,3 +1,6 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const passport = require('passport')
 const bcrypt = require('bcryptjs')
 const { User } = require('../models')
