@@ -1,7 +1,13 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
+const sequelize = require('sequelize')
+const { Op } = require("sequelize");
 const helpers = require('../_helpers')
+const { validateData } = require('../vaildate-function')
+
+const imgur = require('imgur')
+imgur.setClientId(process.env.IMGUR_CLIENT_ID)
 
 const userController = {
   signIn: (req, res, next) => {
@@ -14,7 +20,6 @@ const userController = {
         if (!user) throw new Error('帳號不存在！')
         if (user.role === 'admin') throw new Error('帳號不存在！')
         if (!bcrypt.compareSync(password, user.password)) throw new Error('incorrect account or password!')
-        console.log('使用者', user)
         const userData = user.toJSON()
         delete userData.password
         const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -110,10 +115,10 @@ const userController = {
         if (!user) throw new Error('帳號不存在！')
         user = {
           ...user.toJSON(),
-          tweetCount: user.Tweets.length,
-          followerCount: user.Followers.length,
-          followingCount: user.Followings.length,
-          isFollowed: user.Followers.some(u => u.id === currentUser.id)
+          tweetCount: user.Tweets?.length,
+          followerCount: user.Followers?.length,
+          followingCount: user.Followings?.length,
+          isFollowed: user.Followers?.some(u => u.id === currentUser.id)
         }
 
         delete user.password
@@ -126,9 +131,14 @@ const userController = {
   getUserTweets: (req, res, next) => {
     // GET /api/users/:user_id/tweets - 檢視特定使用者的所有推文
     const UserId = req.params.id
+    User.findByPk(UserId)
+      .then(user => {
+        if (!user) throw new Error('user does not exist')
+      }).catch(err => next(err))
+
     return Tweet.findAll({
       where: { UserId },
-      attributes: ['id','description', 'createdAt'],
+      attributes: ['id', 'description', 'createdAt'],
       order: [['createdAt', 'DESC']],
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'], as: 'tweetAuthor' }, { model: Reply, attributes: ['id'] }, { model: Like, attributes: ['UserId'] }]
     })
@@ -136,9 +146,9 @@ const userController = {
         const currentUser = helpers.getUser(req)
         tweets.forEach(tweet => {
           tweet = tweet.dataValues
-          tweet.replyCounts = tweet.Replies.length,
-          tweet.likeCounts = tweet.Likes.length,
-          tweet.isLiked = tweet.Likes.some(l => l.UserId === currentUser.id)  
+          tweet.replyCounts = tweet.Replies?.length,
+            tweet.likeCounts = tweet.Likes?.length,
+            tweet.isLiked = tweet.Likes?.some(l => l.UserId === currentUser.id)
           delete tweet.Replies
           delete tweet.Likes
         })
@@ -148,6 +158,11 @@ const userController = {
   getUserReplies: (req, res, next) => {
     // GET /api/users/:user_id/replied_tweets - 檢視使用者發布過的所有回覆
     const UserId = req.params.id
+    User.findByPk(UserId)
+      .then(user => {
+        if (!user) throw new Error('user does not exist')
+      })
+
     return Reply.findAll({
       where: { UserId },
       order: [['createdAt', 'DESC']],
@@ -155,9 +170,10 @@ const userController = {
       { model: Tweet, attributes: ['id', 'description'], include: [{ model: User, attributes: ['id', 'account'], as: 'tweetAuthor' }] }]
     })
       .then(replies => {
+        console.log(replies)
         replies.forEach(reply => {
           reply = reply.dataValues
-          reply.tweetAuthorAccount = reply.Tweet.tweetAuthor.account
+          reply.tweetAuthorAccount = reply.Tweet?.tweetAuthor?.account
           delete reply.Tweet.dataValues.tweetAuthor
         })
         res.status(200).json(replies)
@@ -166,6 +182,11 @@ const userController = {
   getUserLikes: (req, res, next) => {
     // GET /api/users/:user_id/likes - 檢視使用 like 過的所有推文
     const UserId = req.params.id
+      User.findByPk(UserId)
+      .then(user => {
+        if (!user) throw new Error('user does not exist')
+      }).catch(err => next(err))
+
     return Like.findAll({
       where: { UserId },
       order: [['createdAt', 'DESC']],
@@ -188,9 +209,10 @@ const userController = {
           ...like.toJSON(),
         }))
         likes.forEach(like => {
-          like.replyCounts = like.Tweet.Replies.length,
-            like.likeCounts = like.Tweet.Likes.length,
-            like.isLiked = like.Tweet.Likes.map(u => u.UserId).includes(currentUser.id)
+          console.log(like)
+          like.replyCounts = like.Tweet?.Replies?.length,
+            like.likeCounts = like.Tweet?.Likes?.length,
+            like.isLiked = like.Tweet?.Likes.includes(currentUser.id)
           delete like.Tweet.Replies
           delete like.Tweet.Likes
         })
@@ -221,6 +243,8 @@ const userController = {
         [[sequelize.col('Followers.created_at', 'DESC')]]
     })
       .then(user => {
+        if (!user) throw new Error('user does not exist')
+
         const userFollowings = helpers.getUser(req).Followings.map(user => user.id)
         const followers = user.toJSON().Followers
 
@@ -255,13 +279,14 @@ const userController = {
         [[sequelize.col('Followings.created_at', 'DESC')]]
     })
       .then(user => {
+        if (!user) throw new Error('user does not exist')
         const userFollowings = helpers.getUser(req).Followings.map(user => user.id)
 
         const followings = user.toJSON().Followings
 
         followings.forEach(data => {
-          data.followingId = data.Followship.followingId
-          data.isFollowed = userFollowings.some(id => id === data.id)
+          data.followingId = data.Followship?.followingId
+          data.isFollowed = userFollowings?.some(id => id === data.id)
           delete data.Followship
         })
         res.status(200).json(followings)
@@ -281,15 +306,16 @@ const userController = {
       where: { role: 'user' }
     })
       .then(users => {
-        users.forEach(user => {
+        popularUser = users.map(user => {
           user = user.dataValues
-          user.followerCounts = user.Followers.length
-          user.isFollowed = user.Followers.some(u => u.id === currentUser)
+          user.followerCounts = user.Followers?.length
+          user.isFollowed = user.Followers?.some(u => u.id === currentUser)
           delete user.Followers
+          return user
         })
-        users.sort((a, b) => b.followerCounts - a.followedCount).slice(0, 10)
+        popularUser.sort((a, b) => b.followerCounts - a.followerCounts).slice(0, 10)
 
-        res.status(200).json(users)
+        res.status(200).json(popularUser)
       }).catch(err => next(err))
   },
   putUser: (req, res, next) => {
@@ -297,10 +323,51 @@ const userController = {
     const id = Number(req.params.id)
     const currentUser = helpers.getUser(req).id
 
+    if (id !== currentUser) throw new Error('permission denied')
+    const data = validateData(req.body)
+    const { name, introduction } = data
+
+    const { files } = req
+    if (!files) {
+      return User.update({ name, introduction }, { where: { id } })
+        .then(user => {
+          res.status(200).json(user)
+        })
+        .catch(err => next(err))
+    }
+
+    const uploadFiles = {}
+
+    Promise.all(Array.from(Object.keys(files), (key, index) => {
+      return imgur.uploadFile(files[key][0]?.path)
+        .then(uploadFile => {
+          uploadFiles[key] = uploadFile?.link || null
+        })
+        .catch(err => next(err))
+    }))
+      .then(() => {
+        return User.findByPk(id)
+      })
+      .then((user) => {
+        if (!user) throw new Error('user not exist')
+        return user.update({
+          name,
+          introduction,
+          avatar: uploadFiles?.avatar || user.avatar,
+          backgroundImage: uploadFiles?.backgroundImage || user.backgroundImage
+        })
+      })
+      .then(updatedUser => res.status(200).json(updatedUser.toJSON()
+      ))
+      .catch(err => next(err))
+  },
+  getCurrentUser: (req, res) => {
+    const currentUser = helpers.getUser(req).toJSON()
+    delete currentUser.password
+    delete currentUser.Followings
+    res.status(200).json(currentUser)
+  }
+
 }
-
-
-
-
 
 module.exports = userController
