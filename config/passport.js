@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User, Tweet } = db
+const { User} = db
 const bcrypt = require('bcryptjs')
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
