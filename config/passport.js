@@ -1,5 +1,3 @@
-require('dotenv').config()
-
 const passport = require('passport')
 const bcrypt = require('bcryptjs')
 const { User } = require('../models')
@@ -7,6 +5,12 @@ const LocalStrategy = require('passport-local').Strategy
 const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
+
+// set jwt options
+const jwtOptions = {
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET
+}
 
 // LocalStrategy
 passport.use(new LocalStrategy({
@@ -27,11 +31,6 @@ passport.use(new LocalStrategy({
 }))
 
 // JWT Strategy
-// set jwt options
-const jwtOptions = {
-  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
-}
 // check token
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
