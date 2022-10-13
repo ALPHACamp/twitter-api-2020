@@ -143,7 +143,8 @@ const tweetController = {
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'profilePhoto'] },
           { model: Tweet, attributes: { exclude: ['id', 'description', 'createdAt', 'updatedAt'] }, include: { model: User, attributes: ['id', 'account'] } }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([tweet, replies]) => {
