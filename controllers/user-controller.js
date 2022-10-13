@@ -385,7 +385,6 @@ const userController = {
   removeFollowing: (req, res, next) => {
     const currentUserId = helpers.getUser(req)?.id
     const userId = req.params.followingId
-    console.log(userId)
     Followship.findOne({
       where: {
         followerId: currentUserId,
@@ -397,6 +396,18 @@ const userController = {
         return followship.destroy()
       })
       .then(removeFollowingUser => res.json(removeFollowingUser))
+      .catch(err => next(err))
+  },
+  removeUserCover: (req, res, next) => {
+    const currentUserId = helpers.getUser(req)?.id
+    const userId = req.params.id
+
+    User.findByPk(userId)
+      .then(user => {
+        if (user.id !== currentUserId) throw new Error('不具權限')
+        user.update({ coverPhoto: '' })
+        res.json(user)
+      })
       .catch(err => next(err))
   }
 }
