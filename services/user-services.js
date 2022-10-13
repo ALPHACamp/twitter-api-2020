@@ -316,6 +316,13 @@ const userServices = {
         return cb(null, userFollowerData)
       })
       .catch(err => cb(err))
+  },
+  getCurrentUser: (req, cb) => {
+    return User.findByPk(getUser(req).dataValues.id, {
+      attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }
+    })
+      .then(user => cb(null, user))
+      .catch(err => cb(err))
   }
 }
 

@@ -24,6 +24,7 @@ router.put('/users/:id/account', authenticated, authenticatedUser, userControlle
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 router.put('/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'coverPhoto', maxCount: 1 }]), uploadFileHandler, userController.putUser)
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
+router.get('/users', authenticated, authenticatedUser, userController.getCurrentUser)
 router.post('/users', userController.signUp)
 
 // Tweets
