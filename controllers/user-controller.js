@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
+// 為配合資料表外鍵設計，所以統一命名為 userId -> UserId, tweetId -> TweetId
+
 const userController = {
   signin: (req, res, next) => {
     try {
