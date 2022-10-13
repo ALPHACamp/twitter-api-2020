@@ -275,7 +275,6 @@ const userController = {
         model: User,
         as: 'Followings',
         attributes: ['id', 'name', 'profilePhoto', 'introduction'],
-        through: { attributes: [] },
         include: [{
           model: User,
           as: 'Followers'
@@ -286,11 +285,13 @@ const userController = {
         if (!followings) throw new Error('該使用者不存在')
         const result = followings.Followings
           .map(following => {
-            const { Followers, ...data } = following.toJSON()
+            const { Followers, Followship, ...data } = following.toJSON()
             data.followingId = following.id
             data.isFollowed = following.Followers.some(follower => follower.id === currentUserId)
+            data.followingDate = following.Followship.createdAt
             return data
           })
+          .sort((a, b) => b.followingDate - a.followingDate)
         res.json(result)
       })
       .catch(err => next(err))
@@ -304,7 +305,6 @@ const userController = {
         model: User,
         as: 'Followers',
         attributes: ['id', 'name', 'profilePhoto', 'introduction'],
-        through: { attributes: [] },
         include: [{
           model: User,
           as: 'Followers'
@@ -315,11 +315,13 @@ const userController = {
         if (!followers) throw new Error('該使用者不存在')
         const result = followers.Followers
           .map(follower => {
-            const { Followers, ...data } = follower.toJSON()
+            const { Followers, Followship, ...data } = follower.toJSON()
             data.followerId = follower.id
             data.isFollowed = follower.Followers.some(follower => follower.id === currentUserId)
+            data.followerDate = follower.Followship.createdAt
             return data
           })
+          .sort((a, b) => b.followerDate - a.followerDate)
         res.json(result)
       })
       .catch(err => next(err))
