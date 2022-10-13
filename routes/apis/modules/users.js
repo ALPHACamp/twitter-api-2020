@@ -19,6 +19,7 @@ router.put('/:id', upload.fields([
   { name: 'profilePhoto', maxCount: 1 },
   { name: 'coverPhoto', maxCount: 1 }
 ]), authenticated, authenticatedUser, userController.putUserProfile) // 更新使用者資料
+router.patch('/:id/cover', authenticated, authenticatedUser, userController.removeUserCover)
 router.get('/', authenticated, userController.getCurrentUser)
 router.post('/', userController.signUp) // 使用者註冊
 
