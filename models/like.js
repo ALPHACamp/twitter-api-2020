@@ -15,10 +15,10 @@ module.exports = (sequelize, DataTypes) => {
     TweetId: DataTypes.INTEGER
   }, {
     sequelize,
-    paranoid: true,
     modelName: 'Like',
     tableName: 'Likes',
     underscored: true,
+    paranoid: true,
   })
   return Like
 }

@@ -33,56 +33,63 @@ const adminController = {
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
         { model: Like, include: Tweet }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(users => {
         const result = users
-          .map(user => ({
-            ...user.toJSON(),
+          .map(user => {
+            return {
+            id: user.id,
+            account: user.account,
+            name: user.name,
+            avatar: user.avatar,
+            cover: user.cover,
             followerCount: user.Followers.length,
             followingCount: user.Followings.length,
             tweetCount: user.Tweets.length,
             likeCount: user.Likes.length
-          }))
-          .map(user => {
+          }})
+          .sort((a, b) => b.tweetCount - a.tweetCount)
 
-            user.Followers.map(follower => {
-              delete follower.password
-            })
-
-            user.Followings.map(following => {
-              delete following.password
-            })
-            
-            delete user.password
-            return user
-          })
-          .sort((a, b) => b.Tweets.length - a.Tweets.length)
-        return res.status(200).json(result)
+        return result
       })
+      .then(data => res.status(200).json(data))
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
     Tweet.findAll({
-      include: User
+      include: User,
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         const result = tweets.map(tweet => ({
-          ...tweet.toJSON(),
-          description: tweet.description.substring(0, 50)
+          id: tweet.id,
+          UserId: tweet.UserId,
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar,
+          description: tweet.description.substring(0, 50),
+          createdAt: tweet.createdAt
         }))
-          .map(tweet => {
-            delete tweet.User.password
-            return tweet
-          })
-        return res.status(200).json(result)
+        return result
       })
+      .then(data => res.status(200).json(data))
       .catch(err => next(err))
   },
   deleteTweet: (req, res, next) => {
-    Tweet.findByPk(req.params.id)
+    Tweet.findByPk(req.params.id, {
+      include: [
+        Reply,
+        Like
+      ]
+    })
       .then(tweet => {
+  
         if (!tweet) throw new Error('此推文已不存在！')
+        
+        tweet.Replies.map(reply => reply.destroy())
+        tweet.Likes.map(like => like.destroy({ force: true }))
         
         return tweet.destroy()
       })

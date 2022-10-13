@@ -8,8 +8,7 @@ const { authenticated, authenticatedAdmin, authenticateUser } = require('../../m
 const { apiErrorHandler, authErrorHandler } = require('../../middleware/error-handler')
 const userController = require('../../controllers/user-controller')
 const adminController = require('../../controllers/admin-controller')
-const imageUpload = require('../../middleware/multer')
-const tweetController = require('../../controllers/tweet-controller')
+const  { imageUpload } = require('../../middleware/multer')
 
 
 router.post('/users', userController.signUp)
@@ -19,8 +18,8 @@ router.get('/users', userController.getUser)
 router.post('/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn, authErrorHandler)
 router.post('/users/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn, authErrorHandler)
 
-router.post('/followships', authenticated, authenticateUser, tweetController.addFollow)
-router.delete('/followships/:followingId', authenticated, authenticateUser, tweetController.removeFollow)
+router.post('/followships', authenticated, authenticateUser, userController.addFollow)
+router.delete('/followships/:followingId', authenticated, authenticateUser, userController.removeFollow)
 
 router.get('/users/:id/top_followers',authenticated,userController.getTopUsers)
 router.get('/current_user', authenticated, userController.getCurrentUser)
