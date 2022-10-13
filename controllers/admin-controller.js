@@ -2,6 +2,8 @@ const { User, Tweet, Like } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 
+// 為配合資料表外鍵設計，所以統一命名為 userId -> UserId, tweetId -> TweetId
+
 const adminController = {
   signin: (req, res, next) => {
     try {

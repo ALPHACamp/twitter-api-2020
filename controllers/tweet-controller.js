@@ -1,6 +1,8 @@
 const { Tweet, User, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 
+// 為配合資料表外鍵設計，所以統一命名為 userId -> UserId, tweetId -> TweetId
+
 const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({

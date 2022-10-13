@@ -1,20 +1,22 @@
 const { Followship, User } = require('../models')
 const helpers = require('../_helpers')
 
+// 為配合資料表外鍵設計，所以統一命名為 userId -> UserId, tweetId -> TweetId
+
 const followshipController = {
   // follow account
   postFollowing: (req, res, next) => {
-    const userId = helpers.getUser(req).id
+    const UserId = helpers.getUser(req).id
     const followingId = Number(req.body.id)
-    if (userId === followingId) throw new Error('無法追蹤、退追自己')
+    if (UserId === followingId) throw new Error('無法追蹤、退追自己')
 
-    return User.findByPk(userId)
+    return User.findByPk(UserId)
       .then(user => {
         if (!user) throw new Error('此使用者不存在')
 
         return Followship.findOne({
           where: {
-            followerId: userId,
+            followerId: UserId,
             followingId
           }
         })
@@ -23,11 +25,11 @@ const followshipController = {
         if (followship) throw new Error('已追蹤此帳號')
 
         return Followship.create({
-          followerId: userId,
+          followerId: UserId,
           followingId
         })
       })
-      .then(followship => res.status(200).json({
+      .then(() => res.status(200).json({
         status: 'success',
         message: '追蹤成功'
       }))
@@ -35,17 +37,17 @@ const followshipController = {
   },
   // unfollow account
   deleteFollowing: (req, res, next) => {
-    const userId = helpers.getUser(req).id
+    const UserId = helpers.getUser(req).id
     const followingId = Number(req.params.followingId)
-    if (userId === followingId) throw new Error('無法追蹤、退追自己')
+    if (UserId === followingId) throw new Error('無法追蹤、退追自己')
 
-    return User.findByPk(userId)
+    return User.findByPk(UserId)
       .then(user => {
         if (!user) throw new Error('此使用者不存在')
 
         return Followship.findOne({
           where: {
-            followerId: userId,
+            followerId: UserId,
             followingId
           }
         })
