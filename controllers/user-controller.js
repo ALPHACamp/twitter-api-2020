@@ -11,6 +11,7 @@ imgur.setClientId(process.env.IMGUR_CLIENT_ID)
 
 const userController = {
   signIn: (req, res, next) => {
+    // POST /api/users/signin - 使用者登入
     const { account, password } = validateData(req.body)
 
     return User.findOne({ where: { account } })
@@ -31,6 +32,7 @@ const userController = {
       .catch(err => next(err))
   },
   postUser: (req, res, next) => {
+    // POST /api/users - 註冊新使用者帳戶
     const { account, name, email, password } = validateData(req.body)
 
     return User.findAll({ where: 
@@ -58,6 +60,7 @@ const userController = {
       })).catch(err => next(err))
   },
   putUserAccount: (req, res, next) => {
+    // PUT /api/user/:id/account - 編輯註冊資料
     const { id } = req.params
     const currentUser = helpers.getUser(req).id
     if (id !== String(currentUser)) throw new Error('permission denied')
@@ -90,6 +93,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUser: (req, res, next) => {
+    // GET /api/users/:user_id - 檢視特定使用者的資訊
     const currentUser = helpers.getUser(req).dataValues
     const { id } = req.params
     return User.findByPk(id, {
@@ -128,6 +132,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserTweets: (req, res, next) => {
+    // GET /api/users/:user_id/tweets - 檢視特定使用者的所有推文
     const UserId = req.params.id
     User.findByPk(UserId)
       .then(user => {
@@ -154,6 +159,7 @@ const userController = {
       }).catch(err => next(err))
   },
   getUserReplies: (req, res, next) => {
+    // GET /api/users/:user_id/replied_tweets - 檢視使用者發布過的所有回覆
     const UserId = req.params.id
 
     User.findByPk(UserId)
@@ -177,6 +183,7 @@ const userController = {
       }).catch(err => next(err))
   },
   getUserLikes: (req, res, next) => {
+    // GET /api/users/:user_id/likes - 檢視使用 like 過的所有推文
     const UserId = req.params.id
     User.findByPk(UserId)
       .then(user => {
@@ -217,6 +224,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserFollowers: (req, res, next) => {
+    // GET /api/users/:user_id/followers - 檢視使用者的跟隨者
     const UserId = req.params.id
     return User.findByPk(UserId, {
       attributes: ['id',
@@ -252,6 +260,7 @@ const userController = {
       }).catch(err => next(err))
   },
   getUserFollowings: (req, res, next) => {
+    // GET /api/users/:user_id/followings - 檢視使用的跟隨中的用戶
     const UserId = req.params.id
     return User.findByPk(UserId, {
       attributes: ['id',
@@ -288,6 +297,7 @@ const userController = {
       }).catch(err => next(err))
   },
   getPopularUsers: (req, res, next) => {
+    // GET /api/users/popularUsers - 檢視十大熱門使用者
     const currentUser = helpers.getUser(req)
     return User.findAll({
       include: {
@@ -298,7 +308,6 @@ const userController = {
         'avatar',
         'account'],
       where: { role: 'user' }
-
     })
       .then(users => {
         popularUser = users.map(user => {
@@ -314,7 +323,7 @@ const userController = {
       }).catch(err => next(err))
   },
   putUser: (req, res, next) => {
-
+    // PUT /api/users/:user_id - 編輯個人資料
     const id = Number(req.params.id)
     const currentUser = helpers.getUser(req).id
 

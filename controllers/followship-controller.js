@@ -5,6 +5,7 @@ const { Op } = require("sequelize");
 
 const followshipController = {
   postFollow: (req, res, next) => {
+    // POST /api/followships - 追蹤其他使用者
     const id = req.body.id
     const currentUser = String(helpers.getUser(req).id)
     if (id === currentUser) throw new Error("You couldn't follow yourself")
@@ -26,6 +27,7 @@ const followshipController = {
       }).catch(err => next(err))
   },
   deleteFollow: (req, res, next) => {
+    // DELETE /api/followships/:following_id - 取消追蹤其他使用者
     const followingId = req.params.followingId
     const followerId = String(helpers.getUser(req).id)
 
