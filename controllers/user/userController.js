@@ -195,7 +195,14 @@ const userController = {
         nest: true,
         where: { userId },
         include: [
-          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: ['id'],
+            include: [
+              { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+            ]
+          }
         ],
         order: [['createdAt', 'DESC']]
       })
