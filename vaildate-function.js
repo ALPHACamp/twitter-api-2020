@@ -1,13 +1,13 @@
 const validator = require('validator')
-const { User, Tweet, Reply, Like } = require('./models')
-
-
+const bcrypt = require('bcrypt-nodejs')
 
 function validateData(data) {
   const errors = []
   for (const key in data) {
     data[key] = data[key].trim()
-
+    if (key === 'account') {
+      if (!data[key]) errors.push("Account is required")
+    }
     if (key === 'email') {
       if (!data[key]) errors.push("Email is required")
       if (!validator.isEmail(data[key])) errors.push('The email doesn\'t fit the email format')
@@ -33,10 +33,30 @@ function validateData(data) {
   return data
 }
 
+function validateUser(user, password) {
+  if (!user) throw new Error('帳號不存在！')
+  if (user.role && user.role === 'admin') throw new Error('帳號不存在！')
+  if (user.password && password) {
+    if (!bcrypt.compareSync(password, user.password)) throw new Error('incorrect account or password!')
+  }
+}
+
+function validateUnique(users, data) {
+
+  users.map(user => {
+    if (!user) return 
+    if (data.currentUser && user.id === data.currentUser) return
+    for (key in data) {
+      if (user[key] === data[key]) throw new Error(`${key} 已重複註冊！`)     
+    }
+  })
+
+}
 
 
 
-module.exports = {
-  validateData
-  
+module.exports = {  
+  validateData,
+  validateUser,
+  validateUnique
 }
