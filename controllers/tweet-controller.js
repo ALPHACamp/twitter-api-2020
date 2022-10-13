@@ -17,7 +17,7 @@ const tweetController = {
         nest: true,
         raw: true
       })
-      return res.json(tweets)
+      return res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
@@ -38,7 +38,6 @@ const tweetController = {
         raw: true,
         nest: true
       })
-      // error code 404
       if (!tweet) {
         return res.status(404).json({
           status: 'error',
@@ -74,7 +73,7 @@ const tweetController = {
           message: 'The tweet does not exist.'
         })
       }
-      res.status(200).json(replies)
+      return res.status(200).json(replies)
     } catch (err) {
       next(err)
     }
@@ -82,24 +81,16 @@ const tweetController = {
 
   addTweetLike: async (req, res, next) => {
     try {
-      const TweetId = req.params.id
+      const TweetId = Number(req.params.id)
       const currentUserId = helpers.getUser(req).id
-      const tweet = await Tweet.findByPk(TweetId, { raw: true })
-
-      // status 404 tweet not exist
-      if (!tweet) {
-        return res.status(404).json({
+      const like = await Like.findOrCreate({ where: { TweetId, UserId: currentUserId } })
+      // like already exist
+      if (like[1] === false) {
+        return res.status(422).json({
           status: 'error',
-          message: 'The tweet does not exist.'
+          message: 'You already liked the tweet.'
         })
       }
-      const like = await Like.findOne({
-        where: { TweetId, UserId: currentUserId }
-      })
-
-      // status 400 like liked tweets
-      if (like) throw new Error('You already liked the tweet.')
-      await Like.create({ TweetId, UserId: currentUserId })
       return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
@@ -109,30 +100,17 @@ const tweetController = {
   deleteTweetLike: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
-      const TweetId = req.params.id
-      const tweet = await Tweet.findByPk(TweetId, { raw: true })
-
-      // status 404 tweets not found
-      if (!tweet) {
+      const TweetId = Number(req.params.id)
+      const result = await Like.destroy({ where: { TweetId, UserId: currentUserId } })
+      // if result = 0, return 404 for not found like
+      if (!result) {
         return res.status(404).json({
           status: 'error',
-          message: 'The tweet does not exist.'
+          message: 'You have not liked the tweet or the tweet dose not exist.'
         })
       }
-
-      const like = await Like.findOne({
-        where: { TweetId, UserId: currentUserId },
-        raw: true
-      })
-
-      // status 400 have not liked the tweet
-      if (!like) throw new Error('You have not liked the tweet.')
-
-      // destroy like
-      await Like.destroy({ where: { id: like.id } })
-
-      // status 200 success
-      res.status(200).json({ status: 'success' })
+      // if result = 1, return status 200 for success
+      return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }
@@ -142,18 +120,19 @@ const tweetController = {
     try {
       const currentUserId = helpers.getUser(req).id
       const description = req.body.description?.trim()
-
-      // status 400 while description length > 140
-      if (description.length > 140) throw new Error('Tweet description must be less than 140 characters long.')
-
-      // status 400 wile description is empty
-      if (!description) throw new Error('Tweet description is required.')
-
-      await Tweet.create({
-        UserId: currentUserId,
-        description
-      })
-      // success 200
+      if (!description) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Tweet description is required.'
+        })
+      }
+      if (description.length > 140) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Tweet description must be less than 140 characters long.'
+        })
+      }
+      await Tweet.create({ UserId: currentUserId, description })
       return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
@@ -162,36 +141,18 @@ const tweetController = {
 
   deleteTweet: async (req, res, next) => {
     try {
-      const currentUserId = helpers.getUser(req).id
       const TweetId = Number(req.params.id)
-      const tweet = await Tweet.findByPk(TweetId, { raw: true })
-
-      // 404 find no tweet
-      if (!tweet) {
+      const currentUserId = helpers.getUser(req).id
+      // delete tweet and it's replies and likes
+      const result = await Tweet.destroy({ where: { id: TweetId, UserId: currentUserId } })
+      // if result = 0, return 404 for not found tweet
+      if (!result) {
         return res.status(404).json({
           status: 'error',
-          message: 'The tweet does not exist.'
+          message: 'User dose not own the tweet or the tweet does not exist.'
         })
       }
-
-      // 403 wanna delete others tweet
-      if (tweet.UserId !== currentUserId) {
-        return res.status(403).json({
-          status: 'error',
-          message: 'User can only delete their own tweet.'
-        })
-      }
-
-      // delete tweet
-      // delete replies of tweet
-      // delete likes of tweet
-      await Promise.all([
-        Tweet.destroy({ where: { id: TweetId } }),
-        Reply.destroy({ where: { TweetId } }),
-        Like.destroy({ where: { TweetId } })
-      ])
-
-      // status 200 success
+      // if result = 1, return status 200 for success
       return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
@@ -203,23 +164,18 @@ const tweetController = {
       const currentUserId = helpers.getUser(req).id
       const comment = req.body.comment?.trim()
       const TweetId = req.params.tweet_id
-      const tweet = await Tweet.findByPk(TweetId, { raw: true })
-
-      // status 400 no comment
-      if (!comment) throw new Error('Reply comment is required.')
-
-      // status 400 comment too long
-      if (comment.length > 140) throw new Error('Reply comment must be less than 140 characters long.')
-
-      // status 404 tweet not exist.
-      if (!tweet) {
-        res.status(404).json({
+      if (!comment) {
+        return res.status(400).json({
           status: 'error',
-          message: 'The tweet you want to reply does not exist.'
+          message: 'Reply comment is required.'
         })
       }
-
-      // status 200 success comment
+      if (comment.length > 140) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Reply comment must be less than 140 characters long.'
+        })
+      }
       await Reply.create({ comment, UserId: currentUserId, TweetId })
       return res.status(200).json({ status: 'success' })
     } catch (err) {
@@ -230,31 +186,18 @@ const tweetController = {
   deleteTweetReply: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
-      const TweetId = req.params.tweet_id
-      const replyId = req.params.reply_id
-      const reply = await Reply.findOne({ where: { TweetId, id: replyId }, raw: true })
-
-      // status 404 tweet not found
-      if (!reply) {
+      const TweetId = Number(req.params.tweet_id)
+      const replyId = Number(req.params.reply_id)
+      const result = await Reply.destroy({ where: { id: replyId, TweetId, UserId: currentUserId } })
+      // if result = 0, return 404 for not found reply
+      if (!result) {
         return res.status(404).json({
           status: 'error',
-          message: 'The reply does not exist.'
+          message: 'User dose not own the reply or the reply does not exist.'
         })
       }
-
-      // status 403 wanna delete others reply
-      if (currentUserId !== reply.UserId) {
-        return res.status(403).json({
-          status: 'error',
-          message: 'User can only delete their own reply.'
-        })
-      }
-
-      // success 200 delete the reply
-      await Reply.destroy({ where: { id: replyId } })
-      return res.status(200).json({
-        status: 'success'
-      })
+      // if result = 1, return status 200 for success
+      return res.status(200).json({ status: 'success' })
     } catch (err) {
       next(err)
     }
