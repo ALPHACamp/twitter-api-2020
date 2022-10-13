@@ -31,7 +31,7 @@ passport.use(new LocalStrategy({
 // set jwt options
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: 'secretKey'
 }
 // check token
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
