@@ -48,25 +48,40 @@ const userServices = {
     }
   },
   getTweets: (req, cb) => {
-    return Tweet.findAll({
-      where: {
-        UserId: req.params.id
-      },
-      include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        Reply,
-        { model: Like, include: User }
-      ],
-      attributes: {
-        include: [
+    const id = req.params.id
+    return Promise.all([
+      Tweet.findAll({
+        where: { UserId: id },
+        attributes: ['id', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
-          [sequelize.literal('( SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'repliedCount']
-        ]
-      },
-      order: [['createdAt', 'DESC']],
-      nest: true
-    })
-      .then(tweets => cb(null, tweets))
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'),
+            'repliedCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${getUser(req).dataValues.id} AND Likes.tweet_id = Tweet.id)`), 'isLiked']
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      }),
+      User.findByPk(id, { raw: true, nest: true })
+    ])
+      .then(([tweets, user]) => {
+        if (!tweets.length) return cb(null, [])
+        const data = tweets.map(t => ({
+          id: t.id,
+          userData: {
+            id: user.id,
+            account: user.account,
+            name: user.name,
+            avatar: user.avatar
+          },
+          description: t.description,
+          repliedCount: t.repliedCount,
+          likedCount: t.likedCount,
+          isLiked: Boolean(t.isLiked),
+          createdAt: t.createdAt
+        }))
+        return cb(null, data)
+      })
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
@@ -227,55 +242,105 @@ const userServices = {
   },
   getLikes: (req, cb) => {
     // 看見某使用者點過 Like的推文(text)
-    return Promise.all([
-      User.findByPk(req.params.id),
-      Like.findAll({
-        where: {
-          UserId: req.params.id
-        }
+    const id = req.params.id
+    return Like.findAll({
+      where: { UserId: id },
+      include: {
+        model: Tweet,
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
+        attributes: ['id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
+          [sequelize.literal('(SELECT COUNT(*)  FROM Replies WHERE Replies.tweet_id = Tweet.id)'),
+            'repliedCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${getUser(req).dataValues.id} AND Likes.tweet_id = Tweet.id)`), 'isLiked']
+        ]
+      },
+      order: [['createdAt', 'Desc']],
+      raw: true,
+      nest: true
+    })
+      .then(likes => {
+        if (!likes.length) return cb(null, [])
+        const data = likes.map(l => ({
+          TweetId: l.Tweet.id,
+          userData: {
+            id: l.Tweet.User.id,
+            account: l.Tweet.User.account,
+            name: l.Tweet.User.name,
+            avatar: l.Tweet.User.avatar
+          },
+          description: l.Tweet.description,
+          repliedCount: l.Tweet.repliedCount,
+          likedCount: l.Tweet.likedCount,
+          isLiked: Boolean(l.Tweet.isLiked),
+          createdAt: l.Tweet.createdAt,
+          likedCreatedAt: l.createdAt
+        }))
+        return cb(null, data)
       })
-    ])
-      .then(([user, likedTweet]) => {
-        if (!user) {
-          const err = new Error("User didn't exist!")
-          err.status = 404
-          throw err
-        }
-        return cb(null, likedTweet)
-      })
-      .catch((err) => cb(err))
+      .catch(err => cb(err))
   },
   getFollowings: (req, cb) => {
     // 看見某使用者跟隨中的人
     return Promise.all([
-      User.findByPk(req.params.id),
+      User.findByPk(req.params.id, {
+        include: { model: User, as: 'Followings' }
+      }),
       Followship.findAll({
-        where: {
-          followerId: req.params.id
-        }
+        where: { followerId: getUser(req).dataValues.id },
+        raw: true,
+        nest: true
       })
     ])
       .then(([user, following]) => {
         if (!user) throw new Error("User didn't exist.")
-        if (!following) throw new Error("This user isn't following anyone.")
-        return cb(null, following)
+        const currentUserFollowing = following.map(f => f.followingId)
+        const userFollowingData = user.Followings.map(f => ({
+          followingId: f.id,
+          account: f.account,
+          name: f.name,
+          avatar: f.avatar,
+          introduction: f.introduction,
+          isFollowed: currentUserFollowing.some(id => id === f.id)
+        }))
+        return cb(null, userFollowingData)
       })
       .catch(err => cb(err))
   },
   getFollowers: (req, cb) => {
+    // 看見某使用者的跟隨者
     return Promise.all([
-      User.findByPk(req.params.id),
+      User.findByPk(req.params.id, {
+        include: { model: User, as: 'Followers' }
+      }),
       Followship.findAll({
-        where: {
-          followingId: req.params.id
-        }
+        where: { followerId: getUser(req).dataValues.id },
+        raw: true,
+        nest: true
       })
     ])
-      .then(([user, follower]) => {
+      .then(([user, following]) => {
         if (!user) throw new Error("User didn't exist.")
-        if (!follower) throw new Error('This user has no followers.')
-        return cb(null, follower)
+        const currentUserFollowing = following.map(f => f.followingId)
+        const userFollowerData = user.Followers.map(f => ({
+          followerId: f.id,
+          account: f.account,
+          name: f.name,
+          avatar: f.avatar,
+          introduction: f.introduction,
+          isFollowed: currentUserFollowing.some(id => id === f.id)
+        }))
+        return cb(null, userFollowerData)
       })
+      .catch(err => cb(err))
+  },
+  getCurrentUser: (req, cb) => {
+    return User.findByPk(getUser(req).dataValues.id, {
+      attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }
+    })
+      .then(user => cb(null, user))
       .catch(err => cb(err))
   }
 }

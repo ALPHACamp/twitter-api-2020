@@ -30,6 +30,9 @@ const userController = {
   },
   getFollowers: (req, res, next) => {
     userServices.getFollowers(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getCurrentUser: (req, res, next) => {
+    userServices.getCurrentUser(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 module.exports = userController
