@@ -88,10 +88,8 @@ const userServices = {
     return User.findByPk(req.params.id, {
       include: [
         Tweet,
-        { model: Reply, include: Tweet },
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' },
-        { model: Like, include: Tweet }
+        { model: User, as: 'Followings' }
       ],
       attributes: {
         include: [[sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
@@ -113,7 +111,7 @@ const userServices = {
     const UserId = getUser(req).dataValues.id
     if (Number(req.params.id) !== Number(UserId)) throw new Error('Not authorized to edit.')
     // 密碼輸入不一致
-    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
+    if (password !== checkPassword) throw new Error('Passwords do not match!')
     // 資料輸入不完整
     if (!name || !account || !email || !password || !checkPassword) throw new Error('All fields are required.')
     return User.findByPk(UserId)
@@ -194,28 +192,51 @@ const userServices = {
   },
   getRepliedTweets: (req, cb) => {
     // tweetId, userId, repliedId 看見某使用者發過回覆的推文
-    // 新增按讚數+留言數+username
+    // 新增按讚數+留言數+使用者reply +tweet被回覆的 username/account
     return Promise.all([User.findByPk(req.params.id), Reply.findAll({
       where: {
         UserId: req.params.id
       },
-      include: [
-        Tweet,
-        { model: User, attributes: ['name', 'account', 'avatar'] }
-      ],
-      attributes: {
+      include: {
+        model: Tweet,
         include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'repliedCount']
+          { model: User, attributes: ['name', 'account', 'id'] }
         ]
       },
-      raw: true,
-      nest: true,
-      order: [['createdAt', 'DESC']]
-    })])
+      attributes: [
+        'id',
+        'comment',
+        'TweetId',
+        'UserId',
+        'createdAt',
+        'updatedAt',
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'repliedCount']
+      ],
+      order: [['createdAt', 'DESC']],
+      nest: true
+    })
+    ])
       .then(([user, replies]) => {
         if (!user) throw new Error("User didn't exist.")
-        return cb(null, replies)
+        if (!replies.length) return cb(null, [])
+        const repliedData = replies.map(r => ({
+          id: r.id,
+          comment: r.comment,
+          TweetId: r.TweetId,
+          UserId: r.UserId,
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
+          likedCount: r.likedCount,
+          repliedCount: r.repliedCount,
+          description: r.Tweet.description,
+          userData: {
+            id: r.Tweet.User.id,
+            name: r.Tweet.User.name,
+            account: r.Tweet.User.account
+          }
+        }))
+        return cb(null, repliedData)
       })
       .catch(err => cb(err))
   },
