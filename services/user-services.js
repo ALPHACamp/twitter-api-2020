@@ -177,16 +177,24 @@ const userServices = {
   },
   getRepliedTweets: (req, cb) => {
     // tweetId, userId, repliedId 看見某使用者發過回覆的推文
-    // 新增按讚數+留言數+username
+    // 新增按讚數+留言數+使用者reply +tweet被回覆的 username/account
     return Promise.all([User.findByPk(req.params.id), Reply.findAll({
       where: {
         UserId: req.params.id
       },
-      include: [
-        Tweet,
-        { model: User, attributes: ['name', 'avatar', 'account', 'id'] }
-      ],
+      include: {
+        model: Tweet,
+        include: [
+          { model: User, attributes: ['name', 'account', 'id'] }
+        ]
+      },
       attributes: [
+        'id',
+        'comment',
+        'TweetId',
+        'UserId',
+        'createdAt',
+        'updatedAt',
         [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'repliedCount']
       ],
@@ -196,7 +204,24 @@ const userServices = {
     ])
       .then(([user, replies]) => {
         if (!user) throw new Error("User didn't exist.")
-        return cb(null, replies)
+        if (!replies.length) return cb(null, [])
+        const repliedData = replies.map(r => ({
+          id: r.id,
+          comment: r.comment,
+          TweetId: r.TweetId,
+          UserId: r.UserId,
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
+          likedCount: r.likedCount,
+          repliedCount: r.repliedCount,
+          description: r.Tweet.description,
+          userData: {
+            id: r.Tweet.User.id,
+            name: r.Tweet.User.name,
+            account: r.Tweet.User.account
+          }
+        }))
+        return cb(null, repliedData)
       })
       .catch(err => cb(err))
   },
