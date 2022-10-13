@@ -221,23 +221,47 @@ const userServices = {
   },
   getLikes: (req, cb) => {
     // 看見某使用者點過 Like的推文(text)
-    return Promise.all([
-      User.findByPk(req.params.id),
-      Like.findAll({
-        where: {
-          UserId: req.params.id
-        }
+    const id = req.params.id
+    return Like.findAll({
+      where: { UserId: id },
+      include: {
+        model: Tweet,
+        include: [
+          { model: Like, attributes: [] },
+          { model: Reply, attributes: [] },
+          { model: User }
+        ],
+        attributes: ['id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
+          [sequelize.literal('(SELECT COUNT(*)  FROM Replies WHERE Replies.tweet_id = Tweet.id)'),
+            'repliedCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${getUser(req).dataValues.id} AND Likes.tweet_id = Tweet.id)`), 'isLiked']
+        ]
+      },
+      order: [['createdAt', 'Desc']],
+      raw: true,
+      nest: true
+    })
+      .then(likes => {
+        if (!likes.length) return cb(null, [])
+        const data = likes.map(l => ({
+          TweetId: l.Tweet.id,
+          userData: {
+            id: l.Tweet.User.id,
+            account: l.Tweet.User.account,
+            name: l.Tweet.User.name,
+            avatar: l.Tweet.User.avatar
+          },
+          description: l.Tweet.description,
+          repliedCount: l.Tweet.repliedCount,
+          likedCount: l.Tweet.likedCount,
+          isLiked: Boolean(l.Tweet.isLiked),
+          createdAt: l.Tweet.createdAt,
+          likedCreatedAt: l.createdAt
+        }))
+        return cb(null, data)
       })
-    ])
-      .then(([user, likedTweet]) => {
-        if (!user) {
-          const err = new Error("User didn't exist!")
-          err.status = 404
-          throw err
-        }
-        return cb(null, likedTweet)
-      })
-      .catch((err) => cb(err))
+      .catch(err => cb(err))
   },
   getFollowings: (req, cb) => {
     // 看見某使用者跟隨中的人
