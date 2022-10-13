@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
 const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { en_IND } = require('faker/lib/locales')
 const e = require('connect-flash')
 const { captureRejectionSymbol } = require('mysql2/lib/connection')
@@ -183,7 +183,37 @@ const userController = {
         followingCount: user.Followings.length,
         isFollowed: user.Followers.map(u => u.id).includes(req.user.id)
       }
-      return res.status(200).json(userData)
+        return res.status(200).json(userData)
+      }
+        catch(error){
+          next(error)
+        }
+    },
+  getTopUsers: async (req, res, next) => {
+    try {
+      let users = await User.findAll({
+        where: { role: 'user' },
+        include: { model: User, as: 'Followers' },
+        attributes:[
+          'id', 'name', 'account', 'avatar',
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)`
+            ),
+            'followersCount'
+          ]],
+        order: [[sequelize.literal('followersCount'), 'DESC']],
+        limit: 10
+      })
+      users = users.map(user => ({
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        avatar: user.avatar,
+        followerCount: user.Followers.length,
+        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+      }))
+      return res.status(200).json(users)
     }
     catch (error) {
       next(error)
@@ -204,7 +234,7 @@ const userController = {
       return res.status(403).json({ status: 'error', message: '自我介紹長度不可超過160字' })
     }
     const { files } = req
-    
+
     let avatar, cover
     if (files) {
       avatar = files['avatar'][0]
@@ -460,5 +490,6 @@ const userController = {
       .catch(err => next(err))
   }
 }
+
 
 module.exports = userController
