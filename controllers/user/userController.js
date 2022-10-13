@@ -228,9 +228,21 @@ const userController = {
         include: {
           model: Tweet,
           attributes: [
-            'id', 'description', 'createdAt',
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount']
+            'id',
+            'description',
+            'createdAt',
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+              ),
+              'likeCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+              ),
+              'replyCount'
+            ]
           ],
           include: {
             model: User,
@@ -277,13 +289,17 @@ const userController = {
           })
         )
       )
-      // 比對 userid 看當前使用者是否有跟隨
-      followersData.forEach((data) => {
-        data.isFollowing = currentUserFollowings.some(
-          (item) => item.followingId === data.id
-        )
+      // 比對 userid 看當前使用者是否有跟隨，並對資料結構做重新整理
+      const result = followersData.map((user) => {
+        return {
+          followerId: user.id,
+          ...user,
+          isFollowing: currentUserFollowings.some(
+            (item) => item.followingId === user.id
+          )
+        }
       })
-      res.json(followersData)
+      res.json(result)
     } catch (error) {
       next(error)
     }
@@ -318,13 +334,17 @@ const userController = {
           })
         )
       )
-      followingsData.forEach((data) => {
-        data.isFollowing = currentUserFollowings.some(
-          (item) => item.followingId === data.id
-        )
-      })
 
-      res.json(followingsData)
+      const result = followingsData.map((user) => {
+        return {
+          followingId: user.id,
+          ...user,
+          isFollowing: currentUserFollowings.some(
+            (item) => item.followingId === user.id
+          )
+        }
+      })
+      res.json(result)
     } catch (error) {
       next(error)
     }
