@@ -266,33 +266,54 @@ const userServices = {
   getFollowings: (req, cb) => {
     // 看見某使用者跟隨中的人
     return Promise.all([
-      User.findByPk(req.params.id),
+      User.findByPk(req.params.id, {
+        include: { model: User, as: 'Followings' }
+      }),
       Followship.findAll({
-        where: {
-          followerId: req.params.id
-        }
+        where: { followerId: getUser(req).dataValues.id },
+        raw: true,
+        nest: true
       })
     ])
       .then(([user, following]) => {
         if (!user) throw new Error("User didn't exist.")
-        if (!following) throw new Error("This user isn't following anyone.")
-        return cb(null, following)
+        const currentUserFollowing = following.map(f => f.followingId)
+        const userFollowingData = user.Followings.map(f => ({
+          followingId: f.id,
+          account: f.account,
+          name: f.name,
+          avatar: f.avatar,
+          introduction: f.introduction,
+          isFollowed: currentUserFollowing.some(id => id === f.id)
+        }))
+        return cb(null, userFollowingData)
       })
       .catch(err => cb(err))
   },
   getFollowers: (req, cb) => {
+    // 看見某使用者的跟隨者
     return Promise.all([
-      User.findByPk(req.params.id),
+      User.findByPk(req.params.id, {
+        include: { model: User, as: 'Followers' }
+      }),
       Followship.findAll({
-        where: {
-          followingId: req.params.id
-        }
+        where: { followerId: getUser(req).dataValues.id },
+        raw: true,
+        nest: true
       })
     ])
-      .then(([user, follower]) => {
+      .then(([user, following]) => {
         if (!user) throw new Error("User didn't exist.")
-        if (!follower) throw new Error('This user has no followers.')
-        return cb(null, follower)
+        const currentUserFollowing = following.map(f => f.followingId)
+        const userFollowerData = user.Followers.map(f => ({
+          followerId: f.id,
+          account: f.account,
+          name: f.name,
+          avatar: f.avatar,
+          introduction: f.introduction,
+          isFollowed: currentUserFollowing.some(id => id === f.id)
+        }))
+        return cb(null, userFollowerData)
       })
       .catch(err => cb(err))
   }
