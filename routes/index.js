@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const passport = require('../config/passport')
+const passport = require('passport')
 const admin = require('./modules/admin')
 const adminController = require('../controllers/admin-controller')
 const userController = require('../controllers/user-controller')
@@ -15,7 +15,7 @@ router.post('/admin/signin', passport.authenticate('local', { session: false }),
 router.use('/admin', authenticated, authAdmin, admin)
 
 // user
-router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
+router.get('/users/current_user', authenticated, authUser, userController.currentUser)
 router.get('/users/top', authenticated, authUser, userController.getTopUsers)
 router.get('/users/:id/tweets', authenticated, authUser, userController.getTweets)
 router.get('/users/:id/replied_tweets', authenticated, authUser, userController.getRepliedTweets)
@@ -24,6 +24,7 @@ router.get('/users/:id/followings', authenticated, authUser, userController.getF
 router.get('/users/:id/followers', authenticated, authUser, userController.getFollowers)
 router.get('/users/:id', authenticated, authUser, userController.getUser)
 router.put('/users/:id', authenticated, authUser, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'backgroundImage', maxCount: 1 }]), userController.putUser)
+router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
 router.post('/users', userController.signup)
 
 // tweet

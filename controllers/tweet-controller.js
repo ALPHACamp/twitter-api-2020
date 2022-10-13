@@ -41,6 +41,7 @@ const tweetController = {
         })
       })
       .then(newTweet => {
+        newTweet = newTweet.toJSON()
         res.status(200).json(newTweet)
       })
       .catch(error => next(error))
@@ -88,6 +89,7 @@ const tweetController = {
         })
       })
       .then(repliedTweet => {
+        repliedTweet = repliedTweet.toJSON()
         return res.status(200).json(repliedTweet)
       })
       .catch(error => next(error))

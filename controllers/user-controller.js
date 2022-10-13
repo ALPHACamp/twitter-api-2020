@@ -88,7 +88,10 @@ const userController = {
           if (existedAccount !== Number(UserId)) throw new Error('account 已存在')
           if (existedEmail !== Number(UserId)) throw new Error('email 已存在')
           return user.update({ name, account, email, password: bcrypt.hashSync(password, 10) })
-            .then(editedData => res.status(200).json(editedData))
+            .then(editedData => res.status(200).json({
+              status: 'success',
+              message: '修改成功'
+            }))
             .catch(error => next(error))
         })
         .catch(error => next(error))
@@ -258,7 +261,14 @@ const userController = {
   getTopUsers: (req, res, next) => {
     const getUser = helpers.getUser(req)
     return User.findAll({
-      include: [{ model: User, as: 'Followers' }]
+      include: [{ model: User, as: 'Followers', attributes: ['id'] }],
+      attributes:
+        { exclude: ['createdAt', 'updatedAt'] },
+      where: {
+        account: {
+          [Op.notIn]: [getUser.account, 'root']
+        }
+      }
     })
       .then(users => {
         const topUsers = users.map(user => ({
@@ -274,6 +284,22 @@ const userController = {
         return res.status(200).json(topUsers)
       })
       .catch(error => next(error))
+  },
+  currentUser: (req, res, next) => {
+    try {
+      const { id, account, email, name, role, image } = helpers.getUser(req)
+      if (role === 'admin') throw new Error('此帳號不存在')
+      const currentUser = {
+        id, account, email, name, role, image
+      }
+
+      res.status(200).json({
+        status: 'success',
+        data: currentUser
+      })
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
