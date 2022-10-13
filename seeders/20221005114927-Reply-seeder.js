@@ -39,7 +39,7 @@ function replyGenerate (user, tweet, NumberOfReplyPerTweet) {
       result.push({
         UserId: userId,
         TweetId: tweet[i].id,
-        comment: faker.lorem.text(),
+        comment: faker.lorem.lines(1),
         createdAt: dayJs
           .between('2022-10-01', '2022-10-10')
           .format('YYYY-MM-DD HH:MM:ss'),
