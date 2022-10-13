@@ -227,9 +227,7 @@ const userServices = {
       include: {
         model: Tweet,
         include: [
-          { model: Like, attributes: [] },
-          { model: Reply, attributes: [] },
-          { model: User }
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         ],
         attributes: ['id', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
