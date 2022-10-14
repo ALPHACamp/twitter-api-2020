@@ -55,7 +55,7 @@ const adminController = {
       Reply.destroy({ where: { TweetId } })
     ])
       .then(([tweet, likes, replies]) => {
-        if (!tweet) return res.status(404).json({ status: 'error', message: '此貼文不存在' })
+        if (!tweet) return res.status(404).json({ status: 'error', message: '推文不存在' })
         return tweet.destroy()
       })
       .then(deletetweet => { res.json(deletetweet) })
