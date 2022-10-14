@@ -129,10 +129,27 @@ const userServices = {
           })
             .then(confirmUser => {
               // db已有重複資料
+              if (!confirmUser.length) {
+                return bcrypt.hash(password, 10)
+                  .then(hash => {
+                    user.update({
+                      name,
+                      email,
+                      account,
+                      password: hash
+                    })
+                  })
+                  .then(updatedUser => cb(null, updatedUser))
+                  .catch(err => cb(err))
+              }
               if (confirmUser.length > 1) {
                 throw new Error('Account or email has already exist.')
-              // db除了user的舊資料，未有重複資料
-              } else {
+                // db除了user的舊資料，未有重複資料
+              } else if (confirmUser.length === 1) {
+                const accountCheck = confirmUser[0].dataValues.account
+                const userCheckId = confirmUser[0].dataValues.id
+                const emailCheck = confirmUser[0].dataValues.email
+                if ((accountCheck === account || emailCheck === email) && (userCheckId !== UserId)) throw new Error('Account or email has already exist.')
                 return bcrypt.hash(password, 10)
                   .then(hash => {
                     user.update({
@@ -229,7 +246,6 @@ const userServices = {
           updatedAt: r.updatedAt,
           likedCount: r.likedCount,
           repliedCount: r.repliedCount,
-          description: r.Tweet.description,
           userData: {
             id: r.Tweet.User.id,
             name: r.Tweet.User.name,
