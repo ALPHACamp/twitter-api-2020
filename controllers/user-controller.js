@@ -34,7 +34,7 @@ const userController = {
         profilePhoto: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
         coverPhoto: 'https://i.imgur.com/t0YRqQH.jpg'
       }))
-      .then(newUser => res.json(newUser))
+      .then(() => res.json({ status: 'success' }))
       .catch(err => next(err))
   },
   signIn: (req, res, next) => {
