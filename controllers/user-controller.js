@@ -4,7 +4,7 @@ const { User, Tweet, Reply, Like } = require('../models')
 const sequelize = require('sequelize')
 const { Op } = require("sequelize");
 const helpers = require('../_helpers')
-const { validateData, validateUser, validateUnique } = require('../vaildate-function')
+const { validateData, validateUser, validateUnique, validateEqual } = require('../vaildate-function')
 
 const imgur = require('imgur')
 imgur.setClientId(process.env.IMGUR_CLIENT_ID)
@@ -64,20 +64,21 @@ const userController = {
   putUserAccount: (req, res, next) => {
     // PUT /api/user/:id/account - 編輯註冊資料
     const { id } = req.params
-    const currentUser = helpers.getUser(req).id
-    if (id !== String(currentUser)) throw new Error('permission denied')
-
-    const { account, name, email, password } = validateData(req.body)
+    const currentUser = helpers.getUser(req)
+    if (id !== String(currentUser.id)) throw new Error('permission denied')
+    const data = validateData(req.body)
+    const { account, name, email, password } = data
 
     return User.findAll({ where: { [Op.or]: [{ account }, { email }] } })
       .then(users => {
-
         const Unique = {
           currentUser,
           account,
           email
         }
+        validateEqual(users, data)
         validateUnique(users, Unique)
+        
 
         return User.update({
           account,
@@ -90,7 +91,7 @@ const userController = {
         })
       }).then(() => res.status(200).json({
         status: 'success',
-        msg: 'change succeeded !'
+        message: 'change succeeded !'
       }))
       .catch(err => next(err))
   },
@@ -314,7 +315,7 @@ const userController = {
       where: { role: 'user' }
     })
       .then(users => {
-        popularUser = users.map(user => {
+        const popularUser = users.map(user => {
           user = user.toJSON()
           user.followerCounts = user.Followers?.length
           user.isFollowed = user.Followers?.some(u => u.id === currentUser.id)
