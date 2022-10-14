@@ -9,7 +9,20 @@ const routes = require('./routes')
 const app = express()
 const port = process.env.PORT
 
-app.use(cors())
+const corsOptions = {
+  origin: [
+    'https://hsiaooooooju.github.io',
+    'http://localhost:8080',
+    'http://localhost:8081',
+    'http://localhost:8082',
+    'http://localhost:8083',
+    'http://localhost:8084'
+  ],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
+
+app.use(cors(corsOptions))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
