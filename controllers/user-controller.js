@@ -4,7 +4,7 @@ const { User, Tweet, Reply, Like } = require('../models')
 const sequelize = require('sequelize')
 const { Op } = require("sequelize");
 const helpers = require('../_helpers')
-const { validateData, validateUser, validateUnique } = require('../vaildate-function')
+const { validateData, validateUser, validateUnique, validateEqual } = require('../vaildate-function')
 
 const imgur = require('imgur')
 imgur.setClientId(process.env.IMGUR_CLIENT_ID)
@@ -35,8 +35,10 @@ const userController = {
     // POST /api/users - 註冊新使用者帳戶
     const { account, name, email, password } = validateData(req.body)
 
-    return User.findAll({ where: 
-  { [Op.or]: [{ account }, { email }] } })
+    return User.findAll({
+      where:
+        { [Op.or]: [{ account }, { email }] }
+    })
       .then(users => {
         const UniqueData = {
           account,
@@ -62,21 +64,21 @@ const userController = {
   putUserAccount: (req, res, next) => {
     // PUT /api/user/:id/account - 編輯註冊資料
     const { id } = req.params
-    const currentUser = helpers.getUser(req).id
-    if (id !== String(currentUser)) throw new Error('permission denied')
-
-    const { account, name, email, password } = validateData(req.body)
+    const currentUser = helpers.getUser(req)
+    if (id !== String(currentUser.id)) throw new Error('permission denied')
+    const data = validateData(req.body)
+    const { account, name, email, password } = data
 
     return User.findAll({ where: { [Op.or]: [{ account }, { email }] } })
       .then(users => {
-
         const Unique = {
           currentUser,
           account,
           email
         }
-        console.log(Unique)
+        validateEqual(users, data)
         validateUnique(users, Unique)
+        
 
         return User.update({
           account,
@@ -88,7 +90,8 @@ const userController = {
           plain: true
         })
       }).then(() => res.status(200).json({
-        status: 'success'
+        status: 'success',
+        message: 'change succeeded !'
       }))
       .catch(err => next(err))
   },
@@ -241,9 +244,7 @@ const userController = {
             'account',
             'avatar',
             'introduction']
-        }],
-      order:
-        [[sequelize.col('Followers.created_at', 'DESC')]]
+        }]
     })
       .then(user => {
         validateUser(user)
@@ -254,8 +255,11 @@ const userController = {
         followers.forEach(data => {
           data.followerId = data.Followship.followerId
           data.isFollowed = userFollowings.some(id => id === data.id)
+          data.followCreatAt = data.Followship.createdAt
           delete data.Followship
         })
+        followers.sort((a, b) => b.followCreatAt - a.followCreatAt)
+        
         res.status(200).json(followers)
       }).catch(err => next(err))
   },
@@ -278,8 +282,6 @@ const userController = {
             'avatar',
             'introduction']
         }],
-      order:
-        [[sequelize.col('Followings.created_at', 'DESC')]]
     })
       .then(user => {
         validateUser(user)
@@ -291,8 +293,11 @@ const userController = {
         followings.forEach(data => {
           data.followingId = data.Followship?.followingId
           data.isFollowed = userFollowings?.some(id => id === data.id)
+          data.followCreatAt = data?.Followship?.createdAt,
           delete data.Followship
         })
+        followings.sort((a, b) => b.followCreatAt - a.followCreatAt)
+
         res.status(200).json(followings)
       }).catch(err => next(err))
   },
@@ -310,14 +315,14 @@ const userController = {
       where: { role: 'user' }
     })
       .then(users => {
-        popularUser = users.map(user => {
+        const popularUser = users.map(user => {
           user = user.toJSON()
           user.followerCounts = user.Followers?.length
           user.isFollowed = user.Followers?.some(u => u.id === currentUser.id)
           delete user.Followers
           return user
         })
-        popularUser.sort((a, b) => b.followerCounts - a.followerCounts).slice(0, 10)
+        popularUser.sort((a, b) => b.followerCounts - a.followerCounts).splice(10)
 
         res.status(200).json(popularUser)
       }).catch(err => next(err))
