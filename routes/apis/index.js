@@ -11,6 +11,7 @@ const userController = require('../../controllers/user-controller')
 const adminController = require('../../controllers/admin-controller')
 const { apiErrorHandler, authErrorHandler } = require('../../middleware/error-handler')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../../middleware/auth')
+const multer = require('multer')
 
 
 router.post('/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn, authErrorHandler)
@@ -21,7 +22,7 @@ router.post('/users', userController.signUp)
 
 
 router.get('/current_user', authenticated, userController.getCurrentUser)
-router.put('/current_user/:id', authenticated, userController.editCurrentUser)
+router.put('/current_user/:id', authenticated, multer().none(), userController.editCurrentUser)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/followships', authenticated, authenticatedUser, followships)
