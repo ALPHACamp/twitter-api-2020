@@ -88,10 +88,10 @@ const userController = {
           attributes: ['followingId']
         })
       ])
+      assert(user, '使用者不存在')
       user.isFollowing = currentUserFollowings.some(
         (item) => item.followingId === user.id
       )
-      assert(user, '使用者不存在')
       res.json(user)
     } catch (error) {
       next(error)
@@ -220,8 +220,8 @@ const userController = {
   }, // 獲取某使用者點過的 Like
   getUserLiked: async (req, res, next) => {
     const userId = req.params.id
-    assert(await User.findByPk(userId), '使用者不存在')
     try {
+      assert(await User.findByPk(userId), '使用者不存在')
       const liked = await Like.findAll({
         raw: true,
         nest: true,
