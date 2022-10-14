@@ -404,7 +404,7 @@ const userController = {
       .then(user => {
         if (user.id !== currentUserId) throw new Error('不具權限')
         user.update({ coverPhoto: '' })
-        res.json(user)
+        res.json({ status: 'success' })
       })
       .catch(err => next(err))
   }
