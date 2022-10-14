@@ -14,7 +14,6 @@ passport.use(
       passwordField: 'password'
     },
     async (account, password, done) => {
-      console.log('account', account, 'password', password)
       try {
         const user = await User.findOne({ where: { account } })
         if (!user) throw new Error('Incorrect account or password.')

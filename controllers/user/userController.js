@@ -220,6 +220,7 @@ const userController = {
   }, // 獲取某使用者點過的 Like
   getUserLiked: async (req, res, next) => {
     const userId = req.params.id
+    const currentUserId = helpers.getUser(req).id
     try {
       assert(await User.findByPk(userId), '使用者不存在')
       const liked = await Like.findAll({
@@ -251,6 +252,17 @@ const userController = {
         },
         where: { userId },
         order: [['createdAt', 'DESC']]
+      })
+      const currentUserLikeList = await Like.findAll({
+        where: { UserId: currentUserId },
+        raw: true,
+        attributes: ['TweetId']
+      })
+
+      liked.forEach((like) => {
+        like.isLike = currentUserLikeList.some(
+          (current) => current.TweetId === like.id
+        )
       })
       assert(liked.length > 0, '該使用者還沒有按喜歡')
       res.json(liked)
