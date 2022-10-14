@@ -1,12 +1,16 @@
 const validator = require('validator')
 const bcrypt = require('bcrypt-nodejs')
 
+// 驗證欄位的格式跟限制
 function validateData(data) {
   const errors = []
   for (const key in data) {
     data[key] = data[key].trim()
     if (key === 'account') {
       if (!data[key]) errors.push("Account is required")
+      if (!validator.isAscii(data[key], 'en-US')) {
+        errors.push('Name is accepted only with English and Number');
+      }
     }
     if (key === 'email') {
       if (!data[key]) errors.push("Email is required")
@@ -33,30 +37,56 @@ function validateData(data) {
   return data
 }
 
+//驗證使用者 + password
 function validateUser(user, password) {
   if (!user) throw new Error('帳號不存在！')
   if (user.role && user.role === 'admin') throw new Error('帳號不存在！')
   if (user.password && password) {
-    if (!bcrypt.compareSync(password, user.password)) throw new Error('incorrect account or password!')
+    if (!bcrypt.compareSync(password, user.password)) throw new Error('帳號或密碼有誤！')
   }
 }
-
+// 驗證資料的唯一性
 function validateUnique(users, data) {
-
+  if (!users) return
   users.map(user => {
-    if (!user) return 
-    if (data.currentUser && user.id === data.currentUser) return
+    if (data.currentUser && user.id === data.currentUser.id) return
+
     for (key in data) {
-      if (user[key] === data[key]) throw new Error(`${key} 已重複註冊！`)     
+      if (user[key] === data[key]) throw new Error(`${key} 已重複註冊！`)
     }
+  })
+}
+
+//驗證 data 是否與舊有資料相同
+function validateEqual(users, data) {
+  if (!users) return
+  data.checkPassword ? delete data.checkPassword : null
+  users.map(user => {
+    if (data.currentUser && user.id !== data.currentUser.id) return
+
+    let isEqual = true
+    for (let key in data) {
+      if (key === 'password') {
+        if (!bcrypt.compareSync(data[key], user[key])) {
+          isEqual = false
+          break
+        }
+      } else if (user[key] !== data[key]) {
+        isEqual = false
+        break
+      }
+    }
+    if (!isEqual) return
+    throw new Error('You didn\'t make any reversion')
   })
 
 }
 
 
 
-module.exports = {  
+module.exports = {
   validateData,
   validateUser,
-  validateUnique
+  validateUnique,
+  validateEqual
 }
