@@ -25,7 +25,7 @@ function tweetGenerate (user, NumberOfTweetPerUser) {
     for (let y = 0; y < NumberOfTweetPerUser; y++) {
       result.push({
         UserId: user[i].id,
-        description: faker.lorem.text(),
+        description: faker.lorem.lines(1),
         createdAt: dayJs
           .between('2022-10-01', '2022-10-10')
           .format('YYYY-MM-DD HH:MM:ss'),
