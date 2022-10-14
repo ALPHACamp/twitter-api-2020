@@ -68,7 +68,7 @@ const tweetController = {
       Like.findAll({ where: { TweetId }, raw: true })
     ])
       .then(([tweet, likes]) => {
-        if (!tweet) throw new Error('此推文不存在')
+        if (!tweet) throw new Error('推文不存在')
         tweet.isLiked = likes.some(like => like.TweetId === tweet.id && like.UserId === currentUserId)
         res.json(tweet)
       })
@@ -122,7 +122,7 @@ const tweetController = {
     const UserId = helpers.getUser(req)?.id
     Tweet.findByPk(TweetId)
       .then(tweet => {
-        if (!tweet) throw new Error('此貼文不存在')
+        if (!tweet) throw new Error('推文不存在')
         return Reply.create({
           comment,
           UserId,
@@ -148,7 +148,7 @@ const tweetController = {
       })
     ])
       .then(([tweet, replies]) => {
-        if (!tweet) throw new Error('此推文不存在')
+        if (!tweet) throw new Error('推文不存在')
         res.json(replies)
       })
       .catch(err => next(err))

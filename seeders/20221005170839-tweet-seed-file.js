@@ -11,7 +11,7 @@ module.exports = {
     )
     users.map(user => {
       tweets.push(...Array.from({ length: 10 }, () => ({
-        description: faker.lorem.text().substring(51, 140),
+        description: faker.lorem.text().substring(1, 140),
         user_id: user.id,
         created_at: new Date(),
         updated_at: new Date()
