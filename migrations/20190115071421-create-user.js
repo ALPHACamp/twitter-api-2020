@@ -20,9 +20,6 @@ module.exports = {
       account: {
         type: Sequelize.STRING
       },
-      nickname: {
-        type: Sequelize.STRING
-      },
       avatar: {
         type: Sequelize.STRING
       },
