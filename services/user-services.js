@@ -290,6 +290,7 @@ const userServices = {
       }),
       Followship.findAll({
         where: { followerId: getUser(req).dataValues.id },
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
@@ -303,7 +304,8 @@ const userServices = {
           name: f.name,
           avatar: f.avatar,
           introduction: f.introduction,
-          isFollowed: currentUserFollowing.some(id => id === f.id)
+          isFollowed: currentUserFollowing.some(id => id === f.id),
+          createdAt: f.createdAt
         }))
         return cb(null, userFollowingData)
       })
@@ -317,6 +319,7 @@ const userServices = {
       }),
       Followship.findAll({
         where: { followerId: getUser(req).dataValues.id },
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
@@ -330,7 +333,8 @@ const userServices = {
           name: f.name,
           avatar: f.avatar,
           introduction: f.introduction,
-          isFollowed: currentUserFollowing.some(id => id === f.id)
+          isFollowed: currentUserFollowing.some(id => id === f.id),
+          createdAt: f.createdAt
         }))
         return cb(null, userFollowerData)
       })

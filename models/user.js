@@ -25,7 +25,6 @@ module.exports = (sequelize, DataTypes) => {
     account: DataTypes.STRING,
     name: DataTypes.STRING(50), // 上限50字
     email: DataTypes.STRING,
-    nickname: DataTypes.STRING,
     password: DataTypes.STRING,
     role: DataTypes.STRING,
     avatar: DataTypes.STRING,

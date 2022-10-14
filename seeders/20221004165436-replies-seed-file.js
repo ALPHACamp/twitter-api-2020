@@ -2,7 +2,7 @@
 const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const users = await queryInterface.sequelize.query('SELECT id FROM Users;', { type: queryInterface.sequelize.QueryTypes.SELECT })
+    const users = await queryInterface.sequelize.query("SELECT id FROM Users WHERE role='user';", { type: queryInterface.sequelize.QueryTypes.SELECT })
     const tweets = await queryInterface.sequelize.query('SELECT id FROM Tweets;', { type: queryInterface.sequelize.QueryTypes.SELECT })
     await queryInterface.bulkInsert('Replies', Array.from({ length: 180 }, (_, i) => ({
       user_id: users[Math.floor(Math.random() * users.length)].id, // 每篇貼文有3個使用者隨機留言
