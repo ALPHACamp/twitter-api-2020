@@ -7,6 +7,9 @@ function validateData(data) {
     data[key] = data[key].trim()
     if (key === 'account') {
       if (!data[key]) errors.push("Account is required")
+      if (!validator.isAscii(data[key])) {
+        errors.push('Name is accepted only with English and Number');
+      }
     }
     if (key === 'email') {
       if (!data[key]) errors.push("Email is required")
@@ -37,7 +40,7 @@ function validateUser(user, password) {
   if (!user) throw new Error('帳號不存在！')
   if (user.role && user.role === 'admin') throw new Error('帳號不存在！')
   if (user.password && password) {
-    if (!bcrypt.compareSync(password, user.password)) throw new Error('incorrect account or password!')
+    if (!bcrypt.compareSync(password, user.password)) throw new Error('帳號或密碼有誤！')
   }
 }
 

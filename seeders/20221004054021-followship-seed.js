@@ -17,7 +17,6 @@ module.exports = {
         }
       })
     })
-    console.log(followArray)
     queryInterface.bulkInsert('Followships', followArray)
   },
 
