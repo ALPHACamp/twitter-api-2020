@@ -34,7 +34,7 @@ const userController = {
         profilePhoto: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png',
         coverPhoto: 'https://i.imgur.com/t0YRqQH.jpg'
       }))
-      .then(newUser => res.json(newUser))
+      .then(() => res.json({ status: 'success' }))
       .catch(err => next(err))
   },
   signIn: (req, res, next) => {
@@ -95,7 +95,7 @@ const userController = {
     const { name, introduction } = req.body
     const { files } = req
     const [nameMin, nameMax] = [1, 50]
-    const [introductionMin, introductionMax] = [1, 160]
+    const introductionMax = 160
     const profilePhoto = files?.profilePhoto ? files.profilePhoto[0] : null
     const coverPhoto = files?.coverPhoto ? files.coverPhoto[0] : null
 
@@ -108,7 +108,7 @@ const userController = {
         if (userId !== id) throw new Error('不具有權限')
         if (name.length < nameMin || name.length > nameMax) throw new Error(`暱稱字數限制需在 ${nameMin}~ ${nameMax} 字之內`)
 
-        if (introduction.length < introductionMin || introduction.length > introductionMax) throw new Error(`自我介紹字數限制需在 ${introductionMin}~ ${introductionMax} 字之內`)
+        if (introduction.length > introductionMax) throw new Error(`自我介紹字數限制需在 ${introductionMax} 字之內`)
 
         return user.update({
           name,
@@ -279,7 +279,8 @@ const userController = {
           model: User,
           as: 'Followers'
         }]
-      }]
+      }],
+      order: [[{ model: User, as: 'Followings' }, Followship, 'createdAt', 'DESC']]
     })
       .then(followings => {
         if (!followings) throw new Error('該使用者不存在')
@@ -288,10 +289,8 @@ const userController = {
             const { Followers, Followship, ...data } = following.toJSON()
             data.followingId = following.id
             data.isFollowed = following.Followers.some(follower => follower.id === currentUserId)
-            data.followingDate = following.Followship.createdAt
             return data
           })
-          .sort((a, b) => b.followingDate - a.followingDate)
         res.json(result)
       })
       .catch(err => next(err))
@@ -309,7 +308,8 @@ const userController = {
           model: User,
           as: 'Followers'
         }]
-      }]
+      }],
+      order: [[{ model: User, as: 'Followers' }, Followship, 'createdAt', 'DESC']]
     })
       .then(followers => {
         if (!followers) throw new Error('該使用者不存在')
@@ -318,10 +318,8 @@ const userController = {
             const { Followers, Followship, ...data } = follower.toJSON()
             data.followerId = follower.id
             data.isFollowed = follower.Followers.some(follower => follower.id === currentUserId)
-            data.followerDate = follower.Followship.createdAt
             return data
           })
-          .sort((a, b) => b.followerDate - a.followerDate)
         res.json(result)
       })
       .catch(err => next(err))
@@ -406,7 +404,7 @@ const userController = {
       .then(user => {
         if (user.id !== currentUserId) throw new Error('不具權限')
         user.update({ coverPhoto: '' })
-        res.json(user)
+        res.json({ status: 'success' })
       })
       .catch(err => next(err))
   }
