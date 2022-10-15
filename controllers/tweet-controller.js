@@ -142,37 +142,34 @@ const tweetController = {
   },
   getReplies:(req, res, next) => {
     // GET /api/tweets/:tweet_id/replies - 讀取回覆串
-    return Promise.all([
-      Tweet.findByPk(req.params.id, {
+    return Reply.findAll({
+      where: { TweetId: req.params.id },
+      attributes: {exclude: ['updatedAt', 'UserId'] },
+      include: [{
+        model: User, 
+        as: 'replyUser',
+        attributes: ['id', 'account', 'avatar', 'name']
+      },
+      {
+        model: Tweet,
         attributes: ['id'],
         include: [{
           model: User,
           as: 'tweetAuthor',
           attributes: ['account']
         }]
-      }),
-      Tweet.findByPk(req.params.id, {
-        attributes: { exclude: ['UserId', 'updatedAt'] },
-        include: [{
-          model: Reply, include: [{
-          model: User,
-          as: 'replyUser',
-          attributes: ['id', 'account', 'avatar', 'name']
-        }]
-      },
-    ]
-      })
-    ])
-    .then(([author, result]) => {
+      }],
+      order: [['createdAt', 'DESC']]
+    })
+    .then((result) => {
       if (!result) throw new Error('Tweet does not exist!')
-      result = result.Replies.map(reply => ({
-        ...reply.toJSON(),
-        tweetAuthorAccount: author.tweetAuthor.account
-      }))
-      .sort((a,b) => b.createdAt - a.createdAt)
-      res.status(200).json(
-        result
-      )
+      result = result.map(element => {
+        element = element.toJSON(),
+        element.tweetAuthorAccount =  element.Tweet.tweetAuthor.account
+        delete element.Tweet
+        return element
+      })
+      res.status(200).json(result)
     })
     .catch(err => next(err))
   },
