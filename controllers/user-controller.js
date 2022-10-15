@@ -271,7 +271,6 @@ const userController = {
       }
     })
       .then(users => {
-        console.log(users)
         const topUsers = users.map(user => ({
           id: user.id,
           name: user.name,
