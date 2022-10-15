@@ -29,7 +29,7 @@ const userController = {
   },
   signup: (req, res, next) => {
     const { name, email, password, checkPassword, account } = { ...req.body }
-    if (!email || !password || !checkPassword || !account || !name.trim()) throw new Error('所有欄位皆須填寫')
+    if (!email || !password || !checkPassword || !account.trim() || !name.trim()) throw new Error('所有欄位皆須填寫')
     if (name.length > 50) throw new Error('名稱的字數超過上限 50 個字!')
     if (password !== checkPassword) throw new Error('密碼與重新輸入密碼不相符!')
 
@@ -71,7 +71,7 @@ const userController = {
     const { name, account, email, password, checkPassword, introduction } = req.body
     // setting page
     if (account || email || password) {
-      if (!name.trim() || !account || !email || !password || !checkPassword) throw new Error('所有欄位皆須填寫')
+      if (!name.trim() || !account.trim() || !email || !password || !checkPassword) throw new Error('所有欄位皆須填寫')
       if (name.length > 50) throw new Error('名稱的字數超過上限 50 個字!')
       if (password !== checkPassword) throw new Error('密碼與重新輸入密碼不相符!')
       return Promise.all([
