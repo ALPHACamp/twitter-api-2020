@@ -4,7 +4,7 @@ const userValidation = (data) => {
   const schema = joi.object({
     name: joi.string().max(50).required(),
     account: joi.string(),
-    introduction: joi.string().max(150),
+    introduction: joi.string().trim().max(160),
     password: joi.string(),
     email: joi.string().email()
   })
