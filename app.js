@@ -9,7 +9,8 @@ const passport = require('./config/passport')
 const cors = require('cors')
 const corsOption = {
   origin: [
-    'https://m790101.github.io/twitter-project-v1-/',
+    'https://m790101.github.io/twitter-project-v1-',
+    'https://twitter-api-2022-10.herokuapp.com',
     'http://localhost:3000'
   ],
   methods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
