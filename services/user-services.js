@@ -15,16 +15,16 @@ const userServices = {
       .then(user => {
         // 錯誤處理: user已註冊
         if (user) {
-          if (user.account === req.body.account) throw new Error('Account already exists!')
-          if (user.email === req.body.email) throw new Error('Email already exists!')
+          if (user.account.toLowerCase().trim() === req.body.account.toLowerCase().trim()) throw new Error('Account already exists!')
+          if (user.email.toLowerCase().trim() === req.body.email.toLowerCase().trim()) throw new Error('Email already exists!')
         }
         // user未註冊過
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => User.create({
-        name: req.body.name,
-        account: req.body.account,
-        email: req.body.email,
+        name: req.body.name.trim(),
+        account: req.body.account.toLowerCase().trim(),
+        email: req.body.email.toLowerCase().trim(),
         password: hash,
         role: 'user'
       }))
