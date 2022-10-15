@@ -24,7 +24,9 @@ module.exports = {
         references: {
           model: 'Tweets',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       created_at: {
         allowNull: false,
