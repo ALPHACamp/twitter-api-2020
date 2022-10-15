@@ -302,7 +302,8 @@ const userServices = {
     // 看見某使用者跟隨中的人
     return Promise.all([
       User.findByPk(req.params.id, {
-        include: { model: User, as: 'Followings' }
+        include: { model: User, as: 'Followings' },
+        order: [['Followings', Followship, 'createdAt', 'DESC']]
       }),
       Followship.findAll({
         where: { followerId: getUser(req).dataValues.id },
@@ -321,7 +322,7 @@ const userServices = {
           avatar: f.avatar,
           introduction: f.introduction,
           isFollowed: currentUserFollowing.some(id => id === f.id),
-          createdAt: f.createdAt
+          createdAt: f.Followship.createdAt
         }))
         return cb(null, userFollowingData)
       })
@@ -331,7 +332,8 @@ const userServices = {
     // 看見某使用者的跟隨者
     return Promise.all([
       User.findByPk(req.params.id, {
-        include: { model: User, as: 'Followers' }
+        include: { model: User, as: 'Followers' },
+        order: [['Followers', Followship, 'createdAt', 'DESC']]
       }),
       Followship.findAll({
         where: { followerId: getUser(req).dataValues.id },
@@ -350,7 +352,7 @@ const userServices = {
           avatar: f.avatar,
           introduction: f.introduction,
           isFollowed: currentUserFollowing.some(id => id === f.id),
-          createdAt: f.createdAt
+          createdAt: f.Followship.createdAt
         }))
         return cb(null, userFollowerData)
       })
