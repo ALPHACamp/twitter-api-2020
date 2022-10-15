@@ -22,13 +22,13 @@ const userServices = {
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => User.create({
-        name: req.body.name.trim(),
-        account: req.body.account.toLowerCase().trim(),
-        email: req.body.email.toLowerCase().trim(),
+        name: req.body.name,
+        account: req.body.account,
+        email: req.body.email,
         password: hash,
         role: 'user'
       }))
-      .then(newUser => cb(null, { newUser }))
+      .then(newUser => cb(null, newUser))
       .catch(err => cb(err))
   },
   signIn: (req, cb) => {
