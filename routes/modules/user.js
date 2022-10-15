@@ -18,6 +18,14 @@ router.put('/:id/account', authenticated, uploadFields, userController.putUserAc
 router.put('/:id', authenticated, uploadFields, userController.putUser)
 router.get('/:id', authenticated, userController.getUser)
 router.post('/', userController.postUser)
+
+router.get('/', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*')
+})
+router.use('/', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*')
+})
 router.use('/', apiErrorHandler)
+
 
 module.exports = router

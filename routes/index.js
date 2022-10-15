@@ -11,6 +11,13 @@ router.use('/api/admin', admin)
 router.use('/api/tweets', authenticated, tweets)
 router.use('/api/users', user)
 router.use('/api/followships', followship)
+
+router.get('/', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*')
+})
+router.use('/', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*')
+})
 router.use('/', apiErrorHandler)
 
 module.exports = router

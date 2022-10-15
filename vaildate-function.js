@@ -8,7 +8,7 @@ function validateData(data) {
     data[key] = data[key].trim()
     if (key === 'account') {
       if (!data[key]) errors.push("Account is required")
-      if (!validator.isAscii(data[key], 'en-US')) {
+      if (!validator.isAlphanumeric(data[key], 'en-US')) {
         errors.push('Name is accepted only with English and Number');
       }
     }
