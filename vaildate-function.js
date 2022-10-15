@@ -21,7 +21,7 @@ function validateData(data) {
       if (!validator.isLength(data[key], { min: 0, max: 50 })) errors.push('Name is accepted within 50 characters')
     }
     if (key === 'introduction') {
-      if (!validator.isLength(data[key], { min: 0, max: 160 })) errors.push('Introduction is accepted within 160 characters')
+      if (!validator.isLength(data[key], { min: 0, max: 160 })) errors.push('帳號或密碼有誤！')
     }
     if (key === 'password') {
       if (!data[key]) errors.push("Password is required")

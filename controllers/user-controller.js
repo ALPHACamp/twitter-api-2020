@@ -281,7 +281,7 @@ const userController = {
             'account',
             'avatar',
             'introduction']
-        }],
+        }]
     })
       .then(user => {
         validateUser(user)
