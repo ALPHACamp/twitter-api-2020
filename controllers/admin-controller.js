@@ -1,46 +1,22 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
-const { Like, Tweet, User } = require('../models')
+const sequelize = require('sequelize')
+const { Tweet, User } = require('../models')
 
 const adminController = {
   getUsers: (req, res, next) => {
     // GET /api/admin/users - 瀏覽使用者清單
     return User.findAll({
-      attributes:['id', 'account', 'name', 'avatar', 'backgroundImage'],
-      include:[{
-        model: Tweet,
-        as: 'Tweets',
-        attributes: ['UserId']
-      },
-      {
-        model: Like,
-        as: 'Likes',
-        attributes: ['UserId']
-      },
-      {
-      model: User,
-      as: 'Followers'
-      },
-      {
-      model: User,
-      as: 'Followings'
-      }
-    ]
+      attributes:[
+        'id', 'account', 'name', 'avatar', 'backgroundImage',
+        [sequelize.literal(`(SELECT COUNT (*) FROM Tweets WHERE Tweets.user_id = User.id)`), 'tweetCount'],
+        [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.user_id = User.id)`), 'likeCount'],
+        [sequelize.literal(`(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id)`), 'followingCount'],
+        [sequelize.literal(`(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id)`), 'followerCount']
+      ]
     })
     .then(users => {
-      users = users.map(user => {
-        user = user.toJSON()
-        user.tweetCount = user.Tweets.length
-        user.likeCount = user.Likes.length
-        user.followerCount = user.Followers.length
-        user.followingCount = user.Followings.length
-        delete user.Tweets
-        delete user.Likes
-        delete user.Followers
-        delete user.Followings
-        return user
-      })
-      .sort((a, b) => ( b.tweetCount - a.tweetCount ))
+      users = users.sort((a, b) => ( b.dataValues.tweetCount - a.dataValues.tweetCount ))
       res.status(200).json(users)
     })
     .catch(err => next(err))
