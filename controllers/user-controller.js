@@ -178,6 +178,9 @@ const userController = {
       { model: Tweet, attributes: ['id', 'description'], include: [{ model: User, attributes: ['id', 'account'], as: 'tweetAuthor' }] }]
     })
       .then(replies => {
+        replies = replies.filter(reply => {
+          if (!(reply.Tweet === null)) return reply
+        })
 
         replies?.forEach(reply => {
           console.log(reply)
@@ -215,6 +218,9 @@ const userController = {
     })
       .then(likes => {
         const currentUser = helpers.getUser(req)
+        likes = likes.filter(like => {
+          if (!(like.Tweet === null)) return like
+        })
 
         likes = likes?.map(like => {
           like = like?.toJSON()
