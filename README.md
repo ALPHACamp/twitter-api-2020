@@ -3,6 +3,8 @@
 ![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
 
 <h2>介紹</h2>
+<a href="https://m790101.github.io/twitter-project-v1-/#/logIn" target="_blank">Alphitter 網站入口</a>  
+
 這是一個使用 Node.js、Express 框架、JWT token 驗證，並連接 MySQL 資料庫的 Simple Twitter 專案，是讓使用者可以發表想法和與其他使用者交流互動的社群平台。  
 
 操作角色可以分為：　　
@@ -35,7 +37,7 @@
 
 
 <h2>API</h2>
-[API 文件] : https://github.com/readthedocs/recommonmark/issues/108
+<a href="https://www.notion.so/API-GitHub-README-a22124ee91864b25a11263cd1e8f92eb" target="_blank">API 文件</a>
 
 <h2>下載安裝</h2>
 
