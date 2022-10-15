@@ -29,28 +29,24 @@ const userController = {
   },
   signup: (req, res, next) => {
     const { name, email, password, checkPassword, account } = { ...req.body }
-    if (!name || !email || !password || !checkPassword || !account) throw new Error('所有欄位皆須填寫')
-
+    if (!email || !password || !checkPassword || !account || !name.trim()) throw new Error('所有欄位皆須填寫')
     if (name.length > 50) throw new Error('名稱的字數超過上限 50 個字!')
     if (password !== checkPassword) throw new Error('密碼與重新輸入密碼不相符!')
-    delete req.body.checkPassword
-    return User.findOrCreate({
-      where: {
-        [Op.or]: [{ email: email }, { account: account }]
-      },
-      defaults: {
-        ...req.body,
-        password: bcrypt.hashSync(password, 10)
-      }
-    })
-      .then(([user, created]) => {
-        if (!created && user) {
-          res.status(404).json({
-            status: 'error',
-            message: 'Error: account 或 email 已重複註冊！',
-            data: req.body
-          })
-        }
+
+    return Promise.all([
+      User.findOne({ where: { email }, attribute: 'email' }),
+      User.findOne({ where: { account }, attribute: 'account' })
+    ])
+      .then(([isEmail, isAccount]) => {
+        if (isEmail) throw new Error('email 已重複註冊！')
+        if (isAccount) throw new Error('account 已重複註冊！')
+
+        delete req.body.checkPassword
+        return User.create({ ...req.body, attributes: { exclude: ['email', 'account'] } })
+      })
+      .then(user => {
+        user = user.toJSON()
+        delete user.password
 
         res.status(200).json({
           status: 'success',
@@ -75,7 +71,7 @@ const userController = {
     const { name, account, email, password, checkPassword, introduction } = req.body
     // setting page
     if (account || email || password) {
-      if (!name || !account || !email || !password || !checkPassword) throw new Error('所有欄位皆須填寫')
+      if (!name.trim() || !account || !email || !password || !checkPassword) throw new Error('所有欄位皆須填寫')
       if (name.length > 50) throw new Error('名稱的字數超過上限 50 個字!')
       if (password !== checkPassword) throw new Error('密碼與重新輸入密碼不相符!')
       return Promise.all([
@@ -99,7 +95,7 @@ const userController = {
         .catch(error => next(error))
     // user information page
     } else {
-      if (!name || !introduction) throw new Error('名稱、自我介紹皆須填寫')
+      if (!name.trim() || !introduction) throw new Error('名稱、自我介紹皆須填寫')
       if (name.length > 50) throw new Error('名稱的字數超過上限 50 個字!')
       if (introduction.length > 160) throw new Error('自我介紹的字數超過上限 160 個字!')
       const image = req.files?.image ? req.files.image[0] : null
@@ -222,6 +218,7 @@ const userController = {
           id: fg.id,
           name: fg.name,
           account: fg.account,
+          image: fg.image,
           introduction: fg.introduction,
           followingId: fg.id,
           followerId: UserId,
@@ -251,6 +248,7 @@ const userController = {
           id: fr.id,
           name: fr.name,
           account: fr.account,
+          image: fr.image,
           introduction: fr.introduction,
           followingId: UserId,
           followerId: fr.id,

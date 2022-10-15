@@ -17,12 +17,14 @@ passport.use(new LocalStrategy({
   usernameField: 'account'
 }, (account, password, cb) => {
   // signin authenticate
+  if (!account || !password) throw new Error('請填入帳號和密碼')
+
   User.findOne({ where: { account } })
     .then(user => {
-      if (!user) throw new Error('尚未註冊')
+      if (!user) throw new Error('帳戶不存在')
       bcrypt.compare(password, user.password)
         .then(result => {
-          if (!result) throw new Error('帳號或密碼錯誤')
+          if (!result) throw new Error('請輸入正確的帳號密碼')
           cb(null, user)
         })
         .catch(error => cb(error))
