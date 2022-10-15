@@ -223,48 +223,50 @@ const userController = {
     const currentUserId = helpers.getUser(req).id
     try {
       assert(await User.findByPk(userId), '使用者不存在')
-      const liked = await Like.findAll({
-        raw: true,
-        nest: true,
-        include: {
-          model: Tweet,
-          attributes: [
-            'id',
-            'description',
-            'createdAt',
-            [
-              sequelize.literal(
-                '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
-              ),
-              'likeCount'
-            ],
-            [
-              sequelize.literal(
-                '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
-              ),
-              'replyCount'
-            ]
-          ],
-          include: {
-            model: User,
-            attributes: ['id', 'name', 'account', 'avatar']
-          }
-        },
-        where: { userId },
-        order: [['createdAt', 'DESC']]
-      })
-      const currentUserLikeList = await Like.findAll({
-        where: { UserId: currentUserId },
-        raw: true,
-        attributes: ['TweetId']
-      })
 
+      const [liked, currentUserLikeList] = await Promise.all([
+        Like.findAll({
+          raw: true,
+          nest: true,
+          include: {
+            model: Tweet,
+            attributes: [
+              'id',
+              'description',
+              'createdAt',
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+                ),
+                'likeCount'
+              ],
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+                ),
+                'replyCount'
+              ]
+            ],
+            include: {
+              model: User,
+              attributes: ['id', 'name', 'account', 'avatar']
+            }
+          },
+          where: { userId },
+          order: [['createdAt', 'DESC']]
+        }),
+        Like.findAll({
+          where: { UserId: currentUserId },
+          raw: true,
+          attributes: ['TweetId']
+        })
+      ])
+      assert(liked.length > 0, '該使用者還沒有按喜歡')
       liked.forEach((like) => {
         like.isLike = currentUserLikeList.some(
-          (current) => current.TweetId === like.id
+          (current) => current.TweetId === like.TweetId
         )
       })
-      assert(liked.length > 0, '該使用者還沒有按喜歡')
       res.json(liked)
     } catch (error) {
       next(error)
