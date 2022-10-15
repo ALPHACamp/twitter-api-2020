@@ -108,6 +108,7 @@ const userServices = {
   },
   putUserSetting: (req, cb) => {
     const { name, account, email, password, checkPassword } = req.body
+    console.log(name)
     const UserId = getUser(req).dataValues.id
     if (Number(req.params.id) !== Number(UserId)) throw new Error('Not authorized to edit.')
     // 密碼輸入不一致
@@ -120,7 +121,7 @@ const userServices = {
         if (!user) throw new Error("User didn't exist.")
         // 比對account和email的唯一性
         // 如果account或email有更動
-        if (account !== user.account || email !== user.email) {
+        if (account.toLowerCase().trim() !== user.account.toLowerCase().trim() || email !== user.email.toLowerCase().trim()) {
           // 確認DB裡面除了舊資料以外沒有重複的資料
           return User.findAll({
             where: {
@@ -132,10 +133,10 @@ const userServices = {
               if (!confirmUser.length) {
                 return bcrypt.hash(password, 10)
                   .then(hash => {
-                    user.update({
+                    return user.update({
                       name,
-                      email,
-                      account,
+                      email: email.toLowerCase().trim(),
+                      account: account.toLowerCase().trim(),
                       password: hash
                     })
                   })
@@ -152,10 +153,10 @@ const userServices = {
                 if ((accountCheck === account || emailCheck === email) && (userCheckId !== UserId)) throw new Error('Account or email has already exist.')
                 return bcrypt.hash(password, 10)
                   .then(hash => {
-                    user.update({
+                    return user.update({
                       name,
-                      email,
-                      account,
+                      email: email.toLowerCase().trim(),
+                      account: account.toLowerCase().trim(),
                       password: hash
                     })
                   })
