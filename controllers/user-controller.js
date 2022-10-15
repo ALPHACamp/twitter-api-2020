@@ -137,6 +137,7 @@ const userController = {
   getUserTweets: (req, res, next) => {
     // GET /api/users/:user_id/tweets - 檢視特定使用者的所有推文
     const UserId = req.params.id
+    console.log(UserId)
     User.findByPk(UserId)
       .then(user => {
         validateUser(user)
@@ -177,11 +178,14 @@ const userController = {
       { model: Tweet, attributes: ['id', 'description'], include: [{ model: User, attributes: ['id', 'account'], as: 'tweetAuthor' }] }]
     })
       .then(replies => {
-        replies.forEach(reply => {
-          reply = reply.dataValues
-          reply.tweetAuthorAccount = reply.Tweet?.tweetAuthor?.account
-          delete reply.Tweet.dataValues.tweetAuthor
+
+        replies?.forEach(reply => {
+          console.log(reply)
+          reply = reply?.dataValues
+          reply.tweetAuthorAccount = reply?.Tweet?.tweetAuthor?.account
+          delete reply?.Tweet?.dataValues?.tweetAuthor
         })
+
         res.status(200).json(replies)
       }).catch(err => next(err))
   },
@@ -212,16 +216,15 @@ const userController = {
       .then(likes => {
         const currentUser = helpers.getUser(req)
 
-        likes = likes.map(like => {
-          like = like.toJSON()
-          like.replyCounts = like.Tweet?.Replies?.length,
-            like.likeCounts = like.Tweet?.Likes?.length,
-            like.isLiked = like.Tweet?.Likes.some(l => l.UserId === currentUser.id)
-          delete like.Tweet.Replies
-          delete like.Tweet.Likes
+        likes = likes?.map(like => {
+          like = like?.toJSON()
+          like.replyCounts = like?.Tweet?.Replies?.length,
+            like.likeCounts = like?.Tweet?.Likes?.length,
+            like.isLiked = like?.Tweet?.Likes.some(l => l.UserId === currentUser.id)
+          delete like?.Tweet?.Replies
+          delete like?.Tweet?.Likes
           return like
         })
-
         return res.status(200).json(likes)
       })
       .catch(err => next(err))
