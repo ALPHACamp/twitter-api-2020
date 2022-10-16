@@ -7,10 +7,9 @@
     "start": "node app.js",
     "dev": "cross-env NODE_ENV=development nodemon app.js",
     "test": "mocha test --exit --recursive --timeout 5000",
-    "table":"npx sequelize db:migrate",
-    "seed" : "npx sequelize db:seed:all",
-    "test_env" :"export NODE_ENV=test"
-    
+    "table": "npx sequelize db:migrate",
+    "seed": "npx sequelize db:seed:all",
+    "test_env": "export NODE_ENV=test"
   },
   "author": "",
   "license": "ISC",
