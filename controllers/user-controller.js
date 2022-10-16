@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
 const { User, Tweet, Reply, Like } = require('../models')
-const sequelize = require('sequelize')
+const sequelize = require("sequelize")
 const { Op } = require("sequelize");
 const helpers = require('../_helpers')
 const { validateData, validateUser, validateUnique, validateEqual } = require('../vaildate-function')
@@ -54,82 +54,84 @@ const userController = {
         })
 
       })
-      .then(user => res.status(200).json({
-        status: 'success',
-        data: {
-          user: user.toJSON()
-        }
-      })).catch(err => next(err))
+      .then(user => {
+        const userData = user.toJSON()
+        delete userData.password
+
+        res.status(200).json({
+          status: 'success',
+          data: {
+            user: userData
+          }
+        })
+      }).catch(err => next(err))
   },
   putUserAccount: (req, res, next) => {
     // PUT /api/user/:id/account - 編輯註冊資料
     const { id } = req.params
-    const currentUser = helpers.getUser(req)
-    if (id !== String(currentUser.id)) throw new Error('permission denied')
+    const currentUserId = helpers.getUser(req).id
+    if (id !== currentUserId.toString()) throw new Error('permission denied')
     const data = validateData(req.body)
     const { account, name, email, password } = data
 
     return User.findAll({ where: { [Op.or]: [{ account }, { email }] } })
       .then(users => {
         const Unique = {
-          currentUser,
+          currentUserId,
           account,
           email
         }
         validateEqual(users, data)
         validateUnique(users, Unique)
-        
-
         return User.update({
           account,
           name,
           email,
           password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
         }, {
-          where: { id }, returning: true,
-          plain: true
+          where: { id }
         })
-      }).then(() => res.status(200).json({
-        status: 'success',
-        message: 'change succeeded !'
-      }))
+      }).then(rowUpdated => {
+        rowUpdated ? res.status(200).json({
+          status: 'success',
+          message: 'change succeeded !'
+        }) : res.send(500)
+      })
       .catch(err => next(err))
   },
   getUser: (req, res, next) => {
     // GET /api/users/:user_id - 檢視特定使用者的資訊
-    const currentUser = helpers.getUser(req).dataValues
+    const currentUser = helpers.getUser(req)
     const { id } = req.params
     return User.findByPk(id, {
       include:
         [{
           model: User,
           as: 'Followings',
-          attributes: ['id']
+          attributes: []
         },
         {
           model: User,
           as: 'Followers',
-          attributes: ['id']
+          attributes: []
         },
         {
           model: Tweet,
-          attributes: ['id']
-        }
+          attributes: []
+        }],
+      attributes: {
+        exclude: ['password'],
+        include: [
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.id'))), 'followingCount'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.id'))), 'followerCount'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'tweetCount']
         ]
+      }
     })
       .then(user => {
         validateUser(user)
-        user = {
-          ...user.toJSON(),
-          tweetCount: user.Tweets?.length,
-          followerCount: user.Followers?.length,
-          followingCount: user.Followings?.length,
-          isFollowed: user.Followers?.some(u => u.id === currentUser.id)
-        }
-
-        delete user.password
-        delete user.Tweets
-        delete user.Followers
+        user = user.toJSON()
+        user.isFollowed = currentUser.Followings.some(u => u.id.toString() === id)
         res.status(200).json(user)
       })
       .catch(err => next(err))
@@ -137,7 +139,6 @@ const userController = {
   getUserTweets: (req, res, next) => {
     // GET /api/users/:user_id/tweets - 檢視特定使用者的所有推文
     const UserId = req.params.id
-    console.log(UserId)
     User.findByPk(UserId)
       .then(user => {
         validateUser(user)
@@ -145,20 +146,34 @@ const userController = {
 
     return Tweet.findAll({
       where: { UserId },
-      attributes: ['id', 'description', 'createdAt'],
+      group: ['Tweet.id'],
+      attributes: {
+        exclude: ['password'],
+        include: ['id', 'description', 'createdAt',
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'replyCounts'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'likeCounts']
+        ]
+      },
       order: [['createdAt', 'DESC']],
-      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'], as: 'tweetAuthor' }, { model: Reply, attributes: ['id'] }, { model: Like, attributes: ['UserId'] }]
+      include: [{
+        model: User,
+        attributes: ['id', 'account', 'name', 'avatar'],
+        as: 'tweetAuthor'
+      },
+      {
+        model: Reply, attributes: []
+      }, {
+        model: Like, attributes: []
+      }]
     })
       .then(tweets => {
         const currentUser = helpers.getUser(req)
-        tweets.forEach(tweet => {
-          tweet = tweet.dataValues
-          tweet.replyCounts = tweet.Replies?.length,
-            tweet.likeCounts = tweet.Likes?.length,
-            tweet.isLiked = tweet.Likes?.some(l => l.UserId === currentUser.id)
-          delete tweet.Replies
-          delete tweet.Likes
-        })
+
+        tweets = tweets.map(tweet => ({
+          ...tweet.toJSON(),
+          isLiked: currentUser.dataValues?.Likes?.some(u => u.TweetId === tweet.id)
+        }))
+
         res.status(200).json(tweets)
       }).catch(err => next(err))
   },
@@ -174,21 +189,22 @@ const userController = {
     return Reply.findAll({
       where: { UserId },
       order: [['createdAt', 'DESC']],
-      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'], foreignKey: 'UserId', as: 'replyUser' },
-      { model: Tweet, attributes: ['id', 'description'], include: [{ model: User, attributes: ['id', 'account'], as: 'tweetAuthor' }] }]
+      include: [{
+        model: User,
+        attributes: ['id', 'account', 'name', 'avatar'], foreignKey: 'UserId', as: 'replyUser'
+      }, {
+        model: Tweet,
+        attributes: ['id', 'description'],
+        where: { id: { [Op.not]: null } },
+        include: [{ model: User, attributes: ['id', 'account'], as: 'tweetAuthor' }]
+      }]
     })
       .then(replies => {
-        replies = replies.filter(reply => {
-          if (!(reply.Tweet === null)) return reply
-        })
-
-        replies?.forEach(reply => {
-          console.log(reply)
-          reply = reply?.dataValues
-          reply.tweetAuthorAccount = reply?.Tweet?.tweetAuthor?.account
+        replies.forEach(reply => {
+          reply = reply.dataValues
+          reply.tweetAuthorAccount = reply.Tweet?.tweetAuthor?.account
           delete reply?.Tweet?.dataValues?.tweetAuthor
         })
-
         res.status(200).json(replies)
       }).catch(err => next(err))
   },
@@ -202,35 +218,30 @@ const userController = {
 
     return Like.findAll({
       where: { UserId },
+      group: ['Like.id'],
       order: [['createdAt', 'DESC']],
-      attributes: ['TweetId'],
+      attributes: ['TweetId', [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweet.Replies.id'))), 'replyCounts'],
+        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweet.Likes.id'))), 'likeCounts']],
       include: [{
         model: Tweet,
-        attributes:
-          ['id', 'description', 'createdAt'],
+        attributes: ['id', 'description', 'createdAt'],
+        where: { id: { [Op.not]: null } },
         include: [{
           model: User,
           attributes:
             ['id', 'account', 'name',
               'avatar'], as: 'tweetAuthor'
-        }, { model: Reply }, { model: Like }]
+        }, { model: Reply, attributes: [] }, { model: Like, attributes: [] }]
       }]
     })
       .then(likes => {
         const currentUser = helpers.getUser(req)
-        likes = likes.filter(like => {
-          if (!(like.Tweet === null)) return like
-        })
 
-        likes = likes?.map(like => {
-          like = like?.toJSON()
-          like.replyCounts = like?.Tweet?.Replies?.length,
-            like.likeCounts = like?.Tweet?.Likes?.length,
-            like.isLiked = like?.Tweet?.Likes.some(l => l.UserId === currentUser.id)
-          delete like?.Tweet?.Replies
-          delete like?.Tweet?.Likes
-          return like
-        })
+        likes = likes.map(like => ({
+          ...like.toJSON(),
+          isLiked: currentUser.dataValues?.Likes?.some(u => u.TweetId === like.TweetId)
+        }))
+
         return res.status(200).json(likes)
       })
       .catch(err => next(err))
@@ -268,7 +279,7 @@ const userController = {
           delete data.Followship
         })
         followers.sort((a, b) => b.followCreatAt - a.followCreatAt)
-        
+
         res.status(200).json(followers)
       }).catch(err => next(err))
   },
@@ -303,7 +314,7 @@ const userController = {
           data.followingId = data.Followship?.followingId
           data.isFollowed = userFollowings?.some(id => id === data.id)
           data.followCreatAt = data?.Followship?.createdAt,
-          delete data.Followship
+            delete data.Followship
         })
         followings.sort((a, b) => b.followCreatAt - a.followCreatAt)
 
@@ -314,24 +325,24 @@ const userController = {
     // GET /api/users/popularUsers - 檢視十大熱門使用者
     const currentUser = helpers.getUser(req)
     return User.findAll({
+      group: ['User.id'],
       include: {
-        model: User, as: 'Followers', attributes: ['id']
+        model: User, as: 'Followers', attributes: []
       },
       attributes: ['id',
         'name',
         'avatar',
-        'account'],
+        'account',
+        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.id'))), 'followerCounts']],
       where: { role: 'user' }
     })
       .then(users => {
-        const popularUser = users.map(user => {
-          user = user.toJSON()
-          user.followerCounts = user.Followers?.length
-          user.isFollowed = user.Followers?.some(u => u.id === currentUser.id)
-          delete user.Followers
-          return user
-        })
-        popularUser.sort((a, b) => b.followerCounts - a.followerCounts).splice(10)
+        users.sort((a, b) => b.dataValues.followerCounts - a.dataValues.followerCounts).splice(10)
+
+        const popularUser = users.map(user => ({
+          ...user.toJSON(),
+          isFollowed: currentUser.toJSON().Followings.some(u => u.id === user.id)
+        }))
 
         res.status(200).json(popularUser)
       }).catch(err => next(err))

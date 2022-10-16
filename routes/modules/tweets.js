@@ -11,13 +11,6 @@ router.post('/:id/unlike', tweetController.unlikeTweet)
 router.get('/:id', tweetController.getTweet)
 router.post('/', tweetController.postTweet)
 router.get('/', tweetController.getTweets)
-
-router.get('/', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*')
-})
-router.use('/', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*')
-})
 router.use('/', apiErrorHandler)
 
 

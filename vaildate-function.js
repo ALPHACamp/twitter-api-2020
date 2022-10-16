@@ -49,7 +49,7 @@ function validateUser(user, password) {
 function validateUnique(users, data) {
   if (!users) return
   users.map(user => {
-    if (data.currentUser && user.id === data.currentUser.id) return
+    if (data.currentUserId && user.id === data.currentUserId) return
 
     for (key in data) {
       if (user[key] === data[key]) throw new Error(`${key} 已重複註冊！`)
@@ -62,7 +62,7 @@ function validateEqual(users, data) {
   if (!users) return
   data.checkPassword ? delete data.checkPassword : null
   users.map(user => {
-    if (data.currentUser && user.id !== data.currentUser.id) return
+    if (data.currentUserId && user.id !== data.currentUserId) return
 
     let isEqual = true
     for (let key in data) {
