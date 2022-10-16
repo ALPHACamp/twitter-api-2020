@@ -1,13 +1,13 @@
+<h1 align="center">Alphitter</h1>
 
-<img src="https://media.giphy.com/media/vFKqnCdLPN/OKc/giphy.gif" width="40" height="40" />
-![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
+<div align="center"><a href="https://imgur.com/Ji23uG2"><img src="https://i.imgur.com/Ji23uG2.gif" title="source: imgur.com" width="800"/></a></div>
 
-<h2>介紹</h2>
-<a href="https://m790101.github.io/twitter-project-v1-/#/logIn" target="_blank">Alphitter 網站入口</a>  
+<h2>介紹</h2>  
 
-這是一個使用 Node.js、Express 框架、JWT token 驗證，並連接 MySQL 資料庫的 Simple Twitter 專案，是讓使用者可以發表想法和與其他使用者交流互動的社群平台。  
+1. 這是一個使用 Node.js、Express 框架、JWT token 驗證，並連接 MySQL 資料庫的 Simple Twitter 專案，是讓使用者可以發表想法和與其他使用者交流互動的社群平台。
+( <a href="https://m790101.github.io/twitter-project-v1-/#/logIn" target="_blank">Alphitter 網站入口</a> )
 
-操作角色可以分為：　　
+2. 操作角色可以分為：　　
 
 【 一般使用者 】  
 * 使用者可以註冊/登入/登出  
@@ -54,17 +54,21 @@
 ```create database ac_twitter_workspace character set utf8mb4 collate utf8mb4_unicode_ci;```   
 ```create database ac_twitter_workspace_test character set utf8mb4 collate utf8mb4_unicode_ci;```
 
-5. 建立資料表  
+5. 切換到測試環境
+export NODE_ENV=test
+
+6. 建立資料表  
 ```npx sequelize db:migrate```
 
-6. 建立種子資料  
+7. 建立種子資料  
 ```npx sequelize db:seed:all```
 
-7. 建立 .env 檔案設定環境變數   
+8. 建立 .env 檔案設定環境變數   
 ```參考 .env.example 設定```
 
-8. 啟動本地伺服器，輸入指令顯示 Example app listening on port 3000! 即成功開啟  
+9. 啟動本地伺服器，輸入指令顯示 Example app listening on port 3000! 即成功開啟  
 ```npm run dev```
+
 
 
 <h2>測試</h2>
