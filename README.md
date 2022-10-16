@@ -1,6 +1,19 @@
 # twitter-api-2020
 ALPHA Camp | 學期 3 | Simple Twitter | 自動化測試檔 (前後分離組) 
 
+前端頁面:https://github.com/yoyo030/simple-twitter
+
+## 前置步驟
+請先確認Node環境是否安裝正確，專案使用版本為![v14.16.0](https://nodejs.org/zh-tw/download/releases/)
+確認方式
+```bash
+node -v
+```
+正確情況下會出現以下畫面:
+```bash
+v14.16.0
+```
+
 ## 安裝步驟
 
 1.下載專案至本地端
