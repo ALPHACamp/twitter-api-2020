@@ -42,7 +42,11 @@ const userController = {
         if (isAccount) throw new Error('account 已重複註冊！')
 
         delete req.body.checkPassword
-        return User.create({ ...req.body, attributes: { exclude: ['email', 'account'] } })
+        return User.create({
+          ...req.body,
+          password: bcrypt.hashSync(password, 10),
+          attributes: { exclude: ['email', 'account'] }
+        })
       })
       .then(user => {
         user = user.toJSON()
