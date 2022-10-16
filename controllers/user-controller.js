@@ -66,7 +66,7 @@ const userController = {
       .then(user => {
         if (user?.role === 'admin') throw new Error('此帳號不存在')
         delete user.password
-        user.isFollowing = req.user.Followings.some(f => f.id === user.id)
+        user.isFollowing = helpers.getUser(req).Followings.some(f => f.id === user.id)
         res.status(200).json(user)
       })
       .catch(error => next(error))
