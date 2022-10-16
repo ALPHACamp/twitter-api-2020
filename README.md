@@ -50,23 +50,42 @@
 3. 安裝 npm 套件   
 ```npm install```
 
-4. 到 MySQL Workbench 建立專案資料庫  
+4. 確認資料庫的帳號、密碼以及名稱設定在 config/config.json 檔案裡
+```
+"development": {
+    "username": "root",
+    "password": "password",
+    "database": "ac_twitter_workspace",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+"test": {
+    "username": "root",
+    "password": "password",
+    "database": "ac_twitter_workspace_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
+  }
+ ```
+
+5. 到 MySQL Workbench 建立專案資料庫  
 ```create database ac_twitter_workspace character set utf8mb4 collate utf8mb4_unicode_ci;```   
 ```create database ac_twitter_workspace_test character set utf8mb4 collate utf8mb4_unicode_ci;```
 
-5. 切換到測試環境  
+6. 切換到測試環境  
 ```export NODE_ENV=test```
 
-6. 建立資料表  
+7. 建立資料表  
 ```npx sequelize db:migrate```
 
-7. 建立種子資料  
+8. 建立種子資料  
 ```npx sequelize db:seed:all```
 
-8. 建立 .env 檔案設定環境變數   
+9. 建立 .env 檔案設定環境變數   
 ```參考 .env.example 設定```
 
-9. 啟動本地伺服器，輸入指令顯示 Example app listening on port 3000! 即成功開啟  
+10. 啟動本地伺服器，輸入指令顯示 Example app listening on port 3000! 即成功開啟  
 ```npm run dev```
 
 
