@@ -208,7 +208,7 @@ const userController = {
         name: user.name,
         account: user.account,
         avatar: user.avatar,
-        followerCount: user.Followers.length,
+        followersCount: user.Followers.length,
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
       return res.status(200).json(users)
