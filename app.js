@@ -23,6 +23,10 @@ const corsOptions = {
 }
 
 const port = process.env.PORT || 3000
+
+app.use(cors(corsOptions))
+
+
 const SESSION_SECRET = 'secret'
 
 // use helpers.getUser(req) to replace req.user
@@ -38,7 +42,7 @@ app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: fals
 app.use(passport.initialize())
 app.use(passport.session())
 //app.use(cors(helpers.corsOptionsDelegate))
-app.use(cors(corsOptions))
+
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use('/api', apis)
