@@ -145,7 +145,8 @@ const tweetController = {
         where: {
           TweetId
         },
-        include: User
+        include: User,
+        order: [['createdAt', 'ASC']]
       })
       if (data.length === 0) throw new Error('這則貼文還沒有任何人回覆')
       return res.json(data)
