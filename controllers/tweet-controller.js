@@ -15,25 +15,22 @@ const tweetController = {
       {model: Like,
       attributes: ['TweetId', 'UserId']},
       {model: Reply,
-      attributes: ['id']},
-    ]
+      attributes: ['id']}
+      ],
+      order: [['createdAt', 'DESC']]
     })
     .then(tweets => {
       const result = []
-
       tweets.forEach(tweet => {
         tweet = tweet.toJSON()
         tweet.likeCounts = tweet.Likes.length
         tweet.replyCounts = tweet.Replies.length
         const isLiked = tweet.Likes.some(like => like.UserId === getUser(req).dataValues.id)
-        if (isLiked) { tweet.isLiked = true } 
-        else if (!isLiked) { tweet.isLiked = false }
+        tweet.isLiked = isLiked
         delete tweet.Likes
         delete tweet.Replies
         result.push(tweet)
       })
-
-      result.sort((a, b) => b.createdAt - a.createdAt)
       res.status(200).json(result)
     })
     .catch(err => next(err))
@@ -59,8 +56,7 @@ const tweetController = {
     .then(tweet => {
       if (!tweet) throw new Error('Tweet does not exist!')
       const isLiked = tweet.dataValues.Likes.some(element => element.UserId === getUser(req).dataValues.id)
-      if (isLiked) { tweet.dataValues.isLiked = true } 
-      else if (!isLiked) { tweet.dataValues.isLiked = false }
+      tweet.dataValues.isLiked = isLiked
       tweet.dataValues.likeCounts = tweet.dataValues.Likes.length
       tweet.dataValues.replyCounts = tweet.dataValues.Replies.length
       delete tweet.dataValues.Likes
