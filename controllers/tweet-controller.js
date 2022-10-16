@@ -7,8 +7,7 @@ const tweetController = {
       include: [
         User,
         { model: Like, include: User },
-        { model: Reply, include: User },
-        { model: User, as: 'LikedUsers' }
+        { model: Reply, include: User }
       ],
       order: [['createdAt', 'DESC']]
     })
@@ -25,7 +24,8 @@ const tweetController = {
             createdAt: tweet.createdAt,
             likeCount: tweet.Likes.length,
             commentCount: tweet.Replies.length,
-            isLike: tweet.LikedUsers.map(t =>t.id).includes(req.user.id)
+            isLike: tweet.Likes.some(l =>
+              l.UserId === helpers.getUser(req).id)
           }))
 
         return result
@@ -68,17 +68,12 @@ const tweetController = {
         include: [
           User,
           { model: Like, include: User },
-          { model: Reply, include: User },
-          { model: User, as: 'LikedUsers' }
+          { model: Reply, include: User }
         ]
       })
       .then(tweet => {
 
         if (!tweet) throw new Error('此推文已消失在這世上')
-
-        const isLike = tweet.Likes.some(l =>
-          l.UserId === helpers.getUser(req).id
-        )
 
         const result = ({
           id: tweet.id,
@@ -90,7 +85,8 @@ const tweetController = {
           createdAt: tweet.createdAt,
           likeCount: tweet.Likes.length,
           commentCount: tweet.Replies.length,
-          isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
+          isLike: tweet.Likes.some(l =>
+            l.UserId === helpers.getUser(req).id)
         })
 
         return result

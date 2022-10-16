@@ -12,10 +12,24 @@ const apis = require('./routes/apis')
 
 const app = express()
 
+const corsOptions = {
+  origin: [
+    'https://weihung-1010.github.io',
+    'http://localhost:8080'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['content-type', 'authorization'],
+  preflightContinue: true,
+  optionsSuccessStatus: 200
+}
+
+
 
 const port = process.env.PORT || 3000
 
-app.use(cors())
+app.use(cors(corsOptions))
+
+//app.use(cors())
 
 
 const SESSION_SECRET = 'secret'
