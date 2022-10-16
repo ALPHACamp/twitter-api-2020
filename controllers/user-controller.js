@@ -196,7 +196,7 @@ const userController = {
           'id', 'name', 'account', 'avatar',
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)`
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'
             ),
             'followersCount'
           ]],
@@ -208,7 +208,7 @@ const userController = {
         name: user.name,
         account: user.account,
         avatar: user.avatar,
-        followersCount: user.Followers.length,
+        followerCount: user.Followers.length,
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
       return res.status(200).json(users)

@@ -7,7 +7,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const session = require('express-session')
 const cors = require('cors')
-const helpers = require('./_helpers');
+//const helpers = require('./_helpers');
 const apis = require('./routes/apis')
 
 const app = express()
@@ -26,7 +26,8 @@ app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
 app.use(passport.session())
-app.use(cors(helpers.corsOptionsDelegate))
+//app.use(cors(helpers.corsOptionsDelegate))
+app.use(cors())
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use('/api', apis)

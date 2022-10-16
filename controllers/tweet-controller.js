@@ -68,7 +68,8 @@ const tweetController = {
         include: [
           User,
           { model: Like, include: User },
-          { model: Reply, include: User }
+          { model: Reply, include: User },
+          { model: User, as: 'LikedUsers' }
         ]
       })
       .then(tweet => {
@@ -85,11 +86,11 @@ const tweetController = {
           description: tweet.description,
           account: tweet.User.account,
           name: tweet.User.name,
-          avatar: tweet.avatar,
+          avatar: tweet.User.avatar,
           createdAt: tweet.createdAt,
           likeCount: tweet.Likes.length,
           commentCount: tweet.Replies.length,
-          isLike
+          isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
         })
 
         return result
