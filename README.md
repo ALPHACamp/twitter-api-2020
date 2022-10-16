@@ -17,7 +17,7 @@ $ npm install
 ```
 4. 建立資料庫（以 MySQLWorkbench 為例）
 ```
-※ 請先核對本地資料庫的 username、password 是否與 config.json 中的 development 設定一致。
+※ 請先核對本地資料庫的 username、password 是否與 /config/config.json 中的 development 設定一致。
 步驟A：create database ac_twitter_workspace;
 步驟B：字元集設定
 Character Set: utf8mb4
@@ -43,7 +43,7 @@ $ npm run dev
 ## 執行測試
 1. 建立測試用資料庫（以 MySQLWorkbench 為例）
 ```
-※ 請先核對本地資料庫的 username、password 是否與 config.json 中的 test 設定一致。
+※ 請先核對本地資料庫的 username、password 是否與 /config/config.json 中的 test 設定一致。
 步驟A：create database ac_twitter_workspace_test;
 步驟B：字元集設定
 Character Set: utf8mb4
