@@ -1,5 +1,6 @@
 const { Like, Reply, Tweet, User } = require('../models')
 const { getUser } = require('../_helpers')
+const charLimit = 140 // 推文及回覆的字元上限
 
 const tweetController = {
   getTweets: (req, res, next) => {
@@ -14,25 +15,22 @@ const tweetController = {
       {model: Like,
       attributes: ['TweetId', 'UserId']},
       {model: Reply,
-      attributes: ['id']},
-    ]
+      attributes: ['id']}
+      ],
+      order: [['createdAt', 'DESC']]
     })
     .then(tweets => {
       const result = []
-
       tweets.forEach(tweet => {
         tweet = tweet.toJSON()
         tweet.likeCounts = tweet.Likes.length
         tweet.replyCounts = tweet.Replies.length
         const isLiked = tweet.Likes.some(like => like.UserId === getUser(req).dataValues.id)
-        if (isLiked) { tweet.isLiked = true } 
-        else if (!isLiked) { tweet.isLiked = false }
+        tweet.isLiked = isLiked
         delete tweet.Likes
         delete tweet.Replies
         result.push(tweet)
       })
-
-      result.sort((a, b) => b.createdAt - a.createdAt)
       res.status(200).json(result)
     })
     .catch(err => next(err))
@@ -58,8 +56,7 @@ const tweetController = {
     .then(tweet => {
       if (!tweet) throw new Error('Tweet does not exist!')
       const isLiked = tweet.dataValues.Likes.some(element => element.UserId === getUser(req).dataValues.id)
-      if (isLiked) { tweet.dataValues.isLiked = true } 
-      else if (!isLiked) { tweet.dataValues.isLiked = false }
+      tweet.dataValues.isLiked = isLiked
       tweet.dataValues.likeCounts = tweet.dataValues.Likes.length
       tweet.dataValues.replyCounts = tweet.dataValues.Replies.length
       delete tweet.dataValues.Likes
@@ -70,15 +67,15 @@ const tweetController = {
   },
   postTweet:(req, res, next) => {
     // POST /api/tweets - 發布一筆推文
-    const UserId = getUser(req).dataValues.id
+    const userId = getUser(req).dataValues.id
     const { description } = req.body
     if (!description) throw new Error('內容不可空白')
-    if (description.length > 140) throw new Error('推文不可超過 140 字元')
-    return User.findByPk(UserId)
+    if (description.length > charLimit) throw new Error(`推文不可超過 ${charLimit} 字元`)
+    return User.findByPk(userId)
     .then(user => {
       if (!user) throw new Error("User didn't exist!")
       return Tweet.create({
-        UserId,
+        UserId: userId,
         description
       })
     })
@@ -92,16 +89,16 @@ const tweetController = {
   },
   likeTweet:(req, res, next) => {
     // POST /api/tweets/:tweet_id/like - 喜歡一則推文
-    const TweetId = req.params.id
-    const UserId = req.user.dataValues.id
+    const tweetId = req.params.id
+    const userId = req.user.dataValues.id
     return Promise.all([
       Tweet.findOne({
-        where: { id: TweetId }
+        where: { id: tweetId }
       }),
       Like.findOne({
         where: {
-          TweetId,
-          UserId
+          TweetId: tweetId,
+          UserId: userId
         }
       })
     ])
@@ -109,8 +106,8 @@ const tweetController = {
       if (!tweet) throw new Error('Tweet does not exist!')
       if (likedTweet) throw new Error('You have liked this Tweet!')
       return Like.create({
-        TweetId,
-        UserId
+        TweetId: tweetId,
+        UserId: userId
       })
     })
     .then(likeRecord => res.status(200).json(likeRecord))
@@ -118,16 +115,16 @@ const tweetController = {
   },
   unlikeTweet:(req, res, next) => {
     // POST /api/tweets/:tweet_id/unlike - 取消喜歡一則推文
-    const TweetId = req.params.id
-    const UserId = req.user.dataValues.id
+    const tweetId = req.params.id
+    const userId = req.user.dataValues.id
     return Promise.all([
       Tweet.findOne({
-        where: { id: TweetId }
+        where: { id: tweetId }
       }),
       Like.findOne({
         where: {
-          TweetId,
-          UserId
+          TweetId: tweetId,
+          UserId: userId
         }
       })
     ])
@@ -141,37 +138,34 @@ const tweetController = {
   },
   getReplies:(req, res, next) => {
     // GET /api/tweets/:tweet_id/replies - 讀取回覆串
-    return Promise.all([
-      Tweet.findByPk(req.params.id, {
+    return Reply.findAll({
+      where: { TweetId: req.params.id },
+      attributes: {exclude: ['updatedAt', 'UserId'] },
+      include: [{
+        model: User, 
+        as: 'replyUser',
+        attributes: ['id', 'account', 'avatar', 'name']
+      },
+      {
+        model: Tweet,
         attributes: ['id'],
         include: [{
           model: User,
           as: 'tweetAuthor',
           attributes: ['account']
         }]
-      }),
-      Tweet.findByPk(req.params.id, {
-        attributes: { exclude: ['UserId', 'updatedAt'] },
-        include: [{
-          model: Reply, include: [{
-          model: User,
-          as: 'replyUser',
-          attributes: ['id', 'account', 'avatar', 'name']
-        }]
-      },
-    ]
-      })
-    ])
-    .then(([author, result]) => {
+      }],
+      order: [['createdAt', 'DESC']]
+    })
+    .then((result) => {
       if (!result) throw new Error('Tweet does not exist!')
-      result = result.Replies.map(reply => ({
-        ...reply.toJSON(),
-        tweetAuthorAccount: author.tweetAuthor.account
-      }))
-      .sort((a,b) => b.createdAt - a.createdAt)
-      res.status(200).json(
-        result
-      )
+      result = result.map(element => {
+        element = element.toJSON(),
+        element.tweetAuthorAccount =  element.Tweet.tweetAuthor.account
+        delete element.Tweet
+        return element
+      })
+      res.status(200).json(result)
     })
     .catch(err => next(err))
   },
@@ -181,7 +175,7 @@ const tweetController = {
     const targetTweetId = req.params.id
     const replierId = req.user.dataValues.id
     if (!comment) throw new Error('Comment text is required!')
-    if (comment.length > 140) throw new Error('回覆不可超過 140 字元')
+    if (comment.length > charLimit) throw new Error(`回覆不可超過 ${charLimit} 字元`)
     return Promise.all([
       Tweet.findByPk(targetTweetId),
       User.findByPk(replierId)
