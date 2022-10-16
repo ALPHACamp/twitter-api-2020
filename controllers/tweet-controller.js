@@ -152,10 +152,9 @@ const tweetController = {
         TweetId,
         comment
       })
-        .then(data => res.status(200).json({
+        .then(() => res.status(200).json({
           status: 'success',
           message: '留言已成功新增',
-          data
         }))
         .catch(err => next(err))
 
