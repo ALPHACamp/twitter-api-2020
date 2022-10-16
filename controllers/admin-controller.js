@@ -13,7 +13,7 @@ const adminController = {
       const userData = helpers.getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.json({
+      res.status(200).json({
         status: 'success',
         data: {
           token,
