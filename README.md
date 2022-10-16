@@ -54,8 +54,8 @@
 ```create database ac_twitter_workspace character set utf8mb4 collate utf8mb4_unicode_ci;```   
 ```create database ac_twitter_workspace_test character set utf8mb4 collate utf8mb4_unicode_ci;```
 
-5. 切換到測試環境
-export NODE_ENV=test
+5. 切換到測試環境  
+```export NODE_ENV=test```
 
 6. 建立資料表  
 ```npx sequelize db:migrate```
