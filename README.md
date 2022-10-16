@@ -73,24 +73,30 @@
 ```create database ac_twitter_workspace character set utf8mb4 collate utf8mb4_unicode_ci;```   
 ```create database ac_twitter_workspace_test character set utf8mb4 collate utf8mb4_unicode_ci;```
 
-6. 切換到測試環境  
-```export NODE_ENV=test```
-
-7. 建立資料表  
+6. 建立資料表  
 ```npx sequelize db:migrate```
 
-8. 建立種子資料  
+7. 建立種子資料  
 ```npx sequelize db:seed:all```
 
-9. 建立 .env 檔案設定環境變數   
+8. 建立 .env 檔案設定環境變數   
 ```參考 .env.example 設定```
 
-10. 啟動本地伺服器，輸入指令顯示 Example app listening on port 3000! 即成功開啟  
+9. 啟動本地伺服器，輸入指令顯示 Example app listening on port 3000! 即成功開啟  
 ```npm run dev```
 
+<h2>執行測試</h2>
 
+1. 切換到測試環境  
+```export NODE_ENV=test```   
 
-<h2>測試</h2>
+2. 建立資料表  
+```npx sequelize db:migrate```  
+
+3. 執行測試檔   
+```npm run test```  
+
+<h2>測試帳號</h2>
 
 【 前台測試帳號 】  
 account：user1  
