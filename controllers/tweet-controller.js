@@ -126,9 +126,8 @@ const tweetController = {
       .catch(err => next(err))
   },
   addReply:(req, res, next) => {
-    
+      const TweetId = Number(req.params.tweet_id)
       const { comment } = req.body
-      const TweetId = Number( req.params.tweet_id)
       const UserId = helpers.getUser(req)?.id
       Tweet.findByPk(TweetId)
         .then(tweet => {

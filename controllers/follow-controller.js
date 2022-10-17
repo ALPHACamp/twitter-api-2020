@@ -18,22 +18,18 @@ addFollow: (req, res, next) => {
 
       if (!user) throw new Error('使用者不存在')
 
-      if (helpers.getUser(req).id === Number(id)) throw new Error('你無法追蹤自己')
+      if (helpers.getUser(req).id === user.id) throw new Error('你無法追蹤自己')
 
       if (followship) throw new Error('你已經追蹤此使用者')
 
 
       return Followship.create({
         followerId: helpers.getUser(req).id,
-        followingId: id
+        followingId: Number(id)
       })
 
     })
-    .then(data => res.status(200).json({
-      status: 'success',
-      message: '追蹤中',
-      data
-    }))
+    .then(data => res.json(data))
     .catch(err => next(err))
 },
   removeFollow: (req, res, next) => {
