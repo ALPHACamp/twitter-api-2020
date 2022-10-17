@@ -16,11 +16,11 @@ addFollow: (req, res, next) => {
   ])
     .then(([user, followship]) => {
 
-      if (!user) throw new Error('使用者不存在')
+     // if (!user) throw new Error('使用者不存在')
 
-      if (helpers.getUser(req).id === user.id) throw new Error('你無法追蹤自己')
+     // if (helpers.getUser(req).id === user.id) throw new Error('你無法追蹤自己')
 
-      if (followship) throw new Error('你已經追蹤此使用者')
+     // if (followship) throw new Error('你已經追蹤此使用者')
 
 
       return Followship.create({
