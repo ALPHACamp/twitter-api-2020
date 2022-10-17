@@ -8,7 +8,7 @@ function validateData(data) {
     data[key] = data[key].trim()
     if (key === 'account') {
       if (!data[key]) errors.push("Account is required")
-      if (!validator.isAscii(data[key], 'en-US')) {
+      if (!validator.isAlphanumeric(data[key], 'en-US')) {
         errors.push('Name is accepted only with English and Number');
       }
     }
@@ -21,7 +21,7 @@ function validateData(data) {
       if (!validator.isLength(data[key], { min: 0, max: 50 })) errors.push('Name is accepted within 50 characters')
     }
     if (key === 'introduction') {
-      if (!validator.isLength(data[key], { min: 0, max: 160 })) errors.push('Introduction is accepted within 160 characters')
+      if (!validator.isLength(data[key], { min: 0, max: 160 })) errors.push('帳號或密碼有誤！')
     }
     if (key === 'password') {
       if (!data[key]) errors.push("Password is required")
@@ -49,7 +49,7 @@ function validateUser(user, password) {
 function validateUnique(users, data) {
   if (!users) return
   users.map(user => {
-    if (data.currentUser && user.id === data.currentUser.id) return
+    if (data.currentUserId && user.id === data.currentUserId) return
 
     for (key in data) {
       if (user[key] === data[key]) throw new Error(`${key} 已重複註冊！`)
@@ -62,7 +62,7 @@ function validateEqual(users, data) {
   if (!users) return
   data.checkPassword ? delete data.checkPassword : null
   users.map(user => {
-    if (data.currentUser && user.id !== data.currentUser.id) return
+    if (data.currentUserId && user.id !== data.currentUserId) return
 
     let isEqual = true
     for (let key in data) {

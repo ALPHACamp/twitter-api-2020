@@ -33,16 +33,11 @@ module.exports = {
         }
       },
       avatar: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'https://i.postimg.cc/zDyBsYX4/img.png'
       },
       introduction: {
-        type: Sequelize.TEXT,
-        validate: {
-          len: {
-            args: [1, 160],
-            msg: "introduction is accepted within 160 characters"
-          }
-        }
+        type: Sequelize.TEXT
       },
       role: {
         type: Sequelize.STRING,

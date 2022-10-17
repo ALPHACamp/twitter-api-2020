@@ -11,7 +11,7 @@ router.post('/:id/unlike', tweetController.unlikeTweet)
 router.get('/:id', tweetController.getTweet)
 router.post('/', tweetController.postTweet)
 router.get('/', tweetController.getTweets)
-
 router.use('/', apiErrorHandler)
+
 
 module.exports = router

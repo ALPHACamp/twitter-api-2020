@@ -20,4 +20,5 @@ router.get('/:id', authenticated, userController.getUser)
 router.post('/', userController.postUser)
 router.use('/', apiErrorHandler)
 
+
 module.exports = router

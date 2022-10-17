@@ -1,6 +1,6 @@
 const passport = require('passport')
 const passportJWT = require('passport-jwt')
-const { User } = require('../models')
+const { User, Like } = require('../models')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 
@@ -11,7 +11,8 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     include: [
-      { model: User, as: 'Followings' }
+      { model: User, as: 'Followings' },
+      { model: Like }
     ]
   })
     .then(user => cb(null, user))

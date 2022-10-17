@@ -9,4 +9,5 @@ router.post('/', authenticated,followshipController.postFollow)
 router.delete('/:followingId', authenticated, followshipController.deleteFollow)
 router.use('/', apiErrorHandler)
 
+
 module.exports = router

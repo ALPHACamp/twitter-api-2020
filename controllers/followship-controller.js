@@ -7,20 +7,20 @@ const followshipController = {
   postFollow: (req, res, next) => {
     // POST /api/followships - 追蹤其他使用者
     const id = req.body.id
-    const currentUser = String(helpers.getUser(req).id)
-    if (id === currentUser) throw new Error("You couldn't follow yourself")
+    const currentUserId = helpers.getUser(req).id.toString()
+    if (id === currentUserId) throw new Error("You couldn't follow yourself")
 
     return User.findAll({
       where:
-        { id: { [Op.in]: [id, currentUser] } }
+        { id: { [Op.in]: [id, currentUserId] } }
     })
       .then(users => {
         if (users.length !== 2) throw new Error('User not exist')
 
-        return Followship.findOrCreate({ where: { followerId: currentUser, followingId: id }, raw: true })
+        return Followship.findOrCreate({ where: { followerId: currentUserId, followingId: id }, raw: true })
       })
       .then(([data, isCreated]) => {
-        if (!isCreated) throw new Error("You have followed this user")
+        if (!isCreated) throw new Error('You have followed this user')
         data = data.toJSON()
         data.isFollowed = true
         res.status(200).json(data)
@@ -28,8 +28,8 @@ const followshipController = {
   },
   deleteFollow: (req, res, next) => {
     // DELETE /api/followships/:following_id - 取消追蹤其他使用者
-    const followingId = req.params.followingId
-    const followerId = String(helpers.getUser(req).id)
+    const { followingId } = req.params
+    const followerId = helpers.getUser(req).id.toString()
 
     return User.findAll({
       where:

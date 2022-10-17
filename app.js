@@ -7,8 +7,6 @@ const router = require('./routes/index')
 const helpers = require('./_helpers')
 const passport = require('./config/passport')
 const cors = require('cors')
-
-const app = express()
 const corsOptions = {
   origin: [
     'https://imabby0508.github.io',
@@ -19,6 +17,8 @@ const corsOptions = {
   preflightContinue: true,
   optionsSuccessStatus: 200
 }
+
+const app = express()
 const PORT = process.env.PORT || 3000
 
 app.use(cors(corsOptions))
