@@ -7,12 +7,21 @@ const router = require('./routes/index')
 const helpers = require('./_helpers')
 const passport = require('./config/passport')
 const cors = require('cors')
+const corsOptions = {
+  origin: [
+    'https://imabby0508.github.io',
+    'http://localhost:8080'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['content-type', 'authorization'],
+  preflightContinue: true,
+  optionsSuccessStatus: 200
+}
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
-app.use(cors())
-
+app.use(cors(corsOptions))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use('/upload', express.static(path.join(__dirname, 'upload')))

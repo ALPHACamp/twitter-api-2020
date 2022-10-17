@@ -17,7 +17,7 @@ $ npm install
 ```
 4. 建立資料庫（以 MySQLWorkbench 為例）
 ```
-※ 請先核對本地資料庫的 username、password 是否與 config.json 中的 development 設定一致。
+※ 請先核對本地資料庫的 username、password 是否與 /config/config.json 中的 development 設定一致。
 步驟A：create database ac_twitter_workspace;
 步驟B：字元集設定
 Character Set: utf8mb4
@@ -43,7 +43,7 @@ $ npm run dev
 ## 執行測試
 1. 建立測試用資料庫（以 MySQLWorkbench 為例）
 ```
-※ 請先核對本地資料庫的 username、password 是否與 config.json 中的 test 設定一致。
+※ 請先核對本地資料庫的 username、password 是否與 /config/config.json 中的 test 設定一致。
 步驟A：create database ac_twitter_workspace_test;
 步驟B：字元集設定
 Character Set: utf8mb4
@@ -78,6 +78,11 @@ $ npm run test
   密碼：12345678
 * 一般用戶帳號 5：user5
   密碼：12345678
+## API 文件
+* Admin 相關路由：https://www.notion.so/Admin-APIs-72bce6d76c4947e5a0472183549a06bb
+* Followship 相關路由：https://www.notion.so/Followship-APIs-13af0e79ac4c4e8289c0a90514cc499b
+* Tweet 相關路由：https://www.notion.so/Tweet-APIs-7c7b82adf7a245f7b4fadff9d885c780
+* User 相關路由：https://www.notion.so/User-APIs-cdc56858f87b4007b68d1974106f4a2a
 ## 主要開發工具
 * Node.js 14.16.0
 * Express 4.16.4
