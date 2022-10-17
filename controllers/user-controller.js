@@ -101,36 +101,39 @@ const userController = {
   },
   getUser: (req, res, next) => {
     // GET /api/users/:user_id - 檢視特定使用者的資訊
-    const currentUser = helpers.getUser(req)
+    const currentUser = helpers.getUser(req).dataValues
     const { id } = req.params
     return User.findByPk(id, {
       include:
         [{
           model: User,
           as: 'Followings',
-          attributes: []
+          attributes: ['id']
         },
         {
           model: User,
           as: 'Followers',
-          attributes: []
+          attributes: ['id']
         },
         {
           model: Tweet,
-          attributes: []
-        }],
-      attributes: {
-        exclude: ['password'],
-        include: [
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.id'))), 'followingCount'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.id'))), 'followerCount'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'tweetCount']
+          attributes: ['id']
+        }
         ]
-      }
     })
       .then(user => {
         validateUser(user)
-        user.dataValues.isFollowed = currentUser?.dataValues?.Followings?.some(u => u.id.toString() === id)
+        user = {
+          ...user.toJSON(),
+          tweetCount: user.Tweets?.length,
+          followerCount: user.Followers?.length,
+          followingCount: user.Followings?.length,
+          isFollowed: user.Followers?.some(u => u.id === currentUser.id)
+        }
+
+        delete user.password
+        delete user.Tweets
+        delete user.Followers
         res.status(200).json(user)
       })
       .catch(err => next(err))
@@ -170,7 +173,7 @@ const userController = {
 
         tweets = tweets.map(tweet => ({
           ...tweet.toJSON(),
-          isLiked: currentUser.dataValues?.Likes?.some(u => u.TweetId === tweet.id)
+          isLiked: currentUser?.dataValues?.Likes?.some(u => u.TweetId === tweet.id)
         }))
 
         res.status(200).json(tweets)
