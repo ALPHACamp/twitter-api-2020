@@ -70,4 +70,3 @@ Password: 12345678
 ```
 ## API文件
 [文件連結](https://docs.google.com/document/d/1uj7txqbYDzgLnbGzjxk0KF0K8Z9QCxctKmKQBmbr6rw/)
-![image](https://user-images.githubusercontent.com/65106895/196086227-6b1103bc-0687-4134-bc7f-d91ccbb9a9bd.png)
