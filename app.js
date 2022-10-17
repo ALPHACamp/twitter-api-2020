@@ -12,28 +12,29 @@ const apis = require('./routes/apis')
 
 const app = express()
 
-//const corsOptions = {
- // origin: [
+const corsOptions = {
+  origin: [
+          '*'
   //  'https://weihung-1010.github.io',
  //   'http://localhost:8080'
-//  ],
-//  methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
-// allowedHeaders: ['content-type', 'authorization'],
-//}
-app.use(cors())
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
+ allowedHeaders: ['content-type', 'authorization'],
+}
+//app.use(cors())
 
-app.use((req, res, next) => {
-  res.append('Access-Control-Allow-Origin', ['*']);
-  res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,HEAD,PATCH,OPTIONS');
-  res.append('Access-Control-Allow-Headers', 'Content-Type', 'authorization');
-  next();
-})
+//app.use((req, res, next) => {
+ // res.append('Access-Control-Allow-Origin', ['*']);
+ // res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,HEAD,PATCH,OPTIONS');
+  //res.append('Access-Control-Allow-Headers', 'Content-Type', 'authorization');
+ // next();
+//})
 
 
 
 const port = process.env.PORT || 3000
 
-//app.use(cors(corsOptions))
+app.use(cors(corsOptions))
 
 //app.use(cors())
 
