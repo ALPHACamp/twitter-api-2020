@@ -125,8 +125,7 @@ const userController = {
     })
       .then(user => {
         validateUser(user)
-        user = user.toJSON()
-        user.isFollowed = currentUser.Followings.some(u => u.id.toString() === id)
+        user.dataValues.isFollowed = currentUser?.dataValues?.Followings?.some(u => u.id.toString() === id)
         res.status(200).json(user)
       })
       .catch(err => next(err))
