@@ -125,41 +125,24 @@ const tweetController = {
       .then(data => res.status(200).json(data))
       .catch(err => next(err))
   },
-  addReply: async (req, res, next) => {
-    try {
+  addReply:(req, res, next) => {
+    
       const { comment } = req.body
-      const TweetId = req.params.tweet_id
-
-      await Tweet.findByPk(TweetId)
+      const TweetId = Number( req.params.tweet_id)
+      const UserId = helpers.getUser(req)?.id
+      Tweet.findByPk(TweetId)
         .then(tweet => {
-          if (!tweet) {
-            return res.status(403).json({
-              status: 'error',
-              message: '此推文已消失在這世上'
-            })
-          }
+          if (!tweet) throw new Error('推文不存在')
+          return Reply.create({
+            comment,
+            UserId,
+            TweetId
+          })
         })
-
-      if (comment.length === 0) {
-        return res.status(403).json({
-          status: 'error',
-          message: '請輸入你想留言的內容'
+        .then(reply => {
+          res.json(reply)
         })
-      }
-
-      await Reply.create({
-        UserId: helpers.getUser(req).id,
-        TweetId,
-        comment
-      })
-        .then(() => res.status(200).json({
-          status: 'success',
-          message: '留言已成功新增',
-        }))
         .catch(err => next(err))
-
-    } catch (err) { console.log(err) }
-
   },
   likeTweet: (req, res, next) => {
     const TweetId = req.params.id
