@@ -57,7 +57,6 @@ const userController = {
       .then(user => {
         const userData = user.toJSON()
         delete userData.password
-
         res.status(200).json({
           status: 'success',
           data: {
