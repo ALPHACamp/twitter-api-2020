@@ -12,20 +12,30 @@ const apis = require('./routes/apis')
 
 const app = express()
 
-const corsOptions = {
-  origin: [
-    'https://weihung-1010.github.io',
-    'http://localhost:8080'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['content-type', 'authorization'],
-}
+//const corsOptions = {
+ // origin: [
+  //  'https://weihung-1010.github.io',
+ //   'http://localhost:8080'
+//  ],
+//  methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
+// allowedHeaders: ['content-type', 'authorization'],
+//}
+app.use(cors({
+  origin: "*",
+})
+)
 
+app.use((req, res, next) => {
+  res.append('Access-Control-Allow-Origin', ['*']);
+  res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.append('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+})
 
 
 const port = process.env.PORT || 3000
 
-app.use(cors(corsOptions))
+//app.use(cors(corsOptions))
 
 //app.use(cors())
 
