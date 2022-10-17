@@ -21,6 +21,10 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
  allowedHeaders: ['content-type', 'authorization'],
 }
+
+
+
+
 //app.use(cors())
 
 //app.use((req, res, next) => {
@@ -34,7 +38,7 @@ const corsOptions = {
 
 const port = process.env.PORT || 3000
 
-app.use(cors(corsOptions))
+
 
 //app.use(cors())
 
@@ -58,6 +62,8 @@ app.use(passport.session())
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use('/api', apis)
+
+app.use(cors(corsOptions))
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
