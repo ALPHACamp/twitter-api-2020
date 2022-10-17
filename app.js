@@ -11,16 +11,16 @@ const cors = require('cors')
 const apis = require('./routes/apis')
 
 const app = express()
-
-const corsOptions = {
-  origin: [
-          '*'
+const port = process.env.PORT || 3000
+//const corsOptions = {
+ // origin: [
+ //         '*'
   //  'https://weihung-1010.github.io',
  //   'http://localhost:8080'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
- allowedHeaders: ['content-type', 'authorization'],
-}
+ // ],
+ // methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
+// allowedHeaders: ['content-type', 'authorization'],
+//}
 
 
 
@@ -36,11 +36,10 @@ const corsOptions = {
 
 
 
-const port = process.env.PORT || 3000
 
 
 
-//app.use(cors())
+//
 
 
 const SESSION_SECRET = 'secret'
@@ -52,18 +51,22 @@ function authenticated(req, res, next){
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
-
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
 app.use(passport.session())
 //app.use(cors(helpers.corsOptionsDelegate))
 
-app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
+
+
+app.use(cors())
 app.use('/api', apis)
 
-app.use(cors(corsOptions))
+//app.use(cors(corsOptions))
+
+
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
