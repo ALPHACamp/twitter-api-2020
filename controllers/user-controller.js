@@ -58,12 +58,7 @@ const userController = {
         const userData = user.toJSON()
         delete userData.password
 
-        res.status(200).json({
-          status: 'success',
-          data: {
-            user: userData
-          }
-        })
+        res.status(200).json(userData)
       }).catch(err => next(err))
   },
   putUserAccount: (req, res, next) => {
