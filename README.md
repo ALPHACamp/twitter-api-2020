@@ -1,7 +1,9 @@
 # Simple Twitter API 伺服器
 ## 專案簡述
 本專案為前後端分離開發的後端部分，主要功能為操作資料庫之 CRUD，以實現前後端分工，為瀏覽器端提供服務。前後端專案串接後可模擬社群媒體 Twitter 的基本功能。
-
+```
+本專案前端 repo：https://github.com/imabby0508/simple-twitter
+```
 ## 專案設定
 1. 將本專案下載至本地
 ```
