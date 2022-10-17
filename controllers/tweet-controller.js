@@ -133,9 +133,9 @@ const tweetController = {
         .then(tweet => {
           if (!tweet) throw new Error('推文不存在')
           return Reply.create({
-            comment,
             UserId,
-            TweetId
+            TweetId,
+            comment
           })
         })
         .then(reply => {
