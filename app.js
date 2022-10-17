@@ -20,10 +20,7 @@ const app = express()
 //  methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'],
 // allowedHeaders: ['content-type', 'authorization'],
 //}
-app.use(cors({
-  origin: "*",
-})
-)
+app.use(cors())
 
 app.use((req, res, next) => {
   res.append('Access-Control-Allow-Origin', ['*']);
@@ -31,6 +28,7 @@ app.use((req, res, next) => {
   res.append('Access-Control-Allow-Headers', 'Content-Type', 'authorization');
   next();
 })
+
 
 
 const port = process.env.PORT || 3000
