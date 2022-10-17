@@ -23,7 +23,7 @@ git clone https://github.com/Berutorion/twitter-api-2020.git
 
 2.安裝專案所需套件
 ```bash
-npm run install
+npm install
 ```
 3.建立資料庫
 於本地端創建好資料庫後在config/confing.json中輸入建好的資料庫資訊
