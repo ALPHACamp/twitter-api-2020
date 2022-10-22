@@ -494,87 +494,88 @@ const userController = {
     }
   },
   putSetting: (req, res) => {
-    const userId = req.user.id
-    const { name, introduction, email, account, checkPassword } = req.body
-    let { password } = req.body
-    if (!name || !email || !account) {
-      return res.status(401).json({ status: 'error', message: 'Name、Email、Account 不可為空白' })
-    }
-    if (password !== checkPassword) {
-      return res.status(401).json({ status: 'error', message: 'password, checkPassword 不一致' })
-    }
-    if (password) {
-      password = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-    } else {
-      password = ''
-    }
+    return res.json({ status: 'error', message: '更改「帳戶設定」功能，暫時關閉' })
+    // const userId = req.user.id
+    // const { name, introduction, email, account, checkPassword } = req.body
+    // let { password } = req.body
+    // if (!name || !email || !account) {
+    //   return res.status(401).json({ status: 'error', message: 'Name、Email、Account 不可為空白' })
+    // }
+    // if (password !== checkPassword) {
+    //   return res.status(401).json({ status: 'error', message: 'password, checkPassword 不一致' })
+    // }
+    // if (password) {
+    //   password = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+    // } else {
+    //   password = ''
+    // }
 
-    // 檢查輸入之 account, email, name 是否已經被使用了
-    const errorMessages = []
-    User.findOne({ where: { email: email } })
-      .then(user => {
-        if (user) {
-          // email 已有人此用，且該人並不是 currentUser
-          if (user.id !== userId) {
-            errorMessages.push('此 email 已經有其他使用者使用')
-          }
-        }
+    // // 檢查輸入之 account, email, name 是否已經被使用了
+    // const errorMessages = []
+    // User.findOne({ where: { email: email } })
+    //   .then(user => {
+    //     if (user) {
+    //       // email 已有人此用，且該人並不是 currentUser
+    //       if (user.id !== userId) {
+    //         errorMessages.push('此 email 已經有其他使用者使用')
+    //       }
+    //     }
 
-        User.findOne({ where: { account: account } })
-          .then(user => {
-            if (user) {
-              // account 已有人此用，且該人並不是 currentUser
-              if (user.id !== userId) {
-                errorMessages.push('此 account 已經有其他使用者使用')
-              }
-            }
+    //     User.findOne({ where: { account: account } })
+    //       .then(user => {
+    //         if (user) {
+    //           // account 已有人此用，且該人並不是 currentUser
+    //           if (user.id !== userId) {
+    //             errorMessages.push('此 account 已經有其他使用者使用')
+    //           }
+    //         }
 
-            User.findOne({ where: { name: name } })
-              .then(user => {
-                if (user) {
-                  // account 已有人此用，且該人並不是 currentUser
-                  if (user.id !== userId) {
-                    errorMessages.push('此 name 已經有其他使用者使用')
-                  }
-                }
+    //         User.findOne({ where: { name: name } })
+    //           .then(user => {
+    //             if (user) {
+    //               // account 已有人此用，且該人並不是 currentUser
+    //               if (user.id !== userId) {
+    //                 errorMessages.push('此 name 已經有其他使用者使用')
+    //               }
+    //             }
 
-                // 如果輸入之 account, email，其中有一已經被其他人使用了，return
-                if (errorMessages.length > 0) {
-                  return res.status(401).json({ status: 'error', errorMessages: errorMessages })
-                }
+    //             // 如果輸入之 account, email，其中有一已經被其他人使用了，return
+    //             if (errorMessages.length > 0) {
+    //               return res.status(401).json({ status: 'error', errorMessages: errorMessages })
+    //             }
 
-                // 無誤時，建立新的資用者資料到資料庫中
-                User.findByPk(userId, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
-                  .then(user => {
-                    user.update({
-                      name: name || user.name,
-                      introduction: introduction || user.introduction,
-                      email: email || user.email,
-                      account: account || user.account,
-                      password: password || user.password
-                    })
-                      .then(user => {
-                        user = {
-                          account: user.account,
-                          avatar: user.avatar,
-                          id: user.id,
-                          email: user.email,
-                          introduction: user.introduction,
-                          name: user.name,
-                          role: user.role,
-                          banner: user.banner,
-                          Followers: user.Followers.map(follower => follower.Followship.followerId),
-                          Followings: user.Followings.map(following => following.Followship.followingId)
-                        }
-                        return res.json(user)
-                      })
-                  })
-              })
-          })
-      })
-      .catch(error => {
-        return res.status(401).json({ status: 'error', errorMessages: [] })
-      })
+    //             // 無誤時，建立新的資用者資料到資料庫中
+    //             User.findByPk(userId, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
+    //               .then(user => {
+    //                 user.update({
+    //                   name: name || user.name,
+    //                   introduction: introduction || user.introduction,
+    //                   email: email || user.email,
+    //                   account: account || user.account,
+    //                   password: password || user.password
+    //                 })
+    //                   .then(user => {
+    //                     user = {
+    //                       account: user.account,
+    //                       avatar: user.avatar,
+    //                       id: user.id,
+    //                       email: user.email,
+    //                       introduction: user.introduction,
+    //                       name: user.name,
+    //                       role: user.role,
+    //                       banner: user.banner,
+    //                       Followers: user.Followers.map(follower => follower.Followship.followerId),
+    //                       Followings: user.Followings.map(following => following.Followship.followingId)
+    //                     }
+    //                     return res.json(user)
+    //                   })
+    //               })
+    //           })
+    //       })
+    //   })
+    //   .catch(error => {
+    //     return res.status(401).json({ status: 'error', errorMessages: [] })
+    //   })
   }
 }
 
