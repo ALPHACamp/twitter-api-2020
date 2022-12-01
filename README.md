@@ -20,11 +20,7 @@ Password: 12345678
 
 ## API Guideline
 
-Please check our [API Docs](https://app.swaggerhub.com/apis-docs/yellaatthebeach/Twitter/1.0.0#/) for more information. All URLs referenced in the API documentation, you can see in the following host and base path: 
-
-```
-https://simple-twitter-22105.herokuapp.com/api
-```
+Please check our [API Docs](https://app.swaggerhub.com/apis-docs/yellaatthebeach/Twitter/1.0.0#/) for more information.
 
 ## Installation
 
