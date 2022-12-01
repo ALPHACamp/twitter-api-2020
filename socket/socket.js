@@ -5,7 +5,7 @@ const { createRoomName, postMessage, getNotRead, changeToRead } = require('../he
 module.exports = (Server, httpServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: ["http://localhost:8084", "http://localhost:8080"],
+      origin: '*',
       methods: ["GET", "POST"],
     }
   })
@@ -23,7 +23,6 @@ module.exports = (Server, httpServer) => {
       userList.push(socket.user)
     }
     console.log(userList)
-    io.emit('loginStatus', `${currentUser.name}已經登入了`)
 
     // 未讀私人訊息
     socket.on('messageNotReadInit', async () => {
@@ -37,8 +36,10 @@ module.exports = (Server, httpServer) => {
       if (data.roomName === 'public') {
         console.log(`${currentUser.name} has join public Room`)
         socket.join('public')
+        io.emit('loginStatus', `${currentUser.name}已經加入了`)
         io.emit('loginUser', userList)
       } else {
+        socket.leaveAll()
         const userId = Number(data.id) // 其他使用者id
         const roomName = createRoomName(userId, currentUser.id)
         socket.join(roomName)
@@ -96,7 +97,7 @@ module.exports = (Server, httpServer) => {
       console.log('The user disconnected')
       const index = userList.findIndex(user => user.id === currentUser.id)
       userList.splice(index, 1)
-      io.emit('loginStatus', `${currentUser.name}已經登出了`)
+      io.emit('loginStatus', `${currentUser.name}已經離開了`)
       io.emit('loginUser', userList)
     })
   })

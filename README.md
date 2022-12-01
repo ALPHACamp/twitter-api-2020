@@ -59,11 +59,7 @@ export NODE_ENV=test
 ```
  npx sequelize db:migrate
 ```
-4. 建立種子資料
-```
-npx sequelize db:seed:all
-```
-5. 測試
+４. 測試
 ```
 npm run test
 ```
