@@ -1,6 +1,9 @@
 // 載入所需套件
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
+const jwt = require('jsonwebtoken')
+const { User } = require('../models')
+
 
 module.exports = {
   authenticated: (req, res, next) => {
@@ -27,4 +30,17 @@ module.exports = {
     }
     return next()
   },
+
+  socketAuth: (socket, next) => {
+    const token = socket.handshake.auth.token
+    const SECRET = process.env.JWT_SECRET
+
+    jwt.verify(token, SECRET, async (err, decoded) => {
+      const user = (await User.findByPk(decoded.id, {
+        attributes: ['id', 'account', 'name', 'avatar'],
+      })).toJSON()
+      socket.user = user
+      return next()
+    })
+  }
 }
