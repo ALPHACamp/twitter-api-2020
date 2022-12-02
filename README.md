@@ -1,8 +1,8 @@
 # twitter-api-2020 (BackEnd)
-本專案為[前端專案](https://github.com/VinceLee9527/twitter-front-end-vue)提供API
+本專案為[前端專案](https://emily81926.github.io/twitter-front-end-vue/)提供API
 
 ## Live DEMO
-請點[此處](https://vincelee9527.github.io/twitter-front-end-vue/#/signin)前往  
+請點[此處](https://emily81926.github.io/twitter-front-end-vue/)前往  
 
 ![image](https://github.com/Emily81926/twitter-api-2020/blob/e3bb73328ab01ac4d01ab319cf2e02810c0d735b/public/home%20page.png)
 
