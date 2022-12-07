@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const path = require('path')
 const express = require('express')
+const cors = require('cors')
 const flash = require('connect-flash')
 const methodOverride = require('method-override')
 const session = require('express-session')
@@ -30,6 +31,7 @@ app.use((req, res, next) => {
   next()
 })
 
+app.use(cors())
 app.use(routes)
 
 // use helpers.getUser(req) to replace req.user
