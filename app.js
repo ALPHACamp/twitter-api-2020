@@ -30,7 +30,7 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use('/api', routes)
+app.use(routes)
 
 // use helpers.getUser(req) to replace req.user
 // function authenticated (req, res, next) {
