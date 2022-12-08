@@ -9,11 +9,13 @@ const flash = require('connect-flash')
 const methodOverride = require('method-override')
 const session = require('express-session')
 const passport = require('./config/passport')
-const helpers = require('./_helpers')
+const { getUser } = require('./helpers/auth-helpers')
 const routes = require('./routes')
 
 const app = express()
 const port = process.env.PORT || 3000
+// cors 的預設為全開放
+app.use(cors())
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -27,12 +29,14 @@ app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash('success_messages')
   res.locals.error_messages = req.flash('error_messages')
-  res.locals.user = helpers.getUser(req)
+  res.locals.user = getUser(req)
   next()
 })
 
-app.use(cors())
-app.use(routes)
+app.use('/api', routes)
+app.get('/', (req, res) => {
+  res.json('Thanks a lot to Lois and Adriene!')
+})
 
 // use helpers.getUser(req) to replace req.user
 // function authenticated (req, res, next) {
