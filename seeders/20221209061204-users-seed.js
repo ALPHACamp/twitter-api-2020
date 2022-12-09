@@ -1,7 +1,7 @@
 'use strict'
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
-const NUMBER_OF_SEED_USERS = 10
+const { SEED_USERS_AMOUNT } = require('../helpers/seeder-helpers')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -16,7 +16,7 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date()
     },
-    ...Array.from({ length: NUMBER_OF_SEED_USERS }, (_, i) => ({
+    ...Array.from({ length: SEED_USERS_AMOUNT }, (_, i) => ({
       name: `user${i + 1}`,
       account: `user${i + 1}`,
       email: `user${i + 1}@example.com`,
@@ -33,7 +33,7 @@ module.exports = {
     await queryInterface.bulkDelete('Users', {
       account: [
         'root',
-        ...Array.from({ length: NUMBER_OF_SEED_USERS }, (_, i) => `user${i + 1}`)
+        ...Array.from({ length: SEED_USERS_AMOUNT }, (_, i) => `user${i + 1}`)
       ]
     })
   }
