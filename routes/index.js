@@ -3,11 +3,11 @@ const router = express.Router()
 const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
 const { generalErrorHandler } = require('../middleware/error-handler')
-const { authenticated } = require('../middleware/authentication')
+const { authenticated, authenticatedAdmin } = require('../middleware/authentication')
 
 router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn)
 //  test router
-router.get('/api/users', authenticated, (req, res) => {
+router.get('/api/users', authenticated, authenticatedAdmin, (req, res) => {
   res.json({
     status: 'success'
   })
