@@ -32,8 +32,8 @@ const userController = {
         User.findOne({ where: { email } }),
         User.findOne({ where: { account } })
       ])
-      if (userEmail) messages.push({ msg: 'email 已重複註冊！' })
-      if (userAccount) messages.push({ msg: 'account已重複註冊!' })
+      if (userEmail) messages.push('email 已重複註冊！')
+      if (userAccount) messages.push('account已重複註冊!')
       if (messages.length) {
         return res.status(422).json({
           status: 'error',
