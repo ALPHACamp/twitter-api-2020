@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=development node app.js",
-    "dev": "NODE_ENV=development nodemon app.js",
+    "start": "cross-env NODE_ENV=development node app.js",
+    "dev": "cross-env NODE_ENV=development nodemon app.js",
     "test": "mocha test --exit --recursive --timeout 5000"
   },
   "author": "",
@@ -33,6 +33,7 @@
     "sinon-chai": "^3.3.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "eslint": "^8.29.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
