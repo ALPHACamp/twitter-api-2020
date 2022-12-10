@@ -5,13 +5,13 @@ module.exports = (sequelize, DataTypes) => {
     static associate (models) {
       // Relation(s)
       Like.belongsTo(models.User, { foreignKey: 'UserId' })
-      Like.belongsTo(models.Tweet, { foreignKey: 'TweedId' })
+      Like.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
     }
   }
   Like.init({
     // field: DataTypes.TYPE
     UserId: DataTypes.INTEGER,
-    TweedId: DataTypes.INTEGER
+    TweetId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Like',

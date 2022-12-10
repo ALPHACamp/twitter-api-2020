@@ -4,11 +4,13 @@ module.exports = (sequelize, DataTypes) => {
   class Followship extends Model {
     static associate (models) {
       // Relation(s)
+      Followship.belongsTo(models.User, { foreignKey: 'followerId', as: 'Followers' })
+      Followship.belongsTo(models.User, { foreignKey: 'followerId', as: 'Followings' })
     }
   }
   Followship.init({
     // field: DataTypes.TYPE
-    follwerId: DataTypes.INTEGER,
+    followerId: DataTypes.INTEGER,
     followingId: DataTypes.INTEGER
   }, {
     sequelize,
