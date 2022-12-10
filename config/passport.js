@@ -10,20 +10,20 @@ const { User } = require('../models')
 passport.use(new LocalStrategy(
   // customize user field
   {
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password'
   },
   //  authenticate user
-  async (email, password, callback) => {
+  async (account, password, callback) => {
     try {
-      //  email error
-      const user = await User.findOne({ where: { email } })
+      //  account error
+      const user = await User.findOne({ where: { account } })
       if (!user) {
         const err = new Error('Incorrect account or password.')
         err.status = 401
         throw err
       }
-      // email error
+      // password error
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) {
         const err = new Error('Incorrect account or password.')
