@@ -4,14 +4,14 @@ module.exports = (sequelize, DataTypes) => {
   class Like extends Model {
     static associate (models) {
       // Relation(s)
-      Like.belongsTo(models.User, { foreignKey: 'userId' })
-      Like.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
+      Like.belongsTo(models.User, { foreignKey: 'UserId' })
+      Like.belongsTo(models.Tweet, { foreignKey: 'TweedId' })
     }
   }
   Like.init({
     // field: DataTypes.TYPE
-    userId: DataTypes.INTEGER,
-    tweetId: DataTypes.INTEGER
+    UserId: DataTypes.INTEGER,
+    TweedId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Like',
