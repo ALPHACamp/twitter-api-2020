@@ -7,6 +7,8 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../mid
 
 router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
+router.post('/api/signup', userController.signUp)
+
 // not found router
 router.use('/', (_, res, next) => {
   res.status(404).json({
