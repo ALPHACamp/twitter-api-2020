@@ -11,12 +11,13 @@ module.exports = {
     )
     const tweets = await queryInterface.sequelize.query(
       'SELECT `id`, `UserId` FROM `Tweets`;',
-      { type: queryInterface.sequelize.QueryTypes.SELECT })
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
     tweets.forEach(tweet => {
       const userIdArr = []
       let UserId
       replies.push(
-        ...Array.from({ length: REPLIES_PER_TWEET }, (_, i) => {
+        ...Array.from({ length: REPLIES_PER_TWEET }, () => {
           do {
             UserId = users[Math.floor(Math.random() * users.length)].id
           } while (UserId === tweet.UserId || userIdArr.includes(UserId))
@@ -31,7 +32,7 @@ module.exports = {
         })
       )
     })
-    await queryInterface.bulkInsert('Replies', replies, {})
+    await queryInterface.bulkInsert('Replies', replies)
   },
 
   down: async (queryInterface, Sequelize) => {
