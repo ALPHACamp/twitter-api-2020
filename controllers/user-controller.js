@@ -27,17 +27,18 @@ const userController = {
       } = req.body
 
       // 確認email or account是否已存在
-      const messages = []
+      const message = {}
       const [userEmail, userAccount] = await Promise.all([
         User.findOne({ where: { email } }),
         User.findOne({ where: { account } })
       ])
-      if (userEmail) messages.push('email 已重複註冊！')
-      if (userAccount) messages.push('account已重複註冊!')
-      if (messages.length) {
+
+      if (userEmail) message.email = 'email 已重複註冊！'
+      if (userAccount) message.account = 'account已重複註冊!'
+      if (Object.keys(message).length !== 0) {
         return res.status(422).json({
           status: 'error',
-          messages,
+          message,
           email,
           account,
           name
