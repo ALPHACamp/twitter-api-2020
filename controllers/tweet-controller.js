@@ -1,7 +1,24 @@
-const { Tweet, User, sequelize, Like } = require('../models')
+const { Tweet, User, sequelize, Like, Reply } = require('../models')
 const { getUser } = require('../_helpers')
 
 const tweetController = {
+  getTweetReplies: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweet_id
+      const replies = await Reply.findAll({
+        where: { TweetId: tweetId },
+        attributes: ['UserId', 'comment', 'createdAt'],
+        include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      if (!replies) return res.status(200).json([])
+      res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  },
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
