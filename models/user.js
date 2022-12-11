@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: Sequelize.INTEGER
     },
+    account: {
+      type: Sequelize.STRING
+    },
     email: {
       type: Sequelize.STRING
     },
