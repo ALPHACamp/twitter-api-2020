@@ -1,5 +1,7 @@
 const express = require('express')
 const router = express.Router()
+const user = require('./modules/user')
+
 const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
 // const tweetController=require('../controllers/tweet-controller')
@@ -8,9 +10,12 @@ const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/authentication')
 const { RegisterValidator } = require('../middleware/validator-handler')
 
-router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn)
+router.post('/api/users/login', passport.authenticate('local', { session: false }), userController.signIn)
 
-router.post('/api/signup', RegisterValidator, userController.signUp)
+router.post('/api/users', RegisterValidator, userController.signUp)
+
+// modules
+router.use('/api/users', authenticated, authenticatedUser, user)
 
 router.use('/api/tweets', authenticated, authenticatedUser, tweet)
 

@@ -4,9 +4,9 @@ const { body, validationResult } = require('express-validator')
 const registerValidations = [
   body('name').trim().not().isEmpty().withMessage('名字不可空白!').bail().isLength({ max: 50 }).withMessage('字數超出上限！'),
   body('account').trim().not().isEmpty().withMessage('帳號不可空白!'),
-  body('email').trim().not().isEmpty().withMessage('Email不可空白').bail().isEmail().normalizeEmail().withMessage('請輸入正確Email!'),
+  body('email').trim().not().isEmpty().withMessage('Email不可空白').bail().isEmail().withMessage('請輸入正確Email!'),
   body('password').trim().not().isEmpty().withMessage('密碼不可空白').bail().isLength({ min: 5 }).withMessage('密碼需要大於5位!'),
-  body('passwordCheck').trim().not().isEmpty().withMessage('確認密碼不可空白').bail()
+  body('checkPassword').trim().not().isEmpty().withMessage('確認密碼不可空白').bail()
     .custom((value, { req }) => {
       if (value !== req.body.password) {
         throw new Error('密碼與確認密碼不相符')
