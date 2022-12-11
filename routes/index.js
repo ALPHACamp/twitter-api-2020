@@ -8,7 +8,7 @@ const { RegisterValidator } = require('../middleware/validator-handler')
 
 router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
-router.post('/api/signup', RegisterValidator, userController.signUp)
+router.post('/api/users', RegisterValidator, userController.signUp)
 
 // not found router
 router.use('/', (_, res, next) => {
