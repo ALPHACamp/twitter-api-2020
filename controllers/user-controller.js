@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, sequelize } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
+const helpers = require('../_helpers')
+const { relativeTime } = require('../helpers/tweet-helper')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -75,7 +77,8 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'), 'followingCount']
         ]
       })
-      // check if the user exists
+
+      // 確認使用者是否存在
       if (!user || user.role === 'admin') {
         return res.status(404).json({
           status: 'error',
@@ -83,6 +86,46 @@ const userController = {
         })
       }
       return res.status(200).json(user)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const [user, userTweets] = await Promise.all([
+        User.findByPk(reqUserId),
+        Tweet.findAll({
+          where: { UserId: reqUserId },
+          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          attributes: [
+            'id', 'description', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+            [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
+          ],
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+
+      // 確認使用者是否存在
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+
+      //  轉換人性化時間
+      const newUserTweets = userTweets.map(userTweet => ({
+        ...userTweet,
+        createdAt: relativeTime(userTweet.createdAt)
+      }))
+
+      return res.status(200).json(newUserTweets)
     } catch (err) {
       next(err)
     }
