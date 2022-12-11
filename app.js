@@ -1,5 +1,5 @@
 const express = require('express')
-const routes = require('./routes/apis')
+const routes = require('./routes')
 const helpers = require('./_helpers')
 
 
