@@ -8,7 +8,7 @@ jwtOpts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
 jwtOpts.secretOrKey = process.env.JWT_SECRET
 passport.use(new JwtStrategy(jwtOpts, async (payload, done) => {
   try {
-    const user = User.findByPk(payload.id)
+    const user = await User.findByPk(payload.id)
     if (!user) return done(null, false)
     return done(null, user)
   } catch (err) {
