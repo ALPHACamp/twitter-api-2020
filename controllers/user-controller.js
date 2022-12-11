@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { validationResult } = require('express-validator')
-const { User, sequelize } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
+const { getUser } = require('../_helpers')
 
 const userController = {
   register: async (req, res, next) => {
@@ -48,7 +49,7 @@ const userController = {
       next(err)
     }
   },
-  getUser: async (req, res, next) => {
+  getUserProfile: async (req, res, next) => {
     try {
       const { id } = req.params
       const user = await User.findOne({
@@ -64,6 +65,29 @@ const userController = {
       if (!user) throw new Error("user didn't exist")
       const userData = user.toJSON()
       res.status(200).json(userData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findOne({ where: { id, role: 'user' } })
+      if (!user) throw new Error("user didn't exist")
+      const tweets = await Tweet.findAll({
+        where: { UserId: id },
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'repliesCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likesCount'],
+            [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${getUser(req).id} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
+          ]
+        },
+        order: [['createdAt', 'DESC']],
+        raw: true
+      })
+      if (!tweets.length) return res.status(200).json([])
+      res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
