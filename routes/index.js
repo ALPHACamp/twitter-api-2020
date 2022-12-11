@@ -1,9 +1,11 @@
 const express = require('express')
 const router = express.Router()
+const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
 
+router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
+
 router.get('/users', userController.getCurrentUser)
-// router.get('/users/:id', userController.getUser)
 
 router.use('/', (req, res) => {
   res.json('api test main')
