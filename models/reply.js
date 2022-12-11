@@ -1,38 +1,27 @@
 'use strict';
+const {
+  Model
+} = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  const Reply = sequelize.define('Reply', {
-    id: {
-      allowNull: false,
-      autoIncrement: true,
-      primaryKey: true,
-      type: Sequelize.INTEGER
-    },
-    UserId: {
-      type: Sequelize.INTEGER
-    },
-    TweetId: {
-      type: Sequelize.INTEGER
-    },
-    comment: {
-      type: Sequelize.TEXT
-    },
-    createdAt: {
-      allowNull: false,
-      type: Sequelize.DATE
-    },
-    updatedAt: {
-      allowNull: false,
-      type: Sequelize.DATE
-    }
-  }, {
-    sequelize,
-    modelName: 'Reply',
-    tableName: 'Replies',
-    underscored: true
-  });
-  Reply.associate = function (models) {
+
+  class Reply extends Model {
+
+    static associate (models) {
     Reply.belongsTo(models.User, { foreignKey: 'userId' })
     Reply.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
-  };
-  return Reply;
-};
+    }  
+  }
+  Reply.init({
+    // Model attributes are defined here
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER,
+    comment: DataTypes.TEXT
+  }, {
+    // Other model options go here
+    sequelize, // We need to pass the connection instance
+    modelName: 'Reply', // We need to choose the model name
+    tableName: 'Replies',
+    underscored: true
+  })
+  return Reply
+}

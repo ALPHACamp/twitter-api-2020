@@ -1,67 +1,44 @@
 'use strict';
-
+const {
+  Model
+} = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define('User', {
+
+  class User extends Model {
+
+    static associate (models) {
+  
+      User.hasMany(models.Tweet, { foreignKey: 'userId' })
+      User.hasMany(models.Reply, { foreignKey: 'userId' })
+      User.hasMany(models.Like, { foreignKey: 'userId' })
+      User.belongsToMany(User, {
+        through: models.FollowShip,
+        foreignKey: 'followingId',
+        as: 'Followers'
+      })
+      User.belongsToMany(User, {
+        through: models.FollowShip,
+        foreignKey: 'followerId',
+        as: 'Followings'
+      })  
+    }  
+  }
+  User.init({
     // Model attributes are defined here
-    id: {
-      allowNull: false,
-      autoIncrement: true,
-      primaryKey: true,
-      type: Sequelize.INTEGER
-    },
-    account: {
-      type: Sequelize.STRING
-    },
-    email: {
-      type: Sequelize.STRING
-    },
-    password: {
-      type: Sequelize.STRING
-    },
-    name: {
-      type: Sequelize.STRING
-    },
-    avatar: {
-      type: Sequelize.STRING
-    },
-    introduction: {
-      type: Sequelize.TEXT
-    },
-    cover: {
-      type: Sequelize.STRING
-    },
-    role: {
-      type: Sequelize.STRING
-    },
-    createdAt: {
-      allowNull: false,
-      type: Sequelize.DATE
-    },
-    updatedAt: {
-      allowNull: false,
-      type: Sequelize.DATE
-    }
+      account: DataTypes.STRING,
+      email: DataTypes.STRING,
+      password: DataTypes.STRING,
+      name: DataTypes.STRING,
+      avatar: DataTypes.STRING,
+      introduction: DataTypes.TEXT,
+      cover: DataTypes.STRING,
+      role: DataTypes.STRING
   }, {
     // Other model options go here
-    sequelize,
-    modelName: 'User',
+    sequelize, // We need to pass the connection instance
+    modelName: 'User', // We need to choose the model name
     tableName: 'Users',
     underscored: true
-  });
-  User.associate = function (models) {
-    User.hasMany(models.Tweet, { foreignKey: 'userId' })
-    User.hasMany(models.Reply, { foreignKey: 'userId' })
-    User.hasMany(models.Like, { foreignKey: 'userId' })
-    User.belongsToMany(User, {
-      through: models.Followship,
-      foreignKey: 'followingId',
-      as: 'Followers'
-    })
-    User.belongsToMany(User, {
-      through: models.Followship,
-      foreignKey: 'followerId',
-      as: 'Followings'
-    })
-    return User;
-  }
+  })
+  return User
 }

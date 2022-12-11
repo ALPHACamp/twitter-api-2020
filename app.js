@@ -2,6 +2,8 @@ const express = require('express')
 const routes = require('./routes')
 const helpers = require('./_helpers')
 
+//確認資料庫連線
+require('./models')
 
 const app = express()
 const port = process.env.PORT || 3000
