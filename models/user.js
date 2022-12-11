@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     password: DataTypes.STRING,
     avatar: DataTypes.STRING,
     cover: DataTypes.STRING,
-    introduction: DataTypes.STRING,
+    introduction: DataTypes.TEXT,
     role: DataTypes.STRING
   }, {
     sequelize,
