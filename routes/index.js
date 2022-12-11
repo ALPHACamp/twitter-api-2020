@@ -8,9 +8,9 @@ const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/authentication')
 const { RegisterValidator } = require('../middleware/validator-handler')
 
-router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn)
+router.post('/api/users/login', passport.authenticate('local', { session: false }), userController.signIn)
 
-router.post('/api/signup', RegisterValidator, userController.signUp)
+router.post('/api/users', RegisterValidator, userController.signUp)
 
 // modules
 router.use('/api/users', authenticated, authenticatedUser, user)
