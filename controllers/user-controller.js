@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { validationResult } = require('express-validator')
-const { User } = require('../models')
+const { User, sequelize } = require('../models')
 
 const userController = {
   register: async (req, res, next) => {
@@ -44,6 +44,26 @@ const userController = {
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '14d' })
       res.status(200).json({ token, user: userData })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findOne({
+        where: { id, role: 'user' },
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingsCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followersCount']
+          ],
+          exclude: ['password', 'createdAt', 'updatedAt']
+        }
+      })
+      if (!user) throw new Error("user didn't exist")
+      const userData = user.toJSON()
+      res.status(200).json(userData)
     } catch (err) {
       next(err)
     }
