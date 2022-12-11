@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, sequelize } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -61,6 +61,28 @@ const userController = {
         status: 'success',
         user: userData
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserProfile: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const user = await User.findByPk(reqUserId, {
+        attributes: [
+          'id', 'account', 'name', 'avatar', 'cover', 'introduction', 'role',
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'), 'followingCount']
+        ]
+      })
+      // check if the user exists
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+      return res.status(200).json(user)
     } catch (err) {
       next(err)
     }
