@@ -4,11 +4,11 @@ const {
 } = require('sequelize')
 
 module.exports = (sequelize, DataTypes) => {
-  const Reply = sequelize.define('Reply', {
-  }, {})
-  Reply.associate = function (models) {
-    Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
-    Reply.belongsTo(models.User, { foreignKey: 'UserId' })
+  class Reply extends Model {
+    static associate (models) {
+      Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
+      Reply.belongsTo(models.User, { foreignKey: 'UserId' })
+    }
   }
   Reply.init({
     comment: DataTypes.TEXT,
@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
     TweetId: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Reply'
-    // tableName: 'Replies'
+    modelName: 'Reply',
+    tableName: 'Replies'
   })
   return Reply
 }
