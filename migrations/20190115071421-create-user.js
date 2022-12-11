@@ -8,6 +8,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      account: {
+        type: Sequelize.STRING
+      },
       email: {
         type: Sequelize.STRING
       },
@@ -22,6 +25,9 @@ module.exports = {
       },
       introduction: {
         type: Sequelize.TEXT
+      },
+      cover: {
+        type: Sequelize.STRING
       },
       role: {
         type: Sequelize.STRING
