@@ -47,6 +47,7 @@ module.exports = (sequelize, DataTypes) => {
   });
   User.associate = function (models) {
     User.hasMany(models.Tweet, { foreignKey: 'userId' })
+    User.hasMany(models.Reply, { foreignKey: 'userId' })
   };
   return User;
 };
