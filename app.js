@@ -2,14 +2,14 @@ const express = require('express')
 const routes = require('./routes')
 const helpers = require('./_helpers')
 
-//確認資料庫連線
+// 確認資料庫連線
 require('./models')
 
 const app = express()
 const port = process.env.PORT || 3000
 
 // use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next) {
+function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 }
 
