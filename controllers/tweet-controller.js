@@ -36,34 +36,28 @@ const tweetController = {
     try {
       const currentUserId = helpers.getUser(req).id
       const tweet = await Tweet.findByPk(req.params.id, {
-        include: [{
+        include: {
           model: User,
           attributes: ['id', 'avatar', 'account', 'name']
-        }, {
-          model: Reply,
-          attributes: ['id', 'comment', 'createdAt'],
-          include: {
-            model: User,
-            attributes: ['id', 'avatar', 'account', 'name']
-          },
-          where: Reply.TweetId = Tweet.id
-        }],
+        },
         attributes: [
           'id',
           'createdAt',
           'description',
-          // 111111111111111111111111111
           [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
           [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
         ],
         order: [['createdAt', 'DESC']]
       })
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: "This tweet doesn't exist!"
+        })
+      }
       const data = tweet.toJSON()
       data.createdAt = relativeTime(data.createdAt)
-      data.replyCountttt = data.Replies.length // 2222222222222222222222222 哪個效能比較好
-      console.log(2222222, data.createdAt) // ........................
-
       return res.status(200).json(data)
     } catch (err) {
       next(err)
@@ -95,7 +89,6 @@ const tweetController = {
     }
   },
   getTweetReplies: async (req, res, next) => {
-    // const repliedTweetId = req.params.id
     try {
       const replies = await Reply.findAll({
         raw: true,
@@ -107,7 +100,6 @@ const tweetController = {
         },
         where: { TweetId: req.params.id }
       })
-
       return res.status(200).json(replies)
     } catch (err) {
       next(err)
