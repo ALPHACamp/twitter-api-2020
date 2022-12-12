@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { relativeTime } = require('../helpers/tweet-helper')
 
@@ -215,6 +215,31 @@ const userController = {
       }))
 
       res.status(200).json(newUserLikedTeets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const [user, followers] = await Promise.all([
+        User.findByPk(reqUserId),
+        Followship.findAll({
+          where: { followingId: reqUserId },
+          include: { model: User, as: 'Followers' }
+        })
+      ])
+
+      // 確認使用者是否存在
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+
+      res.status(200).json(followers)
     } catch (err) {
       next(err)
     }
