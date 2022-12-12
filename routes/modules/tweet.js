@@ -7,8 +7,7 @@ router.post('/', tweetController.postTweet)
 router.get('/:id', tweetController.getTweet)
 router.get('/:id/replies', tweetController.getTweetReplies)
 router.post('/:id/replies', tweetController.postTweetReply)
+router.post('/:id/like', tweetController.likeTweet)
+router.post('/:id/unlike', tweetController.unlikeTweet)
 
 module.exports = router
-
-// POST	/api/tweets/:id/like	喜歡某則tweet
-// POST	/api/tweets/:id/unlike	取消喜歡某則tweet

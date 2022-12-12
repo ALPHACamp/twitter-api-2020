@@ -1,4 +1,4 @@
-const { Tweet, User, Reply, sequelize } = require('../models')
+const { Tweet, User, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { relativeTime } = require('../helpers/tweet-helpers')
 
@@ -129,10 +129,48 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  likeTweet: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.id)
+      const isExist = Boolean(await Tweet.findByPk(TweetId))
+      if (!isExist) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Tweet doesn\'t exist'
+        })
+      }
+      const isLiked = await Like.findOrCreate({
+        where: { UserId, TweetId }
+      })
+      if (!isLiked[1]) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'You have liked this tweet!'
+        })
+      }
+      return res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
+  },
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.id)
+      const aaa = await Like.destroy({ where: { UserId, TweetId } })
+      if (!aaa) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Tweet doesn\'t exist or you haven\'t like this tweet!'
+        })
+      }
+      return res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
 module.exports = tweetController
-
-// POST	/api/tweets/:id/like	喜歡某則tweet
-// POST	/api/tweets/:id/unlike	取消喜歡某則tweet
