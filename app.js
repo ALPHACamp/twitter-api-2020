@@ -10,6 +10,7 @@ const methodOverride = require('method-override')
 const session = require('express-session')
 const passport = require('./config/passport')
 const { getUser } = require('./_helpers')
+const { apiErrorHandler } = require('./middleware/error-handler')
 const routes = require('./routes')
 
 const app = express()
@@ -37,11 +38,7 @@ app.use('/api', routes)
 app.get('/', (req, res) => {
   res.json('Thanks a lot to Lois and Adriene!')
 })
-
-// use helpers.getUser(req) to replace req.user
-// function authenticated (req, res, next) {
-// passport.authenticate('jwt', { ses...
-// };
+app.use('/', apiErrorHandler)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
