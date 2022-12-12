@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router()
 const user = require('./modules/user')
-
+const tweet = require('./modules/tweet')
+const followship = require('./modules/followship')
 const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
-const tweet = require('./modules/tweet')
+
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/authentication')
 const { RegisterValidator } = require('../middleware/validator-handler')
@@ -15,8 +16,8 @@ router.post('/api/users', RegisterValidator, userController.signUp)
 
 // modules
 router.use('/api/users', authenticated, authenticatedUser, user)
-
 router.use('/api/tweets', authenticated, authenticatedUser, tweet)
+router.use('/api/followships', authenticated, authenticatedUser, followship)
 
 // not found router
 router.use('/', (_, res, next) => {
