@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, sequelize } = require('../models')
+const { User, Tweet, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { relativeTime } = require('../helpers/tweet-helper')
 
@@ -126,6 +126,46 @@ const userController = {
       }))
 
       return res.status(200).json(newUserTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const [user, userReplies] = await Promise.all([
+        User.findByPk(reqUserId),
+        Reply.findAll({
+          where: { UserId: reqUserId },
+          include: [
+            { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+            {
+              model: Tweet,
+              attributes: ['id'],
+              include: [{ model: User, attributes: ['id', 'account'] }]
+            }
+          ],
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+
+      // 確認使用者是否存在
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+
+      //  轉換人性化時間
+      const newUserReplies = userReplies.map(userReply => ({
+        ...userReply,
+        createdAt: relativeTime(userReply.createdAt)
+      }))
+
+      return res.status(200).json(newUserReplies)
     } catch (err) {
       next(err)
     }
