@@ -73,6 +73,29 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  addLike: async (req, res, next) => {
+    try {
+      const loginUser = getUser(req)?.id
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId, {
+        attributes: {
+          include: [[sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${loginUser} AND Likes.Tweet_Id = ${TweetId})`), 'isLiked']],
+          exclude: ['description', 'createdAt', 'updatedAt']
+        },
+        raw: true
+      })
+      if (!tweet) throw new Error('推文不存在')
+      if (tweet.isLiked) throw new Error('You have liked this restaurant!')
+      await Like.create({
+        UserId: loginUser,
+        TweetId
+      })
+      tweet.isLiked = 1
+      res.status(200).json(tweet)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = tweetController
