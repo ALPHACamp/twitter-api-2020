@@ -69,6 +69,31 @@ const tweetController = {
       next(err)
     }
   },
+  postTweet: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const description = req.body.description.trim()
+      if (!description) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Tweet description is required!'
+        })
+      }
+      if (description.length > 140) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Tweet description can\'t exceed 140 characters!'
+        })
+      }
+      await Tweet.create({
+        UserId,
+        description
+      })
+      return res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
+  },
   getTweetReplies: async (req, res, next) => {
     // const repliedTweetId = req.params.id
     try {
@@ -95,4 +120,3 @@ module.exports = tweetController
 // POST	/api/tweets/:id/like	喜歡某則tweet
 // POST	/api/tweets/:id/unlike	取消喜歡某則tweet
 // POST	/api/tweets/:id/replies	新增回覆
-// POST	/api/tweets	新增tweets
