@@ -90,6 +90,13 @@ const userController = {
       next(err)
     }
   },
+  putUserProfile: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+    } catch (err) {
+      next(err)
+    }
+  },
   getUserTweets: async (req, res, next) => {
     try {
       const reqUserId = Number(req.params.id)
