@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { validationResult } = require('express-validator')
-const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const userController = {
@@ -57,7 +57,8 @@ const userController = {
         attributes: {
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingsCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followersCount']
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followersCount'],
+            [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = User.id)`), 'isFollowed']
           ],
           exclude: ['password', 'createdAt', 'updatedAt']
         }
@@ -140,6 +141,70 @@ const userController = {
       })
       if (!likes.length) return res.status(200).json([])
       res.status(200).json(likes)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findOne({ where: { id, role: 'user' } })
+      if (!user) throw new Error("user didn't exist")
+      const followings = await Followship.findAll({
+        where: { followerId: id },
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.following_id)'), 'name'],
+            [sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.following_id)'), 'introduction'],
+            [sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.following_id)'), 'avatar'],
+            [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'isFollowed']
+          ]
+        },
+        order: [['createdAt', 'DESC']]
+      })
+      if (!followings.length) return res.status(200).json([])
+      res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findOne({ where: { id, role: 'user' } })
+      if (!user) throw new Error("user didn't exist")
+      const followers = await Followship.findAll({
+        where: { followingId: id },
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.follower_id)'), 'name'],
+            [sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.follower_id)'), 'introduction'],
+            [sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.follower_id)'), 'avatar'],
+            [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'isFollowed']
+          ]
+        },
+        order: [['createdAt', 'DESC']]
+      })
+      if (!followers.length) return res.status(200).json([])
+      res.status(200).json(followers)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTopUsers: async (req, res, next) => {
+    try {
+      const DEFAULT_LIMIT = 10
+      const users = await User.findAll({
+        limit: DEFAULT_LIMIT,
+        where: { role: 'user' },
+        attributes: ['id', 'name', 'account', 'avatar',
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followersCount'],
+          [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = User.id)`), 'isFollowed']
+        ],
+        order: [[sequelize.literal('followersCount'), 'DESC']]
+      })
+      if (!users.length) return res.status(200).json([])
+      res.status(200).json(users)
     } catch (err) {
       next(err)
     }
