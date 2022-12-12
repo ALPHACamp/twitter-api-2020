@@ -68,6 +68,25 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweetReplies: async (req, res, next) => {
+    // const repliedTweetId = req.params.id
+    try {
+      const replies = await Reply.findAll({
+        raw: true,
+        nest: true,
+        attributes: ['id', 'comment', 'createdAt'],
+        include: {
+          model: User,
+          attributes: ['id', 'avatar', 'account', 'name']
+        },
+        where: { TweetId: req.params.id }
+      })
+
+      return res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
@@ -76,5 +95,4 @@ module.exports = tweetController
 // POST	/api/tweets/:id/like	喜歡某則tweet
 // POST	/api/tweets/:id/unlike	取消喜歡某則tweet
 // POST	/api/tweets/:id/replies	新增回覆
-// GET	/api/tweets/:id/replies	讀取回覆
 // POST	/api/tweets	新增tweets
