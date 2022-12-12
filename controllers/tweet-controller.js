@@ -100,7 +100,11 @@ const tweetController = {
         },
         where: { TweetId: req.params.id }
       })
-      return res.status(200).json(replies)
+      const data = replies.map(reply => ({
+        ...reply,
+        createdAt: relativeTime(reply.createdAt)
+      }))
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
