@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { relativeTime } = require('../helpers/tweet-helper')
 
@@ -166,6 +166,55 @@ const userController = {
       }))
 
       return res.status(200).json(newUserReplies)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikedTeets: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const [user, userLikedTeets] = await Promise.all([
+        User.findByPk(reqUserId),
+        Like.findAll({
+          where: { UserId: reqUserId },
+          attributes: ['id', 'TweetId'],
+          include: [
+            {
+              model: Tweet,
+              attributes: [
+                'id', 'description', 'createdAt',
+                [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+                [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+                [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
+              ],
+              include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+            }
+          ],
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+
+      // 確認使用者是否存在
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+
+      //  轉換人性化時間
+      const newUserLikedTeets = userLikedTeets.map(userLikedTeet => ({
+        ...userLikedTeet,
+        Tweet: {
+          ...userLikedTeet.Tweet,
+          createdAt: relativeTime(userLikedTeet.Tweet.createdAt)
+        }
+      }))
+
+      res.status(200).json(newUserLikedTeets)
     } catch (err) {
       next(err)
     }
