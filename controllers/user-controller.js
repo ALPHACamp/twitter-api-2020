@@ -6,7 +6,7 @@ const userController = {
         const {account, name, email, password, passwordCheck} = req.body
         if (!account || !name || !email || !password || !passwordCheck) throw Error('all field is required!',{},Error.prototype.code = 402)
         if (password !== passwordCheck) throw Error('passwords do not match!',{},Error.prototype.code = 422)
-        if (password !== passwordCheck) throw Error('passwords do not match!',{},Error.prototype.code = 422)
+        if (password.length < 8 && password.length > 12) throw Error('password over',{},Error.prototype.code = 412)
         if (account.length > 50 || name.length > 50) throw Error('name or account over',{},Error.prototype.code = 403)
         if (!email.match(/^\w+@\w+\.\w+$/i)) throw Error('invalid email format',{},Error.prototype.code = 401)
 
