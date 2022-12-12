@@ -1,4 +1,4 @@
-const { body, validationResult } = require('express-validator')
+const { body, check, validationResult } = require('express-validator')
 
 //  註冊表單驗證訊息
 const registerValidations = [
@@ -13,6 +13,12 @@ const registerValidations = [
       }
       return true //  沒問題務必回傳true!!
     })
+]
+
+//  驗證個人名稱、自我介紹
+const putUserProfileValidations = [
+  check('name').trim().not().isEmpty().withMessage('名字不可空白!').bail().isLength({ max: 50 }).withMessage('字數超出上限！'),
+  check('introduction').trim().isLength({ max: 160 }).withMessage('字數超出上限！')
 ]
 
 module.exports = {
@@ -50,6 +56,7 @@ module.exports = {
             break
           case 'passwordCheck':
             message.passwordCheck = error.msg
+            break
         }
       })
 
@@ -59,6 +66,37 @@ module.exports = {
         email,
         account,
         name
+      })
+    }
+
+    next()
+  },
+  putUserProfileValidator: async (req, res, next) => {
+    //  平行執行註冊驗證
+    await Promise.all(putUserProfileValidations.map(putUserProfileValidation => (
+      putUserProfileValidation.run(req)
+    )))
+
+    //  驗證結果
+    const errors = validationResult(req)
+
+    //  結果有錯
+    const message = {}
+    if (!errors.isEmpty()) {
+      errors.array().forEach(error => {
+        switch (error.param) {
+          case 'name':
+            message.name = error.msg
+            break
+          case 'introduction':
+            message.introduction = error.msg
+            break
+        }
+      })
+
+      return res.status(422).json({
+        status: 'error',
+        message
       })
     }
 

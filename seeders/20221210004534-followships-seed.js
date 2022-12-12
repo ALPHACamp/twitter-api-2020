@@ -1,5 +1,5 @@
 'use strict'
-const { FOLLOWSHIP_AMOUNT } = require('../helpers/seeder-helpers')
+const { FOLLOWSHIP_AMOUNT } = require('../helpers/seeder-helper')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {

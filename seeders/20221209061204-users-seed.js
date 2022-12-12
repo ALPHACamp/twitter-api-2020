@@ -1,7 +1,7 @@
 'use strict'
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
-const { SEED_USERS_AMOUNT } = require('../helpers/seeder-helpers')
+const { SEED_USERS_AMOUNT } = require('../helpers/seeder-helper')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {

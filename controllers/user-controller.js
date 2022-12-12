@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const helpers = require('../_helpers')
+const { relativeTime } = require('../helpers/date-helper')
+const { imgurFileHandler } = require('../helpers/file-helper')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -61,6 +64,255 @@ const userController = {
         status: 'success',
         user: userData
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserProfile: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const user = await User.findByPk(reqUserId, {
+        attributes: [
+          'id', 'account', 'name', 'avatar', 'cover', 'introduction', 'role',
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'), 'followingCount']
+        ]
+      })
+
+      // 確認使用者是否存在
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+      return res.status(200).json(user)
+    } catch (err) {
+      next(err)
+    }
+  },
+  putUserProfile: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const { name, introduction } = req.body
+      const { files } = req
+
+      const option = { name, introduction }
+      if (files?.avatar) option.avatar = await imgurFileHandler(files.avatar[0])
+      if (files?.cover) option.cover = await imgurFileHandler(files.cover[0])
+
+      //  更新資料
+      const user = await User.findByPk(reqUserId)
+      await user.update(option)
+
+      res.status(200).json({
+        status: 'success'
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const [user, userTweets] = await Promise.all([
+        User.findByPk(reqUserId),
+        Tweet.findAll({
+          where: { UserId: reqUserId },
+          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          attributes: [
+            'id', 'description', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+            [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
+          ],
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+
+      // 確認使用者是否存在
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+
+      //  轉換人性化時間
+      const newUserTweets = userTweets.map(userTweet => ({
+        ...userTweet,
+        createdAt: relativeTime(userTweet.createdAt)
+      }))
+
+      return res.status(200).json(newUserTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const [user, userReplies] = await Promise.all([
+        User.findByPk(reqUserId),
+        Reply.findAll({
+          where: { UserId: reqUserId },
+          include: [
+            { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+            {
+              model: Tweet,
+              attributes: ['id'],
+              include: [{ model: User, attributes: ['id', 'account'] }]
+            }
+          ],
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+
+      // 確認使用者是否存在
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+
+      //  轉換人性化時間
+      const newUserReplies = userReplies.map(userReply => ({
+        ...userReply,
+        createdAt: relativeTime(userReply.createdAt)
+      }))
+
+      return res.status(200).json(newUserReplies)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikedTeets: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const [user, userLikedTeets] = await Promise.all([
+        User.findByPk(reqUserId),
+        Like.findAll({
+          where: { UserId: reqUserId },
+          attributes: ['id', 'TweetId'],
+          include: [
+            {
+              model: Tweet,
+              attributes: [
+                'id', 'description', 'createdAt',
+                [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+                [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+                [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
+              ],
+              include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+            }
+          ],
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+
+      // 確認使用者是否存在
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+
+      //  轉換人性化時間
+      const newUserLikedTeets = userLikedTeets.map(userLikedTeet => ({
+        ...userLikedTeet,
+        Tweet: {
+          ...userLikedTeet.Tweet,
+          createdAt: relativeTime(userLikedTeet.Tweet.createdAt)
+        }
+      }))
+
+      res.status(200).json(newUserLikedTeets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const [user, followings] = await Promise.all([
+        User.findByPk(reqUserId),
+        Followship.findAll({
+          where: { followerId: reqUserId },
+          include: {
+            model: User,
+            as: 'Followings',
+            attributes: [
+              'id',
+              'name',
+              'avatar',
+              'introduction',
+              [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = Followings.id)`), 'isFollowed']
+            ]
+          },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+
+      // 確認使用者是否存在
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+
+      res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const [user, followers] = await Promise.all([
+        User.findByPk(reqUserId),
+        Followship.findAll({
+          where: { followingId: reqUserId },
+          include: {
+            model: User,
+            as: 'Followers',
+            attributes: [
+              'id',
+              'name',
+              'avatar',
+              'introduction',
+              [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = Followers.id)`), 'isFollowed']
+            ]
+          },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+
+      // 確認使用者是否存在
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+
+      res.status(200).json(followers)
     } catch (err) {
       next(err)
     }
