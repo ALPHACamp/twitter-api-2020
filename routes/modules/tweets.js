@@ -7,6 +7,8 @@ const { authenticated, authenticatedUser } = require('../../middleware/auth')
 router.post('/:id/like', authenticated, authenticatedUser, tweetController.addLike)
 // 取消喜歡一則推文
 router.post('/:id/unlike', authenticated, authenticatedUser, tweetController.unlikeTweet)
+// 回覆一則推文
+router.post('/:tweet_id/replies', authenticated, authenticatedUser, tweetController.replyTweet)
 // 取得一則推文的所有回覆
 router.get('/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
 // 使用者取得一則推文

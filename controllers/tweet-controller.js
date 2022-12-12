@@ -131,6 +131,25 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  replyTweet: async (req, res, next) => {
+    try {
+      const { comment } = req.body
+      const TweetId = req.params.tweet_id
+      const UserId = getUser(req).id
+      if (!comment.trim()) throw new Error('內容不可空白')
+      if (comment.length > 140) throw new Error('內容不可超過140字')
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) throw new Error('推文不存在')
+      const data = await Reply.create({
+        UserId,
+        TweetId,
+        comment
+      })
+      res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = tweetController
