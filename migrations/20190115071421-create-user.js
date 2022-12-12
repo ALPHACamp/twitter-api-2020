@@ -7,6 +7,9 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
+      }, 
+      account: {
+        type: Sequelize.STRING
       },
       email: {
         type: Sequelize.STRING
@@ -18,6 +21,9 @@ module.exports = {
         type: Sequelize.STRING
       },
       avatar: {
+        type: Sequelize.STRING
+      }, 
+      coverImage: {
         type: Sequelize.STRING
       },
       introduction: {
