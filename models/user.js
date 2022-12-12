@@ -28,9 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     introduction: DataTypes.TEXT,
     avatar: DataTypes.STRING,
     cover: DataTypes.STRING,
-    role: DataTypes.STRING,
-    createdAt: DataTypes.DATE,
-    updatedAt: DataTypes.DATE
+    role: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',
