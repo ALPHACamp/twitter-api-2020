@@ -15,6 +15,12 @@ const registerValidations = [
     })
 ]
 
+//  驗證個人名稱、自我介紹
+const putUserProfileValidations = [
+  body('name').trim().not().isEmpty().withMessage('名字不可空白!').bail().isLength({ max: 50 }).withMessage('字數超出上限！'),
+  body('introduction').trim().isLength({ max: 160 }).withMessage('字數超出上限！')
+]
+
 module.exports = {
   RegisterValidator: async (req, res, next) => {
     const {
@@ -50,6 +56,7 @@ module.exports = {
             break
           case 'passwordCheck':
             message.passwordCheck = error.msg
+            break
         }
       })
 
@@ -59,6 +66,37 @@ module.exports = {
         email,
         account,
         name
+      })
+    }
+
+    next()
+  },
+  putUserProfileValidator: async (req, res, next) => {
+    //  平行執行註冊驗證
+    await Promise.all(putUserProfileValidations.map(putUserProfileValidation => (
+      putUserProfileValidation.run(req)
+    )))
+
+    //  驗證結果
+    const errors = validationResult(req)
+
+    //  結果有錯
+    const message = {}
+    if (!errors.isEmpty()) {
+      errors.array().forEach(error => {
+        switch (error.param) {
+          case 'name':
+            message.name = error.msg
+            break
+          case 'introduction':
+            message.introduction = error.msg
+            break
+        }
+      })
+
+      return res.status(422).json({
+        status: 'error',
+        message
       })
     }
 
