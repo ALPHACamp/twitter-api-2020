@@ -219,6 +219,44 @@ const userController = {
       next(err)
     }
   },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const [user, followings] = await Promise.all([
+        User.findByPk(reqUserId),
+        Followship.findAll({
+          where: { followerId: reqUserId },
+          include: {
+            model: User,
+            as: 'Followings',
+            attributes: [
+              'id',
+              'name',
+              'avatar',
+              'introduction',
+              [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = Followings.id)`), 'isFollowed']
+            ]
+          },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+
+      // 確認使用者是否存在
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'The user does not exist.'
+        })
+      }
+
+      res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
   getUserFollowers: async (req, res, next) => {
     try {
       const reqUserId = Number(req.params.id)
