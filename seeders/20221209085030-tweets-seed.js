@@ -1,6 +1,6 @@
 'use strict'
 const faker = require('faker')
-const { SEED_USERS_AMOUNT, TWEETS_PER_USER } = require('../helpers/seeder-helpers')
+const { SEED_USERS_AMOUNT, TWEETS_PER_USER } = require('../helpers/seeder-helper')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {

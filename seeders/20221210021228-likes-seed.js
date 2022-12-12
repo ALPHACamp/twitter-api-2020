@@ -1,5 +1,5 @@
 'use strict'
-const { LIKE_AMOUNT } = require('../helpers/seeder-helpers')
+const { LIKE_AMOUNT } = require('../helpers/seeder-helper')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
