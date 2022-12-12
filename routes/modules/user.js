@@ -9,7 +9,7 @@ router.get('/:id/followings', userController.getUserFollowings)
 router.get('/:id/likes', userController.getUserLikedTeets)
 router.get('/:id/replied_tweets', userController.getUserReplies)
 router.get('/:id/tweets', userController.getUserTweets)
-router.put('/:id', authenticatedCurrentUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUserProfile)
+router.put('/:id', authenticatedCurrentUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUserProfile)
 router.get('/:id', userController.getUserProfile)
 
 module.exports = router

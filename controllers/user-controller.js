@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { relativeTime } = require('../helpers/tweet-helper')
+const { imgurFileHandler } = require('../helpers/file-helper')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -93,6 +94,8 @@ const userController = {
   putUserProfile: async (req, res, next) => {
     try {
       const reqUserId = Number(req.params.id)
+      const { files } = req
+      console.log(files)
     } catch (err) {
       next(err)
     }
