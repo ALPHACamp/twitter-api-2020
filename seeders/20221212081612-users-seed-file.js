@@ -1,5 +1,5 @@
 'use strict'
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs')
 const faker = require('faker')
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'admin',
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updatedAt: new Date()
       }, {
         account: 'user1',
         email: 'user1@example.com',
@@ -24,7 +24,7 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'user',
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updatedAt: new Date()
       }, {
         account: 'user2',
         email: 'user2@example.com',
@@ -34,7 +34,7 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'user',
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updatedAt: new Date()
       }, {
         account: 'user3',
         email: 'user3@example.com',
@@ -44,7 +44,7 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'user',
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updatedAt: new Date()
       }, {
         account: 'user4',
         email: 'user4@example.com',
@@ -54,7 +54,7 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'user',
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updatedAt: new Date()
       }, {
         account: 'user5',
         email: 'user5@example.com',
@@ -64,12 +64,12 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'user',
         createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ], {});
+        updatedAt: new Date()
+      }
+    ], {})
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Users', {});
-  },
-};
+    await queryInterface.bulkDelete('Users', {})
+  }
+}
