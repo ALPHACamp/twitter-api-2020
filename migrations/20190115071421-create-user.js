@@ -32,6 +32,9 @@ module.exports = {
       role: {
         type: Sequelize.STRING
       },
+      following_count: {
+        type: Sequelize.STRING
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE
