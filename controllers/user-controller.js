@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { validationResult } = require('express-validator')
-const { User, Tweet, Reply, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const userController = {
@@ -111,6 +111,35 @@ const userController = {
       })
       if (!replies.length) return res.status(200).json([])
       res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findOne({ where: { id, role: 'user' } })
+      if (!user) throw new Error("user didn't exist")
+      const likes = await Like.findAll({
+        where: { UserId: id },
+        include: [
+          {
+            model: Tweet,
+            attributes: [
+              'id', 'description', 'createdAt',
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'repliesCount'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likesCount'],
+              [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${getUser(req).id} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
+            ],
+            include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      if (!likes.length) return res.status(200).json([])
+      res.status(200).json(likes)
     } catch (err) {
       next(err)
     }
