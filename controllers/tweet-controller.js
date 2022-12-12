@@ -116,6 +116,21 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  postTweet: async (req, res, next) => {
+    try {
+      const { description } = req.body
+      const UserId = getUser(req).id
+      if (!description.trim()) throw new Error('內容不可空白')
+      if (description.length > 140) throw new Error('內容不可超過140字')
+      const data = await Tweet.create({
+        description,
+        UserId
+      })
+      res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = tweetController
