@@ -8,6 +8,8 @@ const { authenticated, authenticatedUser } = require('../../middleware/auth')
 router.post('/login', userController.login)
 // 取得使用者全部推文
 router.get('/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
+// 取得使用者全部回覆
+router.get('/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserReplies)
 // 取得使用者資料
 router.get('/:id', authenticated, authenticatedUser, userController.getUserProfile)
 // 註冊

@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { validationResult } = require('express-validator')
-const { User, Tweet, sequelize } = require('../models')
+const { User, Tweet, Reply, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const userController = {
@@ -76,6 +76,7 @@ const userController = {
       if (!user) throw new Error("user didn't exist")
       const tweets = await Tweet.findAll({
         where: { UserId: id },
+        include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
         attributes: {
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'repliesCount'],
@@ -84,10 +85,32 @@ const userController = {
           ]
         },
         order: [['createdAt', 'DESC']],
-        raw: true
+        raw: true,
+        nest: true
       })
       if (!tweets.length) return res.status(200).json([])
       res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findOne({ where: { id, role: 'user' } })
+      if (!user) throw new Error("user didn't exist")
+      const replies = await Reply.findAll({
+        where: { UserId: id },
+        include: [
+          { model: User, attributes: ['account', 'name', 'avatar'] },
+          { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['id', 'account'] }] }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      if (!replies.length) return res.status(200).json([])
+      res.status(200).json(replies)
     } catch (err) {
       next(err)
     }
