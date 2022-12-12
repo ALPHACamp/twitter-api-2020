@@ -94,8 +94,20 @@ const userController = {
   putUserProfile: async (req, res, next) => {
     try {
       const reqUserId = Number(req.params.id)
+      const { name, introduction } = req.body
       const { files } = req
-      console.log(files)
+
+      const option = { name, introduction }
+      if (files?.avatar) option.avatar = await imgurFileHandler(files.avatar[0])
+      if (files?.cover) option.cover = await imgurFileHandler(files.cover[0])
+
+      //  更新資料
+      const user = await User.findByPk(reqUserId)
+      await user.update(option)
+
+      res.status(200).json({
+        status: 'success'
+      })
     } catch (err) {
       next(err)
     }

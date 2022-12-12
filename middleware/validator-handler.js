@@ -1,4 +1,4 @@
-const { body, validationResult } = require('express-validator')
+const { body, check, validationResult } = require('express-validator')
 
 //  註冊表單驗證訊息
 const registerValidations = [
@@ -17,8 +17,8 @@ const registerValidations = [
 
 //  驗證個人名稱、自我介紹
 const putUserProfileValidations = [
-  body('name').trim().not().isEmpty().withMessage('名字不可空白!').bail().isLength({ max: 50 }).withMessage('字數超出上限！'),
-  body('introduction').trim().isLength({ max: 160 }).withMessage('字數超出上限！')
+  check('name').trim().not().isEmpty().withMessage('名字不可空白!').bail().isLength({ max: 50 }).withMessage('字數超出上限！'),
+  check('introduction').trim().isLength({ max: 160 }).withMessage('字數超出上限！')
 ]
 
 module.exports = {
