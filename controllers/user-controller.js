@@ -17,8 +17,8 @@ const userController = {
           cover
         )
       })
-      .then(() => {
-        res.json(`api/users/${req.params.id}`)
+      .then(data => {
+        res.json({ status: 'success', data })
       })
       .catch(err => next(err))
   }
