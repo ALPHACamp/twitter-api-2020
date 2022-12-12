@@ -7,6 +7,13 @@ const followshipController = {
       const currentUserId = helpers.getUser(req).id
       const followingId = Number(req.body.id)
 
+      if (followingId === currentUserId) {
+        return res.status(422).json({
+          status: 'error',
+          message: '使用者不可以追蹤自己.'
+        })
+      }
+
       const [user, followship] = await Promise.all([
         User.findByPk(followingId),
         Followship.findOne({
@@ -21,12 +28,12 @@ const followshipController = {
       if (!user || user.role === 'admin') {
         return res.status(404).json({
           status: 'error',
-          message: 'The user does not exist.'
+          message: '使用者不存在.'
         })
       }
 
       // 確認是否已經按過追蹤
-      if (followship) throw new Error('You are already following this user!')
+      if (followship) throw new Error('你已經追蹤過了!')
 
       await Followship.create({
         followerId: currentUserId,

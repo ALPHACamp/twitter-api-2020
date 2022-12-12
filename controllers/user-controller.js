@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
-const { relativeTime } = require('../helpers/tweet-helper')
+const { relativeTime } = require('../helpers/date-helper')
 const { imgurFileHandler } = require('../helpers/file-helper')
 
 const userController = {
@@ -83,7 +83,7 @@ const userController = {
       if (!user || user.role === 'admin') {
         return res.status(404).json({
           status: 'error',
-          message: 'The user does not exist.'
+          message: '使用者不存在.'
         })
       }
       return res.status(200).json(user)
@@ -137,7 +137,7 @@ const userController = {
       if (!user || user.role === 'admin') {
         return res.status(404).json({
           status: 'error',
-          message: 'The user does not exist.'
+          message: '使用者不存在.'
         })
       }
 
@@ -177,7 +177,7 @@ const userController = {
       if (!user || user.role === 'admin') {
         return res.status(404).json({
           status: 'error',
-          message: 'The user does not exist.'
+          message: '使用者不存在.'
         })
       }
 
@@ -223,7 +223,7 @@ const userController = {
       if (!user || user.role === 'admin') {
         return res.status(404).json({
           status: 'error',
-          message: 'The user does not exist.'
+          message: '使用者不存在.'
         })
       }
 
@@ -270,7 +270,7 @@ const userController = {
       if (!user || user.role === 'admin') {
         return res.status(404).json({
           status: 'error',
-          message: 'The user does not exist.'
+          message: '使用者不存在.'
         })
       }
 
@@ -308,7 +308,7 @@ const userController = {
       if (!user || user.role === 'admin') {
         return res.status(404).json({
           status: 'error',
-          message: 'The user does not exist.'
+          message: '使用者不存在.'
         })
       }
 
