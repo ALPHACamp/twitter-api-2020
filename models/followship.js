@@ -1,33 +1,24 @@
 'use strict';
+const {
+  Model
+} = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  const Followship = sequelize.define('Followship', {
-    id: {
-      allowNull: false,
-      autoIncrement: true,
-      primaryKey: true,
-      type: Sequelize.INTEGER
-    },
-    followerId: {
-      type: Sequelize.INTEGER
-    },
-    followingId: {
-      type: Sequelize.INTEGER
-    },
-    createdAt: {
-      allowNull: false,
-      type: Sequelize.DATE
-    },
-    updatedAt: {
-      allowNull: false,
-      type: Sequelize.DATE
-    }
+
+  class FollowShip extends Model {
+
+    static associate (models) {
+    }  
+  }
+  FollowShip.init({
+    // Model attributes are defined here
+    followerId: DataTypes.INTEGER,
+    followingId: DataTypes.INTEGER
   }, {
-    sequelize,
-    modelName: 'Followship',
-    tableName: 'Followships',
+    // Other model options go here
+    sequelize, // We need to pass the connection instance
+    modelName: 'FollowShip', // We need to choose the model name
+    tableName: 'FollowShips',
     underscored: true
-  });
-  Followship.associate = function (models) {
-  };
-  return Followship;
-};
+  })
+  return FollowShip
+}
