@@ -53,7 +53,7 @@ const tweetController = {
       if (!tweet) {
         return res.status(404).json({
           status: 'error',
-          message: "This tweet doesn't exist!"
+          message: '推文不存在！'
         })
       }
       const data = tweet.toJSON()
@@ -70,13 +70,13 @@ const tweetController = {
       if (!description) {
         return res.status(400).json({
           status: 'error',
-          message: 'Tweet description is required!'
+          message: '推文不可空白！'
         })
       }
       if (description.length > 140) {
         return res.status(400).json({
           status: 'error',
-          message: 'Tweet description can\'t exceed 140 characters!'
+          message: '字數超出上限！'
         })
       }
       await Tweet.create({
@@ -117,7 +117,7 @@ const tweetController = {
       if (!comment) {
         return res.status(400).json({
           status: 'error',
-          message: 'Reply comment is required!'
+          message: '回覆不可空白！'
         })
       }
       await Reply.create({
@@ -138,7 +138,7 @@ const tweetController = {
       if (!isExist) {
         return res.status(404).json({
           status: 'error',
-          message: 'Tweet doesn\'t exist'
+          message: '推文不存在！'
         })
       }
       const isLiked = await Like.findOrCreate({
@@ -147,7 +147,7 @@ const tweetController = {
       if (!isLiked[1]) {
         return res.status(400).json({
           status: 'error',
-          message: 'You have liked this tweet!'
+          message: '已表示喜歡'
         })
       }
       return res.status(200).json({ status: 'success' })
@@ -163,7 +163,7 @@ const tweetController = {
       if (!aaa) {
         return res.status(404).json({
           status: 'error',
-          message: 'Tweet doesn\'t exist or you haven\'t like this tweet!'
+          message: '推文不存在 或 已非喜歡'
         })
       }
       return res.status(200).json({ status: 'success' })
