@@ -104,6 +104,27 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  postTweetReply: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = req.params.id
+      const comment = req.body.comment.trim()
+      if (!comment) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Reply comment is required!'
+        })
+      }
+      await Reply.create({
+        UserId,
+        TweetId,
+        comment
+      })
+      return res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
@@ -111,4 +132,3 @@ module.exports = tweetController
 
 // POST	/api/tweets/:id/like	喜歡某則tweet
 // POST	/api/tweets/:id/unlike	取消喜歡某則tweet
-// POST	/api/tweets/:id/replies	新增回覆
