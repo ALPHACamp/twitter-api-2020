@@ -4,7 +4,6 @@ const user = require('./modules/user')
 
 const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
-// const tweetController=require('../controllers/tweet-controller')
 const tweet = require('./modules/tweet')
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/authentication')
