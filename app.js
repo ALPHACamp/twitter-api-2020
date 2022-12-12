@@ -1,6 +1,7 @@
 const express = require('express')
 const routes = require('./routes')
-const helpers = require('./_helpers')
+
+const { getUser } = require('./_helpers')
 
 // 確認資料庫連線
 require('./models')
@@ -14,7 +15,10 @@ function authenticated (req, res, next) {
 }
 
 app.use(express.urlencoded({ extended: true }))
-// app.use(methodOverride('_method'))
+
+app.use((req, res, next) => {
+  res.locals.user = getUser(req)
+})
 
 app.use(routes)
 
