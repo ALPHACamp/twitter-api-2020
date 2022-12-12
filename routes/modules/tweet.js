@@ -3,6 +3,7 @@ const router = express.Router()
 const tweetController = require('../../controllers/tweet-controller')
 
 router.get('/', tweetController.getTweets)
+router.get('/:id', tweetController.getTweet)
 // router.post('/', tweetController.postTweets)
 
 module.exports = router
@@ -12,5 +13,4 @@ module.exports = router
 // POST	/api/tweets/:id/replies	新增回覆
 // GET	/api/tweets/:id/replies	讀取回覆
 // POST	/api/tweets	新增tweets
-// GET	/api/tweets	查看tweets
 // GET	/api/tweets/:id	查看特定tweet
