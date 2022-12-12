@@ -55,6 +55,17 @@ const adminController = {
         res.status(200).json(data)
       })
       .catch(err => next(err))
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+      if (!tweet) throw new Error('推文不存在')
+      await Tweet.destroy({ where: { id: TweetId } })
+      res.status(200).json(tweet)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = adminController
