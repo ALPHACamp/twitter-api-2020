@@ -227,7 +227,20 @@ const userController = {
         User.findByPk(reqUserId),
         Followship.findAll({
           where: { followingId: reqUserId },
-          include: { model: User, as: 'Followers' }
+          include: {
+            model: User,
+            as: 'Followers',
+            attributes: [
+              'id',
+              'name',
+              'avatar',
+              'introduction',
+              [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = Followers.id)`), 'isFollowed']
+            ]
+          },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
         })
       ])
 
