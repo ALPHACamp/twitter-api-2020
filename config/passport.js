@@ -40,7 +40,7 @@ passport.use(new LocalStrategy(
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET || 'alphacamp',
+  secretOrKey: process.env.JWT_SECRET,
   passReqToCallback: true
 }
 
