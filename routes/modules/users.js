@@ -1,8 +1,9 @@
 const express = require('express')
 const router = express.Router()
-const { registerValidator } = require('../../middleware/validator')
+const { registerValidator, editSettingValidator } = require('../../middleware/validator')
 const userController = require('../../controllers/user-controller')
-const { authenticated, authenticatedUser } = require('../../middleware/auth')
+const { authenticated, authenticatedUser, authenticatedSelf } = require('../../middleware/auth')
+const upload = require('../../middleware/multer')
 
 // 登入
 router.post('/login', userController.login)
@@ -20,6 +21,10 @@ router.get('/:id/followings', authenticated, authenticatedUser, userController.g
 router.get('/:id/followers', authenticated, authenticatedUser, userController.getUserFollowers)
 // 取得使用者資料
 router.get('/:id', authenticated, authenticatedUser, userController.getUserProfile)
+// 編輯使用者帳號設定
+router.put('/:id/setting', authenticated, authenticatedUser, authenticatedSelf, editSettingValidator, userController.editUserSetting)
+// 編輯使用者profile設定
+router.put('/:id', authenticated, authenticatedUser, authenticatedSelf, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.editUserProfile)
 // 註冊
 router.post('/', registerValidator, userController.register)
 

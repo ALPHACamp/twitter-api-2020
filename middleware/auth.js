@@ -18,8 +18,14 @@ const authenticatedAdmin = (req, res, next) => {
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 
+const authenticatedSelf = (req, res, next) => {
+  if (Number(req.params.id) === Number(helpers.getUser(req).id)) return next()
+  return res.status(403).json({ status: 'error', message: 'permission denied' })
+}
+
 module.exports = {
   authenticated,
   authenticatedUser,
-  authenticatedAdmin
+  authenticatedAdmin,
+  authenticatedSelf
 }

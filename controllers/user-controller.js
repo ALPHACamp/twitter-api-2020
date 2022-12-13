@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const { validationResult } = require('express-validator')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
+const imgurFileHandler = require('../helpers/imgur-file-helper')
 
 const userController = {
   register: async (req, res, next) => {
@@ -205,6 +206,49 @@ const userController = {
       })
       if (!users.length) return res.status(200).json([])
       res.status(200).json(users)
+    } catch (err) {
+      next(err)
+    }
+  },
+  editUserSetting: async (req, res, next) => {
+    try {
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        const errorMessage = errors.errors.map(e => e.msg)
+        throw new Error(errorMessage)
+      }
+      const { name, account, email, password } = req.body
+      const salt = await bcrypt.genSalt(10)
+      const hash = await bcrypt.hash(password, salt)
+      const user = await User.findByPk(req.params.id)
+      const updatedUser = await user.update({ name, account, email, password: hash })
+      // sign a new token
+      const userData = updatedUser.toJSON()
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '14d' })
+      res.status(200).json({ token, user: userData })
+    } catch (err) {
+      next(err)
+    }
+  },
+  editUserProfile: async (req, res, next) => {
+    try {
+      const { name, introduction } = req.body
+      const { files } = req
+      if (introduction?.length > 160) throw new Error('Introduction too long!')
+      if (!name || name.length > 50) throw new Error('名稱無效')
+      const avatar = await imgurFileHandler(files?.avatar && files.avatar[0])
+      const cover = await imgurFileHandler(files?.cover && files.cover[0])
+      const user = await User.findByPk(req.params.id)
+      const updatedUser = await user.update({
+        name,
+        introduction,
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover
+      })
+      const userData = updatedUser.toJSON()
+      delete userData.password
+      res.status(200).json({ user: userData })
     } catch (err) {
       next(err)
     }
