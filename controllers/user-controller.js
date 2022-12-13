@@ -82,6 +82,19 @@ const userController = {
       next(err)
     }
   },
+  getUserSetting: async (req, res, next) => {
+    try {
+      const currentUser = helpers.getUser(req).toJSON()
+
+      // 刪除不必要欄位，減少流量。
+      delete currentUser.avatar
+      delete currentUser.cover
+      delete currentUser.introduction
+      res.status(200).json(currentUser)
+    } catch (err) {
+      next(err)
+    }
+  },
   getUserProfile: async (req, res, next) => {
     try {
       const reqUserId = Number(req.params.id)
