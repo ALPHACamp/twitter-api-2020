@@ -3,10 +3,18 @@ const { User, Tweet } = require('../models')
 
 const userController = {
   getUser: (req, res, next) => {
-    return User.findByPk(req.params.id, {
-      include: [Tweet]
-    })
-      .then(data => {
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Tweet.findAndCountAll({
+        where: { userId: req.params.id }
+      })
+    ])
+      .then(([user, tweets]) => {
+        if(!user) throw new Error('error')
+        return User.create
+      })
+
+      (data => {
         res.json({ status: 'success', data })
       })
       .catch(err => next(err))
