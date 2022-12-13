@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=development node app.js",
+    "start": "set NODE_ENV=development && node app.js",
     "dev": "set NODE_ENV=development && nodemon app.js",
     "test": "mocha test --exit --recursive --timeout 5000"
   },
@@ -20,6 +20,7 @@
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
+    "dotenv": "^16.0.3",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "faker": "^4.1.0",
