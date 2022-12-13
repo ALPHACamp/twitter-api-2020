@@ -1,9 +1,11 @@
 // const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 
 const userController = {
   getUser: (req, res, next) => {
-    return User.findByPk(req.params.id)
+    return User.findByPk(req.params.id, {
+      include: [Tweet]
+    })
       .then(data => {
         res.json({ status: 'success', data })
       })
