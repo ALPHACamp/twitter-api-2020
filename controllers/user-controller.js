@@ -3,7 +3,7 @@ const dayjs = require('dayjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
 const helpers = require('../_helpers')
-const { User, Reply, Tweet, Like, sequelize } = require('../models')
+const { User, Reply, Tweet, Like, Followship, sequelize } = require('../models')
 const userController = {
   signUp: async (req, res, next) => {
     try {
@@ -134,6 +134,31 @@ const userController = {
         like.Tweet.isLiked = loginUser?.Likes?.some(loginUserLike => loginUserLike.TweetId === like.Tweet.id)
         return like
       })
+      return res.status(200).json(data)
+    } catch (err) { next(err) }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const reqId = Number(req.params.id)
+      const loginUser = helpers.getUser(req)
+      const reqUser = await User.findByPk(reqId)
+      if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
+
+      const followers = await Followship.findAll({
+        include: [{ model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }],
+        where: { followingId: reqId },
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
+      })
+
+      const data = followers.map(follower => {
+        follower.createdAt = dayjs(follower.createdAt).valueOf()
+        follower.updatedAt = dayjs(follower.updatedAt).valueOf()
+        follower.Followers.isFollowed = loginUser?.Followings?.some(followingUser => followingUser?.id === follower.followerId)
+        return follower
+      })
+
       return res.status(200).json(data)
     } catch (err) { next(err) }
   }
