@@ -14,14 +14,14 @@ router.use('/admin', authenticated, authenticatedAdmin, admin)
 // 前台登入
 router.post('/signin', passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
 
+// Reply CRUD
+router.get('/tweets/:id/replies', authenticated, authenticatedUser, replyController.getReplies)
+router.post('/tweets/:id/replies', authenticated, authenticatedUser, replyController.postReply)
+
 // Tweet CRUD：
-router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
-
-// Reply CRUD
-router.post('tweets/:id/replies', authenticated, authenticatedUser, replyController.postReply)
-router.get('tweets/:id/replies', authenticated, authenticatedUser, replyController.getReplies)
+router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
 router.use('/', (req, res) => {
   res.json('api test main')

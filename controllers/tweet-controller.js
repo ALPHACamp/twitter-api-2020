@@ -2,10 +2,10 @@ const { Tweet, User, Reply, Like } = require('../models')
 const { getUser } = require('../_helpers')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
-dayjs.extend(relativeTime)
+const isYesterday = require('dayjs/plugin/isYesterday')
 require('dayjs/locale/zh-tw')
 dayjs.locale('zh-tw')
-const isYesterday = require('dayjs/plugin/isYesterday')
+dayjs.extend(relativeTime)
 dayjs.extend(isYesterday)
 
 const tweetController = {
@@ -37,8 +37,8 @@ const tweetController = {
         return tweets
           .map(tweet => ({
             ...tweet.dataValues,
-            // [ 修？ ]：未滿24小時，到隔天會顯示日期
-            relativeTime: dayjs(tweet.dataValues.createdAt).add(-1, 'day').isYesterday() ? dayjs(tweet.dataValues.createdAt).fromNow() : dayjs(tweet.dataValues.createdAt).format('MMM DD日')
+            // [ 修？ ]：發文時間是昨天？是的話顯示日期，不是的話顯示多久之前
+            relativeTime: dayjs(tweet.dataValues.createdAt).fromNow()
             // 計算 reply 該推文的回覆數
             // repliedCount: tweet.replies.length
             // 計算 like 該推文的人數
@@ -70,7 +70,7 @@ const tweetController = {
         return res.json({
           status: 'success',
           tweet: tweet.toJSON(),
-          exactTime: dayjs(tweet.dataValues.createdAt).format('A hh:mm YYYY MMM DD日')
+          exactTime: dayjs(tweet.dataValues.createdAt).format('A hh:mm YYYY年 MMM DD日')
           // 計算 reply 該推文的回覆數
           // repliedCount: tweet.replies.length
           // 計算 like 該推文的人數
