@@ -1,11 +1,10 @@
 module.exports = {
   generalErrorHandler (err, req, res, next) {
     if (err instanceof Error) {
-      req.flash('error_messages', `${err.name}: ${err.message}`)
+      res.status(err.code).json({'status':err.code,'message':err.message})
     } else {
-      req.flash('error_messages', `${err}`)
+      req.status(400).json({'message':err})
     }
-    res.redirect('back')
     next(err)
   }
 }
