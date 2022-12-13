@@ -7,6 +7,9 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
+      }, 
+      account: {
+        type: Sequelize.STRING
       },
       email: {
         type: Sequelize.STRING
@@ -19,6 +22,9 @@ module.exports = {
       },
       avatar: {
         type: Sequelize.STRING
+      }, 
+      cover_image: {
+        type: Sequelize.STRING
       },
       introduction: {
         type: Sequelize.TEXT
@@ -26,11 +32,11 @@ module.exports = {
       role: {
         type: Sequelize.STRING
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }
