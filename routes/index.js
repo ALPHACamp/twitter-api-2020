@@ -6,6 +6,8 @@ const userController = require('../controllers/user-controller')
 const { apiErrorHandler } = require('../middleware/error-handler.js')
 
 router.post('/users/login', passport.authenticate('local', { session: false }), userController.loginUser)
+
+router.get('/users', userController.getUsers)
 router.post('/users', userController.registerUser)
 router.use('/', apiErrorHandler)
 
