@@ -12,9 +12,14 @@ module.exports = {
       })
     }
   },
-  signInFail (err, req, res, next) {
-    err.name = '登入失敗'
-    err.message = '帳號或密碼輸入錯誤！'
-    return next(err)
-  }
+  signInFail(err, req, res, next) {
+    if (err.status === 401 & err.name === 'AuthenticationError') {
+      res.status(err.status).json({
+        status: 'fail',
+        message: `${err.name}: ${err.message}`
+      })
+    } else {
+      errorHandler(err, req, res, next)
+    }
+}
 }
