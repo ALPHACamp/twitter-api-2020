@@ -28,11 +28,12 @@ const userController = {
 
         }))
         .then((user) => {
-          const data = {
+          const dataPackage = {
              'status':200,
              'data':user.get({plain:true})
             }
-          res.json(data)
+          delete dataPackage.data.password
+          res.json(dataPackage)
         })
         .catch(err => next(err))
     }
