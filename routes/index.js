@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const user = require('./modules/user')
+const admin = require('./modules/admin')
 const tweet = require('./modules/tweet')
 const followship = require('./modules/followship')
 const passport = require('../config/passport')
@@ -18,6 +19,7 @@ router.post('/api/users', RegisterValidator, userController.signUp)
 
 // modules
 router.use('/api/users', authenticated, authenticatedUser, user)
+router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 router.use('/api/tweets', authenticated, authenticatedUser, tweet)
 router.use('/api/followships', authenticated, authenticatedUser, followship)
 
