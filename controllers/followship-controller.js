@@ -1,7 +1,23 @@
-const { Followship, User } = require('../models')
+const { Followship, User, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const followshipController = {
+  getTopFollowers: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        attributes: [
+          'id', 'name', 'account', 'avatar',
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'), 'followerCount']
+        ],
+        order: [[sequelize.literal('followerCount'), 'DESC']],
+        raw: true,
+        nest: true
+      })
+      res.status(200).json(users)
+    } catch (err) {
+      next(err)
+    }
+  },
   addFollowing: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
