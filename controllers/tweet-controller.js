@@ -1,5 +1,9 @@
 const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
+<<<<<<< HEAD
+=======
+const dayjs = require('dayjs')
+>>>>>>> 1609435b036c0f9e17c09af833fdee22d5340325
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
@@ -12,7 +16,12 @@ const tweetController = {
         nest: true,
         raw: true
       })
+<<<<<<< HEAD
       return res.status(200).json(tweets)
+=======
+      const data = tweets.map(tweet => ({ ...tweet, createdAt: dayjs(tweet.createdAt).valueOf() }))
+      return res.status(200).json(data)
+>>>>>>> 1609435b036c0f9e17c09af833fdee22d5340325
     } catch (err) { next(err) }
   }
 }
