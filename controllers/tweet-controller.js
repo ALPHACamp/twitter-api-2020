@@ -31,7 +31,8 @@ const tweetController = {
           ]
         },
         order: [['createdAt', 'DESC']],
-        raw: true
+        raw: true,
+        nest: true
       })
       const loginUser = getUser(req)?.id
       const likes = await Like.findAll({
