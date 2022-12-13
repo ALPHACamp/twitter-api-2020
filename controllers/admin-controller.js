@@ -13,9 +13,10 @@ const adminController = {
         raw: true
       })
 
-      //  轉換人性化時間
+      //  轉換人性化時間、推文顯示前 50 個字
       const newTweets = tweets.map(tweet => ({
         ...tweet,
+        description: tweet.description.substring(0, 50),
         createdAt: relativeTime(tweet.createdAt)
       }))
 
