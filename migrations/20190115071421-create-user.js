@@ -9,7 +9,6 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       account: {
-        unique: true,
         type: Sequelize.STRING
       },
       name: {
