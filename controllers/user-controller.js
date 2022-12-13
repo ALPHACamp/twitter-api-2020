@@ -131,7 +131,7 @@ const userController = {
         name,
         email,
         account,
-        password
+        password: bcrypt.hashSync(password, 10)
       })
       res.status(200).json({ status: 'success' })
     } catch (err) {
