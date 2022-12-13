@@ -1,7 +1,35 @@
-const jwt = require('jsonwebtoken')
-const helpers = require('../_helpers')
+const bcrypt = require('bcryptjs')
 const dayjs = require('dayjs')
+const jwt = require('jsonwebtoken')
+const validator = require('validator')
+const helpers = require('../_helpers')
+const { User } = require('../models')
 const userController = {
+  signUp: async (req, res, next) => {
+    try {
+      const { account, name, email, password, checkPassword } = req.body
+      if (!account.trim() || !name.trim() || !email.trim() || !password.trim() || !checkPassword.trim()) {
+        return res.status(400).json({ status: 'error', message: 'All field are required!' })
+      }
+      if (!validator.isEmail(email)) {
+        return res.status(422).json({ status: 'error', message: 'Email input is invalid!' })
+      }
+      if (password !== checkPassword) {
+        return res.status(422).json({ status: 'error', message: 'Password and confirmPassword do not match.' })
+      }
+      if (name.length > 50) {
+        return res.status(422).json({ status: 'error', message: 'Name field has max length of 50 characters.' })
+      }
+      const [userAccount, userEmail] = await Promise.all([User.findOne({ where: { account } }), User.findOne({ where: { email } })])
+      if (userAccount) return res.status(422).json({ status: 'error', message: 'Account already exists!' })
+      if (userEmail) return res.status(422).json({ status: 'error', message: 'Email already exists!' })
+
+      const hash = await bcrypt.hash(password, 10)
+      await User.create({ account, name, email, password: hash })
+
+      return res.status(200).json({ status: 'success' })
+    } catch (err) { next(err) }
+  },
   signIn: (req, res, next) => {
     try {
       const loginUser = helpers.getUser(req).toJSON()

@@ -10,5 +10,6 @@ const router = express.Router()
 router.post('/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/tweets', authenticated, tweets)
+router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 module.exports = router
