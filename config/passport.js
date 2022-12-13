@@ -17,12 +17,13 @@ passport.use(new LocalStrategy(
   (account, password, cb) => {
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) return cb(null, false)
+        if (!user) throw new Error('帳號不存在！')
         bcrypt.compare(password, user.password).then(res => {
-          if (!res) return cb(null, false)
+          if (!res) throw new Error('帳號不存在！')
           return cb(null, user)
         })
       })
+      .catch(err => cb(err, false))
   }
 ))
 

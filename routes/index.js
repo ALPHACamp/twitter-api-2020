@@ -14,6 +14,7 @@ router.post('/users', userController.signUp)
 // 前台登入
 router.post('/signin', passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
 
+router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.use('/', (req, res) => {
   res.json('api test main')
 })
