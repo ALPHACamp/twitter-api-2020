@@ -6,8 +6,8 @@ module.exports = (sequelize, DataTypes) => {
     tweetId: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Tweet',
-    tableName: 'Tweets',
+    modelName: 'Reply',
+    tableName: 'Replies',
     underscored: true
   })
   Reply.associate = function (models) {
