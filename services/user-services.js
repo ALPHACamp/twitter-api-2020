@@ -1,4 +1,4 @@
-const { User, Like, Favorite, Tweet } = require('./../models')
+const { User, Like, Favorite, Tweet, Followship } = require('./../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
@@ -15,14 +15,6 @@ const userServices = {
     } catch (err) {
       cb(err)
     }
-  },
-  getUsers: (req, cb) => {
-    return User.findAll({
-      raw: true,
-      nest: true
-    })
-      .then(users => cb(null, { users }))
-      .catch(err => cb(err))
   },
   registerUser: (req, cb) => {
     // password check
@@ -47,6 +39,48 @@ const userServices = {
         return cb(null, {
           user
         })
+      })
+      .catch(err => cb(err))
+  },
+  getUsers: (req, cb) => {
+    return User.findAll({
+      nest: true,
+      raw: true
+    })
+      .then(users => {
+        return cb(null, { users })
+      })
+      .catch(err => cb(err))
+  },
+  getUser: (req, cb) => {
+    return User.findOne(
+      {
+        where: { id: req.params.userId },
+        raw: true
+      })
+      .then(user => {
+        if (!user) throw new Error('user do not exist.')
+        cb(null, { user })
+      })
+      .catch(err => cb(err))
+  },
+  getTopUsers: (req, cb) => { // Still needs to be fixed
+    const limit = req.query.top
+    return User.findAll({
+      // include: [{
+      //   model: User,
+      //   as: 'Followers'
+      // }]
+    })
+      .then(users => {
+        // const data = users.map(user => ({
+        //   ...user.toJSON(),
+        //   followerCount: user.Followers.length,
+        //   isFollowed: req.user.Followings.some(f => f.id === user.id)
+        // }))
+        //   .sort((a, b) => b.followerCount - a.followerCount)
+        //   .slice(0, limit)
+        return cb(null, { users })
       })
       .catch(err => cb(err))
   },

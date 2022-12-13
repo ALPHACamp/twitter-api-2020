@@ -8,6 +8,12 @@ const userController = {
   },
   getUsers: (req, res, next) => {
     userServices.getUsers(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getUser: (req, res, next) => {
+    userServices.getUser(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getTopUsers: (req, res, next) => {
+    userServices.getTopUsers(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 module.exports = userController
