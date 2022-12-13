@@ -38,19 +38,16 @@ const userController = {
       .catch(err => next(err))
   },
   getUser: (req, res, next) => {
-    return Promise.all([
-      User.findByPk(req.params.id),
-      Tweet.findAndCountAll({
-        where: { userId: req.params.id }
-      })
-    ])
-      .then(([user, tweets]) => {
-        if (!user) throw new Error('error')
-        return User.create
-      })
-
-      (data => {
-        res.json({ status: 'success', data })
+    return User.findByPk(req.params.id, {
+      include: [Tweet]
+    })
+      .then(user => {
+        const tweetsCount = user.Tweets.length
+        const dataPackage = {
+          status: 200,
+          data: { tweetsCount, user }
+        }
+        res.json(dataPackage)
       })
       .catch(err => next(err))
   },
