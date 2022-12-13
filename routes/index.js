@@ -1,8 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../controllers/user-controller')
-
-const userController = require('../controllers/user-controller')
+const { generalErrorHandler } = require('../middleware/error-handler')
 
 router.put('/api/users/:id', userController.putUser)
 router.get('/api/users/:id', userController.getUser)

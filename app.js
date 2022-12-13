@@ -1,8 +1,6 @@
 const express = require('express')
 const routes = require('./routes')
 
-// const { getUser } = require('./_helpers')
-
 // // 確認資料庫連線
 // require('./models')
 
