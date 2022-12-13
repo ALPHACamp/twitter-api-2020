@@ -3,8 +3,8 @@ module.exports = (sequelize, DataTypes) => {
   const Reply = sequelize.define('Reply', {
   }, {})
   Reply.associate = function (models) {
-    Reply.belongsTo(models.User, { foreignKey: 'userId' })
-    Reply.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
+    Reply.belongsTo(models.User, { foreignKey: 'UserId' })
+    Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
   }
   Reply.init({
     comment: DataTypes.TEXT,
@@ -13,8 +13,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Reply',
-    tableName: 'Replies',
-    underscored: true
+    tableName: 'Replies'
   })
   return Reply
 }

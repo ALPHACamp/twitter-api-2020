@@ -3,8 +3,9 @@ module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
   }, {})
   User.associate = function (models) {
-    User.hasMany(models.Reply, { foreignKey: 'userId' })
-    User.hasMany(models.Tweet, { foreignKey: 'userId' })
+    User.hasMany(models.Reply, { foreignKey: 'UserId' })
+    User.hasMany(models.Tweet, { foreignKey: 'UserId' })
+    User.hasMany(models.Like, { foreignKey: 'UserId' })
     User.belongsToMany(models.User, {
       through: models.Followship,
       foreignKey: 'followerId',
@@ -15,7 +16,6 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'following',
       as: 'Followers'
     })
-    User.hasMany(models.Like, { foreignKey: 'userId' })
   }
   User.init({
     name: DataTypes.STRING,
@@ -28,8 +28,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
-    tableName: 'Users',
-    underscored: true
+    tableName: 'Users'
   })
   return User
 }
