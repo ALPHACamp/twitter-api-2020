@@ -3,7 +3,7 @@ const dayjs = require('dayjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
 const helpers = require('../_helpers')
-const { User, sequelize } = require('../models')
+const { User, Reply, Tweet, sequelize } = require('../models')
 const userController = {
   signUp: async (req, res, next) => {
     try {
@@ -59,6 +59,24 @@ const userController = {
       user.isFollowed = loginUser?.Followings?.some(followingUser => followingUser?.id === Number(reqId))
       return res.status(200).json(user)
     } catch (err) { next(err) }
+  },
+  getUserReplies: async (req, res, next) => {
+    const reqId = Number(req.params.id)
+    const reqUser = await User.findByPk(reqId)
+    if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
+    const replies = await Reply.findAll({
+      attributes: ['id', 'comment', 'createdAt'],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Tweet, attributes: ['id'], include: { model: User, attributes: ['id', 'account'] } }
+      ],
+      where: { UserId: reqId },
+      order: [['createdAt', 'DESC']],
+      nest: true,
+      raw: true
+    })
+    const data = replies.map(reply => ({ ...reply, createdAt: dayjs(reply.createdAt).valueOf() }))
+    return res.status(200).json(data)
   }
 }
 
