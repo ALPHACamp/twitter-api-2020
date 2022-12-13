@@ -8,10 +8,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      is_follow: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true
-      },
       follower_id: {
         type: Sequelize.INTEGER
       },

@@ -6,21 +6,21 @@ module.exports = {
     await queryInterface.bulkInsert('Users', [{
       email: 'root@example.com',
       password: await bcrypt.hash('12345678', 10),
-      is_admin: true,
+      role: 'admin',
       name: 'root',
       created_at: new Date(),
       updated_at: new Date()
     }, {
       email: 'user1@example.com',
       password: await bcrypt.hash('12345678', 10),
-      is_admin: false,
+      role: 'user',
       name: 'user1',
       created_at: new Date(),
       updated_at: new Date()
     }, {
       email: 'user2@example.com',
       password: await bcrypt.hash('12345678', 10),
-      is_admin: false,
+      role: 'user',
       name: 'user2',
       created_at: new Date(),
       updated_at: new Date()
@@ -28,7 +28,7 @@ module.exports = {
     {
       email: 'user3@example.com',
       password: await bcrypt.hash('12345678', 10),
-      is_admin: false,
+      role: 'user',
       name: 'user3',
       created_at: new Date(),
       updated_at: new Date()
@@ -36,7 +36,7 @@ module.exports = {
     {
       email: 'user4@example.com',
       password: await bcrypt.hash('12345678', 10),
-      is_admin: false,
+      role: 'user',
       name: 'user4',
       created_at: new Date(),
       updated_at: new Date()
@@ -44,7 +44,7 @@ module.exports = {
     {
       email: 'user5@example.com',
       password: await bcrypt.hash('12345678', 10),
-      is_admin: false,
+      role: 'user',
       name: 'user5',
       created_at: new Date(),
       updated_at: new Date()
