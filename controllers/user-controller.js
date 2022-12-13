@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Followship } = require('../models')
 
 const userController = {
   postUsers: (req, res, next) => {
@@ -43,14 +43,18 @@ const userController = {
       Tweet.findAndCountAll({
         where: { userId: req.params.id }
       })
+      // Followship.findAndCountAll({
+      //   where: { followingId: req.params.id }
+      // })
     ])
       .then(([user, tweets]) => {
-        if (!user) throw new Error('error')
-        return User.create
-      })
-
-      (data => {
-        res.json({ status: 'success', data })
+        // const followingCount = following.count
+        const tweetsCount = tweets.count
+        const dataPackage = {
+          status: 200,
+          data: { tweetsCount, user }
+        }
+        res.json(dataPackage)
       })
       .catch(err => next(err))
   },
