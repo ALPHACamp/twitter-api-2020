@@ -9,6 +9,7 @@ const userController = {
       delete loginUser.password
       loginUser.createdAt = dayjs(loginUser.createdAt).valueOf()
       loginUser.updatedAt = dayjs(loginUser.updatedAt).valueOf()
+      console.log(loginUser)
       const token = jwt.sign(loginUser, process.env.JWT_SECRET, { expiresIn: '5d' })
       res.status(200).json({ status: 'success', data: { token, user: loginUser } })
     } catch (err) { next(err) }
