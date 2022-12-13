@@ -3,7 +3,7 @@ const dayjs = require('dayjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
 const helpers = require('../_helpers')
-const { User, Reply, Tweet, sequelize } = require('../models')
+const { User, Reply, Tweet, Like, sequelize } = require('../models')
 const userController = {
   signUp: async (req, res, next) => {
     try {
@@ -100,6 +100,40 @@ const userController = {
         isLiked: loginUser?.Likes?.some(loginUserLike => loginUserLike.TweetId === tweet.id),
         createdAt: dayjs(tweet.createdAt).valueOf()
       }))
+      return res.status(200).json(data)
+    } catch (err) { next(err) }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const reqId = Number(req.params.id)
+      const loginUser = helpers.getUser(req)
+      const reqUser = await User.findByPk(reqId)
+      if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
+      const likes = await Like.findAll(
+        {
+          attributes: ['id', 'TweetId', 'createdAt'],
+          include: [
+            {
+              model: Tweet,
+              attributes: ['id', 'description', 'createdAt',
+                [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+                [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
+              ],
+              include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+            }
+          ],
+          where: { UserId: reqId },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        }
+      )
+      const data = likes.map(like => {
+        like.createdAt = dayjs(like.createdAt).valueOf()
+        like.Tweet.createdAt = dayjs(like.Tweet.createdAt).valueOf()
+        like.Tweet.isLiked = loginUser?.Likes?.some(loginUserLike => loginUserLike.TweetId === like.Tweet.id)
+        return like
+      })
       return res.status(200).json(data)
     } catch (err) { next(err) }
   }
