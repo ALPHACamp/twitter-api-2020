@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('Followships', {
@@ -7,10 +7,6 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
-      },
-      is_follow: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true
       },
       follower_id: {
         type: Sequelize.INTEGER
@@ -26,9 +22,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    });
+    })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Followships');
+    return queryInterface.dropTable('Followships')
   }
-};
+}

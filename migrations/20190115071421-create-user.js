@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('Users', {
@@ -29,9 +29,8 @@ module.exports = {
       introduction: {
         type: Sequelize.TEXT
       },
-      is_admin: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
+      role: {
+        type: Sequelize.STRING
       },
       created_at: {
         allowNull: false,
@@ -41,9 +40,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    });
+    })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Users');
+    return queryInterface.dropTable('Users')
   }
-};
+}
