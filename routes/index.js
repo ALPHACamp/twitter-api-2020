@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const user = require('./modules/user')
+const admin = require('./modules/admin')
 const tweet = require('./modules/tweet')
 const followship = require('./modules/followship')
 const passport = require('../config/passport')
@@ -12,10 +13,13 @@ const { RegisterValidator } = require('../middleware/validator-handler')
 
 router.post('/api/users/login', passport.authenticate('local', { session: false }), userController.signIn)
 
+router.post('/api/admin/login', passport.authenticate('local', { session: false }), userController.signIn)
+
 router.post('/api/users', RegisterValidator, userController.signUp)
 
 // modules
 router.use('/api/users', authenticated, authenticatedUser, user)
+router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 router.use('/api/tweets', authenticated, authenticatedUser, tweet)
 router.use('/api/followships', authenticated, authenticatedUser, followship)
 
