@@ -5,11 +5,12 @@ const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
 const tweets = require('./modules/tweets')
 const admin = require('./modules/admin')
+const users = require('./modules/user')
 const router = express.Router()
 
 router.post('/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/tweets', authenticated, tweets)
-router.post('/users', userController.signUp)
+router.use('/users', users)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 module.exports = router

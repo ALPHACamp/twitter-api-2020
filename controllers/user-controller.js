@@ -3,7 +3,7 @@ const dayjs = require('dayjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
 const helpers = require('../_helpers')
-const { User } = require('../models')
+const { User, sequelize } = require('../models')
 const userController = {
   signUp: async (req, res, next) => {
     try {
@@ -37,9 +37,27 @@ const userController = {
       delete loginUser.password
       loginUser.createdAt = dayjs(loginUser.createdAt).valueOf()
       loginUser.updatedAt = dayjs(loginUser.updatedAt).valueOf()
-      console.log(loginUser)
       const token = jwt.sign(loginUser, process.env.JWT_SECRET, { expiresIn: '5d' })
       res.status(200).json({ status: 'success', data: { token, user: loginUser } })
+    } catch (err) { next(err) }
+  },
+  getUserProfile: async (req, res, next) => {
+    try {
+      const reqId = Number(req.params.id)
+      const loginUser = helpers.getUser(req)
+      const user = await User.findByPk(reqId, {
+        attributes: ['id', 'account', 'name', 'email', 'avatar', 'cover', 'introduction',
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount']
+        ],
+        nest: true,
+        raw: true
+      })
+
+      if (!user) return res.status(404).json({ status: 'error', message: 'User not found!' })
+      user.isFollowed = loginUser?.Followings?.some(followingUser => followingUser?.id === Number(reqId))
+      return res.status(200).json(user)
     } catch (err) { next(err) }
   }
 }
