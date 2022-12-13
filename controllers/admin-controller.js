@@ -1,4 +1,4 @@
-const { Tweet, User } = require('../models')
+const { Tweet, User, sequelize } = require('../models')
 const { relativeTime } = require('../helpers/date-helper')
 
 const adminController = {
@@ -39,6 +39,23 @@ const adminController = {
       await tweet.destroy()
 
       res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUsers: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        attributes: [
+          'id', 'name', 'account', 'avatar', 'cover',
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE UserId = User.id)'), 'tweetCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE UserId = User.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'), 'followingCount']
+        ],
+        order: [[sequelize.literal('tweetCount'), 'DESC']]
+      })
+      res.status(200).json(users)
     } catch (err) {
       next(err)
     }
