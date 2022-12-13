@@ -106,11 +106,17 @@ const userController = {
         password
       } = req.body
 
+      // 確認帳號密碼是否變更
+      const currentUser = helpers.getUser(req).toJSON()
+      const newData = { email, account }
+      if (currentUser.email === email) newData.email = null
+      if (currentUser.account === account) newData.account = null
+
       // 確認email or account是否已存在
       const message = {}
       const [userEmail, userAccount] = await Promise.all([
-        User.findOne({ where: { email } }),
-        User.findOne({ where: { account } })
+        User.findOne({ where: { email: newData.email } }),
+        User.findOne({ where: { account: newData.account } })
       ])
 
       if (userEmail) message.email = 'email已重複註冊!'
