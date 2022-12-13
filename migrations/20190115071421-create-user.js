@@ -20,6 +20,9 @@ module.exports = {
       avatar: {
         type: Sequelize.STRING
       },
+      cover_image: {
+        type: Sequelize.STRING
+      },
       introduction: {
         type: Sequelize.TEXT
       },
