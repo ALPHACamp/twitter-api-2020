@@ -53,11 +53,12 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
-    return User.findOne(
+    return User.findByPk(
       {
-        where: { id: req.params.userId },
+        id: req.params.userId,
         raw: true
-      })
+      }
+    )
       .then(user => {
         if (!user) throw new Error('user do not exist.')
         cb(null, { user })
@@ -85,28 +86,27 @@ const userServices = {
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    const { account, name, email, introduction, password, avatar, cover } = req.body // pending name of User cover
-    return Promise.all([ // Check if account and email are unique
-      User.findOne({ where: { account } }),
-      User.findOne({ where: { email } })
-    ])
-      .then(([UserWithAccount, UserWithEmail]) => {
-        if (UserWithAccount) throw new Error('account already exists!')
-        if (UserWithEmail) throw new Error('email already exists!')
-        const { file } = req
-        imgurFileHandler(file)
-          .then(filePath => User.update({
-            account,
-            name,
-            email,
-            introduction,
-            password,
-            avatar: filePath,
-            cover
-          }))
+    const { account, name, email, introduction, password, avatar, cover } = req.body
+    console.log(account)
+    const userId = req.params.userId
+    const { file } = req
+    return Promise.all([
+      User.findByPk(userId),
+      imgurFileHandler(file)])
+      .then(([user, filePath]) => {
+        if (!user) throw new Error("User didn't exist!")
+        return user.update({
+          account,
+          name,
+          email,
+          introduction,
+          password,
+          avatar: filePath
+          // cover
+        })
       })
       .then(updatedUser => {
-        cb(null, { restaurant: updatedUser })
+        cb(null, { user: updatedUser })
       })
       .catch(err => cb(err))
   }
