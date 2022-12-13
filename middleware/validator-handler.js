@@ -1,7 +1,7 @@
 const { body, check, validationResult } = require('express-validator')
 
-//  註冊表單驗證訊息
-const registerValidations = [
+//  註冊表單、更改帳戶表單驗證訊息
+const accountFormValidations = [
   body('name').trim().not().isEmpty().withMessage('名字不可空白!').bail().isLength({ max: 50 }).withMessage('字數超出上限！'),
   body('account').trim().not().isEmpty().withMessage('帳號不可空白!'),
   body('email').trim().not().isEmpty().withMessage('Email不可空白').bail().isEmail().withMessage('請輸入正確Email!'),
@@ -16,22 +16,22 @@ const registerValidations = [
 ]
 
 //  驗證個人名稱、自我介紹
-const putUserProfileValidations = [
+const userProfileFormValidations = [
   check('name').trim().not().isEmpty().withMessage('名字不可空白!').bail().isLength({ max: 50 }).withMessage('字數超出上限！'),
   check('introduction').trim().isLength({ max: 160 }).withMessage('字數超出上限！')
 ]
 
 module.exports = {
-  RegisterValidator: async (req, res, next) => {
+  accountFormValidator: async (req, res, next) => {
     const {
       name,
       email,
       account
     } = req.body
 
-    //  平行執行註冊驗證
-    await Promise.all(registerValidations.map(registerValidation => (
-      registerValidation.run(req)
+    //  平行執行驗證
+    await Promise.all(accountFormValidations.map(accountFormValidation => (
+      accountFormValidation.run(req)
     )))
 
     //  驗證結果
@@ -54,7 +54,7 @@ module.exports = {
           case 'password':
             message.password = error.msg
             break
-          case 'passwordCheck':
+          case 'checkPassword':
             message.passwordCheck = error.msg
             break
         }
@@ -71,10 +71,10 @@ module.exports = {
 
     next()
   },
-  putUserProfileValidator: async (req, res, next) => {
-    //  平行執行註冊驗證
-    await Promise.all(putUserProfileValidations.map(putUserProfileValidation => (
-      putUserProfileValidation.run(req)
+  userProfileFormValidator: async (req, res, next) => {
+    //  平行執行驗證
+    await Promise.all(userProfileFormValidations.map(userProfileFormValidation => (
+      userProfileFormValidation.run(req)
     )))
 
     //  驗證結果

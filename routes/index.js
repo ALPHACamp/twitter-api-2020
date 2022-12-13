@@ -9,13 +9,13 @@ const userController = require('../controllers/user-controller')
 
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/authentication')
-const { RegisterValidator } = require('../middleware/validator-handler')
+const { accountFormValidator } = require('../middleware/validator-handler')
 
 router.post('/api/users/login', passport.authenticate('local', { session: false }), userController.signIn)
 
 router.post('/api/admin/login', passport.authenticate('local', { session: false }), userController.signIn)
 
-router.post('/api/users', RegisterValidator, userController.signUp)
+router.post('/api/users', accountFormValidator, userController.signUp)
 
 // modules
 router.use('/api/users', authenticated, authenticatedUser, user)

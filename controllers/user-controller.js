@@ -96,6 +96,48 @@ const userController = {
       next(err)
     }
   },
+  putUserSetting: async (req, res, next) => {
+    try {
+      const reqUserId = Number(req.params.id)
+      const {
+        email,
+        name,
+        account,
+        password
+      } = req.body
+
+      // 確認email or account是否已存在
+      const message = {}
+      const [userEmail, userAccount] = await Promise.all([
+        User.findOne({ where: { email } }),
+        User.findOne({ where: { account } })
+      ])
+
+      if (userEmail) message.email = 'email已重複註冊!'
+      if (userAccount) message.account = 'account已重複註冊!'
+      if (Object.keys(message).length !== 0) {
+        return res.status(422).json({
+          status: 'error',
+          message,
+          email,
+          account,
+          name
+        })
+      }
+
+      //  更改帳戶資訊
+      const user = await User.findByPk(reqUserId)
+      user.update({
+        name,
+        email,
+        account,
+        password
+      })
+      res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
+  },
   getUserProfile: async (req, res, next) => {
     try {
       const reqUserId = Number(req.params.id)
