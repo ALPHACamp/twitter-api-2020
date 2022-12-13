@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-
+const jwt = require('jsonwebtoken')
 const { User, Tweet, Followship } = require('../models')
 
 const userController = {
@@ -39,13 +39,16 @@ const userController = {
 			.catch(err => next(err))
 	},
 	signIn:(req, res, next) => {
+		const userData = req.user.toJSON()
+		delete userData.password
 		try {
-			const token = jwt.sign(req.user, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+			// eslint-disable-next-line no-undef
+			const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
 			res.json({
-				status: 'success',
+				status: 200,
 				data: {
 					token,
-					user: req.user
+					user: userData
 				}
 			})
 		} catch (err) {
