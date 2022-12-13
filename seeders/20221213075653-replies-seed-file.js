@@ -13,7 +13,7 @@ module.exports = {
     )
     await queryInterface.bulkInsert('Replies',
       Array.from({ length: 150 }, () => ({
-        description: faker.lorem.sentence(),
+        comment: faker.lorem.sentence(),
         user_id: users[Math.floor(Math.random() * users.length)].id,
         tweet_id: tweets[Math.floor(Math.random() * tweets.length)].id,
         created_at: new Date(),
