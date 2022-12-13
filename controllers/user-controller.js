@@ -2,6 +2,13 @@
 const { User } = require('../models')
 
 const userController = {
+  getUser: (req, res, next) => {
+    return User.findByPk(req.params.id)
+      .then(data => {
+        res.json({ status: 'success', data })
+      })
+      .catch(err => next(err))
+  },
   putUser: (req, res, next) => {
     const { account, name, email, password, avatar, introduction, cover } = req.body
     return User.findByPk(req.params.id)
