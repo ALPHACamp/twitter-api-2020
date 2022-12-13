@@ -90,6 +90,7 @@ const userController = {
       delete currentUser.avatar
       delete currentUser.cover
       delete currentUser.introduction
+      delete currentUser.role
       res.status(200).json(currentUser)
     } catch (err) {
       next(err)
