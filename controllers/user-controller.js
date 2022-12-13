@@ -20,7 +20,7 @@ const userController = {
   },
   registerUser: (req, res, next) => {
     // password check
-    if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match!')
+    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
     // account and email check
     Promise.all([
       User.findOne({ where: { account: req.body.account } }), User.findOne({ where: { email: req.body.email } })
