@@ -1,4 +1,4 @@
-const passport = require('passport')
+const passport = require('../config/passport')
 const { getUser } = require('../_helpers')
 
 const authenticated = (req, res, next) => {
