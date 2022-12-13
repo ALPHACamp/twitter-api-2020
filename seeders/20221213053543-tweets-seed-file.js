@@ -8,43 +8,11 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 10 }, () => ({
+      Array.from({ length: 50 }, (_, index) => ({
         description: faker.lorem.text(),
         created_at: new Date(),
         updated_at: new Date(),
-        user_id: users[0].id
-      }))
-    )
-    await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 10 }, () => ({
-        description: faker.lorem.text(),
-        created_at: new Date(),
-        updated_at: new Date(),
-        user_id: users[1].id
-      }))
-    )
-    await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 10 }, () => ({
-        description: faker.lorem.text(),
-        created_at: new Date(),
-        updated_at: new Date(),
-        user_id: users[2].id
-      }))
-    )
-    await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 10 }, () => ({
-        description: faker.lorem.text(),
-        created_at: new Date(),
-        updated_at: new Date(),
-        user_id: users[3].id
-      }))
-    )
-    await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 10 }, () => ({
-        description: faker.lorem.text(),
-        created_at: new Date(),
-        updated_at: new Date(),
-        user_id: users[4].id
+        user_id: users[(index % users.length)].id
       }))
     )
   },
