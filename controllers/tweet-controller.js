@@ -1,6 +1,6 @@
 const sequelize = require('sequelize')
 const { getUser } = require('../_helpers')
-const { Tweet, User, Like } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -32,6 +32,38 @@ const tweetController = {
         isLiked: likedTweetsId.some(tweetId => tweetId === tweet.id)
       }))
       res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTweet: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const tweetData = await Tweet.findByPk(id, {
+        attributes: ['id', 'description', 'createdAt'],
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          { model: Like, attributes: ['UserId'] },
+          { modle: Reply, attributes: ['id'] }
+        ],
+        nest: true
+      })
+      if (!tweetData) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Tweet not found'
+        })
+      }
+      const tweet = {
+        id: tweetData.id,
+        description: tweetData.description,
+        createdAt: tweetData.createdAt,
+        user: tweetData.user,
+        replyCount: tweetData.Replies.length,
+        likeCount: tweetData.Likes.length,
+        isLiked: tweetData.Likes.map(like => like.UserId).include(getUser(req).id)
+      }
+      return res.status(200).json(tweet)
     } catch (err) {
       next(err)
     }
