@@ -1,13 +1,14 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const assert = require('assert')
+const { User } = require('../models')
 
 const userServices = {
   // 使用者註冊
   signUp: (req, cb) => {
-    const { account, name, email, password, passwordCheck } = req.body
+    const { account, name, email, password, checkPassword } = req.body
     // 驗證兩次密碼輸入是否相符，若不符則提示錯誤訊息
-    if (password !== passwordCheck) throw new Error('Password do not match!')
+    if (password !== checkPassword) throw new Error('Password do not match!')
     // 使用者account & email在資料庫皆須為唯一，任一已存在資料庫則提示錯誤訊息
     Promise.all([
       User.findOne({ where: { account } }),
