@@ -8,14 +8,28 @@ const { imgurFileHandler } = require('../helpers/file-helper')
 const userController = {
   signIn: (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
-      delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
-      res.json({
-        status: 'success',
-        token,
-        user: userData
-      })
+      const userData = helpers.getUser(req).toJSON()
+      switch (true) {
+        case (req.originalUrl === '/api/users/login' && userData.role !== 'user'):
+          return res.status(403).json({
+            status: 'error',
+            message: '不允許登入'
+          })
+        case (req.originalUrl === '/api/admin/login' && userData.role !== 'admin'):
+          return res.status(403).json({
+            status: 'error',
+            message: '不允許登入'
+          })
+        default: {
+          delete userData.password
+          const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+          res.json({
+            status: 'success',
+            token,
+            user: userData
+          })
+        }
+      }
     } catch (err) {
       next(err)
     }

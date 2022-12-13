@@ -12,6 +12,8 @@ const { RegisterValidator } = require('../middleware/validator-handler')
 
 router.post('/api/users/login', passport.authenticate('local', { session: false }), userController.signIn)
 
+router.post('/api/admin/login', passport.authenticate('local', { session: false }), userController.signIn)
+
 router.post('/api/users', RegisterValidator, userController.signUp)
 
 // modules
