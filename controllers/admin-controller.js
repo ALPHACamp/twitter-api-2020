@@ -23,6 +23,25 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+      const tweet = await Tweet.findByPk(id)
+
+      //  確認將刪除的貼文是否存在
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: '你想刪除的這篇貼文不存在!'
+        })
+      }
+      await tweet.destroy()
+
+      res.status(200).json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
