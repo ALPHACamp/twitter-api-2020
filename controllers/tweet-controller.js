@@ -68,13 +68,13 @@ const tweetController = {
       const UserId = helpers.getUser(req).id
       const description = req.body.description.trim()
       if (!description) {
-        return res.status(400).json({
+        return res.status(422).json({
           status: 'error',
           message: '推文不可空白！'
         })
       }
       if (description.length > 140) {
-        return res.status(400).json({
+        return res.status(422).json({
           status: 'error',
           message: '字數超出上限！'
         })
@@ -90,6 +90,14 @@ const tweetController = {
   },
   getTweetReplies: async (req, res, next) => {
     try {
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: '推文不存在！'
+        })
+      }
       const replies = await Reply.findAll({
         raw: true,
         nest: true,
@@ -98,7 +106,7 @@ const tweetController = {
           model: User,
           attributes: ['id', 'avatar', 'account', 'name']
         },
-        where: { TweetId: req.params.id }
+        where: { TweetId }
       })
       const data = replies.map(reply => ({
         ...reply,
@@ -114,8 +122,15 @@ const tweetController = {
       const UserId = helpers.getUser(req).id
       const TweetId = req.params.id
       const comment = req.body.comment.trim()
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: '推文不存在！'
+        })
+      }
       if (!comment) {
-        return res.status(400).json({
+        return res.status(422).json({
           status: 'error',
           message: '回覆不可空白！'
         })
@@ -133,19 +148,19 @@ const tweetController = {
   likeTweet: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
-      const TweetId = Number(req.params.id)
-      const isExist = Boolean(await Tweet.findByPk(TweetId))
-      if (!isExist) {
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
         return res.status(404).json({
           status: 'error',
           message: '推文不存在！'
         })
       }
-      const isLiked = await Like.findOrCreate({
+      const like = await Like.findOrCreate({
         where: { UserId, TweetId }
       })
-      if (!isLiked[1]) {
-        return res.status(400).json({
+      if (!like[1]) {
+        return res.status(422).json({
           status: 'error',
           message: '已表示喜歡'
         })
@@ -159,11 +174,18 @@ const tweetController = {
     try {
       const UserId = helpers.getUser(req).id
       const TweetId = Number(req.params.id)
-      const aaa = await Like.destroy({ where: { UserId, TweetId } })
-      if (!aaa) {
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
         return res.status(404).json({
           status: 'error',
-          message: '推文不存在 或 已非喜歡'
+          message: '推文不存在！'
+        })
+      }
+      const like = await Like.destroy({ where: { UserId, TweetId } })
+      if (!like) {
+        return res.status(404).json({
+          status: 'error',
+          message: '未表示喜歡'
         })
       }
       return res.status(200).json({ status: 'success' })
