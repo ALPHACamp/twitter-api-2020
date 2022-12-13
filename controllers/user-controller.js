@@ -77,6 +77,31 @@ const userController = {
     })
     const data = replies.map(reply => ({ ...reply, createdAt: dayjs(reply.createdAt).valueOf() }))
     return res.status(200).json(data)
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const reqId = Number(req.params.id)
+      const loginUser = helpers.getUser(req)
+      const reqUser = await User.findByPk(reqId)
+      if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
+      const tweets = await Tweet.findAll({
+        attributes: ['id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
+        ],
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        where: { UserId: reqId },
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
+      })
+      const data = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: loginUser?.Likes?.some(loginUserLike => loginUserLike.TweetId === tweet.id),
+        createdAt: dayjs(tweet.createdAt).valueOf()
+      }))
+      return res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 
