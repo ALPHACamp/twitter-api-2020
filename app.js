@@ -11,11 +11,7 @@ const port = process.env.PORT || 3000
 
 app.use(express.urlencoded({ extended: true }))
 
-
 app.use('/api', routes)
-
-
-
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!!Let's go to http://localhost:${port}`))
 
