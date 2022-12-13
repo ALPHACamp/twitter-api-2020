@@ -9,6 +9,8 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../mid
 router.post('/admin/signin', passport.authenticate('local', { session: false }), authenticatedAdmin, userController.signIn)
 // 後台功能路由
 router.use('/admin', authenticated, authenticatedAdmin, admin)
+// 前台註冊
+router.post('/users', userController.signUp)
 // 前台登入
 router.post('/signin', passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
 
