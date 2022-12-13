@@ -11,5 +11,10 @@ module.exports = {
         message: `${err}`
       })
     }
+  },
+  signInFail (err, req, res, next) {
+    err.name = '登入失敗'
+    err.message = '帳號或密碼輸入錯誤！'
+    return next(err)
   }
 }
