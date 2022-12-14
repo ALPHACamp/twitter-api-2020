@@ -1,13 +1,14 @@
-const express = require('express')
-const helpers = require('./_helpers')
 if (process.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+const express = require('express')
+const helpers = require('./_helpers')
+
 const app = express()
 const port = process.env.PORT || 3000
 
 // use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next) {
+function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
