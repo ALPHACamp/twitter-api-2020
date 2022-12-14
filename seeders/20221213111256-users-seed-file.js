@@ -7,6 +7,7 @@ const password = '12345678'
 const profileUrl = 'https://loremflickr.com/140/140/woman,man/?random='
 
 const root = {
+  account: 'root',
   name: 'root',
   email: 'root@example.com',
   password: bcrypt.hashSync(password),
@@ -18,6 +19,7 @@ const root = {
 }
 
 const users = Array.from({ length: 5 }, (_, index) => ({
+  account: 'user' + String(index + 1),
   name: 'user' + String(index + 1),
   email: 'user' + String(index + 1) + '@example.com',
   password: bcrypt.hashSync(password),
