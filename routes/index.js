@@ -14,11 +14,11 @@ router.use('/admin', authenticated, authenticatedAdmin, admin)
 // 前台註冊
 router.post('/users', userController.signUp)
 // 前台登入
-router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
+router.post('/signin', passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
 
 // Reply CRUD
-router.get('/tweets/:id/replies', authenticated, authenticatedUser, replyController.getReplies)
-router.post('/tweets/:id/replies', authenticated, authenticatedUser, replyController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getReplies)
+router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
 
 // Tweet CRUD：
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)

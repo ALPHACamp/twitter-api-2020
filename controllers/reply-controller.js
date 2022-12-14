@@ -1,5 +1,5 @@
 const { User, Tweet, Reply } = require('../models')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
 const isYesterday = require('dayjs/plugin/isYesterday')
@@ -10,8 +10,8 @@ dayjs.extend(isYesterday)
 
 const replyController = {
   postReply: (req, res, next) => {
-    const TweetId = req.params.id
-    const UserId = getUser(req).id
+    const TweetId = req.params.tweet_id
+    const UserId = helpers.getUser(req).id
     const { comment } = req.body
     if (!comment) throw new Error('Comment is required!')
     return Promise.all([
@@ -28,36 +28,26 @@ const replyController = {
         })
       })
       .then(newReply => {
-        res.json({
-          status: 'success',
-          reply: newReply
-        })
+        res.json(newReply)
       })
       .catch(err => next(err))
   },
   // 在回覆中帶入 relativeTime
   getReplies: (req, res, next) => {
-    return Tweet.findByPk(req.params.id, {
-      include: [
-        User,
-        { model: Reply, include: User }
-      ]
+    return Reply.findAll({
+      where: { TweetId: req.params.tweet_id },
+      include: Tweet
     })
-      // .then(tweet => {
-      //   tweet.Replies
-      //     .map(reply => ({
-      //       ...reply.dataValues,
-      //       relativeTime: dayjs(reply.dataValues.createdAt).fromNow()
-      //     }))
-      //   return tweet
-      // })
-      .then(tweet => {
-        if (!tweet) throw new Error("Tweet didn't exist!")
-        return res.json({
-          status: 'success',
-          tweetUser: tweet.toJSON().User,
-          tweetReplies: tweet.toJSON().Replies
-        })
+      .then(replies => {
+        return replies
+          .map(reply => ({
+            ...reply.dataValues,
+            relativeTime: dayjs(reply.dataValues.createdAt).fromNow()
+          }))
+      })
+      .then(replies => {
+        if (!replies) throw new Error("Reply didn't exist!")
+        return res.json(replies)
       })
       .catch(err => next(err))
   }
