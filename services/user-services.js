@@ -66,17 +66,12 @@ const userServices = {
   getTopUsers: (req, cb) => { // Still needs to be fixed
     const limit = Number(req.query.top)
     return Followship.findAll({
-      include: [{ model: User }],
-      attributes: ['following_id'],
-      group: ['following_id'],
+      include: [{ model: User, as: 'followingUser' }],
+      attributes: ['followingId'],
+      group: ['followingId'],
       limit
     })
-      .then(popularUsers => {
-        const data = popularUsers.map(p => ({
-          ...p.User.toJSON()
-        }))
-        return cb(null, { popularUsers: data })
-      })
+      .then(popularUsers => cb(null, popularUsers))
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
@@ -121,7 +116,7 @@ const userServices = {
         if (followship) throw new Error('You are already following this user!')
         return Followship.create({
           followerId: req.user.id,
-          followingId: userId
+          followingId: req.body.id
         })
       })
       .then(followship => {
@@ -145,13 +140,21 @@ const userServices = {
   },
   getUserFollowings: (req, cb) => {
     const userId = req.params.userId
-    User.findByPk(userId, {
-      include: [{ model: User, as: 'Following' }]
+    return Followship.findAll({
+      where: { followerId: userId },
+      include: [{ model: User, as: 'followingUser' }]
     })
+      .then(followings => cb(null, followings))
+      .catch(err => cb(err))
   },
   getUserFollowers: (req, cb) => {
     const userId = req.params.userId
-    Followship.findAll()
+    return Followship.findAll({
+      where: { followingId: userId },
+      include: [{ model: User, as: 'followerUser' }]
+    })
+      .then(followers => cb(null, followers))
+      .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
     const userId = req.params.userId
