@@ -1,6 +1,10 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
-  const Followship = sequelize.define('Followship', {
+  const Followship = sequelize.define('Followship', {}, {})
+  Followship.associate = function (models) {
+    Followship.belongsTo(models.User, { foreignKey: 'following_id' })
+  }
+  Followship.init({
     followerId: DataTypes.INTEGER,
     followingId: DataTypes.INTEGER
   }, {
@@ -9,7 +13,5 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Followships',
     underscored: true
   })
-  Followship.associate = function (models) {
-  }
   return Followship
 }

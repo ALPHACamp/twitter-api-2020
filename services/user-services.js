@@ -53,12 +53,7 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
-    return User.findByPk(
-      {
-        id: req.params.userId,
-        raw: true
-      }
-    )
+    return User.findByPk(req.params.userId, { raw: true })
       .then(user => {
         if (!user) throw new Error('user do not exist.')
         cb(null, { user })
@@ -66,34 +61,31 @@ const userServices = {
       .catch(err => cb(err))
   },
   getTopUsers: (req, cb) => { // Still needs to be fixed
-    const limit = req.query.top
-    return User.findAll({
-      // include: [{
-      //   model: User,
-      //   as: 'Followers'
-      // }]
+    const limit = Number(req.query.top)
+    return Followship.findAll({
+      include: [{ model: User }],
+      attributes: ['following_id'],
+      group: ['following_id'],
+      limit
     })
-      .then(users => {
-        // const data = users.map(user => ({
-        //   ...user.toJSON(),
-        //   followerCount: user.Followers.length,
-        //   isFollowed: req.user.Followings.some(f => f.id === user.id)
-        // }))
-        //   .sort((a, b) => b.followerCount - a.followerCount)
-        //   .slice(0, limit)
-        return cb(null, { users })
+      .then(popularUsers => {
+        const data = popularUsers.map(p => ({
+          ...p.User.toJSON()
+        }))
+        return cb(null, { popularUsers: data })
       })
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    const { account, name, email, introduction, password, avatar, cover } = req.body
-    console.log(account)
+    const { account, name, email, introduction, password } = req.body
     const userId = req.params.userId
-    const { file } = req
+    const { avatarFile, coverFile } = req
     return Promise.all([
       User.findByPk(userId),
-      imgurFileHandler(file)])
-      .then(([user, filePath]) => {
+      imgurFileHandler(avatarFile),
+      imgurFileHandler(coverFile)
+    ])
+      .then(([user, avatarFilePath, coverFilePath]) => {
         if (!user) throw new Error("User didn't exist!")
         return user.update({
           account,
@@ -101,13 +93,51 @@ const userServices = {
           email,
           introduction,
           password,
-          avatar: filePath
-          // cover
+          avatar: avatarFilePath,
+          cover: coverFilePath
         })
       })
       .then(updatedUser => {
         cb(null, { user: updatedUser })
       })
+      .catch(err => cb(err))
+  },
+  addFollowing: (req, cb) => {
+    const { userId } = req.params
+    Promise.all([
+      User.findByPk(userId),
+      Followship.findOne({
+        where: {
+          followerId: req.user.id,
+          followingId: req.params.userId
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (followship) throw new Error('You are already following this user!')
+        return Followship.create({
+          followerId: req.user.id,
+          followingId: userId
+        })
+      })
+      .then(followship => {
+        cb(null, { status: 'success', followship })
+      })
+      .catch(err => cb(err))
+  },
+  removeFollowing: (req, cb) => {
+    Followship.findOne({
+      where: {
+        followerId: req.user.id,
+        followingId: req.params.userId
+      }
+    })
+      .then(followship => {
+        if (!followship) throw new Error("You haven't followed this user!")
+        return followship.destroy()
+      })
+      .then(deletedFollowship => cb(null, { status: 'success', deletedFollowship }))
       .catch(err => cb(err))
   }
 }

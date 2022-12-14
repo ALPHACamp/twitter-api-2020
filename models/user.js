@@ -1,3 +1,4 @@
+'use strict'
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
   }, {})
@@ -20,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'followerId',
       as: 'Followings'
     })
+    User.hasMany(models.Followship, { foreignKey: 'userId' })
   }
   User.init({
     account: DataTypes.STRING,

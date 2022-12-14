@@ -17,6 +17,12 @@ const userController = {
   },
   editUser: (req, res, next) => {
     userServices.editUser(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  addFollowing: (req, res, next) => {
+    userServices.addFollowing(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  removeFollowing: (req, res, next) => {
+    userServices.removeFollowing(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 module.exports = userController
