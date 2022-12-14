@@ -11,7 +11,7 @@ dayjs.extend(relativeTime)
 const userController = {
   signIn: (req, res, next) => {
     try {
-      const userData = helpers.getUser(req).toJSON()
+      const userData = req.user.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
@@ -114,6 +114,42 @@ const userController = {
         if (!replies) throw new Error("Reply didn't exist!")
         return res.json(replies)
       })
+      .catch(err => next(err))
+  },
+  addFollowing: (req, res, next) => {
+    const { followingId } = req.body
+    return Promise.all([
+      User.findByPk(followingId),
+      Followship.findOne({
+        where: {
+          followerId: helpers.getUser(req).id,
+          followingId: followingId
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (followship) throw new Error('You are already following this user!')
+        return Followship.create({
+          followerId: helpers.getUser(req).id,
+          followingId: followingId
+        })
+      })
+      .then(newFollowship => res.json(newFollowship))
+      .catch(err => next(err))
+  },
+  removeFollowing: (req, res, next) => {
+    Followship.findOne({
+      where: {
+        followerId: helpers.getUser(req).id,
+        followingId: req.params.followingId
+      }
+    })
+      .then(followship => {
+        if (!followship) throw new Error("You haven't followed this user!")
+        return followship.destroy()
+      })
+      .then(deleteFollowship => res.json(deleteFollowship))
       .catch(err => next(err))
   }
 }

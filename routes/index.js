@@ -33,6 +33,9 @@ router.post('/users', userController.signUp)
 // 前台登入
 router.post('/signin', passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
 
+// Followship
+router.post('/followships', authenticated, authenticatedUser, userController.addFollowing)
+router.delete('/followships/:followingId', authenticated, authenticatedUser, userController.removeFollowing)
 // Like
 router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.addLike)
 router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.removeLike)
