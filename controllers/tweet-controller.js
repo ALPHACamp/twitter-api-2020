@@ -95,6 +95,62 @@ const tweetController = {
       })
       .then(tweet => res.json({ success: true, message: 'Tweet has been added', tweet }))
       .catch(err => next(err))
+  },
+  likeTweet: (req, res, next) => {
+    const TweetId = Number(req.params.id)
+    // const UserId = getUser(req)?.id
+    const UserId = 1 // 測試用要記得刪掉!!
+    return Promise.all([
+      Tweet.findByPk((TweetId), { raw: true }),
+      Like.findOne({
+        where: {
+          UserId,
+          TweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) {
+          return res.status(404).json({
+            success: false,
+            message: 'Tweet not found'
+          })
+        }
+        if (like) {
+          return res.status(400).json({
+            success: false,
+            message: 'Already liked'
+          })
+        }
+        return Like.create({
+          UserId,
+          TweetId
+        })
+      })
+      .then(() => res.status(200).json({ success: true, message: 'Liked successfully' }))
+      .catch(err => next(err))
+  },
+  unlikeTweet: (req, res, next) => {
+    const TweetId = Number(req.params.id)
+    // const UserId = getUser(req)?.id
+    const UserId = 1 // 測試用要記得刪掉!!
+    return Like.findOne({
+      where: {
+        UserId,
+        TweetId
+      }
+    })
+      .then(like => {
+        if (!like) {
+          return res.status(400).json({
+            success: false,
+            message: "Haven't liked it yet"
+          })
+        }
+        return like.destroy()
+      })
+      .then(() => res.status(200).json({ success: true, message: 'Unliked successfully' }))
+      .catch(err => next(err))
   }
 }
 
