@@ -3,6 +3,8 @@ const router = express.Router()
 const passport = require('../config/passport')
 const admin = require('./modules/admin')
 const userController = require('../controllers/user-controller')
+const tweetController = require('../controllers/tweet-controller')
+const replyController = require('../controllers/reply-controller')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 
 // 後台登入
@@ -14,7 +16,15 @@ router.post('/users', userController.signUp)
 // 前台登入
 router.post('/signin', passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
 
-router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
+// Reply CRUD
+router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getReplies)
+router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
+
+// Tweet CRUD：
+router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
+router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
+router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
+
 router.use('/', (req, res) => {
   res.json('api test main')
 })
