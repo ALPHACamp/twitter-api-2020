@@ -51,7 +51,7 @@ const userServices = {
       raw: true
     })
       .then(users => {
-        return cb(null, { users })
+        return cb(null, users)
       })
       .catch(err => cb(err))
   },
@@ -59,7 +59,7 @@ const userServices = {
     return User.findByPk(req.params.userId, { raw: true })
       .then(user => {
         if (!user) throw new Error('user do not exist.')
-        cb(null, { user })
+        cb(null, user)
       })
       .catch(err => cb(err))
   },
@@ -106,13 +106,13 @@ const userServices = {
       .catch(err => cb(err))
   },
   addFollowing: (req, cb) => {
-    const { userId } = req.params
+    const { id } = req.body
     Promise.all([
-      User.findByPk(userId),
+      User.findByPk(id),
       Followship.findOne({
         where: {
           followerId: req.user.id,
-          followingId: req.params.userId
+          followingId: req.body.id
         }
       })
     ])
@@ -143,25 +143,35 @@ const userServices = {
       .then(deletedFollowship => cb(null, { status: 'success', deletedFollowship }))
       .catch(err => cb(err))
   },
+  getUserFollowings: (req, cb) => {
+    const userId = req.params.userId
+    User.findByPk(userId, {
+      include: [{ model: User, as: 'Following' }]
+    })
+  },
+  getUserFollowers: (req, cb) => {
+    const userId = req.params.userId
+    Followship.findAll()
+  },
   getUserTweets: (req, cb) => {
     const userId = req.params.userId
     Tweet.findAll({ where: { userId }, include: [User] })
       .then(tweets => {
-        cb(null, { tweets })
+        cb(null, tweets)
       })
   },
   getUserReplies: (req, cb) => {
     const userId = req.params.userId
-    Reply.findAll({ where: { userId }, include: [User], nested: true, raw: true })
+    Reply.findAll({ where: { userId }, include: [User] })
       .then(replies => {
-        cb(null, { data: replies })
+        cb(null, replies)
       })
   },
   getLikedTweets: (req, cb) => {
     const userId = req.params.userId
-    Like.findAll({ where: { userId }, include: [Tweet], nested: true, raw: true })
+    Like.findAll({ where: { userId }, include: [Tweet] })
       .then(likedTweets => {
-        cb(null, { data: likedTweets })
+        cb(null, likedTweets)
       })
   }
 }

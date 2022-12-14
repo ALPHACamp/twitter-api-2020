@@ -24,6 +24,12 @@ const userController = {
   removeFollowing: (req, res, next) => {
     userServices.removeFollowing(req, (err, data) => err ? next(err) : res.json(data))
   },
+  getUserFollowings: (req, res, next) => {
+    userServices.removeFollowing(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getUserFollowers: (req, res, next) => {
+    userServices.removeFollowing(req, (err, data) => err ? next(err) : res.json(data))
+  },
   getUserTweets: (req, res, next) => {
     userServices.getUserTweets(req, (err, data) => err ? next(err) : res.json(data))
   },
