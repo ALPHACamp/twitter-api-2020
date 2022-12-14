@@ -23,11 +23,11 @@ const tweetServices = {
           isReplied: repliedTweetId.includes(t.id),
           isLiked: likedTweetId.includes(t.id)
         }))
-        return cb(null, {
-          tweets: 
-          data,
-          pagination: getPagination(limit, page, tweets.count)
-        })
+        return cb(null, 
+           data,
+          {
+           pagination: getPagination(limit, page, tweets.count)}
+        )
       })
       .catch(err => cb(err))
   }, getTweet: (req, cb) => {
@@ -43,15 +43,15 @@ const tweetServices = {
         const likesOfTweet=tweet.Likes
         const isReplied = repliesOfTweet?repliesOfTweet.some(f => f.UserId === req.user.id) :[]
         const isLiked = likesOfTweet ? likesOfTweet.some(f => f.UserId === req.user.id) : []
-        cb(null, {
-          tweet: tweet.toJSON(),
+        data = { ...tweet.toJSON(), isReplied, isLiked }
+        cb(null, 
+           data
           
-          isReplied, isLiked
-        })
+        )
       })
       .catch(err => cb(err))
   }, postTweet: (req, cb) => {
-    const { description } = req.body
+    const { description } = req.body 
     const UserId = req.user.id
     if (!description) throw new Error('Description is required!')
     return User.findByPk(UserId)
@@ -62,7 +62,7 @@ const tweetServices = {
           UserId
         })
       })
-      .then(postedTweet => cb(null, { postedTweet }))
+      .then(postedTweet => cb(null,  {postedTweet} ))
       .catch(err => cb(err))
   }
 }
