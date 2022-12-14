@@ -3,20 +3,24 @@ const { Model } = require('sequelize')
 
 module.exports = (sequelize, DataTypes) => {
   class Tweet extends Model {
-    static associate (models) {
+    static associate(models) {
       Tweet.belongsTo(models.User, { foreignKey: 'UserId' })
       Tweet.hasMany(models.Reply, { foreignKey: 'TweetId' })
       Tweet.hasMany(models.Like, { foreignKey: 'TweetId' })
     }
   }
 
-  Tweet.init({
-    UserId: DataTypes.INTEGER,
-    description: DataTypes.TEXT
-  }, {
-    sequelize,
-    modelName: 'Tweet',
-    tableName: 'Tweets'
-  })
+  Tweet.init(
+    {
+      UserId: DataTypes.INTEGER,
+      description: DataTypes.TEXT
+    },
+    {
+      sequelize,
+      modelName: 'Tweet',
+      tableName: 'Tweets',
+      underscored: true
+    }
+  )
   return Tweet
 }
