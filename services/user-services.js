@@ -2,6 +2,7 @@ const { User, Like, Tweet, Followship, Reply } = require('./../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
+const sequelize = require('sequelize')
 const userServices = {
   loginUser: (req, cb) => {
     try {
@@ -63,11 +64,12 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
-  getTopUsers: (req, cb) => { // Still needs to be fixed
+  getTopUsers: (req, cb) => {
     const limit = Number(req.query.top)
     return Followship.findAll({
       include: [{ model: User, as: 'followingUser' }],
-      attributes: ['followingId'],
+      attributes: ['followingId', [sequelize.fn('COUNT', 'followingId'), 'count']],
+      order: [[sequelize.literal('count'), 'DESC']],
       group: ['followingId'],
       limit
     })
