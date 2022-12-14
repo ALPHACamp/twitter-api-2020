@@ -2,10 +2,8 @@
 const { Model } = require('sequelize')
 
 module.exports = (sequelize, DataTypes) => {
-  const Reply = sequelize.define('Reply', {
-  }, {})
-  Reply.associate = function (models) {
-  }
+  const Reply = sequelize.define('Reply', {}, {})
+  Reply.associate = function (models) {}
   return Reply
 }
 
@@ -27,5 +25,6 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Replies',
     underscored: true
   })
+
   return Reply
 }
