@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs')
+const { User } = require('../models')
 const jwt = require('jsonwebtoken')
 const userController = {
   signIn: (req, res, next) => {
@@ -11,6 +13,53 @@ const userController = {
           token,
           user: userData
         }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  signUp: async (req, res, next) => {
+    try {
+      const { account, name, email, password, checkPassword } = req.body
+      // 初始化message物件
+      const message = {}
+      // 確認密碼與確認密碼是否一致
+      if (password !== checkPassword) message.password = '密碼與確認密碼不符'
+
+      // 查詢資料庫帳號與信箱是否已註冊
+      const [userAccount, userEmail] = await Promise.all([
+        User.findOne({ where: { account } }),
+        User.findOne({ where: { email } })
+      ])
+
+      if (userAccount) message.account = '帳號已註冊!'
+      if (userEmail) message.email = '信箱已註冊!'
+
+      // 若有任一錯誤，接回傳錯誤訊息及原填載資料
+      if (Object.keys(message).length !== 0) {
+        return res.status(422).json({
+          status: 'error',
+          message,
+          account,
+          name,
+          email
+        })
+      }
+
+      // 建立新使用者
+      const newUser = await User.create({
+        account,
+        name,
+        email,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+      })
+
+      // 回傳新使用者資料，刪除password欄位
+      const userData = newUser.toJSON()
+      delete userData.password
+      return res.json({
+        status: 'success',
+        user: userData
       })
     } catch (err) {
       next(err)
