@@ -4,12 +4,11 @@ const {
 } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class Tweet extends Model {
-
-    static associate(models) {
+    static associate (models) {
       // 和Like的關聯
-      Tweet.hasMany(models.Like, { foreignKey: 'TweetId' }) 
+      Tweet.hasMany(models.Like, { foreignKey: 'TweetId' })
       // 和Reply的關聯
-      Tweet.hasMany(models.Reply, { foreignKey: 'TweetId' }) 
+      Tweet.hasMany(models.Reply, { foreignKey: 'TweetId' })
       // 和User的關聯
     }
   }
