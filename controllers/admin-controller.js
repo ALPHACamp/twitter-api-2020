@@ -50,7 +50,7 @@ const adminController = {
         attributes: [
           'id', 'name', 'account', 'avatar', 'cover',
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE UserId = User.id)'), 'tweetCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE UserId = User.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'), 'likeCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'), 'followerCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'), 'followingCount']
         ],
