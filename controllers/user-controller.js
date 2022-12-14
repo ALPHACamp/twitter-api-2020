@@ -17,6 +17,12 @@ const userController = {
   },
   editUser: (req, res, next) => {
     userServices.editUser(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getUserTweets: (req, res, next) => {
+    userServices.getUserTweets(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getUserReplies: (req, res, next) => {
+    userServices.getUserReplies(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 module.exports = userController
