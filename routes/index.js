@@ -5,9 +5,13 @@ const admin = require('./modules/admin')
 const user = require('./modules/user')
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
+const userController = require('../controllers/user-controller')
 
 // admin
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
+
+// user management
+router.post('/api/users', userController.postUser)
 
 // user
 router.use('/api', authenticated, authenticatedUser, user)
