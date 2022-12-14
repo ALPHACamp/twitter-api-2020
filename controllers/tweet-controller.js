@@ -1,4 +1,4 @@
-const { Tweet, User, Reply } = require('../models')
+const { Tweet, User, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
@@ -17,9 +17,9 @@ const tweetController = {
       UserId: helpers.getUser(req).id,
       description
     })
-      .then(newTweet => {
+      .then(newTweet =>
         res.json(newTweet)
-      })
+      )
       .catch(err => next(err))
   },
   // 取得所有推文：
@@ -42,9 +42,9 @@ const tweetController = {
             // likedCount: tweet.likes.length
           }))
       })
-      .then(tweets => {
+      .then(tweets =>
         res.json(tweets)
-      })
+      )
       .catch(err => next(err))
   },
   // 取得一則推文：
@@ -74,6 +74,48 @@ const tweetController = {
           // likedCount: tweet.likes.length
         )
       })
+      .catch(err => next(err))
+  },
+  // 將推文加入喜歡
+  addLike: (req, res, next) => {
+    const TweetId = req.params.id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        if (like) throw new Error('You have liked this tweet!')
+
+        return Like.create({
+          UserId: helpers.getUser(req).id,
+          TweetId
+        })
+      })
+      .then(newLike =>
+        res.json(newLike)
+      )
+      .catch(err => next(err))
+  },
+  // 將推文移除喜歡
+  removeLike: (req, res, next) => {
+    return Like.findOne({
+      where: {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.id
+      }
+    })
+      .then(like => {
+        if (!like) throw new Error("You haven't liked this tweet")
+
+        return like.destroy()
+      })
+      .then(newUnlike => res.json(newUnlike))
       .catch(err => next(err))
   }
 }
