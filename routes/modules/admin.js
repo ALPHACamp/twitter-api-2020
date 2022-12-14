@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express.Router()
 
-const { generalErrorHandler } = require('../middleware/error-handler')
+const { generalErrorHandler } = require('../../middleware/error-handler')
 
-const adminController = require('../controllers/admin-controller')
+const adminController = require('../../controllers/admin-controller')
 
 router.get('/tweets', adminController.getTweets)
 
