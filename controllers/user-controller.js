@@ -8,7 +8,7 @@ const userController = {
       include: [
         Reply, Tweet, Like,
         { model: User, as: 'Followers' },
-        { model: User, as: 'Following' }
+        { model: User, as: 'Followings' }
       ],
       nest: true
     })
