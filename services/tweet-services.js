@@ -52,11 +52,12 @@ const tweetServices = {
       .catch(err => cb(err))
   }, postTweet: (req, cb) => {
     const { description } = req.body 
-    const UserId = req.user.id
+    const UserId = req.user.dataValues.id
     if (!description) throw new Error('Description is required!')
-    return User.findByPk(UserId)
-      .then((User) => {
-        if (!User) throw new Error("User didn't exist!")
+  
+    return User.findByPk(UserId)     
+    .then((User) => {
+      if (!User) throw new Error("User didn't exist!")
         return Tweet.create({
           description,
           UserId
