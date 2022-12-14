@@ -3,6 +3,10 @@ const router = express.Router()
 
 const passport = require('../../config/passport')
 const userController = require('../../controllers/user-controller')
+const {
+  authenticated,
+  authenticatedAdmin
+} = require('../../middleware/api-auth')
 
 router.post(
   '/signin',
@@ -10,7 +14,7 @@ router.post(
   userController.signIn
 )
 
-router.get('/:id', userController.getUser)
+router.get('/:id', authenticated, userController.getUser)
 
 router.post('/', userController.signUp)
 
