@@ -26,8 +26,8 @@ const userController = {
       User.findOne({ where: { email }, raw: true })
     ])
       .then(([userFoundByAccount, userFoundByEmail]) => {
-        if (userFoundByAccount) throw new Error('account 已被註冊')
-        if (userFoundByEmail) throw new Error('Email已被註冊')
+        if (userFoundByAccount) throw new Error('account 已重複註冊！')
+        if (userFoundByEmail) throw new Error('email 已重複註冊！')
         return bcrypt.hash(password, 10)
       })
       .then(hash => {
