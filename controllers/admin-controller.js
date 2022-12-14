@@ -1,5 +1,5 @@
 const { User, Tweet } = require('../models')
-// const { getUser } = require('../_helpers')
+// const { getUser } = require('../helpers/auth-helper')
 
 const adminController = {
   getTweets: (req, res, next) => {
