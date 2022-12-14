@@ -33,11 +33,15 @@ router.post('/users', userController.signUp)
 // 前台登入
 router.post('/signin', passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
 
-// Reply CRUD
+// Like
+router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.addLike)
+router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.removeLike)
+
+// Reply
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getReplies)
 router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
 
-// Tweet CRUD：
+// Tweet
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
