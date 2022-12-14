@@ -6,11 +6,14 @@ const { User } = require('../models')
 const userServices = {
   // 使用者註冊
   signUp: (req, cb) => {
-    const { account, name, email, password, checkPassword } = req.body
+    const { account, email, password, checkPassword } = req.body
+    let name = req.body.name
     // 驗證name內容是否超過上限字數，若超過則提示
     const nameLengthLimit = 50
-    if (name.length > nameLengthLimit) throw new Error(
+    if (name.length > nameLengthLimit) {
+      throw new Error(
       `Name的內容超過${nameLengthLimit}字, 請縮短!(${name.length}/${nameLengthLimit})`)
+    }
     // 驗證兩次密碼輸入是否相符，若不符則提示錯誤訊息
     if (password !== checkPassword) throw new Error('請再次確認密碼!')
     // 若name未填，default為account
@@ -49,6 +52,5 @@ const userServices = {
     }
   }
 }
-
 
 module.exports = userServices
