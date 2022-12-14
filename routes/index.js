@@ -7,6 +7,27 @@ const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 
+// 取得當前登入使用者的資料
+router.get('/users', authenticated, authenticatedUser, userController.getCurrentUser)
+// 取得當前登入使用者的資料
+router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
+// 取得使用者發過的推文
+router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getTweets)
+// 取得使用者在推文的回覆
+router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getRepliedTweets)
+// 取得使用者喜歡的內容
+// router.get('/users/:id/likes', authenticated, authenticatedUser, userController.)
+// // 取得使用者正在關注的名單
+// router.get('/users/:id/followings', authenticated, authenticatedUser, userController.)
+// // 取得使用者正在跟隨的名單
+// router.get('/users/:id/followers', authenticated, authenticatedUser, userController.)
+// // 修改個人資料
+// router.put('/users/:id', authenticated, authenticatedUser, userController.)
+// // 修改個人帳號設定
+// router.put('/users/:id/setting', authenticated, authenticatedUser, userController.)
+// // 更新個人封面照片
+// router.patch('/users/:id/cover', authenticated, authenticatedUser, userController.)
+
 // 後台登入
 router.post('/admin/signin', passport.authenticate('local', { session: false }), authenticatedAdmin, userController.signIn)
 // 後台功能路由
