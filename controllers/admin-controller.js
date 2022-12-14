@@ -5,9 +5,6 @@ const adminController = {
   getTweets: (req, res, next) => {
     // if (!getUser(req)) {
     //   return res.status(401).json({ status: 'error', message: 'token is invalidated' })
-    // } else if (!req.user) // error 5XX 這邊應該怎麼判斷伺服器錯誤呀？
-    // {
-    //   return res.status(500).json({ status: 'error', message: 'internal server error' })
     // }
     Tweet.findAll({
       nest: true,
@@ -22,16 +19,13 @@ const adminController = {
           ...t,
           description: t.description.substring(0, 50)
         }))
-        return res.status(200).json({ status: 'success', data })
+        return res.status(200).json(data)
       })
       .catch(err => next(err))
   },
   deleteTweet: (req, res, next) => {
     // if (!getUser(req)) {
     //   return res.status(401).json({ status: 'error', message: 'token is invalidated' })
-    // } else if (!req.user) // error 5XX 這邊應該怎麼判斷伺服器錯誤呀？
-    // {
-    //   return res.status(500).json({ status: 'error', message: 'internal server error' })
     // }
     return Tweet.findByPk(req.params.id)
       .then(tweet => {
@@ -40,7 +34,7 @@ const adminController = {
             { status: 'error', message: 'Tweet did not exist!' }
           )
         }
-        res.status(200).json({ status: 'success', data: tweet })
+        res.status(200).json(tweet)
         return tweet.destroy()
       })
       .catch(err => next(err))
