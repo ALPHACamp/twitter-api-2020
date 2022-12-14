@@ -16,6 +16,7 @@ router.post('/users', userController.register)
 router.post('/login', passport.authenticate('local', { session: false }), userController.login)
 
 router.get('/tweets', authenticated, tweetController.getTweets)
+router.post('/tweets', authenticated, tweetController.postTweets)
 
 // router.get('/', (req, res) => {
 //   res.send('Hello World!')
