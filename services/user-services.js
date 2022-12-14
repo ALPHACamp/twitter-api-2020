@@ -1,4 +1,4 @@
-const { User, Like, Favorite, Tweet, Followship } = require('./../models')
+const { User, Like, Favorite, Tweet, Followship, Reply } = require('./../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
@@ -32,7 +32,10 @@ const userServices = {
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
-        password: hash
+        password: hash,
+        role: 'user',
+        avatar: `https://loremflickr.com/320/240/cat?random=${Math.random() * 100}`,
+        cover: `https://loremflickr.com/820/312/space?random=${Math.random() * 100}`
       }))
       .then(user => {
         delete user.password
@@ -139,6 +142,27 @@ const userServices = {
       })
       .then(deletedFollowship => cb(null, { status: 'success', deletedFollowship }))
       .catch(err => cb(err))
+  },
+  getUserTweets: (req, cb) => {
+    const userId = req.params.userId
+    Tweet.findAll({ where: { userId }, include: [User] })
+      .then(tweets => {
+        cb(null, { tweets })
+      })
+  },
+  getUserReplies: (req, cb) => {
+    const userId = req.params.userId
+    Reply.findAll({ where: { userId }, include: [User], nested: true, raw: true })
+      .then(replies => {
+        cb(null, { data: replies })
+      })
+  },
+  getLikedTweets: (req, cb) => {
+    const userId = req.params.userId
+    Like.findAll({ where: { userId }, include: [Tweet], nested: true, raw: true })
+      .then(likedTweets => {
+        cb(null, { data: likedTweets })
+      })
   }
 }
 module.exports = userServices
