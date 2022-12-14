@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const bcrypt = require('bcryptjs')
 const { User } = require('../models')
 
@@ -44,11 +45,29 @@ const userController = {
       return res.json({
         status: 'success',
         user: userData
+=======
+const jwt = require('jsonwebtoken')
+const userController = {
+  signIn: (req, res, next) => {
+    try {
+      const userData = req.user.toJSON()
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      res.json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+>>>>>>> 36f7ae15f623236c04eedbf7e1d48d0d35256d54
       })
     } catch (err) {
       next(err)
     }
   }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 36f7ae15f623236c04eedbf7e1d48d0d35256d54
 module.exports = userController
