@@ -1,11 +1,11 @@
 const sequelize = require('sequelize')
-const { getUser } = require('../_helpers')
+// const { getUser } = require('../_helpers')
 const { Tweet, User, Like, Reply } = require('../models')
 
 const tweetController = {
-  getTweets: async (req, res, next) => {
-    try {
-      const tweets = await Tweet.findAll({
+  getTweets: (req, res, next) => {
+    return Promise.all([
+      Tweet.findAll({
         attributes: [ // 指定回傳model欄位
           'id', 'description', 'createdAt',
           [
@@ -19,54 +19,44 @@ const tweetController = {
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
         raw: true,
         nest: true
+      }),
+      Like.findAll({})
+    ])
+      .then(([tweets, likes]) => {
+        const data = tweets.map(tweet => ({
+          ...tweet
+        }))
+        res.status(200).json({ success: true, data }) // 照前端需求統一以success的布林值判斷res是否成功
       })
-      // 檢查目前使用者是否like過推文
-      const currentUserId = getUser(req)?.id
-      const currentUserLiked = await Like.findAll({
-        where: { UserId: currentUserId },
-        raw: true
-      })
-      const likedTweetsId = currentUserLiked.map(like => like.TweetId)
-      const data = tweets.map(tweet => ({
-        ...tweet,
-        isLiked: likedTweetsId.some(tweetId => tweetId === tweet.id)
-      }))
-      res.status(200).json(data)
-    } catch (err) {
-      next(err)
-    }
+      .catch(err => next(err))
   },
-  getTweet: async (req, res, next) => {
-    try {
-      const { id } = req.params
-      const tweetData = await Tweet.findByPk(id, {
-        attributes: ['id', 'description', 'createdAt'],
-        include: [
-          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          { model: Like, attributes: ['UserId'] },
-          { modle: Reply, attributes: ['id'] }
+  getTweet: (req, res, next) => {
+    const { id } = req.params
+    return Promise.all([
+      Tweet.findByPk(id, {
+        attributes: ['id', 'description', 'createdAt',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Replies AS replyCount WHERE tweet_id = Tweet.id)'), 'replyCount' // 回傳留言數
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Likes AS likeCount WHERE tweet_id = Tweet.id)'), 'likeCount' // 回傳按讚數
+          ]
         ],
+        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
         nest: true
+      }),
+      Like.findAll({ where: { id }, raw: true })
+    ])
+      .then(([tweet, likes]) => {
+        if (!tweet) {
+          return res.status(404).json({
+            success: false, // 照前端需求統一以success的布林值判斷res是否成功
+            message: 'Tweet not found'
+          })
+        }
+        res.status(200).json({ success: true, tweet })
       })
-      if (!tweetData) {
-        return res.status(404).json({
-          status: 'error',
-          message: 'Tweet not found'
-        })
-      }
-      const tweet = {
-        id: tweetData.id,
-        description: tweetData.description,
-        createdAt: tweetData.createdAt,
-        user: tweetData.user,
-        replyCount: tweetData.Replies.length,
-        likeCount: tweetData.Likes.length,
-        isLiked: tweetData.Likes.map(like => like.UserId).include(getUser(req).id)
-      }
-      return res.status(200).json(tweet)
-    } catch (err) {
-      next(err)
-    }
+      .catch(err => next(err))
   }
 }
 
