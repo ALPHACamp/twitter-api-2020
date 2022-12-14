@@ -40,21 +40,22 @@ const adminController = {
       next(err)
     }
   },
-  getTweets: (req, res, next) => {
-    Tweet.findAll({
-      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(tweets => {
-        const data = tweets.map(t => ({
-          ...t,
-          description: t.description.substring(0, 50)
-        }))
-        res.status(200).json(data)
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
-      .catch(err => next(err))
+      const data = tweets.map(t => ({
+        ...t,
+        description: t.description.substring(0, 50)
+      }))
+      res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   },
   deleteTweet: async (req, res, next) => {
     try {
