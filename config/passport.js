@@ -18,10 +18,10 @@ passport.use(
         { model: Like }
       ]
     })
-      .then((user) => {
+      .then(user => {
         cb(null, user)
       })
-      .catch((err) => next(err))
+      .catch(err => cb(err))
   })
 )
 
@@ -37,8 +37,8 @@ passport.deserializeUser((id, cb) => {
       { model: Like }
     ]
   })
-    .then((user) => cb(null, user.toJSON()))
-    .catch((err) => cb(err))
+    .then(user => cb(null, user.toJSON()))
+    .catch(err => cb(err))
 })
 
 module.exports = passport
