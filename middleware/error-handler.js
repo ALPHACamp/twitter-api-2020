@@ -19,7 +19,7 @@ module.exports = {
         message: `${err.name}: ${err.message}`
       })
     } else {
-      errorHandler(err, req, res, next)
+      next(err)
     }
-}
+  }
 }
