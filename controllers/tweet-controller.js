@@ -1,6 +1,8 @@
+// 照前端需求皆以success的布林值判斷res是否成功
+
 const sequelize = require('sequelize')
 // const { getUser } = require('../_helpers')
-const { Tweet, User, Like, Reply } = require('../models')
+const { Tweet, User, Like } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
@@ -50,12 +52,48 @@ const tweetController = {
       .then(([tweet, likes]) => {
         if (!tweet) {
           return res.status(404).json({
-            success: false, // 照前端需求統一以success的布林值判斷res是否成功
+            success: false,
             message: 'Tweet not found'
           })
         }
         res.status(200).json({ success: true, tweet })
       })
+      .catch(err => next(err))
+  },
+  postTweet: (req, res, next) => {
+    // const UserId = getUser(req)?.id
+    const UserId = 1 // 測試用，待user功能補齊可拿掉
+    const { description } = req.body
+    // 錯誤判斷
+    // 空白內容
+    if (!description) {
+      return res.status(404).json({
+        success: false,
+        message: 'description is required!'
+      })
+    }
+    // 超過140字
+    if (description.length < 1 || description.length > 140) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tweet is limited to 140 characters'
+      })
+    }
+
+    User.findByPk(UserId)
+      .then(user => {
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: 'User not found'
+          })
+        }
+        return Tweet.create({
+          description,
+          UserId
+        })
+      })
+      .then(tweet => res.json({ success: true, message: 'Tweet has been added', tweet }))
       .catch(err => next(err))
   }
 }
