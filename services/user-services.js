@@ -124,6 +124,13 @@ const userServices = {
       .then(replies => {
         cb(null, { data: replies })
       })
+  },
+  getLikedTweets: (req, cb) => {
+    const userId = req.params.userId
+    Like.findAll({ where: { userId }, include: [Tweet], nested: true, raw: true })
+      .then(likedTweets => {
+        cb(null, { data: likedTweets })
+      })
   }
 }
 module.exports = userServices
