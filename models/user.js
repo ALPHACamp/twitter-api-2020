@@ -4,14 +4,14 @@ const {
 } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-
-    static associate(models) {
+    static associate (models) {
       // 和Like的關聯
-      User.hasMany(models.Like, { foreignKey: 'UserId' }) 
+      User.hasMany(models.Like, { foreignKey: 'UserId' })
       // 和Reply的關聯
-      User.hasMany(models.Reply, { foreignKey: 'UserId' }) 
+      User.hasMany(models.Reply, { foreignKey: 'UserId' })
       // 和Tweet的關聯
       User.hasMany(models.Tweet, { foreignKey: 'UserId' })
+      //  建立followrship關聯
       User.belongsToMany(User, {
         through: models.Followship,
         foreignKey: 'followingId',
