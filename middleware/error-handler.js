@@ -11,5 +11,15 @@ module.exports = {
         message: `${err}`
       })
     }
+  },
+  signInFail(err, req, res, next) {
+    if (err.status === 401 & err.name === 'AuthenticationError') {
+      res.status(err.status).json({
+        status: 'fail',
+        message: `${err.name}: ${err.message}`
+      })
+    } else {
+      next(err)
+    }
   }
 }
