@@ -12,6 +12,9 @@ const userController = {
   // },
   register: (req, res, next) => {
     if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
+    if (req.body.password.length > 8) throw new Error('Passwords should be no more than 8 digit!')
+    if (req.body.account.length > 8) throw new Error('Account should be no more than 8 digit!')
+    if (!req.body.email.includes('@')) throw new Error('your email address does not have @')
     Promise.all([
       User.findOne({ where: { account: req.body.account } }),
       User.findOne({ where: { email: req.body.email } })
