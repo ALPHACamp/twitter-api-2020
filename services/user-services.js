@@ -1,4 +1,4 @@
-const { User, Like, Favorite, Tweet, Followship, Reply } = require('./../models')
+const { User, Like, Tweet, Followship, Reply } = require('./../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
