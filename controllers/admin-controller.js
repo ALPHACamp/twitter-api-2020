@@ -27,13 +27,13 @@ const adminController = {
       const users = await User.findAll({
         attributes: [
           'id', 'account', 'name', 'avatar', 'cover',
-          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetsCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.User_id = User.id)'), 'likesCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingsCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followersCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetCounts'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.User_id = User.id)'), 'likeCounts'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCounts'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCounts']
         ],
         raw: true,
-        order: [[sequelize.literal('tweetsCount'), 'DESC']]
+        order: [[sequelize.literal('tweetCounts'), 'DESC']]
       })
       res.status(200).json(users)
     } catch (err) {

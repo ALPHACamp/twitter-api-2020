@@ -57,8 +57,8 @@ const userController = {
         where: { id, role: 'user' },
         attributes: {
           include: [
-            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingsCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followersCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCounts'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCounts'],
             [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = User.id)`), 'isFollowed']
           ],
           exclude: ['password', 'createdAt', 'updatedAt']
@@ -81,8 +81,8 @@ const userController = {
         include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
         attributes: {
           include: [
-            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'repliesCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likesCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
             [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${getUser(req).id} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
           ]
         },
@@ -129,8 +129,8 @@ const userController = {
             model: Tweet,
             attributes: [
               'id', 'description', 'createdAt',
-              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'repliesCount'],
-              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likesCount'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
               [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${getUser(req).id} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
             ],
             include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
@@ -199,10 +199,10 @@ const userController = {
         limit: DEFAULT_LIMIT,
         where: { role: 'user' },
         attributes: ['id', 'name', 'account', 'avatar',
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followersCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCounts'],
           [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = User.id)`), 'isFollowed']
         ],
-        order: [[sequelize.literal('followersCount'), 'DESC']]
+        order: [[sequelize.literal('followerCounts'), 'DESC']]
       })
       if (!users.length) return res.status(200).json([])
       res.status(200).json(users)
