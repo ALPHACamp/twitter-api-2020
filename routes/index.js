@@ -10,4 +10,8 @@ router.use('/users', authenticated, users)
 
 router.use('/', apiErrorHandler)
 
+const tweets = require('./modules/tweets')
+
+router.use('/tweets', tweets)
+
 module.exports = router

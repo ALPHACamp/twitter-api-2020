@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {}
   }
 
+
   Followship.init(
     {
       followerId: DataTypes.INTEGER,
@@ -18,5 +19,6 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   )
+
   return Followship
 }

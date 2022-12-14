@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
+
   Like.init(
     {
       UserId: DataTypes.INTEGER,
@@ -21,5 +22,6 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   )
+
   return Like
 }

@@ -1,11 +1,13 @@
+// 照前端需求皆以success的布林值判斷res是否成功
+
 const sequelize = require('sequelize')
-const { getUser } = require('../_helpers')
+// const { getUser } = require('../_helpers')
 const { Tweet, User, Like } = require('../models')
 
 const tweetController = {
-  getTweets: async (req, res, next) => {
-    try {
-      const tweets = await Tweet.findAll({
+  getTweets: (req, res, next) => {
+    return Promise.all([
+      Tweet.findAll({
         attributes: [ // 指定回傳model欄位
           'id', 'description', 'createdAt',
           [
@@ -19,22 +21,136 @@ const tweetController = {
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
         raw: true,
         nest: true
+      }),
+      Like.findAll({})
+    ])
+      .then(([tweets, likes]) => {
+        const data = tweets.map(tweet => ({
+          ...tweet
+        }))
+        res.status(200).json({ success: true, data }) // 照前端需求統一以success的布林值判斷res是否成功
       })
-      // 檢查目前使用者是否like過推文
-      const currentUserId = getUser(req)?.id
-      const currentUserLiked = await Like.findAll({
-        where: { UserId: currentUserId },
-        raw: true
+      .catch(err => next(err))
+  },
+  getTweet: (req, res, next) => {
+    const { id } = req.params
+    return Promise.all([
+      Tweet.findByPk(id, {
+        attributes: ['id', 'description', 'createdAt',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Replies AS replyCount WHERE tweet_id = Tweet.id)'), 'replyCount' // 回傳留言數
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Likes AS likeCount WHERE tweet_id = Tweet.id)'), 'likeCount' // 回傳按讚數
+          ]
+        ],
+        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+        nest: true
+      }),
+      Like.findAll({ where: { id }, raw: true })
+    ])
+      .then(([tweet, likes]) => {
+        if (!tweet) {
+          return res.status(404).json({
+            success: false,
+            message: 'Tweet not found'
+          })
+        }
+        res.status(200).json({ success: true, tweet })
       })
-      const likedTweetsId = currentUserLiked.map(like => like.TweetId)
-      const data = tweets.map(tweet => ({
-        ...tweet,
-        isLiked: likedTweetsId.some(tweetId => tweetId === tweet.id)
-      }))
-      res.status(200).json(data)
-    } catch (err) {
-      next(err)
+      .catch(err => next(err))
+  },
+  postTweet: (req, res, next) => {
+    // const UserId = getUser(req)?.id
+    const UserId = 1 // 測試用，待user功能補齊可拿掉
+    const { description } = req.body
+    // 錯誤判斷
+    // 空白內容
+    if (!description) {
+      return res.status(404).json({
+        success: false,
+        message: 'description is required!'
+      })
     }
+    // 超過140字
+    if (description.length < 1 || description.length > 140) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tweet is limited to 140 characters'
+      })
+    }
+
+    User.findByPk(UserId)
+      .then(user => {
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: 'User not found'
+          })
+        }
+        return Tweet.create({
+          description,
+          UserId
+        })
+      })
+      .then(tweet => res.json({ success: true, message: 'Tweet has been added', tweet }))
+      .catch(err => next(err))
+  },
+  likeTweet: (req, res, next) => {
+    const TweetId = Number(req.params.id)
+    // const UserId = getUser(req)?.id
+    const UserId = 1 // 測試用要記得刪掉!!
+    return Promise.all([
+      Tweet.findByPk((TweetId), { raw: true }),
+      Like.findOne({
+        where: {
+          UserId,
+          TweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) {
+          return res.status(404).json({
+            success: false,
+            message: 'Tweet not found'
+          })
+        }
+        if (like) {
+          return res.status(400).json({
+            success: false,
+            message: 'Already liked'
+          })
+        }
+        return Like.create({
+          UserId,
+          TweetId
+        })
+      })
+      .then(() => res.status(200).json({ success: true, message: 'Liked successfully' }))
+      .catch(err => next(err))
+  },
+  unlikeTweet: (req, res, next) => {
+    const TweetId = Number(req.params.id)
+    // const UserId = getUser(req)?.id
+    const UserId = 1 // 測試用要記得刪掉!!
+    return Like.findOne({
+      where: {
+        UserId,
+        TweetId
+      }
+    })
+      .then(like => {
+        if (!like) {
+          return res.status(400).json({
+            success: false,
+            message: "Haven't liked it yet"
+          })
+        }
+        return like.destroy()
+      })
+      .then(() => res.status(200).json({ success: true, message: 'Unliked successfully' }))
+      .catch(err => next(err))
   }
 }
 
