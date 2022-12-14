@@ -13,7 +13,6 @@ const tweetController = {
         raw: true,
         nest: true
       })
-      if (!replies) return res.status(200).json([])
       res.status(200).json(replies)
     } catch (err) {
       next(err)
@@ -34,7 +33,7 @@ const tweetController = {
         raw: true,
         nest: true
       })
-      const loginUser = getUser(req)?.id
+      const loginUser = getUser(req).id
       const likes = await Like.findAll({
         where: { UserId: loginUser },
         raw: true
@@ -52,7 +51,7 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
-      const loginUser = getUser(req)?.id
+      const loginUser = getUser(req).id
       const tweetId = req.params.tweet_id
       const tweet = await Tweet.findByPk(tweetId, {
         include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
@@ -77,7 +76,7 @@ const tweetController = {
   },
   addLike: async (req, res, next) => {
     try {
-      const loginUser = getUser(req)?.id
+      const loginUser = getUser(req).id
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId, {
         attributes: {
@@ -100,7 +99,7 @@ const tweetController = {
   },
   unlikeTweet: async (req, res, next) => {
     try {
-      const loginUser = getUser(req)?.id
+      const loginUser = getUser(req).id
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId, {
         attributes: {
@@ -138,10 +137,10 @@ const tweetController = {
       const { comment } = req.body
       const TweetId = req.params.tweet_id
       const UserId = getUser(req).id
-      if (!comment.trim()) throw new Error('內容不可空白')
-      if (comment.length > 140) throw new Error('內容不可超過140字')
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) throw new Error('推文不存在')
+      if (!comment.trim()) throw new Error('內容不可空白')
+      if (comment.length > 140) throw new Error('內容不可超過140字')
       const data = await Reply.create({
         UserId,
         TweetId,

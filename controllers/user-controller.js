@@ -21,7 +21,7 @@ const userController = {
       const user = await User.findOne({
         where: { account, email, role: 'user' }
       })
-      if (!user) return res.status(401).json({ status: 'error', message: 'redirect fail' })
+      if (!user) return res.status(401).json({ status: 'error', message: 'Redirect fail!' })
       const userData = user.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '14d' })
@@ -64,7 +64,7 @@ const userController = {
           exclude: ['password', 'createdAt', 'updatedAt']
         }
       })
-      if (!user) throw new Error("user didn't exist")
+      if (!user) throw new Error("User didn't exist!")
       const userData = user.toJSON()
       res.status(200).json(userData)
     } catch (err) {
@@ -75,7 +75,7 @@ const userController = {
     try {
       const { id } = req.params
       const user = await User.findOne({ where: { id, role: 'user' } })
-      if (!user) throw new Error("user didn't exist")
+      if (!user) throw new Error("User didn't exist!")
       const tweets = await Tweet.findAll({
         where: { UserId: id },
         include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
@@ -90,7 +90,6 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!tweets.length) return res.status(200).json([])
       res.status(200).json(tweets)
     } catch (err) {
       next(err)
@@ -100,7 +99,7 @@ const userController = {
     try {
       const { id } = req.params
       const user = await User.findOne({ where: { id, role: 'user' } })
-      if (!user) throw new Error("user didn't exist")
+      if (!user) throw new Error("User didn't exist!")
       const replies = await Reply.findAll({
         where: { UserId: id },
         include: [
@@ -111,7 +110,6 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!replies.length) return res.status(200).json([])
       res.status(200).json(replies)
     } catch (err) {
       next(err)
@@ -121,7 +119,7 @@ const userController = {
     try {
       const { id } = req.params
       const user = await User.findOne({ where: { id, role: 'user' } })
-      if (!user) throw new Error("user didn't exist")
+      if (!user) throw new Error("User didn't exist!")
       const likes = await Like.findAll({
         where: { UserId: id },
         include: [
@@ -140,7 +138,6 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!likes.length) return res.status(200).json([])
       res.status(200).json(likes)
     } catch (err) {
       next(err)
@@ -150,7 +147,7 @@ const userController = {
     try {
       const { id } = req.params
       const user = await User.findOne({ where: { id, role: 'user' } })
-      if (!user) throw new Error("user didn't exist")
+      if (!user) throw new Error("User didn't exist!")
       const followings = await Followship.findAll({
         where: { followerId: id },
         attributes: {
@@ -161,9 +158,9 @@ const userController = {
             [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'isFollowed']
           ]
         },
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        raw: true
       })
-      if (!followings.length) return res.status(200).json([])
       res.status(200).json(followings)
     } catch (err) {
       next(err)
@@ -173,7 +170,7 @@ const userController = {
     try {
       const { id } = req.params
       const user = await User.findOne({ where: { id, role: 'user' } })
-      if (!user) throw new Error("user didn't exist")
+      if (!user) throw new Error("User didn't exist!")
       const followers = await Followship.findAll({
         where: { followingId: id },
         attributes: {
@@ -184,9 +181,9 @@ const userController = {
             [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'isFollowed']
           ]
         },
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        raw: true
       })
-      if (!followers.length) return res.status(200).json([])
       res.status(200).json(followers)
     } catch (err) {
       next(err)
@@ -202,9 +199,9 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCounts'],
           [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = User.id)`), 'isFollowed']
         ],
-        order: [[sequelize.literal('followerCounts'), 'DESC']]
+        order: [[sequelize.literal('followerCounts'), 'DESC']],
+        raw: true
       })
-      if (!users.length) return res.status(200).json([])
       res.status(200).json(users)
     } catch (err) {
       next(err)
