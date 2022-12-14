@@ -10,7 +10,7 @@ const app = express()
 const port = process.env.PORT || 3000
 
 const corsOptions = {
-  origin: ['https://s339428326.github.io/', 'http://localhost:3000/'],
+  origin: ['https://s339428326.github.io/AlphaCamp-Twitter', 'http://localhost:3000/AlphaCamp-Twitter'],
   methods: ['GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }
