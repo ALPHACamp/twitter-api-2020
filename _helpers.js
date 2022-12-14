@@ -18,7 +18,12 @@ const imgurFileHandler = file => {
   })
 }
 
+const ensureAuthenticated = req => {
+  return req.isAuthenticated()
+}
+
 module.exports = {
   getUser,
+  ensureAuthenticated
   imgurFileHandler
 }
