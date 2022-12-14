@@ -16,7 +16,6 @@ module.exports = {
         const selectPool = users
         const followerIndex = Math.floor(index / followingPerUser) + 1
         const followingSelectPool = selectPool.filter((_, i) => i !== 0 && i !== followerIndex)
-
         return (
           {
             follower_id: users[followerIndex].id,
