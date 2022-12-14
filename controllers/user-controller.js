@@ -1,10 +1,10 @@
 const bcrypt = require('bcryptjs')
 const { User } = require('../models')
+
 const userController = {
   signUp: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
-
       // 初始化message物件
       const message = {}
       // 確認密碼與確認密碼是否一致
@@ -15,6 +15,7 @@ const userController = {
         User.findOne({ where: { account } }),
         User.findOne({ where: { email } })
       ])
+
       if (userAccount) message.account = '帳號已註冊!'
       if (userEmail) message.email = '信箱已註冊!'
 
