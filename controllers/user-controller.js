@@ -1,7 +1,7 @@
 const assert = require('assert')
 const bcrypt = require('bcrypt-nodejs')
 const { User, Reply, Tweet, Like } = require('../models')
-const { getUser } = require('../_helpers')
+const { getUser, imgurFileHandler } = require('../_helpers')
 
 const userController = {
   getUser: (req, res, next) => {
@@ -61,6 +61,33 @@ const userController = {
       }))
       .then(createdUser => res.json({ status: 'success', data: createdUser }))
       .catch(err => next(err))
+  },
+  putUser: (req, res, next) => {
+    const { id } = req.params
+    const { account, name, email, password, confirmPassword, introduction } = req.body
+    const { avatar, cover } = req
+    if (!account || !name || !email || !password || !confirmPassword) throw new Error('account, name, email, password, confirmPassword必填！')
+    if (password !== confirmPassword) throw new Error('密碼與密碼確認不相同！')
+    if (getUser(req).id !== id) throw new Error('無權限更改此使用者！')
+    return Promise.all([
+      User.findByPk(id),
+      imgurFileHandler(avatar),
+      imgurFileHandler(cover)
+    ])
+      .then(([user, avatarPath, coverPath]) => {
+        if (!user) assert(user, '使用者不存在！')
+        return user.update({
+          account,
+          name,
+          email,
+          password: bcrypt.hashSync(password),
+          avatar: avatarPath || user.avatar,
+          cover: coverPath || user.cover,
+          introduction: introduction || user.introduction
+        })
+      })
+      .then(updatedUser => res.json({ status: 'success', data: updatedUser }))
+      .then(err => next(err))
   }
 }
 
