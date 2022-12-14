@@ -4,12 +4,13 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express')
 const helpers = require('./_helpers')
-const routes = require('./routes')
+// const routes = require('./routes')
 const flash = require('connect-flash')
 const session = require('express-session')
 // const methodOverride = require('method-override')// 不確定不需要
 const passport = require('./config/passport')
 const { getUser } = require('./helpers/auth-helpers')
+const { apis } = require('./routes')
 
 const app = express()
 const port = 3000
@@ -32,7 +33,7 @@ function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
-app.use(routes)
+app.use('/api', apis)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
