@@ -16,5 +16,5 @@ app.use(passport.initialize())
 app.use(methodOverride('_method'))
 app.use('/api', routes)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-
+app.get('/', (req, res) => { res.send('hello') })
 module.exports = app
