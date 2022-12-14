@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 
-const { User, Tweet, Followship } = require('../models')
+const { User, Tweet } = require('../models')
 
 const userController = {
   postUsers: (req, res, next) => {
