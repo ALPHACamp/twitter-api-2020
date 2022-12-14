@@ -9,6 +9,7 @@ dayjs.extend(relativeTime)
 dayjs.extend(isYesterday)
 
 const replyController = {
+  // 新增推文回覆
   postReply: (req, res, next) => {
     const TweetId = req.params.tweet_id
     const UserId = helpers.getUser(req).id
@@ -32,7 +33,7 @@ const replyController = {
       })
       .catch(err => next(err))
   },
-  // 在回覆中帶入 relativeTime
+  // 該則推文的所有回覆
   getReplies: (req, res, next) => {
     return Reply.findAll({
       where: { TweetId: req.params.tweet_id },
