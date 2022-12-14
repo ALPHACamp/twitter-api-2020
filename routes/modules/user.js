@@ -8,6 +8,8 @@ router.get('/followship', userController.getTopUsers)
 router.get('/:userId/tweets', userController.getUserTweets)
 router.get('/:userId/replied_tweets', userController.getUserReplies)
 router.get('/:userId/liked_tweets', userController.getLikedTweets)
+router.get('/:userId/followers', userController.getUserFollowers)
+router.get('/:userId/followings', userController.getUserFollowings)
 router.get('/:userId', userController.getUser)
 router.get('/', userController.getUsers)
 

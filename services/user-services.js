@@ -163,6 +163,20 @@ const userServices = {
       .then(likedTweets => {
         cb(null, { data: likedTweets })
       })
+  },
+  getUserFollowers: (req, cb) => {
+    const userId = req.params.userId
+    Followship.findAll({ where: { followingId: userId }, include: [User], nested: true, raw: true })
+      .then(followers => {
+        cb(null, followers)
+      })
+  },
+  getUserFollowings: (req, cb) => {
+    const userId = req.params.userId
+    Followship.findAll({ where: { followerId: userId }, include: [User], nested: true, raw: true })
+      .then(followings => {
+        cb(null, followings)
+      })
   }
 }
 module.exports = userServices
