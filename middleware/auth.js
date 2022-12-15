@@ -1,7 +1,7 @@
 // const passport = require('../config/passport')
 // const authenticated = passport.authenticate('jwt', { session: false })
 
-const { ensureAuthenticated, getUser } = require('../helpers/auth-helper')
+const { ensureAuthenticated, getUser } = require('../_helpers.js')
 
 const authenticated = (req, res, next) => {
   if (ensureAuthenticated(req)) {
