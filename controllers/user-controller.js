@@ -10,14 +10,15 @@ const userServices = {
 
     const { account, name, email, password } = req.body
 
+    if (name.length > 50) throw new Error('字數超出上限！')
     User.findOne({ where: { email }, raw: true })
-      .then(user => {
+      .then((user) => {
         if (!user) return bcrypt.hash(password, 10)
 
         if (user.account === account) throw new Error('account 已重複註冊！')
         if (user.email === email) throw new Error('email 已重複註冊！')
       })
-      .then(hash =>
+      .then((hash) =>
         User.create({
           account,
           name,
@@ -25,13 +26,14 @@ const userServices = {
           password: hash
         })
       )
-      .then(newUser => cb(null, { success: 'true', user: newUser }))
-      .catch(err => cb(err))
+      .then((newUser) => cb(null, { success: 'true' }))
+      .catch((err) => cb(err))
   },
   signIn: (req, cb) => {
     const { account, password } = req.body
+
     User.findOne({ where: { account }, raw: true })
-      .then(user => {
+      .then((user) => {
         if (!user) {
           throw new Error('帳號不存在 ！')
         }
@@ -47,22 +49,18 @@ const userServices = {
           expiresIn: '30d'
         })
 
-        delete userData.password
-
-        return [userData, token]
+        return token
       })
-      .then(([userData, token]) =>
-        cb(null, { success: 'true', data: { token, user: userData } })
-      )
-      .catch(err => cb(err))
+      .then((token) => cb(null, { success: 'true', token }))
+      .catch((err) => cb(err))
   },
   getUser: (req, cb) => {
     User.findByPk(req.params.id)
-      .then(user => {
+      .then((user) => {
         if (!user) throw new Error('使用者不存在 !')
         return cb(null, { success: 'true', data: user })
       })
-      .catch(err => cb(err))
+      .catch((err) => cb(err))
   }
 }
 
