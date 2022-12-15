@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../models')
+const helpers = require('../_helpers')
 
 const { User } = db
 
@@ -39,7 +40,7 @@ const userController = {
   },
   login: (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
+      const userData = helpers.getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({

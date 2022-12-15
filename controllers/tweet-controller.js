@@ -1,8 +1,20 @@
-const { Tweet } = require('../models')
+const helpers = require('../_helpers')
+const { Tweet, User } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
-    return res.send('tweets')
+    Tweet.findAll({
+      include: User,
+      order: [
+        ['createdAt', 'DESC']
+      ]
+    })
+      .then(tweets => {
+        // const data = { tweets }
+        // res.json({ status: 'success', data })
+        res.json(tweets)
+      })
+      .catch(err => next(err))
   },
   postTweets: (req, res, next) => {
     const { description } = req.body
@@ -11,11 +23,10 @@ const tweetController = {
     if (!description) throw new Error('description is required!')
     return Tweet.create({
       description,
-      UserId: req.user.id
+      UserId: helpers.getUser(req).id
     })
       .then(newTweet => {
-        const data = { tweet: newTweet }
-        res.json({ status: 'success', data })
+        res.json({ newTweet })
       })
       .catch(err => next(err))
   }
