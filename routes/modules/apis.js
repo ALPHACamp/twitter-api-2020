@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 
+const followshipController = require('../../controllers/followshipController')
 const replyController = require('../../controllers/replyController')
 const userController = require('../../controllers/userController')
 const tweetController = require('../../controllers/tweetController')
@@ -20,4 +21,7 @@ router.post('/tweets', authenticated, tweetController.postTweet)
 
 router.post('/tweets/:id/like', authenticated, likeController.addLike)
 router.post('/tweets/:id/unlike', authenticated, likeController.unLike)
+
+router.post('/followships', authenticated, followshipController.addFollowing)
+router.delete('/followships/:followingId', authenticated, followshipController.removeFollowing)
 module.exports = router
