@@ -1,5 +1,5 @@
 const helpers = require('../_helpers')
-const { Tweet, User } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
@@ -13,6 +13,31 @@ const tweetController = {
         // const data = { tweets }
         // res.json({ status: 'success', data })
         res.json(tweets)
+      })
+      .catch(err => next(err))
+  },
+  getTweet: (req, res, next) => {
+    return Promise.all([
+      Tweet.findOne(
+        {
+          where: { id: req.params.tweet_id },
+          raw: true
+        }),
+      Like.findAll({ where: { tweetId: req.params.tweet_id } }),
+      Reply.findAll({ where: { tweetId: req.params.tweet_id } })
+    ])
+      .then(([tweet, likes, replies]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        return User.findByPk(tweet.userId)
+          .then(user => {
+            res.json({
+              ...tweet,
+              userName: user.name,
+              replyAmount: replies.length,
+              likeAmount: likes.length
+            })
+          })
+          .catch(err => next(err))
       })
       .catch(err => next(err))
   },
