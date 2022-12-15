@@ -1,6 +1,6 @@
-const assert = require('assert')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
+
 const { User } = require('../models')
 const { getOffset, getUser } = require('../_helpers')
 
@@ -52,7 +52,7 @@ const adminController = {
         raw: true
       })
 
-      res.json({ status: 'success', data: users })
+      return res.json(users)
     } catch (err) {
       next(err)
     }
@@ -62,9 +62,9 @@ const adminController = {
       const { role } = req.body
       const { id } = req.params
       const user = await User.findByPk(id)
-      if (user.email === superUser.email) assert(user, `禁止變更${superUser.name}權限`)
-      const updateUser = await user.update({ role })
-      res.json({ status: 'success', data: updateUser })
+      if (user.email === superUser.email) return res.status(401).json({ status: 'error', message: `禁止變更${superUser.name}權限` })
+      const updatedUser = await user.update({ role })
+      return res.json({ status: 'success', data: updatedUser })
     } catch (err) {
       next(err)
     }
