@@ -1,8 +1,11 @@
 const express = require('express')
 const router = express.Router()
 
-// const adminController = require('../../controllers/admin-controller')
+// const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 
+const adminController = require('../../controllers/admin-controller')
+
+router.post('/signin', adminController.signIn) // 後台登入
 // router.get('/users', adminController.getUsers) // 查看所有使用者
 // router.delete('/tweets/:id', adminController.deleteTweet) // 刪除特定推文
 

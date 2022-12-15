@@ -7,6 +7,9 @@ const authenticated = (req, res, next) => {
     if (err || !user) {
       return res.status(401).json({ success: 'false', message: 'unauthorized' })
     }
+    if (user) {
+      req.user = user
+    }
     next()
   })(req, res, next)
 }
