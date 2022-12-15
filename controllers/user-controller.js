@@ -48,7 +48,7 @@ const userController = {
         nest: true
       })
       if (!user) return res.status(404).json({ status: 'error', message: "User doesn't exist!" })
-      return res.json({ status: 'success', data: user })
+      return res.json(user)
     } catch (err) {
       next(err)
     }
@@ -75,9 +75,9 @@ const userController = {
   },
   postUser: async (req, res, next) => {
     try {
-      const { account, name, email, password, confirmPassword } = req.body
-      if (!account || !name || !email || !password || !confirmPassword) return res.status(400).json({ status: 'error', message: '所有欄位都是必填！' })
-      if (password !== confirmPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
+      const { account, name, email, password, checkPassword } = req.body
+      if (!account || !name || !email || !password || !checkPassword) return res.status(400).json({ status: 'error', message: '所有欄位都是必填！' })
+      if (password !== checkPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
 
       const user1 = await User.findOne({ where: { email } })
       if (user1) return res.status(400).json({ status: 'error', message: 'email 已重複註冊！' })
@@ -99,17 +99,17 @@ const userController = {
   putUser: async (req, res, next) => {
     try {
       const { id } = req.params
-      const { account, name, email, password, confirmPassword, introduction } = req.body
+      const { account, name, email, password, checkPassword, introduction } = req.body
       const { avatar, cover } = req
 
-      if (password && password !== confirmPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
-      if (getUser(req).id !== Number(id)) return res.status(401).json({ status: 'error', message: '無權限更改此使用者！' })
+      if (password && password !== checkPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
 
       const user = await User.findByPk(id)
       const avatarPath = await imgurFileHandler(avatar)
       const coverPath = await imgurFileHandler(cover)
 
       if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在！' })
+      if (getUser(req).dataValues.id !== Number(id)) return res.status(401).json({ status: 'error', message: '無權限更改此使用者！' })
 
       const updatedUser = await user.update({
         account: account || user.account,

@@ -1,5 +1,5 @@
 const { User } = require('../models')
-const { getOffset, getPagination } = require('../_helpers')
+const { getOffset } = require('../_helpers')
 
 const superUser = { name: 'root', email: 'root@example.com' }
 
@@ -18,9 +18,7 @@ const adminController = {
         raw: true
       })
 
-      const pagination = getPagination(limit, page, users.length)
-
-      return res.json({ status: 'success', data: { users, pagination } })
+      return res.json(users)
     } catch (err) {
       next(err)
     }
