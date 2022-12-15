@@ -23,19 +23,20 @@ passport.use(new LocalStrategy(
   // customize user field
   {
     usernameField: 'account',
-    passwordField: 'password',
-    passReqToCallback: true
+    passwordField: 'password'
   },
   // authenticate user
-  (req, account, password, cb) => {
+  (account, password, done) => {
+    if (account === 'root') { throw new Error('admin account cannot enter') } // 管理者帳號不能登入
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
+        if (!user) throw new Error('account do not match!')
         bcrypt.compare(password, user.password).then(res => {
-          if (!res) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
-          return cb(null, user)
-        })
+          if (res) { return done(null, user) }
+          throw new Error('Passwords do not match!')
+        }).catch(err => done(err, false))
       })
+      .catch(err => done(err, false))
   }
 ))
 // serialize and deserialize user

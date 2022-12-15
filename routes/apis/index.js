@@ -18,10 +18,6 @@ router.post('/login', passport.authenticate('local', { session: false }), userCo
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweets)
 
-// router.get('/', (req, res) => {
-//   res.send('Hello World!')
-// })
-
 router.use('/', apiErrorHandler)
 
 module.exports = router
