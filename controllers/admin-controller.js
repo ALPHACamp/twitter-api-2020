@@ -1,24 +1,23 @@
-const { User, Tweet } = require('../models')
-// const { getUser } = require('../_helpers')
+const { User, Tweet, Like, FollowShip } = require('../models')
+const { getUser } = require('../_helpers')
 
 const adminController = {
   getUsers: (req, res, next) => {
     // if (!getUser(req)) {
     //   return res.status(401).json({ status: 'error', message: 'token is invalidated' })
     // }
-    return User.findAll({
-      include: [
-        { model: User, as: 'Followers' }
-        // { model: User, as: 'Followings' }
-      ]
-    })
-      .then(users => {
-        users = users.map(user => ({
-          ...user.toJSON(),
-          followerCount: user.Followers.length
-          // followingCount: user.Followings.length
-        }))
-        res.status(200).json(users)
+    Promise.all([
+      User.findAll({
+        nest: true,
+        raw: true,
+        include: Tweet,
+        attributes: {
+          exclude: 'password'
+        }
+      })
+    ])
+      .then(([users]) => {
+        return res.status(200).json(users)
       })
       .catch(err => next(err))
   },
