@@ -242,6 +242,58 @@ const userController = {
       }))
       return res.status(200).json(data)
     } catch (err) { next(err) }
+  },
+  getLoginUserProfile: (req, res, next) => {
+    try {
+      const loginUser = helpers.getUser(req).toJSON()
+      if (!loginUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
+
+      const data = {
+        id: loginUser.id,
+        account: loginUser.account,
+        name: loginUser.name,
+        email: loginUser.email,
+        avatar: loginUser.avatar,
+        cover: loginUser.cover,
+        introduction: loginUser.introduction,
+        role: loginUser.role,
+        tweetCount: loginUser.Tweets.length,
+        followingCount: loginUser.Followings.length,
+        followerCount: loginUser.Followers.length
+      }
+      return res.status(200).json(data)
+    } catch (err) { next(err) }
+  },
+  putUserSetting: async (req, res, next) => {
+    try {
+      const reqId = Number(req.params.id)
+      const loginUserId = helpers.getUser(req).id
+      const { account, name, email, password, checkPassword } = req.body
+      if (!account.trim() || !name.trim() || !email.trim() || !password.trim() || !checkPassword.trim()) {
+        return res.status(400).json({ status: 'error', message: 'All field are required!' })
+      }
+      if (!validator.isEmail(email)) {
+        return res.status(422).json({ status: 'error', message: 'Email input is invalid!' })
+      }
+      if (password !== checkPassword) {
+        return res.status(422).json({ status: 'error', message: 'Password and confirmPassword do not match.' })
+      }
+      if (name.length > 50) {
+        return res.status(422).json({ status: 'error', message: 'Name field has max length of 50 characters.' })
+      }
+      if (reqId !== loginUserId) {
+        return res.status(403).json({ status: 'error', message: "Cannot edit other user's setting." })
+      }
+
+      const user = await User.findByPk(reqId)
+      if (!user) return res.status(404).json({ status: 'error', message: 'User not found!' })
+      if (user.email === email) return res.status(422).json({ status: 'error', message: 'Email already exists!' })
+      if (user.account === account) return res.status(422).json({ status: 'error', message: 'Account name already exists!' })
+
+      const hash = await bcrypt.hash(password, 10)
+      await user.update({ account, name, email, password: hash })
+      return res.status(200).json({ status: 'success' })
+    } catch (err) { next(err) }
   }
 }
 

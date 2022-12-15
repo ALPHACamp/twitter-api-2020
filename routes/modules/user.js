@@ -5,6 +5,8 @@ const { authenticated } = require('../../middleware/auth')
 const upload = require('../../middleware/multer')
 
 router.get('/top', authenticated, userController.getUsersTop)
+router.get('/login_user', authenticated, userController.getLoginUserProfile)
+router.put('/:id/setting', authenticated, userController.putUserSetting)
 router.get('/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/:id/likes', authenticated, userController.getUserLikes)
