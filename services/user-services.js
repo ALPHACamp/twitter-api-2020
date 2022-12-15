@@ -2,11 +2,12 @@ const { User, Like, Tweet, Followship, Reply } = require('./../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
+const helpers = require('../_helpers')
 const userServices = {
   loginUser: (req, cb) => {
     try {
-      delete req.user.password
-      const userData = req.user.toJSON()
+      delete helpers.getUser(req).password
+      const userData = helpers.getUser(req).toJSON()
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, {
         token,

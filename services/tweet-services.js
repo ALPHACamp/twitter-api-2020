@@ -18,27 +18,28 @@ const tweetServices = {
   },
   postTweet: (req, cb) => {
     const description = req.body.description
-    const userId = req.user.id
-    User.findByPk(userId)
+    const UserId = helpers.getUser(req).id
+    return User.findByPk(UserId)
       .then(user => {
         if (!user) throw new Error("User didn't exist!")
         return Tweet.create({
-          description
+          description,
+          UserId
         })
       })
-      .then(postedTweet => cb(null, { status: 'success', postedTweet }))
+      .then(postedTweet => cb(null, postedTweet))
       .catch(err => cb(err))
   },
   postReply: (req, cb) => {
     const { comment } = req.body
-    const tweetId = req.params.tweetId
-    const userId = req.user.id
-    Tweet.findByPk(tweetId)
+    const TweetId = req.params.tweetId
+    const UserId = helpers.getUser(req).id
+    Tweet.findByPk(TweetId)
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
         return Reply.create({
-          userId,
-          tweetId,
+          UserId,
+          TweetId,
           comment
         })
       })
@@ -46,24 +47,24 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   getReplies: (req, cb) => {
-    const tweetId = req.params.tweetId
-    Tweet.findByPk(tweetId)
+    const TweetId = req.params.tweetId
+    Tweet.findByPk(TweetId)
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
-        return Reply.findAll({ where: { tweetId }, include: [User], nest: true })
+        return Reply.findAll({ where: { TweetId }, include: [User], nest: true })
       })
       .then(replies => cb(null, replies))
       .catch(err => cb(err))
   },
   likeTweet: (req, cb) => {
-    const userId = req.user.id
-    const tweetId = req.params.tweetId
+    const UserId = helpers.getUser(req).id
+    const TweetId = req.params.tweetId
     return Promise.all([
-      User.findByPk(userId),
+      User.findByPk(UserId),
       Like.findOne({
         where: {
-          userId,
-          tweetId
+          UserId,
+          TweetId
         }
       })
     ])
@@ -71,8 +72,8 @@ const tweetServices = {
         if (!user) throw new Error("User didn't exist!")
         if (like) throw new Error('Tweet has already been liked!')
         return Like.create({
-          tweetId,
-          userId
+          TweetId,
+          UserId
         })
       })
       .then(result => {
@@ -81,12 +82,12 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   unlikeTweet: (req, cb) => {
-    const userId = helpers.getUser(req).id
-    const tweetId = req.params.tweetId
+    const UserId = helpers.getUser(req).id
+    const TweetId = req.params.tweetId
     Like.findOne({
       where: {
-        userId,
-        tweetId
+        UserId,
+        TweetId
       }
     })
       .then(like => {

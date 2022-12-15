@@ -20,7 +20,7 @@ const followshipServices = {
       User.findByPk(id),
       Followship.findOne({
         where: {
-          followerId: req.user.id,
+          followerId: helpers.getUser(req).id,
           followingId: req.body.id
         }
       })
@@ -29,7 +29,7 @@ const followshipServices = {
         if (!user) throw new Error("User didn't exist!")
         if (followship) throw new Error('You are already following this user!')
         return Followship.create({
-          followerId: req.user.id,
+          followerId: helpers.getUser(req).id,
           followingId: req.body.id
         })
       })
@@ -41,7 +41,7 @@ const followshipServices = {
   removeFollowing: (req, cb) => {
     Followship.findOne({
       where: {
-        followerId: req.user.id,
+        followerId: helpers.getUser(req).id,
         followingId: req.params.followingId
       }
     })
