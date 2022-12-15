@@ -49,13 +49,9 @@ const userServices = {
           expiresIn: '30d'
         })
 
-        delete userData.password
-
-        return [userData, token]
+        return token
       })
-      .then(([userData, token]) =>
-        cb(null, { success: 'true', data: { token, user: userData } })
-      )
+      .then((token) => cb(null, { success: 'true', token }))
       .catch((err) => cb(err))
   },
   getUser: (req, cb) => {
