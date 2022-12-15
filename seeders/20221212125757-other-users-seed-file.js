@@ -9,7 +9,7 @@ module.exports = {
 			password: bcrypt.hashSync(faker.internet.password(20), 10),
 			name: faker.name.findName(),
 			avatar: `https://loremflickr.com/140/140/people/?random=${Math.random() * 100}`,
-			introduction: faker.lorem.text(),
+			introduction: faker.lorem.text().substring(0,160),
 			cover: `https://loremflickr.com/639/200/image?random=${Math.random() * 100}`,
 			role: 0,
 			following_count: Math.floor(Math.random() * 500),
