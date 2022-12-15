@@ -1,4 +1,3 @@
-const assert = require('assert')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
 const { User, Reply, Tweet, Like } = require('../models')
@@ -48,8 +47,8 @@ const userController = {
         ],
         nest: true
       })
-      if (!user) assert(user, "User doesn't exist!")
-      res.json({ status: 'success', data: user })
+      if (!user) return res.status(404).json({ status: 'error', message: "User doesn't exist!" })
+      return res.json({ status: 'success', data: user })
     } catch (err) {
       next(err)
     }
@@ -58,7 +57,7 @@ const userController = {
     try {
       const top = Number(req.query.top)
       const currentUser = getUser(req)
-      const users = User.findAll({
+      const users = await User.findAll({
         include: [{ model: User, as: 'Followers' }]
       })
       const result = users
@@ -69,7 +68,7 @@ const userController = {
         }))
         .sort((a, b) => b.followerCount - a.followerCount)
         .slice(0, top || users.length)
-      res.json({ status: 'success', data: result })
+      return res.status(200).json({ status: 'success', data: result })
     } catch (err) {
       next(err)
     }
@@ -77,13 +76,13 @@ const userController = {
   postUser: async (req, res, next) => {
     try {
       const { account, name, email, password, confirmPassword } = req.body
-      if (!account || !name || !email || !password || !confirmPassword) throw new Error('所有欄位都是必填！')
-      if (password !== confirmPassword) throw new Error('密碼與密碼確認不相同！')
+      if (!account || !name || !email || !password || !confirmPassword) return res.status(400).json({ status: 'error', message: '所有欄位都是必填！' })
+      if (password !== confirmPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
 
       const user1 = await User.findOne({ where: { email } })
-      if (user1) assert(user1, 'email 已重複註冊！')
+      if (user1) return res.status(400).json({ status: 'error', message: 'email 已重複註冊！' })
       const user2 = await User.findOne({ where: { account } })
-      if (user2) assert(user2, 'account 已重複註冊！')
+      if (user2) return res.status(400).json({ status: 'error', message: 'account 已重複註冊！' })
 
       const createdUser = await User.create({
         account,
@@ -92,7 +91,7 @@ const userController = {
         password: bcrypt.hashSync(password)
       })
 
-      res.json({ status: 'success', data: createdUser })
+      return res.status(200).json({ status: 'success', data: createdUser })
     } catch (err) {
       next(err)
     }
@@ -103,27 +102,26 @@ const userController = {
       const { account, name, email, password, confirmPassword, introduction } = req.body
       const { avatar, cover } = req
 
-      if (!account || !name || !email || !password || !confirmPassword) throw new Error('account, name, email, password, confirmPassword必填！')
-      if (password !== confirmPassword) throw new Error('密碼與密碼確認不相同！')
-      if (getUser(req).id !== id) throw new Error('無權限更改此使用者！')
+      if (password && password !== confirmPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
+      if (getUser(req).id !== Number(id)) return res.status(401).json({ status: 'error', message: '無權限更改此使用者！' })
 
       const user = await User.findByPk(id)
       const avatarPath = await imgurFileHandler(avatar)
       const coverPath = await imgurFileHandler(cover)
 
-      if (!user) assert(user, '使用者不存在！')
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在！' })
 
       const updatedUser = await user.update({
-        account,
-        name,
-        email,
-        password: bcrypt.hashSync(password),
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        password: bcrypt.hashSync(password) || user.password,
         avatar: avatarPath || user.avatar,
         cover: coverPath || user.cover,
         introduction: introduction || user.introduction
       })
 
-      res.json({ status: 'success', data: updatedUser })
+      return res.status(200).json({ status: 'success', data: updatedUser })
     } catch (err) {
       next(err)
     }
