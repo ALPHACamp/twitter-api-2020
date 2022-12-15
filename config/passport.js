@@ -1,8 +1,29 @@
 const passport = require('passport')
+const assert = require('assert')
+const bcrypt = require('bcrypt-nodejs')
+const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
+
 const { User, Tweet } = require('../models')
+
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
+
+// local strategy
+const localStrategy = new LocalStrategy({
+  usernameField: 'email',
+  passwordField: 'password',
+  passReqToCallback: true
+}, async (req, email, password, next) => {
+  try {
+    const user = await User.findOne({ where: { email } })
+    if (!user) assert(user, '帳號或密碼輸入錯誤！')
+    if (!bcrypt.compareSync(password, user.password)) assert(null, '帳號或密碼輸入錯誤！')
+    return next(null, user)
+  } catch (err) {
+    next(err)
+  }
+})
 
 // JWT設定
 const jwtOptions = {
@@ -10,7 +31,7 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET
 }
 
-const strategy = new JWTStrategy(jwtOptions, async (jwtPayload, next) => {
+const jwtStrategy = new JWTStrategy(jwtOptions, async (jwtPayload, next) => {
   const user = await User.findByPk(jwtPayload.id, {
     include: [
       { model: User, as: 'Followers' },
@@ -22,6 +43,8 @@ const strategy = new JWTStrategy(jwtOptions, async (jwtPayload, next) => {
   if (!user) return next(null, false)
   return next(null, user)
 })
-passport.use(strategy)
+
+passport.use(localStrategy)
+passport.use(jwtStrategy)
 
 module.exports = passport

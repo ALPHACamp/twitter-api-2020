@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const passport = require('passport')
 
 const admin = require('./modules/admin')
 const user = require('./modules/user')
@@ -11,6 +12,7 @@ const userController = require('../controllers/user-controller')
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 
 // user management
+router.post('/api/users/login', passport.authenticate('local', { session: false }), userController.userLogin)
 router.post('/api/users', userController.postUser)
 
 // user
