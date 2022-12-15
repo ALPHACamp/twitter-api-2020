@@ -2,7 +2,6 @@ const { User, Like, Tweet, Followship, Reply } = require('./../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
-const sequelize = require('sequelize')
 const userServices = {
   loginUser: (req, cb) => {
     try {
@@ -46,34 +45,12 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
-  getUsers: (req, cb) => {
-    return User.findAll({
-      nest: true,
-      raw: true
-    })
-      .then(users => {
-        return cb(null, users)
-      })
-      .catch(err => cb(err))
-  },
   getUser: (req, cb) => {
     return User.findByPk(req.params.userId, { raw: true })
       .then(user => {
         if (!user) throw new Error('user do not exist.')
         cb(null, user)
       })
-      .catch(err => cb(err))
-  },
-  getTopUsers: (req, cb) => {
-    const limit = Number(req.query.top)
-    return Followship.findAll({
-      include: [{ model: User, as: 'followingUser' }],
-      attributes: ['followingId', [sequelize.fn('COUNT', 'followingId'), 'count']],
-      order: [[sequelize.literal('count'), 'DESC']],
-      group: ['followingId'],
-      limit
-    })
-      .then(popularUsers => cb(null, popularUsers))
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
@@ -100,44 +77,6 @@ const userServices = {
       .then(updatedUser => {
         cb(null, { user: updatedUser })
       })
-      .catch(err => cb(err))
-  },
-  addFollowing: (req, cb) => {
-    const { id } = req.body
-    Promise.all([
-      User.findByPk(id),
-      Followship.findOne({
-        where: {
-          followerId: req.user.id,
-          followingId: req.body.id
-        }
-      })
-    ])
-      .then(([user, followship]) => {
-        if (!user) throw new Error("User didn't exist!")
-        if (followship) throw new Error('You are already following this user!')
-        return Followship.create({
-          followerId: req.user.id,
-          followingId: req.body.id
-        })
-      })
-      .then(followship => {
-        cb(null, { status: 'success', followship })
-      })
-      .catch(err => cb(err))
-  },
-  removeFollowing: (req, cb) => {
-    Followship.findOne({
-      where: {
-        followerId: req.user.id,
-        followingId: req.params.userId
-      }
-    })
-      .then(followship => {
-        if (!followship) throw new Error("You haven't followed this user!")
-        return followship.destroy()
-      })
-      .then(deletedFollowship => cb(null, { status: 'success', deletedFollowship }))
       .catch(err => cb(err))
   },
   getUserFollowings: (req, cb) => {

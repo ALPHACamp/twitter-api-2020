@@ -6,23 +6,11 @@ const userController = {
   registerUser: (req, res, next) => {
     userServices.registerUser(req, (err, data) => err ? next(err) : res.json(data))
   },
-  getUsers: (req, res, next) => {
-    userServices.getUsers(req, (err, data) => err ? next(err) : res.json(data))
-  },
   getUser: (req, res, next) => {
     userServices.getUser(req, (err, data) => err ? next(err) : res.json(data))
   },
-  getTopUsers: (req, res, next) => {
-    userServices.getTopUsers(req, (err, data) => err ? next(err) : res.json(data))
-  },
   editUser: (req, res, next) => {
     userServices.editUser(req, (err, data) => err ? next(err) : res.json(data))
-  },
-  addFollowing: (req, res, next) => {
-    userServices.addFollowing(req, (err, data) => err ? next(err) : res.json(data))
-  },
-  removeFollowing: (req, res, next) => {
-    userServices.removeFollowing(req, (err, data) => err ? next(err) : res.json(data))
   },
   getUserFollowers: (req, res, next) => {
     userServices.getUserFollowers(req, (err, data) => err ? next(err) : res.json(data))
