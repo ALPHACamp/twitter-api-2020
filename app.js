@@ -2,7 +2,6 @@ if (process.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const express = require('express')
-const helpers = require('./_helpers')
 const routes = require('./routes')
 const methodOverride = require('method-override')
 const passport = require('./config/passport')
