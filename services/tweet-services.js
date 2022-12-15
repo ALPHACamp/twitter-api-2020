@@ -46,7 +46,9 @@ const tweetServices = {
         const isReplied = repliesOfTweet ? repliesOfTweet.some(f => f.UserId === req.user.id) : []
         const isLiked = likesOfTweet ? likesOfTweet.some(f => f.UserId === req.user.id) : []
         const data = { ...tweet.toJSON(), isReplied, isLiked }
+
         cb(null, data)
+
       })
       .catch(err => cb(err))
   },

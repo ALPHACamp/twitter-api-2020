@@ -1,3 +1,4 @@
+
 const { Tweet, Reply, User } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const helpers = require('../_helpers')
@@ -16,7 +17,9 @@ const replyServices = {
       nest: true,
       raw: true
     })
+
       .then(replies => {
+
         const data = replies.rows
         return cb(null,
           data,
@@ -26,11 +29,13 @@ const replyServices = {
         )
       })
       .catch(err => cb(err))
+
   },
   postReply: (req, cb) => {
     const TweetId = req.params.tweet_id
     const { comment } = req.body
     const UserId = helpers.getUser(req).id
+
     if (!comment) throw new Error('Comment is required!')
     return Promise.all([
       User.findByPk(UserId),
@@ -39,6 +44,8 @@ const replyServices = {
       .then(([user, tweet]) => {
         if (!user) throw new Error("User didn't exist!")
         if (!tweet) throw new Error("Tweet didn't exist!")
+
+     
         return Reply.create({
           comment,
           TweetId,
