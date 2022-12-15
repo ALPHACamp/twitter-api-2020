@@ -5,7 +5,7 @@ const { User, Reply, Tweet, Like } = require('../models')
 const { getUser, imgurFileHandler } = require('../_helpers')
 
 const userController = {
-  userLogin: (req, res, next) => {
+  userLogin: async (req, res, next) => {
     try {
       const { email, password } = req.body
       // 檢查必填欄位
@@ -13,7 +13,7 @@ const userController = {
         return res.json({ status: 'error', message: '所有欄位都是必填！' })
       }
 
-      const user = User.findOne({ where: { email } })
+      const user = await User.findOne({ where: { email } })
       // 若找不到該帳號使用者，顯示錯誤訊息
       if (!user) return res.status(401).json({ status: 'error', message: "User doesn't exist!" })
       // 若使用者的權限是admin，則依據角色權限顯示錯誤訊息
