@@ -37,90 +37,96 @@ const userController = {
       next(err)
     }
   },
-  getUser: (req, res, next) => {
-    const { id } = req.params
-    return User.findByPk(id, {
-      include: [
-        Reply, Tweet, Like,
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ],
-      nest: true
-    })
-      .then(user => {
-        if (!user) assert(user, "User doesn't exist!")
-        res.json({ status: 'success', data: user })
+  getUser: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id, {
+        include: [
+          Reply, Tweet, Like,
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ],
+        nest: true
       })
-      .catch(err => next(err))
+      if (!user) assert(user, "User doesn't exist!")
+      res.json({ status: 'success', data: user })
+    } catch (err) {
+      next(err)
+    }
   },
-  getUsers: (req, res, next) => {
-    const top = Number(req.query.top)
-    const currentUser = getUser(req)
-    return User.findAll({
-      include: [{ model: User, as: 'Followers' }]
-    })
-      .then(users => {
-        const result = users
-          .map(user => ({
-            ...user.toJSON(),
-            followerCount: user.Followers.length,
-            isFollowed: currentUser.Followings.some(f => f.id === user.id)
-          }))
-          .sort((a, b) => b.followerCount - a.followerCount)
-          .slice(0, top || users.length)
-        res.json({ status: 'success', data: result })
+  getUsers: async (req, res, next) => {
+    try {
+      const top = Number(req.query.top)
+      const currentUser = getUser(req)
+      const users = User.findAll({
+        include: [{ model: User, as: 'Followers' }]
       })
-      .catch(err => next(err))
+      const result = users
+        .map(user => ({
+          ...user.toJSON(),
+          followerCount: user.Followers.length,
+          isFollowed: currentUser.Followings.some(f => f.id === user.id)
+        }))
+        .sort((a, b) => b.followerCount - a.followerCount)
+        .slice(0, top || users.length)
+      res.json({ status: 'success', data: result })
+    } catch (err) {
+      next(err)
+    }
   },
-  postUser: (req, res, next) => {
-    const { account, name, email, password, confirmPassword } = req.body
-    if (!account || !name || !email || !password || !confirmPassword) throw new Error('所有欄位都是必填！')
-    if (password !== confirmPassword) throw new Error('密碼與密碼確認不相同！')
+  postUser: async (req, res, next) => {
+    try {
+      const { account, name, email, password, confirmPassword } = req.body
+      if (!account || !name || !email || !password || !confirmPassword) throw new Error('所有欄位都是必填！')
+      if (password !== confirmPassword) throw new Error('密碼與密碼確認不相同！')
 
-    Promise.all([
-      User.findOne({ where: { email } }),
-      User.findOne({ where: { account } })
-    ])
-      .then((user1, user2) => {
-        if (user1) assert(user1, 'email 已重複註冊！')
-        if (user2) assert(user2, 'account 已重複註冊！')
-        return bcrypt.hashSync(password)
-      })
-      .then(hash => User.create({
+      const user1 = await User.findOne({ where: { email } })
+      if (user1) assert(user1, 'email 已重複註冊！')
+      const user2 = await User.findOne({ where: { account } })
+      if (user2) assert(user2, 'account 已重複註冊！')
+
+      const createdUser = await User.create({
         account,
         name,
         email,
-        password: hash
-      }))
-      .then(createdUser => res.json({ status: 'success', data: createdUser }))
-      .catch(err => next(err))
-  },
-  putUser: (req, res, next) => {
-    const { id } = req.params
-    const { account, name, email, password, confirmPassword, introduction } = req.body
-    const { avatar, cover } = req
-    if (!account || !name || !email || !password || !confirmPassword) throw new Error('account, name, email, password, confirmPassword必填！')
-    if (password !== confirmPassword) throw new Error('密碼與密碼確認不相同！')
-    if (getUser(req).id !== id) throw new Error('無權限更改此使用者！')
-    return Promise.all([
-      User.findByPk(id),
-      imgurFileHandler(avatar),
-      imgurFileHandler(cover)
-    ])
-      .then(([user, avatarPath, coverPath]) => {
-        if (!user) assert(user, '使用者不存在！')
-        return user.update({
-          account,
-          name,
-          email,
-          password: bcrypt.hashSync(password),
-          avatar: avatarPath || user.avatar,
-          cover: coverPath || user.cover,
-          introduction: introduction || user.introduction
-        })
+        password: bcrypt.hashSync(password)
       })
-      .then(updatedUser => res.json({ status: 'success', data: updatedUser }))
-      .then(err => next(err))
+
+      res.json({ status: 'success', data: createdUser })
+    } catch (err) {
+      next(err)
+    }
+  },
+  putUser: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const { account, name, email, password, confirmPassword, introduction } = req.body
+      const { avatar, cover } = req
+
+      if (!account || !name || !email || !password || !confirmPassword) throw new Error('account, name, email, password, confirmPassword必填！')
+      if (password !== confirmPassword) throw new Error('密碼與密碼確認不相同！')
+      if (getUser(req).id !== id) throw new Error('無權限更改此使用者！')
+
+      const user = await User.findByPk(id)
+      const avatarPath = await imgurFileHandler(avatar)
+      const coverPath = await imgurFileHandler(cover)
+
+      if (!user) assert(user, '使用者不存在！')
+
+      const updatedUser = await user.update({
+        account,
+        name,
+        email,
+        password: bcrypt.hashSync(password),
+        avatar: avatarPath || user.avatar,
+        cover: coverPath || user.cover,
+        introduction: introduction || user.introduction
+      })
+
+      res.json({ status: 'success', data: updatedUser })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
