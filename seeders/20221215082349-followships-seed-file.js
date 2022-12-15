@@ -1,5 +1,4 @@
 'use strict'
-const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -7,17 +6,18 @@ module.exports = {
       'SELECT id FROM Users WHERE role = "user";',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-    await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 50 }, (_, index) => ({
-        description: faker.lorem.text(),
+
+    await queryInterface.bulkInsert('Followships',
+      Array.from({ length: 6 }, (_, index) => ({
+        following_id: users[index % users.length].id,
+        follower_id: users[(index + 2) % users.length].id,
         created_at: new Date(),
-        updated_at: new Date(),
-        user_id: users[(index % users.length)].id
+        updated_at: new Date()
       }))
     )
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Tweets', {})
+    await queryInterface.bulkDelete('Replies', {})
   }
 }
