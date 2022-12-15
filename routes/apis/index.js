@@ -15,6 +15,7 @@ router.post('/users', userController.register)
 
 router.post('/login', passport.authenticate('local', { session: false }), userController.login)
 
+router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweets)
 
