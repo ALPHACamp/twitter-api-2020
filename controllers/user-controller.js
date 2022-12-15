@@ -1,9 +1,42 @@
 const assert = require('assert')
+const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
 const { User, Reply, Tweet, Like } = require('../models')
 const { getUser, imgurFileHandler } = require('../_helpers')
 
 const userController = {
+  userLogin: async (req, res, next) => {
+    try {
+      const { email, password } = req.body
+      // 檢查必填欄位
+      if (!email.trim() || !password.trim()) {
+        return res.json({ status: 'error', message: '所有欄位都是必填！' })
+      }
+
+      const user = await User.findOne({ where: { email } })
+      // 若找不到該帳號使用者，顯示錯誤訊息
+      if (!user) return res.status(401).json({ status: 'error', message: "User doesn't exist!" })
+      // 若使用者的權限是admin，則依據角色權限顯示錯誤訊息
+      if (user.role === 'admin') return res.status(401).json({ status: 'error', message: '帳號不存在' })
+      // 比對密碼是否錯誤
+      if (!bcrypt.compareSync(password, user.password)) {
+        return res.status(401).json({ status: 'error', message: '密碼錯誤！' })
+      }
+      // token(效期30天)
+      const userData = getUser(req).toJSON()
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      return res.status(200).json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
   getUser: (req, res, next) => {
     const { id } = req.params
     return User.findByPk(id, {
