@@ -21,9 +21,9 @@ const adminController = {
         const token = jwt.sign(UserId, process.env.JWT_SECRET, {
           expiresIn: '30d'
         })
-        return token
+        delete user.password
+        return res.status(200).json({ success: true, token, user })
       })
-      .then(token => res.status(200).json({ success: true, token }))
       .catch(err => next(err))
   }
 
