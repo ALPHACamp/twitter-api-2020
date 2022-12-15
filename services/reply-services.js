@@ -1,9 +1,11 @@
-const { Tweet,  Reply, User } = require('../models')
+
+const { Tweet, Reply, User } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const helpers = require('../_helpers')
 
 const replyServices = {
   getReplies: (req, cb) => {
-    //預設可以再改 
+    // 預設可以再改
     const DEFAULT_LIMIT = 9
     const page = Number(req.query.page) || 1
     const limit = Number(req.query.limit) || DEFAULT_LIMIT
@@ -15,8 +17,9 @@ const replyServices = {
       nest: true,
       raw: true
     })
-      .then((replies) => {
-        
+
+      .then(replies => {
+
         const data = replies.rows
         return cb(null,
           data,
@@ -26,18 +29,23 @@ const replyServices = {
         )
       })
       .catch(err => cb(err))
-  }, postReply: (req, cb) => {
-    const TweetId  = req.params.tweet_id
+
+  },
+  postReply: (req, cb) => {
+    const TweetId = req.params.tweet_id
     const { comment } = req.body
-    const UserId = req.user.dataValues.id
+    const UserId = helpers.getUser(req).id
+
     if (!comment) throw new Error('Comment is required!')
     return Promise.all([
       User.findByPk(UserId),
       Tweet.findByPk(TweetId)
     ])
-      .then(([User, Tweet]) => {
-        if (!User) throw new Error("User didn't exist!")
-        if (!Tweet) throw new Error("Tweet didn't exist!")
+      .then(([user, tweet]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (!tweet) throw new Error("Tweet didn't exist!")
+
+     
         return Reply.create({
           comment,
           TweetId,
@@ -46,9 +54,7 @@ const replyServices = {
       })
       .then(postedReply => cb(null, { postedReply }))
       .catch(err => cb(err))
-    
   }
 }
-
 
 module.exports = replyServices

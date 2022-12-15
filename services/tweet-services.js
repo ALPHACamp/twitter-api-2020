@@ -1,5 +1,7 @@
 const { Tweet, Like, Reply, User } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const helpers = require('../_helpers')
+
 const tweetServices = {
   getTweets: (req, cb) => {
     // 預設可以再改
@@ -52,7 +54,7 @@ const tweetServices = {
   },
   postTweet: (req, cb) => {
     const { description } = req.body
-    const UserId = req.user.dataValues.id
+    const UserId = helpers.getUser(req).id
     if (!description) throw new Error('Description is required!')
 
     return User.findByPk(UserId)

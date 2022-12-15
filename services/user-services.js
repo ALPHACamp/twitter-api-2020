@@ -12,7 +12,7 @@ const userServices = {
     const nameLengthLimit = 50
     if (name.length > nameLengthLimit) {
       throw new Error(
-      `Name的內容超過${nameLengthLimit}字, 請縮短!(${name.length}/${nameLengthLimit})`)
+        `Name的內容超過${nameLengthLimit}字, 請縮短!(${name.length}/${nameLengthLimit})`)
     }
     // 驗證兩次密碼輸入是否相符，若不符則提示錯誤訊息
     if (password !== checkPassword) throw new Error('請再次確認密碼!')
@@ -38,7 +38,11 @@ const userServices = {
           password: hash
         })
       })
-      .then(createdUser => cb(null, { createdUser }))
+      .then(createdUser => {
+        createdUser = createdUser.toJSON()
+        delete createdUser.password
+        cb(null, { createdUser })
+      })
       .catch(err => cb(err))
   },
   signIn: (req, cb) => {

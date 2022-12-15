@@ -4,7 +4,7 @@ const JwtStrategy = require('passport-jwt').Strategy
 const ExtractJwt = require('passport-jwt').ExtractJwt
 const bcrypt = require('bcryptjs')
 
-const { User, Like ,Reply} = require('../models')
+const { User, Like, Reply } = require('../models')
 
 passport.use(new LocalStrategy(
   // customize user field
@@ -21,7 +21,7 @@ passport.use(new LocalStrategy(
         bcrypt.compare(password, user.password)
           .then(isMatch => {
             if (!isMatch) return cb(null, false)
-            return cb(null, user)
+            return cb(null, user.toJSON())
           })
       })
       .catch(err => cb(err))
@@ -36,12 +36,12 @@ const jwtOptions = {
 passport.use(new JwtStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     include: [
-       { model: Reply, include: User }, {model: Like, include: User},
+      { model: Reply, include: User }, { model: Like, include: User },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
   })
-    .then(user => cb(null, user))
+    .then(user => cb(null, user.toJSON()))
     .catch(err => cb(err))
 }))
 
