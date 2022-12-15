@@ -50,7 +50,8 @@ const tweetServices = {
   },
   postTweet: (req, cb) => {
     const { description } = req.body
-    const UserId = req.user.dataValues.id
+    console.log('req.user', req.user)
+    const UserId = req.user.id
     if (!description) throw new Error('Description is required!')
 
     return User.findByPk(UserId)
