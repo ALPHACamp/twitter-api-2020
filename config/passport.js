@@ -17,9 +17,9 @@ passport.use(new LocalStrategy(
   async (account, password, cb) => {
     try {
       const user = await User.findOne({ where: { account } })
-      if (!user) throw new Error('帳號不存在！')
+      if (!user) throw new Error('帳號不存在!')
       const passwordCompare = await bcrypt.compare(password, user.password)
-      if (!passwordCompare) throw new Error('帳號不存在！')
+      if (!passwordCompare) throw new Error('帳號不存在!')
       return cb(null, user)
     } catch (err) {
       cb(err, false)

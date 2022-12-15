@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Followship } = require('../models')
+const { User, Tweet, Reply, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
@@ -26,14 +26,14 @@ const userController = {
   signUp: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     if (!account || !name || !email || !password || !checkPassword) throw new Error('所有欄位皆為必填')
-    if (password !== checkPassword) throw new Error('密碼與確認密碼不相符！')
+    if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
     return Promise.all([
       User.findOne({ where: { account }, raw: true }),
       User.findOne({ where: { email }, raw: true })
     ])
       .then(([userFoundByAccount, userFoundByEmail]) => {
-        if (userFoundByAccount) throw new Error('account 已重複註冊！')
-        if (userFoundByEmail) throw new Error('email 已重複註冊！')
+        if (userFoundByAccount) throw new Error('account 已重複註冊!')
+        if (userFoundByEmail) throw new Error('email 已重複註冊!')
         return bcrypt.hash(password, 10)
       })
       .then(hash => {
@@ -47,35 +47,40 @@ const userController = {
       .then(newUser => {
         const userData = newUser.toJSON()
         delete userData.password
-        res.json({ status: 'success', message: '帳號已成功註冊', newUser: userData })
+        res.json({ status: 'success', message: '帳號已成功註冊!', newUser: userData })
       })
       .catch(err => next(err))
   },
-  // CurrentUser Profile：[未完成] tweetCount, followerCount, followingCount
   getCurrentUser: (req, res, next) => {
     return User.findByPk(helpers.getUser(req).id, {
-      // include: [
-      //   { model: Tweet },
-      //   { model: User, as: 'Followers' },
-      //   { model: User, as: 'Followings' }
-      // ]
+      attributes: {
+        exclude: ['password'],
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id )'), 'tweetCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followersCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id )'), 'followingCount']
+        ]
+      }
     })
       .then(user => {
-        if (!user) throw new Error("User didn't exist!")
+        if (!user) throw new Error('使用者不存在!')
         return res.json(user)
       })
       .catch(err => next(err))
   },
   getUser: (req, res, next) => {
     return User.findByPk(req.params.id, {
-      // include: [
-      //   { model: Tweet },
-      //   { model: User, as: 'Followers' },
-      //   { model: User, as: 'Followings' }
-      // ]
+      attributes: {
+        exclude: ['password'],
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id )'), 'tweetCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followersCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id )'), 'followingCount']
+        ]
+      }
     })
       .then(user => {
-        if (!user) throw new Error("User didn't exist!")
+        if (!user) throw new Error('使用者不存在!')
         return res.json(user)
       })
       .catch(err => next(err))
@@ -118,7 +123,7 @@ const userController = {
   },
   addFollowing: (req, res, next) => {
     const followingId = Number(req.body.id)
-    if (helpers.getUser(req).id === followingId) throw new Error('不能追蹤自己！')
+    if (helpers.getUser(req).id === followingId) throw new Error('不能追蹤自己!')
     return Promise.all([
       User.findByPk(followingId),
       Followship.findOne({
