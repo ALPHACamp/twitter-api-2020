@@ -17,7 +17,7 @@ const adminPassValid = (req, res, next) => {
   if (account === 'root' && password === '12345678') {
     return next()
   }
-  return res.status(401).json({ success: 'false', message: 'unauthorized' })
+  return res.status(401).json({ success: 'false', message: '帳號不存在 !' })
 }
 
 // 驗證是否為 admin
@@ -26,9 +26,7 @@ const authenticatedAdmin = (req, res, next) => {
 
   User.findOne({ where: { account } }).then((user) => {
     if (!user || user.role === 'user') {
-      return res
-        .status(403)
-        .json({ success: 'false', message: 'permission denied' })
+      return res.status(403).json({ success: 'false', message: '帳號不存在 !' })
     }
     return next()
   })
@@ -44,7 +42,7 @@ const authenticatedUser = (req, res, next) => {
         if (!item || item.role === 'admin') {
           return res
             .status(403)
-            .json({ success: 'false', message: 'permission denied' })
+            .json({ success: 'false', message: '帳號不存在 !' })
         }
       })
       return next()
@@ -55,7 +53,7 @@ const authenticatedUser = (req, res, next) => {
       if (!user || user.role === 'admin') {
         return res
           .status(403)
-          .json({ success: 'false', message: 'permission denied' })
+          .json({ success: 'false', message: '帳號不存在 !' })
       }
       return next()
     })
