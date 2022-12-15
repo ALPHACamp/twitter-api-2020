@@ -7,7 +7,7 @@ const tweetController = {
       const tweetId = req.params.tweet_id
       const replies = await Reply.findAll({
         where: { TweetId: tweetId },
-        attributes: ['UserId', 'comment', 'createdAt'],
+        attributes: ['id', 'UserId', 'comment', 'createdAt'],
         include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
         order: [['createdAt', 'DESC']],
         raw: true,
