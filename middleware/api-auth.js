@@ -38,7 +38,6 @@ const authenticatedAdmin = (req, res, next) => {
 const authenticatedUser = (req, res, next) => {
   const { account } = req.body
   const id = req.params.id
-
   if (account !== null) {
     User.findAll({ where: { account } }).then((user) => {
       user.forEach((item) => {

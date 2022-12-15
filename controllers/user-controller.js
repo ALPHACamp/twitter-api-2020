@@ -29,31 +29,6 @@ const userServices = {
       .then((newUser) => cb(null, { success: 'true' }))
       .catch((err) => cb(err))
   },
-  signIn: (req, cb) => {
-    const { account, password } = req.body
-
-    User.findOne({ where: { account }, raw: true })
-      .then((user) => {
-        if (!user) {
-          throw new Error('帳號不存在 ！')
-        }
-        const isValidPassword = bcrypt.compareSync(password, user.password)
-
-        if (!isValidPassword) {
-          throw new Error('帳號不存在 ！')
-        }
-      })
-      .then(() => {
-        const userData = req.user.toJSON()
-        const token = jwt.sign(userData, process.env.JWT_SECRET, {
-          expiresIn: '30d'
-        })
-
-        return token
-      })
-      .then((token) => cb(null, { success: 'true', token }))
-      .catch((err) => cb(err))
-  },
   getUser: (req, cb) => {
     User.findByPk(req.params.id)
       .then((user) => {
@@ -69,7 +44,31 @@ const userController = {
     userServices.signUp(req, (err, data) => (err ? next(err) : res.json(data)))
   },
   signIn: (req, res, next) => {
-    userServices.signIn(req, (err, data) => (err ? next(err) : res.json(data)))
+    const { account, password } = req.body
+    if (!account || !password) {
+      throw new Error('account and password are required.')
+    }
+
+    User.findOne({ where: { account }, raw: true })
+      .then((user) => {
+        if (!user) {
+          throw new Error('帳號不存在 ！')
+        }
+        const isValidPassword = bcrypt.compareSync(password, user.password)
+
+        if (!isValidPassword) {
+          throw new Error('帳號不存在 ！')
+        }
+
+        const UserId = { id: user.id }
+        const token = jwt.sign(UserId, process.env.JWT_SECRET, {
+          expiresIn: '30d'
+        })
+
+        delete user.password
+        return res.status(200).json({ success: true, token, user })
+      })
+      .catch((err) => next(err))
   },
   getUser: (req, res, next) => {
     userServices.getUser(req, (err, data) => (err ? next(err) : res.json(data)))
