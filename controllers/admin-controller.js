@@ -1,29 +1,19 @@
-const { User, Tweet } = require('../models')
+const id = require('faker/lib/locales/id_ID')
+const { User, Tweet, Like, sequelize } = require('../models')
 // const { getUser } = require('../_helpers')
 
 const adminController = {
   getUsers: (req, res, next) => {
-    // if (!getUser(req)) {
-    //   return res.status(401).json({ status: 'error', message: 'token is invalidated' })
-    // }
-    return User.findAll({
-      include: [
-        { model: User, as: 'Followers' }
-        // { model: User, as: 'Followings' }
-      ]
+    User.findAll({
+      nest: true,
+      raw: true,
+      attributes: ['id', 'account', 'email', 'name', 'avatar', 'introduction', 'cover', 'role', 'createdAt', 'updatedAt']
     })
-      .then(users => {
-        users = users.map(user => ({
-          ...user.toJSON(),
-          followerCount: user.Followers.length
-          // followingCount: user.Followings.length
-        }))
-        res.status(200).json(users)
-      })
+      .then(users => res.status(200).json(users))
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
-    // if (!getUser(req)) {
+    // if (!getUser) {
     //   return res.status(401).json({ status: 'error', message: 'token is invalidated' })
     // }
     Tweet.findAll({
@@ -31,7 +21,7 @@ const adminController = {
       raw: true,
       include: {
         model: User,
-        attributes: ['id', 'account', 'name', 'avatar']
+        attributes: ['id', 'account', 'name', 'avatar', 'cover']
       }
     })
       .then(tweets => {
@@ -44,7 +34,7 @@ const adminController = {
       .catch(err => next(err))
   },
   deleteTweet: (req, res, next) => {
-    // if (!getUser(req)) {
+    // if (!getUser) {
     //   return res.status(401).json({ status: 'error', message: 'token is invalidated' })
     // }
     return Tweet.findByPk(req.params.id)
