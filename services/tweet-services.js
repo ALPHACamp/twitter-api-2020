@@ -1,8 +1,8 @@
-const { Tweet,Like,Reply ,User} = require('../models')
+const { Tweet, Like, Reply, User } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const tweetServices = {
   getTweets: (req, cb) => {
-   //預設可以再改 
+    // 預設可以再改
     const DEFAULT_LIMIT = 9
     const page = Number(req.query.page) || 1
     const limit = Number(req.query.limit) || DEFAULT_LIMIT
@@ -14,7 +14,7 @@ const tweetServices = {
       nest: true,
       raw: true
     })
-      .then((tweets) => {
+      .then(tweets => {
         const repliedTweetId = req.user?.Replies ? req.user.Replies.map(rt => rt.TweetId) : []
         const likedTweetId = req.user?.Likes ? req.user.Likes.map(lt => lt.TweetId) : []
         const data = tweets.rows.map(t => ({
@@ -23,14 +23,14 @@ const tweetServices = {
           isReplied: repliedTweetId.includes(t.id),
           isLiked: likedTweetId.includes(t.id)
         }))
-        return cb(null, 
-           data,
-          {
-           pagination: getPagination(limit, page, tweets.count)}
+        return cb(null,
+          data,
+          { pagination: getPagination(limit, page, tweets.count) }
         )
       })
       .catch(err => cb(err))
-  }, getTweet: (req, cb) => {
+  },
+  getTweet: (req, cb) => {
     const id = req.params.tweet_id
     return Tweet.findByPk(id, {
       include: [{ model: Reply, include: User }, {
@@ -39,34 +39,33 @@ const tweetServices = {
     })
       .then(tweet => {
         if (!tweet) throw new Error("Tweet doesn't exist!")
-        const repliesOfTweet=tweet.Replies
-        const likesOfTweet=tweet.Likes
-        const isReplied = repliesOfTweet?repliesOfTweet.some(f => f.UserId === req.user.id) :[]
+        const repliesOfTweet = tweet.Replies
+        const likesOfTweet = tweet.Likes
+        const isReplied = repliesOfTweet ? repliesOfTweet.some(f => f.UserId === req.user.id) : []
         const isLiked = likesOfTweet ? likesOfTweet.some(f => f.UserId === req.user.id) : []
         const data = { ...tweet.toJSON(), isReplied, isLiked }
-        cb(null, 
-           data
-          
-        )
+
+        cb(null, data)
+
       })
       .catch(err => cb(err))
-  }, postTweet: (req, cb) => {
-    const { description } = req.body 
+  },
+  postTweet: (req, cb) => {
+    const { description } = req.body
     const UserId = req.user.dataValues.id
     if (!description) throw new Error('Description is required!')
-  
-    return User.findByPk(UserId)     
-    .then((User) => {
-      if (!User) throw new Error("User didn't exist!")
+
+    return User.findByPk(UserId)
+      .then(User => {
+        if (!User) throw new Error("User didn't exist!")
         return Tweet.create({
           description,
           UserId
         })
       })
-      .then(postedTweet => cb(null,  {postedTweet} ))
+      .then(postedTweet => cb(null, { postedTweet }))
       .catch(err => cb(err))
   }
 }
-
 
 module.exports = tweetServices
