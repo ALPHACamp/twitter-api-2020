@@ -5,7 +5,7 @@ const passport = require('passport')
 const replyController = require('../../controllers/replyController')
 const userController = require('../../controllers/userController')
 const tweetController = require('../../controllers/tweetController')
-const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
+const { authenticated } = require('../../middleware/auth')
 const { signInFail } = require('../../middleware/error-handler')
 
 router.post('/users', userController.signUp)
