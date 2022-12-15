@@ -15,7 +15,7 @@ const followshipServices = {
   },
   addFollowing: (req, cb) => {
     const { id } = req.body
-    Promise.all([
+    return Promise.all([
       User.findByPk(id),
       Followship.findOne({
         where: {

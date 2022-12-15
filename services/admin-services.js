@@ -1,4 +1,4 @@
-const { User } = require('./../models')
+const { User, Tweet } = require('./../models')
 const adminServices = {
   getUsers: (req, cb) => {
     return User.findAll({
@@ -8,6 +8,17 @@ const adminServices = {
       .then(users => {
         return cb(null, users)
       })
+      .catch(err => cb(err))
+  },
+  deleteTweet: (req, cb) => {
+    const { id } = req.params
+    return Tweet.findByPk(id)
+      .then(tweet => {
+        if (!tweet) throw new Error('Tweet does not exist!')
+        return tweet.destroy()
+      })
+      .then(deletedTweet => cb(null, { status: 'success', deletedTweet })
+      )
       .catch(err => cb(err))
   }
 }
