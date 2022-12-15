@@ -1,6 +1,6 @@
 const { Tweet, User, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
-const dateFormat = require('../helpers/date-helper')
+const { dateFormat } = require('../helpers/date-helper')
 
 const tweetController = {
   // 新增推文：

@@ -1,6 +1,6 @@
 const { User, Tweet, Reply } = require('../models')
 const helpers = require('../_helpers')
-const dateFormat = require('../helpers/date-helper')
+const { dateFormat } = require('../helpers/date-helper')
 
 const replyController = {
   // 新增推文回覆

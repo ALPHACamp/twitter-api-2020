@@ -2,7 +2,7 @@ const { User, Tweet, Reply, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const dateFormat = require('../helpers/date-helper')
+const { dateFormat } = require('../helpers/date-helper')
 
 const userController = {
   signIn: (req, res, next) => {
