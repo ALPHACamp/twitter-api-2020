@@ -11,8 +11,8 @@ const adminServices = {
       .catch(err => cb(err))
   },
   deleteTweet: (req, cb) => {
-    const { id } = req.params
-    return Tweet.findByPk(id)
+    const TweetId = req.params.tweetId
+    return Tweet.findByPk(TweetId)
       .then(tweet => {
         if (!tweet) throw new Error('Tweet does not exist!')
         return tweet.destroy()
