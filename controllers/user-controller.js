@@ -224,6 +224,24 @@ const userController = {
 
       return res.status(200).json({ status: 'success' })
     } catch (err) { next(err) }
+  },
+  getUsersTop: async (req, res, next) => {
+    try {
+      const loginUser = helpers.getUser(req)
+      const topUsers = await User.findAll({
+        attributes: ['id', 'name', 'account', 'avatar',
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount']],
+        order: [[sequelize.literal('followerCount'), 'DESC']],
+        limit: 10,
+        raw: true,
+        nest: true
+      })
+      const data = topUsers.map(topuser => ({
+        ...topuser,
+        isFollowed: loginUser?.Followings?.some(followingUser => followingUser.id === topuser.id)
+      }))
+      return res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 
