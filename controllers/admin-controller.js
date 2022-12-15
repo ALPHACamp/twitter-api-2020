@@ -1,6 +1,7 @@
+const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -23,6 +24,32 @@ const adminController = {
         })
         delete user.password
         return res.status(200).json({ success: true, token, user })
+      })
+      .catch(err => next(err))
+  },
+  getUsers: (req, res, next) => {
+    return User.findAll({
+      include: [{ model: Tweet, attributes: [] }],
+      attributes: [
+        'id', 'account', 'name', 'avatar', 'cover',
+        [
+          sequelize.fn('COUNT', sequelize.col('Tweets.user_id')), 'tweetCount'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.tweet_id WHERE Tweets.user_id = User.id)'), 'likeCount'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships AS followerCount WHERE follower_id = User.id)'), 'followerCount'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships AS followingCount WHERE following_id = User.id)'), 'followingCount'
+        ]
+      ],
+      order: [[sequelize.literal('tweetCount'), 'DESC']],
+      group: ['User.id']
+    })
+      .then(users => {
+        res.status(200).json({ success: true, users })
       })
       .catch(err => next(err))
   }
