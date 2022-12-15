@@ -1,12 +1,12 @@
 const express = require('express')
 const router = express.Router()
-
+const { authenticatedUser } = require('../../middleware/api-auth')
 const tweetController = require('../../controllers/tweet-controller')
 
-router.post('/:id/unlike', tweetController.unlikeTweet)
-router.post('/:id/like', tweetController.likeTweet)
-router.get('/:id', tweetController.getTweet)
-router.post('/', tweetController.postTweet)
-router.get('/', tweetController.getTweets)
+router.post('/:id/unlike', authenticatedUser, tweetController.unlikeTweet)
+router.post('/:id/like', authenticatedUser, tweetController.likeTweet)
+router.get('/:id', authenticatedUser, tweetController.getTweet)
+router.post('/', authenticatedUser, tweetController.postTweet)
+router.get('/', tweetController.getTweets) // user 跟 admin 共用同一條
 
 module.exports = router
