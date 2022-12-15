@@ -21,7 +21,7 @@ passport.use(new LocalStrategy(
         bcrypt.compare(password, user.password)
           .then(isMatch => {
             if (!isMatch) return cb(null, false)
-            return cb(null, user.toJSON())
+            return cb(null, user)
           })
       })
       .catch(err => cb(err))
@@ -41,7 +41,7 @@ passport.use(new JwtStrategy(jwtOptions, (jwtPayload, cb) => {
       { model: User, as: 'Followings' }
     ]
   })
-    .then(user => cb(null, user.toJSON()))
+    .then(user => cb(null, user))
     .catch(err => cb(err))
 }))
 

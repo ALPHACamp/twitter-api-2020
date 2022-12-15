@@ -1,11 +1,11 @@
 const assert = require('assert')
 const { Like, Tweet } = require('../models')
+const helpers = require('../_helpers')
 
 const likeServices = {
   addLike: (req, cb) => {
-    const UserId = req.user.id
+    const UserId = helpers.getUser(req).id
     const TweetId = req.params.id
-    console.log(TweetId)
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({ where: { TweetId, UserId } })
@@ -22,9 +22,8 @@ const likeServices = {
       .catch(err => cb(err))
   },
   unLike: (req, cb) => {
-    const UserId = req.user.id
+    const UserId = helpers.getUser(req).id
     const TweetId = req.params.id
-    console.log(TweetId)
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({ where: { TweetId, UserId } })

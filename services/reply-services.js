@@ -1,5 +1,6 @@
 const { Tweet, Reply, User } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const helpers = require('../_helpers')
 
 const replyServices = {
   getReplies: (req, cb) => {
@@ -29,7 +30,7 @@ const replyServices = {
   postReply: (req, cb) => {
     const TweetId = req.params.tweet_id
     const { comment } = req.body
-    const UserId = req.user.id
+    const UserId = helpers.getUser(req).id
     if (!comment) throw new Error('Comment is required!')
     return Promise.all([
       User.findByPk(UserId),
