@@ -8,11 +8,14 @@ function authenticated (req, res, next) {
       return next(err)
     }
     if (!user) {
-      return res.status(401).json({ status: 'error', message: 'unauthorized' })
+      return res.status(401).json({ success: false, error: 'unauthorized' })
     }
     req.user = user
     return next()
   })(req, res, next)
+}
+function authenticatedSuccess (req, res, next) {
+  res.status(200).json({ success: true, error: null })
 }
 
 function authenticatedAdmin (req, res, next) {
@@ -20,4 +23,4 @@ function authenticatedAdmin (req, res, next) {
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 
-module.exports = { authenticated, authenticatedAdmin }
+module.exports = { authenticated, authenticatedSuccess, authenticatedAdmin }
