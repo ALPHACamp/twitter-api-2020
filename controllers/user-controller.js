@@ -2,11 +2,7 @@ const { User, Tweet, Reply, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const dayjs = require('dayjs')
-const relativeTime = require('dayjs/plugin/relativeTime')
-require('dayjs/locale/zh-tw')
-dayjs.locale('zh-tw')
-dayjs.extend(relativeTime)
+const dateFormat = require('../helpers/date-helper')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -94,7 +90,7 @@ const userController = {
         return tweets
           .map(tweet => ({
             ...tweet.dataValues,
-            relativeTime: dayjs(tweet.dataValues.createdAt).fromNow()
+            relativeTime: dateFormat(tweet.dataValues.createdAt).fromNow()
           }))
       })
       .then(tweets => {
@@ -112,7 +108,7 @@ const userController = {
         return replies
           .map(reply => ({
             ...reply.dataValues,
-            relativeTime: dayjs(reply.dataValues.createdAt).fromNow()
+            relativeTime: dateFormat(reply.dataValues.createdAt).fromNow()
           }))
       })
       .then(replies => {

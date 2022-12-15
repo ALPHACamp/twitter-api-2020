@@ -1,12 +1,6 @@
 const { User, Tweet, Reply } = require('../models')
 const helpers = require('../_helpers')
-const dayjs = require('dayjs')
-const relativeTime = require('dayjs/plugin/relativeTime')
-const isYesterday = require('dayjs/plugin/isYesterday')
-require('dayjs/locale/zh-tw')
-dayjs.locale('zh-tw')
-dayjs.extend(relativeTime)
-dayjs.extend(isYesterday)
+const dateFormat = require('../helpers/date-helper')
 
 const replyController = {
   // 新增推文回覆
@@ -43,7 +37,7 @@ const replyController = {
         return replies
           .map(reply => ({
             ...reply.dataValues,
-            relativeTime: dayjs(reply.dataValues.createdAt).fromNow()
+            relativeTime: dateFormat(reply.dataValues.createdAt).fromNow()
           }))
       })
       .then(replies => {
