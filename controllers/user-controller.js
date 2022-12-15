@@ -161,6 +161,29 @@ const userController = {
 
       return res.status(200).json(data)
     } catch (err) { next(err) }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const reqId = Number(req.params.id)
+      const loginUser = helpers.getUser(req)
+      const reqUser = await User.findByPk(reqId)
+      if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
+
+      const followings = await Followship.findAll({
+        include: { model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] },
+        where: { followerId: reqId },
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
+      })
+      const data = followings.map(following => {
+        following.createdAt = dayjs(following.createdAt).valueOf()
+        following.updatedAt = dayjs(following.updatedAt).valueOf()
+        following.Followings.isFollowed = loginUser?.Followings?.some(followingUser => followingUser.id === following.followingId)
+        return following
+      })
+      return res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 
