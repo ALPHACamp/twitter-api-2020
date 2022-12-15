@@ -26,7 +26,7 @@ const userServices = {
           password: hash
         })
       )
-      .then((newUser) => cb(null, { success: 'true', user: newUser }))
+      .then((newUser) => cb(null, { success: 'true' }))
       .catch((err) => cb(err))
   },
   signIn: (req, cb) => {
