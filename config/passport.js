@@ -27,7 +27,6 @@ passport.use(new LocalStrategy(
   },
   // authenticate user
   (account, password, done) => {
-    if (account === 'root') { throw new Error('admin account cannot enter') } // 管理者帳號不能登入
     User.findOne({ where: { account } })
       .then(user => {
         if (!user) throw new Error('account do not match!')
