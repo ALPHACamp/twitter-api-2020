@@ -21,7 +21,7 @@ const userServices = {
     // password check
     if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
     // account and email check
-    Promise.all([
+    return Promise.all([
       User.findOne({ where: { account: req.body.account } }), User.findOne({ where: { email: req.body.email } })
     ])
       .then(([userWithAccount, userWithEmail]) => {
@@ -56,10 +56,10 @@ const userServices = {
   },
   editUser: (req, cb) => {
     const { account, name, email, introduction, password } = req.body
-    const userId = req.params.userId
+    const UserId = req.params.userId
     const { avatarFile, coverFile } = req
     return Promise.all([
-      User.findByPk(userId),
+      User.findByPk(UserId),
       imgurFileHandler(avatarFile),
       imgurFileHandler(coverFile)
     ])
@@ -81,43 +81,40 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUserFollowings: (req, cb) => {
-    const userId = req.params.userId
+    const UserId = req.params.userId
     return Followship.findAll({
-      where: { followerId: userId },
+      where: { followerId: UserId },
       include: [{ model: User, as: 'followingUser' }]
     })
       .then(followings => cb(null, followings))
       .catch(err => cb(err))
   },
   getUserFollowers: (req, cb) => {
-    const userId = req.params.userId
+    const UserId = req.params.userId
     return Followship.findAll({
-      where: { followingId: userId },
+      where: { followingId: UserId },
       include: [{ model: User, as: 'followerUser' }]
     })
       .then(followers => cb(null, followers))
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
-    const userId = req.params.userId
-    Tweet.findAll({ where: { userId }, include: [User] })
-      .then(tweets => {
-        cb(null, tweets)
-      })
+    const UserId = req.params.userId
+    return Tweet.findAll({ where: { UserId }, include: [{ model: User }] })
+      .then(tweets => cb(null, tweets))
+      .catch(err => cb(err))
   },
   getUserReplies: (req, cb) => {
-    const userId = req.params.userId
-    Reply.findAll({ where: { userId }, include: [User] })
-      .then(replies => {
-        cb(null, replies)
-      })
+    const UserId = req.params.userId
+    return Reply.findAll({ where: { UserId }, include: [{ model: User }] })
+      .then(replies => cb(null, replies))
+      .catch(err => cb(err))
   },
   getLikedTweets: (req, cb) => {
-    const userId = req.params.userId
-    Like.findAll({ where: { userId }, include: [Tweet] })
-      .then(likedTweets => {
-        cb(null, likedTweets)
-      })
+    const UserId = req.params.userId
+    return Like.findAll({ where: { UserId }, include: [{ model: Tweet }] })
+      .then(likedTweets => cb(null, likedTweets))
+      .catch(err => cb(err))
   }
 }
 module.exports = userServices

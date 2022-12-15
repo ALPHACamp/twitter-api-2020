@@ -34,7 +34,7 @@ const tweetServices = {
     const { comment } = req.body
     const TweetId = req.params.tweetId
     const UserId = helpers.getUser(req).id
-    Tweet.findByPk(TweetId)
+    return Tweet.findByPk(TweetId)
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
         return Reply.create({
@@ -48,7 +48,7 @@ const tweetServices = {
   },
   getReplies: (req, cb) => {
     const TweetId = req.params.tweetId
-    Tweet.findByPk(TweetId)
+    return Tweet.findByPk(TweetId)
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
         return Reply.findAll({ where: { TweetId }, include: [User], nest: true })
@@ -84,7 +84,7 @@ const tweetServices = {
   unlikeTweet: (req, cb) => {
     const UserId = helpers.getUser(req).id
     const TweetId = req.params.tweetId
-    Like.findOne({
+    return Like.findOne({
       where: {
         UserId,
         TweetId

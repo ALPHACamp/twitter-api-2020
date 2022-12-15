@@ -39,7 +39,7 @@ const followshipServices = {
       .catch(err => cb(err))
   },
   removeFollowing: (req, cb) => {
-    Followship.findOne({
+    return Followship.findOne({
       where: {
         followerId: helpers.getUser(req).id,
         followingId: req.params.followingId
