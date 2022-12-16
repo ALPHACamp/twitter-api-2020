@@ -5,7 +5,7 @@ const helpers = require('../_helpers')
 const likeServices = {
   addLike: (req, cb) => {
     const UserId = helpers.getUser(req).id
-    const TweetId = req.params.id
+    const TweetId = req.params.tweet_id
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({ where: { TweetId, UserId } })
@@ -23,7 +23,7 @@ const likeServices = {
   },
   unLike: (req, cb) => {
     const UserId = helpers.getUser(req).id
-    const TweetId = req.params.id
+    const TweetId = req.params.tweet_id
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({ where: { TweetId, UserId } })

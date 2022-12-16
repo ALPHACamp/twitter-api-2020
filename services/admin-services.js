@@ -11,13 +11,17 @@ const adminServices = {
       raw: true
     })
       .then((users) => {
+        users.map(user => {
+          delete user.password
+          return user
+        })
         const data = users
         cb(null, data)
       })
       .catch(err => cb(err))
   },
   deleteTweet: (req, cb) => {
-    const id = req.params.id
+    const id = req.params.tweet_id
     return Tweet.findByPk(id)
       .then(tweet => {
         assert(tweet, "Tweet not found!!")
