@@ -26,6 +26,7 @@ const userController = {
     try {
       const { id } = req.params
       let user = await User.findByPk(id, {
+        attributes: ['id', 'name', 'account', 'email', 'avatar', 'cover', 'introduction', 'role'],
         include: [
           Reply, Tweet, Like,
           { model: User, as: 'Followers' },
@@ -46,7 +47,8 @@ const userController = {
       const top = Number(req.query.top)
       const currentUser = getUser(req)
       const users = await User.findAll({
-        include: [{ model: User, as: 'Followers' }]
+        attributes: ['id', 'account', 'name', 'avatar'],
+        include: [{ model: User, as: 'Followers', attributes: ['id'] }]
       })
       const result = users
         .map(user => ({
@@ -72,12 +74,15 @@ const userController = {
       const user2 = await User.findOne({ where: { account } })
       if (user2) return res.status(400).json({ status: 'error', message: 'account 已重複註冊！' })
 
-      const createdUser = await User.create({
+      let createdUser = await User.create({
         account,
         name,
         email,
         password: bcrypt.hashSync(password)
       })
+
+      createdUser = createdUser.toJSON()
+      delete createdUser.password
 
       return res.status(200).json({ status: 'success', data: createdUser })
     } catch (err) {
@@ -112,12 +117,20 @@ const userController = {
       // 若有回傳password，檢查password與checkPassword是否相符
       if (password && password !== checkPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
 
-      const updatedUser = await user.update({
+      let updatedUser = await user.update({
         account: account || user.account,
         name: name || user.name,
         email: email || user.email,
         password: bcrypt.hashSync(password) || user.password
       })
+
+      updatedUser = updatedUser.toJSON()
+      delete updatedUser.avatar
+      delete updatedUser.cover
+      delete updatedUser.password
+      delete updatedUser.introduction
+      delete updatedUser.role
+
       return res.status(200).json({ status: 'success', data: updatedUser })
     } catch (err) {
       next(err)
@@ -145,12 +158,16 @@ const userController = {
       const avatarPath = await imgurFileHandler(avatar)
       const coverPath = await imgurFileHandler(cover)
 
-      const updatedUser = await user.update({
+      let updatedUser = await user.update({
         name,
         avatar: avatarPath,
         cover: coverPath,
         introduction
       })
+
+      updatedUser = updatedUser.toJSON()
+      delete updatedUser.password
+      delete updatedUser.role
 
       return res.status(200).json({ status: 'success', data: updatedUser })
     } catch (err) {

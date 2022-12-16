@@ -21,7 +21,7 @@ router.post('/api/users', userController.postUser)
 router.use('/api/tweets', authenticated, authenticatedUser, tweet)
 
 // user
-router.use('/api', authenticated, authenticatedUser, user)
+router.use('/api/users', authenticated, authenticatedUser, user)
 
 // handle error
 router.use('/', generalErrorHandler)
