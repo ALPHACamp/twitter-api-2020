@@ -1,7 +1,7 @@
 // 照前端需求皆以success的布林值判斷res是否成功
 
 const sequelize = require('sequelize')
-// const { getUser } = require('../_helpers')
+const { getUser } = require('../_helpers')
 const { Tweet, User, Like } = require('../models')
 
 const tweetController = {
@@ -61,8 +61,7 @@ const tweetController = {
       .catch(err => next(err))
   },
   postTweet: (req, res, next) => {
-    // const UserId = getUser(req)?.id
-    const UserId = 1 // 測試用，待user功能補齊可拿掉
+    const UserId = getUser(req)?.id
     const { description } = req.body
     // 錯誤判斷
     // 空白內容
@@ -98,8 +97,7 @@ const tweetController = {
   },
   likeTweet: (req, res, next) => {
     const TweetId = Number(req.params.id)
-    // const UserId = getUser(req)?.id
-    const UserId = 1 // 測試用要記得刪掉!!
+    const UserId = getUser(req)?.id
     return Promise.all([
       Tweet.findByPk((TweetId), { raw: true }),
       Like.findOne({
@@ -132,8 +130,7 @@ const tweetController = {
   },
   unlikeTweet: (req, res, next) => {
     const TweetId = Number(req.params.id)
-    // const UserId = getUser(req)?.id
-    const UserId = 1 // 測試用要記得刪掉!!
+    const UserId = getUser(req)?.id
     return Like.findOne({
       where: {
         UserId,
