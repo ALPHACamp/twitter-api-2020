@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt-nodejs')
 const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
 
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
@@ -35,13 +35,11 @@ const jwtStrategy = new JWTStrategy(jwtOptions, async (jwtPayload, next) => {
   try {
     const user = await User.findByPk(jwtPayload.id, {
       include: [
-        Reply, Tweet,
+        Reply, Tweet, Like,
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' },
-        { model: Tweet, as: 'LikedTweets' }
+        { model: User, as: 'Followings' }
       ]
     })
-    if (!user) return next(null, false)
     return next(null, user)
   } catch (err) {
     next(null, err)
