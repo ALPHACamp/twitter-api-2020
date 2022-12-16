@@ -1,7 +1,6 @@
-// const id = require('faker/lib/locales/id_ID')
+const jwt = require('jsonwebtoken')
 const { User, Tweet, Like, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
-
 
 const adminController = {
 	login: (req, res, next) => {
