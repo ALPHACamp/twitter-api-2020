@@ -5,7 +5,7 @@ module.exports = {
 		await queryInterface.bulkInsert('Tweets',
 			Array.from({ length: 50 }, (v, i) => ({
 				user_id: Math.floor(i / 10) + 2,
-				description: faker.lorem.text(),
+				description: faker.lorem.text().substring(0,140),
 				created_at: faker.datatype.datetime({ min: 1577836800000, max: 1623456000000 }),
 				updated_at: faker.datatype.datetime({ min: 1637836800000, max: 1663456000000 })
 			}))
