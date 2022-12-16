@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const bcrypt = require('bcryptjs')
+const { uploadFile } = require('../helpers/file-helpers')
+const upload = require('../middleware/multer')
 
 const userServices = {
   signUp: (req, cb) => {
@@ -50,7 +52,7 @@ const userController = {
     }
 
     User.findOne({ where: { account, role: 'user' }, raw: true })
-      .then(user => {
+      .then((user) => {
         if (!user) {
           throw new Error('帳號不存在！')
         }
@@ -68,10 +70,53 @@ const userController = {
         delete user.password
         return res.status(200).json({ success: true, token, user })
       })
-      .catch(err => next(err))
+      .catch((err) => next(err))
   },
   getUser: (req, res, next) => {
     userServices.getUser(req, (err, data) => (err ? next(err) : res.json(data)))
+  },
+  putUser: (req, res, next) => {
+    const { account, name, email, introduction } = req.body
+    const { id } = req.params
+
+    let avatarFile = req.files.avatar
+    let coverFile = req.files.cover
+    if (!name) throw new Error('name 欄位為必填!')
+    // 將 avatar 和 cover 資料取出
+
+    if (!req.files.avatar) {
+      avatarFile = [{ path: '' }]
+    }
+
+    if (!req.files.cover) {
+      coverFile = [{ path: '' }]
+    }
+
+    console.log('req.files: ', req.files)
+
+    console.log('req.files.avatar: ', avatarFile)
+
+    return Promise.all([User.findByPk(id), avatarFile, coverFile])
+      .then(([user, avatarFile, coverFile]) => {
+        if (!user) throw new Error('使用者不存在!')
+        // console.log('user:', user)
+        // console.log('user avatar:', user.avatar)
+        // console.log('user cover:', user.cover)
+        // console.log('avatarFile:', avatarPath)
+        // console.log('coverFile:', coverPath)
+        return user.update({
+          account,
+          name,
+          email,
+          introduction,
+          avatar: avatarFile[0].path || user.avatar,
+          cover: coverFile[0].path || user.cover
+        })
+      })
+      .then((updateUser) =>
+        res.status(201).json({ success: true, data: updateUser })
+      )
+      .catch((err) => next(err))
   }
 }
 
