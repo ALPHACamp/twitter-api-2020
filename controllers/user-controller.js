@@ -175,7 +175,7 @@ const userController = {
 
       const option = { name, introduction }
       if (files?.avatar) option.avatar = await imgurFileHandler(files.avatar[0])
-      if (files?.cover) option.cover = await imgurFileHandler(files.cover[0])
+      option.cover = files?.cover ? await imgurFileHandler(files.cover[0]) : null // 未上傳cover可以是空白
 
       //  更新資料
       const user = await User.findByPk(reqUserId)
