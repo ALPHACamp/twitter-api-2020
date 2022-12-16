@@ -44,8 +44,8 @@ const userController = {
 			// eslint-disable-next-line no-undef
 			const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
 			res.status(200).json({
-					token,
-					user: userData
+				token,
+				user: userData
 			})
 		} catch (err) {
 			next(err)
