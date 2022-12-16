@@ -49,15 +49,15 @@ const userController = {
       throw new Error('account and password are required.')
     }
 
-    User.findOne({ where: { account }, raw: true })
-      .then((user) => {
+    User.findOne({ where: { account, role: 'user' }, raw: true })
+      .then(user => {
         if (!user) {
-          throw new Error('帳號不存在 ！')
+          throw new Error('帳號不存在！')
         }
         const isValidPassword = bcrypt.compareSync(password, user.password)
 
         if (!isValidPassword) {
-          throw new Error('帳號不存在 ！')
+          throw new Error('帳號不存在！')
         }
 
         const UserId = { id: user.id }
@@ -68,7 +68,7 @@ const userController = {
         delete user.password
         return res.status(200).json({ success: true, token, user })
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
   getUser: (req, res, next) => {
     userServices.getUser(req, (err, data) => (err ? next(err) : res.json(data)))
