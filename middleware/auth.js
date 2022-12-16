@@ -1,25 +1,20 @@
-// const passport = require('../config/passport')
-// const authenticated = passport.authenticate('jwt', { session: false })
+const passport = require('../config/passport')  
+const helpers = require('../_helpers')
 
-const { ensureAuthenticated, getUser } = require('../helpers/auth-helper')
 
 const authenticated = (req, res, next) => {
-  if (ensureAuthenticated(req)) {
-    return next()
-  }
-  res.status(200).json({ status: 'success', message: 'Admin login successfully!' })
+	passport.authenticate('jwt', { session: false }, (err, user) => {
+		if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
+		req.user = user.dataValues
+		next()
+	})(req, res, next)
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (ensureAuthenticated(req)) {
-    if (getUser(req).isAdmin) return next()
-    res.status(200).json({ status: 'success', message: 'Admin login successfully!' })
-  } else {
-    res.status(401).json({ status: 'error', message: 'user is invalidated' })
-  }
+	if (helpers.getUser(req) && helpers.getUser(req).role === 1) return next()
+	return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
-
 module.exports = {
-  authenticated,
-  authenticatedAdmin
+	authenticated,
+	authenticatedAdmin
 }
