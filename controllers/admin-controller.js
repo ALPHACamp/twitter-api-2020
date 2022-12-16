@@ -62,7 +62,8 @@ const adminController = {
       const { role } = req.body
       const { id } = req.params
       const user = await User.findByPk(id)
-      if (user.email === superUser.email) return res.status(401).json({ status: 'error', message: `禁止變更${superUser.name}權限` })
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+      if (user.email === superUser.email) return res.status(401).json({ status: 'error', message: `禁止變更${superUser.name}權限！` })
       const updatedUser = await user.update({ role })
       return res.json({ status: 'success', data: updatedUser })
     } catch (err) {

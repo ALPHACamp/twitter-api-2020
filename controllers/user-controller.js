@@ -39,7 +39,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const { id } = req.params
-      const user = await User.findByPk(id, {
+      let user = await User.findByPk(id, {
         include: [
           Reply, Tweet, Like,
           { model: User, as: 'Followers' },
@@ -47,7 +47,9 @@ const userController = {
         ],
         nest: true
       })
-      if (!user) return res.status(404).json({ status: 'error', message: "User doesn't exist!" })
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+      user = user.toJSON()
+      user.isFollowed = getUser(req).Followings ? getUser(req).Followings.some(f => f.id === user.id) : null
       return res.json(user)
     } catch (err) {
       next(err)
@@ -96,29 +98,72 @@ const userController = {
       next(err)
     }
   },
-  putUser: async (req, res, next) => {
+  putUserAccount: async (req, res, next) => {
     try {
       const { id } = req.params
-      const { account, name, email, password, checkPassword, introduction } = req.body
-      const { avatar, cover } = req
+      // 未回傳則預設不修改
+      const { account, name, email, password, checkPassword } = req.body
 
-      if (password && password !== checkPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
-
+      // 確定使用者存在
       const user = await User.findByPk(id)
-      const avatarPath = await imgurFileHandler(avatar)
-      const coverPath = await imgurFileHandler(cover)
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
 
-      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在！' })
+      // 只能更改自己的資料
       if (getUser(req).dataValues.id !== Number(id)) return res.status(401).json({ status: 'error', message: '無權限更改此使用者！' })
+
+      // 檢查account是否與其他使用者重複
+      if (account) {
+        const accountRepeatedUser = await User.findOne({ where: { account }, raw: true })
+        if (accountRepeatedUser && Number(accountRepeatedUser.id) !== Number(id)) return res.status(400).json({ status: 'error', message: 'account與其他使用者重複！' })
+      }
+
+      // 檢查email是否與其他使用者重複
+      if (email) {
+        const emailRepeatedUser = await User.findOne({ where: { email }, raw: true })
+        if (emailRepeatedUser && Number(emailRepeatedUser.id) !== Number(id)) return res.status(400).json({ status: 'error', message: 'email與其他使用者重複！' })
+      }
+
+      // 若有回傳password，檢查password與checkPassword是否相符
+      if (password && password !== checkPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
 
       const updatedUser = await user.update({
         account: account || user.account,
         name: name || user.name,
         email: email || user.email,
-        password: bcrypt.hashSync(password) || user.password,
-        avatar: avatarPath || user.avatar,
-        cover: coverPath || user.cover,
-        introduction: introduction || user.introduction
+        password: bcrypt.hashSync(password) || user.password
+      })
+      return res.status(200).json({ status: 'success', data: updatedUser })
+    } catch (err) {
+      next(err)
+    }
+  },
+  putUserProfile: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const { name, introduction } = req.body
+      const { files } = req
+
+      if (!name) return res.status(400).json({ status: 'error', message: 'name是必填！' })
+
+      const avatar = files?.avatar ? files.avatar[0] : null
+      const cover = files?.cover ? files.cover[0] : null
+
+      // 確定使用者存在
+      const user = await User.findByPk(id)
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      // 只能更改自己的資料
+      if (getUser(req).dataValues.id !== Number(id)) return res.status(401).json({ status: 'error', message: '無權限更改此使用者！' })
+
+      // 圖片上傳imgur
+      const avatarPath = await imgurFileHandler(avatar)
+      const coverPath = await imgurFileHandler(cover)
+
+      const updatedUser = await user.update({
+        name,
+        avatar: avatarPath,
+        cover: coverPath,
+        introduction
       })
 
       return res.status(200).json({ status: 'success', data: updatedUser })
