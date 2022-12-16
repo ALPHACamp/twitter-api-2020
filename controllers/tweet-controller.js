@@ -54,6 +54,57 @@ const tweetController = {
         res.json({ newTweet })
       })
       .catch(err => next(err))
+  },
+  addLike: (req, res, next) => {
+    return Promise.all([
+      Like.findOne({
+        where: {
+          userId: helpers.getUser(req).id,
+          tweetId: req.params.id
+        }
+      }),
+      Tweet.findByPk(req.params.id)
+    ])
+      .then(([like, tweet]) => {
+        if (!tweet) throw new Error("The tweet didn't exist!")
+        if (like) throw new Error('You have already liked this tweet!')
+        Like.create({
+          tweetId: req.params.id,
+          userId: helpers.getUser(req).id
+        })
+          .then(() => {
+            res.json({
+              ...tweet.toJSON(),
+              islike: true
+            })
+          })
+          .catch(err => next(err))
+      })
+      .catch(err => next(err))
+  },
+  removeLike: (req, res, next) => {
+    return Promise.all([
+      Like.findOne({
+        where: {
+          userId: helpers.getUser(req).id,
+          tweetId: req.params.id
+        }
+      }),
+      Tweet.findByPk(req.params.id)
+    ])
+      .then(([like, tweet]) => {
+        if (!tweet) throw new Error("The tweet didn't exist!")
+        if (!like) throw new Error("'You haven't liked this tweet!")
+        return like.destroy()
+          .then(() => {
+            res.json({
+              ...tweet.toJSON(),
+              islike: false
+            })
+          })
+          .catch(err => next(err))
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = tweetController
