@@ -161,7 +161,7 @@ const userController = {
     try {
       const { id } = req.params
       let user = await User.findOne({ where: { id }, include: Like, nest: true })
-      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在！' })
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
       user = user.toJSON()
       return res.status(200).json(user.Likes)
     } catch (err) {
