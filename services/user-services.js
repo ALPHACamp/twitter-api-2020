@@ -1,7 +1,6 @@
 const { User, Like, Tweet, Followship, Reply } = require('./../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
-const { Op } = require('sequelize')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 
