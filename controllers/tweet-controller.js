@@ -1,6 +1,7 @@
 // const id = require('faker/lib/locales/id_ID')
 const { User, Tweet, Like, sequelize } = require('../models')
-// const { getUser } = require('../_helpers')
+// model 要記得載入 sequelize
+const { getUser } = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -8,19 +9,15 @@ const tweetController = {
       const tweets = await Tweet.findAll({
         nest: true,
         raw: true,
-        include: {
-          model: User,
-          attributes: ['id', 'account', 'name', 'avatar', 'cover']
-        }
-      })
-      const repliesCount = await Tweet.findAll({
+        include: { model: User, attributes: ['id', 'account', 'name', 'avatar', 'cover'] },
         attributes: [
           'id', 'description', 'createdAt',
-          [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweetId = Tweet.id)'), 'replyCount']
+          [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount']
+          // 這裡還可以再加上其他 sequelize literal
         ],
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
       })
-      return res.json(tweets, repliesCount)
+      return res.json(tweets)
     } catch (err) {
       next(err)
     }
