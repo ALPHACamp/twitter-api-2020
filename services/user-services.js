@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const assert = require('assert')
-const { User } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 
 const userServices = {
   // 使用者註冊
@@ -41,8 +41,54 @@ const userServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  getUser: (req, cb) => {
+    return User.findByPk(req.params.user_id)
+      .then((user) => {
+        if (!user) throw new Error("User didn't exist!")
+        const userData = user.toJSON()
+        delete userData.password
+        cb(null, userData)
+      })
+      .catch(err => cb(err))
+  },
+  getTweetsOfUser: (req, cb) => {
+    const UserId = req.params.user_id
+    return Tweet.findAll({
+      where: {
+        UserId
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true
+
+    })
+      .then((tweetsOfUser) => {
+
+        if (!tweetsOfUser) throw new Error("此用戶沒有發過推文!")
+        cb(null, tweetsOfUser)
+
+      })
+      .catch(err => cb(err))
+  }, getRepliesOfTweet: (req, cb) => {
+    const UserId = req.params.user_id
+    return Reply.findAll({
+      where: {
+        UserId
+      },
+      include: {
+        model: User, include: Tweet
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+
+    })
+      .then((repliesOfTweet) => {
+        if (!repliesOfTweet) throw new Error("此用戶沒有發過推文回覆!")
+        cb(null, repliesOfTweet)
+      })
+      .catch(err => cb(err))
   }
+
 }
-
-
 module.exports = userServices
