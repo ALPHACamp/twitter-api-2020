@@ -4,7 +4,7 @@ const passport = require('passport')
 
 const admin = require('./modules/admin')
 const user = require('./modules/user')
-const tweet = require('../models/tweet')
+const tweet = require('./modules/tweet')
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
 const userController = require('../controllers/user-controller')
@@ -17,7 +17,7 @@ router.post('/api/users/login', passport.authenticate('local', { session: false 
 router.post('/api/users', userController.postUser)
 
 // tweet
-router.use('/api/tweets', tweet)
+router.use('/api/tweets', authenticated, authenticatedUser, tweet)
 
 // user
 router.use('/api', authenticated, authenticatedUser, user)

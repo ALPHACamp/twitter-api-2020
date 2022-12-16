@@ -1,6 +1,6 @@
-const { User, Reply, Tweet, Like, sequelize } = require('../models')
-const { Op } = sequelize
-const { getOffset } = require('../_helpers')
+const { User, Tweet, sequelize } = require('../models')
+const { getUser, getOffset } = require('../_helpers')
+const dayjs = require('dayjs')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -10,32 +10,26 @@ const tweetController = {
       const limit = Number(req.query.limit) || DEFAULT_LIMIT
       const offset = getOffset(limit, page)
 
-      let tweets = await Tweet.findAll({
+      const user = getUser(req)
+      const tweets = await Tweet.findAll({
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
         attributes: [
-          ['id', 'TweetId'], 'createdAt', 'description',
-          [sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
-          [sequelize.literal('count(distinct Replies.id)'), 'RepliesCount']
+          'id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
         ],
-        group: 'TweetId',
-        include: [
-          { model: Like, attributes: [] },
-          { model: Reply, attributes: [] },
-          { model: User, attributes: ['id', 'name', 'avatar', 'account'], where: { role: { [Op.not]: 'admin' } } }
-        ],
-        order: [['createAt', 'DESC']],
+        order: [['createdAt', 'DESC']],
         limit,
         offset,
-        raw: true,
         nest: true
       })
-      tweets = tweets.map(tweet => ({
-        ...tweet,
-        isLiked: req.user.LikedTweets ? req.user.LikedTweets.map(like => like.id).includes(tweet.TweetId) : null
+      const data = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        isLiked: user?.Likes?.some(userLike => userLike?.TweetId === tweet.id),
+        createdAt: dayjs(tweet.createdAt).valueOf()
       }))
-      return res.status(200).json(tweets)
-    } catch (err) {
-      next(err)
-    }
+      return res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 module.exports = tweetController
