@@ -2,12 +2,9 @@ const express = require('express')
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
-
-const helpers = require('./_helpers')
 const routes = require('./routes/')
 
 const app = express()
-
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
