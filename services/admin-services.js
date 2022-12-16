@@ -6,6 +6,7 @@ const adminServices = {
       raw: true
     })
       .then(users => {
+        users.forEach(user => delete user.password)
         return cb(null, users)
       })
       .catch(err => cb(err))

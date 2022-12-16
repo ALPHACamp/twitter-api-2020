@@ -6,8 +6,8 @@ const helpers = require('../_helpers')
 const userServices = {
   loginUser: (req, cb) => {
     try {
-      delete helpers.getUser(req).password
       const userData = helpers.getUser(req).toJSON()
+      delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, {
         token,
@@ -18,11 +18,12 @@ const userServices = {
     }
   },
   registerUser: (req, cb) => {
+    const { account, name, email, password, checkPassword } = req.body
     // password check
-    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
+    if (password !== checkPassword) throw new Error('Passwords do not match!')
     // account and email check
     return Promise.all([
-      User.findOne({ where: { account: req.body.account } }), User.findOne({ where: { email: req.body.email } })
+      User.findOne({ where: { account } }), User.findOne({ where: { email } })
     ])
       .then(([userWithAccount, userWithEmail]) => {
         if (userWithAccount) throw new Error('Account already exists!')
@@ -30,9 +31,9 @@ const userServices = {
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => User.create({
-        account: req.body.account,
-        name: req.body.name,
-        email: req.body.email,
+        account,
+        name,
+        email,
         password: hash,
         role: 'user',
         avatar: `https://loremflickr.com/320/240/cat?random=${Math.random() * 100}`,
@@ -40,9 +41,7 @@ const userServices = {
       }))
       .then(user => {
         delete user.password
-        return cb(null, {
-          user
-        })
+        cb(null, user)
       })
       .catch(err => cb(err))
   },
@@ -50,6 +49,7 @@ const userServices = {
     return User.findByPk(req.params.userId, { raw: true })
       .then(user => {
         if (!user) throw new Error('user do not exist.')
+        delete user.password
         cb(null, user)
       })
       .catch(err => cb(err))
@@ -76,6 +76,7 @@ const userServices = {
         })
       })
       .then(updatedUser => {
+        delete updatedUser.password
         cb(null, { user: updatedUser })
       })
       .catch(err => cb(err))
@@ -84,35 +85,64 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followerId: UserId },
-      include: [{ model: User, as: 'followingUser' }]
+      include: [{ model: User, as: 'followingUser' }],
+      raw: true,
+      nest: true
     })
-      .then(followings => cb(null, followings))
+      .then(followings => {
+        followings.forEach(f => delete f.followingUser.password)
+        cb(null, followings)
+      })
       .catch(err => cb(err))
   },
   getUserFollowers: (req, cb) => {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followingId: UserId },
-      include: [{ model: User, as: 'followerUser' }]
+      include: [{ model: User, as: 'followerUser' }],
+      raw: true,
+      nest: true
     })
-      .then(followers => cb(null, followers))
+      .then(followers => {
+        followers.forEach(f => delete f.followerUser.password)
+        cb(null, followers)
+      })
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
     const UserId = req.params.userId
-    return Tweet.findAll({ where: { UserId }, include: [{ model: User }] })
-      .then(tweets => cb(null, tweets))
+    return Tweet.findAll({
+      where: { UserId },
+      include: [{ model: User }],
+      raw: true,
+      nest: true
+    })
+      .then(tweets => {
+        tweets.forEach(r => delete r.User.password)
+        cb(null, tweets)
+      })
       .catch(err => cb(err))
   },
   getUserReplies: (req, cb) => {
     const UserId = req.params.userId
-    return Reply.findAll({ where: { UserId }, include: [{ model: User }] })
-      .then(replies => cb(null, replies))
+    return Reply.findAll({
+      where: { UserId },
+      include: [{ model: User }],
+      raw: true,
+      nest: true
+    })
+      .then(replies => {
+        replies.forEach(r => delete r.User.password)
+        cb(null, replies)
+      })
       .catch(err => cb(err))
   },
   getLikedTweets: (req, cb) => {
     const UserId = req.params.userId
-    return Like.findAll({ where: { UserId }, include: [{ model: Tweet }] })
+    return Like.findAll({
+      where: { UserId },
+      include: [{ model: Tweet }]
+    })
       .then(likedTweets => cb(null, likedTweets))
       .catch(err => cb(err))
   }

@@ -3,17 +3,27 @@ const helpers = require('../_helpers')
 const tweetServices = {
   getTweets: (req, cb) => {
     return Tweet.findAll({
-      include: [User]
+      include: [{ model: User }],
+      raw: true,
+      nest: true
     })
-      .then(tweets => cb(null, tweets))
+      .then(tweets => {
+        tweets.forEach(t => delete t.User.password)
+        cb(null, tweets)
+      })
       .catch(err => cb(err))
   },
   getTweet: (req, cb) => {
     const { tweetId } = req.params
     return Tweet.findByPk(tweetId, {
-      include: [User]
+      include: [{ model: User }],
+      raw: true,
+      nest: true
     })
-      .then(tweet => cb(null, tweet))
+      .then(tweet => {
+        delete tweet.User.password
+        cb(null, tweet)
+      })
       .catch(err => cb(err))
   },
   postTweet: (req, cb) => {
@@ -51,9 +61,17 @@ const tweetServices = {
     return Tweet.findByPk(TweetId)
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
-        return Reply.findAll({ where: { TweetId }, include: [User], nest: true })
+        return Reply.findAll({
+          where: { TweetId },
+          include: [{ model: User }],
+          raw: true,
+          nest: true
+        })
       })
-      .then(replies => cb(null, replies))
+      .then(replies => {
+        replies.forEach(r => delete r.User.password)
+        cb(null, replies)
+      })
       .catch(err => cb(err))
   },
   likeTweet: (req, cb) => {
