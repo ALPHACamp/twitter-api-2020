@@ -16,7 +16,7 @@ router.post('/api/users/login', passport.authenticate('local', { session: false 
 router.post('/api/users', userController.postUser)
 
 // user
-router.use('/api', authenticated, authenticatedUser, user)
+router.use('/api/users', authenticated, authenticatedUser, user)
 
 // handle error
 router.use('/', generalErrorHandler)
