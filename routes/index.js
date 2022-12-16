@@ -26,6 +26,7 @@ router.get('/auth', authenticated, (req, res) => res.status(200).json({ status: 
 
 router.post('/users', authenticated, userController.postUsers)
 router.get('/tweets', authenticated, tweetController.getTweets)
+router.post('/tweets', authenticated, tweetController.postTweets)
 
 router.get('/', (req, res) => res.send('Hello World!'))
 

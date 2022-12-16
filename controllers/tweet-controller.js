@@ -1,4 +1,4 @@
-const { User, Tweet, Like, sequelize } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const tweetController = {
@@ -21,6 +21,20 @@ const tweetController = {
 		} catch (err) {
 			next(err)
 		}
+	},
+	postTweets: (req, res, next) => {
+		const currentUserId = getUser(req).id
+		const { description } = req.body
+		if (!description) throw Error('content is required!', {}, Error.prototype.code = 401)
+		if (description.length > 140) throw Error('too many words!', {}, Error.prototype.code = 401)
+		Tweet.create({
+			UserId: currentUserId,
+			description
+		})
+			.then(tweet => {
+				res.status(200).json(tweet)
+			})
+			.catch(err => next(err))
 	}
 }
 
