@@ -19,9 +19,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(passport.initialize()) 
 
 app.use('/api', routes)
-
-
-
+app.use(routes)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!!Let's go to http://localhost:${port}`))
 

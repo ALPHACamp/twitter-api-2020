@@ -15,8 +15,10 @@ const authenticatedAdmin = (req, res, next) => {
         req.user = user
         next()
       })(req, res, next)
+
 }
+
 module.exports = {
-  authenticated,
-  authenticatedAdmin
+	authenticated,
+	authenticatedAdmin
 }
