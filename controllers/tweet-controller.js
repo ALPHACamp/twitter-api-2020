@@ -4,12 +4,17 @@ const { getUser } = require('../_helpers')
 const tweetController = {
   getTweetReplies: async (req, res, next) => {
     try {
+      const page = Number(req.query.page) || 1
+      const limit = 10
+      const offset = (page - 1) * limit
       const tweetId = req.params.tweet_id
       const replies = await Reply.findAll({
         where: { TweetId: tweetId },
         attributes: ['id', 'UserId', 'comment', 'createdAt'],
         include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
         order: [['createdAt', 'DESC']],
+        limit,
+        offset,
         raw: true,
         nest: true
       })
@@ -20,6 +25,9 @@ const tweetController = {
   },
   getTweets: async (req, res, next) => {
     try {
+      const page = Number(req.query.page) || 1
+      const limit = 10
+      const offset = (page - 1) * limit
       const loginUser = getUser(req).id
       const tweets = await Tweet.findAll({
         include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
@@ -32,6 +40,8 @@ const tweetController = {
           ]
         },
         order: [['createdAt', 'DESC']],
+        limit,
+        offset,
         raw: true,
         nest: true
       })

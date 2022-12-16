@@ -73,6 +73,9 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
+      const page = Number(req.query.page) || 1
+      const limit = 10
+      const offset = (page - 1) * limit
       const { id } = req.params
       const user = await User.findOne({ where: { id, role: 'user' } })
       if (!user) throw new Error("User didn't exist!")
@@ -87,6 +90,8 @@ const userController = {
           ]
         },
         order: [['createdAt', 'DESC']],
+        limit,
+        offset,
         raw: true,
         nest: true
       })
@@ -97,6 +102,9 @@ const userController = {
   },
   getUserReplies: async (req, res, next) => {
     try {
+      const page = Number(req.query.page) || 1
+      const limit = 10
+      const offset = (page - 1) * limit
       const { id } = req.params
       const user = await User.findOne({ where: { id, role: 'user' } })
       if (!user) throw new Error("User didn't exist!")
@@ -107,6 +115,8 @@ const userController = {
           { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['id', 'account'] }] }
         ],
         order: [['createdAt', 'DESC']],
+        limit,
+        offset,
         raw: true,
         nest: true
       })
@@ -117,6 +127,9 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
+      const page = Number(req.query.page) || 1
+      const limit = 10
+      const offset = (page - 1) * limit
       const { id } = req.params
       const user = await User.findOne({ where: { id, role: 'user' } })
       if (!user) throw new Error("User didn't exist!")
@@ -135,6 +148,8 @@ const userController = {
           }
         ],
         order: [['createdAt', 'DESC']],
+        limit,
+        offset,
         raw: true,
         nest: true
       })
@@ -145,6 +160,9 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
+      const page = Number(req.query.page) || 1
+      const limit = 10
+      const offset = (page - 1) * limit
       const { id } = req.params
       const user = await User.findOne({ where: { id, role: 'user' } })
       if (!user) throw new Error("User didn't exist!")
@@ -159,6 +177,8 @@ const userController = {
           ]
         },
         order: [['createdAt', 'DESC']],
+        limit,
+        offset,
         raw: true
       })
       res.status(200).json(followings)
@@ -168,6 +188,9 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
+      const page = Number(req.query.page) || 1
+      const limit = 10
+      const offset = (page - 1) * limit
       const { id } = req.params
       const user = await User.findOne({ where: { id, role: 'user' } })
       if (!user) throw new Error("User didn't exist!")
@@ -182,6 +205,8 @@ const userController = {
           ]
         },
         order: [['createdAt', 'DESC']],
+        limit,
+        offset,
         raw: true
       })
       res.status(200).json(followers)
