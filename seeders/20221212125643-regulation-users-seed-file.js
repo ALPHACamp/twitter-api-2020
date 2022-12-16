@@ -11,7 +11,7 @@ module.exports = {
 			avatar: `https://loremflickr.com/140/140/people/?random=${Math.random() * 100}`,
 			introduction: faker.lorem.text().substring(0,160),
 			cover: 'https://loremflickr.com/639/200/image',
-			role: 1,
+			role: 'admin',
 			following_count: 0,
 			created_at: new Date(),
 			updated_at: new Date()
@@ -23,7 +23,7 @@ module.exports = {
 			avatar: `https://loremflickr.com/140/140/people/?random=${Math.random() * 100}`,
 			introduction: faker.lorem.text().substring(0,160),
 			cover: `https://loremflickr.com/639/200/image/?random=${Math.random() * 100}`,
-			role: 0,
+			role: 'user',
 			following_count: Math.floor(Math.random() * 500),
 			created_at: new Date(),
 			updated_at: new Date()

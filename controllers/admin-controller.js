@@ -3,12 +3,11 @@ const { User, Tweet, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const adminController = {
-	// login 還沒有成功
 	login: (req, res, next) => {
 		const adminData = getUser(req).toJSON()
 		delete adminData.password
 		try {
-			const token = jwt.sign(adminData, process.env.JWT_SECRET, { expiresIn: '30d' })
+			const token = jwt.sign(adminData, 'process.env.JWT_SECRET', { expiresIn: '30d' })
 			res.status(200).json({
 				token,
 				user: adminData

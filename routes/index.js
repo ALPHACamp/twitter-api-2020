@@ -11,6 +11,8 @@ const admin = require('./modules/admin')
 
 const { generalErrorHandler } = require('../middleware/error-handler')
 
+router.use('/admin', admin)
+
 router.post('/login', passport.authenticate('local', { session: false }), userController.logIn)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, userController.putUser)
@@ -31,7 +33,7 @@ router.post('/tweets', authenticated, tweetController.postTweets)
 router.get('/', (req, res) => res.send('Hello World!'))
 
 // router.use('/admin', authenticated, authenticatedAdmin, admin)
-router.use('/admin', admin)
+
 router.use('/', generalErrorHandler)
 
 module.exports = router
