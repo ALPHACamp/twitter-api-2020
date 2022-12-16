@@ -1,57 +1,36 @@
 'use strict'
 const bcrypt = require('bcryptjs')
+const faker = require('faker')
+const SEED_USERS = 10
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkInsert('Users', [{
-      account: 'root',
-      name: 'Root',
-      email: 'root@example.com',
-      password: await bcrypt.hash('12345678', 10),
-      role: 'admin',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }, {
-      account: 'user1',
-      name: 'User1',
-      email: 'user1@example.com',
-      password: await bcrypt.hash('12345678', 10),
-      role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }, {
-      account: 'user2',
-      name: 'User2',
-      email: 'user2@example.com',
-      password: await bcrypt.hash('12345678', 10),
-      role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }, {
-      account: 'user3',
-      name: 'User3',
-      email: 'user3@example.com',
-      password: await bcrypt.hash('12345678', 10),
-      role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }, {
-      account: 'user4',
-      name: 'User4',
-      email: 'user4@example.com',
-      password: await bcrypt.hash('12345678', 10),
-      role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }, {
-      account: 'user5',
-      name: 'User5',
-      email: 'user5@example.com',
-      password: await bcrypt.hash('12345678', 10),
-      role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }], {})
+    await queryInterface.bulkInsert('Users',
+      [{
+        account: 'root',
+        name: 'Root',
+        email: 'root@example.com',
+        password: bcrypt.hashSync('12345678', 10),
+        avatar: `https://loremflickr.com/320/240/man,woman/?random=${Math.random() * 100}`,
+        cover: 'https://upload.cc/i1/2022/12/16/bVJwGS.jpg',
+        introduction: faker.lorem.paragraph(3).substring(0, 160),
+        role: 'admin',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      ...Array.from({ length: SEED_USERS }, (_, i) => ({
+        account: `user${i + 1}`,
+        name: `User${i + 1}`,
+        email: `user${i + 1}@example.com`,
+        password: bcrypt.hashSync('12345678', 10),
+        avatar: `https://loremflickr.com/320/240/man,woman/?random=${Math.random() * 100}`,
+        cover: 'https://upload.cc/i1/2022/12/16/bVJwGS.jpg',
+        introduction: faker.lorem.paragraph(3).substring(0, 160),
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }))
+      ], {})
   },
 
   down: async (queryInterface, Sequelize) => {
