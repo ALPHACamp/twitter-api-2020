@@ -8,5 +8,5 @@ const ensureAuthenticated = req => {
 
 module.exports = {
 	getUser,
-  ensureAuthenticated
+	ensureAuthenticated
 }
