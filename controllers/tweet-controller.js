@@ -4,6 +4,7 @@ const { Tweet, User, Like } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
+    const UserId = helpers.getUser(req)?.id
     return Promise.all([
       Tweet.findAll({
         attributes: [ // 指定回傳model欄位
@@ -24,7 +25,8 @@ const tweetController = {
     ])
       .then(([tweets, likes]) => {
         const data = tweets.map(tweet => ({
-          ...tweet
+          ...tweet,
+          isLiked: likes.some(like => like.TweetId === tweet.id && UserId === like.UserId)
         }))
         res.status(200).json(data)
       })
@@ -32,6 +34,7 @@ const tweetController = {
   },
   getTweet: (req, res, next) => {
     const { id } = req.params
+    const UserId = helpers.getUser(req)?.id
     return Promise.all([
       Tweet.findByPk(id, {
         attributes: ['id', 'description', 'createdAt',
@@ -43,7 +46,8 @@ const tweetController = {
           ]
         ],
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
-        nest: true
+        nest: true,
+        raw: true
       }),
       Like.findAll({ where: { id }, raw: true })
     ])
@@ -54,6 +58,7 @@ const tweetController = {
             message: 'Tweet not found'
           })
         }
+        tweet.isLiked = likes.some(like => like.TweetId === tweet.id && UserId === like.UserId)
         res.status(200).json(tweet)
       })
       .catch(err => next(err))
