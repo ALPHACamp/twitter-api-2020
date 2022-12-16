@@ -45,12 +45,11 @@ const tweetController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
           [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${user} AND Likes.TweetId = Tweet.id)`), 'isLiked']
         ],
-        createdAt: dayjs(id.createdAt).valueOf(),
         raw: true,
         nest: true
       })
 
-      if (!tweet) return res.status(404).json({ status: 'error', message: '找不到貼文！' })
+      if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
       return res.status(200).json(tweet)
     } catch (err) { next(err) }
   }
