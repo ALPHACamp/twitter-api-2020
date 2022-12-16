@@ -20,7 +20,7 @@ app.use(express.json())
 app.use(passport.initialize())
 
 app.use('/api', routes)
-// app.use('/', (req, res) => res.send('Hello World!')) // fallback
+app.use('/', (req, res) => res.send('Hello World!')) // fallback
 app.use(generalErrorHandler) // error handle
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
