@@ -11,11 +11,15 @@ const adminServices = {
       raw: true
     })
       .then((users) => {
+      users.map(user => { 
+      delete user.password 
+      return user 
+      })
         const data = users
         cb(null, data)
       })
       .catch(err => cb(err))
-  },
+  }, //軟刪除?
   deleteTweet: (req, cb) => {
     const id = req.params.id
     return Tweet.findByPk(id)
