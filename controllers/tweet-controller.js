@@ -1,4 +1,4 @@
-const { User, Tweet, sequelize } = require('../models')
+const { User, Tweet, Like, sequelize } = require('../models')
 const { getUser, getOffset } = require('../_helpers')
 const dayjs = require('dayjs')
 
@@ -31,6 +31,44 @@ const tweetController = {
       return res.status(200).json(data)
     } catch (err) { next(err) }
   },
+  likeTweet: async (req, res, next) => {
+    try {
+      const TweetId = Number(req.params.id)
+      const UserId = getUser(req).dataValues.id
+
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
+
+      const like = await Like.findOne({ where: { TweetId, UserId } })
+      if (like) return res.status(400).json({ status: 'error', message: '使用者已經like此貼文！' })
+      const createdLike = await Like.create({
+        UserId,
+        TweetId
+      })
+
+      return res.status(200).json(createdLike.toJSON())
+    } catch (err) {
+      next(err)
+    }
+  },
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const TweetId = Number(req.params.id)
+      const UserId = getUser(req).dataValues.id
+
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
+
+      const like = await Like.findOne({ where: { TweetId, UserId } })
+      if (!like) return res.status(400).json({ status: 'error', message: '使用者已經unlike此貼文！' })
+
+      const deletedLike = await like.destroy()
+
+      return res.status(200).json(deletedLike.toJSON())
+    } catch (err) {
+      next(err)
+    }
+},
   getTweet: async (req, res, next) => {
     try {
       const user = getUser(req)
