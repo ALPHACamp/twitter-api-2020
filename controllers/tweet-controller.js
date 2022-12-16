@@ -172,6 +172,25 @@ const tweetController = {
         res.status(200).json(replies)
       })
       .catch(err => next(err))
+  },
+  replyTweet: (req, res, next) => {
+    const UserId = Number(helpers.getUser(req)?.id)
+    const TweetId = Number(req.params.tweet_id)
+    const { comment } = req.body
+    if (!comment) throw new Error('comment is required')
+    if (!TweetId) throw new Error('tweet not found')
+    // 先找到tweet的資料，再新增留言
+    return Tweet.findByPk(TweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error('tweet not found')
+        return Reply.create({
+          comment,
+          UserId,
+          TweetId
+        })
+      })
+      .then(reply => res.status(200).json({ success: true, message: 'Reply successfully' }))
+      .catch(err => next(err))
   }
 }
 
