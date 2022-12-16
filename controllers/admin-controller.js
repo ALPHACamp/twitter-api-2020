@@ -33,9 +33,6 @@ const adminController = {
 		} catch (err) { next(err) }
 	},
 	getTweets: (req, res, next) => {
-		// if (!getUser) {
-		//   return res.status(401).json({ status: 'error', message: 'token is invalidated' })
-		// }
 		Tweet.findAll({
 			nest: true,
 			raw: true,
