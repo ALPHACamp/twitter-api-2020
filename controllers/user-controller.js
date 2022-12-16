@@ -5,12 +5,7 @@ const helpers = require('../_helpers')
 
 const { User, Followship, Tweet, Reply, Like } = db
 
-// const cb = (err, data) => err ? next(err) : res.json({ status: 'success', data })
-
 const userController = {
-  // signUpPage: (req, res) => {
-  //   res.send('signup page')
-  // },
   register: (req, res, next) => {
     if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
     if (req.body.password.length > 8) throw new Error('Passwords should be no more than 8 digit!')
@@ -41,7 +36,7 @@ const userController = {
   login: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      if (userData.role !== 'user') throw new Error('Admin account cannot enter!')
+      if (userData.role !== 'user') throw new Error('Admin account cannot enter front-end!')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({

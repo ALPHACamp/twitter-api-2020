@@ -1,11 +1,13 @@
 const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 
+const { Tweet, User, Like, Reply, Followship } = require('../models')
+
 const adminController = {
   login: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      if (userData.role !== 'admin') throw new Error('User account cannot enter!')
+      if (userData.role !== 'admin') throw new Error('User account cannot enter back-end!')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
@@ -19,8 +21,38 @@ const adminController = {
       next(err)
     }
   },
-  getUsers: (req, res) => {
-    return res.send('admin users')
+  getUsers: (req, res, next) => {
+    return User.findAll({
+      include: [
+        { model: Tweet, include: Like },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+      .then(users => {
+        const data = users.map(user => {
+          let likedAmount = 0
+          user.Tweets.forEach(tweet => {
+            likedAmount += tweet.Likes.length
+          })
+          user = {
+            ...user.toJSON(), // 之後要再研究為什麼不帶入toJSON()會有 error: TypeError: Converting circular structure to JSON
+            tweetAmount: user.Tweets.length,
+            likedAmount,
+            followingAmount: user.Followings.length,
+            followerAmount: user.Followers.length
+          }
+          delete user.Tweets
+          delete user.Followers
+          delete user.Followings
+          return user
+        })
+        return data.sort((a, b) => b.tweetAmount - a.tweetAmount)
+      })
+      .then(data => {
+        res.json(data)
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = adminController

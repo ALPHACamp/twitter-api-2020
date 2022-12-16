@@ -6,11 +6,12 @@ const admin = require('./modules/admin')
 const userController = require('../../controllers/user-controller')
 const tweetController = require('../../controllers/tweet-controller')
 
+
 const { authenticated } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 
-// router.use('/admin', authenticated, authenticatedAdmin, admin)
-router.use('/admin', passport.authenticate('local', { session: false }), admin)
+router.use('/admin', admin)
+
 
 router.post('/users', userController.register)
 
