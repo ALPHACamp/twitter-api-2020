@@ -12,7 +12,6 @@ const likeController = require('../../controllers/likeController')
 const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 const { signInFail } = require('../../middleware/error-handler')
 
-
 router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn, signInFail)
 
@@ -27,7 +26,6 @@ router.post('/tweets/:tweet_id/unlike', authenticated, likeController.unLike)
 
 router.post('/followships', authenticated, followshipController.addFollowing)
 router.delete('/followships/:following_id', authenticated, followshipController.removeFollowing)
-
 
 router.get('/admin/users', authenticatedAdmin, adminController.getUsers)
 router.delete('/admin/tweets/:tweet_id', authenticatedAdmin, adminController.deleteTweet)
