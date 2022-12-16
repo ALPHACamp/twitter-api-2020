@@ -32,7 +32,7 @@ const followshipServices = {
     Followship.findOne({
       where: {
         followerId,
-        followingId: req.params.followingId
+        followingId: req.params.following_id
       }
     })
       .then(followship => {
