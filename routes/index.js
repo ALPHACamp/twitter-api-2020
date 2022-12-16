@@ -1,21 +1,24 @@
 const express = require('express')
 const router = express.Router()
-const admin = require('./modules/admin')
+
+const passport = require('../config/passport')
+const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
 const userController = require('../controllers/user-controller')
+const admin = require('./modules/admin')
 
-const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 const { generalErrorHandler } = require('../middleware/error-handler')
 
-// router.use('/admin', authenticated, authenticatedAdmin, admin)
-router.use('/admin', admin)
-
-router.put('/users/:id', authenticated, userController.putUser)
+router.post('/login', passport.authenticate('local', { session: false }), userController.logIn)
 router.get('/users/:id', authenticated, userController.getUser)
+router.put('/users/:id', authenticated, userController.putUser)
+router.post('/users', userController.postUsers)
 
-router.post('/users', authenticated, userController.postUsers)
+router.get('/auth', authenticated, (req, res) => res.status(200).json({ status: '200', message: 'JWT success' }))
+
 router.get('/', (req, res) => res.send('Hello World!'))
 
+router.use('/admin', admin)
 router.use('/', generalErrorHandler)
 
 module.exports = router
