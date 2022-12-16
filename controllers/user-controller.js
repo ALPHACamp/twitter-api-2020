@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const db = require('../models')
 const helpers = require('../_helpers')
 
-const { User } = db
+const { User, Followship, Tweet, Reply, Like } = db
 
 const userController = {
   register: (req, res, next) => {
@@ -49,6 +49,68 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUser: (req, res, next) => {
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Followship.findOne({
+        where: {
+          followerId: helpers.getUser(req), // 6 測試用DB裡面的6和下面的4即可得到true
+          followingId: req.params.id // 4
+        }
+      }),
+      Followship.findAndCountAll({ where: { followerId: helpers.getUser(req) } }),
+      Followship.findAndCountAll({ where: { followingId: helpers.getUser(req) } })
+    ])
+      .then(([user, followship, followerCount, followingCount]) => {
+        user = user.toJSON()
+        user.isSelf = Number(req.params.id) === Number(helpers.getUser(req).id)
+        user.isfollow = followship !== null
+        user.followingAmount = followerCount.count
+        user.followerAmount = followingCount.count
+        res.json({
+          status: 'success',
+          data: {
+            user
+          }
+        })
+      })
+      .catch(err => next(err))
+  },
+  getUserTweets: (req, res, next) => {
+    return Tweet.findAll({
+      // raw: true,
+      // nest: true,
+      where: {
+        UserId: req.params.id
+      },
+      include: [Reply, Like, User],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => {
+        tweets = tweets.map(tweet => {
+          return {
+            id: tweet.id,
+            UserId: tweet.UserId,
+            description: tweet.description,
+            userAccount: tweet.User.account,
+            userName: tweet.User.name,
+            avatar: tweet.User.avatar,
+            createdAt: tweet.createdAt,
+            updatedAt: tweet.updatedAt,
+            likedAmount: tweet.Likes.length,
+            repliedAmount: tweet.Replies.length,
+            isLike: tweet.Likes.map(t => t.id).includes(helpers.getUser(req).id)
+          }
+        })
+        res.json({
+          status: 'success',
+          data: {
+            tweets
+          }
+        })
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = userController
