@@ -1,6 +1,6 @@
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
-const { Tweet, User, Like } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
@@ -150,6 +150,27 @@ const tweetController = {
         return like.destroy()
       })
       .then(() => res.status(200).json({ success: true, message: 'Unliked successfully' }))
+      .catch(err => next(err))
+  },
+  getTweetReplies: (req, res, next) => {
+    const TweetId = Number(req.params.tweet_id)
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Reply.findAll({
+        where: { TweetId },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] }, // 先撈reply使用者本身的資料
+          { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['id', 'account'] }] } // 再撈tweet跟建立tweet的人的資料
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([tweet, replies]) => {
+        if (!tweet) throw new Error('tweet not found')
+        res.status(200).json(replies)
+      })
       .catch(err => next(err))
   }
 }
