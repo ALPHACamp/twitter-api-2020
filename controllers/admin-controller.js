@@ -1,8 +1,20 @@
-const id = require('faker/lib/locales/id_ID')
+// const id = require('faker/lib/locales/id_ID')
 const { User, Tweet, Like, sequelize } = require('../models')
-// const { getUser } = require('../_helpers')
+const { getUser } = require('../_helpers')
+
 
 const adminController = {
+	login: (req, res, next) => {
+		const adminData = getUser(req).toJSON()
+		delete adminData.password
+		try {
+			const token = jwt.sign(adminData, process.env.JWT_SECRET, { expiresIn: '30d' })
+			res.status(200).json({
+				token,
+				user: adminData
+			})
+		} catch (err) { next(err) }
+	},
 	getUsers: (req, res, next) => {
 		User.findAll({
 			nest: true,
