@@ -3,13 +3,13 @@ const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
 const bcrypt = require('bcryptjs')
 const { User } = require('../models')
-const {getUser} = require('../_helpers')
+// const {getUser} = require('../_helpers')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 require('dotenv').config()
 
 // set up Passport strategy
-passport.use('local',new LocalStrategy(
+passport.use('local', new LocalStrategy(
 	// customize user field
 	{
 		usernameField: 'account',
@@ -21,10 +21,10 @@ passport.use('local',new LocalStrategy(
 		console.log('===========流程三')
 		User.findOne({ where: { account } })
 			.then(user => {
-				if (!user) return cb(null, false, {message:'帳號或密碼輸入錯誤！'})
+				if (!user) return cb(null, false, { message: '帳號或密碼輸入錯誤！' })
 				bcrypt.compare(password, user.password)
 					.then(res => {
-						if (!res) return cb(null, false, {message:'帳號或密碼輸入錯誤！'})
+						if (!res) return cb(null, false, { message: '帳號或密碼輸入錯誤！' })
 						return cb(null, user)
 					})
 			})
@@ -36,10 +36,10 @@ const jwtOptions = {
 	secretOrKey: process.env.JWT_SECRET
 }
 
-passport.use('jwt',new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-	User.findByPk(jwtPayload.id,{raw:true})
-	  .then(user => {cb(null, user)})
-	  .catch(err => cb(err))
+passport.use('jwt', new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
+	User.findByPk(jwtPayload.id, { raw: true })
+		.then(user => { cb(null, user) })
+		.catch(err => cb(err))
 }))
 
 module.exports = passport
