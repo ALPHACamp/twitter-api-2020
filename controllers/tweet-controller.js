@@ -1,7 +1,5 @@
-// 照前端需求皆以success的布林值判斷res是否成功
-
 const sequelize = require('sequelize')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const { Tweet, User, Like } = require('../models')
 
 const tweetController = {
@@ -28,7 +26,7 @@ const tweetController = {
         const data = tweets.map(tweet => ({
           ...tweet
         }))
-        res.status(200).json({ success: true, data }) // 照前端需求統一以success的布林值判斷res是否成功
+        res.status(200).json(data)
       })
       .catch(err => next(err))
   },
@@ -56,12 +54,12 @@ const tweetController = {
             message: 'Tweet not found'
           })
         }
-        res.status(200).json({ success: true, tweet })
+        res.status(200).json(tweet)
       })
       .catch(err => next(err))
   },
   postTweet: (req, res, next) => {
-    const UserId = getUser(req)?.id
+    const UserId = helpers.getUser(req)?.id
     const { description } = req.body
     // 錯誤判斷
     // 空白內容
@@ -97,7 +95,7 @@ const tweetController = {
   },
   likeTweet: (req, res, next) => {
     const TweetId = Number(req.params.id)
-    const UserId = getUser(req)?.id
+    const UserId = helpers.getUser(req)?.id
     return Promise.all([
       Tweet.findByPk((TweetId), { raw: true }),
       Like.findOne({
@@ -130,7 +128,7 @@ const tweetController = {
   },
   unlikeTweet: (req, res, next) => {
     const TweetId = Number(req.params.id)
-    const UserId = getUser(req)?.id
+    const UserId = helpers.getUser(req)?.id
     return Like.findOne({
       where: {
         UserId,

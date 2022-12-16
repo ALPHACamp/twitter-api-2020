@@ -49,7 +49,7 @@ const adminController = {
       group: ['User.id']
     })
       .then(users => {
-        res.status(200).json({ success: true, users })
+        res.status(200).json(users)
       })
       .catch(err => next(err))
   }
