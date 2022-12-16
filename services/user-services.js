@@ -1,8 +1,10 @@
 const { User, Like, Tweet, Followship, Reply } = require('./../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const { Op } = require('sequelize')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
+
 const userServices = {
   loginUser: (req, cb) => {
     try {
@@ -28,6 +30,12 @@ const userServices = {
       .then(([userWithAccount, userWithEmail]) => {
         if (userWithAccount) throw new Error('Account already exists!')
         if (userWithEmail) throw new Error('Email already exists!')
+        return bcrypt.hash(req.body.password, 10)
+      })
+      .then(user => {
+        console.log(user)
+        if (user.account === account) throw new Error('Account already exists!')
+        if (user.email === email) throw new Error('Email already exists!')
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => User.create({
