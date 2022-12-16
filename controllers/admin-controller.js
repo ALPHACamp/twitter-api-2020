@@ -29,24 +29,18 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      const [users, tweetsLikedCounts] = await Promise.all([
-        User.findAll({
-          attributes: ['id', 'name', 'account', 'avatar', 'cover',
-            [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetsCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount']
-          ],
-          order: [[sequelize.literal('tweetsCount'), 'DESC']],
-          nest: true,
-          raw: true
-        }),
-        sequelize.query('SELECT `Tweets`.`UserId`, COUNT(*) AS `tweetsLikedCount` FROM `Tweets` JOIN `Likes` on `Likes`.`TweetId` = `Tweets`.`id` GROUP BY `Tweets`.`UserId`;', { type: sequelize.QueryTypes.SELECT })
-      ])
-      const data = users.map(user => ({
-        ...user,
-        tweetsLikedCount: tweetsLikedCounts.find(tweetsLiked => tweetsLiked.UserId === user.id)?.tweetsLikedCount
-      }))
-      return res.status(200).json(data)
+      const users = await User.findAll({
+        attributes: ['id', 'name', 'account', 'avatar', 'cover',
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetsCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets JOIN Likes on Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'), 'tweetsLikedCount']
+        ],
+        order: [[sequelize.literal('tweetsCount'), 'DESC']],
+        nest: true,
+        raw: true
+      })
+      return res.status(200).json(users)
     } catch (err) { next(err) }
   },
   deleteTweet: async (req, res, next) => {
