@@ -8,14 +8,14 @@ function authenticated (req, res, next) {
       return next(err)
     }
     if (!user) {
-      return res.status(401).json({ success: false, error: 'unauthorized' })
+      return res.status(401).json({ status: 'error', error: 'unauthorized' })
     }
     req.user = user
     return next()
   })(req, res, next)
 }
 function authenticatedSuccess (req, res, next) {
-  res.status(200).json({ success: true, error: null })
+  res.status(200).json({ status: 'success', message: 'Token valid!' })
 }
 
 function authenticatedAdmin (req, res, next) {
