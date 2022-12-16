@@ -62,7 +62,7 @@ const userController = {
       const currentUser = getUser(req)
       const users = await User.findAll({
         attributes: ['id', 'account', 'name', 'avatar'],
-        include: [{ model: User, as: 'Followers' }]
+        include: [{ model: User, as: 'Followers', attributes: ['id'] }]
       })
       const result = users
         .map(user => ({
