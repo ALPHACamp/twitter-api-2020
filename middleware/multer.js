@@ -1,5 +1,4 @@
 const multer = require('multer')
-// const upload = multer({ dest: 'temp/' })
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

@@ -1,8 +1,6 @@
 const jwt = require('jsonwebtoken')
-const { User, Followship } = require('../models')
+const { User } = require('../models')
 const bcrypt = require('bcryptjs')
-const { uploadFile } = require('../helpers/file-helpers')
-const upload = require('../middleware/multer')
 
 const userServices = {
   signUp: (req, cb) => {
@@ -31,20 +29,6 @@ const userServices = {
       .then((newUser) => cb(null, { success: 'true' }))
       .catch((err) => cb(err))
   }
-  // getUser: (req, cb) => {
-  //   User.findByPk(req.params.id, {
-  //     include: [{ model: User, as: 'Followings' }]
-  //   })
-  //     .then((user) => {
-  //       if (!user) throw new Error('使用者不存在 !')
-  //       return cb(null, {
-  //         id: user.id,
-  //         Followings: user.Followings,
-  //         role: user.role
-  //       })
-  //     })
-  //     .catch((err) => cb(err))
-  // }
 }
 
 const userController = {
@@ -79,13 +63,11 @@ const userController = {
       .catch((err) => next(err))
   },
   getUser: (req, res, next) => {
-    // userServices.getUser(req, (err, data) => (err ? next(err) : res.json(data)))
-    console.log('id:', req.params.id)
-    User.findByPk(req.params.id, {
+    const { id } = req.params
+    User.findByPk(id, {
       include: [{ model: User, as: 'Followings' }]
     })
       .then((user) => {
-        console.log('user:', user)
         if (!user) throw new Error('使用者不存在 !')
         return res.status(200).json({
           id: user.id,
@@ -115,11 +97,7 @@ const userController = {
     return Promise.all([User.findByPk(id), avatarFile, coverFile])
       .then(([user, avatarFile, coverFile]) => {
         if (!user) throw new Error('使用者不存在!')
-        // console.log('user:', user)
-        // console.log('user avatar:', user.avatar)
-        // console.log('user cover:', user.cover)
-        // console.log('avatarFile:', avatarPath)
-        // console.log('coverFile:', coverPath)
+
         return user.update({
           account,
           name,
