@@ -30,6 +30,6 @@ router.delete('/followships/:followingId', authenticated, followshipController.r
 
 
 router.get('/admin/users', authenticatedAdmin, adminController.getUsers)
-router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
+router.delete('/admin/tweets/:tweetId', authenticatedAdmin, adminController.deleteTweet)
 
 module.exports = router
