@@ -49,8 +49,7 @@ const userController = {
       })
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
       user = user.toJSON()
-      const isFollowed = getUser(req).Followings.some(f => f.id === user.id)
-      user.isFollowed = isFollowed
+      user.isFollowed = getUser(req).Followings ? getUser(req).Followings.some(f => f.id === user.id) : null
       return res.json(user)
     } catch (err) {
       next(err)
@@ -146,8 +145,8 @@ const userController = {
 
       if (!name) return res.status(400).json({ status: 'error', message: 'name是必填！' })
 
-      const avatar = files.avatar ? files.avatar[0] : null
-      const cover = files.cover ? files.cover[0] : null
+      const avatar = files?.avatar ? files.avatar[0] : null
+      const cover = files?.cover ? files.cover[0] : null
 
       // 確定使用者存在
       const user = await User.findByPk(id)
@@ -161,10 +160,10 @@ const userController = {
       const coverPath = await imgurFileHandler(cover)
 
       const updatedUser = await user.update({
-        name: name,
+        name,
         avatar: avatarPath,
         cover: coverPath,
-        introduction: introduction
+        introduction
       })
 
       return res.status(200).json({ status: 'success', data: updatedUser })
