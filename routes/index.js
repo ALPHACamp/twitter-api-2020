@@ -30,7 +30,8 @@ router.get('/tweets', tweetController.getTweets)
 
 router.get('/', (req, res) => res.send('Hello World!'))
 
-router.use('/admin', authenticated, authenticatedAdmin, admin)
+// router.use('/admin', authenticated, authenticatedAdmin, admin)
+router.use('/admin', admin)
 router.use('/', generalErrorHandler)
 
 module.exports = router

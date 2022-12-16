@@ -3,6 +3,7 @@ const { User, Tweet, Like, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const adminController = {
+	// login 還沒有成功
 	login: (req, res, next) => {
 		const adminData = getUser(req).toJSON()
 		delete adminData.password
@@ -14,14 +15,22 @@ const adminController = {
 			})
 		} catch (err) { next(err) }
 	},
-	getUsers: (req, res, next) => {
-		User.findAll({
-			nest: true,
-			raw: true,
-			attributes: ['id', 'account', 'email', 'name', 'avatar', 'introduction', 'cover', 'role', 'createdAt', 'updatedAt']
-		})
-			.then(users => res.status(200).json(users))
-			.catch(err => next(err))
+	getUsers: async (req, res, next) => {
+		try {
+			const usersData = await User.findAll({
+				nest: true,
+				raw: true,
+				attributes: [
+					'id', 'account', 'email', 'name', 'avatar', 'introduction', 'cover', 'role', 'createdAt', 'updatedAt',
+					[sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)'), 'replyCount'],
+					[sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = User.id)'), 'likeCount'],
+					[sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.follower_id = User.id)'), 'followerCount'],
+					[sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = User.id)'), 'followingCount']
+				],
+				order: [['createdAt', 'DESC']],
+			})
+			return res.status(200).json(usersData)
+		} catch (err) { next(err) }
 	},
 	getTweets: (req, res, next) => {
 		// if (!getUser) {
