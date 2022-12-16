@@ -8,8 +8,9 @@ const tweet = require('./modules/tweet')
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
 const userController = require('../controllers/user-controller')
-
+const adminController = require('../controllers/admin-controller')
 // admin
+router.post('/api/admin/users/login', passport.authenticate('local', { session: false }), adminController.adminLogin)
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 
 // user management
