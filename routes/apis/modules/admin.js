@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-// const passport = require('passport')
+const passport = require('passport')
 
 const { authenticated, authenticatedAdmin } = require('../../../middleware/api-auth')
 const adminController = require('../../../controllers/admin-controller')

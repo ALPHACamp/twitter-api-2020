@@ -105,6 +105,17 @@ const tweetController = {
           .catch(err => next(err))
       })
       .catch(err => next(err))
+  },
+  replyTweet: (req, res, next) => {
+    return Reply.create({
+      comment: req.body.comment,
+      UserId: helpers.getUser(req).id,
+      TweetId: req.params.tweet_id
+    })
+      .then(newReply => {
+        res.json( newReply )
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = tweetController
