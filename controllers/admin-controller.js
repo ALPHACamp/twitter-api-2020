@@ -1,9 +1,28 @@
+const jwt = require('jsonwebtoken')
 const { User } = require('../models')
-const { getOffset } = require('../_helpers')
+const { getOffset, getUser } = require('../_helpers')
 
 const superUser = { name: 'root', email: 'root@example.com' }
 
 const adminController = {
+  adminLogin: async (req, res, next) => {
+    try {
+      // token(效期30天)
+      const userData = getUser(req).toJSON()
+      if (userData.role !== 'admin') return res.json({ status: 'error', message: '帳號不存在！' })
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      return res.status(200).json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
   getUsers: async (req, res, next) => {
     try {
       const DEFAULT_LIMIT = 10

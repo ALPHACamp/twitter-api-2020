@@ -7,7 +7,7 @@ const methodOverride = require('method-override')
 const routes = require('./routes')
 
 const app = express()
-const port = 3000
+const PORT = process.env.PORT || 3000
 
 // use method-override
 app.use(methodOverride('_method'))
@@ -18,6 +18,6 @@ app.use(express.json())
 
 app.use(routes)
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
 
 module.exports = app
