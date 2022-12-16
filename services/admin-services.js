@@ -19,7 +19,7 @@ const adminServices = {
         cb(null, data)
       })
       .catch(err => cb(err))
-  },
+  }, //軟刪除?
   deleteTweet: (req, cb) => {
     const id = req.params.tweet_id
     return Tweet.findByPk(id)
