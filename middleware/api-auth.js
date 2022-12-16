@@ -15,7 +15,7 @@ const authenticated = (req, res, next) => {
   })(req, res, next)
 }
 
-// admin權限驗證
+// admin 權限驗證
 const authenticatedAdmin = (req, res, next) => {
   if (getUser(req)?.role === 'admin') return next()
   return res.status(403).json({ status: 'error', message: '權限不足' })
@@ -25,14 +25,13 @@ const authenticatedAdmin = (req, res, next) => {
 const authenticatedUser = (req, res, next) => {
   const { account } = req.body
   const id = req.params.id
-
   if (account !== null) {
     User.findAll({ where: { account } }).then(user => {
       user.forEach(item => {
         if (!item || item.role === 'admin') {
           return res
             .status(403)
-            .json({ success: 'false', message: 'permission denied' })
+            .json({ success: 'false', message: '帳號不存在 !' })
         }
       })
       return next()
@@ -43,7 +42,7 @@ const authenticatedUser = (req, res, next) => {
       if (!user || user.role === 'admin') {
         return res
           .status(403)
-          .json({ success: 'false', message: 'permission denied' })
+          .json({ success: 'false', message: '帳號不存在 !' })
       }
       return next()
     })
