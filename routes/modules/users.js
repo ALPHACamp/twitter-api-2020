@@ -10,11 +10,15 @@ const upload = require('../../middleware/multer')
 // 登入不需要驗證登入狀態
 router.post('/signin', userController.signIn)
 
+// router.get('/:id', authenticated, authenticatedUser, userController.getUser)
+
 router.get('/:id', authenticated, authenticatedUser, userController.getUser)
 
 // 編輯個人頁面
 router.put(
   '/:id',
+  authenticated,
+  authenticatedUser,
   upload.fields([
     { name: 'avatar', maxCount: 1 },
     { name: 'cover', maxCount: 1 }

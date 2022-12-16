@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const { uploadFile } = require('../helpers/file-helpers')
 const upload = require('../middleware/multer')
@@ -30,15 +30,21 @@ const userServices = {
       )
       .then((newUser) => cb(null, { success: 'true' }))
       .catch((err) => cb(err))
-  },
-  getUser: (req, cb) => {
-    User.findByPk(req.params.id)
-      .then((user) => {
-        if (!user) throw new Error('使用者不存在 !')
-        return cb(null, { success: 'true', data: user })
-      })
-      .catch((err) => cb(err))
   }
+  // getUser: (req, cb) => {
+  //   User.findByPk(req.params.id, {
+  //     include: [{ model: User, as: 'Followings' }]
+  //   })
+  //     .then((user) => {
+  //       if (!user) throw new Error('使用者不存在 !')
+  //       return cb(null, {
+  //         id: user.id,
+  //         Followings: user.Followings,
+  //         role: user.role
+  //       })
+  //     })
+  //     .catch((err) => cb(err))
+  // }
 }
 
 const userController = {
@@ -73,7 +79,21 @@ const userController = {
       .catch((err) => next(err))
   },
   getUser: (req, res, next) => {
-    userServices.getUser(req, (err, data) => (err ? next(err) : res.json(data)))
+    // userServices.getUser(req, (err, data) => (err ? next(err) : res.json(data)))
+    console.log('id:', req.params.id)
+    User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followings' }]
+    })
+      .then((user) => {
+        console.log('user:', user)
+        if (!user) throw new Error('使用者不存在 !')
+        return res.status(200).json({
+          id: user.id,
+          Followings: user.Followings,
+          role: user.role
+        })
+      })
+      .catch((err) => next(err))
   },
   putUser: (req, res, next) => {
     const { account, name, email, introduction } = req.body
@@ -91,10 +111,6 @@ const userController = {
     if (!req.files.cover) {
       coverFile = [{ path: '' }]
     }
-
-    console.log('req.files: ', req.files)
-
-    console.log('req.files.avatar: ', avatarFile)
 
     return Promise.all([User.findByPk(id), avatarFile, coverFile])
       .then(([user, avatarFile, coverFile]) => {
