@@ -39,7 +39,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const { id } = req.params
-      const user = await User.findByPk(id, {
+      let user = await User.findByPk(id, {
         include: [
           Reply, Tweet, Like,
           { model: User, as: 'Followers' },
@@ -47,7 +47,10 @@ const userController = {
         ],
         nest: true
       })
-      if (!user) return res.status(404).json({ status: 'error', message: "User doesn't exist!" })
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+      user = user.toJSON()
+      const isFollowed = getUser(req).Followings.some(f => f.id === user.id)
+      user.isFollowed = isFollowed
       return res.json(user)
     } catch (err) {
       next(err)
