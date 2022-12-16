@@ -19,6 +19,7 @@ router.put('/users/:id', authenticated, userController.putUser)
 router.post('/users', userController.postUsers)
 
 router.get('/users/:id/followings', authenticated, userController.getUserFollowing)
+router.get('/users/:id/followers', authenticated, userController.getUserFollower)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, userController.putUser)
 

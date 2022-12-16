@@ -114,6 +114,27 @@ const userController = {
 				res.status(200).json(followingList)
 			})
 			.catch(err => { console.log(err) })
+	},
+	getUserFollower: (req, res, next) => {
+		Followship.findAll({
+			where: { followingId: req.params.id },
+			attributes: {
+				include: [
+					[sequelize.literal('(SELECT id FROM Users WHERE Users.id = Followship.follower_id)'), 'id'],
+					[sequelize.literal('(SELECT account FROM Users WHERE Users.id = Followship.follower_id)'), 'account'],
+					[sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.follower_id)'), 'name'],
+					[sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.follower_id)'), 'introduction'],
+					[sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.follower_id)'), 'avatar'],
+					//   [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'Following']
+				]
+			},
+			order: [['createdAt', 'DESC']],
+			raw: true
+		})
+			.then((followingList) => {
+				res.status(200).json(followingList)
+			})
+			.catch(err => { console.log(err) })
 	}
 }
 
