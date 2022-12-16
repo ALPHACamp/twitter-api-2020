@@ -20,7 +20,10 @@ const authenticatedAdmin = (req, res, next) => {
 
 // user 權限驗證
 const authenticatedUser = (req, res, next) => {
-  if (helpers.getUser(req)?.role === 'user') return next()
+  // console.log('req:', helpers.getUser(req))
+  if (helpers.getUser(req)?.role === 'user') {
+    return next()
+  }
   return res.status(403).json({ success: false, message: 'permissions denied' })
 }
 
