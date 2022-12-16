@@ -24,6 +24,7 @@ const userServices = {
       User.findOne({ where: { email } })
     ])
       .then(([userFindByAccount, userFindByEmail]) => {
+        // account email註冊，後端驗證唯一性
         assert(!userFindByAccount, 'Account 已重複註冊!')
         assert(!userFindByEmail, 'Email 已重複註冊！')
         // input驗證OK，bcrypt密碼
@@ -40,6 +41,7 @@ const userServices = {
       })
       .then(createdUser => {
         createdUser = createdUser.toJSON()
+        // 刪除機敏資訊
         delete createdUser.password
         cb(null, { createdUser })
       })
@@ -47,8 +49,11 @@ const userServices = {
   },
   signIn: (req, cb) => {
     try {
-      const userData = req.user.toJSON()
+      // 通過passport local驗證後的user
+      const userData = req.user
+      // 刪除機敏資訊
       delete userData.password
+      // 發送註冊token
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, { token, user: userData })
     } catch (err) {

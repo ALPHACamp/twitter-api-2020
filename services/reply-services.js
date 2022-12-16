@@ -19,7 +19,6 @@ const replyServices = {
     })
 
       .then(replies => {
-
         const data = replies.rows
         return cb(null,
           data,
@@ -29,7 +28,6 @@ const replyServices = {
         )
       })
       .catch(err => cb(err))
-
   },
   postReply: (req, cb) => {
     const TweetId = req.params.tweet_id
@@ -45,7 +43,6 @@ const replyServices = {
         if (!user) throw new Error("User didn't exist!")
         if (!tweet) throw new Error("Tweet didn't exist!")
 
-     
         return Reply.create({
           comment,
           TweetId,

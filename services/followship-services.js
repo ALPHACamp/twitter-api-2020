@@ -16,9 +16,8 @@ const followshipServices = {
       })
     ])
       .then(([user, followship]) => {
-
         assert(user, "User didn't exist!")
-        assert(!followship, "You are already following this user!")
+        assert(!followship, 'You are already following this user!')
         return Followship.create({
           followerId,
           followingId: req.body.id
