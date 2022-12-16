@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
+// const helpers = require('../_helpers')
 const userController = {
   signIn: (req, res, next) => {
     try {
@@ -64,6 +65,30 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUser: (req, res, next) => {
+    const id = Number(req.params.id)
+    return User.findByPk(id, {
+      // include: [
+      // Tweet,
+      //  { model: User, as: 'Followers' },
+      //  { model: User, as: 'Followings' }
+      // ],
+      attributes: {
+        exclude: ['password', 'createdAt', 'updatedAt'],
+
+        include: [[sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount']]
+      }
+    })
+      .then(user => {
+        if (!user) throw new Error("User didn't exist!")
+        const { ...userData } = {
+          ...user.toJSON()
+        }
+        return res.json({ ...userData })
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = userController
