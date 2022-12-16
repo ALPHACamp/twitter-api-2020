@@ -37,7 +37,7 @@ passport.deserializeUser((id, cb) => {
       { model: Like }
     ]
   })
-    .then(user => cb(null, user.toJSON()))
+    .then(user => cb(null, user))
     .catch(err => cb(err))
 })
 

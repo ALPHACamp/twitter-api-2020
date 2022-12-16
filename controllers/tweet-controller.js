@@ -1,11 +1,10 @@
-// 照前端需求皆以success的布林值判斷res是否成功
-
 const sequelize = require('sequelize')
-const { getUser } = require('../_helpers')
-const { Tweet, User, Like } = require('../models')
+const helpers = require('../_helpers')
+const { Tweet, User, Like, Reply } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
+    const UserId = helpers.getUser(req)?.id
     return Promise.all([
       Tweet.findAll({
         attributes: [ // 指定回傳model欄位
@@ -26,14 +25,16 @@ const tweetController = {
     ])
       .then(([tweets, likes]) => {
         const data = tweets.map(tweet => ({
-          ...tweet
+          ...tweet,
+          isLiked: likes.some(like => like.TweetId === tweet.id && UserId === like.UserId)
         }))
-        res.status(200).json({ success: true, data }) // 照前端需求統一以success的布林值判斷res是否成功
+        res.status(200).json(data)
       })
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
     const { id } = req.params
+    const UserId = helpers.getUser(req)?.id
     return Promise.all([
       Tweet.findByPk(id, {
         attributes: ['id', 'description', 'createdAt',
@@ -45,7 +46,8 @@ const tweetController = {
           ]
         ],
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
-        nest: true
+        nest: true,
+        raw: true
       }),
       Like.findAll({ where: { id }, raw: true })
     ])
@@ -56,12 +58,13 @@ const tweetController = {
             message: 'Tweet not found'
           })
         }
-        res.status(200).json({ success: true, tweet })
+        tweet.isLiked = likes.some(like => like.TweetId === tweet.id && UserId === like.UserId)
+        res.status(200).json(tweet)
       })
       .catch(err => next(err))
   },
   postTweet: (req, res, next) => {
-    const UserId = getUser(req)?.id
+    const UserId = helpers.getUser(req)?.id
     const { description } = req.body
     // 錯誤判斷
     // 空白內容
@@ -97,7 +100,7 @@ const tweetController = {
   },
   likeTweet: (req, res, next) => {
     const TweetId = Number(req.params.id)
-    const UserId = getUser(req)?.id
+    const UserId = helpers.getUser(req)?.id
     return Promise.all([
       Tweet.findByPk((TweetId), { raw: true }),
       Like.findOne({
@@ -130,7 +133,7 @@ const tweetController = {
   },
   unlikeTweet: (req, res, next) => {
     const TweetId = Number(req.params.id)
-    const UserId = getUser(req)?.id
+    const UserId = helpers.getUser(req)?.id
     return Like.findOne({
       where: {
         UserId,
@@ -147,6 +150,46 @@ const tweetController = {
         return like.destroy()
       })
       .then(() => res.status(200).json({ success: true, message: 'Unliked successfully' }))
+      .catch(err => next(err))
+  },
+  getTweetReplies: (req, res, next) => {
+    const TweetId = Number(req.params.tweet_id)
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Reply.findAll({
+        where: { TweetId },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] }, // 先撈reply使用者本身的資料
+          { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['id', 'account'] }] } // 再撈tweet跟建立tweet的人的資料
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([tweet, replies]) => {
+        if (!tweet) throw new Error('tweet not found')
+        res.status(200).json(replies)
+      })
+      .catch(err => next(err))
+  },
+  replyTweet: (req, res, next) => {
+    const UserId = Number(helpers.getUser(req)?.id)
+    const TweetId = Number(req.params.tweet_id)
+    const { comment } = req.body
+    if (!comment) throw new Error('comment is required')
+    if (!TweetId) throw new Error('tweet not found')
+    // 先找到tweet的資料，再新增留言
+    return Tweet.findByPk(TweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error('tweet not found')
+        return Reply.create({
+          comment,
+          UserId,
+          TweetId
+        })
+      })
+      .then(reply => res.status(200).json({ success: true, message: 'Reply successfully' }))
       .catch(err => next(err))
   }
 }

@@ -49,8 +49,18 @@ const adminController = {
       group: ['User.id']
     })
       .then(users => {
-        res.status(200).json({ success: true, users })
+        res.status(200).json(users)
       })
+      .catch(err => next(err))
+  },
+  deleteTweet: (req, res, next) => {
+    const { id } = req.params
+    return Tweet.findByPk(id)
+      .then(tweet => {
+        if (!tweet) throw new Error('tweet not found')
+        return tweet.destroy()
+      })
+      .then(() => res.status(200).json({ success: true, mseeage: 'tweet has been deleted' }))
       .catch(err => next(err))
   }
 
