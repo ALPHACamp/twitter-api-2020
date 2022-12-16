@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const passport = require('../config/passport')
-const { authenticated, authenticatedAdmin } = require('../middleware/auth')
+const { authenticated} = require('../middleware/auth')
 
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
@@ -32,7 +32,6 @@ router.post('/tweets', authenticated, tweetController.postTweets)
 
 router.get('/', (req, res) => res.send('Hello World!'))
 
-// router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 router.use('/', generalErrorHandler)
 

@@ -10,7 +10,7 @@ const authenticated = (req, res, next) => {
 
 const authenticatedAdmin = (req, res, next) => {
 	passport.authenticate('jwt', { session: false }, (err, user) => {
-		if (err || !user || user.dataValues.role !== 'admin') return res.status(401).json({ status: 'error', message: 'permission denied' })
+		if (err || !user || user.role !== 'admin') return res.status(401).json({ status: 'error', message: 'permission denied' })
 		req.user = user
 		next()
 	})(req, res, next)
