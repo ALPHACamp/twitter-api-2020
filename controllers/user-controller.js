@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const db = require('../models')
 const helpers = require('../_helpers')
 
-const { User } = db
+const { User, Followship } = db
 
 // const cb = (err, data) => err ? next(err) : res.json({ status: 'success', data })
 
@@ -54,6 +54,33 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUser: (req, res, next) => {
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Followship.findOne({
+        where: {
+          followerId: helpers.getUser(req), // 6 測試用DB裡面的6和下面的4即可得到true
+          followingId: req.params.id // 4
+        }
+      }),
+      Followship.findAndCountAll({ where: { followerId: helpers.getUser(req) } }),
+      Followship.findAndCountAll({ where: { followingId: helpers.getUser(req) } })
+    ])
+      .then(([user, followship, followerCount, followingCount]) => {
+        user = user.toJSON()
+        user.isSelf = Number(req.params.id) === Number(helpers.getUser(req).id)
+        user.isfollow = followship !== null
+        user.followingAmount = followerCount.count
+        user.followerAmount = followingCount.count
+        res.json({
+          status: 'success',
+          data: {
+            user
+          }
+        })
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = userController
