@@ -7,7 +7,7 @@ const likeServices = {
   addLike: (req, cb) => {
     // 使用helpers.getUser(req)拿到req.user for test檔模擬authenticated後的user format
     const UserId = helpers.getUser(req).id
-    const TweetId = req.params.id
+    const TweetId = req.params.tweet_id
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({ where: { TweetId, UserId } })
@@ -27,7 +27,7 @@ const likeServices = {
   // 收回like
   unLike: (req, cb) => {
     const UserId = helpers.getUser(req).id
-    const TweetId = req.params.id
+    const TweetId = req.params.tweet_id
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({ where: { TweetId, UserId } })
