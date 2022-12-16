@@ -41,7 +41,6 @@ const jwtStrategy = new JWTStrategy(jwtOptions, async (jwtPayload, next) => {
         { model: Tweet, as: 'LikedTweets' }
       ]
     })
-    if (!user) return next(null, false)
     return next(null, user)
   } catch (err) {
     next(null, err)
