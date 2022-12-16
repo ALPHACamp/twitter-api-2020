@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
-
+const cors = require('cors')
 const express = require('express')
 const path = require('path')
 const flash = require('connect-flash')
@@ -16,6 +16,7 @@ const port = process.env.PORT || 3000
 const SESSION_SECRET = process.env.SESSION_SECRET
 
 // setting
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(
