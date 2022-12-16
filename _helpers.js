@@ -5,7 +5,6 @@ function getUser (req) {
 const ensureAuthenticated = req => {
 	return req.isAuthenticated()
 }
-  
 
 module.exports = {
 	getUser,
