@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const db = require('../models')
 const helpers = require('../_helpers')
 
-const { User, Followship } = db
+const { User, Followship, Tweet, Reply, Like } = db
 
 // const cb = (err, data) => err ? next(err) : res.json({ status: 'success', data })
 
@@ -77,6 +77,41 @@ const userController = {
           status: 'success',
           data: {
             user
+          }
+        })
+      })
+      .catch(err => next(err))
+  },
+  getUserTweets: (req, res, next) => {
+    return Tweet.findAll({
+      // raw: true,
+      // nest: true,
+      where: {
+        UserId: req.params.id
+      },
+      include: [Reply, Like, User],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => {
+        tweets = tweets.map(tweet => {
+          return {
+            id: tweet.id,
+            UserId: tweet.UserId,
+            description: tweet.description,
+            userAccount: tweet.User.account,
+            userName: tweet.User.name,
+            avatar: tweet.User.avatar,
+            createdAt: tweet.createdAt,
+            updatedAt: tweet.updatedAt,
+            likedAmount: tweet.Likes.length,
+            repliedAmount: tweet.Replies.length,
+            isLike: tweet.Likes.map(t => t.id).includes(helpers.getUser(req).id)
+          }
+        })
+        res.json({
+          status: 'success',
+          data: {
+            tweets
           }
         })
       })
