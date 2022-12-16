@@ -53,6 +53,17 @@ const adminController = {
         res.json(data)
       })
       .catch(err => next(err))
+  },
+  deleteTweet: (req, res, next) => {
+    return Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) throw new Error("tweet didn't exist!")
+        return tweet.destroy()
+      })
+      .then(deletedTweet => {
+        res.json(deletedTweet)
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = adminController

@@ -4,10 +4,9 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express')
 const helpers = require('./_helpers')
-// const routes = require('./routes')
 const flash = require('connect-flash')
 const session = require('express-session')
-// const methodOverride = require('method-override')// 不確定不需要
+const methodOverride = require('method-override')// 不確定不需要
 const passport = require('./config/passport')
 // const { getUser } = require('./helpers/auth-helpers')
 const { apis } = require('./routes')
