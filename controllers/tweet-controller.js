@@ -113,7 +113,33 @@ const tweetController = {
       TweetId: req.params.tweet_id
     })
       .then(newReply => {
-        res.json( newReply )
+        res.json(newReply)
+      })
+      .catch(err => next(err))
+  },
+  getReplies: (req, res, next) => {
+    Reply.findAll({
+      where: { TweetId: req.params.tweet_id },
+      include: User,
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => {
+        return replies.map(reply => {
+          const { id, account, name, avatar } = reply.User
+          const userData = {
+            id,
+            account,
+            name,
+            avatar
+          }
+          return {
+            ...reply.toJSON(),
+            User: userData
+          }
+        })
+      })
+      .then(replies => {
+        res.json(replies)
       })
       .catch(err => next(err))
   }
