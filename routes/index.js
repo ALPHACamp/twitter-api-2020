@@ -5,11 +5,9 @@ const passport = require('../config/passport')
 const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
 const userController = require('../controllers/user-controller')
-<<<<<<< HEAD
 const tweetController = require('../controllers/tweet-controller')
-=======
+
 const admin = require('./modules/admin')
->>>>>>> master
 
 const { generalErrorHandler } = require('../middleware/error-handler')
 
@@ -20,12 +18,10 @@ router.post('/users', userController.postUsers)
 
 router.get('/auth', authenticated, (req, res) => res.status(200).json({ status: '200', message: 'JWT success' }))
 
-<<<<<<< HEAD
 router.post('/users', authenticated, userController.postUsers)
-// router.get('/tweets', authenticated, tweetController.getTweets)
+router.get('/tweets', authenticated, tweetController.getTweets)
 router.get('/tweets', tweetController.getTweets)
-=======
->>>>>>> master
+
 router.get('/', (req, res) => res.send('Hello World!'))
 
 router.use('/admin', admin)
