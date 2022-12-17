@@ -308,7 +308,7 @@ const userController = {
   addFollowing: async (req, res, next) => {
     try {
       const followerId = helpers.getUser(req).id
-      const followingId = req.body.id
+      const followingId = Number(req.body.id)
       // Follow self
       if (followerId === followingId) {
         return res.status(422).json({ status: 'error', message: 'You cannot follow yourself.' })
