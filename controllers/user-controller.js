@@ -48,7 +48,8 @@ const userController = {
       .catch(err => next(err))
   },
   getCurrentUser: (req, res, next) => {
-    return User.findByPk(helpers.getUser(req).id, {
+    const currentUser = helpers.getUser(req)
+    return User.findByPk(currentUser.id, {
       attributes: {
         exclude: ['password'],
         include: [
@@ -81,7 +82,8 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  getTweets: (req, res, next) => {
+  getUserTweets: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
     return Tweet.findAll({
       where: { UserId: req.params.id },
       include: [
@@ -90,13 +92,23 @@ const userController = {
           attributes: {
             exclude: ['password']
           }
-        }]
+        }],
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id )'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id )'), 'likeCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM likes WHERE likes.UserId = ${currentUser.id} AND likes.TweetId = tweet.id )`), 'isLiked']
+        ]
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
     })
       .then(tweets => {
         return tweets
           .map(tweet => ({
-            ...tweet.dataValues,
-            relativeTime: dateFormat(tweet.dataValues.createdAt).fromNow()
+            ...tweet,
+            relativeTime: dateFormat(tweet.createdAt).fromNow()
           }))
       })
       .then(tweets => {
@@ -105,7 +117,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  getRepliedTweets: (req, res, next) => {
+  getUserReplies: (req, res, next) => {
     return Reply.findAll({
       where: { UserId: req.params.id },
       include: [
