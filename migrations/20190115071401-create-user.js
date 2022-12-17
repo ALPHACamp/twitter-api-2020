@@ -22,6 +22,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       avatar: {
+        defaultValue: 'https://imgur.com/HD4yT2V',
         type: Sequelize.STRING
       },
       cover: {
