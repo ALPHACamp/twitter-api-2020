@@ -161,6 +161,40 @@ const userController = {
         res.json(replies)
       })
       .catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+    return Like.findAll({
+      where: {
+        UserId: req.params.id
+      },
+      include: [
+        { model: Tweet, include: Reply },
+        User
+      ]
+    })
+      .then(likes => {
+        const tweets = likes.map(like => {
+          const { id, name, account, avatar } = like.User
+          const tweet = {
+            TweetId: like.Tweet.id,
+            ...like.Tweet.toJSON(),
+            User: {
+              id,
+              account,
+              name,
+              avatar
+            },
+            likedAmount: like.length,
+            repliedAmount: like.Tweet.Replies.length,
+            isLike: true
+          }
+          delete tweet.Replies
+          return tweet
+        })
+        tweets.sort((a, b) => b.createdAt - a.createdAt)
+        res.json(tweets)
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = userController

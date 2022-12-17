@@ -11,7 +11,6 @@ const tweetController = {
         res.json(tweets)
       })
       .catch(err => {
-        console.log(err)
         next(err)
       })
   },
