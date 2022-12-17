@@ -57,7 +57,7 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
-      const currentUserId = getUser(req)
+      const currentUserId = getUser(req).id
       const tweet = await Tweet.findByPk(req.params.tweet_id, {
         raw: true,
         nest: true,

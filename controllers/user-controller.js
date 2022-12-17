@@ -1,11 +1,14 @@
 const bcrypt = require('bcryptjs')
 const { User, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
-// const helpers = require('../_helpers')
+const helpers = require('../_helpers')
 const userController = {
   signIn: (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
+      const userData = helpers.getUser(req).toJSON()
+      if (userData.role !== 'user') {
+        throw new Error('帳號不存在')
+      }
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
@@ -76,6 +79,7 @@ const userController = {
       //  { model: User, as: 'Followers' },
       //  { model: User, as: 'Followings' }
       // ],
+      where: { id, role: 'user' },
       attributes: {
         exclude: ['password', 'createdAt', 'updatedAt'],
         include: [
@@ -86,6 +90,7 @@ const userController = {
     })
       .then(user => {
         if (!user) throw new Error("User didn't exist!")
+        if (user.role === 'admin') throw new Error('帳號不存在！')
         const { ...userData } = {
           ...user.toJSON()
         }
