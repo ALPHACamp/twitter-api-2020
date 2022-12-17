@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const assert = require('assert')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const userServices = {
   // 使用者註冊
@@ -62,7 +62,7 @@ const userServices = {
   },
   getUser: (req, cb) => {
     return User.findByPk(req.params.user_id)
-      .then((user) => {
+      .then(user => {
         if (!user) throw new Error("User didn't exist!")
         const userData = user.toJSON()
         delete userData.password
@@ -80,13 +80,13 @@ const userServices = {
       raw: true
 
     })
-      .then((tweetsOfUser) => {
-        if (!tweetsOfUser) throw new Error("此用戶沒有發過推文!")
+      .then(tweetsOfUser => {
+        if (!tweetsOfUser) throw new Error('此用戶沒有發過推文!')
         cb(null, tweetsOfUser)
-
       })
       .catch(err => cb(err))
-  }, getRepliesOfTweet: (req, cb) => {
+  },
+  getRepliesOfTweet: (req, cb) => {
     const UserId = req.params.user_id
     return Reply.findAll({
       where: {
@@ -100,12 +100,62 @@ const userServices = {
       nest: true
 
     })
-      .then((repliesOfTweet) => {
-        if (!repliesOfTweet) throw new Error("此用戶沒有發過推文回覆!")
+      .then(repliesOfTweet => {
+        if (!repliesOfTweet) throw new Error('此用戶沒有發過推文回覆!')
         cb(null, repliesOfTweet)
       })
       .catch(err => cb(err))
-  }
+  },
+  getLikesOfUser: (req, cb) => {
+    const UserId = req.params.user_id
+    return Like.findAll({
+      where: {
+        UserId
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
 
+    })
+      .then(likes => {
+        assert(likes, 'Unexpected operation of database.')
+        cb(null, likes)
+      })
+      .catch(err => cb(err))
+  },
+  getFollowingsOfUser: (req, cb) => {
+    const followerId = req.params.user_id
+    return Followship.findAll({
+      where: {
+        followerId
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+
+    })
+      .then(followings => {
+        assert(followings, 'Unexpected operation of database.')
+        cb(null, followings)
+      })
+      .catch(err => cb(err))
+  },
+  getFollowersOfUser: (req, cb) => {
+    const followingId = req.params.user_id
+    return Followship.findAll({
+      where: {
+        followingId
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+
+    })
+      .then(followers => {
+        assert(followers, 'Unexpected operation of database.')
+        cb(null, followers)
+      })
+      .catch(err => cb(err))
+  }
 }
 module.exports = userServices

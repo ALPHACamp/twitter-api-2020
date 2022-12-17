@@ -14,6 +14,9 @@ const { signInFail } = require('../../middleware/error-handler')
 
 router.get('/users/:user_id/replied_tweets', userController.getRepliesOfTweet)
 router.get('/users/:user_id/tweets', userController.getTweetsOfUser)
+router.get('/users/:user_id/likes', authenticated, userController.getLikesOfUser)
+router.get('/users/:user_id/followings', authenticated, userController.getFollowingsOfUser)
+router.get('/users/:user_id/followers', authenticated, userController.getFollowersOfUser)
 router.get('/users/:user_id', userController.getUser)
 
 router.post('/users', userController.signUp)
@@ -30,7 +33,6 @@ router.post('/tweets/:tweet_id/unlike', authenticated, likeController.unLike)
 
 router.post('/followships', authenticated, followshipController.addFollowing)
 router.delete('/followships/:following_id', authenticated, followshipController.removeFollowing)
-
 
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.delete('/admin/tweets/:tweet_id', authenticated, authenticatedAdmin, adminController.deleteTweet)
