@@ -3,18 +3,17 @@ const { Tweet, User, Like, Reply } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
-    Tweet.findAll({
+    return Tweet.findAll({
       include: User,
-      order: [
-        ['createdAt', 'DESC']
-      ]
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
-        // const data = { tweets }
-        // res.json({ status: 'success', data })
         res.json(tweets)
       })
-      .catch(err => next(err))
+      .catch(err => {
+        console.log(err)
+        next(err)
+      })
   },
   getTweet: (req, res, next) => {
     return Promise.all([
@@ -23,8 +22,8 @@ const tweetController = {
           where: { id: req.params.tweet_id },
           raw: true
         }),
-      Like.findAll({ where: { tweetId: req.params.tweet_id } }),
-      Reply.findAll({ where: { tweetId: req.params.tweet_id } })
+      Like.findAll({ where: { TweetId: req.params.tweet_id } }),
+      Reply.findAll({ where: { TweetId: req.params.tweet_id } })
     ])
       .then(([tweet, likes, replies]) => {
         if (!tweet) throw new Error("Tweet didn't exist!")
@@ -59,8 +58,8 @@ const tweetController = {
     return Promise.all([
       Like.findOne({
         where: {
-          userId: helpers.getUser(req).id,
-          tweetId: req.params.id
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.id
         }
       }),
       Tweet.findByPk(req.params.id)
@@ -69,8 +68,8 @@ const tweetController = {
         if (!tweet) throw new Error("The tweet didn't exist!")
         if (like) throw new Error('You have already liked this tweet!')
         Like.create({
-          tweetId: req.params.id,
-          userId: helpers.getUser(req).id
+          TweetId: req.params.id,
+          UserId: helpers.getUser(req).id
         })
           .then(() => {
             res.json({
@@ -86,8 +85,8 @@ const tweetController = {
     return Promise.all([
       Like.findOne({
         where: {
-          userId: helpers.getUser(req).id,
-          tweetId: req.params.id
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.id
         }
       }),
       Tweet.findByPk(req.params.id)
