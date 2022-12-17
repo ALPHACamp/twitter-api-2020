@@ -1,4 +1,4 @@
-const { User, Tweet, Like, sequelize } = require('../models')
+const { User, Tweet, Like, Reply, sequelize } = require('../models')
 const { getUser, getOffset } = require('../_helpers')
 const dayjs = require('dayjs')
 
@@ -90,6 +90,47 @@ const tweetController = {
       if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
       return res.status(200).json(tweet)
     } catch (err) { next(err) }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
+
+      const replies = await Reply.findAll({
+        include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        where: { TweetId },
+        nest: true,
+        raw: true
+      })
+
+      return res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  },
+  postReplies: async (req, res, next) => {
+    try {
+      const UserId = getUser(req).dataValues.id
+      const TweetId = req.params.id
+      const { comment } = req.body
+
+      if (!comment || comment.trim().length === 0) return res.status(404).json({ status: 'error', message: '內容不可為空白！' })
+
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
+
+      const createdReply = await Reply.create({
+        comment,
+        TweetId,
+        UserId
+      })
+
+      return res.status(200).json({ status: 'success', data: createdReply.toJSON() })
+    } catch (err) {
+      next(err)
+    }
   },
   postTweet: async (req, res, next) => {
     try {

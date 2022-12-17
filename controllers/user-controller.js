@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
-const { User, Reply, Tweet, Like } = require('../models')
+const { User, Like, Tweet, Followship, Reply, sequelize } = require('../models')
 const { getUser, imgurFileHandler } = require('../_helpers')
 
 const userController = {
@@ -26,11 +26,14 @@ const userController = {
     try {
       const { id } = req.params
       let user = await User.findByPk(id, {
-        include: [
-          Reply, Tweet, Like,
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
-        ],
+        attributes: {
+          exclude: ['password', 'createdAt', 'updatedAt', 'role'],
+          include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.userId = User.id)'), 'tweetCount']
+          ]
+        },
         nest: true
       })
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
@@ -44,19 +47,18 @@ const userController = {
   getUsers: async (req, res, next) => {
     try {
       const top = Number(req.query.top)
-      const currentUser = getUser(req)
       const users = await User.findAll({
-        include: [{ model: User, as: 'Followers' }]
+        attributes: {
+          exclude: ['email', 'introduction', 'password', 'role', 'cover', 'createdAt', 'updatedAt'],
+          include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
+            [sequelize.literal('EXISTS (SELECT * from Followships where Followships.followingId = User.id) != 0'), 'isFollowed']
+          ]
+        },
+        // order: ['followerCount', 'DESC'],
+        limit: top || null
       })
-      const result = users
-        .map(user => ({
-          ...user.toJSON(),
-          followerCount: user.Followers.length,
-          isFollowed: currentUser.Followings.some(f => f.id === user.id)
-        }))
-        .sort((a, b) => b.followerCount - a.followerCount)
-        .slice(0, top || users.length)
-      return res.status(200).json({ status: 'success', data: result })
+      return res.status(200).json({ status: 'success', data: users })
     } catch (err) {
       next(err)
     }
@@ -72,12 +74,15 @@ const userController = {
       const user2 = await User.findOne({ where: { account } })
       if (user2) return res.status(400).json({ status: 'error', message: 'account 已重複註冊！' })
 
-      const createdUser = await User.create({
+      let createdUser = await User.create({
         account,
         name,
         email,
         password: bcrypt.hashSync(password)
       })
+
+      createdUser = createdUser.toJSON()
+      delete createdUser.password
 
       return res.status(200).json({ status: 'success', data: createdUser })
     } catch (err) {
@@ -112,12 +117,20 @@ const userController = {
       // 若有回傳password，檢查password與checkPassword是否相符
       if (password && password !== checkPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
 
-      const updatedUser = await user.update({
+      let updatedUser = await user.update({
         account: account || user.account,
         name: name || user.name,
         email: email || user.email,
         password: bcrypt.hashSync(password) || user.password
       })
+
+      updatedUser = updatedUser.toJSON()
+      delete updatedUser.avatar
+      delete updatedUser.cover
+      delete updatedUser.password
+      delete updatedUser.introduction
+      delete updatedUser.role
+
       return res.status(200).json({ status: 'success', data: updatedUser })
     } catch (err) {
       next(err)
@@ -145,12 +158,16 @@ const userController = {
       const avatarPath = await imgurFileHandler(avatar)
       const coverPath = await imgurFileHandler(cover)
 
-      const updatedUser = await user.update({
+      let updatedUser = await user.update({
         name,
         avatar: avatarPath,
         cover: coverPath,
         introduction
       })
+
+      updatedUser = updatedUser.toJSON()
+      delete updatedUser.password
+      delete updatedUser.role
 
       return res.status(200).json({ status: 'success', data: updatedUser })
     } catch (err) {
@@ -159,11 +176,78 @@ const userController = {
   },
   getLikes: async (req, res, next) => {
     try {
-      const { id } = req.params
-      let user = await User.findOne({ where: { id }, include: Like, nest: true })
+      const UserId = req.params.id
+
+      const user = await User.findOne({ where: { id: UserId } })
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
-      user = user.toJSON()
-      return res.status(200).json(user.Likes)
+
+      const likedTweets = await Like.findAll({
+        where: { UserId },
+        include: { model: Tweet, include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] } },
+        nest: true,
+        raw: true,
+        order: [['createdAt', 'DESC']]
+      })
+
+      return res.status(200).json(likedTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowings: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      const followings = await Followship.findAll({
+        attributes: { exclude: ['updatedAt'] },
+        include: { model: User, as: 'FollowingInfo', attributes: ['id', 'account', 'name', 'avatar'] },
+        where: { followerId: id },
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      const followings = await Followship.findAll({
+        attributes: { exclude: ['updatedAt'] },
+        include: { model: User, as: 'FollowerInfo', attributes: ['id', 'account', 'name', 'avatar'] },
+        where: { followingId: id },
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const user = await User.findByPk(id)
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      const repliedTweets = await Reply.findAll({
+        include: Tweet,
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(repliedTweets)
     } catch (err) {
       next(err)
     }
