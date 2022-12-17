@@ -27,20 +27,30 @@ const userController = {
       if (userEmail) return res.status(422).json({ status: 'error', message: 'Email already exists!' })
 
       const hash = await bcrypt.hash(password, 10)
-      await User.create({ account, name, email, password: hash })
+      let userRegistered = await User.create({ account, name, email, password: hash })
+      userRegistered = userRegistered.toJSON()
 
-      return res.status(200).json({ status: 'success' })
+      delete userRegistered.password
+      userRegistered.createdAt = dayjs(userRegistered.createdAt).valueOf()
+      userRegistered.updatedAt = dayjs(userRegistered.updatedAt).valueOf()
+
+      const token = jwt.sign(userRegistered, process.env.JWT_SECRET, { expiresIn: '5d' })
+
+      return res.status(200).json({ status: 'success', data: { token, user: userRegistered } })
     } catch (err) { next(err) }
   },
   signIn: (req, res, next) => {
     try {
       const loginUser = helpers.getUser(req).toJSON()
       if (loginUser?.role === 'admin') return res.status(403).json({ status: 'error', message: 'Permission denied.' })
+
       delete loginUser.password
       loginUser.createdAt = dayjs(loginUser.createdAt).valueOf()
       loginUser.updatedAt = dayjs(loginUser.updatedAt).valueOf()
+
       const token = jwt.sign(loginUser, process.env.JWT_SECRET, { expiresIn: '5d' })
-      res.status(200).json({ status: 'success', data: { token, user: loginUser } })
+
+      return res.status(200).json({ status: 'success', data: { token, user: loginUser } })
     } catch (err) { next(err) }
   },
   getUserProfile: async (req, res, next) => {
