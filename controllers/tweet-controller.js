@@ -37,10 +37,26 @@ const tweetController = {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar']
         },
-        where: { tweetId }
+        where: { TweetId: tweetId }
       })
       return res.status(200).json(replies)
     } catch (err) { next(err) }
+  },
+  postTweetReply: (req, res, next) => {
+    const { comment } = req.body
+    const tweetId = req.params.id
+    const currentUserId = helpers.getUser(req).id
+    if (!comment) throw Error('content is required!', {}, Error.prototype.code = 401)
+    if (comment.length > 140) throw Error('too many words!', {}, Error.prototype.code = 401)
+    Reply.create({
+      UserId: currentUserId,
+      TweetId: tweetId,
+      comment
+    })
+      .then(reply => {
+        res.status(200).json(reply)
+      })
+      .catch(err => next(err))
   },
   getTweets: async (req, res, next) => {
     try {
