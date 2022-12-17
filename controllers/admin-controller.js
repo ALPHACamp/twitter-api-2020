@@ -19,11 +19,16 @@ const adminController = {
             exclude: ['password']
           } // only these attributes returned
         }],
+      order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
     })
       .then(tweets => {
-        res.json(tweets)
+        const tweetsData = tweets.map(tweet => ({
+          ...tweet,
+          description: tweet.description.substring(0, 50)
+        }))
+        res.json(tweetsData)
       })
       .catch(err => next(err))
   },
