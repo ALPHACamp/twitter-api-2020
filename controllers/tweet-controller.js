@@ -11,7 +11,6 @@ const tweetController = {
         res.json(tweets)
       })
       .catch(err => {
-        console.log(err)
         next(err)
       })
   },
@@ -139,6 +138,38 @@ const tweetController = {
       })
       .then(replies => {
         res.json(replies)
+      })
+      .catch(err => next(err))
+  },
+  getTweetFollowing: (req, res, next) => {
+    User.findByPk(helpers.getUser(req).id, {
+      include: {
+        model: User, as: 'Followings', include: { model: Tweet, include: [Reply, Like, User] }
+      }
+    })
+      .then(user => {
+        let tweets = []
+        user.Followings.forEach(following => {
+          tweets = tweets.concat(following.Tweets)
+        })
+        tweets = tweets.map(tweet => {
+          const { id, name, account, avatar } = tweet.User.toJSON()
+          tweet = {
+            ...tweet.toJSON(),
+            replyAmount: tweet.Replies.length,
+            likedAmount: tweet.Likes.length,
+            User: {
+              id,
+              name,
+              account,
+              avatar
+            }
+          }
+          delete tweet.Replies
+          delete tweet.Likes
+          return tweet
+        })
+        res.json(tweets)
       })
       .catch(err => next(err))
   }

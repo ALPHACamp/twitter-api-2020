@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../models')
 const helpers = require('../_helpers')
-
+const { imgurFileHandler } = require('../helpers/file-helpers')
 const { User, Followship, Tweet, Reply, Like } = db
 
 const userController = {
@@ -63,17 +63,13 @@ const userController = {
       Followship.findAndCountAll({ where: { followingId: helpers.getUser(req) } })
     ])
       .then(([user, followship, followerCount, followingCount]) => {
+        if (!user) throw new Error("User didn't exist!")
         user = user.toJSON()
         user.isSelf = Number(req.params.id) === Number(helpers.getUser(req).id)
         user.isfollow = followship !== null
         user.followingAmount = followerCount.count
         user.followerAmount = followingCount.count
-        res.json({
-          status: 'success',
-          data: {
-            user
-          }
-        })
+        res.status(200).json(user)
       })
       .catch(err => next(err))
   },
@@ -103,12 +99,37 @@ const userController = {
             isLike: tweet.Likes.map(t => t.id).includes(helpers.getUser(req).id)
           }
         })
-        res.json({
-          status: 'success',
-          data: {
-            tweets
-          }
+        res.status(200).json(tweets)
+      })
+      .catch(err => next(err))
+  },
+  putUser: (req, res, next) => {
+    if (Number(req.params.id) !== helpers.getUser(req).id) throw new Error('permission denied.')
+    const { name, introduction } = req.body
+    const { files } = req
+    const nameMax = 50
+    const introMax = 160
+    const avatar = files?.avatar ? files.avatar[0] : null
+    const background = files?.background ? files.background[0] : null
+    return Promise.all([
+      User.findByPk(req.params.id),
+      imgurFileHandler(avatar),
+      imgurFileHandler(background)
+    ])
+      .then(([user, avatar, background]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (name.length > nameMax) throw new Error('the length of name should be under 50.')
+        if (introduction.length > introMax) throw new Error('the length of introduction should be under 160.')
+        return user.update({
+          name,
+          introduction,
+          avatar: avatar || user.avatar,
+          background: background || user.background
         })
+      })
+      .then(user => {
+        // const user = updatedUser.toJSON()
+        res.status(200).json(user)
       })
       .catch(err => next(err))
   },
@@ -168,6 +189,40 @@ const userController = {
       })
       .then(user => {
         res.status(200).json(user)
+      })
+      .catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+    return Like.findAll({
+      where: {
+        UserId: req.params.id
+      },
+      include: [
+        { model: Tweet, include: Reply },
+        User
+      ]
+    })
+      .then(likes => {
+        const tweets = likes.map(like => {
+          const { id, name, account, avatar } = like.User
+          const tweet = {
+            TweetId: like.Tweet.id,
+            ...like.Tweet.toJSON(),
+            User: {
+              id,
+              account,
+              name,
+              avatar
+            },
+            likedAmount: like.length,
+            repliedAmount: like.Tweet.Replies.length,
+            isLike: true
+          }
+          delete tweet.Replies
+          return tweet
+        })
+        tweets.sort((a, b) => b.createdAt - a.createdAt)
+        res.json(tweets)
       })
       .catch(err => next(err))
   }
