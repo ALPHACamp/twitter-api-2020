@@ -76,7 +76,6 @@ const userServices = {
 
     })
       .then((tweetsOfUser) => {
-
         if (!tweetsOfUser) throw new Error("此用戶沒有發過推文!")
         cb(null, tweetsOfUser)
 
