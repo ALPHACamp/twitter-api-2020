@@ -11,22 +11,40 @@ const userServices = {
     const { account, name, email, password } = req.body
 
     if (name.length > 50) throw new Error('字數超出上限！')
-    User.findOne({ where: { email }, raw: true })
-      .then((user) => {
-        if (!user) return bcrypt.hash(password, 10)
 
-        if (user.account === account) throw new Error('account 已重複註冊！')
-        if (user.email === email) throw new Error('email 已重複註冊！')
+    return Promise.all([
+      User.findOne({ where: { account }, raw: true }),
+      User.findOne({ where: { email }, raw: true })
+    ])
+      .then(([userAccount, userEmail]) => {
+        // account 和 email 都未重複，建立資料
+        if (!userAccount && !userEmail) {
+          return User.create({
+            account,
+            name,
+            email,
+            password: bcrypt.hashSync(password, 10)
+          })
+        }
+
+        // account 或是 email 未重複
+        if (!userAccount || !userEmail) {
+          //  account 重複
+          if (!userEmail) throw new Error('account 已重複註冊！')
+          //  email 重複
+          if (!userAccount) {
+            throw new Error('email 已重複註冊！')
+          }
+        }
+        // 重複 account
+        if (userAccount.account === account) {
+          throw new Error('account 已重複註冊！')
+        }
+        // 重複 email
+        if (userEmail.email === email) throw new Error('email 已重複註冊！')
       })
-      .then((hash) =>
-        User.create({
-          account,
-          name,
-          email,
-          password: hash
-        })
-      )
-      .then((newUser) => cb(null, { success: 'true' }))
+
+      .then(() => cb(null, { success: 'true' }))
       .catch((err) => cb(err))
   }
 }
@@ -90,10 +108,10 @@ const userController = {
         delete user.Followers
         delete user.password
         // 新增屬性
-        user['tweetCount'] = tweetCount
-        user['followingCount'] = followingCount
-        user['follwerCount'] = follwerCount
-        user['isFollwerd'] = isFollwerd
+        user.tweetCount = tweetCount
+        user.followingCount = followingCount
+        user.follwerCount = follwerCount
+        user.isFollwerd = isFollwerd
 
         return res.status(200).send(user)
       })
