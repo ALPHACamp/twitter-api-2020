@@ -6,7 +6,9 @@ const tweetController = {
   // 新增推文：
   postTweet: (req, res, next) => {
     const { description } = req.body
-    if (!description) throw new Error('Description is required!')
+    if (!description) throw new Error('推文欄位必填!')
+    if (!description?.trim()) throw new Error('內容不可空白!')
+    if (description?.length > 140) throw new Error('推文字數限制在 140 以內!')
     return Tweet.create({
       UserId: helpers.getUser(req).id,
       description
@@ -88,22 +90,24 @@ const tweetController = {
   },
   // 將推文加入喜歡
   addLike: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
     const TweetId = req.params.id
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({
         where: {
-          UserId: helpers.getUser(req).id,
+          UserId: currentUser.id,
           TweetId
         }
       })
     ])
       .then(([tweet, like]) => {
         if (!tweet) throw new Error("Tweet didn't exist!")
+        const likeJson = like.toJSON()
+        if (likeJson.UserId === currentUser.id) throw new Error('不能按自己的推文讚!')
         if (like) throw new Error('You have liked this tweet!')
-
         return Like.create({
-          UserId: helpers.getUser(req).id,
+          UserId: currentUser.id,
           TweetId
         })
       })
