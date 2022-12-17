@@ -234,7 +234,28 @@ const userController = {
 			.catch(err => { console.log(err) })
 	},
 	getUserReplidTweets:(req,res,next)=>{
+		const id = req.params.id
+			Reply.findAll({
+				where:{userId:id},
+				include: { 
+					model: Tweet,
+					attributes:
+					['id'],					
+					include: [{
+						model:User,
+						attributes:
+						['id', 'name','account','avatar'],
+					}],
+				},
+				order: [['createdAt', 'DESC']],
+				nest:true,
+				raw:true
 
+			})
+			.then((replyList) => {
+				res.status(200).json(replyList)
+			})
+			.catch(err => { console.log(err) })
 	}
 }
 
