@@ -13,7 +13,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         avatar: `https://loremflickr.com/320/240/man,woman/?random=${Math.random() * 100}`,
         cover: 'https://upload.cc/i1/2022/12/16/bVJwGS.jpg',
-        introduction: faker.lorem.paragraph(3).substring(0, 160),
+        introduction: faker.lorem.sentence(7),
         role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -25,7 +25,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', 10),
         avatar: `https://loremflickr.com/320/240/man,woman/?random=${Math.random() * 100}`,
         cover: 'https://upload.cc/i1/2022/12/16/bVJwGS.jpg',
-        introduction: faker.lorem.paragraph(3).substring(0, 160),
+        introduction: faker.lorem.sentence(7),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()

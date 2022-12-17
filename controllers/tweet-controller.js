@@ -34,6 +34,7 @@ const tweetController = {
             // repliedCount: tweet.replies.length
             // 計算 like 該推文的人數
             // likedCount: tweet.likes.length
+            // isLiked(boolean)
           }))
       })
       .then(tweets =>
