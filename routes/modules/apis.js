@@ -8,10 +8,10 @@ const admin = require('../modules/admin')
 const sign = require('../modules/sign')
 const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 
+router.use('/', sign)
 router.use('/users', authenticated, users)
 router.use('/tweets', authenticated, tweets)
 router.use('/followships', authenticated, followships)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
-router.use('/', sign)
 
 module.exports = router
