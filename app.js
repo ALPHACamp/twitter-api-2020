@@ -5,10 +5,20 @@ const express = require('express')
 const routes = require('./routes')
 const methodOverride = require('method-override')
 const passport = require('./config/passport')
+const cors = require('cors')
 
 const app = express()
 const port = process.env.PORT || 3000
 
+const corsOptions = {
+  origin: [
+    'http://localhost:3000'
+  ],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
+
+app.use(cors(corsOptions))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
