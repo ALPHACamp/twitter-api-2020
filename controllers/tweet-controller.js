@@ -1,4 +1,4 @@
-const { Tweet, User, Reply, Like, sequelize } = require('../models')
+const { Tweet, User, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { dateFormat } = require('../helpers/date-helper')
 
