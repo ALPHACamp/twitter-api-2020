@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const passport = require('../config/passport')
-const { authenticated} = require('../middleware/auth')
+const { authenticated } = require('../middleware/auth')
 
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
@@ -31,7 +31,7 @@ router.get('/auth', authenticated, (req, res) => res.status(200).json({ status: 
 
 router.post('/users', authenticated, userController.postUsers)
 
-// router.get('/tweets/:id/replies', authenticated, tweetController.getTweetReplies)
+router.get('/tweets/:id/replies', authenticated, tweetController.getTweetReplies)
 // router.post('/tweets/:id/replies', authenticated, tweetController.postTweetReply)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
