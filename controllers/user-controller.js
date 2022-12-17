@@ -198,6 +198,20 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      const followings = await Followship.findAll({ where: { followingId: id }, raw: true })
+
+      return res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
