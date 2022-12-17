@@ -26,7 +26,7 @@ router.put('/users/:id', upload.fields([
   { name: 'background', maxCount: 1 }
 ]), authenticated, authenticatedUser, userController.putUser)
 
-
+router.get('/tweets/following', authenticated, authenticatedUser, tweetController.getTweetFollowing)
 router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.removeLike)
 router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.addLike)
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getReplies)
