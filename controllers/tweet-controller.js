@@ -1,4 +1,4 @@
-const { User, Tweet, sequelize } = require('../models')
+const { User, Tweet, Like, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const dayjs = require('dayjs')
 const tweetController = {
@@ -21,6 +21,59 @@ const tweetController = {
         createdAt: dayjs(tweet.createdAt).valueOf()
       }))
       return res.status(200).json(data)
+    } catch (err) { next(err) }
+  },
+
+  addOneTweet: async (req, res, next) => {
+    try {
+      // Get user and tweet data from req
+      // Validate tweet content(not empty and less than 140)
+      // Create a tweet
+      return res.status(200).json('JSON Response')
+    } catch (err) { next(err) }
+  },
+
+  getOneTweet: async (req, res, next) => {
+    try {
+      // Get tweet_id from req
+      // Find tweet in database
+      // Transform data
+      return res.status(200).json('JSON Response')
+    } catch (err) { next(err) }
+  },
+
+  getReplies: async (req, res, next) => {
+    try {
+      // Get tweet_id from req
+      // Find all replies in database
+      // Transform data
+      return res.status(200).json('JSON Response')
+    } catch (err) { next(err) }
+  },
+
+  addReply: async (req, res, next) => {
+    try {
+      // Get user, tweet_id and reply data from req
+      // Validate reply content(not empty)
+      // Create a tweet
+      return res.status(200).json('JSON Response')
+    } catch (err) { next(err) }
+  },
+
+  likeOneTweet: async (req, res, next) => {
+    try {
+      // Get user and tweet_id from req
+      // Check record don't exist
+      return res.status(200).json('JSON Response')
+    } catch (err) { next(err) }
+  },
+
+  unlikeOneTweet: async (req, res, next) => {
+    try {
+      // Get user and tweet_id from req
+      // Check record existance
+      // Delete record
+      return res.status(200).json('JSON Response')
     } catch (err) { next(err) }
   }
 }
