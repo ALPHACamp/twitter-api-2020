@@ -1,6 +1,6 @@
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-}
+// if (process.env.NODE_ENV !== 'production') {
+// 	require('dotenv').config()
+// }
 
 const express = require('express')
 const routes = require('./routes')
@@ -23,7 +23,7 @@ app.use(express.json())
 app.use(cors(corsOptions))
 
 app.use('/api', routes)
-app.use(routes)
+
 
 app.use('/', (req, res) => res.send('Hello World!'))
 app.use(generalErrorHandler)
