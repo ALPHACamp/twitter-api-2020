@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
-const { User, Tweet, Followship, sequelize } = require('../models')
+const { User, Tweet, Followship, Like, Reply, sequelize } = require('../models')
 
 const userController = {
 	postUsers: (req, res, next) => {
@@ -135,6 +135,58 @@ const userController = {
 				res.status(200).json(followingList)
 			})
 			.catch(err => { console.log(err) })
+	},
+	getUserlikes:(req, res, next) => {
+		const currentUser = getUser(req).id
+		const id = req.params.id
+			Promise.all([
+				Like.findAll({
+					where:{userId:id},
+					include: { 
+						model: Tweet,
+						include: [{
+							model:User,
+							attributes:
+							['id', 'name','account','avatar'],
+						}],
+					},
+					order: [['createdAt', 'DESC']],
+					nest:true,
+					raw:true
+
+				}),
+				Like.findAll({
+					attributes:['id','TweetId','UserId'],
+					raw :true}),
+				Reply.findAll({
+					attributes:['id','TweetId'],
+					raw :true},
+				)
+			])
+				.then(([likeList,like,reply]) => {
+					console.log(like)
+					console.log(currentUser)
+					likeList.forEach((l)=>{
+						l.Tweet.likeCount = 0
+						l.Tweet.replyCount = 0
+						l.Tweet.liked = false
+						like.forEach((i)=>{
+							if(i.TweetId === l.TweetId){
+								l.Tweet.likeCount++
+							}
+							if(i.UserId === currentUser&&i.TweetId === l.TweetId){
+								l.Tweet.liked = true
+							}
+						})
+						reply.forEach((r)=>{
+							if(r.TweetId === l.TweetId){
+								l.Tweet.replyCount++
+							}
+						})
+					})
+					res.status(200).json(likeList)
+				})
+				.catch(err => { console.log(err) })
 	}
 }
 
