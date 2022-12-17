@@ -20,13 +20,13 @@ router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userCo
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
-router.put('/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
+// router.put('/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
 router.put('/users/:id', upload.fields([
   { name: 'avatar', maxCount: 1 },
   { name: 'background', maxCount: 1 }
 ]), authenticated, authenticatedUser, userController.putUser)
 
-
+router.get('/tweets/following', authenticated, authenticatedUser, tweetController.getTweetFollowing)
 router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.removeLike)
 router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.addLike)
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getReplies)
