@@ -171,12 +171,14 @@ const userController = {
   putUserProfile: async (req, res, next) => {
     try {
       const reqUserId = Number(req.params.id)
-      const { name, introduction } = req.body
+      const userData = helpers.getUser(req).toJSON()
+      const { name, introduction, cover } = req.body
       const { files } = req
 
       const option = { name, introduction }
       if (files?.avatar) option.avatar = await imgurFileHandler(files.avatar[0])
       option.cover = files?.cover ? await imgurFileHandler(files.cover[0]) : null // 未上傳cover可以是空白
+      if (cover === userData.cover) delete option.cover // 如果上傳是原本url字串，沿用上次的字串
 
       //  更新資料
       const user = await User.findByPk(reqUserId)
