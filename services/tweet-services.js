@@ -48,7 +48,6 @@ const tweetServices = {
         const data = { ...tweet.toJSON(), isReplied, isLiked }
 
         cb(null, data)
-
       })
       .catch(err => cb(err))
   },
