@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const { getOffset, getUser } = require('../_helpers')
 
 const superUser = { name: 'root', email: 'root@example.com' }
+
+const dayjs = require('dayjs')
 
 const adminController = {
   adminLogin: async (req, res, next) => {
@@ -54,6 +56,29 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const DEFAULT_LIMIT = 10
+      const page = Number(req.query.page) || 1
+      const limit = Number(req.query.limit) || DEFAULT_LIMIT
+      const offset = getOffset(limit, page)
+
+      const tweets = await Tweet.findAll({
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        attributes: ['id', 'description', 'createdAt'],
+        order: [['createdAt', 'DESC']],
+        limit,
+        offset,
+        nest: true
+      })
+      const data = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        description: tweet?.description.slice(0, 50),
+        createdAt: dayjs(tweet.createdAt).valueOf()
+      }))
+      return res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 
