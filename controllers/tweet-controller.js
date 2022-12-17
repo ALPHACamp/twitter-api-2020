@@ -1,4 +1,4 @@
-const { User, Tweet, Like, sequelize } = require('../models')
+const { User, Tweet, Like, Reply, sequelize } = require('../models')
 const { getUser, getOffset } = require('../_helpers')
 const dayjs = require('dayjs')
 
@@ -90,6 +90,25 @@ const tweetController = {
       if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
       return res.status(200).json(tweet)
     } catch (err) { next(err) }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
+
+      const replies = await Reply.findAll({
+        include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        where: { TweetId },
+        nest: true,
+        raw: true
+      })
+
+      return res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = tweetController
