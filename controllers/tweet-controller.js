@@ -22,29 +22,22 @@ const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       include: [
-        User,
-        { model: Reply, include: User }
+        {
+          model: User,
+          attributes: {
+            exclude: ['password', 'email', 'cover', 'introduction']
+          }
+        }
       ],
-      attributes: {
-        exclude: ['password'],
-        include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id )'), 'tweetCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followersCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id )'), 'followingCount']
-        ]
-      }
+      order: [
+        [sequelize.literal('createdAt'), 'DESC']
+      ]
     })
       .then(tweets => {
         return tweets
           .map(tweet => ({
             ...tweet.dataValues,
-            // [ 修 ]：發文過一週？是的話顯示日期，不是的話顯示多久之前
             relativeTime: dateFormat(tweet.dataValues.createdAt).fromNow()
-            // 計算 reply 該推文的回覆數
-            // repliedCount: tweet.replies.length
-            // 計算 like 該推文的人數
-            // likedCount: tweet.likes.length
-            // isLiked(boolean)
           }))
       })
       .then(tweets =>
@@ -55,10 +48,12 @@ const tweetController = {
   // 取得一則推文：
   getTweet: (req, res, next) => {
     Tweet.findByPk(req.params.tweet_id, {
-      include: [
-        User,
-        { model: Reply, include: User }
-      ]
+      include: [{
+        model: User,
+        attributes: {
+          exclude: ['password', 'email', 'cover', 'introduction']
+        }
+      }]
     })
       .then(tweet => {
         if (!tweet) {
@@ -69,6 +64,7 @@ const tweetController = {
         const treetJSON = tweet.toJSON()
         const treetNew = {
           ...treetJSON,
+          relativeTime: dateFormat(tweet.dataValues.createdAt).fromNow(),
           exactTime: dateFormat(tweet.dataValues.createdAt).format('A hh:mm YYYY年 MMM DD日')
         }
         return res.json(
