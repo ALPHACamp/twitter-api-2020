@@ -17,7 +17,7 @@ const adminController = {
           model: User,
           attributes: {
             exclude: ['password']
-          } // only these attributes returned
+          }
         }],
       raw: true,
       nest: true
