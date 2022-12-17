@@ -77,6 +77,7 @@ const userController = {
       //  { model: User, as: 'Followers' },
       //  { model: User, as: 'Followings' }
       // ],
+      where: { id, role: 'user' },
       attributes: {
         exclude: ['password', 'createdAt', 'updatedAt'],
 
@@ -86,6 +87,7 @@ const userController = {
     })
       .then(user => {
         if (!user) throw new Error("User didn't exist!")
+        if (user.role === 'admin') throw new Error('帳號不存在！')
         const { ...userData } = {
           ...user.toJSON()
         }

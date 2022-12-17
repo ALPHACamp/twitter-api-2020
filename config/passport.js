@@ -11,16 +11,17 @@ passport.use(new LocalStrategy(
     usernameField: 'account',
     passwordField: 'password'
   },
-  // authenticate user
-  (account, password, cb) => {
-    User.findOne({ where: { account } })
-      .then(user => {
-        if (!user) cb(new Error('帳號不存在！'))
-        bcrypt.compare(password, user.password).then(res => {
-          if (!res) cb(new Error('帳號或密碼輸入錯誤！'))
-          return cb(null, user)
-        })
-      })
+
+  async (account, password, cb) => {
+    try {
+      const user = await User.findOne({ where: { account } })
+      if (!user) throw new Error('帳號或密碼錯誤！')
+      const res = await bcrypt.compare(password, user.password)
+      if (!res) throw new Error('帳號或密碼錯誤！')
+      return cb(null, user)
+    } catch (err) {
+      cb(err)
+    }
   }
 ))
 const jwtOptions = {
