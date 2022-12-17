@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const bcrypt = require('bcryptjs')
 
 const userServices = {
@@ -41,7 +41,7 @@ const userController = {
       throw new Error('account and password are required.')
     }
 
-    User.findOne({ where: { account, role: 'user' }, raw: true })
+    User.findOne({ where: { account }, raw: true })
       .then((user) => {
         if (!user) {
           throw new Error('帳號不存在！')
@@ -65,15 +65,37 @@ const userController = {
   getUser: (req, res, next) => {
     const { id } = req.params
     User.findByPk(id, {
-      include: [{ model: User, as: 'Followings' }]
+      include: [
+        Tweet,
+        { model: User, as: 'Followings' },
+        { model: User, as: 'Followers' }
+      ]
     })
       .then((user) => {
         if (!user) throw new Error('使用者不存在 !')
-        return res.status(200).json({
-          id: user.id,
-          Followings: user.Followings,
-          role: user.role
-        })
+        // 使用者推文數
+        const tweetCount = user.Tweets.length
+        // 使用者追蹤數
+        const followingCount = user.Followings.length
+        // 使用者被追蹤數
+        const follwerCount = user.Followers.length
+        // 使用者與登入者追蹤關係
+        const isFollwerd = user.Followers.some(
+          (follower) => follower.followingId === user.id
+        )
+        user = user.toJSON()
+        // 刪除非必要屬性
+        delete user.Tweets
+        delete user.Followings
+        delete user.Followers
+        delete user.password
+        // 新增屬性
+        user['tweetCount'] = tweetCount
+        user['followingCount'] = followingCount
+        user['follwerCount'] = follwerCount
+        user['isFollwerd'] = isFollwerd
+
+        return res.status(200).send(user)
       })
       .catch((err) => next(err))
   },
