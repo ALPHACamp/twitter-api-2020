@@ -149,13 +149,16 @@ const userController = {
     if (password.length > 8) throw new Error('Passwords should be no more than 8 digit!')
     if (account.length > 8) throw new Error('Account should be no more than 8 digit!')
     if (!email.includes('@')) throw new Error('your email address does not have @')
-    
     return Promise.all([
       User.findByPk(req.params.id),
-      bcrypt.hash(password, 10)
+      bcrypt.hash(password, 10),
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
     ])
-      .then(([user, hash]) => {
+      .then(([user, hash, checkAccount, checkEmail]) => {
         if (!user) throw new Error("User didn't exist!")
+        if (checkAccount) throw new Error("The account is existed!")
+        if (checkEmail) throw new Error("The email is existed!")
         return user.update({
           name,
           account,
