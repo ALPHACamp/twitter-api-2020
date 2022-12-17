@@ -90,7 +90,8 @@ const userController = {
 				})
 			})
 			.then((data) => {
-				res.json({ data })
+				delete data.get({plain:true}).password
+				res.json(data )
 			})
 			.catch(err => next(err))
 	},
@@ -164,8 +165,6 @@ const userController = {
 				)
 			])
 				.then(([likeList,like,reply]) => {
-					console.log(like)
-					console.log(currentUser)
 					likeList.forEach((l)=>{
 						l.Tweet.likeCount = 0
 						l.Tweet.replyCount = 0
@@ -187,6 +186,51 @@ const userController = {
 					res.status(200).json(likeList)
 				})
 				.catch(err => { console.log(err) })
+	},
+	getUserTweets:(req,res,next)=>{
+		const currentUser = getUser(req).id
+		const id = req.params.id
+		Promise.all([
+			Tweet.findAll({
+				where:{UserId:id},
+				order: [['createdAt', 'DESC']],
+				nest:true,
+				raw:true
+			}),
+			Like.findAll({
+				attributes:['id','TweetId','UserId'],
+				raw :true}),
+			Reply.findAll({
+				attributes:['id','TweetId'],
+				raw :true},
+			)
+
+		])
+			.then(([tweetList,like,reply]) => {
+				// console.log(tweetList)
+				// console.log(like)
+				// console.log(reply)
+				tweetList.forEach((t)=>{
+					t.likeCount = 0
+					t.replyCount = 0
+					t.liked = false
+					like.forEach((i)=>{
+						if(t.id === i.TweetId){
+							t.likeCount++
+						}
+						if(i.UserId === currentUser && i.TweetId === t.id){
+							t.liked = true
+						}
+					})
+					reply.forEach((r)=>{
+						if(r.TweetId === t.TweetId){
+							t.replyCount++
+						}
+					})
+				})
+				res.status(200).json(tweetList)
+			})
+			.catch(err => { console.log(err) })
 	}
 }
 
