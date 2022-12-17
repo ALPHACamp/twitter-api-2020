@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
-const { User, Like, Tweet, sequelize } = require('../models')
+const { User, Like, Tweet, Followship, Reply, sequelize } = require('../models')
 const { getUser, imgurFileHandler } = require('../_helpers')
 const dayjs = require('dayjs')
 
@@ -177,11 +177,79 @@ const userController = {
   },
   getLikes: async (req, res, next) => {
     try {
-      const { id } = req.params
-      let user = await User.findOne({ where: { id }, include: Like, nest: true })
+      const UserId = req.params.id
+
+      const user = await User.findOne({ where: { id: UserId } })
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
-      user = user.toJSON()
-      return res.status(200).json(user.Likes)
+
+      const likedTweets = await Like.findAll({
+        where: { UserId },
+        include: { model: Tweet, include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] } },
+        nest: true,
+        raw: true,
+        order: [['createdAt', 'DESC']]
+      })
+
+      return res.status(200).json(likedTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowings: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      const followings = await Followship.findAll({
+        attributes: { exclude: ['updatedAt'] },
+        include: { model: User, as: 'FollowingInfo', attributes: ['id', 'account', 'name', 'avatar'] },
+        where: { followerId: id },
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      const followings = await Followship.findAll({
+        attributes: { exclude: ['updatedAt'] },
+        include: { model: User, as: 'FollowerInfo', attributes: ['id', 'account', 'name', 'avatar'] },
+        where: { followingId: id },
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const user = await User.findByPk(id)
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      const repliedTweets = await Reply.findAll({
+        where: { UserId: id },
+        include: Tweet,
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(repliedTweets)
     } catch (err) {
       next(err)
     }

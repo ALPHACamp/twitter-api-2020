@@ -3,11 +3,20 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const express = require('express')
 const methodOverride = require('method-override')
+const cors = require('cors')
 
 const routes = require('./routes')
 
 const app = express()
 const PORT = process.env.PORT || 3000
+
+// 使用cors允許跨域連線
+app.use(
+  cors({
+    origin: ['http://localhost:3000'],
+    credentials: true
+  })
+)
 
 // use method-override
 app.use(methodOverride('_method'))
