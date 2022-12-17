@@ -19,6 +19,22 @@ const followshipController = {
     })
     createdFollow = createdFollow.toJSON()
     return res.status(200).json({ status: 'success', data: createdFollow })
+  },
+  deleteFollow: async (req, res, next) => {
+    const followerId = getUser(req).dataValues.id
+    const followingId = Number(req.params.followingId)
+
+    const following = await User.findByPk(followingId)
+    if (!following) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+    const followed = await Followship.findOne({ where: { followerId, followingId } })
+    if (!followed) return res.status(400).json({ status: 'error', message: '使用者尚未追蹤此用戶！' })
+
+    let deletedFollow = await followed.destroy()
+
+    deletedFollow = deletedFollow.toJSON()
+
+    return res.status(200).json({ status: 'success', data: deletedFollow })
   }
 }
 
