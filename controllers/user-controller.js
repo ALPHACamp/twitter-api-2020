@@ -151,7 +151,8 @@ const userController = {
         attributes: [
           'id', 'account', 'name', 'avatar', 'cover', 'introduction', 'role',
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'), 'followerCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'), 'followingCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'), 'followingCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE UserId = User.id )'), 'tweetCount']
         ]
       })
 
