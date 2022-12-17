@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
-const { User, Reply, Tweet, Like } = require('../models')
+const { User, Like, sequelize } = require('../models')
 const { getUser, imgurFileHandler } = require('../_helpers')
 
 const userController = {
@@ -26,12 +26,14 @@ const userController = {
     try {
       const { id } = req.params
       let user = await User.findByPk(id, {
-        attributes: ['id', 'name', 'account', 'email', 'avatar', 'cover', 'introduction', 'role'],
-        include: [
-          Reply, Tweet, Like,
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
-        ],
+        attributes: {
+          exclude: ['password', 'createdAt', 'updatedAt', 'role'],
+          include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.userId = User.id)'), 'tweetCount']
+          ]
+        },
         nest: true
       })
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
@@ -45,20 +47,18 @@ const userController = {
   getUsers: async (req, res, next) => {
     try {
       const top = Number(req.query.top)
-      const currentUser = getUser(req)
       const users = await User.findAll({
-        attributes: ['id', 'account', 'name', 'avatar'],
-        include: [{ model: User, as: 'Followers', attributes: ['id'] }]
+        attributes: {
+          exclude: ['email', 'introduction', 'password', 'role', 'cover', 'createdAt', 'updatedAt'],
+          include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
+            [sequelize.literal('EXISTS (SELECT * from Followships where Followships.followingId = User.id) != 0'), 'isFollowed']
+          ]
+        },
+        // order: ['followerCount', 'DESC'],
+        limit: top || null
       })
-      const result = users
-        .map(user => ({
-          ...user.toJSON(),
-          followerCount: user.Followers.length,
-          isFollowed: currentUser.Followings.some(f => f.id === user.id)
-        }))
-        .sort((a, b) => b.followerCount - a.followerCount)
-        .slice(0, top || users.length)
-      return res.status(200).json({ status: 'success', data: result })
+      return res.status(200).json({ status: 'success', data: users })
     } catch (err) {
       next(err)
     }
