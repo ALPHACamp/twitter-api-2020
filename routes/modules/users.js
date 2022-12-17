@@ -17,6 +17,7 @@ router.get('/:id', authenticated, authenticatedUser, userController.getUser)
 // 編輯個人頁面
 router.put(
   '/:id',
+  authenticated,
   authenticatedUser,
   upload.fields([
     { name: 'avatar', maxCount: 1 },
