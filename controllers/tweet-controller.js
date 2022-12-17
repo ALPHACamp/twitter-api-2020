@@ -19,13 +19,6 @@ const tweetController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      // const replyList = await Reply.findAll({
-      //   include: { 
-      //     model: User, 
-      //     attributes: ['id', 'account', 'name', 'avatar', 'cover'] 
-      //   },
-      //   order: [['createdAt', 'DESC']]
-      // })
       return res.status(200).json({ tweet })
     } catch (err) { next(err) }
   },
