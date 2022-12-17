@@ -1,12 +1,12 @@
 function getUser (req) {
-	return req.user
+  return req.user
 }
 
 const ensureAuthenticated = req => {
-	return req.isAuthenticated()
+  return req.isAuthenticated()
 }
 
 module.exports = {
-	getUser,
-	ensureAuthenticated
+  getUser,
+  ensureAuthenticated
 }
