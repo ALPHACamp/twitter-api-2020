@@ -3,7 +3,6 @@ const { User, Tweet, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const adminController = {
-	// login 還沒有成功
 	login: (req, res, next) => {
 		const adminData = getUser(req).toJSON()
 		delete adminData.password
