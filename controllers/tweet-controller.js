@@ -63,17 +63,37 @@ const tweetController = {
   likeOneTweet: async (req, res, next) => {
     try {
       // Get user and tweet_id from req
-      // Check record don't exist
-      return res.status(200).json('JSON Response')
+      const UserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.tweet_id)
+
+      // Check tweet existance
+      console.log(UserId, TweetId)
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) return res.status(404).json({ status: 'error', message: 'Cannot find this tweet.' })
+
+      // Check record don't exist in database
+      const like = await Like.findOne({ where: { UserId, TweetId } })
+      if (like) return res.status(422).json({ status: 'error', message: 'You have already liked this tweet.' })
+
+      // Create like record
+      await Like.create({ UserId, TweetId })
+      return res.status(200).json({ status: 'success' })
     } catch (err) { next(err) }
   },
 
   unlikeOneTweet: async (req, res, next) => {
     try {
       // Get user and tweet_id from req
-      // Check record existance
+      const UserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.tweet_id)
+
+      // Check record existance in database
+      const like = await Like.findOne({ where: { UserId, TweetId } })
+      if (!like) return res.status(404).json({ status: 'error', message: "Cannot find this tweet or you havn't like this tweet." })
+
       // Delete record
-      return res.status(200).json('JSON Response')
+      await like.destroy()
+      return res.status(200).json({ status: 'success' })
     } catch (err) { next(err) }
   }
 }
