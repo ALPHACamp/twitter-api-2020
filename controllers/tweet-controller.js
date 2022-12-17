@@ -22,42 +22,42 @@ const tweetController = {
       return res.status(200).json({ tweet })
     } catch (err) { next(err) }
   },
-  getTweetReplies: async (req, res, next) => {
-    try {
-      const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId)
-      if (!tweet) {
-        return res.status(404).json({ status: 'error', message: 'tweet did not exist!' })
-      }
-      const replies = await Reply.findAll({
-        nest: true,
-        raw: true,
-        attributes: ['id', 'comment', 'createdAt'],
-        include: {
-          model: User,
-          attributes: ['id', 'account', 'name', 'avatar']
-        },
-        where: { TweetId: tweetId }
-      })
-      return res.status(200).json(replies)
-    } catch (err) { next(err) }
-  },
-  postTweetReply: (req, res, next) => {
-    const { comment } = req.body
-    const tweetId = req.params.id
-    const currentUserId = helpers.getUser(req).id
-    if (!comment) throw Error('content is required!', {}, Error.prototype.code = 401)
-    if (comment.length > 140) throw Error('too many words!', {}, Error.prototype.code = 401)
-    Reply.create({
-      UserId: currentUserId,
-      TweetId: tweetId,
-      comment
-    })
-      .then(reply => {
-        res.status(200).json(reply)
-      })
-      .catch(err => next(err))
-  },
+  // getTweetReplies: async (req, res, next) => {
+  //   try {
+  //     const tweetId = req.params.id
+  //     const tweet = await Tweet.findByPk(tweetId)
+  //     if (!tweet) {
+  //       return res.status(404).json({ status: 'error', message: 'tweet did not exist!' })
+  //     }
+  //     const replies = await Reply.findAll({
+  //       nest: true,
+  //       raw: true,
+  //       attributes: ['id', 'comment', 'createdAt'],
+  //       include: {
+  //         model: User,
+  //         attributes: ['id', 'account', 'name', 'avatar']
+  //       },
+  //       where: { TweetId: tweetId }
+  //     })
+  //     return res.status(200).json(replies)
+  //   } catch (err) { next(err) }
+  // },
+  // postTweetReply: (req, res, next) => {
+  //   const { comment } = req.body
+  //   const tweetId = req.params.id
+  //   const currentUserId = helpers.getUser(req).id
+  //   if (!comment) throw Error('content is required!', {}, Error.prototype.code = 401)
+  //   if (comment.length > 140) throw Error('too many words!', {}, Error.prototype.code = 401)
+  //   Reply.create({
+  //     UserId: currentUserId,
+  //     TweetId: tweetId,
+  //     comment
+  //   })
+  //     .then(reply => {
+  //       res.status(200).json(reply)
+  //     })
+  //     .catch(err => next(err))
+  // },
   getTweets: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id

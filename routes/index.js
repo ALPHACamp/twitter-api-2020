@@ -31,8 +31,8 @@ router.get('/auth', authenticated, (req, res) => res.status(200).json({ status: 
 
 router.post('/users', authenticated, userController.postUsers)
 
-router.get('/tweets/:id/replies', authenticated, tweetController.getTweetReplies)
-router.post('/tweets/:id/replies', authenticated, tweetController.postTweetReply)
+// router.get('/tweets/:id/replies', authenticated, tweetController.getTweetReplies)
+// router.post('/tweets/:id/replies', authenticated, tweetController.postTweetReply)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweets)
