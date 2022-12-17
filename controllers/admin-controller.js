@@ -1,4 +1,4 @@
-const { User, sequelize } = require('../models')
+const { User, sequelize, Tweet } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const adminController = {
@@ -36,8 +36,24 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(tweets => {
+        if (!tweets) throw new Error('There are no Tweets!')
+        const data = tweets.map(t => ({
+          ...t,
+          description: t.description.substring(0, 50)
+        }))
+        res.status(200).json(data)
+      })
+      .catch(err => next(err))
   }
-
 }
 
 module.exports = adminController
