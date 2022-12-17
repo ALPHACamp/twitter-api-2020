@@ -52,7 +52,9 @@ const userController = {
         account,
         name,
         email,
-        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+        role: 'user',
+        cover: 'https://loremflickr.com/1500/800/mountain'
       })
 
       // 回傳新使用者資料，刪除password欄位
@@ -76,9 +78,10 @@ const userController = {
       // ],
       attributes: {
         exclude: ['password', 'createdAt', 'updatedAt'],
-
-        include: [[sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount']]
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount']
+        ]
       }
     })
       .then(user => {
