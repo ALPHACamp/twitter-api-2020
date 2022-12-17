@@ -4,9 +4,9 @@ const helpers = require('../_helpers')
 const tweetController = {
   getTweet: async (req, res, next) => {
     try {
-      const tweet_id = req.params.tweet_id
+      const tweetId = req.params.id
       const currentUserId = helpers.getUser(req).id
-      const tweet = await Tweet.findByPk(tweet_id, {
+      const tweet = await Tweet.findByPk(tweetId, {
         nest: true,
         raw: true,
         include:
@@ -20,6 +20,26 @@ const tweetController = {
         order: [['createdAt', 'DESC']]
       })
       return res.status(200).json({ tweet })
+    } catch (err) { next(err) }
+  },
+  getTweetReplies: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) {
+        return res.status(404).json({ status: 'error', message: 'tweet did not exist!' })
+      }
+      const replies = await Reply.findAll({
+        nest: true,
+        raw: true,
+        attributes: ['id', 'comment', 'createdAt'],
+        include: {
+          model: User,
+          attributes: ['id', 'account', 'name', 'avatar']
+        },
+        where: { tweetId }
+      })
+      return res.status(200).json(replies)
     } catch (err) { next(err) }
   },
   getTweets: async (req, res, next) => {

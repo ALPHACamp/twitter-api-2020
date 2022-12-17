@@ -24,10 +24,10 @@ router.post('/users', userController.postUsers)
 router.get('/auth', authenticated, (req, res) => res.status(200).json({ status: '200', message: 'JWT success' }))
 
 router.post('/users', authenticated, userController.postUsers)
+router.get('/tweets/:id/replies', authenticated, tweetController.getTweetReplies)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweets)
-router.post('/tweets', authenticated, tweetController.postTweets)
-router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 
 router.get('/', (req, res) => res.send('Hello World!'))
 
