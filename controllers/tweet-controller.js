@@ -68,7 +68,7 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
-},
+  },
   getTweet: async (req, res, next) => {
     try {
       const user = getUser(req).id
