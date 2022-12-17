@@ -7,7 +7,6 @@ const tweetController = {
     try {
       const message = {}
       const description = req.body.description.trim()
-      const { UserId } = getUser(req).id
       if (!description) message.description = '內容不可空白'
       if (description.length > 140) message.description = '內容不可超出140字'
       if (Object.keys(message).length !== 0) {
@@ -17,13 +16,13 @@ const tweetController = {
           data: { description } || null
         })
       }
-      await Tweet.create({
-        UserId,
+      const data = await Tweet.create({
+        UserId: getUser(req).id,
         description
       })
-      return res.status(200).json({ status: 'success' })
+      return res.status(200).json(data)
     } catch (err) {
-      next(err)
+      return next(err)
     }
   },
   getTweets: async (req, res, next) => {
@@ -50,7 +49,7 @@ const tweetController = {
         ...tweet,
         createdAt: relativeTime(tweet.createdAt)
       }))
-      return res.status(200).json(data)
+      res.status(200).json(data)
     } catch (err) {
       next(err)
     }

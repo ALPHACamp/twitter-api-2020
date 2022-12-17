@@ -10,7 +10,6 @@ const { authenticated, authenticatedUser, authenticatedAdmin } = require('../mid
 const { apiErrorHandler } = require('../middleware/error-handler')
 const passport = require('../config/passport')
 
-router.use('/users', authenticated, authenticatedUser, user)
 router.use('/tweets', authenticated, authenticatedUser, tweet) // authenticatedUser
 
 // 使用者註冊
