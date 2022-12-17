@@ -1,4 +1,4 @@
-const { Tweet, User, Reply, Like } = require('../models')
+const { Tweet, User, Like } = require('../models')
 const helpers = require('../_helpers')
 const { dateFormat } = require('../helpers/date-helper')
 
@@ -6,7 +6,9 @@ const tweetController = {
   // 新增推文：
   postTweet: (req, res, next) => {
     const { description } = req.body
-    if (!description) throw new Error('Description is required!')
+    if (!description) throw new Error('推文欄位必填!')
+    if (!description?.trim()) throw new Error('內容不可空白!')
+    if (description?.length > 140) throw new Error('推文字數限制在 140 以內!')
     return Tweet.create({
       UserId: helpers.getUser(req).id,
       description
