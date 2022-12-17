@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { getOffset, getUser } = require('../_helpers')
 
 const superUser = { name: 'root', email: 'root@example.com' }
@@ -79,6 +79,25 @@ const adminController = {
       }))
       return res.status(200).json(data)
     } catch (err) { next(err) }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const TweetId = Number(req.params.id)
+
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
+
+      await tweet.destroy()
+      await Reply.destroy({ where: { TweetId: tweet.id } })
+      await Like.destroy({ where: { TweetId: tweet.id } })
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'delete successfully'
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
