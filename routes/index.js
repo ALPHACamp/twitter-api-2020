@@ -17,6 +17,7 @@ router.post('/login', passport.authenticate('local', { session: false }), userCo
 
 router.get('/users/:id/likes', authenticated, userController.getUserlikes)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplidTweets)
 
 router.get('/users/:id/followings', authenticated, userController.getUserFollowing)
 router.get('/users/:id/followers', authenticated, userController.getUserFollower)

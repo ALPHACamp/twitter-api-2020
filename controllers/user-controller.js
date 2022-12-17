@@ -193,6 +193,10 @@ const userController = {
 		Promise.all([
 			Tweet.findAll({
 				where:{UserId:id},
+				include:{
+					model:User,
+					attributes:['id','account','avatar']
+				},
 				order: [['createdAt', 'DESC']],
 				nest:true,
 				raw:true
@@ -207,9 +211,6 @@ const userController = {
 
 		])
 			.then(([tweetList,like,reply]) => {
-				// console.log(tweetList)
-				// console.log(like)
-				// console.log(reply)
 				tweetList.forEach((t)=>{
 					t.likeCount = 0
 					t.replyCount = 0
@@ -231,6 +232,9 @@ const userController = {
 				res.status(200).json(tweetList)
 			})
 			.catch(err => { console.log(err) })
+	},
+	getUserReplidTweets:(req,res,next)=>{
+
 	}
 }
 
