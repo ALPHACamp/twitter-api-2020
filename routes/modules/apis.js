@@ -27,7 +27,7 @@ router.post('/tweets/:tweet_id/unlike', authenticated, likeController.unLike)
 router.post('/followships', authenticated, followshipController.addFollowing)
 router.delete('/followships/:following_id', authenticated, followshipController.removeFollowing)
 
-router.get('/admin/users', authenticatedAdmin, adminController.getUsers)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.delete('/admin/tweets/:tweet_id', authenticatedAdmin, adminController.deleteTweet)
 
 module.exports = router
