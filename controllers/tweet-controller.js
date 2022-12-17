@@ -116,6 +116,8 @@ const tweetController = {
       const TweetId = req.params.id
       const { comment } = req.body
 
+      if (!comment || comment.trim().length === 0) return res.status(404).json({ status: 'error', message: '內容不可為空白！' })
+
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
 
