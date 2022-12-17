@@ -20,6 +20,7 @@ const tweetController = {
   },
   // 取得所有推文：
   getTweets: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
     return Tweet.findAll({
       include: [
         {
@@ -29,6 +30,13 @@ const tweetController = {
           }
         }
       ],
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id )'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id )'), 'likeCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM likes WHERE likes.UserId = ${currentUser.id} AND likes.TweetId = tweet.id )`), 'isLiked']
+        ]
+      },
       order: [
         [sequelize.literal('createdAt'), 'DESC']
       ]
