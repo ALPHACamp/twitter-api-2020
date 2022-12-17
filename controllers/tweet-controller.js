@@ -20,32 +20,31 @@ const tweetController = {
   },
   // 取得所有推文：
   getTweets: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
     return Tweet.findAll({
       include: [
-        User,
-        { model: Reply, include: User }
-      ],
+        {
+          model: User,
+          attributes: {
+            exclude: ['password']
+          }
+        }],
       attributes: {
-        exclude: ['password'],
         include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id )'), 'tweetCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followersCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id )'), 'followingCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id )'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id )'), 'likeCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM likes WHERE likes.UserId = ${currentUser.id} AND likes.TweetId = tweet.id )`), 'isLiked']
         ]
-      }
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
     })
       .then(tweets => {
-        return tweets
-          .map(tweet => ({
-            ...tweet.dataValues,
-            // [ 修 ]：發文過一週？是的話顯示日期，不是的話顯示多久之前
-            relativeTime: dateFormat(tweet.dataValues.createdAt).fromNow()
-            // 計算 reply 該推文的回覆數
-            // repliedCount: tweet.replies.length
-            // 計算 like 該推文的人數
-            // likedCount: tweet.likes.length
-            // isLiked(boolean)
-          }))
+        return tweets.map(tweet => ({
+          ...tweet,
+          relativeTime: dateFormat(tweet.createdAt).fromNow()// [ 修 ]：發文過一週？是的話顯示日期，不是的話顯示多久之前
+        }))
       })
       .then(tweets =>
         res.json(tweets)
@@ -54,11 +53,25 @@ const tweetController = {
   },
   // 取得一則推文：
   getTweet: (req, res, next) => {
-    Tweet.findByPk(req.params.tweet_id, {
+    const currentUser = helpers.getUser(req)
+    return Tweet.findByPk(req.params.tweet_id, {
       include: [
-        User,
-        { model: Reply, include: User }
-      ]
+        {
+          model: User,
+          attributes: {
+            exclude: ['password']
+          }
+        }],
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id )'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id )'), 'likeCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM likes WHERE likes.UserId = ${currentUser.id} AND likes.TweetId = tweet.id )`), 'isLiked']
+        ]
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
     })
       .then(tweet => {
         if (!tweet) {
@@ -66,18 +79,12 @@ const tweetController = {
           err.status = 404
           throw err
         }
-        const treetJSON = tweet.toJSON()
-        const treetNew = {
-          ...treetJSON,
-          exactTime: dateFormat(tweet.dataValues.createdAt).format('A hh:mm YYYY年 MMM DD日')
+        const tweetAddTime = {
+          ...tweet,
+          exactTime: dateFormat(tweet.createdAt).format('A hh:mm YYYY年 MMM DD日'),
+          relativeTime: dateFormat(tweet.createdAt).fromNow()
         }
-        return res.json(
-          treetNew
-          // 計算 reply 該推文的回覆數
-          // repliedCount: tweet.replies.length
-          // 計算 like 該推文的人數
-          // likedCount: tweet.likes.length
-        )
+        return res.json(tweetAddTime)
       })
       .catch(err => next(err))
   },
