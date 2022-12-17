@@ -1,4 +1,6 @@
 const { User, sequelize } = require('../models')
+const jwt = require('jsonwebtoken')
+const helpers = require('../_helpers')
 const adminController = {
   getUsers: (req, res, next) => {
     return User.findAll({
@@ -14,6 +16,26 @@ const adminController = {
         res.status(200).json(users)
       })
       .catch(err => next(err))
+  },
+  signIn: (req, res, next) => {
+    try {
+      const userData = helpers.getUser(req).toJSON()
+      console.log(userData)
+      if (userData.role !== 'admin') {
+        throw new Error('帳號不存在')
+      }
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      res.json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 
 }
