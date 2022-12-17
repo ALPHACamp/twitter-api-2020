@@ -68,7 +68,7 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
-},
+  },
   getTweet: async (req, res, next) => {
     try {
       const user = getUser(req).dataValues.id
@@ -89,6 +89,22 @@ const tweetController = {
 
       if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
       return res.status(200).json(tweet)
+    } catch (err) { next(err) }
+  },
+  postTweet: async (req, res, next) => {
+    try {
+      const { description } = req.body
+      const UserId = getUser(req).dataValues.id
+
+      if (!description || description.trim().length === 0) return res.status(404).json({ status: 'error', message: '內容不可為空白！' })
+
+      if (description.length > 140) return res.status(404).json({ status: 'error', message: '內容不可超過140字！' })
+
+      const createdTweet = await Tweet.create({
+        description,
+        UserId
+      })
+      return res.status(200).json(createdTweet.toJSON())
     } catch (err) { next(err) }
   }
 }
