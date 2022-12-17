@@ -156,7 +156,6 @@ const userController = {
     ])
       .then(([user, hash]) => {
         if (!user) throw new Error("User didn't exist!")
-        if 
         return user.update({
           name,
           account,
