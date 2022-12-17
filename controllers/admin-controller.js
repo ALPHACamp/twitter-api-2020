@@ -3,17 +3,22 @@ const helpers = require('../_helpers')
 const dayjs = require('dayjs')
 const { User, Tweet, sequelize } = require('../models')
 const adminController = {
+
   signIn: (req, res, next) => {
     try {
       const loginUser = helpers.getUser(req).toJSON()
       if (loginUser?.role === 'user') return res.status(403).json({ status: 'error', message: 'Permission denied.' })
+
       delete loginUser.password
       loginUser.createdAt = dayjs(loginUser.createdAt).valueOf()
       loginUser.updatedAt = dayjs(loginUser.updatedAt).valueOf()
+
       const token = jwt.sign(loginUser, process.env.JWT_SECRET, { expiresIn: '5d' })
-      res.status(200).json({ status: 'success', data: { token, user: loginUser } })
+
+      return res.status(200).json({ status: 'success', data: { token, user: loginUser } })
     } catch (err) { next(err) }
   },
+
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
@@ -23,10 +28,13 @@ const adminController = {
         nest: true,
         raw: true
       })
+
       const data = tweets.map(tweet => ({ ...tweet, description: tweet?.description.slice(0, 50), createdAt: dayjs(tweet.createdAt).valueOf() }))
+
       return res.status(200).json(data)
     } catch (err) { next(err) }
   },
+
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
@@ -40,9 +48,11 @@ const adminController = {
         nest: true,
         raw: true
       })
+
       return res.status(200).json(users)
     } catch (err) { next(err) }
   },
+
   deleteTweet: async (req, res, next) => {
     try {
       const reqTweetId = Number(req.params.id)
@@ -50,6 +60,7 @@ const adminController = {
       if (!tweet) return res.status(404).json({ status: 'error', message: 'Tweet does not exist.' })
 
       await tweet.destroy()
+
       return res.status(200).json({ status: 'success' })
     } catch (err) { next(err) }
   }
