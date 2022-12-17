@@ -12,6 +12,9 @@ const likeController = require('../../controllers/likeController')
 const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 const { signInFail } = require('../../middleware/error-handler')
 
+router.get('/users/:user_id/replied_tweets', userController.getRepliesOfTweet)
+router.get('/users/:user_id/tweets', userController.getTweetsOfUser)
+router.get('/users/:user_id', userController.getUser)
 
 router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn, signInFail)
