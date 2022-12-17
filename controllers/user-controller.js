@@ -304,6 +304,41 @@ const userController = {
       await user.update({ account, name, email, password: hash })
       return res.status(200).json({ status: 'success' })
     } catch (err) { next(err) }
+  },
+  addFollowing: async (req, res, next) => {
+    try {
+      const followerId = helpers.getUser(req).id
+      const followingId = Number(req.body.id)
+      // Follow self
+      if (followerId === followingId) {
+        return res.status(422).json({ status: 'error', message: 'You cannot follow yourself.' })
+      }
+
+      // Followed user don't exist
+      const followingUser = await User.findByPk(followingId)
+      if (!followingUser) return res.status(404).json({ status: 'error', message: 'Cannot find this user.' })
+
+      // Already followed
+      const followship = await Followship.findOne({ where: { followerId, followingId } })
+      if (followship) return res.status(422).json({ status: 'error', message: 'You have already followed this user.' })
+
+      // Create follow record
+      await Followship.create({ followerId, followingId })
+      return res.status(200).json({ status: 'success' })
+    } catch (err) { next(err) }
+  },
+  removeFollowing: async (req, res, next) => {
+    try {
+      const followerId = helpers.getUser(req).id
+      const followingId = Number(req.params.followingId)
+      // Check existance of followship
+      const followship = await Followship.findOne({ where: { followerId, followingId } })
+      if (!followship) return res.status(404).json({ status: 'error', message: "You have already unfollowed this user or you havn't followed this user." })
+
+      // Delete followship
+      await followship.destroy()
+      return res.status(200).json({ status: 'success' })
+    } catch (err) { next(err) }
   }
 }
 
