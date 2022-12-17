@@ -1,8 +1,20 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
 
 const adminController = {
   getUsers: (req, res, next) => {
     return User.findAll({
+      attributes: {
+        exclude: ['password'],
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id )'), 'tweetCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.UserId = user.id )'), 'likeCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followersCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id )'), 'followingCount']
+        ]
+      },
+      order: [
+        [sequelize.literal('tweetCount'), 'DESC']
+      ],
       raw: true
     })
       .then(users => {
@@ -17,13 +29,18 @@ const adminController = {
           model: User,
           attributes: {
             exclude: ['password']
-          } // only these attributes returned
+          }
         }],
+      order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
     })
       .then(tweets => {
-        res.json(tweets)
+        const tweetsData = tweets.map(tweet => ({
+          ...tweet,
+          description: tweet.description.substring(0, 50)
+        }))
+        res.json(tweetsData)
       })
       .catch(err => next(err))
   },

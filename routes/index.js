@@ -7,8 +7,8 @@ const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 
-router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getTweets)
-router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getRepliedTweets)
+router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserReplies)
+router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 // 取得使用者喜歡的內容
 // router.get('/users/:id/likes', authenticated, authenticatedUser, userController.)
 // // 取得使用者正在關注的名單
