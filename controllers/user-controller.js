@@ -241,6 +241,7 @@ const userController = {
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
 
       const repliedTweets = await Reply.findAll({
+        where: { UserId: id },
         include: Tweet,
         order: [['createdAt', 'DESC']],
         raw: true,
