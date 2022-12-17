@@ -14,6 +14,7 @@ router.use('/admin', admin)
 router.post('/users', userController.register) // 註冊
 router.post('/login', passport.authenticate('local', { session: false }), userController.login)
 
+router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getUserLikes)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getRepliedTweets)
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
