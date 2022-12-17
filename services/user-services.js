@@ -47,7 +47,7 @@ const userServices = {
   },
   signIn: (req, cb) => {
     try {
-      const userData = req.user.toJSON()
+      const userData = req.user
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, { token, user: userData })
