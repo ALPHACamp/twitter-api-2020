@@ -63,6 +63,7 @@ const userController = {
       Followship.findAndCountAll({ where: { followingId: helpers.getUser(req) } })
     ])
       .then(([user, followship, followerCount, followingCount]) => {
+        if (!user) throw new Error("User didn't exist!")
         user = user.toJSON()
         user.isSelf = Number(req.params.id) === Number(helpers.getUser(req).id)
         user.isfollow = followship !== null
