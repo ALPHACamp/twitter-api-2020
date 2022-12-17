@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../models')
 const helpers = require('../_helpers')
-
+const { imgurFileHandler } = require('../helpers/file-helpers')
 const { User, Followship, Tweet, Reply, Like } = db
 
 const userController = {
@@ -68,12 +68,7 @@ const userController = {
         user.isfollow = followship !== null
         user.followingAmount = followerCount.count
         user.followerAmount = followingCount.count
-        res.json({
-          status: 'success',
-          data: {
-            user
-          }
-        })
+        res.status(200).json(user)
       })
       .catch(err => next(err))
   },
@@ -103,14 +98,32 @@ const userController = {
             isLike: tweet.Likes.map(t => t.id).includes(helpers.getUser(req).id)
           }
         })
-        res.json({
-          status: 'success',
-          data: {
-            tweets
-          }
-        })
+        res.status(200).json(tweets)
       })
       .catch(err => next(err))
+  },
+  putUser: (req, res, next) => {
+    const { name, introduction } = req.body
+    const { files } = req
+    const nameMax = 50
+    const introMax = 160
+    const avatar = files.avatar[0]
+    const background = files.background[0] 
+    return Promise.all([
+      User.findByPk(req.params.id),
+      imgurFileHandler(avatar),
+      imgurFileHandler(background)
+    ])
+      .then(([user, avatar, background]) => {
+        if (user.id !== helpers.getUser(req)) throw new Error('permission denied.')
+        if (name.length > nameMax) throw new Error('the length of name should be under 50.')
+        if (introduction > introMax) throw new Error('the length of introduction should be under 160.')
+
+      })
+
+  },
+  putUserSetting: (req, res, next) => {
+
   }
 }
 module.exports = userController
