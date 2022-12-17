@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
-const { User, Like, sequelize, Tweet } = require('../models')
+const { User, Like, Followship, Tweet, sequelize,  } = require('../models')
 const { getUser, imgurFileHandler } = require('../_helpers')
 
 const userController = {
@@ -190,6 +190,46 @@ const userController = {
       })
 
       return res.status(200).json(likedTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowings: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      const followings = await Followship.findAll({
+        attributes: { exclude: ['updatedAt'] },
+        include: { model: User, as: 'FollowingInfo', attributes: ['id', 'account', 'name', 'avatar'] },
+        where: { followerId: id },
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      const followings = await Followship.findAll({
+        attributes: { exclude: ['updatedAt'] },
+        include: { model: User, as: 'FollowerInfo', attributes: ['id', 'account', 'name', 'avatar'] },
+        where: { followingId: id },
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(followings)
     } catch (err) {
       next(err)
     }
