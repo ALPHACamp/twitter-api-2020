@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
 const { User, Like, Tweet, Followship, Reply, sequelize } = require('../models')
 const { getUser, imgurFileHandler } = require('../_helpers')
+const dayjs = require('dayjs')
 
 const userController = {
   userLogin: async (req, res, next) => {
@@ -252,6 +253,33 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+      const user = getUser(req)
+      const userId = await User.findByPk(id)
+      if (!userId) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      const tweets = await Tweet.findAll({
+        attributes: [
+          'id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
+        ],
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        where: { UserId: id },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      const data = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: user?.Likes?.some(userLike => userLike?.TweetId === tweet.id),
+        createdAt: dayjs(tweet.createdAt).valueOf()
+      }))
+      return res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 
