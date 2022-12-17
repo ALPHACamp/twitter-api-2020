@@ -45,7 +45,7 @@ const adminController = {
       nest: true
     })
       .then(tweets => {
-        if (!tweets) throw new Error('There are no Tweets!')
+        if (!tweets) throw new Error('貼文不存在!')
         const data = tweets.map(t => ({
           ...t,
           description: t.description.substring(0, 50)
@@ -53,7 +53,17 @@ const adminController = {
         res.status(200).json(data)
       })
       .catch(err => next(err))
+  },
+  deleteTweets: (req, res, next) => {
+    const tweetId = Number(req.params.id)
+    return Tweet.destroy({
+      where: { id: tweetId }
+    })
+      .then(deletedTweet => {
+        if (!deletedTweet) throw new Error('貼文不存在!')
+        return res.status(200).json({ status: 'success', message: '貼文已刪除!' })
+      })
+      .catch(err => next(err))
   }
 }
-
 module.exports = adminController
