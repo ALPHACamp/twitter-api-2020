@@ -8,6 +8,5 @@ router.get('/:user_id/likes', userController.getLikesOfUser)
 router.get('/:user_id/followings', userController.getFollowingsOfUser)
 router.get('/:user_id/followers', userController.getFollowersOfUser)
 router.get('/:user_id', userController.getUser)
-router.post('/', userController.signUp)
 
 module.exports = router
