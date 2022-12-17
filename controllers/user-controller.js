@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 
 const userServices = {
@@ -82,25 +82,32 @@ const userController = {
   },
   getUser: (req, res, next) => {
     const { id } = req.params
-    User.findByPk(id, {
-      include: [
-        Tweet,
-        { model: User, as: 'Followings' },
-        { model: User, as: 'Followers' }
-      ]
-    })
-      .then((user) => {
+    console.log('id:', id)
+    return Promise.all([
+      Followship.findOne({ where: { followingId: id }, raw: true }),
+      User.findByPk(id, {
+        include: [
+          Tweet,
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ]
+      })
+    ])
+      .then(([track, user]) => {
         if (!user) throw new Error('使用者不存在 !')
+
+        // 若未被追蹤，都顯示 false
+        const trackData = track ? track.followingId === user.id : false
+
         // 使用者推文數
         const tweetCount = user.Tweets.length
         // 使用者追蹤數
         const followingCount = user.Followings.length
         // 使用者被追蹤數
         const follwerCount = user.Followers.length
-        // 使用者與登入者追蹤關係
-        const isFollwerd = user.Followers.some(
-          (follower) => follower.followingId === user.id
-        )
+        // 使用者與追蹤者關係
+        const isFollowed = trackData
+
         user = user.toJSON()
         // 刪除非必要屬性
         delete user.Tweets
@@ -111,7 +118,7 @@ const userController = {
         user.tweetCount = tweetCount
         user.followingCount = followingCount
         user.follwerCount = follwerCount
-        user.isFollwerd = isFollwerd
+        user.isFollowed = isFollowed
 
         return res.status(200).send(user)
       })
@@ -123,9 +130,7 @@ const userController = {
 
     let avatarFile = req.files.avatar
     let coverFile = req.files.cover
-    if (!name) throw new Error('name 欄位為必填!')
     // 將 avatar 和 cover 資料取出
-
     if (!req.files.avatar) {
       avatarFile = [{ path: '' }]
     }
@@ -147,9 +152,7 @@ const userController = {
           cover: coverFile[0].path || user.cover
         })
       })
-      .then((updateUser) =>
-        res.status(201).json({ success: true, data: updateUser })
-      )
+      .then((updateUser) => res.status(200).send(updateUser))
       .catch((err) => next(err))
   }
 }

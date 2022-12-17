@@ -16,16 +16,12 @@ const authenticated = (req, res, next) => {
 
 // admin 權限驗證
 const authenticatedAdmin = (req, res, next) => {
-  console.log('req:', helpers.getUser(req))
-  console.log('role is:', helpers.getUser(req).role)
   if (helpers.getUser(req)?.role === 'admin') return next()
   return res.status(403).json({ success: false, message: 'permissions denied' })
 }
 
 // user 權限驗證
 const authenticatedUser = (req, res, next) => {
-  console.log('req:', helpers.getUser(req))
-  console.log('role is:', helpers.getUser(req).role)
   if (helpers.getUser(req)?.role === 'user') {
     return next()
   }
