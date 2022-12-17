@@ -33,10 +33,10 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
-    const { id } = req.params
+    const TweetId = req.params.id
     const UserId = helpers.getUser(req)?.id
     return Promise.all([
-      Tweet.findByPk(id, {
+      Tweet.findByPk(TweetId, {
         attributes: ['id', 'description', 'createdAt',
           [
             sequelize.literal('(SELECT COUNT(*) FROM Replies AS replyCount WHERE tweet_id = Tweet.id)'), 'replyCount' // 回傳留言數
@@ -49,7 +49,7 @@ const tweetController = {
         nest: true,
         raw: true
       }),
-      Like.findAll({ where: { id }, raw: true })
+      Like.findAll({ where: { TweetId }, raw: true })
     ])
       .then(([tweet, likes]) => {
         if (!tweet) {
@@ -58,7 +58,8 @@ const tweetController = {
             message: 'Tweet not found'
           })
         }
-        tweet.isLiked = likes.some(like => like.TweetId === tweet.id && UserId === like.UserId)
+        // console.log(likes)
+        tweet.isLiked = likes.some(like => like.TweetId === tweet.id && like.UserId === UserId)
         res.status(200).json(tweet)
       })
       .catch(err => next(err))
