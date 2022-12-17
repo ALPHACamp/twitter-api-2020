@@ -26,10 +26,27 @@ const tweetController = {
 
   addOneTweet: async (req, res, next) => {
     try {
-      // Get user and tweet data from req
+      // Get user id and tweet data from req
+      const UserId = helpers.getUser(req).id
+      const description = req.body.description
+
       // Validate tweet content(not empty and less than 140)
+      if (description.trim() === '') {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Discription is empty.'
+        })
+      }
+      if (description.length > 140) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Tweets content should be less than 140 characters.'
+        })
+      }
+
       // Create a tweet
-      return res.status(200).json('JSON Response')
+      await Tweet.create({ UserId, description })
+      return res.status(200).json({ status: 'success' })
     } catch (err) { next(err) }
   },
 
@@ -53,10 +70,24 @@ const tweetController = {
 
   addReply: async (req, res, next) => {
     try {
-      // Get user, tweet_id and reply data from req
-      // Validate reply content(not empty)
-      // Create a tweet
-      return res.status(200).json('JSON Response')
+      // Get user, tweet_id and reply comment from req
+      const UserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.tweet_id)
+      const comment = req.body.comment
+
+      // Check tweet existance
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) { return res.status(404).json({ status: 'error', message: 'Cannot find this tweet.' }) }
+
+      // Validate reply content(not empty and less than 140)
+      if (comment.trim() === '') { return res.status(400).json({ status: 'error', message: 'Replied comment is empty.' }) }
+      if (comment.length > 140) {
+        return res.status(422).json({ status: 'error', message: 'Replied comment should be less than 140 characters.' })
+      }
+
+      // Create a reply
+      await Reply.create({ UserId, TweetId, comment })
+      return res.status(200).json({ status: 'success' })
     } catch (err) { next(err) }
   },
 
