@@ -111,6 +111,36 @@ const userController = {
         })
       })
       .catch(err => next(err))
+  },
+  getRepliedTweets: (req, res, next) => {
+    Reply.findAll({
+      where: { UserId: req.params.id },
+      include: [User, { model: Tweet, include: User }],
+      order: [['createdAt', 'DESC']]
+    })
+      // .then(replies => {
+      //   res.json(replies)
+      // })
+      .then(replies => {
+        replies = replies.map(reply => {
+          reply = {
+            ...reply.toJSON(),
+            repliedAccount: reply.Tweet.User.account,
+            User: {
+              id: reply.User.id,
+              account: reply.User.account,
+              name: reply.User.name
+            }
+          }
+          delete reply.Tweet
+          return reply
+        })
+        return replies
+      })
+      .then(replies => {
+        res.json(replies)
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = userController

@@ -12,8 +12,8 @@ module.exports = {
     )
     await queryInterface.bulkInsert('Likes',
       Array.from({ length: 70 }, (_, index) => ({
-        user_id: users[index % users.length].id,
-        tweet_id: tweets[Math.floor(index / 3)].id,
+        User_id: users[index % users.length].id,
+        Tweet_id: tweets[Math.floor(index / 3)].id,
         created_at: new Date(),
         updated_at: new Date()
       }))
