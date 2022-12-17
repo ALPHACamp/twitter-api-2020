@@ -109,6 +109,26 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  postReplies: async (req, res, next) => {
+    try {
+      const UserId = getUser(req).dataValues.id
+      const TweetId = req.params.id
+      const { comment } = req.body
+
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
+
+      const createdReply = await Reply.create({
+        comment,
+        TweetId,
+        UserId
+      })
+
+      return res.status(200).json({ status: 'success', data: createdReply.toJSON() })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = tweetController
