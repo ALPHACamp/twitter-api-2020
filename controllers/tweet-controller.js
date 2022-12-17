@@ -8,6 +8,21 @@ const tweetController = {
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
+        tweets = tweets.map(tweet => {
+          const { id, account, name, introduction, avatar, background } = tweet.User
+          tweet = {
+            ...tweet.toJSON(),
+            User: {
+              id,
+              account,
+              name,
+              introduction,
+              avatar,
+              background
+            }
+          }
+          return tweet
+        })
         res.json(tweets)
       })
       .catch(err => {
@@ -26,11 +41,17 @@ const tweetController = {
     ])
       .then(([tweet, likes, replies]) => {
         if (!tweet) throw new Error("Tweet didn't exist!")
-        return User.findByPk(tweet.userId)
+        return User.findByPk(tweet.UserId)
           .then(user => {
+            const { id, name, account, avatar } = user
             res.json({
               ...tweet,
-              userName: user.name,
+              User: {
+                id,
+                name,
+                account,
+                avatar
+              },
               replyAmount: replies.length,
               likeAmount: likes.length
             })
@@ -169,7 +190,7 @@ const tweetController = {
           delete tweet.Likes
           return tweet
         })
-        res.json(tweets)
+        res.json(tweets.sort((a, b) => b.createdAt - a.createdAt))
       })
       .catch(err => next(err))
   }
