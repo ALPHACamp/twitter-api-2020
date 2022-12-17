@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     avatar: DataTypes.STRING,
     cover: DataTypes.STRING,
-    introduction: DataTypes.TEXT,
+    introduction: DataTypes.STRING,
     role: DataTypes.STRING,
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE
