@@ -13,7 +13,7 @@ const cors = require('cors')
 const { apis } = require('./routes')
 
 const app = express()
-const port = 8080
+const port = process.env.PORT || 3000
 const SESSION_SECRET = 'secret'
 
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
