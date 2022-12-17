@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
-const { User, Like, Followship, Tweet, sequelize,  } = require('../models')
+const { User, Like, Tweet, Followship, Reply, sequelize } = require('../models')
 const { getUser, imgurFileHandler } = require('../_helpers')
 
 const userController = {
@@ -230,6 +230,24 @@ const userController = {
       })
 
       return res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const user = await User.findByPk(id)
+      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
+
+      const repliedTweets = await Reply.findAll({
+        include: Tweet,
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(repliedTweets)
     } catch (err) {
       next(err)
     }
