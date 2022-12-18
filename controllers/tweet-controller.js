@@ -22,7 +22,6 @@ const tweetController = {
       return res.status(200).json({ tweet })
     } catch (err) { next(err) }
   },
-  // unfinished 前端畫面第 12 頁
   getTweetReplies: async (req, res, next) => {
     try {
       const tweetId = req.params.id
@@ -46,22 +45,32 @@ const tweetController = {
       res.status(200).json(replyList)
     } catch (err) { next(err) }
   },
-  // postTweetReply: (req, res, next) => {
-  //   const { comment } = req.body
-  //   const tweetId = req.params.id
-  //   const currentUserId = helpers.getUser(req).id
-  //   if (!comment) throw Error('content is required!', {}, Error.prototype.code = 401)
-  //   if (comment.length > 140) throw Error('too many words!', {}, Error.prototype.code = 401)
-  //   Reply.create({
-  //     UserId: currentUserId,
-  //     TweetId: tweetId,
-  //     comment
-  //   })
-  //     .then(reply => {
-  //       res.status(200).json(reply)
-  //     })
-  //     .catch(err => next(err))
-  // },
+  postTweetReply: (req, res, next) => {
+    const { comment } = req.body
+    const tweetId = req.params.id
+    const currentUserId = helpers.getUser(req).id
+    if (!comment) {
+      return res.status(404).json({
+        status: '404',
+        message: 'Content is required!'
+      })
+    }
+    if (comment.length > 140) {
+      return res.status(401).json({
+        status: '401',
+        message: 'Too many words!'
+      })
+    }
+    Reply.create({
+      UserId: currentUserId,
+      TweetId: tweetId,
+      comment
+    })
+      .then(reply => {
+        res.status(200).json(reply)
+      })
+      .catch(err => next(err))
+  },
   getTweets: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
