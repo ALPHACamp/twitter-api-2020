@@ -151,7 +151,7 @@ const userController = {
 	getUserlikes: (req, res, next) => {
 		const id = req.params.id
 		  Like.findAll({
-		   where:{userId:id},
+		   where:{UserId:id},
 		   include: { 
 			model: Tweet,
 			attributes: {
