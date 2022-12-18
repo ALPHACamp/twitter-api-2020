@@ -24,10 +24,10 @@ const userController = {
   },
   signUp: async (req, res, next) => {
     try {
-      const { account, name, email, password } = req.body
+      const { account, name, email, password, checkPassword } = req.body
       // 初始化message物件
       const message = {}
-
+      if (password !== checkPassword) return res.status({ status: 'error', message: '密碼與確認密碼不一致' })
       // 查詢資料庫帳號與信箱是否已註冊
       const [userAccount, userEmail] = await Promise.all([
         User.findOne({ where: { account } }),
