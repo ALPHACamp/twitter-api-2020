@@ -3,6 +3,7 @@ const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { dateFormat } = require('../helpers/date-helper')
+const { imgurUploadImageHandler } = require('../helpers/file-helper')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -246,6 +247,34 @@ const userController = {
       .then(followships => {
         if (!followships) throw new Error("Followships didn't exist!")
         return res.json(followships)
+      })
+      .catch(err => next(err))
+  },
+  putUserProfile: (req, res, next) => {
+    const { name, introduction } = req.body
+    const currentUser = helpers.getUser(req)
+    if (name?.length > 50) throw new Error('暱稱字數上限 50 字!')
+    if (introduction?.length > 160) throw new Error('自我介紹字數上限 160 字!')
+    // const id = Number(req.params.id)
+    // if (Number(id) !== getUser(req).id) throw new Error('You are not allowed to use!')
+    const { files } = req
+    return Promise.all([
+      User.findByPk(currentUser.id),
+      imgurUploadImageHandler(files?.avatar),
+      imgurUploadImageHandler(files?.cover)
+    ])
+      .then(([user, avatarFilePath, coverFilePath]) => {
+        if (!user) throw new Error('使用者不存在!')
+        return user.update({
+          name,
+          introduction,
+          avatar: avatarFilePath || user.avatar,
+          cover: coverFilePath || user.cover
+        })
+      })
+      .then(updatedUser => {
+        const userData = updatedUser.toJSON()
+        res.json(userData)
       })
       .catch(err => next(err))
   }
