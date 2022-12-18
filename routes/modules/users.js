@@ -41,6 +41,13 @@ router.get(
   userController.getFollowing
 )
 
+// 查看特定使用者的追隨者們
+router.get(
+  '/:id/followers',
+  authenticated,
+  authenticatedUser,
+  userController.getFollower
+)
 // 註冊不需要驗證登入狀態
 router.post('/', userController.signUp)
 

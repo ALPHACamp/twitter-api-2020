@@ -183,6 +183,14 @@ const userController = {
         res.status(200).send(followingList)
       })
       .catch((err) => next(err))
+  },
+  getFollower: (req, res, next) => {
+    const { id } = req.params
+    Followship.findAll({ where: { followingId: id } })
+      .then((followerList) => {
+        res.status(200).send(followerList)
+      })
+      .catch((err) => next(err))
   }
 }
 
