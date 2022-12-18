@@ -23,6 +23,7 @@ const userController = {
     const { account, name, email, password, checkPassword } = req.body
     if (!account || !name || !email || !password || !checkPassword) throw new Error('所有欄位皆為必填')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
+    if (name?.length > 50) throw new Error('暱稱 name 上限 50 字!')
     return Promise.all([
       User.findOne({ where: { account }, raw: true }),
       User.findOne({ where: { email }, raw: true })
