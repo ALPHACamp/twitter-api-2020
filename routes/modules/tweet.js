@@ -6,6 +6,7 @@ const { authenticated } = require('../../middleware/auth')
 
 // router.get('/tweets/:id/replies', authenticated, tweetController.getTweetReplies)
 // router.post('/tweets/:id/replies', authenticated, tweetController.postTweetReply)
+router.post('/:id/like', authenticated, tweetController.likeTweet)
 router.get('/:id', authenticated, tweetController.getTweet)
 router.get('/', authenticated, tweetController.getTweets)
 router.post('/', authenticated, tweetController.postTweets)

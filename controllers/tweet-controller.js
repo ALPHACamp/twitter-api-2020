@@ -1,4 +1,4 @@
-const { User, Tweet, sequelize } = require('../models')
+const { User, Tweet, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -94,6 +94,38 @@ const tweetController = {
         res.status(200).json(tweet)
       })
       .catch(err => next(err))
+  },
+  likeTweet: async (req, res, next) => {
+    try {
+      console.log(req.params)
+      const tweetId = req.params.id
+      const tweet = await Tweet.findByPk(tweetId)
+      const like = await Like.finOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          tweetId
+        }
+      })
+      if (!tweet) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Tweet did not exist!'
+        })
+      }
+      if (like) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'You have already liked this tweet!'
+        })
+      }
+      Like.create({
+        UserId: helpers.getUser(req).id,
+        tweetId
+      })
+      return res.status(200).json(Like)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
