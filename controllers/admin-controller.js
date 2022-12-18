@@ -4,8 +4,6 @@ const { getOffset, getUser } = require('../_helpers')
 
 const superUser = { name: 'root', email: 'root@example.com' }
 
-const dayjs = require('dayjs')
-
 const adminController = {
   adminLogin: async (req, res, next) => {
     try {
@@ -83,8 +81,7 @@ const adminController = {
       })
       const data = tweets.map(tweet => ({
         ...tweet.toJSON(),
-        description: tweet?.description.slice(0, 50),
-        createdAt: dayjs(tweet.createdAt).valueOf()
+        description: tweet?.description.slice(0, 50)
       }))
       return res.status(200).json(data)
     } catch (err) { next(err) }
