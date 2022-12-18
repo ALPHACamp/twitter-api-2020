@@ -3,11 +3,13 @@ const router = express.Router()
 const passport = require('../config/passport')
 const admin = require('./modules/admin')
 const user = require('./modules/user')
+const tweet = require('./modules/tweet')
 const userController = require('../controllers/user-controller')
-const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 
+// tweet功能
+router.use('/tweets', authenticated, authenticatedUser, tweet)
 // user功能
 router.use('/users', authenticated, authenticatedUser, user)
 // 取得當前使用者
@@ -24,18 +26,10 @@ router.post('/signin', passport.authenticate('local', { session: false }), authe
 // Followship
 router.delete('/followships/:followingId', authenticated, authenticatedUser, userController.removeFollowing)
 router.post('/followships', authenticated, authenticatedUser, userController.addFollowing)
-// Like
-router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.addLike)
-router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.removeLike)
 
 // Reply
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getReplies)
 router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
-
-// Tweet
-router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
-router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
-router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
 router.use('/', (req, res) => {
   res.json('api test main')
