@@ -277,6 +277,34 @@ const userController = {
         res.json(userData)
       })
       .catch(err => next(err))
+  },
+  putUserSetting: (req, res, next) => {
+    const { account, name, email, password, checkPassword } = req.body
+    if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
+    if (name?.length > 50) throw new Error('暱稱 name 上限 50 字!')
+    return Promise.all([
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
+    ])
+      .then(([userFoundByAccount, userFoundByEmail]) => {
+        if (userFoundByAccount) throw new Error('account 已重複註冊!')
+        if (userFoundByEmail) throw new Error('email 已重複註冊!')
+        return bcrypt.hash(password, 10)
+      })
+      .then(hash => {
+        return User.update({
+          account,
+          name,
+          email,
+          password: hash
+        })
+      })
+      .then(renewUser => {
+        const userData = renewUser.toJSON()
+        delete userData.password
+        res.json({ status: 'success', message: '帳號內容已成功修改!', renewUser: userData })
+      })
+      .catch(err => next(err))
   }
 }
 
