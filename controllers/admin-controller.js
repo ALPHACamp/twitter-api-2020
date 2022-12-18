@@ -9,7 +9,7 @@ const adminController = {
     try {
       // token(效期30天)
       const userData = getUser(req).toJSON()
-      if (userData.role !== 'admin') return res.json({ status: 'error', message: '帳號不存在！' })
+      if (userData.role !== 'admin') return res.status(401).json({ status: 'error', message: '帳號不存在！' })
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       return res.status(200).json({
