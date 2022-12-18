@@ -16,7 +16,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     // Other model options go here
     sequelize, // We need to pass the connection instance
-    paranoid: true,
     modelName: 'Followship', // We need to choose the model name
     tableName: 'Followships',
     underscored: true

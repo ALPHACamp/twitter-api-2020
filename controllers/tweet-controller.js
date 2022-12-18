@@ -116,7 +116,32 @@ const tweetController = {
         })
       }
       const likeRecord = await Like.create({ UserId, TweetId })
-      return res.status(200).json(likeRecord)
+      return res.status(200).json({ status: "success", data: likeRecord })
+    } catch (err) {
+      next(err)
+    }
+  },
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+      const UserId = helpers.getUser(req).id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Tweet did not exist!'
+        })
+      }
+      const like = await Like.findOne({
+        where: { UserId, TweetId }
+      })
+      if (!like) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'You have not liked this tweet!'
+        })
+      } else like.destroy()
+      return res.status(200).json({ status: "success", data: like })
     } catch (err) {
       next(err)
     }
