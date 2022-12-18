@@ -7,7 +7,7 @@ const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 const bcrypt = require('bcryptjs')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 
 // set up Passport strategy
 passport.use(new LocalStrategy(
@@ -38,9 +38,9 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
+  return User.findByPk(jwtPayload.id, {
     include: [
-      { model: Tweet, as: 'LikedTweets' },
+      Reply, Tweet, Like,
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
@@ -51,22 +51,22 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
     })
     .catch(err => cb(err))
 }))
-// serialize and deserialize user
-passport.serializeUser((user, cb) => {
-  cb(null, user.id)
-})
-passport.deserializeUser((id, cb) => {
-  return User.findByPk(id, {
-    include: [
-      { model: Tweet, as: 'LikedTweets' },
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
-    ]
-  })
-    .then(user => {
-      user = user.toJSON()
-      return cb(null, user)
-    })
-})
+// // serialize and deserialize user
+// passport.serializeUser((user, cb) => {
+//   cb(null, user.id)
+// })
+// passport.deserializeUser((id, cb) => {
+//   return User.findByPk(id, {
+//     include: [
+//       { model: Tweet, as: 'LikedTweets' },
+//       { model: User, as: 'Followers' },
+//       { model: User, as: 'Followings' }
+//     ]
+//   })
+//     .then(user => {
+//       user = user.toJSON()
+//       return cb(null, user)
+//     })
+// })
 
 module.exports = passport
