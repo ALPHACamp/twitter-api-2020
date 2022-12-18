@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       UserId: DataTypes.INTEGER,
       TweetId: DataTypes.INTEGER,
-      comment: DataTypes.STRING
+      comment: DataTypes.TEXT
     },
     {
       sequelize,
