@@ -5,13 +5,28 @@ const followshipServices = {
   getTopUsers: (req, cb) => {
     const limit = Number(req.query.top)
     return Followship.findAll({
-      include: [{ model: User, as: 'followingUser' }],
-      attributes: ['followingId', [sequelize.fn('COUNT', 'followingId'), 'count']],
-      order: [[sequelize.literal('count'), 'DESC']],
+      attributes: [
+        'followingId',
+        [sequelize.fn('COUNT', 'followingId'), 'followerCount']
+      ],
+      order: [[sequelize.literal('followerCount'), 'DESC']],
       group: ['followingId'],
-      limit
+      limit,
+      include: [
+        {
+          model: User,
+          as: 'followingUser',
+          attributes: ['id', 'avatar', 'name', 'account']
+        }
+      ]
     })
-      .then(popularUsers => cb(null, popularUsers))
+      .then(users => {
+        const popularUsers = users.map(user => ({
+          ...user.toJSON(),
+          isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.followingId)
+        }))
+        cb(null, popularUsers)
+      })
       .catch(err => cb(err))
   },
   addFollowing: (req, cb) => {

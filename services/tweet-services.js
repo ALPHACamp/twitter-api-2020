@@ -1,19 +1,48 @@
+const sequelize = require('sequelize')
 const { User, Tweet, Reply, Like } = require('./../models')
 const helpers = require('../_helpers')
 const tweetServices = {
   getTweets: (req, cb) => {
     return Tweet.findAll({
-      include: [User]
+      attributes: [
+        'id', 'UserId', 'description', 'createdAt', 'updatedAt',
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
+      ],
+      include: [{
+        model: User,
+        attributes: [
+          'id', 'avatar', 'name', 'account'
+        ]
+      }],
+      order: [['id', 'DESC']]
     })
-      .then(tweets => cb(null, tweets))
+      .then(datas => {
+        const tweets = datas.map(data => ({
+          ...data.toJSON(),
+          isLiked: helpers.getUser(req).LikedTweets.some(t => t.Like.TweetId === data.id)
+        }))
+        console.log(helpers.getUser(req).LikedTweets)
+        cb(null, tweets)
+      })
       .catch(err => cb(err))
   },
   getTweet: (req, cb) => {
     const { tweetId } = req.params
     return Tweet.findByPk(tweetId, {
-      include: [User]
+      attributes: [
+        'id', 'description', 'createdAt',
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
+      ],
+      include: [{ model: User, attributes: ['id', 'avatar', 'account', 'name'] }],
+      raw: true,
+      nest: true
     })
-      .then(tweet => cb(null, tweet))
+      .then(tweet => {
+        tweet.isLike = helpers.getUser(req).LikedTweets.some(t => t.Like.TweetId === tweet.id)
+        cb(null, tweet)
+      })
       .catch(err => cb(err))
   },
   postTweet: (req, cb) => {
@@ -48,12 +77,31 @@ const tweetServices = {
   },
   getReplies: (req, cb) => {
     const TweetId = req.params.tweetId
-    return Tweet.findByPk(TweetId)
+    return Tweet.findByPk(TweetId, {
+      include: { model: User, as: 'TweetOwner', attributes: ['account'] },
+      raw: true,
+      nest: true
+    })
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
-        return Reply.findAll({ where: { TweetId }, include: [User], nest: true })
+        return Reply.findAll({
+          where: { TweetId },
+          attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
+          include: [
+            {
+              model: Tweet,
+              attributes: ['id'],
+              include: [{ model: User, as: 'TweetOwner', attributes: ['account'] }]
+            },
+            { model: User, attributes: ['id', 'avatar', 'account', 'name'] }
+          ],
+          raw: true,
+          nest: true
+        })
       })
-      .then(replies => cb(null, replies))
+      .then(replies => {
+        cb(null, replies)
+      })
       .catch(err => cb(err))
   },
   likeTweet: (req, cb) => {
