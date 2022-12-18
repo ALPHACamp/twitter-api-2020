@@ -1,4 +1,4 @@
-const { Tweet, User, sequelize } = require('../models')
+const { Tweet, User, sequelize, Reply } = require('../models')
 const { getUser } = require('../_helpers')
 const { relativeTime } = require('../helpers/date-helper')
 
@@ -87,6 +87,18 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getReplies: (req, res, next) => {
+    const tweetId = Number(req.params.tweet_id)
+    return Reply.findAll({
+      where: { TweetId: tweetId },
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => {
+        return res.status(200).json(replies)
+      })
+      .catch(err => next(err))
   }
 }
 
