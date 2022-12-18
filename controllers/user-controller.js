@@ -26,6 +26,7 @@ const userController = {
 				account,
 				name,
 				email,
+				avatar:'https://i.imgur.com/PuP3Fmn.jpg',
 				password: hash,
 				cover: 'https://i.imgur.com/KNbtyGq.png'
 
