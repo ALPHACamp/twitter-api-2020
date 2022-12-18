@@ -81,7 +81,15 @@ You would get
 
 ```json
 {
-	 "status": "error",
-   "message": "unauthorized"
+	"status": "error",
+  "message": "unauthorized"
+}
+```
+Failure | code: 500 其他server error
+
+```json
+{
+  "status": "error",
+  "message": {{err message}}
 }
 ```

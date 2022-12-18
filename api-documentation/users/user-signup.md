@@ -51,6 +51,7 @@ Success | code: 200 改為也發送token
             "createdAt": 1671245545191
         }
     }
+} 
 ```
 
 Failure | code: 400任一欄位為空值

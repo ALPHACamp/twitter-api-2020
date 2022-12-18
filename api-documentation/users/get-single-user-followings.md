@@ -49,7 +49,8 @@ Success | code: 200
 				"name": "user1",
 				"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36",
 				"introduction": "Sed ut perspiciatis unde omnis iste natus",
-				"isFollowed": true, // 登入的這個使用者是否已追隨清單上這個用戶	 
+				"isFollowed": true, // 登入的這個使用者是否已追隨清單上這個用戶
+				}
 	},
 	{
 			"followerId" : 3, 
@@ -62,7 +63,8 @@ Success | code: 200
 					"name": "Mario",
 					"avatar": "https://loremflickr.com/320/240/man,woman/?lock=45",
 					"introduction": "Nulla eros mauris, rhoncus eu mattis ut",
-					"isFollowed": false, // 登入的這個使用者是否已追隨清單上這個用戶(Mario)	 
+					"isFollowed": false, // 登入的這個使用者是否已追隨清單上這個用戶(Mario)	
+			} 
 		},
 		....// 依照追蹤紀錄時間先後排序，最新的排最前面 
 ]
@@ -88,8 +90,8 @@ You would get
 
 ```json
 {
-	 "status": "error",
-   "message": "unauthorized"
+	"status": "error",
+  "message": "unauthorized"
 }
 ```
 

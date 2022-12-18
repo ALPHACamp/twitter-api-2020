@@ -63,8 +63,8 @@ You would get
 
 ```json
 {
-	 "status": "error",
-   "message": "unauthorized"
+	"status": "error",
+  "message": "unauthorized"
 }
 ```
 

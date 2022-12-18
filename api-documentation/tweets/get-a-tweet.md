@@ -48,7 +48,7 @@ Success | code: 200
 				"name":"user2",
 				"account":"user2",
 				"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-		
+		}
 	},
 
 ```
@@ -79,8 +79,8 @@ You would get
 
 ```json
 {
-	 "status": "error",
-   "message": "unauthorized"
+	"status": "error",
+  "message": "unauthorized"
 }
 ```
 

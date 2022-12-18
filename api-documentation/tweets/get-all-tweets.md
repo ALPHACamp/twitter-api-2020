@@ -84,7 +84,7 @@ You would get
 
 ```json
 {
-	 "status": "error",
+   "status": "error",
    "message": "unauthorized"
 }
 ```
