@@ -33,7 +33,8 @@ module.exports = {
 				type: Sequelize.STRING
 			},
 			following_count: {
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
+				defaultValue:0
 			},
 			created_at: {
 				allowNull: false,
