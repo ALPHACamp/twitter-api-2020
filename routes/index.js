@@ -28,9 +28,8 @@ router.post('/users', userController.postUsers)
 
 
 router.post('/users', userController.postUsers)
-router.get('/auth', authenticated, (req, res) => res.status(200).json({ status: '200', message: 'JWT success' }))
+router.get('/auth', authenticated, userController.getCurrentUser)
 
-router.post('/users', authenticated, userController.postUsers)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweets)
 

@@ -244,17 +244,25 @@ const userController = {
 			.then((replyList) => {
 				res.status(200).json(replyList)
 			})
-			.catch(err => { console.log(err) })
+			.catch(err => { next(err) })
 	},
 	getTopUser: (req,res,next)=>{
-		const queryUser2 = `SELECT * ,(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = ${getUser(req).id} AND Followships.follower_id = Users.id) AS isFollowing FROM Users ORDER BY (following_count *1) DESC LIMIT 0,10`
-		sequelize.query(queryUser2)
+		const queryUser = `SELECT * ,(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = ${getUser(req).id} AND Followships.follower_id = Users.id) AS isFollowing FROM Users ORDER BY (following_count *1) DESC LIMIT 0,10`
+		sequelize.query(queryUser)
 			.then((replyList)=>{
 				replyList[0].map((r)=>{delete r.password})
 				res.status(200).json(replyList[0])
 			})
 			.catch(err=>{console.log(err)})
-		}
+		},
+	getCurrentUser:(req, res, next) => {
+		User.findByPk(getUser(req).id)
+		.then((user)=>{
+			delete user.get({plain:true}).password
+			res.status(200).json({ status: '200', message: 'JWT success',user })
+		})
+		.catch(err=>{next(err)})
+	}
 }
 
 module.exports = userController
