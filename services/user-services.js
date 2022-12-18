@@ -56,7 +56,11 @@ const userServices = {
   },
   getUser: (req, cb) => {
     return User.findByPk(req.params.userId, {
-      attributes: { exclude: 'password' },
+      attributes: [
+        'id', 'name', 'account', 'introduction', 'avatar', 'cover',
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount']
+      ],
       raw: true
     })
       .then(user => {
@@ -96,7 +100,7 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followerId: UserId },
-      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password'] } }]
+      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }]
     })
       .then(datas => {
         const followings = datas.map(data => ({
@@ -111,7 +115,7 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followingId: UserId },
-      include: [{ model: User, as: 'followerUser', attributes: { exclude: ['password'] } }],
+      include: [{ model: User, as: 'followerUser', attributes: { exclude: ['password', 'role'] } }]
     })
       .then(datas => {
         const followers = datas.map(data => ({
