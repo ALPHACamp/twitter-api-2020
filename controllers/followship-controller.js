@@ -1,4 +1,4 @@
-const { User, Followship } = require('../models')
+const { User, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const followshipController = {
@@ -37,6 +37,27 @@ const followshipController = {
         return followship.destroy()
       })
       .then(deleteFollowship => res.json(deleteFollowship))
+      .catch(err => next(err))
+  },
+  getTopUsers: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
+    return User.findAll({
+      attributes: {
+        exclude: ['password'],
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followerCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM followships WHERE followships.followerId = ${currentUser.id} AND followships.followingId = user.id )`), 'isFollowing']
+        ]
+      },
+      order: [
+        [sequelize.literal('followerCount'), 'DESC'], ['createdAt', 'DESC']
+      ],
+      raw: true
+    })
+      .then(users => {
+        const usersData = users.slice(0, 10)
+        res.json(usersData)
+      })
       .catch(err => next(err))
   }
 }
