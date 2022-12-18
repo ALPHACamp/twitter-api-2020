@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000
 const corsOptions = {
   origin: [
     'http://localhost:3000',
-    'https://kignite.github.io/simple-twitter-frontend'
+    'https://kignite.github.io'
   ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: ['Content-Type', 'Authorization']
