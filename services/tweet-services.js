@@ -16,8 +16,11 @@ const tweetServices = {
       }],
       order: [['id', 'DESC']]
     })
-      .then(tweets => {
-        console.log(helpers.getUser(req))
+      .then(datas => {
+        const tweets = datas.map(data => ({
+          ...data.toJSON(),
+          isLiked: helpers.getUser(req).Likes.some(t => t.TweetId === data.id)
+        }))
         cb(null, tweets)
       })
       .catch(err => cb(err))
@@ -30,12 +33,12 @@ const tweetServices = {
         [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
       ],
-      include: [{ model: User, attributes: ['id', 'avatar', 'account', 'name'] }],
+      include: [{ model: User, as: 'User', attributes: ['id', 'avatar', 'account', 'name'] }],
       raw: true,
       nest: true
     })
       .then(tweet => {
-        tweet.isLike = helpers.getUser(req).LikedTweets.some(t => t.Like.TweetId === tweet.id)
+        tweet.isLike = helpers.getUser(req).Likes.some(t => t.TweetId === tweet.id)
         cb(null, tweet)
       })
       .catch(err => cb(err))
@@ -73,7 +76,7 @@ const tweetServices = {
   getReplies: (req, cb) => {
     const TweetId = req.params.tweetId
     return Tweet.findByPk(TweetId, {
-      include: { model: User, as: 'TweetOwner', attributes: ['account'] },
+      include: { model: User, attributes: ['account'] },
       raw: true,
       nest: true
     })
@@ -86,7 +89,7 @@ const tweetServices = {
             {
               model: Tweet,
               attributes: ['id'],
-              include: [{ model: User, as: 'TweetOwner', attributes: ['account'] }]
+              include: [{ model: User, attributes: ['account'] }]
             },
             { model: User, attributes: ['id', 'avatar', 'account', 'name'] }
           ],

@@ -136,7 +136,7 @@ const userServices = {
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
         ]
       },
-      include: [{ model: User, as: 'TweetOwner' }],
+      include: [{ model: User }],
       raw: true,
       nest: true
     })
