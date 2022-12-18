@@ -200,7 +200,7 @@ const userController = {
   getUserFollowings: (req, res, next) => {
     const currentUser = helpers.getUser(req)
     return Followship.findAll({
-      where: { followerId: currentUser.id },
+      where: { followerId: req.params.id },
       include: {
         model: User,
         as: 'Followings',
@@ -226,7 +226,7 @@ const userController = {
   getUserFollowers: (req, res, next) => {
     const currentUser = helpers.getUser(req)
     return Followship.findAll({
-      where: { followingId: currentUser.id },
+      where: { followingId: req.params.id },
       include: {
         model: User,
         as: 'Followers',
