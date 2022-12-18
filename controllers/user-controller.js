@@ -82,7 +82,6 @@ const userController = {
   },
   getUser: (req, res, next) => {
     const { id } = req.params
-    console.log('id:', id)
     return Promise.all([
       Followship.findOne({ where: { followingId: id }, raw: true }),
       User.findByPk(id, {
@@ -104,7 +103,7 @@ const userController = {
         // 使用者追蹤數
         const followingCount = user.Followings.length
         // 使用者被追蹤數
-        const follwerCount = user.Followers.length
+        const followerCount = user.Followers.length
         // 使用者與追蹤者關係
         const isFollowed = trackData
 
@@ -117,7 +116,7 @@ const userController = {
         // 新增屬性
         user.tweetCount = tweetCount
         user.followingCount = followingCount
-        user.follwerCount = follwerCount
+        user.followerCount = followerCount
         user.isFollowed = isFollowed
 
         return res.status(200).send(user)
