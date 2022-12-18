@@ -97,32 +97,26 @@ const tweetController = {
   },
   likeTweet: async (req, res, next) => {
     try {
-      console.log(req.params)
-      const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId)
-      const like = await Like.finOne({
-        where: {
-          UserId: helpers.getUser(req).id,
-          tweetId
-        }
-      })
+      const TweetId = req.params.id
+      const UserId = helpers.getUser(req).id
+      const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) {
-        return res.status(401).json({
+        return res.status(404).json({
           status: 'error',
           message: 'Tweet did not exist!'
         })
       }
+      const like = await Like.findOne({
+        where: { UserId, TweetId }
+      })
       if (like) {
         return res.status(401).json({
           status: 'error',
           message: 'You have already liked this tweet!'
         })
       }
-      Like.create({
-        UserId: helpers.getUser(req).id,
-        tweetId
-      })
-      return res.status(200).json(Like)
+      const likeRecord = await Like.create({ UserId, TweetId })
+      return res.status(200).json(likeRecord)
     } catch (err) {
       next(err)
     }
