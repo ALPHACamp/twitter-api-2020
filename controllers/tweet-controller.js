@@ -1,4 +1,4 @@
-const { User, Tweet, Like, sequelize } = require('../models')
+const { User, Tweet, Like, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -23,29 +23,28 @@ const tweetController = {
     } catch (err) { next(err) }
   },
   // unfinished
-  // getTweetReplies: (req, res, next) => {
-  //   const id = req.params.id
-  //   const tweet = Tweet.findByPk(id)
-  //   if (!tweet) {
-  //     console.log(id)
-  //     return res.status(404).json({ status: 'error', message: 'tweet did not exist!' })
-  //   }
-  //   Reply.findAll({
-  //     nest: true,
-  //     raw: true,
-  //     where: { tweetId: id },
-  //     attributes: ['id', 'comment', 'createdAt'],
-  //     order: [['createdAt', 'DESC']],
-  //     include: {
-  //       model: User,
-  //       attributes: ['id', 'account', 'name', 'avatar']
-  //     }
-  //   }).then(replyList => {
-  //     console.log(replyList.tweetId)
-  //     return res.status(200).json(replies)
-  //   })
-  //     .catch(err => next(err))
-  // },
+  getTweetReplies: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) {
+        return res.status(404).json({
+          status: '404',
+          message: 'Tweet did not exist!'
+        })
+      }
+      const replyList = await Reply.findAll({
+        raw: true,
+        nest: true,
+        where: { TweetId: tweetId },
+        includes: {
+          model: User
+        },
+        order: [['createdAt', 'DESC']]
+      })
+      res.status(200).json({ status: '200', data: replyList })
+    } catch (err) { next(err) }
+  },
   // postTweetReply: (req, res, next) => {
   //   const { comment } = req.body
   //   const tweetId = req.params.id
