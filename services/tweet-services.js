@@ -4,12 +4,11 @@ const helpers = require('../_helpers')
 const tweetServices = {
   getTweets: (req, cb) => {
     return Tweet.findAll({
-      // attributes: [
-      //   'id', 'UserId', 'description', 'createdAt', 'updatedAt'
-      //   [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = id)'), 'replyCount'],
-      //   [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = id)'), 'likedCount']
-      // ],
-
+      attributes: [
+        'id', 'UserId', 'description', 'createdAt', 'updatedAt',
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
+      ],
       include: [{
         model: User,
         attributes: [
@@ -21,8 +20,9 @@ const tweetServices = {
       .then(datas => {
         const tweets = datas.map(data => ({
           ...data.toJSON(),
-          isLiked: helpers.getUser(req).LikedTweets.some(t => t.TweetId === data.id)
+          isLiked: helpers.getUser(req).LikedTweets.some(t => t.Like.TweetId === data.id)
         }))
+        console.log(helpers.getUser(req).LikedTweets)
         cb(null, tweets)
       })
       .catch(err => cb(err))
@@ -30,12 +30,17 @@ const tweetServices = {
   getTweet: (req, cb) => {
     const { tweetId } = req.params
     return Tweet.findByPk(tweetId, {
-      include: [{ model: User }],
+      attributes: [
+        'id', 'description', 'createdAt',
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
+      ],
+      include: [{ model: User, attributes: ['id', 'avatar', 'account', 'name'] }],
       raw: true,
       nest: true
     })
       .then(tweet => {
-        delete tweet.User.password
+        tweet.isLike = helpers.getUser(req).LikedTweets.some(t => t.Like.TweetId === tweet.id)
         cb(null, tweet)
       })
       .catch(err => cb(err))
@@ -72,18 +77,29 @@ const tweetServices = {
   },
   getReplies: (req, cb) => {
     const TweetId = req.params.tweetId
-    return Tweet.findByPk(TweetId)
+    return Tweet.findByPk(TweetId, {
+      include: { model: User, as: 'TweetOwner', attributes: ['account'] },
+      raw: true,
+      nest: true
+    })
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
         return Reply.findAll({
           where: { TweetId },
-          include: [{ model: User }],
+          attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
+          include: [
+            {
+              model: Tweet,
+              attributes: ['id'],
+              include: [{ model: User, as: 'TweetOwner', attributes: ['account'] }]
+            },
+            { model: User, attributes: ['id', 'avatar', 'account', 'name'] }
+          ],
           raw: true,
           nest: true
         })
       })
       .then(replies => {
-        replies.forEach(r => delete r.User.password)
         cb(null, replies)
       })
       .catch(err => cb(err))
