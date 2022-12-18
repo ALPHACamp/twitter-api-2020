@@ -178,8 +178,17 @@ const userController = {
   },
   getFollowing: (req, res, next) => {
     const { id } = req.params
-    Followship.findAll({ where: { followerId: id } })
-      .then((followingList) => {
+    return Promise.all([
+      User.findByPk(id, {
+        include: [{ model: User, as: 'Followings' }]
+      }),
+      Followship.findAll({ where: { followerId: id }, raw: true })
+    ])
+      .then(([trackData, followingList]) => {
+        followingList.forEach((list) => {
+          // 新增 isFollowed 屬性
+          list.isFollowed = list.followerId === trackData.id
+        })
         res.status(200).send(followingList)
       })
       .catch((err) => next(err))
