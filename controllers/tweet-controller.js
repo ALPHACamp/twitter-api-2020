@@ -26,9 +26,12 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const page = Number(req.query.page) || 1
+      console.log('page', page)
       const limit = 10
       const offset = (page - 1) * limit
+      console.log('offset', offset)
       const loginUser = getUser(req).id
+      console.log('loginUser', loginUser)
       const tweets = await Tweet.findAll({
         include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
         attributes: {
@@ -45,15 +48,19 @@ const tweetController = {
         raw: true,
         nest: true
       })
+      console.log('tweets', tweets)
       res.status(200).json(tweets)
     } catch (err) {
+      console.log('err', err)
       next(err)
     }
   },
   getTweet: async (req, res, next) => {
     try {
       const loginUser = getUser(req).id
+      console.log('loginUser', loginUser)
       const tweetId = req.params.tweet_id
+      console.log('tweetId', tweetId)
       const tweet = await Tweet.findByPk(tweetId, {
         include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
         attributes: {
@@ -67,9 +74,11 @@ const tweetController = {
         raw: true,
         nest: true
       })
+      console.log('tweet, tweet')
       if (!tweet) throw new Error('推文不存在')
       res.status(200).json(tweet)
     } catch (err) {
+      console.log('err', err)
       next(err)
     }
   },
