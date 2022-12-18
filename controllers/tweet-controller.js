@@ -135,6 +135,12 @@ const tweetController = {
           message: '回覆不可空白！'
         })
       }
+      if (comment.length > 140) {
+        return res.status(422).json({
+          status: 'error',
+          message: '字數超出上限！'
+        })
+      }
       await Reply.create({
         UserId,
         TweetId,

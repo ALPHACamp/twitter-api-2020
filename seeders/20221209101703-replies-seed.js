@@ -25,7 +25,7 @@ module.exports = {
           return ({
             UserId,
             TweetId: tweet.id,
-            comment: faker.lorem.sentences(2),
+            comment: faker.lorem.sentence(10),
             createdAt: new Date(),
             updatedAt: new Date()
           })

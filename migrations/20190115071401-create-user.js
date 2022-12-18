@@ -19,7 +19,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(50)
       },
       avatar: {
         defaultValue: 'https://imgur.com/HD4yT2V',
@@ -29,7 +29,8 @@ module.exports = {
         type: Sequelize.STRING
       },
       introduction: {
-        type: Sequelize.TEXT
+        type: Sequelize.STRING(160)
+
       },
       role: {
         defaultValue: 'user',
