@@ -20,10 +20,7 @@ const tweetController = {
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true,
-      attributes: [
-        'id',
-        'description',
-        'createdAt',
+      attributes: ['id', 'description', 'createdAt',
         [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCount'],
         [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount']
       ]
