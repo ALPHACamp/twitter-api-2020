@@ -67,6 +67,8 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
       if (!account || !name || !email || !password || !checkPassword) return res.status(400).json({ status: 'error', message: '所有欄位都是必填！' })
+      if (account.trim() === '' || name.trim() === '' || email.trim() === '') return res.status(400).json({ status: 'error', message: '所有欄位都是必填！' })
+      if (name.length > 50) return res.status(400).json({ status: 'error', message: '超過name字數上限50字！' })
       if (password !== checkPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
 
       const user1 = await User.findOne({ where: { email } })
@@ -95,6 +97,9 @@ const userController = {
       // 未回傳則預設不修改
       const { account, name, email, password, checkPassword } = req.body
 
+      // 確認回傳不可為空白
+      if ((account && account.trim() === '') || (name && name.trim() === '') || (email && email.trim() === '')) return res.status(400).json({ status: 'error', message: '所有欄位都是必填！' })
+
       // 確定使用者存在
       const user = await User.findByPk(id)
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
@@ -117,6 +122,9 @@ const userController = {
       // 若有回傳password，檢查password與checkPassword是否相符
       if (password && password !== checkPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
 
+      // 確認name沒有超過上限
+      if (name && name.length > 50) return res.status(400).json({ status: 'error', message: '超過name字數上限50字！' })
+
       let updatedUser = await user.update({
         account: account || user.account,
         name: name || user.name,
@@ -138,11 +146,13 @@ const userController = {
   },
   putUserProfile: async (req, res, next) => {
     try {
+      // 回傳null則代表刪除資料
       const { id } = req.params
       const { name, introduction } = req.body
       const { files } = req
 
       if (!name) return res.status(400).json({ status: 'error', message: 'name是必填！' })
+      if (name.trim() === '') return res.status(400).json({ status: 'error', message: 'name是必填！' })
 
       const avatar = files?.avatar ? files.avatar[0] : null
       const cover = files?.cover ? files.cover[0] : null
@@ -153,6 +163,10 @@ const userController = {
 
       // 只能更改自己的資料
       if (getUser(req).dataValues.id !== Number(id)) return res.status(401).json({ status: 'error', message: '無權限更改此使用者！' })
+
+      // 確認name及introduction字數上限
+      if (name && name.length > 50) return res.status(400).json({ status: 'error', message: '超過name字數上限50字！' })
+      if (introduction && introduction.length > 160) return status(400).json({ status: 'error', message: '超過introduction字數上限160字！' })
 
       // 圖片上傳imgur
       const avatarPath = await imgurFileHandler(avatar)
