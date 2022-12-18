@@ -53,8 +53,8 @@ const adminController = {
 		return Tweet.findByPk(req.params.id)
 			.then(tweet => {
 				if (!tweet) {
-					return res.status(400).json(
-						{ status: 'error', message: 'Tweet did not exist!' }
+					return res.status(404).json(
+						{ status: '404', message: 'Tweet did not exist!' }
 					)
 				}
 				res.status(200).json(tweet)

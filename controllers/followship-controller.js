@@ -7,18 +7,18 @@ const followshipController = {
       const currentUserId = helpers.getUser(req).id
       const followingId = req.body.id
       if (currentUserId === Number(followingId)) {
-        return res.status(404).json({
-          status: '404',
+        return res.status(406).json({
+          status: '406',
           message: 'You can not follow yourself!'
         })
       }
-      const ifFollowed = await Followship.findOne({
+      const isFollowed = await Followship.findOne({
         where: {
           followerId: currentUserId,
           followingId
         }
       })
-      if (ifFollowed) {
+      if (isFollowed) {
         return res.status(404).json({
           status: '404',
           message: 'You have already followed this user!'
@@ -28,7 +28,7 @@ const followshipController = {
         followerId: currentUserId,
         followingId
       })
-      res.status(200).json({ "status": 200, "data": followRecord })
+      res.status(200).json(followRecord)
     } catch (err) {
       next(err)
     }
@@ -37,20 +37,20 @@ const followshipController = {
     try {
       const currentUserId = helpers.getUser(req).id
       const followingId = req.params.followingId
-      const ifFollowed = await Followship.findOne({
+      const isFollowed = await Followship.findOne({
         where: {
           followerId: currentUserId,
           followingId
         }
       })
-      if (!ifFollowed) {
+      if (!isFollowed) {
         return res.status(404).json({
           status: '404',
           message: 'You have not followed this user!'
         })
       }
-      await ifFollowed.destroy()
-      res.status(200).json({ "status": 200, "data": ifFollowed })
+      await isFollowed.destroy()
+      res.status(200).json(isFollowed)
     } catch (err) {
       next(err)
     }

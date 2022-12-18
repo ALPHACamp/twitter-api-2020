@@ -14,12 +14,18 @@ const tweetController = {
         attributes: [
           'id', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'LikeCount'],
-          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.tweet_id = Tweet.id AND Likes.user_id = ${currentUserId})`), 'ifLiked']
+          [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.tweet_id = Tweet.id AND Likes.user_id = ${currentUserId})`), 'isLiked']
         ],
         order: [['createdAt', 'DESC']]
       })
-      return res.status(200).json({ tweet })
+      if (!tweet) {
+        return res.status(404).json({
+          status: '404',
+          message: 'Tweet did not exist!'
+        })
+      }
+      return res.status(200).json(tweet)
     } catch (err) { next(err) }
   },
   getTweetReplies: async (req, res, next) => {
@@ -49,6 +55,13 @@ const tweetController = {
     const { comment } = req.body
     const tweetId = req.params.id
     const currentUserId = helpers.getUser(req).id
+    const tweet = Tweet.findByPk(tweetId)
+    if (!tweet) {
+      return res.status(404).json({
+        status: '404',
+        message: 'Tweet did not exist!'
+      })
+    }
     if (!comment) {
       return res.status(404).json({
         status: '404',
@@ -97,8 +110,18 @@ const tweetController = {
   postTweets: (req, res, next) => {
     const currentUserId = helpers.getUser(req).id
     const { description } = req.body
-    if (!description) throw Error('content is required!', {}, Error.prototype.code = 401)
-    if (description.length > 140) throw Error('too many words!', {}, Error.prototype.code = 401)
+    if (!description) {
+      return res.status(401).json({
+        status: '401',
+        message: 'Content is required!'
+      })
+    }
+    if (description.length > 140) {
+      return res.status(401).json({
+        status: '401',
+        message: 'Too many words!'
+      })
+    }
     Tweet.create({
       UserId: currentUserId,
       description
@@ -115,7 +138,7 @@ const tweetController = {
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) {
         return res.status(404).json({
-          status: 'error',
+          status: '404',
           message: 'Tweet did not exist!'
         })
       }
@@ -124,12 +147,12 @@ const tweetController = {
       })
       if (like) {
         return res.status(401).json({
-          status: 'error',
+          status: '401',
           message: 'You have already liked this tweet!'
         })
       }
       const likeRecord = await Like.create({ UserId, TweetId })
-      return res.status(200).json({ status: "success", data: likeRecord })
+      return res.status(200).json(likeRecord)
     } catch (err) {
       next(err)
     }
@@ -141,7 +164,7 @@ const tweetController = {
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) {
         return res.status(404).json({
-          status: 'error',
+          status: '404',
           message: 'Tweet did not exist!'
         })
       }
@@ -150,12 +173,12 @@ const tweetController = {
       })
       if (!like) {
         return res.status(401).json({
-          status: 'error',
+          status: '401',
           message: 'You have not liked this tweet!'
         })
       }
       await like.destroy()
-      return res.status(200).json({ status: "success", data: like })
+      return res.status(200).json(like)
     } catch (err) {
       next(err)
     }
