@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../../controllers/user-controller')
+const upload = require('../../middleware/multer')
 
 // 取得使用者的所有推文留言
 router.get('/:id/replied_tweets', userController.getUserReplies)
@@ -15,7 +16,7 @@ router.get('/:id/followers', userController.getUserFollowers)
 // 修改個人帳號設定
 router.put('/:id/setting', userController.putUserSetting)
 // 修改個人資料
-router.put('/:id', userController.putUserProfile)
+router.put('/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUserProfile)
 // 取得特定使用者
 router.get('/:id', userController.getUser)
 

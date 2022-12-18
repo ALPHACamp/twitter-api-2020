@@ -165,6 +165,9 @@ const userController = {
         {
           model: Tweet,
           attributes: [
+            'id',
+            'UserId',
+            'description',
             [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id )'), 'replyCount']
           ],
           include: {
