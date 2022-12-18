@@ -15,6 +15,7 @@ router.use('/admin', admin)
 router.use('/tweets', tweet)
 router.use('/followships', followship)
 
+router.get('/users/topFollow', authenticated, userController.getTopUser)
 router.get('/users/:id/likes', authenticated, userController.getUserlikes)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserRepliedTweets)
@@ -27,10 +28,7 @@ router.post('/users', userController.postUsers)
 
 
 router.post('/users', userController.postUsers)
-
-router.get('/auth', authenticated, (req, res) => res.status(200).json({ status: '200', message: 'JWT success' }))
-
-router.post('/users', authenticated, userController.postUsers)
+router.get('/auth', authenticated, userController.getCurrentUser)
 
 router.get('/', (req, res) => res.send('Hello World!'))
 
