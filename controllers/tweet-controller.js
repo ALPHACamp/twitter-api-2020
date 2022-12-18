@@ -53,18 +53,58 @@ const tweetController = {
   getOneTweet: async (req, res, next) => {
     try {
       // Get tweet_id from req
+      const loginUserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.tweet_id)
+
       // Find tweet in database
-      // Transform data
-      return res.status(200).json('JSON Response')
+      const tweet = await Tweet.findOne({
+        where: { id: TweetId },
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        attributes: [
+          'id', 'description', 'createdAt',
+          [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = ${TweetId})`), 'replyCount'],
+          [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = ${TweetId})`), 'likeCount'],
+          // (Count() > 0) means that there is a like record in like table --> isLiked is true
+          [sequelize.literal(`(SELECT (COUNT(*) > 0) FROM Likes WHERE Likes.UserId = ${loginUserId} AND Likes.TweetId = ${TweetId})`), 'isLiked']
+        ],
+        nest: true,
+        raw: true
+      })
+      if (!tweet) { return res.status(404).json({ status: 'error', message: 'Cannot find this tweet.' }) }
+
+      // Transform data and response
+      // Can't use isLiked: (tweet.isLiked === 1), keep its integer value, wait for fix -----> add raw: true in query
+      const data = { ...tweet, isLiked: Boolean(tweet.isLiked), createdAt: dayjs(tweet.createdAt).valueOf() }
+      return res.status(200).json(data)
+
+      // Try stored procedure in database if time allow
+      // await sequelize.query(`CALL getOneTweet(2, ${TweetId});`)
     } catch (err) { next(err) }
   },
 
   getReplies: async (req, res, next) => {
     try {
       // Get tweet_id from req
+      const TweetId = Number(req.params.tweet_id)
       // Find all replies in database
-      // Transform data
-      return res.status(200).json('JSON Response')
+      const replies = await Reply.findAll({
+        where: { TweetId },
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          { model: Tweet, attributes: ['id'], include: { model: User, attributes: ['id', 'account'] } }
+        ],
+        attributes: ['id', 'comment', 'createdAt'],
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
+      })
+      if (replies.length === 0) return res.status(404).json({ status: 'error', message: 'Cannot find this tweet or there is no reply.' })
+      // Transform data and response
+      const data = replies.map(reply => ({
+        ...reply,
+        createdAt: dayjs(reply.createdAt).valueOf()
+      }))
+      return res.status(200).json(data)
     } catch (err) { next(err) }
   },
 
