@@ -24,9 +24,8 @@ app.use(cors(corsOptions))
 
 app.use('/api', routes)
 
-
-app.use('/', (req, res) => res.send('Hello World!'))
-app.use(generalErrorHandler)
+// app.use('/', (req, res) => res.send('Hello World!'))
+// app.use(generalErrorHandler)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!!Let's go to http://localhost:${port}`))
 
