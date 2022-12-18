@@ -1,7 +1,7 @@
 const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 
-const { Tweet, User, Like, Reply, Followship } = require('../models')
+const { Tweet, User, Like } = require('../models')
 
 const adminController = {
   login: (req, res, next) => {
@@ -47,10 +47,7 @@ const adminController = {
           delete user.Followings
           return user
         })
-        return data.sort((a, b) => b.tweetAmount - a.tweetAmount)
-      })
-      .then(data => {
-        res.json(data)
+        res.json(data.sort((a, b) => b.tweetAmount - a.tweetAmount))
       })
       .catch(err => next(err))
   },

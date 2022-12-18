@@ -27,7 +27,9 @@ const userController = {
         password: hash,
         role: 'user'
       }))
-      .then(newUser => {
+      .then(user => {
+        const newUser = user.toJSON()
+        delete newUser.password
         const data = { user: newUser }
         res.json({ status: 'success', data })
       })
@@ -69,6 +71,7 @@ const userController = {
         user.isfollow = followship !== null
         user.followingAmount = followerCount.count
         user.followerAmount = followingCount.count
+        delete user.password
         res.status(200).json(user)
       })
       .catch(err => next(err))
@@ -89,9 +92,15 @@ const userController = {
             id: tweet.id,
             UserId: tweet.UserId,
             description: tweet.description,
-            userAccount: tweet.User.account,
-            userName: tweet.User.name,
-            avatar: tweet.User.avatar,
+            User: {
+              id: tweet.UserId,
+              userAccount: tweet.User.account,
+              userName: tweet.User.name,
+              avatar: tweet.User.avatar
+            },
+            // userAccount: tweet.User.account,
+            // userName: tweet.User.name,
+            // avatar: tweet.User.avatar,
             createdAt: tweet.createdAt,
             updatedAt: tweet.updatedAt,
             likedAmount: tweet.Likes.length,
@@ -103,7 +112,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  putUser: (req, res, next) => {
+  putUser: (req, res, next) => { // 這個還沒檢查格式
     if (Number(req.params.id) !== helpers.getUser(req).id) throw new Error('permission denied.')
     const { name, introduction } = req.body
     const { files } = req
@@ -137,29 +146,26 @@ const userController = {
     Reply.findAll({
       where: { UserId: req.params.id },
       include: [User, { model: Tweet, include: User }],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      nest: true,
+      raw: true
     })
-      // .then(replies => {
-      //   res.json(replies)
-      // })
       .then(replies => {
         replies = replies.map(reply => {
           reply = {
-            ...reply.toJSON(),
+            ...reply,
             repliedAccount: reply.Tweet.User.account,
             User: {
               id: reply.User.id,
               account: reply.User.account,
-              name: reply.User.name
+              name: reply.User.name,
+              avatar: reply.User.avatar
             }
           }
           delete reply.Tweet
           return reply
         })
-        return replies
-      })
-      .then(replies => {
-        res.json(replies)
+        res.json(replies.sort((a, b) => b.createdAt - a.createdAt))
       })
       .catch(err => next(err))
   },
@@ -169,15 +175,16 @@ const userController = {
         UserId: req.params.id
       },
       include: [
-        { model: Tweet, include: Reply },
+        { model: Tweet, include: [Reply, Like] },
         User
       ]
     })
       .then(likes => {
         const tweets = likes.map(like => {
+          const TweetId = like.Tweet.id
           const { id, name, account, avatar } = like.User
           const tweet = {
-            TweetId: like.Tweet.id,
+            TweetId,
             ...like.Tweet.toJSON(),
             User: {
               id,
@@ -185,11 +192,12 @@ const userController = {
               name,
               avatar
             },
-            likedAmount: like.length,
+            likedAmount: like.Tweet.Likes.length,
             repliedAmount: like.Tweet.Replies.length,
             isLike: true
           }
           delete tweet.Replies
+          delete tweet.Likes
           return tweet
         })
         tweets.sort((a, b) => b.createdAt - a.createdAt)
