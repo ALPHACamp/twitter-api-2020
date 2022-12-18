@@ -196,6 +196,58 @@ const userController = {
         return res.json(likes)
       })
       .catch(err => next(err))
+  },
+  getUserFollowings: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
+    return Followship.findAll({
+      where: { followerId: currentUser.id },
+      include: {
+        model: User,
+        as: 'Followings',
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'avatar',
+          'introduction',
+          [sequelize.literal(`EXISTS (SELECT id FROM followships WHERE followships.followerId = ${currentUser.id} AND followships.followingId = Followings.id )`), 'isFollowing']
+        ]
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(followships => {
+        if (!followships) throw new Error("Followships didn't exist!")
+        return res.json(followships)
+      })
+      .catch(err => next(err))
+  },
+  getUserFollowers: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
+    return Followship.findAll({
+      where: { followingId: currentUser.id },
+      include: {
+        model: User,
+        as: 'Followers',
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'avatar',
+          'introduction',
+          [sequelize.literal(`EXISTS (SELECT id FROM followships WHERE followships.followerId = ${currentUser.id} AND followships.followingId = Followers.id )`), 'isFollowing']
+        ]
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(followships => {
+        if (!followships) throw new Error("Followships didn't exist!")
+        return res.json(followships)
+      })
+      .catch(err => next(err))
   }
 }
 

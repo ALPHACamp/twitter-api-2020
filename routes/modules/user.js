@@ -6,10 +6,10 @@ router.get('/:id/replied_tweets', userController.getUserReplies)
 router.get('/:id/tweets', userController.getUserTweets)
 // 取得使用者喜歡的內容
 router.get('/:id/likes', userController.getUserLikes)
-// // 取得使用者正在關注的名單
-// router.get('/:id/followings', userController.getUserFollowings)
-// // 取得使用者正在跟隨的名單
-// router.get('/:id/followers', userController.getUserFollowers)
+// 取得使用者正在關注的名單
+router.get('/:id/followings', userController.getUserFollowings)
+// 取得使用者正在跟隨的名單
+router.get('/:id/followers', userController.getUserFollowers)
 // // 修改個人帳號設定
 // router.put('/:id/setting', userController.putUserSetting)
 // // 修改個人資料
