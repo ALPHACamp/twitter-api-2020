@@ -12,9 +12,14 @@ const upload = require('../../middleware/multer')
 router.post('/signin', userController.signIn)
 
 // 查看特定使用者發過的所有推文 ********Evelyn 先註記一下 避免搞混
-router.get('/:id/tweets', authenticated, authenticatedUser, user2Controller.getUserTweets)
+router.get(
+  '/:id/tweets',
+  authenticated,
+  authenticatedUser,
+  user2Controller.getUserTweets
+)
 
-// 測試檔規定 name 為 root 的使用者要能進入，所以不限定 role
+// 查看特定使用者頁面
 router.get('/:id', authenticated, authenticatedUser, userController.getUser)
 
 // 編輯個人頁面
@@ -28,7 +33,21 @@ router.put(
   ]),
   userController.putUser
 )
+// 查看特定使用者的追蹤者們
+router.get(
+  '/:id/followings',
+  authenticated,
+  authenticatedUser,
+  userController.getFollowing
+)
 
+// 查看特定使用者的追隨者們
+router.get(
+  '/:id/followers',
+  authenticated,
+  authenticatedUser,
+  userController.getFollower
+)
 // 註冊不需要驗證登入狀態
 router.post('/', userController.signUp)
 
