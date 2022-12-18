@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const admin = require('./modules/admin')
 const tweet = require('./modules/tweet')
+const followship = require('./modules/followship')
 const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
 
@@ -12,10 +13,11 @@ router.post('/login', passport.authenticate('local', { session: false }), userCo
 
 router.use('/admin', admin)
 router.use('/tweets', tweet)
+router.use('/followships', followship)
 
 router.get('/users/:id/likes', authenticated, userController.getUserlikes)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
-router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplidTweets)
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserRepliedTweets)
 
 router.get('/users/:id/followings', authenticated, userController.getUserFollowing)
 router.get('/users/:id/followers', authenticated, userController.getUserFollower)

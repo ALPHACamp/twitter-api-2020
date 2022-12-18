@@ -22,6 +22,7 @@ const tweetController = {
       return res.status(200).json({ tweet })
     } catch (err) { next(err) }
   },
+  // unfinished
   // getTweetReplies: (req, res, next) => {
   //   const id = req.params.id
   //   const tweet = Tweet.findByPk(id)
@@ -32,13 +33,13 @@ const tweetController = {
   //   Reply.findAll({
   //     nest: true,
   //     raw: true,
-  //     where: { tweetId: id }
-  //     // attributes: ['id', 'comment', 'createdAt'],
-  //     // order: [['createdAt', 'DESC']],        
-  //     // include: {
-  //     //   model: User
-  //     //   attributes: ['id', 'account', 'name', 'avatar']
-  //     // }        
+  //     where: { tweetId: id },
+  //     attributes: ['id', 'comment', 'createdAt'],
+  //     order: [['createdAt', 'DESC']],
+  //     include: {
+  //       model: User,
+  //       attributes: ['id', 'account', 'name', 'avatar']
+  //     }
   //   }).then(replyList => {
   //     console.log(replyList.tweetId)
   //     return res.status(200).json(replies)
