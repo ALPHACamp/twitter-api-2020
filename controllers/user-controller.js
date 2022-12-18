@@ -230,6 +230,31 @@ const userController = {
         res.status(200).json(result)
       })
       .catch(err => next(err))
+  },
+  getUserFollowers: (req, res, next) => {
+    return User.findByPk(req.params.id, {
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: ['id', 'name', 'avatar', 'introduction'],
+        include: [{
+          model: User,
+          as: 'Followers'
+        }]
+      }],
+      order: [[{ model: User, as: 'Followers' }, Followship, 'createdAt', 'DESC']]
+    })
+      .then(followers => {
+        if (!followers) throw new Error("User didn't exist")
+        const result = followers.Followers
+          .map(follower => {
+            const { Followers, Followship, ...data } = follower.toJSON()
+            data.followerId = follower.id
+            data.isFollow = follower.Followers.some(follower => follower.id === helpers.getUser(req).id)
+            return data
+          })
+        res.status(200).json(result)
+      })
   }
 }
 module.exports = userController
