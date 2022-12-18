@@ -7,7 +7,7 @@ const followshipServices = {
     return Followship.findAll({
       attributes: [
         'followingId',
-        [sequelize.fn('COUNT', 'followingId'), 'followerCount'],
+        [sequelize.fn('COUNT', 'followingId'), 'followerCount']
       ],
       order: [[sequelize.literal('followerCount'), 'DESC']],
       group: ['followingId'],
