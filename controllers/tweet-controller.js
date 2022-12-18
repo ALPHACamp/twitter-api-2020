@@ -161,17 +161,35 @@ const tweetController = {
   getReplies: (req, res, next) => {
     return Reply.findAll({
       where: { TweetId: req.params.tweet_id },
-      include: Tweet
+      include: [
+        {
+          model: User,
+          attributes: {
+            exclude: ['password']
+          }
+        },
+        {
+          model: Tweet,
+          attributes: ['UserId'],
+          include: {
+            model: User,
+            attributes: ['account', 'name']
+          }
+        }
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
     })
       .then(replies => {
         return replies
           .map(reply => ({
-            ...reply.dataValues,
-            relativeTime: dateFormat(reply.dataValues.createdAt).fromNow()
+            ...reply,
+            relativeTime: dateFormat(reply.createdAt).fromNow()
           }))
       })
       .then(replies => {
-        if (!replies) throw new Error("Reply didn't exist!")
+        if (!replies) throw new Error("Replies didn't exist!")
         return res.json(replies)
       })
       .catch(err => next(err))
