@@ -127,7 +127,7 @@ const userController = {
         {
           model: User,
           attributes: {
-            exclude: ['password', 'email', 'cover', 'introduction', 'role', 'createdAt', 'updatedAt']
+            exclude: ['password']
           }
         },
         {
@@ -135,20 +135,23 @@ const userController = {
           attributes: ['UserId'],
           include: {
             model: User,
-            attributes: ['name']
+            attributes: ['account', 'name']
           }
         }
-      ]
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
     })
       .then(replies => {
         return replies
           .map(reply => ({
-            ...reply.dataValues,
-            relativeTime: dateFormat(reply.dataValues.createdAt).fromNow()
+            ...reply,
+            relativeTime: dateFormat(reply.createdAt).fromNow()
           }))
       })
       .then(replies => {
-        if (!replies) throw new Error("Reply didn't exist!")
+        if (!replies) throw new Error("Replies didn't exist!")
         return res.json(replies)
       })
       .catch(err => next(err))

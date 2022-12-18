@@ -1,6 +1,5 @@
 const { User, Followship } = require('../models')
 const helpers = require('../_helpers')
-// const { dateFormat } = require('../helpers/date-helper')
 
 const followshipController = {
   addFollowing: (req, res, next) => {

@@ -11,7 +11,7 @@ router.get('/:id/tweets', userController.getUserTweets)
 // // 取得使用者正在跟隨的名單
 // router.get('/:id/followers', userController.getUserFollowers)
 // // 修改個人帳號設定
-// router.put('/:id/setting', userController.putUserAccountSetting)
+// router.put('/:id/setting', userController.putUserSetting)
 // // 修改個人資料
 // router.put('/:id', userController.putUserProfile)
 // // 取得特定使用者
