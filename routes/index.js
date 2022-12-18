@@ -15,6 +15,7 @@ router.use('/admin', admin)
 
 router.post('/login', passport.authenticate('local', { session: false }), userController.logIn)
 
+router.get('/users/topFollow', authenticated, userController.getTopUser)
 router.get('/users/:id/likes', authenticated, userController.getUserlikes)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplidTweets)
@@ -27,9 +28,8 @@ router.post('/users', userController.postUsers)
 
 
 router.post('/users', userController.postUsers)
-router.get('/auth', authenticated, (req, res) => res.status(200).json({ status: '200', message: 'JWT success' }))
+router.get('/auth', authenticated, userController.getCurrentUser)
 
-router.post('/users', authenticated, userController.postUsers)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweets)
 

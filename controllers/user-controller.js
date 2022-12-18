@@ -26,6 +26,7 @@ const userController = {
 				account,
 				name,
 				email,
+				avatar:'https://i.imgur.com/PuP3Fmn.jpg',
 				password: hash,
 				cover: 'https://i.imgur.com/KNbtyGq.png'
 
@@ -115,7 +116,7 @@ const userController = {
 					[sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.following_id)'), 'name'],
 					[sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.following_id)'), 'introduction'],
 					[sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.following_id)'), 'avatar'],
-					//   [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'Following']
+					[sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'Following']
 				]
 			},
 			order: [['createdAt', 'DESC']],
@@ -136,7 +137,7 @@ const userController = {
 					[sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.follower_id)'), 'name'],
 					[sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.follower_id)'), 'introduction'],
 					[sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.follower_id)'), 'avatar'],
-					//   [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'Following']
+					[sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'Following']
 				]
 			},
 			order: [['createdAt', 'DESC']],
@@ -147,55 +148,34 @@ const userController = {
 			})
 			.catch(err => { console.log(err) })
 	},
-	getUserlikes:(req, res, next) => {
-		const currentUser = getUser(req).id
+	getUserlikes: (req, res, next) => {
 		const id = req.params.id
-			Promise.all([
-				Like.findAll({
-					where:{userId:id},
-					include: { 
-						model: Tweet,
-						include: [{
-							model:User,
-							attributes:
-							['id', 'name','account','avatar'],
-						}],
-					},
-					order: [['createdAt', 'DESC']],
-					nest:true,
-					raw:true
-
-				}),
-				Like.findAll({
-					attributes:['id','TweetId','UserId'],
-					raw :true}),
-				Reply.findAll({
-					attributes:['id','TweetId'],
-					raw :true},
-				)
-			])
-				.then(([likeList,like,reply]) => {
-					likeList.forEach((l)=>{
-						l.Tweet.likeCount = 0
-						l.Tweet.replyCount = 0
-						l.Tweet.liked = false
-						like.forEach((i)=>{
-							if(i.TweetId === l.TweetId){
-								l.Tweet.likeCount++
-							}
-							if(i.UserId === currentUser&&i.TweetId === l.TweetId){
-								l.Tweet.liked = true
-							}
-						})
-						reply.forEach((r)=>{
-							if(r.TweetId === l.TweetId){
-								l.Tweet.replyCount++
-							}
-						})
-					})
-					res.status(200).json(likeList)
-				})
-				.catch(err => { console.log(err) })
+		  Like.findAll({
+		   where:{userId:id},
+		   include: { 
+			model: Tweet,
+			attributes: {
+			 include: [
+			  [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'LikeCount'],
+			  [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'ReplyCount'],
+			  [sequelize.literal(`(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id AND user_id = ${getUser(req).id})`), 'isLiked'],
+			 ]
+			},
+			include: [{
+			 model:User,
+			 attributes:
+			 ['id', 'name','account','avatar'],
+			}],
+		   },
+		   order: [['createdAt', 'DESC']],
+		   nest:true,
+		   raw:true
+	  
+		  })
+		  .then((likeList)=>{
+		   res.status(200).json(likeList)
+		  })
+		  .catch(err => { console.log(err) })
 	},
 	getUserTweets:(req,res,next)=>{
 		const currentUser = getUser(req).id
@@ -205,7 +185,7 @@ const userController = {
 				where:{UserId:id},
 				include:{
 					model:User,
-					attributes:['id','account','avatar']
+					attributes:['id','account','avatar','name']
 				},
 				order: [['createdAt', 'DESC']],
 				nest:true,
@@ -265,7 +245,24 @@ const userController = {
 			.then((replyList) => {
 				res.status(200).json(replyList)
 			})
-			.catch(err => { console.log(err) })
+			.catch(err => { next(err) })
+	},
+	getTopUser: (req,res,next)=>{
+		const queryUser = `SELECT * ,(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = ${getUser(req).id} AND Followships.follower_id = Users.id) AS isFollowing FROM Users ORDER BY (following_count *1) DESC LIMIT 0,10`
+		sequelize.query(queryUser)
+			.then((replyList)=>{
+				replyList[0].map((r)=>{delete r.password})
+				res.status(200).json(replyList[0])
+			})
+			.catch(err=>{console.log(err)})
+		},
+	getCurrentUser:(req, res, next) => {
+		User.findByPk(getUser(req).id)
+		.then((user)=>{
+			delete user.get({plain:true}).password
+			res.status(200).json({ status: '200', message: 'JWT success',user })
+		})
+		.catch(err=>{next(err)})
 	}
 }
 

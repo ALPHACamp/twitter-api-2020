@@ -18,13 +18,13 @@ passport.use('local', new LocalStrategy(
 	},
 	// authenticate user
 	(req, account, password, cb) => {
-		console.log('===========流程三')
 		User.findOne({ where: { account } })
 			.then(user => {
-				if (!user) return cb(null, false, { message: '帳號或密碼輸入錯誤！' })
+				if (!user) return cb(null, false, { message: 'account or password invalid!' })
+				if (user.dataValues.role !== 'user') return cb(null, false, { message: 'permission denied!' })
 				bcrypt.compare(password, user.password)
 					.then(res => {
-						if (!res) return cb(null, false, { message: '帳號或密碼輸入錯誤！' })
+						if (!res) return cb(null, false, { message: 'account or password invalid!' })
 						return cb(null, user)
 					})
 			})
@@ -32,13 +32,13 @@ passport.use('local', new LocalStrategy(
 ))
 
 passport.use('localAdmin', new LocalStrategy(
-	// customize user field
+	// customize admin field
 	{
 		usernameField: 'account',
 		passwordField: 'password',
 		passReqToCallback: true
 	},
-	// authenticate user
+	// authenticate admin
 	(req, account, password, cb) => {
 		User.findOne({ where: { account } })
 			.then(user => {
@@ -59,7 +59,7 @@ const jwtOptions = {
 }
 
 passport.use('jwt', new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-	User.findByPk(jwtPayload.id, { raw: true })
+	User.findByPk(jwtPayload.id)
 		.then(user => { cb(null, user) })
 		.catch(err => cb(err))
 }))
