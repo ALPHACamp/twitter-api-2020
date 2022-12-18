@@ -7,7 +7,7 @@ const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 const bcrypt = require('bcryptjs')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like } = require('../models')
 
 // set up Passport strategy
 passport.use(new LocalStrategy(
@@ -40,7 +40,7 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     include: [
-      { model: Tweet, as: 'LikedTweets' },
+      Like,
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
@@ -58,7 +58,7 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser((id, cb) => {
   return User.findByPk(id, {
     include: [
-      { model: Tweet, as: 'LikedTweets' },
+      Like,
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]

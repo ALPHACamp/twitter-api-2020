@@ -5,24 +5,19 @@ const tweetServices = {
   getTweets: (req, cb) => {
     return Tweet.findAll({
       attributes: [
-        'id', 'UserId', 'description', 'createdAt', 'updatedAt',
+        'id', 'description', 'createdAt', 'updatedAt',
         [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
       ],
       include: [{
         model: User,
-        attributes: [
-          'id', 'avatar', 'name', 'account'
-        ]
+        as: 'TweetOwner',
+        attributes: ['id', 'avatar', 'name', 'account']
       }],
       order: [['id', 'DESC']]
     })
-      .then(datas => {
-        const tweets = datas.map(data => ({
-          ...data.toJSON(),
-          isLiked: helpers.getUser(req).LikedTweets.some(t => t.Like.TweetId === data.id)
-        }))
-        console.log(helpers.getUser(req).LikedTweets)
+      .then(tweets => {
+        console.log(helpers.getUser(req))
         cb(null, tweets)
       })
       .catch(err => cb(err))
