@@ -17,6 +17,7 @@ router.post('/users', userController.register) // 註冊
 router.post('/login', passport.authenticate('local', { session: false }), userController.login)
 
 router.post('/followships', authenticated, authenticatedUser, followshipController.addFollow)
+router.delete('/followships/:followingId', authenticated, authenticatedUser, followshipController.removeFollow)
 
 router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getUserFollowers)
