@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet, sequelize } = require('../models')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 
 const adminController = {
 	login: (req, res, next) => {
-		const adminData = getUser(req).toJSON()
+		const adminData = helpers.getUser(req).toJSON()
 		delete adminData.password
 		try {
 			const token = jwt.sign(adminData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -50,14 +50,11 @@ const adminController = {
 			.catch(err => next(err))
 	},
 	deleteTweet: (req, res, next) => {
-		// if (!getUser) {
-		//   return res.status(401).json({ status: 'error', message: 'token is invalidated' })
-		// }
 		return Tweet.findByPk(req.params.id)
 			.then(tweet => {
 				if (!tweet) {
-					return res.status(400).json(
-						{ status: 'error', message: 'Tweet did not exist!' }
+					return res.status(404).json(
+						{ status: '404', message: 'Tweet did not exist!' }
 					)
 				}
 				res.status(200).json(tweet)

@@ -12,9 +12,9 @@ const app = express()
 const port = process.env.PORT || 3000
 
 const corsOptions = {
-	origin: ['https://yhosutun2490.github.io', 'http://localhost:3000'],
-	methods: ['GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS'],
-	allowedHeaders: ['Content-Type', 'Authorization']
+  origin: ['https://yhosutun2490.github.io', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }
 
 app.use(express.urlencoded({ extended: true }))
@@ -24,9 +24,8 @@ app.use(cors(corsOptions))
 
 app.use('/api', routes)
 
-
-app.use('/', (req, res) => res.send('Hello World!'))
-app.use(generalErrorHandler)
+// app.use('/', (req, res) => res.send('Hello World!'))
+// app.use(generalErrorHandler)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!!Let's go to http://localhost:${port}`))
 

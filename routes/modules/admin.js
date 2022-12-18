@@ -7,7 +7,7 @@ const { generalErrorHandler } = require('../../middleware/error-handler')
 const adminController = require('../../controllers/admin-controller')
 
 router.delete('/tweets/:id', adminController.deleteTweet)
-// router.get('/tweets', authenticatedAdmin,adminController.getTweets)
+router.get('/tweets', authenticatedAdmin,adminController.getTweets)
 router.get('/users',authenticatedAdmin, adminController.getUsers)
 router.post('/login', passport.authenticate('localAdmin', { session: false }), adminController.login)
 

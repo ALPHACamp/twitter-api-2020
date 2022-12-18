@@ -8,7 +8,7 @@ const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 require('dotenv').config()
 
-// set up Passport strategy
+// set up Passport strategyisAuthenticated
 passport.use('local', new LocalStrategy(
 	// customize user field
 	{
@@ -54,8 +54,8 @@ passport.use('localAdmin', new LocalStrategy(
 ))
 
 const jwtOptions = {
-	jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-	secretOrKey: process.env.JWT_SECRET
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET
 }
 
 passport.use('jwt', new JWTStrategy(jwtOptions, (jwtPayload, cb) => {

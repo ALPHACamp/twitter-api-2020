@@ -28,17 +28,17 @@ module.exports = {
 			created_at: new Date(),
 			updated_at: new Date()
 
-		}], {})
-	},
-	down: async (queryInterface, Sequelize) => {
-		const { sequelize } = queryInterface
-		try {
-			await sequelize.transaction(async transaction => {
-				const options = { transaction }
-				await sequelize.query('TRUNCATE TABLE Users', options)
-			})
-		} catch (error) {
-			console.log(error)
-		}
-	}
+    }], {})
+  },
+  down: async (queryInterface, Sequelize) => {
+    const { sequelize } = queryInterface
+    try {
+      await sequelize.transaction(async transaction => {
+        const options = { transaction }
+        await sequelize.query('TRUNCATE TABLE Users', options)
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }
 }

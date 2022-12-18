@@ -8,7 +8,7 @@ const userController = {
 		const { account, name, email, password, checkPassword } = req.body
 		if (!account || !name || !email || !password || !checkPassword) throw Error('All field is required!', {}, Error.prototype.code = 402)
 		if (password !== checkPassword) throw Error('Passwords do not match!', {}, Error.prototype.code = 422)
-		if (/\s/.test(account)||/\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
+		if (/\s/.test(account) || /\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
 		if (password.length < 4 || password.length > 12) throw Error('Password over!', {}, Error.prototype.code = 412)
 		if (account.length > 50 || name.length > 50) throw Error('Name or account over!', {}, Error.prototype.code = 403)
 		if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw Error('Invalid email format!', {}, Error.prototype.code = 401)
@@ -33,7 +33,7 @@ const userController = {
 
 			}))
 			.then((user) => {
-				delete user.get({plain:true}).password
+				delete user.get({ plain: true }).password
 				const userData = {
 					id: user.id,
 					account: user.account,
@@ -43,7 +43,7 @@ const userController = {
 					createdAt: user.createdAt
 				}
 				const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-				res.status(200).json({token,user})
+				res.status(200).json({ token, user })
 			})
 			.catch(err => next(err))
 	},
@@ -66,7 +66,7 @@ const userController = {
 		return Promise.all([
 			User.findByPk(id),
 			Tweet.findAndCountAll({
-				where: { userId: id }
+				where: { UserId: id }
 			}),
 			Followship.findAndCountAll({
 				where: { followingId: id }
@@ -87,7 +87,7 @@ const userController = {
 	},
 	putUser: (req, res, next) => {
 		const { account, name, email, password, avatar, introduction, cover } = req.body
-		if (/\s/.test(account)||/\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
+		if (/\s/.test(account) || /\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
 		User.findByPk(req.params.id)
 			.then(user => {
 				if (!user) throw new Error('User is not exist!')
@@ -102,8 +102,8 @@ const userController = {
 				})
 			})
 			.then((data) => {
-				delete data.get({plain:true}).password
-				res.json(data )
+				delete data.get({ plain: true }).password
+				res.json(data)
 			})
 			.catch(err => next(err))
 	},
@@ -152,7 +152,7 @@ const userController = {
 	getUserlikes: (req, res, next) => {
 		const id = req.params.id
 		  Like.findAll({
-		   where:{userId:id},
+		   where:{UserId:id},
 		   include: { 
 			model: Tweet,
 			attributes: {
@@ -178,7 +178,7 @@ const userController = {
 		  })
 		  .catch(err => { console.log(err) })
 	},
-	getUserTweets:(req,res,next)=>{
+	getUserTweets: (req, res, next) => {
 		const currentUser = getUser(req).id
 		const id = req.params.id
 		Promise.all([
@@ -189,33 +189,35 @@ const userController = {
 					attributes:['id','account','avatar','name']
 				},
 				order: [['createdAt', 'DESC']],
-				nest:true,
-				raw:true
+				nest: true,
+				raw: true
 			}),
 			Like.findAll({
-				attributes:['id','TweetId','UserId'],
-				raw :true}),
+				attributes: ['id', 'TweetId', 'UserId'],
+				raw: true
+			}),
 			Reply.findAll({
-				attributes:['id','TweetId'],
-				raw :true},
+				attributes: ['id', 'TweetId'],
+				raw: true
+			},
 			)
 
 		])
-			.then(([tweetList,like,reply]) => {
-				tweetList.forEach((t)=>{
+			.then(([tweetList, like, reply]) => {
+				tweetList.forEach((t) => {
 					t.likeCount = 0
 					t.replyCount = 0
 					t.liked = false
-					like.forEach((i)=>{
-						if(t.id === i.TweetId){
+					like.forEach((i) => {
+						if (t.id === i.TweetId) {
 							t.likeCount++
 						}
-						if(i.UserId === currentUser && i.TweetId === t.id){
+						if (i.UserId === currentUser && i.TweetId === t.id) {
 							t.liked = true
 						}
 					})
-					reply.forEach((r)=>{
-						if(r.TweetId === t.TweetId){
+					reply.forEach((r) => {
+						if (r.TweetId === t.TweetId) {
 							t.replyCount++
 						}
 					})
@@ -224,25 +226,25 @@ const userController = {
 			})
 			.catch(err => { console.log(err) })
 	},
-	getUserReplidTweets:(req,res,next)=>{
+	getUserRepliedTweets: (req, res, next) => {
 		const id = req.params.id
-			Reply.findAll({
-				where:{userId:id},
-				include: { 
-					model: Tweet,
+		Reply.findAll({
+			where: { UserId: id },
+			include: {
+				model: Tweet,
+				attributes:
+					['id'],
+				include: [{
+					model: User,
 					attributes:
-					['id'],					
-					include: [{
-						model:User,
-						attributes:
-						['id', 'name','account','avatar'],
-					}],
-				},
-				order: [['createdAt', 'DESC']],
-				nest:true,
-				raw:true
+						['id', 'name', 'account', 'avatar'],
+				}],
+			},
+			order: [['createdAt', 'DESC']],
+			nest: true,
+			raw: true
 
-			})
+		})
 			.then((replyList) => {
 				res.status(200).json(replyList)
 			})
