@@ -54,7 +54,7 @@ const userController = {
         exclude: ['password'],
         include: [
           [sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id )'), 'tweetCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followersCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followerCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id )'), 'followingCount']
         ]
       }
@@ -71,7 +71,7 @@ const userController = {
         exclude: ['password'],
         include: [
           [sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id )'), 'tweetCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followersCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followerCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id )'), 'followingCount']
         ]
       }
@@ -120,7 +120,22 @@ const userController = {
   getUserReplies: (req, res, next) => {
     return Reply.findAll({
       where: { UserId: req.params.id },
-      include: [User, Tweet]
+      include: [
+        {
+          model: User,
+          attributes: {
+            exclude: ['password', 'email', 'cover', 'introduction', 'role', 'createdAt', 'updatedAt']
+          }
+        },
+        {
+          model: Tweet,
+          attributes: ['UserId'],
+          include: {
+            model: User,
+            attributes: ['name']
+          }
+        }
+      ]
     })
       .then(replies => {
         return replies

@@ -1,4 +1,5 @@
 const { User, Tweet, sequelize } = require('../models')
+const { dateFormat } = require('../helpers/date-helper')
 
 const adminController = {
   getUsers: (req, res, next) => {
@@ -38,7 +39,8 @@ const adminController = {
       .then(tweets => {
         const tweetsData = tweets.map(tweet => ({
           ...tweet,
-          description: tweet.description.substring(0, 50)
+          description: tweet.description.substring(0, 50),
+          relativeTime: dateFormat(tweet.createdAt).fromNow()
         }))
         res.json(tweetsData)
       })
