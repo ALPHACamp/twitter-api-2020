@@ -204,6 +204,32 @@ const userController = {
         res.json(tweets)
       })
       .catch(err => next(err))
+  },
+  getUserFollowings: (req, res, next) => {
+    return User.findByPk(req.params.id, {
+      include: [{
+        model: User,
+        as: 'Followings',
+        attributes: ['id', 'name', 'avatar', 'introduction'],
+        include: [{
+          model: User,
+          as: 'Followers'
+        }]
+      }],
+      order: [[{ model: User, as: 'Followings' }, Followship, 'createdAt', 'DESC']]
+    })
+      .then(followings => {
+        if (!followings) throw new Error("User didn't exist")
+        const result = followings.Followings
+          .map(following => {
+            const { Followers, Followship, ...data } = following.toJSON()
+            data.followingId = following.id
+            data.isFollow = following.Followers.some(follower => follower.id === helpers.getUser(req).id)
+            return data
+          })
+        res.status(200).json(result)
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = userController
