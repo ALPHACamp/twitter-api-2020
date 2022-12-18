@@ -22,7 +22,7 @@ const tweetController = {
       return res.status(200).json({ tweet })
     } catch (err) { next(err) }
   },
-  // unfinished
+  // unfinished 前端畫面第 12 頁
   getTweetReplies: async (req, res, next) => {
     try {
       const tweetId = req.params.id
@@ -36,13 +36,14 @@ const tweetController = {
       const replyList = await Reply.findAll({
         raw: true,
         nest: true,
-        where: { TweetId: tweetId },
-        includes: {
-          model: User
+        include: {
+          model: User,
+          attributes: ['id', 'account', 'name', 'avatar', 'cover']
         },
+        where: { TweetId: tweetId },
         order: [['createdAt', 'DESC']]
       })
-      res.status(200).json({ status: '200', data: replyList })
+      res.status(200).json(replyList)
     } catch (err) { next(err) }
   },
   // postTweetReply: (req, res, next) => {
@@ -71,8 +72,8 @@ const tweetController = {
         attributes: [
           'id', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'LikeCount'],
-          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.tweet_id = Tweet.id AND Likes.user_id = ${currentUserId})`), 'ifLiked']
+          [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.tweet_id = Tweet.id AND Likes.user_id = ${currentUserId})`), 'isLiked']
         ],
         order: [['createdAt', 'DESC']]
       })
