@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
@@ -153,6 +153,47 @@ const userController = {
       .then(replies => {
         if (!replies) throw new Error("Replies didn't exist!")
         return res.json(replies)
+      })
+      .catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
+    return Like.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        {
+          model: Tweet,
+          attributes: [
+            [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id )'), 'replyCount']
+          ],
+          include: {
+            model: User,
+            attributes: {
+              exclude: ['password']
+            }
+          }
+        }
+      ],
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id )'), 'likeCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM likes WHERE likes.UserId = ${currentUser.id} AND likes.TweetId = tweet.id )`), 'isLiked']
+        ]
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(likes => {
+        return likes
+          .map(like => ({
+            ...like,
+            relativeTime: dateFormat(like.createdAt).fromNow()
+          }))
+      })
+      .then(likes => {
+        if (!likes) throw new Error("Likes didn't exist!")
+        return res.json(likes)
       })
       .catch(err => next(err))
   }

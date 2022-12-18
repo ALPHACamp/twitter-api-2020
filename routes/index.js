@@ -9,7 +9,7 @@ const userController = require('../controllers/user-controller')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 
 // 取得當前使用者
-router.get('/current_user', userController.getCurrentUser)
+router.get('/current_user', authenticated, userController.getCurrentUser)
 // 後台登入
 router.post('/admin/signin', passport.authenticate('local', { session: false }), authenticatedAdmin, userController.signIn)
 // 前台註冊
