@@ -5,6 +5,7 @@ const passport = require('passport')
 const admin = require('./modules/admin')
 const user = require('./modules/user')
 const tweet = require('./modules/tweet')
+const followship = require('./modules/followship')
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
 const userController = require('../controllers/user-controller')
@@ -22,6 +23,9 @@ router.use('/api/tweets', authenticated, authenticatedUser, tweet)
 
 // user
 router.use('/api/users', authenticated, authenticatedUser, user)
+
+// followship
+router.use('/api/followships', authenticated, authenticatedUser, followship)
 
 // handle error
 router.use('/', generalErrorHandler)
