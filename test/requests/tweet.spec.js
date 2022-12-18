@@ -20,7 +20,7 @@ describe('# tweet requests', () => {
         // 模擬登入資料
         const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null)
-          return (req, res, next) => {}
+          return (req, res, next) => { }
         })
         this.getUser = sinon.stub(
           helpers, 'getUser'
@@ -69,7 +69,7 @@ describe('# tweet requests', () => {
         // 模擬登入資料
         const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null)
-          return (req, res, next) => {}
+          return (req, res, next) => { }
         })
         this.getUser = sinon.stub(
           helpers, 'getUser'
