@@ -3,6 +3,7 @@ const router = express.Router()
 const tweetController = require('../../controllers/tweet-controller')
 // 查看貼文的回覆
 router.get('/:tweet_id/replies', tweetController.getReplies)
+router.post('/:tweet_id/replies', tweetController.postReply)
 router.get('/:tweet_id', tweetController.getTweet)
 router.post('/', tweetController.postTweet)
 router.get('/', tweetController.getTweets)
