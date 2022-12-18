@@ -178,16 +178,50 @@ const userController = {
   },
   getFollowing: (req, res, next) => {
     const { id } = req.params
-    Followship.findAll({ where: { followerId: id } })
-      .then((followingList) => {
+    return Promise.all([
+      User.findByPk(id, {
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      }),
+      Followship.findAll({ where: { followerId: id }, raw: true })
+    ])
+      .then(([trackData, followingList]) => {
+        //檢查特定使用者的追隨者
+        let checkBox = []
+        trackData.Followers.forEach((f) => {
+          checkBox.push(f.id)
+        })
+        followingList.forEach((list) => {
+          // 新增 isFollowed 屬性
+          list.isFollowed = checkBox.includes(list.followingId)
+        })
         res.status(200).send(followingList)
       })
       .catch((err) => next(err))
   },
   getFollower: (req, res, next) => {
     const { id } = req.params
-    Followship.findAll({ where: { followingId: id } })
-      .then((followerList) => {
+    return Promise.all([
+      User.findByPk(id, {
+        include: [
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ]
+      }),
+      Followship.findAll({ where: { followingId: id }, raw: true })
+    ])
+      .then(([trackData, followerList]) => {
+        //檢查特定使用者的追蹤者
+        let checkBox = []
+        trackData.Followings.forEach((f) => {
+          checkBox.push(f.id)
+        })
+        followerList.forEach((list) => {
+          // 新增 isFollowed 屬性
+          list.isFollowed = checkBox.includes(list.followerId)
+        })
         res.status(200).send(followerList)
       })
       .catch((err) => next(err))
