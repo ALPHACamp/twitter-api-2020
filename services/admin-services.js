@@ -1,4 +1,5 @@
 const { User, Tweet } = require('./../models')
+const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 
@@ -18,7 +19,13 @@ const adminServices = {
   },
   getUsers: (req, cb) => {
     return User.findAll({
-      attributes: { exclude: ['password'] }
+      attributes: ['id', 'account', 'name', 'avatar', 'cover',
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'tweetCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE user_id = User.id)'), 'replyCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets JOIN Likes ON Tweets.id = Likes.tweet_id WHERE Tweets.user_id = User.id)'), 'likeCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount']
+      ]
     })
       .then(users => {
         return cb(null, users)
