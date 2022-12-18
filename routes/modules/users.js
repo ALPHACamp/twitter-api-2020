@@ -11,6 +11,8 @@ const upload = require('../../middleware/multer')
 // 登入不需要驗證登入狀態
 router.post('/signin', userController.signIn)
 
+// 查看特定使用者發過的所有回覆 ********Evelyn 先註記一下 避免搞混
+router.get('/:id/replied_tweets', authenticated, authenticatedUser, user2Controller.getUserReplies)
 // 查看特定使用者發過的所有推文 ********Evelyn 先註記一下 避免搞混
 router.get('/:id/tweets', authenticated, authenticatedUser, user2Controller.getUserTweets)
 

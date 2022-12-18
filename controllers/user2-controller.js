@@ -1,6 +1,6 @@
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 
 const user2Controller = {
   getUserTweets: (req, res, next) => {
@@ -30,8 +30,8 @@ const user2Controller = {
     ])
       .then(([user, tweets, likes]) => {
         if (!user) throw new Error("User didn't exist")
-        console.log(likes)
-        console.log(tweets)
+        // console.log(likes)
+        // console.log(tweets)
         const userData = tweets.map(tweet => ({
           ...tweet,
           isLiked: likes.some(like => like.TweetId === tweet.id && currentUserId === like.UserId)
@@ -39,7 +39,32 @@ const user2Controller = {
         res.status(200).json(userData)
       })
       .catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    // const currentUserId = helpers.getUser(req)?.id // 正在使用網站的使用者id
+    const UserId = Number(req.params.id) // 要查看的特定使用者id
+
+    // 要撈特定使用者資料/reply資料
+    return Promise.all([
+      User.findByPk(UserId),
+      Reply.findAll({
+        where: { UserId },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['id', 'account'] }] }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, replies]) => {
+        if (!user) throw new Error("User didn't exist")
+        res.status(200).json(replies)
+      })
+      .catch(err => next(err))
   }
+
 }
 
 module.exports = user2Controller
