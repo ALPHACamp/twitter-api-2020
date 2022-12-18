@@ -67,13 +67,15 @@ const userController = {
       .catch(err => next(err))
   },
   getUser: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
     return User.findByPk(req.params.id, {
       attributes: {
         exclude: ['password'],
         include: [
           [sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id )'), 'tweetCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followerCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id )'), 'followingCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id )'), 'followingCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM followships WHERE followships.followerId = ${currentUser.id} AND followships.followingId = user.id )`), 'isFollowing']
         ]
       }
     })
