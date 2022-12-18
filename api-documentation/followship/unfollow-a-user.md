@@ -37,7 +37,7 @@ Success | code: 200
 ```json
 {
   "status":"success"
-}Failure | code: 422 使用者不能追蹤自己
+}
 ```
 
 Failure | code: 404

@@ -136,7 +136,7 @@ ctrl + c
 | Get user's profile                   | GET    | [/api/users/:id](api-documentation/users/get-single-user-profile.md)               |
 | Get login user's info                | GET    | [/api/users/login_user](api-documentation/users/get-login-user-profile.md)         |
 | Edit user's own profile              | PUT    | [/api/users/:id](api-documentation/users/edit-login-user-profile.md)                |
-| Get user's own replies               | GET    | [/api/users/:id/replied_tweets](api-documentation/users/get-single-user-profile.md) |
+| Get user's own replies               | GET    | [/api/users/:id/replied_tweets](api-documentation/users/get-single-user-replies.md) |
 | Get user's own tweets                | GET    | [/api/users/:id/tweets](api-documentation/users/get-single-user-tweets.md)         |
 | Get user's liked tweets              | GET    | [/api/users/:id/likes](api-documentation/users/get-single-user-likes-tweet.md)          |
 | Get user's followings list           | GET    | [/api/users/:id/followings](api-documentation/users/get-single-user-followings.md)     |
@@ -154,7 +154,7 @@ ctrl + c
 | Post reply for a tweet               | POST   | [/api/tweets/:tweet_id/replie](api-documentation/tweets/post-a-tweet-reply.md) |
 | Get all tweets                       | GET    | [/api/tweets](api-documentation/tweets/get-all-tweets.md)                   |
 | Get a tweet detail                   | GET    | [/api/tweets/:tweet_id](api-documentation/tweets/get-a-tweet.md)         |
-| Get all replies for a tweet          | GET    | [/api/tweets/:tweet_id/replies](api-documentation/tweets/get-a-tweet.md) |
+| Get all replies for a tweet          | GET    | [/api/tweets/:tweet_id/replies](api-documentation/tweets/get-a-tweet-replies.md) |
 | Like a tweet                         | POST   | [/api/tweets/:tweet_id/like](api-documentation/tweets/like-a-tweet.md)    |
 | Unlike a tweet                       | POST   | [/api/tweets/:tweet_id/unlike](api-documentation/tweets/unlike-a-tweet.md)  |
 |--------------------------------------|--------|-------------------------------|
