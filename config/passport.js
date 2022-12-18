@@ -39,11 +39,11 @@ const jwtOptions = {
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
-    // include: [
-    //   { model: Tweet, as: 'LikedTweets' },
-    //   { model: User, as: 'Followers' },
-    //   { model: User, as: 'Followings' }
-    // ]
+    include: [
+      { model: Tweet, as: 'LikedTweets' },
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ]
   })
     .then(user => cb(null, user))
     .catch(err => cb(err))
@@ -54,11 +54,11 @@ passport.serializeUser((user, cb) => {
 })
 passport.deserializeUser((id, cb) => {
   return User.findByPk(id, {
-    // include: [
-    //   { model: Tweet, as: 'LikedTweets' },
-    //   { model: User, as: 'Followers' },
-    //   { model: User, as: 'Followings' }
-    // ]
+    include: [
+      { model: Tweet, as: 'LikedTweets' },
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ]
   })
     .then(user => {
       user = user.toJSON()

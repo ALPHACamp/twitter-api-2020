@@ -18,11 +18,9 @@ const adminServices = {
   },
   getUsers: (req, cb) => {
     return User.findAll({
-      nest: true,
-      raw: true
+      attributes: { exclude: ['password'] }
     })
       .then(users => {
-        users.forEach(user => delete user.password)
         return cb(null, users)
       })
       .catch(err => cb(err))

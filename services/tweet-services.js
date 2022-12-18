@@ -1,14 +1,28 @@
+const sequelize = require('sequelize')
 const { User, Tweet, Reply, Like } = require('./../models')
 const helpers = require('../_helpers')
 const tweetServices = {
   getTweets: (req, cb) => {
     return Tweet.findAll({
-      include: [{ model: User }],
-      raw: true,
-      nest: true
+      // attributes: [
+      //   'id', 'UserId', 'description', 'createdAt', 'updatedAt'
+      //   [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = id)'), 'replyCount'],
+      //   [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = id)'), 'likedCount']
+      // ],
+
+      include: [{
+        model: User,
+        attributes: [
+          'id', 'avatar', 'name', 'account'
+        ]
+      }],
+      order: [['id', 'DESC']]
     })
-      .then(tweets => {
-        tweets.forEach(t => delete t.User.password)
+      .then(datas => {
+        const tweets = datas.map(data => ({
+          ...data.toJSON(),
+          isLiked: helpers.getUser(req).LikedTweets.some(t => t.TweetId === data.id)
+        }))
         cb(null, tweets)
       })
       .catch(err => cb(err))
