@@ -49,7 +49,7 @@ const followshipController = {
           message: 'You have not followed this user!'
         })
       }
-      ifFollowed.destroy()
+      await ifFollowed.destroy()
       res.status(200).json({ "status": 200, "data": ifFollowed })
     } catch (err) {
       next(err)

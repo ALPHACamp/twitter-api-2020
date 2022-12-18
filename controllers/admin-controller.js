@@ -5,6 +5,7 @@ const helpers = require('../_helpers')
 const adminController = {
 	login: (req, res, next) => {
 		const adminData = helpers.getUser(req).toJSON()
+		console.log(adminData)
 		delete adminData.password
 		try {
 			const token = jwt.sign(adminData, process.env.JWT_SECRET, { expiresIn: '30d' })

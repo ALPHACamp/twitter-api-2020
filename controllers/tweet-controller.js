@@ -141,7 +141,8 @@ const tweetController = {
           status: 'error',
           message: 'You have not liked this tweet!'
         })
-      } else like.destroy()
+      }
+      await like.destroy()
       return res.status(200).json({ status: "success", data: like })
     } catch (err) {
       next(err)
