@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
 const { User, Like, Tweet, Followship, Reply, sequelize } = require('../models')
 const { getUser, imgurFileHandler } = require('../_helpers')
-const dayjs = require('dayjs')
 
 const userController = {
   userLogin: async (req, res, next) => {
@@ -275,8 +274,7 @@ const userController = {
       })
       const data = tweets.map(tweet => ({
         ...tweet,
-        isLiked: user?.Likes?.some(userLike => userLike?.TweetId === tweet.id),
-        createdAt: dayjs(tweet.createdAt).valueOf()
+        isLiked: user?.Likes?.some(userLike => userLike?.TweetId === tweet.id)
       }))
       return res.status(200).json(data)
     } catch (err) { next(err) }
