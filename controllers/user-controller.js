@@ -169,6 +169,35 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  putUserSetting: (req, res, next) => {
+    if (helpers.getUser(req).id !== Number(req.params.id)) throw new Error('You have no permission!')
+    const { account, name, email, password, checkPassword } = req.body
+    if (password !== checkPassword) throw new Error('Passwords do not match!')
+    if (password.length > 8) throw new Error('Passwords should be no more than 8 digit!')
+    if (account.length > 8) throw new Error('Account should be no more than 8 digit!')
+    if (!email.includes('@')) throw new Error('your email address does not have @')
+    return Promise.all([
+      User.findByPk(req.params.id),
+      bcrypt.hash(password, 10),
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
+    ])
+      .then(([user, hash, checkAccount, checkEmail]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (checkAccount) throw new Error("The account is existed!")
+        if (checkEmail) throw new Error("The email is existed!")
+        return user.update({
+          name,
+          account,
+          email,
+          password: hash
+        })
+      })
+      .then(user => {
+        res.status(200).json(user)
+      })
+      .catch(err => next(err))
+  },
   getUserLikes: (req, res, next) => {
     return Like.findAll({
       where: {
