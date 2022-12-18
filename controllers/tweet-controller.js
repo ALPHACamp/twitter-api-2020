@@ -33,9 +33,9 @@ const tweetController = {
         include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
         attributes: {
           include: [
-            [sequelize.literal(`(SELECT COUNT(*) AS replyCounts FROM replies
-          WHERE Tweet_id = tweet.id)`), 'replyCounts'],
-            [sequelize.literal('(SELECT COUNT(*) AS likeCounts FROM likes WHERE Tweet_id = tweet.id)'), 'likeCounts'],
+            [sequelize.literal(`(SELECT COUNT(*) FROM Replies
+          WHERE Replies.Tweet_id = Tweet.id)`), 'replyCounts'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
             [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${loginUser} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
           ]
         },
@@ -58,9 +58,9 @@ const tweetController = {
         include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
         attributes: {
           include: [
-            [sequelize.literal(`(SELECT COUNT(*) AS replyCounts FROM replies
-          WHERE Tweet_id = tweet.id)`), 'replyCounts'],
-            [sequelize.literal('(SELECT COUNT(*) AS likeCounts FROM likes WHERE Tweet_id = tweet.id)'), 'likeCounts'],
+            [sequelize.literal(`(SELECT COUNT(*)FROM Replies
+          WHERE Replies.Tweet_id = Tweet.id)`), 'replyCounts'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
             [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${loginUser} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
           ]
         },
