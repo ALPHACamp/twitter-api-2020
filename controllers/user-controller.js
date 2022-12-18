@@ -22,7 +22,7 @@ const userController = {
   },
   signUp: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
-    if (!account || !name || !email || !password || !checkPassword) throw new Error('所有欄位皆為必填')
+    if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw new Error('所有欄位皆為必填')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
     if (name?.length > 50) throw new Error('暱稱 name 上限 50 字!')
     return Promise.all([
@@ -280,23 +280,26 @@ const userController = {
   },
   putUserSetting: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
+    if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw new Error('所有欄位皆為必填')
+    const currentUser = helpers.getUser(req)
     if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
     if (name?.length > 50) throw new Error('暱稱 name 上限 50 字!')
     return Promise.all([
+      User.findByPk(currentUser.id),
       User.findOne({ where: { account } }),
       User.findOne({ where: { email } })
     ])
-      .then(([userFoundByAccount, userFoundByEmail]) => {
-        if (userFoundByAccount) throw new Error('account 已重複註冊!')
-        if (userFoundByEmail) throw new Error('email 已重複註冊!')
-        return bcrypt.hash(password, 10)
+      .then(([user, userFoundByAccount, userFoundByEmail]) => {
+        if (user?.toJSON().account === userFoundByAccount?.toJSON().account) throw new Error('account 已重複註冊!')
+        if (user?.toJSON().email === userFoundByEmail?.toJSON().email) throw new Error('email 已重複註冊!')
+        return user
       })
-      .then(hash => {
-        return User.update({
+      .then(user => {
+        return user.update({
           account,
           name,
           email,
-          password: hash
+          password: bcrypt.hashSync(password, 10)
         })
       })
       .then(renewUser => {
