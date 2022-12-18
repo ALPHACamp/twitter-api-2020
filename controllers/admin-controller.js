@@ -50,9 +50,6 @@ const adminController = {
 			.catch(err => next(err))
 	},
 	deleteTweet: (req, res, next) => {
-		// if (!getUser) {
-		//   return res.status(401).json({ status: 'error', message: 'token is invalidated' })
-		// }
 		return Tweet.findByPk(req.params.id)
 			.then(tweet => {
 				if (!tweet) {

@@ -77,7 +77,10 @@ const tweetController = {
       const tweets = await Tweet.findAll({
         nest: true,
         raw: true,
-        include: { model: User, attributes: ['id', 'account', 'name', 'avatar', 'cover'] },
+        include: {
+          model: User,
+          attributes: ['id', 'account', 'name', 'avatar', 'cover']
+        },
         attributes: [
           'id', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
