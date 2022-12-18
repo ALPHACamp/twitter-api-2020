@@ -126,16 +126,38 @@ const userController = {
   putUser: (req, res, next) => {
     const { account, name, email, introduction } = req.body
     const { id } = req.params
-
-    let avatarFile = req.files.avatar
-    let coverFile = req.files.cover
-    // 將 avatar 和 cover 資料取出
-    if (!req.files.avatar) {
+    const { files } = req
+    // 設定 avatar 和 cover 暫存變數
+    let avatarFile
+    let coverFile
+    // 未上傳檔案 (上傳檔案為空的情況下)
+    if (!files) {
       avatarFile = [{ path: '' }]
-    }
-
-    if (!req.files.cover) {
       coverFile = [{ path: '' }]
+    }
+    // 上傳檔案
+    if (files) {
+      avatarFile = files.avatar
+      coverFile = files.cover
+      // 都未上傳檔案
+      if (!avatarFile && !coverFile) {
+        avatarFile = [{ path: '' }]
+        coverFile = [{ path: '' }]
+      }
+
+      // 只上傳其中一個檔案
+      if (!avatarFile || !coverFile) {
+        // 未上傳 avatar，上傳 cover
+        if (!avatarFile) {
+          avatarFile = [{ path: '' }]
+          coverFile = req.files.cover
+        }
+        // 未上傳 cover，上傳 avatar
+        if (!coverFile) {
+          coverFile = [{ path: '' }]
+          avatarFile = req.files.avatar
+        }
+      }
     }
 
     return Promise.all([User.findByPk(id), avatarFile, coverFile])
