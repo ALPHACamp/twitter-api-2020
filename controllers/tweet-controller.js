@@ -35,7 +35,7 @@ const tweetController = {
           include: [
             [sequelize.literal(`(SELECT COUNT(*) FROM Replies
           WHERE Replies.Tweet_id = Tweet.id)`), 'replyCounts'],
-            [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
             [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${loginUser} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
           ]
         },
