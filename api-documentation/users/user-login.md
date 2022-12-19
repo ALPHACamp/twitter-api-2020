@@ -34,7 +34,7 @@ content-type: application/json
 
 Success | code: 200 使用者登入成功
 
-```json
+```
 {
     "status": "success",
     "data": {
@@ -57,7 +57,7 @@ Success | code: 200 使用者登入成功
 
 Failure | code: 400 帳號或密碼未填寫
 
-```json
+```
 {
 	Bad Request
 }
@@ -65,7 +65,7 @@ Failure | code: 400 帳號或密碼未填寫
 
 Failure | code: 401 帳號不存在
 
-```json
+```
 {
   "status": "error",
   "message": "This account has not registered."
@@ -74,7 +74,7 @@ Failure | code: 401 帳號不存在
 
 Failure | code: 401 密碼不正確
 
-```json
+```
 {
   "status": "error",
   "message": "Account or password is not correct."
@@ -83,7 +83,7 @@ Failure | code: 401 密碼不正確
 
 Failure | code: 403 forbidden 管理員登入前台
 
-```json
+```
 {
   "status": "error",
   "message": "Permission denied."
@@ -92,7 +92,7 @@ Failure | code: 403 forbidden 管理員登入前台
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

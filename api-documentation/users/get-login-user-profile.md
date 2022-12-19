@@ -32,7 +32,7 @@ Success | code: 200
 
 回傳現在登入的這個使用者資訊
 
-```json
+```
 {
   "id": 2,
   "account": "user1",
@@ -50,7 +50,7 @@ Success | code: 200
 
 Failure | code: 404 找不到該使用者
 
-```json
+```
 {
   "status": "error",
   "message": "User not found!"
@@ -63,7 +63,7 @@ If your request header do not send`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
 	"status": "error",
   "message": "unauthorized"
@@ -72,7 +72,7 @@ You would get
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

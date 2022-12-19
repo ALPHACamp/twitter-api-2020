@@ -34,7 +34,7 @@ Success | code: 200
 
 備註: 推文僅回覆50字
 
-```json
+```
 [
     {
         "id": 1,
@@ -66,11 +66,12 @@ Success | code: 200
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
    "status": "error",
    "message": "unauthorized"
@@ -79,7 +80,7 @@ You would get
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

@@ -34,7 +34,7 @@ Success | code: 200
 
 單一推文內容
 
-```json
+```
 
 	{
 	  "id": 2, // 貼文id
@@ -53,9 +53,9 @@ Success | code: 200
 
 ```
 
-Failure | code: 404 找不到該使用者(討論是否刪除?)
+Failure | code: 404 找不到該使用者
 
-```json
+```
 {
   "status": "error",
   "message": "User not found!"
@@ -64,7 +64,7 @@ Failure | code: 404 找不到該使用者(討論是否刪除?)
 
 Failure | code: 404 找不到該推文(新增)
 
-```json
+```
 {
   "status": "error",
   "message": "Cannot find this tweet."
@@ -73,11 +73,12 @@ Failure | code: 404 找不到該推文(新增)
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
 	"status": "error",
   "message": "unauthorized"
@@ -86,7 +87,7 @@ You would get
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

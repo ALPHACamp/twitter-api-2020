@@ -32,7 +32,7 @@ content-type: application/json
 
 Success | code: 200 依推文時間createdAt由新到舊回傳該用戶所有推文
 
-```json
+```
 [
 	{
 	  "id": 2,
@@ -69,7 +69,7 @@ Success | code: 200 依推文時間createdAt由新到舊回傳該用戶所有推
 
 Failure | code: 404 找不到該使用者
 
-```json
+```
 {
   "status": "error",
   "message": "User not found!"
@@ -82,7 +82,7 @@ If your request header do not send`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
 	"status": "error",
   "message": "unauthorized"
@@ -91,7 +91,7 @@ You would get
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

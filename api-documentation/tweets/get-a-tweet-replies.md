@@ -34,7 +34,7 @@ Success | code: 200
 
 依回覆時間createdAt由新到舊，回傳特定推文的所有回覆
 
-```json
+```
 [
 		{
 		  "id": 9,// replyId in replies table
@@ -79,11 +79,12 @@ Success | code: 200
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
 	"status": "error",
   "message": "unauthorized"
@@ -92,7 +93,7 @@ You would get
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

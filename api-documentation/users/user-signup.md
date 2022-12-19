@@ -35,9 +35,9 @@ content-type: application/json
 
 ### Response Body
 
-Success | code: 200 改為也發送token
+Success | code: 200
 
-```json
+```
 {
     "status": "success",
     "data": {
@@ -56,7 +56,7 @@ Success | code: 200 改為也發送token
 
 Failure | code: 400任一欄位為空值
 
-```json
+```
 {
   "status": "error",
   "message": "All field are required!"
@@ -65,7 +65,7 @@ Failure | code: 400任一欄位為空值
 
 Failure | code: 422密碼與確認密碼輸入值不同
 
-```json
+```
 {
   "status": "error",
   "message": "Password and confirmPassword do not match."
@@ -74,7 +74,7 @@ Failure | code: 422密碼與確認密碼輸入值不同
 
 Failure | code: 422Email 格式不對
 
-```json
+```
 {
   "status": "error",
   "message": "Email input is invalid!"
@@ -83,7 +83,7 @@ Failure | code: 422Email 格式不對
 
 Failure | code: 422 Name 超過 50 個字
 
-```json
+```
 {
   "status": "error",
   "message": "Name field has max length of 50 characters."
@@ -92,7 +92,7 @@ Failure | code: 422 Name 超過 50 個字
 
 Failure | code: 422 Account 已註冊
 
-```json
+```
 {
   "status": "error",
   "message": "Account already exists!"
@@ -101,7 +101,7 @@ Failure | code: 422 Account 已註冊
 
 Failure | code: 422 Email 已註冊
 
-```json
+```
 {
   "status": "error",
   "message": "Email already exists!"
@@ -110,7 +110,7 @@ Failure | code: 422 Email 已註冊
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

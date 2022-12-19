@@ -35,7 +35,7 @@ Success | code: 200
 
 依使用者追蹤紀錄成立時間(createdAt)也就是按下跟隨按鈕的時間，由新到舊回傳該用戶所有追隨中(following)用戶。
 
-```json
+```
 
 [
 	{
@@ -75,7 +75,7 @@ Success | code: 200
 
 Failure | code: 404 找不到該使用者
 
-```json
+```
 {
   "status": "error",
   "message": "User not found!"
@@ -84,11 +84,12 @@ Failure | code: 404 找不到該使用者
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
 	"status": "error",
   "message": "unauthorized"
@@ -97,7 +98,7 @@ You would get
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

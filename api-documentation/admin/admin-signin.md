@@ -18,8 +18,6 @@ Content-Type: Content-Type: application/json
 
 ### Request Body
 
-form enctype: default application/x-www-form-urlencoded;charset=utf-8
-
 | Name | Required | Description | Type |
 | --- | --- | --- | --- |
 | account | True | 帳號 | String |
@@ -37,7 +35,7 @@ content-type: application/json
 
 Success | code: 200 使用者登入成功
 
-```json
+```
 {
     "status": "success",
     "data": {
@@ -58,7 +56,7 @@ Success | code: 200 使用者登入成功
 
 Failure | code: 400 帳號或密碼未填寫
 
-```json
+```
 {
   "status": "error",
   "message": "Account and Password field is required."
@@ -67,7 +65,7 @@ Failure | code: 400 帳號或密碼未填寫
 
 Failure | code: 401 密碼不正確
 
-```json
+```
 {
   "status": "error",
   "message": "Account or password is not correct."
@@ -76,7 +74,7 @@ Failure | code: 401 密碼不正確
 
 Failure | code: 404 此管理員帳號不存在
 
-```json
+```
 {
   "status": "error",
   "message": "This admin account has not created."
@@ -85,7 +83,7 @@ Failure | code: 404 此管理員帳號不存在
 
 Failure | code: 403 forbidden 一般使用者登入後台
 
-```json
+```
 {
   "status": "error",
   "message": "Permission denied."
@@ -94,11 +92,12 @@ Failure | code: 403 forbidden 一般使用者登入後台
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
 	"status": "error",
   "message": "unauthorized"
@@ -107,7 +106,7 @@ You would get
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}
