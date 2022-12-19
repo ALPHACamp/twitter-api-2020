@@ -45,14 +45,14 @@ Success | code: 200
     "name":"user2",
     "account":"user2",
     "avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-		 },
-	"Tweet": {
+    },
+  "Tweet": {
     "id": 3, // 回覆的teewtId
     "User": {
     "id": 6, // 推文的作者id
     "account": "mario",
-     }
-	 }
+    }
+   }
   },
 
 	....// 依照時間先後排序，最新的排最前面

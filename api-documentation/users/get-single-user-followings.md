@@ -38,7 +38,7 @@ Success | code: 200
 ```
 
 [
-	{
+  {
     "followerId" : 3, // 這個用戶的id＝userId
     "followingId": 2,
     "createdAt": 1670812139000, // 追蹤紀錄成立時間，以此排序

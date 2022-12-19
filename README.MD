@@ -129,7 +129,7 @@ ctrl + c
 | Admin get all users list             | GET    | [/api/admin/users](api-documentation/admin/admin-get-all-users.md)                    |
 | Admin delete a tweet                 | DELETE | [/api/admin/tweets/:id](api-documentation/admin/admin-delete-a-tweet.md)              |
 | Admin get all tweets                 | GET    | [/api/admin/tweets](api-documentation/admin/admin-get-all-tweets.md)                  |
-|---------------------------------------------------------------------------------------------------------------------------------------|
+||
 | **User**                                                                                                                              |
 | Normal user login to foreground app  | POST   | [/api/signin](api-documentation/users/user-login.md)                                  |
 | New user register                    | POST   | [/api/users](api-documentation/users/user-signup.md)                                  |
@@ -144,11 +144,11 @@ ctrl + c
 | Get top-10 users (top #followers)    | GET    | [/api/users/top](api-documentation/users/get-top10-users.md)                          | 
 | Edit user's account setting          | POST   | [/api/users/:id/setting](api-documentation/users/edit-login-user-account-setting.md)  |
 | Check user's permission              | GET    | [/api/auth/test-token](api-documentation/users/get-token-status.md)                   |
-|---------------------------------------------------------------------------------------------------------------------------------------|
+||
 | **Followship**                                                                                                                        |
 | Follow a user                        | POST   | [/api/followships](api-documentation/followship/follow-a-user.md)                     |
 | Unfollow a user                      | DELETE | [/api/followships/:followingId](api-documentation/followship/unfollow-a-user.md)      |
-|---------------------------------------------------------------------------------------------------------------------------------------|
+||
 | **Tweet**                                                                                                                             |
 | Post a tweet                         | POST   | [/api/tweets](api-documentation/tweets/post-a-tweet.md)                               |
 | Post reply for a tweet               | POST   | [/api/tweets/:tweet_id/replie](api-documentation/tweets/post-a-tweet-reply.md)        |
@@ -157,7 +157,7 @@ ctrl + c
 | Get all replies for a tweet          | GET    | [/api/tweets/:tweet_id/replies](api-documentation/tweets/get-a-tweet-replies.md)      |
 | Like a tweet                         | POST   | [/api/tweets/:tweet_id/like](api-documentation/tweets/like-a-tweet.md)                |
 | Unlike a tweet                       | POST   | [/api/tweets/:tweet_id/unlike](api-documentation/tweets/unlike-a-tweet.md)            |
-|---------------------------------------------------------------------------------------------------------------------------------------|
+
 
 ## Contributors
 - [Benson Ye Bin Shuo](https://github.com/bensonybs)
