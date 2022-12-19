@@ -38,7 +38,7 @@ const adminController = {
         limit,
         offset,
         raw: true,
-        order: [[sequelize.literal('tweetCounts'), 'DESC']]
+        order: [[sequelize.literal('tweetCounts'), 'DESC'], ['role', 'DESC']]
       })
       res.status(200).json(users)
     } catch (err) {
