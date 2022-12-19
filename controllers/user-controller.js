@@ -193,8 +193,26 @@ const userController = {
         trackData.Followers.forEach((f) => {
           checkBox.push(f.id)
         })
-        followingList.forEach((list) => {
-          // 新增 isFollowed 屬性
+        // 儲存追蹤者屬性
+        let followingsbox = []
+
+        trackData.Followings.forEach((l) => {
+          let temp = {}
+          let data = {}
+          data.id = l.id
+          data.name = l.name
+          data.avatar = l.avatar
+          data.introduction = l.introduction
+          console.log('data:', data)
+          temp.result = data
+          followingsbox.push(temp)
+        })
+
+        followingList.forEach((list, index) => {
+          // 新增 isFollowed, name, introduction, avatar 屬性
+          list.name = followingsbox[index].result.name
+          list.avatar = followingsbox[index].result.avatar
+          list.introduction = followingsbox[index].result.introduction
           list.isFollowed = checkBox.includes(list.followingId)
         })
         res.status(200).send(followingList)
@@ -218,8 +236,26 @@ const userController = {
         trackData.Followings.forEach((f) => {
           checkBox.push(f.id)
         })
-        followerList.forEach((list) => {
-          // 新增 isFollowed 屬性
+
+        // 儲存追隨者屬性
+        let followersbox = []
+
+        trackData.Followers.forEach((l) => {
+          let temp = {}
+          let data = {}
+          data.id = l.id
+          data.name = l.name
+          data.avatar = l.avatar
+          data.introduction = l.introduction
+          console.log('data:', data)
+          temp.result = data
+          followersbox.push(temp)
+        })
+        followerList.forEach((list, index) => {
+          // 新增 isFollowed, name, introduction, avatar 屬性
+          list.name = followersbox[index].result.name
+          list.avatar = followersbox[index].result.avatar
+          list.introduction = followersbox[index].result.introduction
           list.isFollowed = checkBox.includes(list.followerId)
         })
         res.status(200).send(followerList)
