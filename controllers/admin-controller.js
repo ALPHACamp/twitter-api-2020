@@ -60,7 +60,7 @@ const adminController = {
         if (!tweet) throw new Error('tweet not found')
         return tweet.destroy()
       })
-      .then(() => res.status(200).json({ success: true, mseeage: 'tweet has been deleted' }))
+      .then(() => res.status(200).json({ success: true, message: 'tweet has been deleted' }))
       .catch(err => next(err))
   }
 
