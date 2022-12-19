@@ -5,7 +5,6 @@ const { User, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helper')
 
-
 const userController = {
   signIn: (req, res, next) => {
     try {
@@ -101,11 +100,13 @@ const userController = {
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
-    const { name, email, password, account, introduction } = req.body
+    const { name, email, password, checkPassword, account, introduction } = req.body
     const currentUser = helpers.getUser(req)
-    const { file } = req
+    const { files } = req
 
+    if (Number(req.params.id) !== currentUser.id) res.status(401).json({ status: 'error', message: '無權限編輯他人個人資料' })
     if (!name) throw new Error('使用者姓名為必填!')
+    if (name.length > 50) throw new Error('使用者姓名不得超過50字!')
 
     // email不可重複
     if (email !== currentUser.email) {
@@ -122,23 +123,26 @@ const userController = {
         })
     }
 
+    // 確認密碼是否變更
+    if (password && password !== checkPassword) return res.json({ status: 'error', message: '密碼與確認密碼不一致' })
+
     // 確認是否有圖片
-    const avatar = file.avatar[0] || null
-    const cover = file.cover[0] || null
+    const avatar = files?.avatar ? files.avatar[0] : null
+    const cover = files?.cover ? files.cover[0] : null
 
     return Promise.all([
-      User.findByPk(helpers.getUser(req)),
+      User.findByPk(currentUser.id),
       imgurFileHandler(avatar),
       imgurFileHandler(cover)
     ])
       .then(([user, avatarPath, coverPath]) => {
         if (!user) throw new Error('查無使用者!')
-        return User.update({
+        return user.update({
           name,
-          email,
-          password: bcrypt.hashSync(password.genSaltSync(10), null),
-          account,
-          introduction,
+          email: email || user.email,
+          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
+          account: account || user.account,
+          introduction: introduction || null,
           avatar: avatarPath || user.avatar,
           cover: coverPath || user.cover
         })
@@ -147,7 +151,7 @@ const userController = {
         updatedUser.toJSON()
         delete updatedUser.password
         delete updatedUser.role
-        res.status(200).json({ status: 'sucess', message: '使用者資料更新成功!', data: updatedUser })
+        res.status(200).json({ status: 'success', message: '使用者資料更新成功!', data: updatedUser })
       })
       .catch(err => next(err))
   }
