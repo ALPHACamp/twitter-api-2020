@@ -1,7 +1,11 @@
 const bcrypt = require('bcryptjs')
-const { User, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
+
+const { User, sequelize } = require('../models')
 const helpers = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helper')
+
+
 const userController = {
   signIn: (req, res, next) => {
     try {
@@ -93,6 +97,57 @@ const userController = {
           ...user.toJSON()
         }
         return res.json({ ...userData })
+      })
+      .catch(err => next(err))
+  },
+  putUser: (req, res, next) => {
+    const { name, email, password, account, introduction } = req.body
+    const currentUser = helpers.getUser(req)
+    const { file } = req
+
+    if (!name) throw new Error('使用者姓名為必填!')
+
+    // email不可重複
+    if (email !== currentUser.email) {
+      User.findOne({ where: { email } })
+        .then(duplicateEmail => {
+          if (duplicateEmail) throw new Error('email已註冊!')
+        })
+    }
+    // account不可重複
+    if (account !== currentUser.account) {
+      User.findOne({ where: { account } })
+        .then(duplicateAccount => {
+          if (duplicateAccount) throw new Error('account已註冊!')
+        })
+    }
+
+    // 確認是否有圖片
+    const avatar = file.avatar[0] || null
+    const cover = file.cover[0] || null
+
+    return Promise.all([
+      User.findByPk(helpers.getUser(req)),
+      imgurFileHandler(avatar),
+      imgurFileHandler(cover)
+    ])
+      .then(([user, avatarPath, coverPath]) => {
+        if (!user) throw new Error('查無使用者!')
+        return User.update({
+          name,
+          email,
+          password: bcrypt.hashSync(password.genSaltSync(10), null),
+          account,
+          introduction,
+          avatar: avatarPath || user.avatar,
+          cover: coverPath || user.cover
+        })
+      })
+      .then(updatedUser => {
+        updatedUser.toJSON()
+        delete updatedUser.password
+        delete updatedUser.role
+        res.status(200).json({ status: 'sucess', message: '使用者資料更新成功!', data: updatedUser })
       })
       .catch(err => next(err))
   }
