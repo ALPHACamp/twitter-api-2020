@@ -19,6 +19,7 @@ router.post('/login', passport.authenticate('local', { session: false }), userCo
 router.post('/followships', authenticated, authenticatedUser, followshipController.addFollow)
 router.delete('/followships/:followingId', authenticated, authenticatedUser, followshipController.removeFollow)
 
+router.get('/users/recommendUsers', authenticated, authenticatedUser, userController.getRecommendUsers)
 router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getUserFollowers)
 router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getUserLikes)
