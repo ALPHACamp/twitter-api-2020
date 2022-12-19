@@ -2,7 +2,7 @@ const validator = require('validator')
 
 const { User } = require('../models')
 const helpers = require('../_helpers')
-
+const { sanitizedInput } = require('../helpers/sanitized')
 async function registerValidation (req, res, next) {
   const { account, name, email, password, checkPassword } = req.body
 
@@ -23,11 +23,18 @@ async function registerValidation (req, res, next) {
   if (userAccount) return res.status(422).json({ status: 'error', message: 'Account already exists!' })
   if (userEmail) return res.status(422).json({ status: 'error', message: 'Email already exists!' })
 
+  // sanitized user input
+  req.body = {
+    ...req.body,
+    account: sanitizedInput(account),
+    name: sanitizedInput(name),
+    email: sanitizedInput(email)
+  }
   return next()
 }
 
 function userProfileValidation (req, res, next) {
-  const profileId = Number(req.params.id)
+  const profileId = Number(sanitizedInput(req.params.id))
   const loginUserId = helpers.getUser(req).id
   const { name, introduction } = req.body
   if (!name.trim()) {
@@ -43,11 +50,17 @@ function userProfileValidation (req, res, next) {
     return res.status(403).json({ status: 'error', message: "Cannot edit other user's profile." })
   }
 
+  req.body = {
+    ...req.body,
+    name: sanitizedInput(name),
+    introduction: sanitizedInput(introduction)
+  }
+
   return next()
 }
 
 async function userSettingValidation (req, res, next) {
-  const reqId = Number(req.params.id)
+  const reqId = Number(sanitizedInput(req.params.id))
   const loginUserId = helpers.getUser(req).id
   const { account, name, email, password, checkPassword } = req.body
 
@@ -74,6 +87,12 @@ async function userSettingValidation (req, res, next) {
 
   req.userEdit = user
 
+  req.body = {
+    ...req.body,
+    account: sanitizedInput(account),
+    name: sanitizedInput(name),
+    email: sanitizedInput(email)
+  }
   return next()
 }
 
