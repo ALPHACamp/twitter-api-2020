@@ -4,6 +4,8 @@ const userController = require('../../controllers/user-controller')
 const upload = require('../../middleware/multer')
 const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 
+// 取得使用者回覆過的留言
+router.get('/:id/replied_tweets', userController.getUserReplies)
 // 取得使用者推文
 router.get('/:id/tweets', userController.getUserTweets)
 // 取得使用者追隨的人
