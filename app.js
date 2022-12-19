@@ -14,13 +14,15 @@ const corsOptions = {
   origin: [
     'http://localhost:3000'
   ],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  methods: 'GET,PUT,POST,DELETE,OPTIONS',
   allowedHeaders: ['Content-Type', 'Authorization']
 }
 
 app.use(cors(corsOptions))
+
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+
 app.use(passport.initialize())
 app.use(methodOverride('_method'))
 app.use('/api', routes)

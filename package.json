@@ -22,7 +22,7 @@
     "express-handlebars": "^6.0.6",
     "express-session": "^1.17.3",
     "faker": "^4.1.0",
-    "imgur": "^2.2.0",
+    "imgur": "^1.0.2",
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
     "multer": "^1.4.5-lts.1",
@@ -30,6 +30,7 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
+    "request-promise": "^4.2.6",
     "sequelize": "^6.26.0",
     "sequelize-cli": "^5.5.1"
   },

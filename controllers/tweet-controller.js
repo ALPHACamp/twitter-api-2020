@@ -1,10 +1,10 @@
 const { Tweet, User, sequelize, Reply } = require('../models')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const { relativeTime } = require('../helpers/date-helper')
 
 const tweetController = {
   postTweet: (req, res, next) => {
-    const UserId = getUser(req).id
+    const UserId = helpers.getUser(req).id
     const { description } = req.body
     if (description.length > 140) return res.status(500).json({ status: '內容不可超出140字' })
     return Tweet.create({
@@ -14,7 +14,7 @@ const tweetController = {
     ).catch(err => next(err))
   },
   getTweets: (req, res, next) => {
-    const currentUserId = getUser(req).id
+    const currentUserId = helpers.getUser(req).id
     return Tweet.findAll({
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']],
@@ -37,7 +37,7 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
-    const currentUserId = getUser(req).id
+    const currentUserId = helpers.getUser(req).id
     return Tweet.findByPk(req.params.tweet_id, {
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']],
