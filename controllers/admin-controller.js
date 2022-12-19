@@ -24,7 +24,7 @@ const adminController = {
   signIn: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      if (userData.role !== 'admin') throw new Error('帳號不存在!')
+      if (userData.role !== 'admin') res.status(404).json({ status: 'error', message: '帳號不存在!' })
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
@@ -46,7 +46,7 @@ const adminController = {
       nest: true
     })
       .then(tweets => {
-        if (!tweets) throw new Error('貼文不存在!')
+        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在' })
         const data = tweets.map(t => ({
           ...t,
           description: t.description.substring(0, 50),
@@ -62,7 +62,7 @@ const adminController = {
       where: { id: tweetId }
     })
       .then(deletedTweet => {
-        if (!deletedTweet) throw new Error('貼文不存在!')
+        if (!deletedTweet) res.status(404).json({ status: 'error', message: '貼文不存在' })
         return res.status(200).json({ status: 'success', message: '貼文已刪除!' })
       })
       .catch(err => next(err))

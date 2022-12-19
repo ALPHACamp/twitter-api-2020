@@ -4,18 +4,17 @@ const { relativeTime } = require('../helpers/date-helper')
 
 const followshipController = {
   addFollowing: (req, res, next) => {
-    // 測試檔未通過
-    const followerId = helpers.getUser(req).id // 追隨者AKA登入者
-    const followingId = Number(req.body.id) // 被追蹤的人
+    const followerId = helpers.getUser(req).id
+    const followingId = Number(req.body.id)
     return Promise.all([
-      User.findByPk(followingId), // 找有沒有這個使用者
-      Followship.findOne({ // 找這個追隨關係是否已經成立
+      User.findByPk(followingId),
+      Followship.findOne({
         where: { followerId, followingId }
       })
     ]).then(([followingUser, followships]) => {
-      if (!followingUser) return res.status(404).json({ status: 'error', message: '查無使用者資料' })
-      if (followerId === followingId) return res.status(500).json({ status: 'error', message: '不能追蹤自己' })
-      if (followships) return res.status(500).json({ status: 'error', message: '已追蹤這個使用者' })
+      if (!followingUser) res.status(404).json({ status: 'error', message: '帳號不存在!' })
+      if (followerId === followingId) return res.status(400).json({ status: 'error', message: '不能追蹤自己!' })
+      if (followships) res.status(400).json({ status: 'error', message: '已追蹤這個使用者!' })
       return Followship.create({ followerId, followingId })
     }).then(followship => {
       const data = followship.toJSON()
@@ -24,10 +23,9 @@ const followshipController = {
     }).catch(err => next(err))
   },
   removeFollowing: (req, res, next) => {
-    // 測試檔未通過
     return Promise.all([
-      User.findByPk(Number(req.params.followingId)), // 找有沒有這個使用者
-      Followship.findOne({ // 找這個追隨關係是否已經成立
+      User.findByPk(Number(req.params.followingId)),
+      Followship.findOne({
         where: {
           followerId: helpers.getUser(req).id,
           followingId: Number(req.params.followingId)
@@ -35,10 +33,10 @@ const followshipController = {
       })
     ])
       .then(([user, followship]) => {
-        if (!user) res.status(404).json({ status: 'error', message: '查無使用者!' })
-        if (!followship) res.status(500).json({ status: 'error', message: '你沒有追蹤這個使用者!' })
+        if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
+        if (!followship) res.status(404).json({ status: 'error', message: '你沒有追蹤這個使用者!' })
         return followship.destroy()
-      }).then(deletedFollowship => res.status(200).json({ status: 'success', message: '取消追蹤成功!', data: deletedFollowship })
+      }).then(() => res.status(200).json({ status: 'success', message: '取消追蹤成功!' })
       ).catch(err => next(err))
   },
   getTopUsers: (req, res, next) => {
