@@ -114,8 +114,8 @@ const user2Controller = {
       // 錯誤驗證
       if (id !== currentUserId) return res.status(400).json({ success: false, message: 'permission denied' }) // 不可編輯別人的檔案
       if (password !== checkPassword) throw new Error('password and checkPassword do not match') // 密碼不相符
-      if (name.length > 50) throw new Error('name is limited to 50 characters') // 名字太長
-      if (introduction.length > 160) throw new Error('introduction is limited to 160 characters') // 自介太長
+      if (name?.length > 50) throw new Error('name is limited to 50 characters') // 名字太長
+      if (introduction?.length > 160) throw new Error('introduction is limited to 160 characters') // 自介太長
 
       const user = await User.findByPk(id)
 
@@ -148,13 +148,13 @@ const user2Controller = {
       })
 
       // 找出使用者avatar & cover
-      let avatar = files?.avatar ? files.avatar[0] : null
-      let cover = files?.cover ? files.avatar[0] : null
+      let avatar = files?.avatar || null
+      let cover = files?.cover || null
       if (avatar) {
-        avatar = await imgurFileHandler(avatar)
+        avatar = await imgurFileHandler(avatar[0])
       }
       if (cover) {
-        cover = await imgurFileHandler(cover)
+        cover = await imgurFileHandler(cover[0])
       }
 
       // 使用者頁面更新
@@ -163,6 +163,7 @@ const user2Controller = {
         avatar: avatar || user.avatar,
         cover: cover || user.cover
       })
+
       const data = updateUserProfile.toJSON()
       delete user.password
       return res.status(200).json(data)
