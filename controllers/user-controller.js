@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const { User, Tweet, sequelize } = require('../models')
+const { User, Tweet, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helper')
 const { relativeTime } = require('../helpers/date-helper')
@@ -183,6 +183,58 @@ const userController = {
           ...t,
           createdAt: relativeTime(t.createdAt),
           isLiked: currentUser?.Likes?.some(currentUserLike => currentUserLike?.TweetId === t.id)
+        }))
+        res.status(200).json(data)
+      })
+      .catch(err => next(err))
+  },
+  getUserFollowings: (req, res, next) => {
+    const { id } = req.params
+    const currentUser = helpers.getUser(req)
+    return Promise.all([
+      User.findByPk(id),
+      Followship.findAll({
+        attributes: { exclude: 'updatedAt' },
+        order: [['createdAt', 'DESC']],
+        include: { model: User, as: 'FollowingUser', attributes: ['id', 'account', 'name', 'avatar'] },
+        where: { followerId: id },
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, followings]) => {
+        if (!user) throw new Error('查無使用者!')
+        if (!followings) throw new Error('使用者沒有追蹤任何人!')
+        const data = followings.map(fi => ({
+          ...fi,
+          createdAt: relativeTime(fi.createdAt),
+          isFollowed: currentUser.Followings?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
+        }))
+        res.status(200).json(data)
+      })
+      .catch(err => next(err))
+  },
+  getUserFollowers: (req, res, next) => {
+    const { id } = req.params
+    const currentUser = helpers.getUser(req)
+    return Promise.all([
+      User.findByPk(id),
+      Followship.findAll({
+        attributes: { exclude: 'updatedAt' },
+        order: [['createdAt', 'DESC']],
+        include: { model: User, as: 'FollowerUser', attributes: ['id', 'account', 'name', 'avatar'] },
+        where: { followingId: id },
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, followers]) => {
+        if (!user) throw new Error('查無使用者!')
+        if (!followers) throw new Error('使用者沒有追蹤任何人!')
+        const data = followers.map(fi => ({
+          ...fi,
+          createdAt: relativeTime(fi.createdAt),
+          isFollowed: currentUser.Followings?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
         }))
         res.status(200).json(data)
       })
