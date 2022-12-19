@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const { User, Tweet, Followship, sequelize } = require('../models')
+const { User, Tweet, Followship, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helper')
 const { relativeTime } = require('../helpers/date-helper')
@@ -238,6 +238,32 @@ const userController = {
           isFollowed: currentUser.Followings?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
         }))
         res.status(200).json(data)
+      })
+      .catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    const id = Number(req.params.id)
+    return Promise.all([
+      User.findByPk(id),
+      Reply.findAll({
+        where: { UserId: id },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        ],
+        attributes: { exclude: ['updatedAt'] },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, replies]) => {
+        if (!user) throw new Error('查無使用者!')
+        if (!replies) throw new Error('使用者沒有留下任何評論!')
+        const data = replies.map(rp => ({
+          ...rp,
+          createdAt: relativeTime(rp.createdAt)
+        }))
+        return res.status(200).json(data)
       })
       .catch(err => next(err))
   }
