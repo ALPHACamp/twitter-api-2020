@@ -216,8 +216,16 @@ const userController = {
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
 
       const followings = await Followship.findAll({
-        attributes: { exclude: ['updatedAt'] },
-        include: { model: User, as: 'FollowingInfo', attributes: ['id', 'account', 'name', 'introduction', 'avatar'] },
+        attributes: {
+          exclude: ['updatedAt'],
+          include: [
+            [sequelize.literal('(SELECT Users.id FROM Users WHERE Users.id = Followship.FollowingId)'), 'UserInfo.id'],
+            [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Followship.FollowingId)'), 'UserInfo.acocunt'],
+            [sequelize.literal('(SELECT Users.name FROM Users WHERE Users.id = Followship.FollowingId)'), 'UserInfo.name'],
+            [sequelize.literal('(SELECT Users.introduction FROM Users WHERE Users.id = Followship.FollowingId)'), 'UserInfo.introduction'],
+            [sequelize.literal('(SELECT Users.avatar FROM Users WHERE Users.id = Followship.FollowingId)'), 'UserInfo.avatar']
+          ]
+        },
         where: { followerId: id },
         raw: true,
         nest: true
@@ -236,8 +244,16 @@ const userController = {
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
 
       const followings = await Followship.findAll({
-        attributes: { exclude: ['updatedAt'] },
-        include: { model: User, as: 'FollowerInfo', attributes: ['id', 'account', 'name', 'introduction', 'avatar'] },
+        attributes: {
+          exclude: ['updatedAt'],
+          include: [
+            [sequelize.literal('(SELECT Users.id FROM Users WHERE Users.id = Followship.FollowerId)'), 'UserInfo.id'],
+            [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Followship.FollowerId)'), 'UserInfo.acocunt'],
+            [sequelize.literal('(SELECT Users.name FROM Users WHERE Users.id = Followship.FollowerId)'), 'UserInfo.name'],
+            [sequelize.literal('(SELECT Users.introduction FROM Users WHERE Users.id = Followship.FollowerId)'), 'UserInfo.introduction'],
+            [sequelize.literal('(SELECT Users.avatar FROM Users WHERE Users.id = Followship.FollowerId)'), 'UserInfo.avatar']
+          ]
+        },
         where: { followingId: id },
         raw: true,
         nest: true
