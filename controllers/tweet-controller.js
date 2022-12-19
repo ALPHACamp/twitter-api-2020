@@ -111,14 +111,14 @@ const tweetController = {
     const currentUserId = helpers.getUser(req).id
     const { description } = req.body
     if (!description) {
-      return res.status(401).json({
-        status: '401',
+      return res.status(406).json({
+        status: '406',
         message: 'Content is required!'
       })
     }
     if (description.length > 140) {
       return res.status(401).json({
-        status: '401',
+        status: '406',
         message: 'Too many words!'
       })
     }
