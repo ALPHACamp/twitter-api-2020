@@ -70,36 +70,38 @@ const user2Controller = {
     const currentUserId = helpers.getUser(req)?.id // 正在使用網站的使用者id
     const UserId = Number(req.params.id) // 要查看的特定使用者id
 
-    // 要撈特定使用者資料/特定使用者like的資料/現在使用者like的資料(要判斷現在使用者是否like)
     return Promise.all([
       User.findByPk(UserId),
+      // 用UserId去撈Like關聯tweet，找到使用者like過的tweet資料
+      // 再用tweet去關聯user跟like資料，取得tweet-user跟like資料，判斷登入使用者isliked布林值
       Like.findAll({
         where: { UserId },
-        attributes: ['id', 'TweetId', 'createdAt'],
         include: [{
           model: Tweet,
-          attributes: ['id', 'description', 'createdAt',
-            [
-              sequelize.literal('(SELECT COUNT(*) FROM Replies AS replyCount WHERE tweet_id = Tweet.id)'), 'replyCount' // 回傳留言數
-            ],
-            [
-              sequelize.literal('(SELECT COUNT(*) FROM Likes AS likeCount WHERE tweet_id = Tweet.id)'), 'likeCount' // 回傳按讚數
-            ]],
-          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Like }],
+          attributes: {
+            include: [
+              [
+                sequelize.literal('(SELECT COUNT(*) FROM Replies AS replyCount WHERE tweet_id = Tweet.id)'), 'replyCount' // 回傳留言數
+              ],
+              [
+                sequelize.literal('(SELECT COUNT(*) FROM Likes AS likeCount WHERE tweet_id = Tweet.id)'), 'likeCount' // 回傳按讚數
+              ]]
+          }
         }],
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
-      }),
-      Like.findAll({ where: { UserId: currentUserId }, raw: true })
+        order: [['createdAt', 'DESC']]
+      })
     ])
-      .then(([user, likes, currentUserlikes]) => {
+      .then(([user, likes]) => {
         if (!user) throw new Error("User didn't exist")
-        const currentUserlikeList = currentUserlikes.map(like => like.TweetId)
-        const data = likes.map(like => ({
-          ...like,
-          isLiked: currentUserlikeList.some(TweetId => TweetId === like.TweetId)
-        }))
+        const data = likes.map(like => {
+          const { Likes, ...data } = like.Tweet.toJSON()
+          const userLikes = like.Tweet.toJSON().Likes
+          data.isLiked = userLikes.some(like => like.UserId === currentUserId)
+          data.TweetId = like.Tweet.toJSON().id
+          delete data.UserId
+          return data
+        })
         res.status(200).json(data)
       })
       .catch(err => next(err))
@@ -110,8 +112,8 @@ const user2Controller = {
       const id = Number(req.params.id)
       let { account, name, email, password, checkPassword, introduction } = req.body
       const { files } = req
-      console.log('files:', files) // **********確認前端送來的req，之後記得刪掉
-      console.log('typeof files:', typeof files) // **********確認前端送來的req，之後記得刪掉
+      // console.log('files:', files) // **********確認前端送來的req，之後記得刪掉
+      // console.log('typeof files:', typeof files) // **********確認前端送來的req，之後記得刪掉
       // 錯誤驗證
       if (id !== currentUserId) return res.status(400).json({ success: false, message: 'permission denied' }) // 不可編輯別人的檔案
       if (password !== checkPassword) throw new Error('password and checkPassword do not match') // 密碼不相符
