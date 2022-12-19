@@ -59,7 +59,7 @@ const userController = {
       throw new Error('account and password are required.')
     }
 
-    User.findOne({ where: { account }, raw: true })
+    User.findOne({ where: { account, role: 'user' }, raw: true })
       .then((user) => {
         if (!user) {
           throw new Error('帳號不存在！')
