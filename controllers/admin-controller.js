@@ -19,14 +19,15 @@ const adminController = {
 			const usersData = await User.findAll({
 				nest: true,
 				raw: true,
+				where: { role: "user" },
 				attributes: [
 					'id', 'account', 'email', 'name', 'avatar', 'introduction', 'cover', 'role', 'createdAt', 'updatedAt',
-					[sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)'), 'replyCount'],
+					[sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)'), 'tweetCount'],
 					[sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = User.id)'), 'likeCount'],
 					[sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.follower_id = User.id)'), 'followerCount'],
 					[sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = User.id)'), 'followingCount']
 				],
-				order: [['createdAt', 'DESC']],
+				order: [['createdAt', 'DESC']]
 			})
 			return res.status(200).json(usersData)
 		} catch (err) { next(err) }
@@ -38,7 +39,8 @@ const adminController = {
 			include: {
 				model: User,
 				attributes: ['id', 'account', 'name', 'avatar', 'cover']
-			}
+			},
+			order: [['createdAt', 'DESC']]
 		})
 			.then(tweets => {
 				const data = tweets.map(t => ({
