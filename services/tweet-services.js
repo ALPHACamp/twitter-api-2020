@@ -11,7 +11,6 @@ const tweetServices = {
       ],
       include: [{
         model: User,
-        as: 'TweetOwner',
         attributes: ['id', 'avatar', 'name', 'account']
       }],
       order: [['id', 'DESC']]
