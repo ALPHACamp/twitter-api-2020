@@ -266,28 +266,6 @@ const userController = {
     } catch (err) { next(err) }
   },
 
-  getLoginUserProfile: (req, res, next) => {
-    try {
-      const loginUser = helpers.getUser(req).toJSON()
-      if (!loginUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
-
-      const data = {
-        id: loginUser.id,
-        account: loginUser.account,
-        name: loginUser.name,
-        email: loginUser.email,
-        avatar: loginUser.avatar,
-        cover: loginUser.cover,
-        introduction: loginUser.introduction,
-        role: loginUser.role,
-        tweetCount: loginUser.Tweets.length,
-        followingCount: loginUser.Followings.length,
-        followerCount: loginUser.Followers.length
-      }
-      return res.status(200).json(data)
-    } catch (err) { next(err) }
-  },
-
   putUserSetting: async (req, res, next) => {
     try {
       const { account, name, email, password } = req.body

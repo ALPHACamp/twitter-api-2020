@@ -4,7 +4,7 @@ const LocalStrategy = require('passport-local').Strategy
 const passportJWT = require('passport-jwt')
 const JwtStrategy = passportJWT.Strategy
 const ExtractJwt = passportJWT.ExtractJwt
-const { User, Tweet, Reply, Like } = require('../models')
+const { User } = require('../models')
 
 passport.use(new LocalStrategy(
   {
@@ -36,15 +36,7 @@ const jwtOptions = {
 
 passport.use(new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
-    const user = await User.findByPk(jwtPayload.id, {
-      include: [
-        { model: Tweet },
-        { model: Reply },
-        { model: Like },
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ]
-    })
+    const user = await User.findByPk(jwtPayload.id)
     if (user) return done(null, user)
   } catch (err) { return done(err, false) }
 }))

@@ -6,7 +6,6 @@ const upload = require('../../middleware/multer')
 const { registerValidation, userProfileValidation, userSettingValidation } = require('../../middleware/server-side-validation')
 
 router.get('/top', authenticated, userController.getUsersTop)
-router.get('/login_user', authenticated, userController.getLoginUserProfile)
 router.put('/:id/setting', authenticated, userSettingValidation, userController.putUserSetting)
 router.get('/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/:id/tweets', authenticated, userController.getUserTweets)

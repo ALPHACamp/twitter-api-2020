@@ -134,7 +134,6 @@ ctrl + c
 | Normal user login to foreground app  | POST   | [/api/signin](api-documentation/users/user-login.md)                                  |
 | New user register                    | POST   | [/api/users](api-documentation/users/user-signup.md)                                  |
 | Get user's profile                   | GET    | [/api/users/:id](api-documentation/users/get-single-user-profile.md)                  |
-| Get login user's info                | GET    | [/api/users/login_user](api-documentation/users/get-login-user-profile.md)            |
 | Edit user's own profile              | PUT    | [/api/users/:id](api-documentation/users/edit-login-user-profile.md)                  |
 | Get user's own replies               | GET    | [/api/users/:id/replied_tweets](api-documentation/users/get-single-user-replies.md)   |
 | Get user's own tweets                | GET    | [/api/users/:id/tweets](api-documentation/users/get-single-user-tweets.md)            |
