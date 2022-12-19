@@ -1,9 +1,10 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const { User, sequelize } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helper')
+const { relativeTime } = require('../helpers/date-helper')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -152,6 +153,38 @@ const userController = {
         delete updatedUser.password
         delete updatedUser.role
         res.status(200).json({ status: 'success', message: '使用者資料更新成功!', data: updatedUser })
+      })
+      .catch(err => next(err))
+  },
+  getUserTweets: (req, res, next) => {
+    const { id } = req.params
+    const currentUser = helpers.getUser(req)
+    return Promise.all([
+      User.findByPk(id),
+      Tweet.findAll({
+        where: { UserId: id },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true,
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCount'],
+          [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount']
+        ]
+      })
+    ])
+      .then(([user, tweets]) => {
+        if (!user) throw new Error('查無使用者!')
+        if (!tweets) throw new Error('貼文不存在!')
+        const data = tweets.map(t => ({
+          ...t,
+          createdAt: relativeTime(t.createdAt),
+          isLiked: currentUser?.Likes?.some(currentUserLike => currentUserLike?.TweetId === t.id)
+        }))
+        res.status(200).json(data)
       })
       .catch(err => next(err))
   }
