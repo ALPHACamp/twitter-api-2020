@@ -33,12 +33,14 @@ const tweetServices = {
         'id', 'description', 'createdAt',
         [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
+        // [sequelize.literal('EXISTS (SELECT id FROM Likes WHERE tweet_id = Tweet.id AND user_id = 3)'), 'isLike']
       ],
       include: [{ model: User, as: 'User', attributes: ['id', 'avatar', 'account', 'name'] }],
       raw: true,
       nest: true
     })
       .then(tweet => {
+        // if (!tweet) throw new Error('Tweet does not exist!')
         tweet.isLike = helpers.getUser(req).Likes.some(t => t.TweetId === tweet.id)
         cb(null, tweet)
       })

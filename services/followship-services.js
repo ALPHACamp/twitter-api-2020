@@ -31,11 +31,13 @@ const followshipServices = {
   },
   addFollowing: (req, cb) => {
     const { id } = req.body
+    const followerId = helpers.getUser(req).id
+    if (+id === followerId) throw new Error('You cannot follow yourself!')
     return Promise.all([
       User.findByPk(id),
       Followship.findOne({
         where: {
-          followerId: helpers.getUser(req).id,
+          followerId,
           followingId: req.body.id
         }
       })

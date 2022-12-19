@@ -34,7 +34,6 @@ const userServices = {
         return bcrypt.hash(req.body.password, 10)
       })
       .then(user => {
-        console.log(user)
         if (user.account === account) throw new Error('Account already exists!')
         if (user.email === email) throw new Error('Email already exists!')
         return bcrypt.hash(req.body.password, 10)
@@ -115,12 +114,13 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followingId: UserId },
-      include: [{ model: User, as: 'followerUser', attributes: { exclude: ['password', 'role'] } }]
+      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }]
     })
       .then(datas => {
+        console.log(datas)
         const followers = datas.map(data => ({
           ...data.toJSON(),
-          isFollowed: helpers.getUser(req).Followers.some(f => f.id === data.followerId)
+          isFollowed: helpers.getUser(req).followerUser.some(f => f.id === data.followerId)
         }))
         cb(null, followers)
       })

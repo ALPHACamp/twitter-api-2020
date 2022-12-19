@@ -41,12 +41,11 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   return User.findByPk(jwtPayload.id, {
     include: [
       Reply, Tweet, Like,
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
+      { model: User, as: 'followerUser' },
+      { model: User, as: 'followingUser' }
     ]
   })
     .then(user => {
-      user = user.toJSON()
       cb(null, user)
     })
     .catch(err => cb(err))
