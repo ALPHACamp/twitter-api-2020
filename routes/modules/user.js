@@ -12,6 +12,8 @@ router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id/followings', userController.getUserFollowings)
 // 取得追隨使用者的人
 router.get('/:id/followers', userController.getUserFollowers)
+// 取得 user likes
+router.get('/:id/likes', userController.getLikes)
 // 取得使用者資料
 router.get('/:id', userController.getUser)
 // 更新使用者資料

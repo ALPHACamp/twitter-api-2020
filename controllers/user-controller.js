@@ -1,6 +1,5 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-
 const { User, Tweet, Followship, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helper')
@@ -241,6 +240,38 @@ const userController = {
       })
       .catch(err => next(err))
   },
+
+  getLikes: (req, res, next) => {
+    const UserId = req.params.id
+    const currentUser = helpers.getUser(req).id
+    return Like.findAll({
+      where: { UserId },
+      include: {
+        model: Tweet,
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
+        attributes: ['id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeCount'],
+          [sequelize.literal('(SELECT COUNT(*)  FROM Replies WHERE Replies.tweet_id = Tweet.id)'),
+            'replyCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${currentUser} AND Likes.tweet_id = Tweet.id)`), 'isLiked']
+        ]
+      },
+      order: [['createdAt', 'Desc']],
+      raw: true,
+      nest: true
+    })
+      .then(likes => {
+        const likeData = likes.map(li => ({
+          ...li,
+          Tweet: {
+            ...li.Tweet,
+            createdAt: relativeTime(li.Tweet.createdAt)
+          }
+        }))
+        return res.status(200).json(likeData)
+        },
   getUserReplies: (req, res, next) => {
     const id = Number(req.params.id)
     return Promise.all([
