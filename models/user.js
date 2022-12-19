@@ -11,10 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Reply, { foreignKey: 'UserId' })
       // 和Tweet的關聯
       User.hasMany(models.Tweet, { foreignKey: 'UserId' })
-
       //  建立followrship關聯
-   
-
       User.belongsToMany(User, {
         through: models.Followship,
         foreignKey: 'followingId',

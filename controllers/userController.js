@@ -24,6 +24,9 @@ const userController = {
   },
   getFollowersOfUser: (req, res, next) => {
     userServices.getFollowersOfUser(req, (err, data) => err ? next(err) : res.json(data)) // 特別注意要是陣列
+  },
+  editUser: (req, res, next) => {
+    userServices.editUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 
