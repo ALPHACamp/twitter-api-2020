@@ -70,6 +70,10 @@ const tweetController = {
       })
       if (!tweet) { return res.status(404).json({ status: 'error', message: 'Cannot find this tweet.' }) }
 
+
+      // Transform data and response
+      // Must add 'raw: true' in query to get plain object
+
       const data = { ...tweet, isLiked: Boolean(tweet.isLiked), createdAt: dayjs(tweet.createdAt).valueOf() }
       return res.status(200).json(data)
     } catch (err) { next(err) }
@@ -78,6 +82,14 @@ const tweetController = {
   getReplies: async (req, res, next) => {
     try {
       const TweetId = Number(sanitizedInput(req.params.tweet_id))
+
+
+      // Check tweet existance
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) return res.status(404).json({ status: 'error', message: 'Cannot find this tweet.'})
+
+      // Find all replies in database
+
       const replies = await Reply.findAll({
         where: { TweetId },
         include: [
@@ -89,7 +101,10 @@ const tweetController = {
         nest: true,
         raw: true
       })
-      if (replies.length === 0) return res.status(404).json({ status: 'error', message: 'Cannot find this tweet or there is no reply.' })
+
+      if (replies.length === 0) return res.status(204).json({ status: 'success', message: 'There is no reply.' })
+
+      // Transform data and response
 
       const data = replies.map(reply => ({
         ...reply,
