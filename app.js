@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const express = require('express')
+const { clearTemp } = require('./helpers/file-helper')
 const routes = require('./routes')
 const passport = require('./config/passport')
 const cors = require('cors')
@@ -24,4 +25,5 @@ app.use('/', (req, res) => res.send('Hello World!')) // fallback
 app.use(generalErrorHandler) // error handle
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
+setInterval(clearTemp, 10800000)
 module.exports = app
