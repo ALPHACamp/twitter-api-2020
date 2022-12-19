@@ -6,11 +6,11 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const UserId = helpers.getUser(req).id
     const { description } = req.body
-    if (description.length > 140) return res.status(500).json({ status: '內容不可超出140字' })
+    if (description.length > 140) return res.status(400).json({ status: 'error', message: '內容不可超出140字' })
     return Tweet.create({
       UserId,
       description
-    }).then(postedTweet => res.status(200).json({ status: 'success', postedTweet })
+    }).then(postedTweet => res.status(200).json({ status: 'success', data: postedTweet })
     ).catch(err => next(err))
   },
   getTweets: (req, res, next) => {
