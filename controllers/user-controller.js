@@ -44,19 +44,21 @@ const userController = {
   getUserProfile: async (req, res, next) => {
     try {
       const reqId = Number(sanitizedInput(req.params.id))
-      const loginUser = helpers.getUser(req)
+      const loginUserId = helpers.getUser(req).id
       const user = await User.findByPk(reqId, {
         attributes: ['id', 'account', 'name', 'email', 'avatar', 'cover', 'introduction',
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
+          [sequelize.literal(`(SELECT (COUNT(*) > 0) FROM Followships WHERE Followships.followingId = ${reqId} AND Followships.followerId=${loginUserId})`), 'isFollowed']
         ],
         nest: true,
         raw: true
       })
 
       if (!user) return res.status(404).json({ status: 'error', message: 'User not found!' })
-      user.isFollowed = loginUser?.Followings?.some(followingUser => followingUser?.id === Number(reqId))
+      user.isFollowed = Boolean(user.isFollowed)
+
       return res.status(200).json(user)
     } catch (err) { next(err) }
   },
@@ -87,14 +89,15 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const reqId = Number(sanitizedInput(req.params.id))
-      const loginUser = helpers.getUser(req)
+      const loginUserId = helpers.getUser(req).id
       const reqUser = await User.findByPk(reqId)
       if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
 
       const tweets = await Tweet.findAll({
         attributes: ['id', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+          [sequelize.literal(`(SELECT (COUNT(*) > 0) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId=${loginUserId})`), 'isLiked']
         ],
         include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
         where: { UserId: reqId },
@@ -104,7 +107,7 @@ const userController = {
       })
       const data = tweets.map(tweet => ({
         ...tweet,
-        isLiked: loginUser?.Likes?.some(loginUserLike => loginUserLike.TweetId === tweet.id),
+        isLiked: Boolean(tweet.isLiked),
         createdAt: dayjs(tweet.createdAt).valueOf()
       }))
 
@@ -115,7 +118,7 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const reqId = Number(sanitizedInput(req.params.id))
-      const loginUser = helpers.getUser(req)
+      const loginUserId = helpers.getUser(req).id
       const reqUser = await User.findByPk(reqId)
       if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
 
@@ -127,7 +130,8 @@ const userController = {
               model: Tweet,
               attributes: ['id', 'description', 'createdAt',
                 [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-                [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
+                [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+                [sequelize.literal(`(SELECT (COUNT(*) > 0) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId=${loginUserId})`), 'isLiked']
               ],
               include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
             }
@@ -142,7 +146,7 @@ const userController = {
       const data = likes.map(like => {
         like.createdAt = dayjs(like.createdAt).valueOf()
         like.Tweet.createdAt = dayjs(like.Tweet.createdAt).valueOf()
-        like.Tweet.isLiked = loginUser?.Likes?.some(loginUserLike => loginUserLike.TweetId === like.Tweet.id)
+        like.Tweet.isLiked = Boolean(like.Tweet.isLiked)
         return like
       })
 
@@ -153,12 +157,18 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const reqId = Number(sanitizedInput(req.params.id))
-      const loginUser = helpers.getUser(req)
+      const loginUserId = helpers.getUser(req).id
       const reqUser = await User.findByPk(reqId)
       if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
 
       const followers = await Followship.findAll({
-        include: [{ model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }],
+        include: [{
+          model: User,
+          as: 'Followers',
+          attributes: ['id', 'account', 'name', 'avatar', 'introduction',
+            [sequelize.literal(`(SELECT (COUNT(*) > 0) FROM Followships WHERE Followships.followerId = ${loginUserId} AND Followships.followingId=Followers.id)`), 'isFollowed']
+          ]
+        }],
         where: { followingId: reqId },
         order: [['createdAt', 'DESC']],
         nest: true,
@@ -168,7 +178,7 @@ const userController = {
       const data = followers.map(follower => {
         follower.createdAt = dayjs(follower.createdAt).valueOf()
         follower.updatedAt = dayjs(follower.updatedAt).valueOf()
-        follower.Followers.isFollowed = loginUser?.Followings?.some(followingUser => followingUser?.id === follower.followerId)
+        follower.Followers.isFollowed = Boolean(follower.Followers.isFollowed)
         return follower
       })
 
@@ -179,12 +189,18 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       const reqId = Number(sanitizedInput(req.params.id))
-      const loginUser = helpers.getUser(req)
+      const loginUserId = helpers.getUser(req).id
       const reqUser = await User.findByPk(reqId)
       if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
 
       const followings = await Followship.findAll({
-        include: { model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] },
+        include: {
+          model: User,
+          as: 'Followings',
+          attributes: ['id', 'account', 'name', 'avatar', 'introduction',
+            [sequelize.literal(`(SELECT (COUNT(*) > 0) FROM Followships WHERE Followships.followerId = ${loginUserId} AND Followships.followingId=Followings.id)`), 'isFollowed']
+          ]
+        },
         where: { followerId: reqId },
         order: [['createdAt', 'DESC']],
         nest: true,
@@ -194,7 +210,7 @@ const userController = {
       const data = followings.map(following => {
         following.createdAt = dayjs(following.createdAt).valueOf()
         following.updatedAt = dayjs(following.updatedAt).valueOf()
-        following.Followings.isFollowed = loginUser?.Followings?.some(followingUser => followingUser.id === following.followingId)
+        following.Followings.isFollowed = Boolean(following.Followings.isFollowed)
         return following
       })
 
@@ -229,10 +245,12 @@ const userController = {
 
   getUsersTop: async (req, res, next) => {
     try {
-      const loginUser = helpers.getUser(req)
+      const loginUserId = helpers.getUser(req).id
       const topUsers = await User.findAll({
         attributes: ['id', 'name', 'account', 'avatar',
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount']],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
+          [sequelize.literal(`(SELECT (COUNT(*) > 0) FROM Followships WHERE Followships.followerId = ${loginUserId} AND Followships.followingId = User.id)`), 'isFollowed']
+        ],
         order: [[sequelize.literal('followerCount'), 'DESC']],
         limit: 10,
         raw: true,
@@ -241,31 +259,9 @@ const userController = {
 
       const data = topUsers.map(topuser => ({
         ...topuser,
-        isFollowed: loginUser?.Followings?.some(followingUser => followingUser.id === topuser.id)
+        isFollowed: Boolean(topuser.isFollowed)
       }))
 
-      return res.status(200).json(data)
-    } catch (err) { next(err) }
-  },
-
-  getLoginUserProfile: (req, res, next) => {
-    try {
-      const loginUser = helpers.getUser(req).toJSON()
-      if (!loginUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
-
-      const data = {
-        id: loginUser.id,
-        account: loginUser.account,
-        name: loginUser.name,
-        email: loginUser.email,
-        avatar: loginUser.avatar,
-        cover: loginUser.cover,
-        introduction: loginUser.introduction,
-        role: loginUser.role,
-        tweetCount: loginUser.Tweets.length,
-        followingCount: loginUser.Followings.length,
-        followerCount: loginUser.Followers.length
-      }
       return res.status(200).json(data)
     } catch (err) { next(err) }
   },
