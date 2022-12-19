@@ -252,15 +252,15 @@ const userController = {
   putUserProfile: (req, res, next) => {
     const { name, introduction } = req.body
     const currentUser = helpers.getUser(req)
+    const id = Number(req.params.id)
     if (name?.length > 50) throw new Error('暱稱字數上限 50 字!')
     if (introduction?.length > 160) throw new Error('自我介紹字數上限 160 字!')
-    // const id = Number(req.params.id)
-    // if (Number(id) !== getUser(req).id) throw new Error('You are not allowed to use!')
+    if (id !== currentUser.id) throw new Error('You are not allowed to use!') // 待重構，把只能編輯自己的邏輯寫成另外一個auth middleware
     const { files } = req
     return Promise.all([
-      User.findByPk(currentUser.id),
-      imgurUploadImageHandler(files?.avatar),
-      imgurUploadImageHandler(files?.cover)
+      User.findByPk(id),
+      imgurUploadImageHandler(files?.avatar ? files.avatar[0] : null),
+      imgurUploadImageHandler(files?.cover ? files.cover[0] : null)
     ])
       .then(([user, avatarFilePath, coverFilePath]) => {
         if (!user) throw new Error('使用者不存在!')
