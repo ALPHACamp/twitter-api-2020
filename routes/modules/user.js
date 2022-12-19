@@ -5,7 +5,6 @@ const userController = require('../../controllers/user-controller')
 const upload = require('../../middleware/multer')
 const batchUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 
-
 router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id/replied_tweets', userController.getRepliedTweets)
 router.get('/:id/followers', userController.getFollowers)
