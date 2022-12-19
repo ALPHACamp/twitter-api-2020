@@ -87,30 +87,30 @@ const userController = {
 			.catch(err => next(err))
 	},
 	putUser: (req, res, next) => {
-		const  id = getUser(req).id
 		const { account, name, email, password, introduction} = req.body
 		const { file } = req
 		if (/\s/.test(account) || /\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
 
 		Promise.all([
-			User.findByPk(id),
+			User.findByPk(req.params.id),
 			imgurFileHandler(file)
 		])
 			.then(([user,filePath]) => {
+				console.log('上傳圖片',filePath)
+				console.log('上傳圖片',user)
 				if (!user) throw new Error('User is not exist!')
 				return user.update({
 					account,
 					name,
 					email,
 					password,
-					avatar:filePath.avatar || user.avatar,
+					avatar:filePath,
 					introduction,
-					cover:filePath.cover || user.cover
+					cover:filePath
 				})
 			})
 			.then((data) => {
 				delete data.get({ plain: true }).password
-				console.log(data)
 				res.json(data)
 			})
 			.catch(err => next(err))
