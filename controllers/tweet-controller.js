@@ -1,4 +1,4 @@
-const { Tweet, User, sequelize } = require('../models')
+const { Tweet, User, sequelize, Reply } = require('../models')
 const { getUser } = require('../_helpers')
 const { relativeTime } = require('../helpers/date-helper')
 
@@ -57,7 +57,39 @@ const tweetController = {
       data.isLiked = currentUserId?.Likes?.some(currentUserLike => currentUserLike?.TweetId === tweet.id)
       return res.status(200).json(data)
     }).catch(err => next(err))
+  },
+  getReplies: (req, res, next) => {
+    const TweetId = Number(req.params.tweet_id)
+    return Reply.findAll({
+      where: { TweetId },
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => {
+        return res.status(200).json(replies)
+      })
+      .catch(err => next(err))
+  },
+  postReply: (req, res, next) => {
+    const TweetId = Number(req.params.tweet_id)
+    const UserId = getUser(req).dataValues.id
+    const { comment } = req.body
+    // 打空白也無法送出回覆
+    if (!comment || (comment.trim() === '')) throw new Error('內容不可空白')
+    if (comment.length > 140) throw new Error('回覆字數超出限制')
+    return Tweet.findByPk(TweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error('推文不存在')
+        return Reply.create({
+          TweetId,
+          UserId,
+          comment
+        })
+      })
+      .then(reply => {
+        res.status(200).json(reply)
+      })
+      .catch(err => next(err))
   }
 }
-
 module.exports = tweetController

@@ -1,4 +1,5 @@
 const { User, sequelize, Tweet } = require('../models')
+const { relativeTime } = require('../helpers/date-helper')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const adminController = {
@@ -10,7 +11,8 @@ const adminController = {
         [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.User_id = User.id)'), 'likeCount'],
         [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount'],
         [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount']
-      ]
+      ],
+      order: [[sequelize.literal('tweetCount'), 'DESC']]
     })
       .then(users => {
         res.status(200).json(users)
@@ -48,7 +50,8 @@ const adminController = {
         if (!tweets) throw new Error('貼文不存在!')
         const data = tweets.map(t => ({
           ...t,
-          description: t.description.substring(0, 50)
+          description: t.description.substring(0, 50),
+          createdAt: relativeTime(t.createdAt)
         }))
         res.status(200).json(data)
       })
