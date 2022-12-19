@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const assert = require('assert')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { uploadImgur } = require('../helpers/file-helpers')
 
 const userServices = {
   // 使用者註冊
@@ -154,6 +155,32 @@ const userServices = {
       .then(followers => {
         assert(followers, 'Unexpected operation of database.')
         cb(null, followers)
+      })
+      .catch(err => cb(err))
+  },
+  editUser: (req, cb) => {
+    const { name, introduction } = req.body
+    assert(name, 'User name is required!')
+    const avatarFile = req.files ? req.files['avatar'][0] : null
+    const coverImageFile = req.files ? req.files['coverImage'][0] : null
+    return Promise.all([
+      uploadImgur(avatarFile),
+      uploadImgur(coverImageFile),
+      User.findByPk(req.params.user_id)
+    ])
+      .then(([avatarFilePath, coverImageFilePath, user]) => {
+        assert(name, "User doesn't exit!")
+        return user.update({
+          name,
+          introduction,
+          avatar: avatarFilePath || user.avatar,
+          coverImage: coverImageFilePath || user.coverImage
+        })
+      })
+      .then(updatedUser => {
+        updatedUser = updatedUser.toJSON()
+        delete updatedUser.password
+        cb(null, { updatedUser })
       })
       .catch(err => cb(err))
   }
