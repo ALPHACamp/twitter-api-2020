@@ -157,7 +157,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  getUserLikes: (req, res, next) => {
+  getUserLikedTweets: (req, res, next) => {
     const currentUser = helpers.getUser(req)
     return Like.findAll({
       where: { UserId: req.params.id },
@@ -168,7 +168,9 @@ const userController = {
             'id',
             'UserId',
             'description',
-            [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id )'), 'replyCount']
+            [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id )'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id )'), 'likeCount'],
+            [sequelize.literal(`EXISTS (SELECT id FROM likes WHERE likes.UserId = ${currentUser.id} AND likes.TweetId = tweet.id )`), 'isLiked']
           ],
           include: {
             model: User,
@@ -178,12 +180,6 @@ const userController = {
           }
         }
       ],
-      attributes: {
-        include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id )'), 'likeCount'],
-          [sequelize.literal(`EXISTS (SELECT id FROM likes WHERE likes.UserId = ${currentUser.id} AND likes.TweetId = tweet.id )`), 'isLiked']
-        ]
-      },
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
@@ -277,6 +273,7 @@ const userController = {
       })
       .then(updatedUser => {
         const userData = updatedUser.toJSON()
+        delete userData.password
         res.json(userData)
       })
       .catch(err => next(err))
@@ -293,8 +290,8 @@ const userController = {
       User.findOne({ where: { email } })
     ])
       .then(([user, userFoundByAccount, userFoundByEmail]) => {
-        if (user?.toJSON().account === userFoundByAccount?.toJSON().account) throw new Error('account 已重複註冊!')
-        if (user?.toJSON().email === userFoundByEmail?.toJSON().email) throw new Error('email 已重複註冊!')
+        if (account === userFoundByAccount?.toJSON().account) throw new Error('account 已重複註冊!')
+        if (email === userFoundByEmail?.toJSON().email) throw new Error('email 已重複註冊!')
         return user
       })
       .then(user => {
