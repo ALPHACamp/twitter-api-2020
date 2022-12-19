@@ -7,9 +7,10 @@ const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
 
 const { generalErrorHandler } = require('../middleware/error-handler')
-const { authenticated } = require('../middleware/auth')
+const { authenticated ,userLoginAuth} = require('../middleware/auth')
+const { authErrorHandler } = require('../middleware/error-handler')
 
-router.post('/login', passport.authenticate('local', { session: false }), userController.logIn)
+router.post('/login', userLoginAuth,userController.logIn)
 
 router.use('/admin', admin)
 router.use('/tweets', tweet)

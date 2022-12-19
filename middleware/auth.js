@@ -15,8 +15,25 @@ const authenticatedAdmin = (req, res, next) => {
 		next()
 	})(req, res, next)
 }
+const userLoginAuth = (req, res, next)=>{
+	passport.authenticate('local', (err, user, info) =>{
+	  if (err) { return next(err) }
+	  if (!user) { return res.status(info.status||400).json(  {status:info.status||400,message:info.message }) }
+	  res.json(user)
+	})(req, res, next) 
+}
+
+const adminLoginAuth = (req, res, next)=>{
+	passport.authenticate('localAdmin', (err, user, info) =>{
+	  if (err) { return next(err) }
+	  if (!user) {res.status(info.status||400).json(  {status:info.status||400,message:info.message }) }
+	  res.json(user)
+	})(req, res, next) 
+}
 
 module.exports = {
   authenticated,
-  authenticatedAdmin
+  authenticatedAdmin,
+  userLoginAuth,
+  adminLoginAuth
 }

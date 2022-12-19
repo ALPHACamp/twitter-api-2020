@@ -48,6 +48,7 @@ const userController = {
 			.catch(err => next(err))
 	},
 	logIn: (req, res, next) => {
+		console.log(req.info)
 		const userData = getUser(req).toJSON()
 		delete userData.password
 		try {
