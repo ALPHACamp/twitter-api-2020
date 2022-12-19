@@ -72,7 +72,7 @@ const tweetController = {
   },
   postReply: (req, res, next) => {
     const TweetId = Number(req.params.tweet_id)
-    const UserId = helpers.getUser(req).dataValues.id
+    const UserId = helpers.getUser(req).id
     const { comment } = req.body
     // 打空白也無法送出回覆
     if (!comment || (comment.trim() === '')) throw new Error('內容不可空白')
