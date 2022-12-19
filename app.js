@@ -7,7 +7,6 @@ const routes = require('./routes')
 const passport = require('./config/passport')
 require('dotenv').config()
 const cors = require('cors')
-const { generalErrorHandler } = require('./middleware/error-handler')
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -16,6 +15,9 @@ const corsOptions = {
   methods: ['GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }
+
+const path = require('path')
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use(express.urlencoded({ extended: true }))
 app.use(passport.initialize())

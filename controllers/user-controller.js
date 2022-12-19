@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { getUser } = require('../_helpers')
+const { getUser ,localFileHandler} = require('../_helpers')
 const { User, Tweet, Followship, Like, Reply, sequelize } = require('../models')
 
 const userController = {
@@ -88,18 +88,22 @@ const userController = {
 	},
 	putUser: (req, res, next) => {
 		const { account, name, email, password, avatar, introduction, cover } = req.body
+		const { file } = req
 		if (/\s/.test(account) || /\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
-		User.findByPk(req.params.id)
-			.then(user => {
+		Promise.all([
+			User.findByPk(req.params.id),
+			imgurFileHandler(file)
+		])
+			.then(([user,filePath]) => {
 				if (!user) throw new Error('User is not exist!')
 				return user.update({
 					account,
 					name,
 					email,
 					password,
-					avatar,
+					avatar:filePath.avatar || user.avatar,
 					introduction,
-					cover
+					cover:filePath.cover || user.cover
 				})
 			})
 			.then((data) => {
