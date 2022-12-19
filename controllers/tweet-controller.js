@@ -47,8 +47,7 @@ const tweetController = {
           [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
           [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
-        ],
-        order: [['createdAt', 'DESC']]
+        ]
       })
       if (!tweet) {
         return res.status(404).json({
@@ -106,6 +105,7 @@ const tweetController = {
           model: User,
           attributes: ['id', 'avatar', 'account', 'name']
         },
+        order: [['createdAt', 'DESC']],
         where: { TweetId }
       })
       const data = replies.map(reply => ({
