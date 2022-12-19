@@ -1,7 +1,9 @@
+const jwt = require('jsonwebtoken')
+
 const { User, sequelize, Tweet } = require('../models')
 const { relativeTime } = require('../helpers/date-helper')
-const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+
 const adminController = {
   getUsers: (req, res, next) => {
     return User.findAll({
@@ -22,10 +24,7 @@ const adminController = {
   signIn: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      console.log(userData)
-      if (userData.role !== 'admin') {
-        throw new Error('帳號不存在')
-      }
+      if (userData.role !== 'admin') throw new Error('帳號不存在!')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
