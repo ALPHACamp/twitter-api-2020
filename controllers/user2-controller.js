@@ -1,5 +1,7 @@
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
+const bcrypt = require('bcryptjs')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 const { User, Tweet, Like, Reply } = require('../models')
 
 const user2Controller = {
@@ -101,8 +103,73 @@ const user2Controller = {
         res.status(200).json(data)
       })
       .catch(err => next(err))
-  }
+  },
+  putUser: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req)?.id
+      const id = Number(req.params.id)
+      let { account, name, email, password, checkPassword, introduction } = req.body
+      const { files } = req
 
+      // 錯誤驗證
+      if (id !== currentUserId) return res.status(400).json({ success: false, message: 'permission denied' }) // 不可編輯別人的檔案
+      if (password !== checkPassword) throw new Error('password and checkPassword do not match') // 密碼不相符
+      if (name.length > 50) throw new Error('name is limited to 50 characters') // 名字太長
+      if (introduction.length > 160) throw new Error('introduction is limited to 160 characters') // 自介太長
+
+      const user = await User.findByPk(id)
+
+      account = account?.trim()
+      name = name?.trim()
+      email = email?.trim()
+      password = password?.trim()
+      checkPassword = checkPassword?.trim()
+
+      // 檢查資料庫有沒有使用者想要更新的account & email，若有則不可使用該account & email
+      if (account) {
+        if (account !== user.account) {
+          const accountExist = await User.findOne({ where: { account } })
+          if (accountExist) return res.status(401).json({ success: false, message: 'account 已重複註冊！' })
+        }
+      }
+      if (email) {
+        if (email !== user.email) {
+          const emailExist = await User.findOne({ where: { email } })
+          if (emailExist) return res.status(401).json({ success: false, message: 'email 已重複註冊！' })
+        }
+      }
+
+      // 使用者帳號資料更新
+      const updateUser = await user.update({
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        password: password ? bcrypt.hashSync(password, 10) : user.password
+      })
+
+      // 找出使用者avatar & cover
+      let avatar = files?.avatar ? files.avatar[0] : null
+      let cover = files?.cover ? files.avatar[0] : null
+      if (avatar) {
+        avatar = await imgurFileHandler(avatar)
+      }
+      if (cover) {
+        cover = await imgurFileHandler(cover)
+      }
+
+      // 使用者頁面更新
+      const updateUserProfile = await updateUser.update({
+        introduction: introduction,
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover
+      })
+      const data = updateUserProfile.toJSON()
+      delete user.password
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  }
 }
 
 module.exports = user2Controller
