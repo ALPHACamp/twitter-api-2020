@@ -184,8 +184,8 @@ const userController = {
     ])
       .then(([user, hash, checkAccount, checkEmail]) => {
         if (!user) throw new Error("User didn't exist!")
-        if (checkAccount) throw new Error('The account is existed!')
-        if (checkEmail) throw new Error('The email is existed!')
+        if (checkAccount && checkAccount?.toJSON().account !== user.account) throw new Error('The account is used!')
+        if (checkEmail && checkEmail?.toJSON().email !== user.email) throw new Error('The email is used!')
         return user.update({
           name,
           account,
