@@ -1,4 +1,4 @@
-const { Tweet, User, sequelize, Reply } = require('../models')
+const { Tweet, User, sequelize, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 const { relativeTime } = require('../helpers/date-helper')
 
@@ -72,7 +72,7 @@ const tweetController = {
   },
   postReply: (req, res, next) => {
     const TweetId = Number(req.params.tweet_id)
-    const UserId = helpers.getUser(req).dataValues.id
+    const UserId = helpers.getUser(req).id
     const { comment } = req.body
     // 打空白也無法送出回覆
     if (!comment || (comment.trim() === '')) throw new Error('內容不可空白')
@@ -89,6 +89,49 @@ const tweetController = {
       .then(reply => {
         res.status(200).json(reply)
       })
+      .catch(err => next(err))
+  },
+  likeTweet: (req, res, next) => {
+    const TweetId = Number(req.params.id)
+    const UserId = helpers.getUser(req).id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          TweetId,
+          UserId
+        }
+      })
+    ])
+      .then(([tweet, likedTweet]) => {
+        if (!tweet) throw new Error('推文不存在')
+        if (likedTweet) throw new Error('已經按讚過了!')
+        return Like.create({
+          TweetId,
+          UserId
+        })
+      })
+      .then(like => res.status(200).json(like))
+      .catch(err => next(err))
+  },
+  unlikeTweet: (req, res, next) => {
+    const TweetId = Number(req.params.id)
+    const UserId = helpers.getUser(req).id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          TweetId,
+          UserId
+        }
+      })
+    ])
+      .then(([tweet, likedTweet]) => {
+        if (!tweet) throw new Error('推文不存在')
+        if (!likedTweet) throw new Error('還沒有按讚過喔!')
+        return likedTweet.destroy()
+      })
+      .then(unlike => res.status(200).json(unlike))
       .catch(err => next(err))
   }
 }
