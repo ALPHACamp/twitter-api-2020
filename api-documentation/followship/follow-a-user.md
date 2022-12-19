@@ -82,7 +82,7 @@ You would get
 
 ```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```

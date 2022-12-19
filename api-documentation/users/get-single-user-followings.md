@@ -39,33 +39,19 @@ Success | code: 200
 
 [
 	{
-		"followerId" : 3, // 這個用戶的id＝userId
-		"followingId": 2,
-		"createdAt": 1670812139000, // 追蹤紀錄成立時間，以此排序
-		"updatedAt": 1670812139000, 
-		"Followings": {
-				"id": 2,
-			  "account": "user1",
-				"name": "user1",
-				"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36",
-				"introduction": "Sed ut perspiciatis unde omnis iste natus",
-				"isFollowed": true, // 登入的這個使用者是否已追隨清單上這個用戶
-				}
-	},
-	{
-			"followerId" : 3, 
-			"followingId": 6,
-			"createdAt": 1670812139000, // 追蹤紀錄成立時間，以此排序
-			"updatedAt": 1670812139000, 
-			"Followings": {
-					"id": 6,
-				  "account": "mario",
-					"name": "Mario",
-					"avatar": "https://loremflickr.com/320/240/man,woman/?lock=45",
-					"introduction": "Nulla eros mauris, rhoncus eu mattis ut",
-					"isFollowed": false, // 登入的這個使用者是否已追隨清單上這個用戶(Mario)	
-			} 
-		},
+    "followerId" : 3, // 這個用戶的id＝userId
+    "followingId": 2,
+    "createdAt": 1670812139000, // 追蹤紀錄成立時間，以此排序
+    "updatedAt": 1670812139000, 
+    "Followings": {
+      "id": 2,
+      "account": "user1",
+      "name": "user1",
+      "avatar": "https://loremflickr.com/320/240/man,woman/?lock=36",
+      "introduction": "Sed ut perspiciatis unde omnis iste natus",
+      "isFollowed": true, // 登入的這個使用者是否已追隨清單上這個用戶
+      }
+  },
 		....// 依照追蹤紀錄時間先後排序，最新的排最前面 
 ]
 
@@ -91,7 +77,7 @@ You would get
 
 ```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```

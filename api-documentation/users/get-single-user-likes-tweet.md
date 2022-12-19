@@ -34,24 +34,24 @@ Success | code: 200 依like時間createdAt由新到舊回傳該用戶所有like�
 
 ```
 [
-	{
-		"TweetId": 2, // 該使用者喜歡的推文id(測試規定)
-		"createdAt": 1670812139000, // 該使用者按下like的時間
-		"Tweet": { // 該使用者喜歡的推文
-				"id": 2, 
-				"description": "ued ut perspiciatis unde omnis iste natus",
-				"createdAt": 1670812139000,
-				"replyCount": 10,
-				"likeCount": 36,
-				"isLiked": true, // 現在登入的使用者是否like過這則推文
-				"User": { // 推文的作者
-					"id":2
-					"name":"user2",
-					"account":"user2",
-					"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-				}
-			}
-		},
+  {
+    "TweetId": 2, // 該使用者喜歡的推文id(測試規定)
+    "createdAt": 1670812139000, // 該使用者按下like的時間
+    "Tweet": { // 該使用者喜歡的推文
+        "id": 2, 
+        "description": "ued ut perspiciatis unde omnis iste natus",
+        "createdAt": 1670812139000,
+        "replyCount": 10,
+        "likeCount": 36,
+        "isLiked": true, // 現在登入的使用者是否like過這則推文
+        "User": { // 推文的作者
+        	"id":2
+        	"name":"user2",
+        	"account":"user2",
+        	"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
+        }
+		 }
+  },
 		....// 依照時間先後排序，最新的排最前面
  
 ]
@@ -76,7 +76,7 @@ You would get
 
 ```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```

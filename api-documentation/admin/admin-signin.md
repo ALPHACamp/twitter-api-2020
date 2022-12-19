@@ -42,9 +42,9 @@ Success | code: 200 使用者登入成功
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQsIm5hbWUiOiJyb290IiwiZW1haWwiOiJyb290QGV4YW1wbGUuY29tIiwiaXNBZG1pbiI6dHJ1ZSwiaW1hZ2UiOm51bGwsImNyZWF0ZWRBdCI6IjIwMjItMTEtMzBUMDg6MTQ6NTQuMDAwWiIsInVwZGF0ZWRBdCI6IjIwMjItMTEtMzBUMDg6MTQ6NTQuMDAwWiIsImlhdCI6MTY3MDU1NjM0MiwiZXhwIjoxNjcxNDIwMzQyfQ.JDPA4_qFE3GyLFyGH6miWuATgsMLDqB8xW3NgeWXqsA",
         "user": {
             "id": 1,
-						"account": "root",
+            "account": "root",
             "name": "Admin",
-						"email": "root@example.com",
+            "email": "root@example.com",
             "role": "admin",
             "avatar": "<img_url>", // 如果沒有大頭貼圖檔會回傳null
             "createdAt": 1670812139000,
@@ -99,7 +99,7 @@ You would get
 
 ```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```

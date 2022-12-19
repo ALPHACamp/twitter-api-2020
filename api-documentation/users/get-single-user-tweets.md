@@ -34,34 +34,21 @@ Success | code: 200 依推文時間createdAt由新到舊回傳該用戶所有推
 
 ```
 [
-	{
-	  "id": 2,
-	  "description": "Sed ut perspiciatis unde omnis iste natus",
-		"createdAt": 1670812139000,
-		"replyCount": 13,
-		"likeCount": 76,
-		"isLiked": false,
-		"User": {
-				"id":2
-				"name":"user2",
-				"account":"user2",
-				"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-		}
-	},
-	{
-	  "id": 5,
-	  "description": "ued ut perspiciatis unde omnis iste natus",
-		"createdAt": 1670812139000,
-		"replyCount": 10,
-		"likeCount": 36,
-		"isLiked": true,
-		"User": {
-				"id":2
-				"name":"user2",
-				"account":"user2",
-				"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-		}
-	},
+  {
+    "id": 2,
+    "description": "Sed ut perspiciatis unde omnis iste natus",
+    "createdAt": 1670812139000,
+    "replyCount": 13,
+    "likeCount": 76,
+    "isLiked": false,
+    "User": {
+      "id":2
+      "name":"user2",
+      "account":"user2",
+      "avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
+    }
+  },
+
  ....// 依照時間先後排序，最新的排最前面
 ]
 
@@ -84,7 +71,7 @@ You would get
 
 ```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```

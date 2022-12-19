@@ -36,15 +36,15 @@ Success | code: 200
 {
   "id": 2,
   "account": "user1",
-	"name": "user1",
-	"email": "user1@example.com",
-	"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36",
-	"cover": "https://loremflickr.com/800/600/man,woman/?lock=45",
-	"introduction": "Sed ut perspiciatis unde omnis iste natus",
-	"role": "user",
-	"tweetCount": 25,
-	"followingCount": 231,
-	"followerCount": 45,
+  "name": "user1",
+  "email": "user1@example.com",
+  "avatar": "https://loremflickr.com/320/240/man,woman/?lock=36",
+  "cover": "https://loremflickr.com/800/600/man,woman/?lock=45",
+  "introduction": "Sed ut perspiciatis unde omnis iste natus",
+  "role": "user",
+  "tweetCount": 25,
+  "followingCount": 231,
+  "followerCount": 45,
 }
 ```
 
@@ -65,7 +65,7 @@ You would get
 
 ```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```

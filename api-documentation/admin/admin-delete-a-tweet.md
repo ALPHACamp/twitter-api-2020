@@ -45,8 +45,8 @@ Failure | code: 404 找不到此筆推文
 
 ```
 {
-"status": "error",
-"message": "Tweet does not exist."
+    "status": "error",
+    "message": "Tweet does not exist."
 }
 ```
 
@@ -59,7 +59,7 @@ You would get
 
 ```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```

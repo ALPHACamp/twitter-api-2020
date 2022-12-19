@@ -48,20 +48,7 @@ Success | code: 200
         },
         "isLiked": false
     },
-    {
-        "id": 2,
-        "description": "Ut sit non blanditiis corporis.",
-        "createdAt": 1670812139000,
-        "replyCount": 3,
-        "likeCount": 1,
-        "User": {
-            "id": 2,
-            "name": "user1",
-            "account": "user1",
-            "avatar": "https://loremflickr.com/320/240/girl/?lock=6.568042719936207"
-        },
-        "isLiked": false
-    },
+
  ....// 依照時間先後排序，最新的排最前面
 ]
 

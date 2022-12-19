@@ -34,42 +34,25 @@ Success | code: 200 依回覆時間createdAt由新到舊回傳該用戶所有回
 
 ```
 [
-	{
-	  "id": 9,// replyId in replies table
-	  "comment": "Sed ut perspiciatis unde omnis iste natus",
-		"createdAt": 1670812139000, // 整理時間格式
-		"User": { // 此使用者(寫回覆的人）
-				"id":2
-				"name":"user2",
-				"account":"user2",
-				"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-		},
-		"Tweet": { // 此使用者回覆的推文
-				"id": 2, // 該推文id
-				"User": { // 原推文的作者
-					"id": 3, 
-					"account": "user3"
-				}
-		},	
-	},
-	{
-	  "id": 8,
-	  "comment": "ed uwt ptunde omnis iste natus",
-		"createdAt": 1670812139000,
-		"User": {
-				"id":2
-				"name":"user2",
-				"account":"user2",
-				"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-		},
-		"Tweet": {
-				"id": 36, 
-				"User": {
-					"id": 5, 
-					"account": "user5"
-				}
-		},	
-	},
+ {
+    "id": 9,// replyId in replies table
+    "comment": "Sed ut perspiciatis unde omnis iste natus",
+    "createdAt": 1670812139000, // 整理時間格式
+    "User": { // 此使用者(寫回覆的人）
+      "id":2
+      "name":"user2",
+      "account":"user2",
+      "avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
+    },
+    "Tweet": { // 此使用者回覆的推文
+      "id": 2, // 該推文id
+      "User": { // 原推文的作者
+        "id": 3, 
+        "account": "user3"
+		  }
+    }	
+  },
+	
  ....// 依照時間先後排序，最新的排最前面
 ]
 
@@ -93,7 +76,7 @@ You would get
 
 ```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```

@@ -35,26 +35,26 @@ Success | code: 200
 ```
 [
 	{
-	  "id": 2,
-		"name":"user1",
-		"account":"user1",
-		"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36",
-		"cover": "<url>",
-		"tweetsCount": 10000,
-		"tweetsLikedCount":900,
-		"followingCount":100,
-	  "followerCount":90,
+    "id": 2,
+    "name":"user1",
+    "account":"user1",
+    "avatar": "https://loremflickr.com/320/240/man,woman/?lock=36",
+    "cover": "<url>",
+    "tweetsCount": 10000,
+    "tweetsLikedCount":900,
+    "followingCount":100,
+    "followerCount":90,
 	},
 	{
-	  "id": 6,
-		"name":"Mario",
-		"account":"mario",
-		"avatar": "https://loremflickr.com/320/240/man,woman/?lock=45",
-		"cover": "<url>",
-	  "tweetsCount": 99998,
-		"tweetsLikedCount":5000,
-		"followingCount":3000,
-	  "followerCount":3000,
+    "id": 6,
+    "name":"Mario",
+    "account":"mario",
+    "avatar": "https://loremflickr.com/320/240/man,woman/?lock=45",
+    "cover": "<url>",
+    "tweetsCount": 99998,
+    "tweetsLikedCount":5000,
+    "followingCount":3000,
+    "followerCount":3000,
 	},  
 	...
 ]
@@ -65,8 +65,8 @@ Failure | code: 403 前台user想用後台功能
 
 ```
 {
-    "status": "error",
-    "message": "permission denied"
+  "status": "error",
+  "message": "permission denied"
 }
 ```
 
@@ -79,7 +79,7 @@ You would get
 
 ```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```

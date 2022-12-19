@@ -59,7 +59,7 @@ Failure | code: 400 帳號或密碼未填寫
 
 ```
 {
-	Bad Request
+  Bad Request
 }
 ```
 

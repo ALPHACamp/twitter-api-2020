@@ -36,20 +36,20 @@ Success | code: 200
 
 ```
 
-	{
-	  "id": 2, // 貼文id
-	  "description": "Sed ut perspiciatis unde omnis iste natus",
-		"createdAt": 1670812139000,
-		"replyCount": 13,
-		"likeCount": 76,
-		"isLiked": false,
-		"User": { // 發貼文的人(這個登入者)
-				"id":2
-				"name":"user2",
-				"account":"user2",
-				"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-		}
-	},
+{
+	"id": 2, // 貼文id
+	"description": "Sed ut perspiciatis unde omnis iste natus",
+	"createdAt": 1670812139000,
+	"replyCount": 13,
+	"likeCount": 76,
+	"isLiked": false,
+	"User": { // 發貼文的人(這個登入者)
+			"id":2
+			"name":"user2",
+			"account":"user2",
+			"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
+	}
+},
 
 ```
 
@@ -80,7 +80,7 @@ You would get
 
 ```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```
