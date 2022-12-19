@@ -255,7 +255,8 @@ const userController = {
 		sequelize.query(queryUser)
 			.then((replyList)=>{
 				replyList[0].map((r)=>{delete r.password})
-				res.status(200).json(replyList[0])
+				const topUsers = replyList[0].filter(ru => ru.role === 'user')
+				res.status(200).json(topUsers)
 			})
 			.catch(err=>{console.log(err)})
 		},
