@@ -1,6 +1,7 @@
 const { User, Tweet, Like, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const dayjs = require('dayjs')
+const { sanitizedInput } = require('../helpers/sanitized')
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
@@ -54,7 +55,7 @@ const tweetController = {
     try {
       // Get tweet_id from req
       const loginUserId = helpers.getUser(req).id
-      const TweetId = Number(req.params.tweet_id)
+      const TweetId = Number(sanitizedInput(req.params.tweet_id))
 
       // Find tweet in database
       const tweet = await Tweet.findOne({
@@ -85,7 +86,7 @@ const tweetController = {
   getReplies: async (req, res, next) => {
     try {
       // Get tweet_id from req
-      const TweetId = Number(req.params.tweet_id)
+      const TweetId = Number(sanitizedInput(req.params.tweet_id))
       // Find all replies in database
       const replies = await Reply.findAll({
         where: { TweetId },
@@ -112,7 +113,7 @@ const tweetController = {
     try {
       // Get user, tweet_id and reply comment from req
       const UserId = helpers.getUser(req).id
-      const TweetId = Number(req.params.tweet_id)
+      const TweetId = Number(sanitizedInput(req.params.tweet_id))
       const comment = req.body.comment
 
       // Check tweet existance
@@ -135,10 +136,8 @@ const tweetController = {
     try {
       // Get user and tweet_id from req
       const UserId = helpers.getUser(req).id
-      const TweetId = Number(req.params.tweet_id)
+      const TweetId = Number(sanitizedInput(req.params.tweet_id))
 
-      // Check tweet existance
-      console.log(UserId, TweetId)
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) return res.status(404).json({ status: 'error', message: 'Cannot find this tweet.' })
 
@@ -156,7 +155,7 @@ const tweetController = {
     try {
       // Get user and tweet_id from req
       const UserId = helpers.getUser(req).id
-      const TweetId = Number(req.params.tweet_id)
+      const TweetId = Number(sanitizedInput(req.params.tweet_id))
 
       // Check record existance in database
       const like = await Like.findOne({ where: { UserId, TweetId } })
