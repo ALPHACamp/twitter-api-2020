@@ -238,7 +238,8 @@ const userController = {
             isFollowed: req.user.Followers.some((f) => f.id === user.id)
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
-        res.status(200).send(result)
+        const finalResult = result.slice(0, 9) // 取前10名
+        res.status(200).send(finalResult)
       })
       .catch((err) => next(err))
   }
