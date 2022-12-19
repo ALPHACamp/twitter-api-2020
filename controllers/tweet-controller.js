@@ -1,6 +1,6 @@
 const { Tweet, User, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
-const { relativeTime } = require('../helpers/date-helper')
+const { relativeTime, tweetSimplifyTime, tweetDetailTime } = require('../helpers/date-helper')
 const { getOffset } = require('../helpers/pagination-helper')
 
 const tweetController = {
@@ -66,7 +66,7 @@ const tweetController = {
         })
       }
       const data = tweet.toJSON()
-      data.createdAt = relativeTime(data.createdAt)
+      data.createdAt = [tweetSimplifyTime(data.createdAt), tweetDetailTime(data.createdAt)]
       return res.status(200).json(data)
     } catch (err) {
       next(err)
