@@ -11,8 +11,13 @@ const followship = require('./modules/followship')
 const tweet = require('./modules/tweet')
 const admin = require('./modules/admin')
 
+router.get('/test-auth', authenticated, (req, res) => {
+  res.json({ success: true, error: null })
+})
+
 router.post('/admin/login', passport.authenticate('local', { session: false }), adminController.loginAdmin)
 router.post('/users/login', passport.authenticate('local', { session: false }), userController.loginUser)
+
 router.post('/users', userController.registerUser)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/followships', authenticated, followship)
