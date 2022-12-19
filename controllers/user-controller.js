@@ -59,7 +59,7 @@ const userController = {
       throw new Error('account and password are required.')
     }
 
-    User.findOne({ where: { account }, raw: true })
+    User.findOne({ where: { account, role: 'user' }, raw: true })
       .then((user) => {
         if (!user) {
           throw new Error('帳號不存在！')
@@ -193,8 +193,26 @@ const userController = {
         trackData.Followers.forEach((f) => {
           checkBox.push(f.id)
         })
-        followingList.forEach((list) => {
-          // 新增 isFollowed 屬性
+        // 儲存追蹤者屬性
+        let followingsbox = []
+
+        trackData.Followings.forEach((l) => {
+          let temp = {}
+          let data = {}
+          data.id = l.id
+          data.name = l.name
+          data.avatar = l.avatar
+          data.introduction = l.introduction
+          console.log('data:', data)
+          temp.result = data
+          followingsbox.push(temp)
+        })
+
+        followingList.forEach((list, index) => {
+          // 新增 isFollowed, name, introduction, avatar 屬性
+          list.name = followingsbox[index].result.name
+          list.avatar = followingsbox[index].result.avatar
+          list.introduction = followingsbox[index].result.introduction
           list.isFollowed = checkBox.includes(list.followingId)
         })
         res.status(200).send(followingList)
@@ -218,11 +236,46 @@ const userController = {
         trackData.Followings.forEach((f) => {
           checkBox.push(f.id)
         })
-        followerList.forEach((list) => {
-          // 新增 isFollowed 屬性
+
+        // 儲存追隨者屬性
+        let followersbox = []
+
+        trackData.Followers.forEach((l) => {
+          let temp = {}
+          let data = {}
+          data.id = l.id
+          data.name = l.name
+          data.avatar = l.avatar
+          data.introduction = l.introduction
+          console.log('data:', data)
+          temp.result = data
+          followersbox.push(temp)
+        })
+        followerList.forEach((list, index) => {
+          // 新增 isFollowed, name, introduction, avatar 屬性
+          list.name = followersbox[index].result.name
+          list.avatar = followersbox[index].result.avatar
+          list.introduction = followersbox[index].result.introduction
           list.isFollowed = checkBox.includes(list.followerId)
         })
         res.status(200).send(followerList)
+      })
+      .catch((err) => next(err))
+  },
+  getTopUsers: (req, res, next) => {
+    User.findAll({
+      include: [{ model: User, as: 'Followers' }]
+    })
+      .then((users) => {
+        const result = users
+          .map((user) => ({
+            ...user.toJSON(),
+            followerCount: user.Followers.length,
+            isFollowed: req.user.Followers.some((f) => f.id === user.id)
+          }))
+          .sort((a, b) => b.followerCount - a.followerCount)
+        const finalResult = result.slice(0, 9) // 取前10名
+        res.status(200).send(finalResult)
       })
       .catch((err) => next(err))
   }
