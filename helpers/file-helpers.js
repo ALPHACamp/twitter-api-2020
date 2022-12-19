@@ -1,6 +1,6 @@
 const fs = require('fs') // 引入 fs 模組
 const imgur = require('imgur')
-// 存放本地端
+// 將temp folder中file複製至本地端upload folder
 const uploadFileLocal = file => { // file 是 multer 處理完的檔案
   // Promise找不到file就結束，有file就複製一份並回傳file name
   return new Promise((resolve, reject) => {
@@ -13,7 +13,7 @@ const uploadFileLocal = file => { // file 是 multer 處理完的檔案
   })
 }
 
-// 存放imgur
+// 將temp folder中file上傳至imgur
 const uploadImgur = file => {
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null)
