@@ -6,7 +6,7 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const UserId = helpers.getUser(req).id
     const { description } = req.body
-    if (description.length > 140) return res.status(400).json({ status: 'error', message: '內容不可超出140字' })
+    if (description.length > 140) res.status(400).json({ status: 'error', message: '內容不可超出140字' })
     return Tweet.create({
       UserId,
       description
@@ -14,7 +14,7 @@ const tweetController = {
     ).catch(err => next(err))
   },
   getTweets: (req, res, next) => {
-    const currentUserId = helpers.getUser(req).id
+    const UserId = helpers.getUser(req).id
     return Tweet.findAll({
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']],
@@ -26,10 +26,10 @@ const tweetController = {
       ]
     })
       .then(tweets => {
-        if (!tweets) throw new Error('貼文不存在!')
+        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在' })
         const data = tweets.map(t => ({
           ...t,
-          isLiked: currentUserId?.Likes?.some(currentUserLike => currentUserLike?.TweetId === t.id),
+          isLiked: UserId?.Likes?.some(UserLike => UserLike?.TweetId === t.id),
           createdAt: relativeTime(t.createdAt)
         }))
         res.status(200).json(data)
@@ -37,7 +37,7 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
-    const currentUserId = helpers.getUser(req).id
+    const UserId = helpers.getUser(req).id
     return Tweet.findByPk(req.params.tweet_id, {
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']],
@@ -54,7 +54,7 @@ const tweetController = {
       if (!tweet) res.status(500).json({ status: 'error', message: '貼文不存在' })
       const data = tweet
       data.createdAt = relativeTime(data.createdAt)
-      data.isLiked = currentUserId?.Likes?.some(currentUserLike => currentUserLike?.TweetId === tweet.id)
+      data.isLiked = UserId?.Likes?.some(UserLike => UserLike?.TweetId === tweet.id)
       return res.status(200).json(data)
     }).catch(err => next(err))
   },
@@ -74,12 +74,11 @@ const tweetController = {
     const TweetId = Number(req.params.tweet_id)
     const UserId = helpers.getUser(req).id
     const { comment } = req.body
-    // 打空白也無法送出回覆
-    if (!comment || (comment.trim() === '')) throw new Error('內容不可空白')
-    if (comment.length > 140) throw new Error('回覆字數超出限制')
+    if (!comment || (comment.trim() === '')) res.status(400).json({ status: 'error', message: '回覆內容不可空白!' })
+    if (comment.length > 140) res.status(400).json({ status: 'error', message: '回覆字數超出140字限制!' })
     return Tweet.findByPk(TweetId)
       .then(tweet => {
-        if (!tweet) throw new Error('推文不存在')
+        if (!tweet) res.status(404).json({ status: 'error', message: '貼文不存在' })
         return Reply.create({
           TweetId,
           UserId,
@@ -104,8 +103,8 @@ const tweetController = {
       })
     ])
       .then(([tweet, likedTweet]) => {
-        if (!tweet) throw new Error('推文不存在')
-        if (likedTweet) throw new Error('已經按讚過了!')
+        if (!tweet) res.status(404).json({ status: 'error', message: '貼文不存在' })
+        if (likedTweet) return res.status(400).json({ status: 'error', message: '已經按讚過了!' })
         return Like.create({
           TweetId,
           UserId
@@ -127,8 +126,8 @@ const tweetController = {
       })
     ])
       .then(([tweet, likedTweet]) => {
-        if (!tweet) throw new Error('推文不存在')
-        if (!likedTweet) throw new Error('還沒有按讚過喔!')
+        if (!tweet) res.status(404).json({ status: 'error', message: '貼文不存在' })
+        if (!likedTweet) return res.status(400).json({ status: 'error', message: '還沒有按讚過喔!' })
         return likedTweet.destroy()
       })
       .then(unlike => res.status(200).json(unlike))
