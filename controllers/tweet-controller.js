@@ -13,7 +13,7 @@ const tweetController = {
           { model: User, attributes: ['id', 'account', 'name', 'avatar', 'cover'] },
         attributes: [
           'id', 'description', 'createdAt',
-          [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'tweetCount'],
           [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.tweet_id = Tweet.id AND Likes.user_id = ${currentUserId})`), 'isLiked']
         ],
