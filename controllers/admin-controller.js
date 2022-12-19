@@ -7,10 +7,10 @@ const adminController = {
       attributes: {
         exclude: ['password'],
         include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id )'), 'tweetCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.UserId = user.id )'), 'likeCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id )'), 'followersCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id )'), 'followingCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id )'), 'tweetCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id )'), 'likeCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id )'), 'followersCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id )'), 'followingCount']
         ]
       },
       order: [

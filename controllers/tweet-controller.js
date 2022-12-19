@@ -31,9 +31,9 @@ const tweetController = {
         }],
       attributes: {
         include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id )'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id )'), 'likeCount'],
-          [sequelize.literal(`EXISTS (SELECT id FROM likes WHERE likes.UserId = ${currentUser.id} AND likes.TweetId = tweet.id )`), 'isLiked']
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id )'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id )'), 'likeCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${currentUser.id} AND Likes.TweetId = Tweet.id )`), 'isLiked']
         ]
       },
       order: [['createdAt', 'DESC']],
@@ -43,7 +43,7 @@ const tweetController = {
       .then(tweets => {
         return tweets.map(tweet => ({
           ...tweet,
-          relativeTime: dateFormat(tweet.createdAt).fromNow()// [ 修 ]：發文過一週？是的話顯示日期，不是的話顯示多久之前
+          relativeTime: dateFormat(tweet.createdAt).fromNow()
         }))
       })
       .then(tweets =>
@@ -64,9 +64,9 @@ const tweetController = {
         }],
       attributes: {
         include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id )'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id )'), 'likeCount'],
-          [sequelize.literal(`EXISTS (SELECT id FROM likes WHERE likes.UserId = ${currentUser.id} AND likes.TweetId = tweet.id )`), 'isLiked']
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id )'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id )'), 'likeCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${currentUser.id} AND likes.TweetId = Tweet.id )`), 'isLiked']
         ]
       },
       order: [['createdAt', 'DESC']],
