@@ -217,7 +217,7 @@ const userController = {
 
       const followings = await Followship.findAll({
         attributes: { exclude: ['updatedAt'] },
-        include: { model: User, as: 'FollowingInfo', attributes: ['id', 'account', 'name', 'avatar'] },
+        include: { model: User, as: 'FollowingInfo', attributes: ['id', 'account', 'name', 'introduction', 'avatar'] },
         where: { followerId: id },
         raw: true,
         nest: true
@@ -237,7 +237,7 @@ const userController = {
 
       const followings = await Followship.findAll({
         attributes: { exclude: ['updatedAt'] },
-        include: { model: User, as: 'FollowerInfo', attributes: ['id', 'account', 'name', 'avatar'] },
+        include: { model: User, as: 'FollowerInfo', attributes: ['id', 'account', 'name', 'introduction', 'avatar'] },
         where: { followingId: id },
         raw: true,
         nest: true
