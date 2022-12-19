@@ -32,7 +32,7 @@ Success | code: 200
 
 Token有效
 
-```json
+```
 {
 	"status": "success",
 	"message": "Token valid"
@@ -41,20 +41,21 @@ Token有效
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

@@ -13,7 +13,7 @@ Feature
 ### Request Header
 
 ```
-**Content-Type:multipart/form-data**
+Content-Type:multipart/form-data
 Authorization: Bearer [bearer token]
 ```
 
@@ -44,7 +44,7 @@ content-type: application/json
 
 Success | code: 200 
 
-```json
+```
 {
   "status": "success",
 }
@@ -52,7 +52,7 @@ Success | code: 200
 
 Failure | code: 400 未填寫使用者name
 
-```json
+```
 {
   "status": "error",
   "message": "User name is required!"
@@ -61,7 +61,7 @@ Failure | code: 400 未填寫使用者name
 
 Failure | code: 400 cover或avatar使用者上傳非圖檔(接受png/jpg/jpeg格式)
 
-```json
+```
 {
   "status": "error",
   "message": "Please upload image file format."
@@ -70,7 +70,7 @@ Failure | code: 400 cover或avatar使用者上傳非圖檔(接受png/jpg/jpeg格
 
 Failure | code: 403 forbidden 使用者想編輯他人的檔案
 
-```json
+```
 {
   "status": "error",
   "message": "Cannot edit other user's profile."
@@ -79,7 +79,7 @@ Failure | code: 403 forbidden 使用者想編輯他人的檔案
 
 Failure | code: 404 找不到這個使用者
 
-```json
+```
 {
   "status": "error",
   "message": "Cannot find this user."
@@ -88,7 +88,7 @@ Failure | code: 404 找不到這個使用者
 
 Failure | code: 422 自我介紹字數超過160字
 
-```json
+```
 {
   "status": "error",
   "message": "User's introduction should be less than 160 chars"
@@ -97,7 +97,7 @@ Failure | code: 422 自我介紹字數超過160字
 
 Failure | code: 422 name暱稱字數超過50字
 
-```json
+```
 {
   "status": "error",
   "message": "Username should be less than 50 chars."
@@ -106,13 +106,14 @@ Failure | code: 422 name暱稱字數超過50字
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```
@@ -121,7 +122,7 @@ Failure | code: 500
 
 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

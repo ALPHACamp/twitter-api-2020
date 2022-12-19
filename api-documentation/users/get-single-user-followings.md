@@ -35,37 +35,23 @@ Success | code: 200
 
 依使用者追蹤紀錄成立時間(createdAt)也就是按下跟隨按鈕的時間，由新到舊回傳該用戶所有追隨中(following)用戶。
 
-```json
+```
 
 [
-	{
-		"followerId" : 3, // 這個用戶的id＝userId
-		"followingId": 2,
-		"createdAt": 1670812139000, // 追蹤紀錄成立時間，以此排序
-		"updatedAt": 1670812139000, 
-		"Followings": {
-				"id": 2,
-			  "account": "user1",
-				"name": "user1",
-				"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36",
-				"introduction": "Sed ut perspiciatis unde omnis iste natus",
-				"isFollowed": true, // 登入的這個使用者是否已追隨清單上這個用戶
-				}
-	},
-	{
-			"followerId" : 3, 
-			"followingId": 6,
-			"createdAt": 1670812139000, // 追蹤紀錄成立時間，以此排序
-			"updatedAt": 1670812139000, 
-			"Followings": {
-					"id": 6,
-				  "account": "mario",
-					"name": "Mario",
-					"avatar": "https://loremflickr.com/320/240/man,woman/?lock=45",
-					"introduction": "Nulla eros mauris, rhoncus eu mattis ut",
-					"isFollowed": false, // 登入的這個使用者是否已追隨清單上這個用戶(Mario)	
-			} 
-		},
+  {
+    "followerId" : 3, // 這個用戶的id＝userId
+    "followingId": 2,
+    "createdAt": 1670812139000, // 追蹤紀錄成立時間，以此排序
+    "updatedAt": 1670812139000, 
+    "Followings": {
+      "id": 2,
+      "account": "user1",
+      "name": "user1",
+      "avatar": "https://loremflickr.com/320/240/man,woman/?lock=36",
+      "introduction": "Sed ut perspiciatis unde omnis iste natus",
+      "isFollowed": true, // 登入的這個使用者是否已追隨清單上這個用戶
+      }
+  },
 		....// 依照追蹤紀錄時間先後排序，最新的排最前面 
 ]
 
@@ -75,7 +61,7 @@ Success | code: 200
 
 Failure | code: 404 找不到該使用者
 
-```json
+```
 {
   "status": "error",
   "message": "User not found!"
@@ -84,20 +70,21 @@ Failure | code: 404 找不到該使用者
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

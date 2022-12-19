@@ -36,7 +36,7 @@ content-type: application/json
 
 Success | code: 200 
 
-```json
+```
 {
   "status": "success",
 }
@@ -44,7 +44,7 @@ Success | code: 200
 
 Failure | code: 400 任一欄位為空值
 
-```json
+```
 {
   "status": "error",
   "message": "All field are required!"
@@ -53,7 +53,7 @@ Failure | code: 400 任一欄位為空值
 
 Failure | code: 403 forbidden 使用者想編輯他人的設定
 
-```json
+```
 {
   "status": "error",
   "message": "Cannot edit other user's setting."
@@ -62,7 +62,7 @@ Failure | code: 403 forbidden 使用者想編輯他人的設定
 
 Failure | code: 404 使用者id不存在
 
-```json
+```
 {
   "status": "error",
   "message": "User not found!"
@@ -71,7 +71,7 @@ Failure | code: 404 使用者id不存在
 
 Failure | code: 422 Email 格式不對
 
-```json
+```
 {
   "status": "error",
   "message": "Email input is invalid!"
@@ -80,7 +80,7 @@ Failure | code: 422 Email 格式不對
 
 Failure | code: 422 Name 超過 50 個字
 
-```json
+```
 {
   "status": "error",
   "message": "Name field has max length of 50 characters."
@@ -89,7 +89,7 @@ Failure | code: 422 Name 超過 50 個字
 
 Failure | code: 422 Account 已註冊
 
-```json
+```
 {
   "status": "error",
   "message": "Account name already exists!"
@@ -98,7 +98,7 @@ Failure | code: 422 Account 已註冊
 
 Failure | code: 422 Email 已註冊
 
-```json
+```
 {
   "status": "error",
   "message": "Email already exists!"
@@ -107,7 +107,7 @@ Failure | code: 422 Email 已註冊
 
 Failure | code: 422密碼與確認密碼輸入值不同
 
-```json
+```
 {
   "status": "error",
   "message": "Password and confirmPassword do not match."
@@ -116,20 +116,21 @@ Failure | code: 422密碼與確認密碼輸入值不同
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

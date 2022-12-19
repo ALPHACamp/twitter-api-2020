@@ -34,65 +34,49 @@ Success | code: 200
 
 依回覆時間createdAt由新到舊，回傳特定推文的所有回覆
 
-```json
+```
 [
-		{
-		  "id": 9,// replyId in replies table
-		  "comment": "Sed ut perspiciatis unde omnis iste natus",
-			"createdAt": 1670812139000,
-			"User": { // 寫reply的使用者
-					"id":2
-					"name":"user2",
-					"account":"user2",
-					"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-			},
-			"Tweet": {
-					"id": 3, // 回覆的teewtId
-					"User": {
-						"id": 6, // 推文的作者id
-						"account": "mario",
-					}
-			}
-		},
-		{
-		  "id": 8,
-		  "comment": "ed uwt ptunde omnis iste natus",
-			"createdAt": 1670812139000,
-			"User": {
-					"id":9
-					"name":"Luigi",
-					"account":"luigi",
-					"avatar": "https://loremflickr.com/320/240/man,woman/?lock=66"
-				},
-			"Tweet": {
-					"id": 3, // 回覆的teewtId
-					"User": {
-					"id": 6, // 推文的作者id
-					"account": "mario",
-					}
-			}
-		},
-	 ....// 依照時間先後排序，最新的排最前面
+ {
+  "id": 9,// replyId in replies table
+  "comment": "Sed ut perspiciatis unde omnis iste natus",
+  "createdAt": 1670812139000,
+  "User": { // 寫reply的使用者
+    "id":2
+    "name":"user2",
+    "account":"user2",
+    "avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
+    },
+  "Tweet": {
+    "id": 3, // 回覆的teewtId
+    "User": {
+    "id": 6, // 推文的作者id
+    "account": "mario",
+    }
+   }
+  },
+
+	....// 依照時間先後排序，最新的排最前面
 ]
 
 ```
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

@@ -34,7 +34,7 @@ Success | code: 200
 
 成功新增追蹤
 
-```json
+```
 {
   "status":"success"
 }
@@ -44,7 +44,7 @@ Failure | code: 404
 
 找不到這個想追蹤的user
 
-```json
+```
 {
   "status": "error",
   "message": "Cannot find this user."
@@ -55,7 +55,7 @@ Failure | code: 422
 
 使用者追蹤自己
 
-```json
+```
 {
   "status": "error",
   "message": "You cannot follow yourself."
@@ -66,7 +66,7 @@ Failure | code: 422
 
 已追蹤此使用者了
 
-```json
+```
 {
   "status": "error",
   "message": "You have already followed this user."
@@ -75,19 +75,20 @@ Failure | code: 422
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

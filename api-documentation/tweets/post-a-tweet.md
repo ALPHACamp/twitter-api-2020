@@ -34,7 +34,7 @@ Success | code: 200
 
 推文新增成功
 
-```json
+```
 {
   "status":"success"
 }
@@ -42,7 +42,7 @@ Success | code: 200
 
 Failure | code: 400輸入空白內容
 
-```json
+```
 {
   "status": "error",
   "message": "Discription is empty."
@@ -53,7 +53,7 @@ Failure | code: 422
 
 推文內容超過140字
 
-```json
+```
 {
   "status": "error",
   "message": "Tweets content should be less than 140 characters."
@@ -62,20 +62,21 @@ Failure | code: 422
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

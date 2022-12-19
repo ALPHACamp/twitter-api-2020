@@ -34,7 +34,7 @@ Success | code: 200
 
 推文unlike成功
 
-```json
+```
 {
   "status":"success"
 }
@@ -44,7 +44,7 @@ Failure | code: 404
 
 找不到這則推文或使用者沒有like這則推文
 
-```json
+```
 {
   "status": "error",
   "message": "Cannot find this tweet or you havn't like this tweet."
@@ -53,20 +53,21 @@ Failure | code: 404
 
 Failure | code: 401 使用者未登入就使用此服務
 
-If your request header do not send`Authorization: Bearer [bearer token]`
+If your request header do not send
+`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}

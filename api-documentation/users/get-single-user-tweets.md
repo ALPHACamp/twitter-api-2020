@@ -32,36 +32,23 @@ content-type: application/json
 
 Success | code: 200 依推文時間createdAt由新到舊回傳該用戶所有推文
 
-```json
+```
 [
-	{
-	  "id": 2,
-	  "description": "Sed ut perspiciatis unde omnis iste natus",
-		"createdAt": 1670812139000,
-		"replyCount": 13,
-		"likeCount": 76,
-		"isLiked": false,
-		"User": {
-				"id":2
-				"name":"user2",
-				"account":"user2",
-				"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-		}
-	},
-	{
-	  "id": 5,
-	  "description": "ued ut perspiciatis unde omnis iste natus",
-		"createdAt": 1670812139000,
-		"replyCount": 10,
-		"likeCount": 36,
-		"isLiked": true,
-		"User": {
-				"id":2
-				"name":"user2",
-				"account":"user2",
-				"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-		}
-	},
+  {
+    "id": 2,
+    "description": "Sed ut perspiciatis unde omnis iste natus",
+    "createdAt": 1670812139000,
+    "replyCount": 13,
+    "likeCount": 76,
+    "isLiked": false,
+    "User": {
+      "id":2
+      "name":"user2",
+      "account":"user2",
+      "avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
+    }
+  },
+
  ....// 依照時間先後排序，最新的排最前面
 ]
 
@@ -69,7 +56,7 @@ Success | code: 200 依推文時間createdAt由新到舊回傳該用戶所有推
 
 Failure | code: 404 找不到該使用者
 
-```json
+```
 {
   "status": "error",
   "message": "User not found!"
@@ -82,16 +69,16 @@ If your request header do not send`Authorization: Bearer [bearer token]`
 
 You would get
 
-```json
+```
 {
-	"status": "error",
+  "status": "error",
   "message": "unauthorized"
 }
 ```
 
 Failure | code: 500 其他server error
 
-```json
+```
 {
   "status": "error",
   "message": {{err message}}
