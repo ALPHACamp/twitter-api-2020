@@ -4,6 +4,7 @@ const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { relativeTime } = require('../helpers/date-helper')
 const { imgurFileHandler } = require('../helpers/file-helper')
+const { getOffset } = require('../helpers/pagination-helper')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -192,6 +193,12 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
+      //  lazy loading
+      const DEFAULT_LIMIT = 10
+      const page = Number(req.query.page) || 1
+      const limit = Number(req.query.limit) || DEFAULT_LIMIT
+      const offset = getOffset(limit, page)
+
       const reqUserId = Number(req.params.id)
       const currentUserId = helpers.getUser(req).id
       const [user, userTweets] = await Promise.all([
@@ -206,6 +213,8 @@ const userController = {
             [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
           ],
           order: [['createdAt', 'DESC']],
+          limit,
+          offset,
           nest: true,
           raw: true
         })
@@ -232,6 +241,12 @@ const userController = {
   },
   getUserReplies: async (req, res, next) => {
     try {
+      //  lazy loading
+      const DEFAULT_LIMIT = 10
+      const page = Number(req.query.page) || 1
+      const limit = Number(req.query.limit) || DEFAULT_LIMIT
+      const offset = getOffset(limit, page)
+
       const reqUserId = Number(req.params.id)
       const [user, userReplies] = await Promise.all([
         User.findByPk(reqUserId),
@@ -246,6 +261,8 @@ const userController = {
             }
           ],
           order: [['createdAt', 'DESC']],
+          limit,
+          offset,
           nest: true,
           raw: true
         })
@@ -272,6 +289,12 @@ const userController = {
   },
   getUserLikedTeets: async (req, res, next) => {
     try {
+      //  lazy loading
+      const DEFAULT_LIMIT = 10
+      const page = Number(req.query.page) || 1
+      const limit = Number(req.query.limit) || DEFAULT_LIMIT
+      const offset = getOffset(limit, page)
+
       const reqUserId = Number(req.params.id)
       const currentUserId = helpers.getUser(req).id
       const [user, userLikedTeets] = await Promise.all([
@@ -292,6 +315,8 @@ const userController = {
             }
           ],
           order: [['createdAt', 'DESC']],
+          limit,
+          offset,
           nest: true,
           raw: true
         })
@@ -321,6 +346,12 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
+      //  lazy loading
+      const DEFAULT_LIMIT = 10
+      const page = Number(req.query.page) || 1
+      const limit = Number(req.query.limit) || DEFAULT_LIMIT
+      const offset = getOffset(limit, page)
+
       const reqUserId = Number(req.params.id)
       const currentUserId = helpers.getUser(req).id
       const [user, followings] = await Promise.all([
@@ -339,6 +370,8 @@ const userController = {
             ]
           },
           order: [['createdAt', 'DESC']],
+          limit,
+          offset,
           nest: true,
           raw: true
         })
@@ -359,6 +392,12 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
+      //  lazy loading
+      const DEFAULT_LIMIT = 10
+      const page = Number(req.query.page) || 1
+      const limit = Number(req.query.limit) || DEFAULT_LIMIT
+      const offset = getOffset(limit, page)
+
       const reqUserId = Number(req.params.id)
       const currentUserId = helpers.getUser(req).id
       const [user, followers] = await Promise.all([
@@ -377,6 +416,8 @@ const userController = {
             ]
           },
           order: [['createdAt', 'DESC']],
+          limit,
+          offset,
           nest: true,
           raw: true
         })

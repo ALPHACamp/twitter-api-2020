@@ -1,10 +1,17 @@
 const { Tweet, User, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { relativeTime } = require('../helpers/date-helper')
+const { getOffset } = require('../helpers/pagination-helper')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
+      //  lazy loading
+      const DEFAULT_LIMIT = 10
+      const page = Number(req.query.page) || 1
+      const limit = Number(req.query.limit) || DEFAULT_LIMIT
+      const offset = getOffset(limit, page)
+
       const currentUserId = helpers.getUser(req).id
       const tweets = await Tweet.findAll({
         raw: true,
@@ -21,7 +28,9 @@ const tweetController = {
           [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
         ],
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        limit,
+        offset
       })
       const data = tweets.map(tweet => ({
         ...tweet,
@@ -90,6 +99,12 @@ const tweetController = {
   },
   getTweetReplies: async (req, res, next) => {
     try {
+      //  lazy loading
+      const DEFAULT_LIMIT = 10
+      const page = Number(req.query.page) || 1
+      const limit = Number(req.query.limit) || DEFAULT_LIMIT
+      const offset = getOffset(limit, page)
+
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) {
@@ -106,7 +121,9 @@ const tweetController = {
           model: User,
           attributes: ['id', 'avatar', 'account', 'name']
         },
-        where: { TweetId }
+        where: { TweetId },
+        limit,
+        offset
       })
       const data = replies.map(reply => ({
         ...reply,
