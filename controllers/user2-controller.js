@@ -110,7 +110,8 @@ const user2Controller = {
       const id = Number(req.params.id)
       let { account, name, email, password, checkPassword, introduction } = req.body
       const { files } = req
-
+      console.log('files:', files) // **********確認前端送來的req，之後記得刪掉
+      console.log('typeof files:', typeof files) // **********確認前端送來的req，之後記得刪掉
       // 錯誤驗證
       if (id !== currentUserId) return res.status(400).json({ success: false, message: 'permission denied' }) // 不可編輯別人的檔案
       if (password !== checkPassword) throw new Error('password and checkPassword do not match') // 密碼不相符
