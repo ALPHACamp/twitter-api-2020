@@ -59,6 +59,7 @@ const userController = {
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
         role: 'user',
+        avatar: 'https://i.imgur.com/zByqb7D.png',
         cover: 'https://loremflickr.com/1500/800/mountain'
       })
 
