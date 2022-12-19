@@ -1,5 +1,5 @@
 const { ImgurClient } = require('imgur')
-const { createReadStream, readdir, unlink } = require('fs')
+const { createReadStream, promises } = require('fs')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const IMGUR_CLIENT_SECRET = process.env.IMGUR_CLIENT_SECRET
 const IMGUR_REFRESH_TOKEN = process.env.IMGUR_REFRESH_TOKEN
@@ -24,21 +24,16 @@ const imgurFileHandler = file => {
   })
 }
 
-function clearTemp () {
-  readdir('./temp', (err, files) => {
-    if (err) {
-      console.error(err)
-      throw err
-    }
+async function clearTemp () {
+  try {
+    const files = await promises.readdir('./temp')
     for (const file of files) {
-      unlink(`./temp/${file}`, err => {
-        if (err) {
-          console.log(err)
-          throw err
-        }
-      })
+      await promises.unlink(`./temp/${file}`)
     }
-  })
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
 }
 module.exports = {
   imgurFileHandler, clearTemp

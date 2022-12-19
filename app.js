@@ -25,5 +25,5 @@ app.use('/', (req, res) => res.send('Hello World!')) // fallback
 app.use(generalErrorHandler) // error handle
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
-setInterval(clearTemp, 10800000)
+setInterval(clearTemp, 43200000)
 module.exports = app
