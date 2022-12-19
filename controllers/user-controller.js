@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Followship, Reply, sequelize } = require('../models')
+const { User, Tweet, Followship, Reply, sequelize, Like } = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helper')
 const { relativeTime } = require('../helpers/date-helper')
@@ -271,7 +271,10 @@ const userController = {
           }
         }))
         return res.status(200).json(likeData)
-        },
+      })
+      .catch(err => next(err))
+  },
+
   getUserReplies: (req, res, next) => {
     const id = Number(req.params.id)
     return Promise.all([
