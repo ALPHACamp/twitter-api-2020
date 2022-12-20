@@ -310,6 +310,24 @@ const userController = {
         res.json({ status: 'success', message: '帳號內容已成功修改!', renewUser: userData })
       })
       .catch(err => next(err))
+  },
+  patchUserCover: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
+    const id = Number(req.params.id)
+    if (id !== currentUser.id) throw new Error('You are not allowed to use!') // 待重構，把只能編輯自己的邏輯寫成另外一個auth middleware
+    return User.findByPk(id)
+      .then(user => {
+        if (!user) throw new Error('使用者不存在!')
+        return user.update({
+          cover: 'https://i.imgur.com/dIsjVjn.jpeg'
+        })
+      })
+      .then(updatedUser => {
+        const userData = updatedUser.toJSON()
+        delete userData.password
+        res.json(userData)
+      })
+      .catch(err => next(err))
   }
 }
 
