@@ -138,12 +138,17 @@ const tweetController = {
       .catch(err => next(err))
   },
   getReplies: (req, res, next) => {
-    Reply.findAll({
-      where: { TweetId: req.params.tweet_id },
-      include: User,
-      order: [['createdAt', 'DESC']]
-    })
-      .then(replies => {
+    Promise.all([
+      Reply.findAll({
+        where: { TweetId: req.params.tweet_id },
+        include: User,
+        order: [['createdAt', 'DESC']]
+      }),
+      Tweet.findByPk(req.params.tweet_id, {
+        include: User
+      })
+    ])
+      .then(([replies, tweet]) => {
         return replies.map(reply => {
           const { id, account, name, avatar } = reply.User
           const userData = {
@@ -154,6 +159,7 @@ const tweetController = {
           }
           return {
             ...reply.toJSON(),
+            repliedAccount: tweet.User.account,
             User: userData
           }
         })
