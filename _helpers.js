@@ -26,5 +26,6 @@ function getUser (req) {
 module.exports = {
   getUser,
   relativeTime: a => dayjs(a).fromNow(),
+  date: date => dayjs(date),
   imgurFileHandler
 }

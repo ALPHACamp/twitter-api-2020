@@ -42,7 +42,6 @@ const tweetController = {
     const currentUser = helpers.getUser(req)
     return Tweet.findByPk(req.params.tweet_id, {
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
-      order: [['createdAt', 'DESC']],
       raw: true,
       nest: true,
       attributes: [
@@ -55,7 +54,7 @@ const tweetController = {
     }).then(tweet => {
       if (!tweet) res.status(404).json({ status: 'error', message: '貼文不存在!' })
       const data = tweet
-      data.createdAt = helpers.relativeTime(data.createdAt)
+      data.createdAt = helpers.date(tweet.createdAt).format('A hh:mm YYYY年MM月DD日')
       data.isLiked = currentUser?.Likes?.some(UserLike => UserLike?.TweetId === tweet.id)
       return res.status(200).json(data)
     }).catch(err => next(err))
