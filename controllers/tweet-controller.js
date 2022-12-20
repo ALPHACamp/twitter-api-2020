@@ -56,8 +56,7 @@ const tweetController = {
           [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
           [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
-        ],
-        order: [['createdAt', 'DESC']]
+        ]
       })
       if (!tweet) {
         return res.status(404).json({
@@ -121,9 +120,10 @@ const tweetController = {
           model: User,
           attributes: ['id', 'avatar', 'account', 'name']
         },
-        where: { TweetId },
         limit,
         offset
+        order: [['createdAt', 'DESC']],
+        where: { TweetId }
       })
       const data = replies.map(reply => ({
         ...reply,
@@ -150,6 +150,12 @@ const tweetController = {
         return res.status(422).json({
           status: 'error',
           message: '回覆不可空白！'
+        })
+      }
+      if (comment.length > 140) {
+        return res.status(422).json({
+          status: 'error',
+          message: '字數超出上限！'
         })
       }
       await Reply.create({
