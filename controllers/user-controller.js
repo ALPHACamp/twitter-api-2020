@@ -319,7 +319,7 @@ const userController = {
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
         return user.update({
-          cover: 'https://i.imgur.com/dIsjVjn.jpeg'
+          cover: 'https://i.imgur.com/dIsjVjn.jpeg' || user.cover
         })
       })
       .then(updatedUser => {
