@@ -59,7 +59,7 @@ router.put(
   ]),
   authenticated,
   authenticatedUser,
-  user2Controller.putUser
+  userController.putUser
 )
 
 // 登入不需要驗證登入狀態

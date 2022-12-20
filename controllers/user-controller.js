@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
+const helpers = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
   signUp: (req, cb) => {
@@ -82,8 +84,9 @@ const userController = {
   },
   getUser: (req, res, next) => {
     const { id } = req.params
+    const loginUser = helpers.getUser(req)
+
     return Promise.all([
-      Followship.findOne({ where: { followingId: id }, raw: true }),
       User.findByPk(id, {
         include: [
           Tweet,
@@ -92,20 +95,22 @@ const userController = {
         ]
       })
     ])
-      .then(([track, user]) => {
+      .then(([user]) => {
         if (!user) throw new Error('使用者不存在 !')
+        // 儲存登入者的追蹤者 id
+        const checkBox = []
 
-        // 若未被追蹤，都顯示 false
-        const trackData = track ? track.followingId === user.id : false
-
+        loginUser.Followings.forEach((f) => {
+          checkBox.push(f.id)
+        })
         // 使用者推文數
         const tweetCount = user.Tweets.length
         // 使用者追蹤數
         const followingCount = user.Followings.length
         // 使用者被追蹤數
         const followerCount = user.Followers.length
-        // 使用者與追蹤者關係
-        const isFollowed = trackData
+        // 登入者與個別使用者追蹤關係
+        const isFollowed = checkBox.includes(user.id)
 
         user = user.toJSON()
         // 刪除非必要屬性
@@ -123,61 +128,110 @@ const userController = {
       })
       .catch((err) => next(err))
   },
-  putUser: (req, res, next) => {
-    const { account, name, email, introduction } = req.body
-    const { id } = req.params
-    const { files } = req
-    // 設定 avatar 和 cover 暫存變數
-    let avatarFile
-    let coverFile
-    // 未上傳檔案 (上傳檔案為空的情況下)
-    if (!files) {
-      avatarFile = [{ path: '' }]
-      coverFile = [{ path: '' }]
-    }
-    // 上傳檔案
-    if (files) {
-      avatarFile = files.avatar
-      coverFile = files.cover
-      // 都未上傳檔案
-      if (!avatarFile && !coverFile) {
-        avatarFile = [{ path: '' }]
-        coverFile = [{ path: '' }]
+  putUser: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req)?.id
+      const id = Number(req.params.id)
+      let { account, name, email, password, checkPassword, introduction } =
+        req.body
+      const { files } = req
+      // console.log('files:', files) // **********確認前端送來的req，之後記得刪掉
+      // console.log('typeof files:', typeof files) // **********確認前端送來的req，之後記得刪掉
+      // 錯誤驗證
+      if (id !== currentUserId) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'permission denied' })
+      } // 不可編輯別人的檔案
+      if (password !== checkPassword) {
+        throw new Error('password and checkPassword do not match')
+      } // 密碼不相符
+      if (name?.length > 50) throw new Error('name is limited to 50 characters') // 名字太長
+      if (introduction?.length > 160) {
+        throw new Error('introduction is limited to 160 characters')
+      } // 自介太長
+
+      const user = await User.findByPk(id)
+
+      account = account?.trim()
+      name = name?.trim()
+      email = email?.trim()
+      password = password?.trim()
+      checkPassword = checkPassword?.trim()
+
+      // 檢查資料庫有沒有使用者想要更新的account & email，若有則不可使用該account & email
+      if (account) {
+        if (account !== user.account) {
+          const accountExist = await User.findOne({ where: { account } })
+          if (accountExist) {
+            return res
+              .status(401)
+              .json({ success: false, message: 'account 已重複註冊！' })
+          }
+        }
+      }
+      if (email) {
+        if (email !== user.email) {
+          const emailExist = await User.findOne({ where: { email } })
+          if (emailExist) {
+            return res
+              .status(401)
+              .json({ success: false, message: 'email 已重複註冊！' })
+          }
+        }
       }
 
-      // 只上傳其中一個檔案
-      if (!avatarFile || !coverFile) {
-        // 未上傳 avatar，上傳 cover
-        if (!avatarFile) {
-          avatarFile = [{ path: '' }]
-          coverFile = req.files.cover
-        }
-        // 未上傳 cover，上傳 avatar
-        if (!coverFile) {
-          coverFile = [{ path: '' }]
-          avatarFile = req.files.avatar
-        }
-      }
-    }
-
-    return Promise.all([User.findByPk(id), avatarFile, coverFile])
-      .then(([user, avatarFile, coverFile]) => {
-        if (!user) throw new Error('使用者不存在!')
-
-        return user.update({
-          account,
-          name,
-          email,
-          introduction,
-          avatar: avatarFile[0].path || user.avatar,
-          cover: coverFile[0].path || user.cover
-        })
+      // 使用者帳號資料更新
+      const updateUser = await user.update({
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        password: password ? bcrypt.hashSync(password, 10) : user.password
       })
-      .then((updateUser) => res.status(200).send(updateUser))
-      .catch((err) => next(err))
+
+      // 找出使用者avatar & cover
+      let avatar = files?.avatar || null
+      let cover = files?.cover || null
+      // console.log('avatar: ', avatar)
+      // console.log('cover: ', cover)
+      if (avatar) {
+        avatar = await imgurFileHandler(avatar[0])
+      }
+      if (cover) {
+        cover = await imgurFileHandler(cover[0])
+      }
+
+      // 前端傳送 null 值給 avatar 或是 cover 的情況
+      if (!cover || !avatar) {
+        if (!cover) {
+          updateUser.update({
+            cover: null
+          })
+        }
+        if (!avatar) {
+          updateUser.update({
+            avatar: null
+          })
+        }
+      }
+
+      // 使用者頁面更新
+      const updateUserProfile = await updateUser.update({
+        introduction: introduction,
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover
+      })
+
+      const data = updateUserProfile.toJSON()
+      delete user.password
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   },
   getFollowing: (req, res, next) => {
     const { id } = req.params
+    const user = helpers.getUser(req)
     return Promise.all([
       User.findByPk(id, {
         include: [
@@ -188,39 +242,45 @@ const userController = {
       Followship.findAll({ where: { followerId: id }, raw: true })
     ])
       .then(([trackData, followingList]) => {
-        //檢查特定使用者的追隨者
-        let checkBox = []
-        trackData.Followers.forEach((f) => {
+        // 儲存登入者的追蹤者 id
+        const checkBox = []
+        // 登入者的追蹤者 id
+        user.Followings.forEach((f) => {
           checkBox.push(f.id)
         })
-        // 儲存追蹤者屬性
-        let followingsbox = []
+
+        // 儲存追蹤者清單屬性
+        const followingsbox = []
 
         trackData.Followings.forEach((l) => {
-          let temp = {}
-          let data = {}
+          const temp = {}
+          const data = {}
           data.id = l.id
           data.name = l.name
           data.avatar = l.avatar
           data.introduction = l.introduction
-          console.log('data:', data)
           temp.result = data
           followingsbox.push(temp)
         })
-
         followingList.forEach((list, index) => {
+          // 將 followingId 改成 id
+          list.id = list.followingId
           // 新增 isFollowed, name, introduction, avatar 屬性
           list.name = followingsbox[index].result.name
           list.avatar = followingsbox[index].result.avatar
           list.introduction = followingsbox[index].result.introduction
           list.isFollowed = checkBox.includes(list.followingId)
+          // 刪除 followerId
+          delete list.followerId
         })
+
         res.status(200).send(followingList)
       })
       .catch((err) => next(err))
   },
   getFollower: (req, res, next) => {
     const { id } = req.params
+    const user = helpers.getUser(req)
     return Promise.all([
       User.findByPk(id, {
         include: [
@@ -231,32 +291,36 @@ const userController = {
       Followship.findAll({ where: { followingId: id }, raw: true })
     ])
       .then(([trackData, followerList]) => {
-        //檢查特定使用者的追蹤者
-        let checkBox = []
-        trackData.Followings.forEach((f) => {
+        // 儲存登入者的追蹤者 id
+        const checkBox = []
+        // 登入者的追蹤者 id
+        user.Followings.forEach((f) => {
           checkBox.push(f.id)
         })
 
-        // 儲存追隨者屬性
-        let followersbox = []
+        // 儲存追隨者清單屬性
+        const followersbox = []
 
         trackData.Followers.forEach((l) => {
-          let temp = {}
-          let data = {}
+          const temp = {}
+          const data = {}
           data.id = l.id
           data.name = l.name
           data.avatar = l.avatar
           data.introduction = l.introduction
-          console.log('data:', data)
           temp.result = data
           followersbox.push(temp)
         })
         followerList.forEach((list, index) => {
+          // 將 followerId 改成 id
+          list.id = list.followerId
           // 新增 isFollowed, name, introduction, avatar 屬性
           list.name = followersbox[index].result.name
           list.avatar = followersbox[index].result.avatar
           list.introduction = followersbox[index].result.introduction
           list.isFollowed = checkBox.includes(list.followerId)
+          // 刪除 followingId
+          delete list.followingId
         })
         res.status(200).send(followerList)
       })
@@ -271,7 +335,7 @@ const userController = {
           .map((user) => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowed: req.user.Followers.some((f) => f.id === user.id)
+            isFollowed: req.user.Followings.some((f) => f.id === user.id) // 登入者是否追隨名單中的使用者
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
         const finalResult = result.slice(0, 9) // 取前10名
