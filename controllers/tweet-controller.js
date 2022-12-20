@@ -1,5 +1,6 @@
 const helpers = require('../_helpers')
-const { Tweet, User, Like, Reply } = require('../models')
+const { Tweet, User, Like, Reply, Followship } = require('../models')
+// const followship = require('../models/followship')
 
 const tweetController = {
   getTweets: (req, res, next) => {
@@ -163,12 +164,24 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweetFollowing: (req, res, next) => {
-    User.findByPk(helpers.getUser(req).id, {
-      include: {
-        model: User, as: 'Followings', include: { model: Tweet, include: [Reply, Like, User] }
-      }
+    return Followship.create({
+      followerId: helpers.getUser(req).id,
+      followingId: helpers.getUser(req).id
     })
+      .then(() => {
+        return User.findByPk(helpers.getUser(req).id, {
+          include: {
+            model: User, as: 'Followings', include: { model: Tweet, include: [Reply, Like, User] }
+          }
+        })
+      })
       .then(user => {
+        Followship.destroy({
+          where: {
+            followerId: helpers.getUser(req).id,
+            followingId: helpers.getUser(req).id
+          }
+        })
         let tweets = []
         user.Followings.forEach(following => {
           tweets = tweets.concat(following.Tweets)
