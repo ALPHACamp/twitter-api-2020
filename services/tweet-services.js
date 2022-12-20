@@ -21,9 +21,6 @@ const tweetServices = {
         const tweets = datas.map(data => ({
           ...data.toJSON()
         }))
-        tweets.map(tweet => {
-          tweet.isLiked = tweet.isLiked ? true : false
-        })
         cb(null, tweets)
       })
       .catch(err => cb(err))
@@ -44,7 +41,6 @@ const tweetServices = {
     })
       .then(tweet => {
         if (!tweet) throw new Error('Tweet does not exist!')
-        tweet.isLiked = tweet.isLiked ? true : false
         cb(null, tweet)
       })
       .catch(err => cb(err))

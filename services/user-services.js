@@ -1,7 +1,7 @@
 const { User, Like, Tweet, Followship, Reply } = require('./../models')
 const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
-const { imgurFileHandler } = require('../helpers/file-helpers')
+// const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 
@@ -69,13 +69,13 @@ const userServices = {
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    const { account, name, email, introduction, password } = req.body
+    const { account, name, email, introduction, password, avatar, cover } = req.body
     const UserId = req.params.userId
-    const { avatarFile, coverFile } = req
+    // const { avatarFile, coverFile } = req
     return Promise.all([
-      User.findByPk(UserId),
-      imgurFileHandler(avatarFile),
-      imgurFileHandler(coverFile)
+      User.findByPk(UserId)
+      // imgurFileHandler(avatarFile),
+      // imgurFileHandler(coverFile)
     ])
       .then(([user, avatarFilePath, coverFilePath]) => {
         if (!user) throw new Error("User didn't exist!")
@@ -85,8 +85,8 @@ const userServices = {
           email,
           introduction,
           password,
-          avatar: avatarFilePath,
-          cover: coverFilePath
+          avatar,
+          cover
         })
       })
       .then(updatedUser => {
@@ -102,15 +102,12 @@ const userServices = {
       include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }],
       attributes: [
         'id', 'followingId', 'followerId', 'createdAt', 'updatedAt',
-        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = following_id )`), 'isFollowed']]
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']]
     })
       .then(datas => {
         const followings = datas.map(data => ({
           ...data.toJSON()
         }))
-        followings.map(f => {
-          f.isfollowed = f.isFollowed ? true : false
-        })
         cb(null, followings)
       })
       .catch(err => cb(err))
@@ -122,15 +119,12 @@ const userServices = {
       include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }],
       attributes: [
         'id', 'followingId', 'followerId', 'createdAt', 'updatedAt',
-        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = following_id )`), 'isFollowed']]
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE following_id = followerId AND follower_id = ${UserId} )`), 'isFollowed']]
     })
       .then(datas => {
         const followers = datas.map(data => ({
           ...data.toJSON()
         }))
-        followers.map(f => {
-          f.isfollowed = f.isFollowed ? true : false
-        })
         cb(null, followers)
       })
       .catch(err => cb(err))
