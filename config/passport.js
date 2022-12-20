@@ -17,8 +17,8 @@ const localStrategy = new LocalStrategy({
 }, async (req, account, password, next) => {
   try {
     const user = await User.findOne({ where: { account } })
-    if (!user) assert(user, '帳號或密碼輸入錯誤！')
-    if (!bcrypt.compareSync(password, user.password)) assert(null, '帳號或密碼輸入錯誤！')
+    if (!user) assert(user, '帳號不存在！')
+    if (!bcrypt.compareSync(password, user.password)) assert(null, '密碼輸入錯誤！')
     return next(null, user)
   } catch (err) {
     next(err)
