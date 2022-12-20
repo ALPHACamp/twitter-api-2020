@@ -3,11 +3,13 @@ const { User, Tweet, Reply, Like } = require('./../models')
 const helpers = require('../_helpers')
 const tweetServices = {
   getTweets: (req, cb) => {
+    const userId = helpers.getUser(req).id
     return Tweet.findAll({
       attributes: [
         'id', 'description', 'createdAt', 'updatedAt',
         [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
-        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount'],
+        [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE tweet_id = Tweet.id AND user_id = ${userId})`), 'isLiked']
       ],
       include: [{
         model: User,
@@ -17,29 +19,32 @@ const tweetServices = {
     })
       .then(datas => {
         const tweets = datas.map(data => ({
-          ...data.toJSON(),
-          isLiked: helpers.getUser(req).Likes.some(t => t.TweetId === data.id)
+          ...data.toJSON()
         }))
+        tweets.map(tweet => {
+          tweet.isLiked = tweet.isLiked ? true : false
+        })
         cb(null, tweets)
       })
       .catch(err => cb(err))
   },
   getTweet: (req, cb) => {
     const { tweetId } = req.params
+    const userId = helpers.getUser(req).id
     return Tweet.findByPk(tweetId, {
       attributes: [
         'id', 'description', 'createdAt',
         [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
-        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
-        // [sequelize.literal('EXISTS (SELECT id FROM Likes WHERE tweet_id = Tweet.id AND user_id = 3)'), 'isLike']
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount'],
+        [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE tweet_id = Tweet.id AND user_id = ${userId})`), 'isLiked']
       ],
       include: [{ model: User, as: 'User', attributes: ['id', 'avatar', 'account', 'name'] }],
       raw: true,
       nest: true
     })
       .then(tweet => {
-        // if (!tweet) throw new Error('Tweet does not exist!')
-        tweet.isLike = helpers.getUser(req).Likes.some(t => t.TweetId === tweet.id)
+        if (!tweet) throw new Error('Tweet does not exist!')
+        tweet.isLiked = tweet.isLiked ? true : false
         cb(null, tweet)
       })
       .catch(err => cb(err))

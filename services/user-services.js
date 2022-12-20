@@ -99,13 +99,18 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followerId: UserId },
-      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }]
+      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }],
+      attributes: [
+        'id', 'followingId', 'followerId', 'createdAt', 'updatedAt',
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = following_id )`), 'isFollowed']]
     })
       .then(datas => {
         const followings = datas.map(data => ({
-          ...data.toJSON(),
-          isFollowed: helpers.getUser(req).Followings.some(f => f.id === data.followingId)
+          ...data.toJSON()
         }))
+        followings.map(f => {
+          f.isfollowed = f.isFollowed ? true : false
+        })
         cb(null, followings)
       })
       .catch(err => cb(err))
@@ -114,14 +119,18 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followingId: UserId },
-      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }]
+      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }],
+      attributes: [
+        'id', 'followingId', 'followerId', 'createdAt', 'updatedAt',
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = following_id )`), 'isFollowed']]
     })
       .then(datas => {
-        console.log(datas)
         const followers = datas.map(data => ({
-          ...data.toJSON(),
-          isFollowed: helpers.getUser(req).followerUser.some(f => f.id === data.followerId)
+          ...data.toJSON()
         }))
+        followers.map(f => {
+          f.isfollowed = f.isFollowed ? true : false
+        })
         cb(null, followers)
       })
       .catch(err => cb(err))
