@@ -48,7 +48,6 @@ const userController = {
 			.catch(err => next(err))
 	},
 	logIn: (req, res, next) => {
-		console.log(req.info)
 		const userData = getUser(req).toJSON()
 		delete userData.password
 		try {
@@ -77,6 +76,7 @@ const userController = {
 			})
 		])
 			.then(([user, tweets, following, follower]) => {
+				if (!user) throw new Error('user is invalidated',{},Error.prototype.code = 402)
 				const userData = user.get({ plain: true })
 				delete userData.password
 				userData.followingCount = following.count
