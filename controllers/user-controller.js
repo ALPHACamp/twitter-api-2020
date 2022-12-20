@@ -179,7 +179,6 @@ const userController = {
   },
   getUserFollowings: (req, res, next) => {
     const { id } = req.params
-    const currentUser = helpers.getUser(req)
     return Promise.all([
       User.findByPk(id),
       Followship.findAll({
@@ -196,8 +195,7 @@ const userController = {
         if (!followings) res.status(404).json({ status: 'error', message: '使用者沒有追隨任何人!' })
         const data = followings.map(fi => ({
           ...fi,
-          createdAt: relativeTime(fi.createdAt),
-          isFollowed: currentUser.Followings?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
+          createdAt: relativeTime(fi.createdAt)
         }))
         res.status(200).json(data)
       })
@@ -223,8 +221,9 @@ const userController = {
         const data = followers.map(fi => ({
           ...fi,
           createdAt: relativeTime(fi.createdAt),
-          isFollowed: currentUser.Followings?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
+          isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
         }))
+        console.log(currentUser)
         res.status(200).json(data)
       })
       .catch(err => next(err))

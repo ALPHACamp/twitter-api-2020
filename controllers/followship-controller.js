@@ -34,25 +34,27 @@ const followshipController = {
     ])
       .then(([user, followship]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (!followship) res.status(404).json({ status: 'error', message: '你沒有追蹤這個使用者!' })
+        if (!followship) res.status(404).json({ status: 'error', message: '尚未追蹤這個使用者!' })
         return followship.destroy()
-      }).then(() => res.status(200).json({ status: 'success', message: '取消追蹤成功!' })
+      }).then((deletedFollowship) => res.status(200).json({ status: 'success', message: '取消追蹤成功!', deletedFollowship })
       ).catch(err => next(err))
   },
   getTopUsers: (req, res, next) => {
-    const currentUserId = helpers.getUser(req).id
+    const currentUser = helpers.getUser(req)
     return User.findAll({
+      where: { role: 'user' },
       attributes: [
         'id', 'account', 'name', 'avatar', 'introduction',
-        [sequelize.literal('(SELECT COUNT (id) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
-        [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.follower_id = ${currentUserId} AND Followships.following_id = User.id)`), 'isFollowed']
+        [sequelize.literal('(SELECT COUNT (id) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount']
       ],
       order: [[sequelize.literal('followerCount'), 'DESC']],
       raw: true,
-      nest: true
+      nest: true,
+      limit: 10
     }).then(users => {
       const data = users.map(u => ({
-        ...u
+        ...u,
+        isFollowed: currentUser?.Followings?.some(currentUserFollow => currentUserFollow?.id === u.id)
       }))
       return res.status(200).json(data)
     }).catch(err => next(err))
