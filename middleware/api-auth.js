@@ -9,7 +9,7 @@ const authenticated = (req, res, next) => {
 }
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req) && (helpers.getUser(req).role === 'admin')) return next()
-  return res.status(403).json({ status: 'error', message: 'permission denied' })
+  return res.status(403).json({ success: false, error: 'permission denied' })
 }
 module.exports = {
   authenticated,
