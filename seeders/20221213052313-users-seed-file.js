@@ -10,7 +10,9 @@ module.exports = {
       role: 'admin',
       name: 'root',
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      avatar: 'https://i.imgur.com/vdw7dQ1.png',
+      background: 'https://i.imgur.com/iH11x1t.jpeg'
     }, {
       account: 'user1',
       email: 'user1@example.com',
@@ -18,7 +20,9 @@ module.exports = {
       role: 'user',
       name: 'user1',
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      avatar: 'https://i.imgur.com/vdw7dQ1.png',
+      background: 'https://i.imgur.com/iH11x1t.jpeg'
     }, {
       account: 'user2',
       email: 'user2@example.com',
@@ -26,7 +30,9 @@ module.exports = {
       role: 'user',
       name: 'user2',
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      avatar: 'https://i.imgur.com/vdw7dQ1.png',
+      background: 'https://i.imgur.com/iH11x1t.jpeg'
     },
     {
       account: 'user3',
@@ -35,7 +41,9 @@ module.exports = {
       role: 'user',
       name: 'user3',
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      avatar: 'https://i.imgur.com/vdw7dQ1.png',
+      background: 'https://i.imgur.com/iH11x1t.jpeg'
     },
     {
       account: 'user4',
@@ -44,7 +52,9 @@ module.exports = {
       role: 'user',
       name: 'user4',
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      avatar: 'https://i.imgur.com/vdw7dQ1.png',
+      background: 'https://i.imgur.com/iH11x1t.jpeg'
     },
     {
       account: 'user5',
@@ -53,7 +63,9 @@ module.exports = {
       role: 'user',
       name: 'user5',
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      avatar: 'https://i.imgur.com/vdw7dQ1.png',
+      background: 'https://i.imgur.com/iH11x1t.jpeg'
     }], {})
 
     await queryInterface.bulkInsert('Users', [{
@@ -63,7 +75,9 @@ module.exports = {
       role: 'user',
       name: 'user6',
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      avatar: 'https://i.imgur.com/vdw7dQ1.png',
+      background: 'https://i.imgur.com/iH11x1t.jpeg'
     }, {
       account: 'user7',
       email: 'user7@example.com',
@@ -71,7 +85,9 @@ module.exports = {
       role: 'user',
       name: 'user7',
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      avatar: 'https://i.imgur.com/vdw7dQ1.png',
+      background: 'https://i.imgur.com/iH11x1t.jpeg'
     },
     {
       account: 'user8',
@@ -80,7 +96,9 @@ module.exports = {
       role: 'user',
       name: 'user8',
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      avatar: 'https://i.imgur.com/vdw7dQ1.png',
+      background: 'https://i.imgur.com/iH11x1t.jpeg'
     },
     {
       account: 'user9',
@@ -89,7 +107,9 @@ module.exports = {
       role: 'user',
       name: 'user9',
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      avatar: 'https://i.imgur.com/vdw7dQ1.png',
+      background: 'https://i.imgur.com/iH11x1t.jpeg'
     },
     {
       account: 'user10',
@@ -98,7 +118,9 @@ module.exports = {
       role: 'user',
       name: 'user10',
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      avatar: 'https://i.imgur.com/vdw7dQ1.png',
+      background: 'https://i.imgur.com/iH11x1t.jpeg'
     }], {})
   },
 
