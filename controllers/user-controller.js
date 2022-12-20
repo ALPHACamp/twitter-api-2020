@@ -104,8 +104,9 @@ const userController = {
     const { files } = req
 
     if (Number(req.params.id) !== currentUser.id) res.status(401).json({ status: 'error', message: '無權編輯他人資料!' })
-    if (!name) res.status(422).json({ status: 'error', message: '使用者姓名為必填!' })
-    if (name.length > 50) res.status(422).json({ status: 'error', message: '使用者姓名不得超過50字!' })
+    if (!name) res.status(422).json({ status: 'error', message: '暱稱為必填!' })
+    if (name.length > 50) res.status(422).json({ status: 'error', message: '暱稱不得超過50字!' })
+    if (introduction && introduction.length > 160) res.status(422).json({ status: 'error', message: '自我介紹不得超過160字!' })
 
     // email不可重複
     if (email !== currentUser.email) {
@@ -225,13 +226,13 @@ const userController = {
     ])
       .then(([user, followers]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (!followers) res.status(404).json({ status: 'error', message: '使用者沒有任何追隨者!' })
+        if (followers.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有任何追隨者!' })
         const data = followers.map(fi => ({
           ...fi,
           createdAt: relativeTime(fi.createdAt),
           isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
         }))
-        console.log(currentUser)
+        console.log(currentUser.Followers)
         res.status(200).json(data)
       })
       .catch(err => next(err))
