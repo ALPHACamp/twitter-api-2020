@@ -13,8 +13,8 @@ const followshipController = {
       })
     ]).then(([followingUser, followships]) => {
       if (!followingUser) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-      if (followerId === followingId) return res.status(400).json({ status: 'error', message: '不能追蹤自己!' })
-      if (followships) res.status(400).json({ status: 'error', message: '已追蹤這個使用者!' })
+      if (followerId === followingId) return res.status(422).json({ status: 'error', message: '不能追蹤自己!' })
+      if (followships) res.status(422).json({ status: 'error', message: '已追蹤這個使用者!' })
       return Followship.create({ followerId, followingId })
     }).then(followship => {
       const data = followship.toJSON()

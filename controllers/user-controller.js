@@ -35,8 +35,8 @@ const userController = {
         User.findOne({ where: { account } }),
         User.findOne({ where: { email } })
       ])
-      if (userAccount) message.account('帳號重複註冊!')
-      if (userEmail) message.account('信箱重複註冊!')
+      if (userAccount) message.account = '帳號重複註冊!'
+      if (userEmail) message.email = '信箱重複註冊!'
 
       // 若有任一錯誤，回傳錯誤訊息及原填載資料
       if (Object.keys(message).length !== 0) {
@@ -96,26 +96,28 @@ const userController = {
     const { files } = req
 
     if (Number(req.params.id) !== currentUser.id) res.status(401).json({ status: 'error', message: '無權編輯他人資料!' })
-    if (!name) res.status(400).json({ status: 'error', message: '使用者姓名為必填!' })
-    if (name.length > 50) res.status(400).json({ status: 'error', message: '使用者姓名不得超過50字!' })
+    if (!name) res.status(422).json({ status: 'error', message: '使用者姓名為必填!' })
+    if (name.length > 50) res.status(422).json({ status: 'error', message: '使用者姓名不得超過50字!' })
 
-    // 不可重複確認
-    if (email !== currentUser.email || account !== currentUser.account) {
-      const message = {}
-      return Promise.all([
-        User.findOne({ where: { email } }),
-        User.findOne({ where: { account } })
-      ]).then(([duplicateEmail, duplicateAccount]) => {
-        if (duplicateEmail) message.account('帳號重複註冊!')
-        if (duplicateAccount) message.account('信箱重複註冊!')
-        if (Object.keys(message).length !== 0) {
-          return res.status(400).json({ status: 'error', message })
-        }
-      }).catch(err => next(err))
+    // email不可重複
+    if (email !== currentUser.email) {
+      User.findOne({ where: { email } })
+        .then(duplicateEmail => {
+          if (duplicateEmail) return res.status(422).json({ status: 'error', message: 'email已註冊!' })
+          next()
+        })
+    }
+    // account不可重複
+    if (account !== currentUser.account) {
+      User.findOne({ where: { account } })
+        .then(duplicateAccount => {
+          if (duplicateAccount) return res.status(422).json({ status: 'error', message: 'account已註冊!' })
+          next()
+        })
     }
 
     // 確認密碼是否變更
-    if (password && password !== checkPassword) return res.json({ status: 'error', message: '密碼與確認密碼不一致' })
+    if (password && password !== checkPassword) return res.status(422).json({ status: 'error', message: '密碼與確認密碼不一致' })
 
     // 確認是否有圖片
     const avatar = files?.avatar ? files.avatar[0] : null
