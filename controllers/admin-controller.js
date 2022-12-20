@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken')
-
 const { User, sequelize, Tweet } = require('../models')
-const { relativeTime } = require('../helpers/date-helper')
 const helpers = require('../_helpers')
 
 const adminController = {
@@ -52,7 +50,7 @@ const adminController = {
         const data = tweets.map(t => ({
           ...t,
           description: t.description.substring(0, 50),
-          createdAt: relativeTime(t.createdAt)
+          createdAt: helpers.relativeTime(t.createdAt)
         }))
         res.status(200).json(data)
       })

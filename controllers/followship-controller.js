@@ -1,6 +1,5 @@
 const { User, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
-const { relativeTime } = require('../helpers/date-helper')
 
 const followshipController = {
   addFollowing: (req, res, next) => {
@@ -18,7 +17,7 @@ const followshipController = {
       return Followship.create({ followerId, followingId })
     }).then(followship => {
       const data = followship.toJSON()
-      data.createdAt = relativeTime(data.createdAt)
+      data.createdAt = helpers.relativeTime(data.createdAt)
       return res.status(200).json({ status: 'success', data })
     }).catch(err => next(err))
   },

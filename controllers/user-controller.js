@@ -2,8 +2,6 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Followship, Reply, sequelize, Like } = require('../models')
 const helpers = require('../_helpers')
-const { imgurFileHandler } = require('../helpers/file-helper')
-const { relativeTime } = require('../helpers/date-helper')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -135,8 +133,8 @@ const userController = {
 
     return Promise.all([
       User.findByPk(currentUser.id),
-      imgurFileHandler(avatar),
-      imgurFileHandler(cover)
+      helpers.imgurFileHandler(avatar),
+      helpers.imgurFileHandler(cover)
     ])
       .then(([user, avatarPath, coverPath]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
@@ -181,7 +179,7 @@ const userController = {
         if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在!' })
         const data = tweets.map(t => ({
           ...t,
-          createdAt: relativeTime(t.createdAt),
+          createdAt: helpers.relativeTime(t.createdAt),
           isLiked: currentUser?.Likes?.some(currentUserLike => currentUserLike?.TweetId === t.id)
         }))
         res.status(200).json(data)
@@ -207,7 +205,7 @@ const userController = {
         if (!followings) res.status(404).json({ status: 'error', message: '使用者沒有追隨任何人!' })
         const data = followings.map(fi => ({
           ...fi,
-          createdAt: relativeTime(fi.createdAt)
+          createdAt: helpers.relativeTime(fi.createdAt)
         }))
         res.status(200).json(data)
       })
@@ -233,7 +231,7 @@ const userController = {
         if (followers.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有任何追隨者!' })
         const data = followers.map(fi => ({
           ...fi,
-          createdAt: relativeTime(fi.createdAt),
+          createdAt: helpers.relativeTime(fi.createdAt),
           isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
         }))
         res.status(200).json(data)
@@ -269,7 +267,7 @@ const userController = {
           ...li,
           Tweet: {
             ...li.Tweet,
-            createdAt: relativeTime(li.Tweet.createdAt)
+            createdAt: helpers.relativeTime(li.Tweet.createdAt)
           }
         }))
         return res.status(200).json(likeData)
@@ -297,7 +295,7 @@ const userController = {
         if (replies.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有留下任何評論!' })
         const data = replies.map(rp => ({
           ...rp,
-          createdAt: relativeTime(rp.createdAt)
+          createdAt: helpers.relativeTime(rp.createdAt)
         }))
         return res.status(200).json(data)
       })

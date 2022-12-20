@@ -1,6 +1,5 @@
 const { Tweet, User, sequelize, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
-const { relativeTime } = require('../helpers/date-helper')
 
 const tweetController = {
   postTweet: (req, res, next) => {
@@ -32,7 +31,7 @@ const tweetController = {
         const data = tweets.map(t => ({
           ...t,
           isLiked: currentUser?.Likes?.some(UserLike => UserLike?.TweetId === t.id),
-          createdAt: relativeTime(t.createdAt)
+          createdAt: helpers.relativeTime(t.createdAt)
         }))
         res.status(200).json(data)
       })
@@ -56,7 +55,7 @@ const tweetController = {
     }).then(tweet => {
       if (!tweet) res.status(404).json({ status: 'error', message: '貼文不存在!' })
       const data = tweet
-      data.createdAt = relativeTime(data.createdAt)
+      data.createdAt = helpers.relativeTime(data.createdAt)
       data.isLiked = currentUser?.Likes?.some(UserLike => UserLike?.TweetId === tweet.id)
       return res.status(200).json(data)
     }).catch(err => next(err))
@@ -75,7 +74,7 @@ const tweetController = {
         if (!tweet) res.status(404).json({ status: 'error', message: '貼文不存在!' })
         const data = replies.map(r => ({
           ...r,
-          createdAt: relativeTime(r.createdAt)
+          createdAt: helpers.relativeTime(r.createdAt)
         }))
         return res.status(200).json(data)
       })
