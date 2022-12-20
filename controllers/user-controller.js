@@ -110,7 +110,7 @@ const userController = {
 				})
 			})
 			.then((data) => {
-				console.log('上傳完',data)
+				// console.log('上傳完',data)
 				delete data.get({ plain: true }).password
 				res.json(data)
 			})
