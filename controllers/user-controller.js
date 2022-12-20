@@ -26,7 +26,9 @@ const userController = {
         name: req.body.name,
         email: req.body.email,
         password: hash,
-        role: 'user'
+        role: 'user',
+        avatar: 'https://i.imgur.com/vdw7dQ1.png',
+        background: 'https://i.imgur.com/iH11x1t.jpeg'
       }))
       .then(user => {
         const newUser = user.toJSON()
