@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken')
-
 const { User, sequelize, Tweet } = require('../models')
-const { relativeTime } = require('../helpers/date-helper')
 const helpers = require('../_helpers')
 
 const adminController = {
@@ -21,6 +19,7 @@ const adminController = {
       })
       .catch(err => next(err))
   },
+
   signIn: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
@@ -38,6 +37,7 @@ const adminController = {
       next(err)
     }
   },
+
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
@@ -46,23 +46,24 @@ const adminController = {
       nest: true
     })
       .then(tweets => {
-        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在' })
+        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在!' })
         const data = tweets.map(t => ({
           ...t,
           description: t.description.substring(0, 50),
-          createdAt: relativeTime(t.createdAt)
+          createdAt: helpers.relativeTime(t.createdAt)
         }))
         res.status(200).json(data)
       })
       .catch(err => next(err))
   },
+
   deleteTweets: (req, res, next) => {
     const tweetId = Number(req.params.id)
     return Tweet.destroy({
       where: { id: tweetId }
     })
       .then(deletedTweet => {
-        if (!deletedTweet) res.status(404).json({ status: 'error', message: '貼文不存在' })
+        if (!deletedTweet) res.status(404).json({ status: 'error', message: '貼文不存在!' })
         return res.status(200).json({ status: 'success', message: '貼文已刪除!' })
       })
       .catch(err => next(err))

@@ -2,8 +2,6 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Followship, Reply, sequelize, Like } = require('../models')
 const helpers = require('../_helpers')
-const { imgurFileHandler } = require('../helpers/file-helper')
-const { relativeTime } = require('../helpers/date-helper')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -25,18 +23,19 @@ const userController = {
       next(err)
     }
   },
+
   signUp: async (req, res, next) => {
     try {
       const message = {}
       const { account, name, email, password, checkPassword } = req.body
-      if (password !== checkPassword) res.status(400).json({ status: 'error', message: '密碼與確認密碼不一致!' })
+      if (password !== checkPassword) res.status(422).json({ status: 'error', message: '密碼與確認密碼不一致!' })
       // 查詢資料庫帳號與信箱是否已註冊
       const [userAccount, userEmail] = await Promise.all([
         User.findOne({ where: { account } }),
         User.findOne({ where: { email } })
       ])
-      if (userAccount) message.account = '帳號重複註冊!'
-      if (userEmail) message.email = '信箱重複註冊!'
+      if (userAccount) message.account = 'account 已重複註冊！'
+      if (userEmail) message.email = 'email 已重複註冊！'
 
       // 若有任一錯誤，回傳錯誤訊息及原填載資料
       if (Object.keys(message).length !== 0) {
@@ -48,7 +47,6 @@ const userController = {
           email
         })
       }
-
       // 建立新使用者
       const createdUser = await User.create({
         account,
@@ -59,7 +57,6 @@ const userController = {
         avatar: 'https://i.imgur.com/zByqb7D.png',
         cover: 'https://loremflickr.com/1500/800/mountain'
       })
-
       // 回傳新使用者資料，刪除password欄位
       const user = createdUser.toJSON()
       delete user.password
@@ -76,6 +73,7 @@ const userController = {
       next(err)
     }
   },
+
   getUser: (req, res, next) => {
     const id = Number(req.params.id)
     return User.findByPk(id, {
@@ -98,20 +96,22 @@ const userController = {
       })
       .catch(err => next(err))
   },
+
   putUser: (req, res, next) => {
     const { name, email, password, checkPassword, account, introduction } = req.body
     const currentUser = helpers.getUser(req)
     const { files } = req
 
     if (Number(req.params.id) !== currentUser.id) res.status(401).json({ status: 'error', message: '無權編輯他人資料!' })
-    if (!name) res.status(422).json({ status: 'error', message: '使用者姓名為必填!' })
-    if (name.length > 50) res.status(422).json({ status: 'error', message: '使用者姓名不得超過50字!' })
+    if (!name) res.status(422).json({ status: 'error', message: '暱稱為必填!' })
+    if (name.length > 50) res.status(422).json({ status: 'error', message: '暱稱不得超過50字!' })
+    if (introduction && introduction.length > 160) res.status(422).json({ status: 'error', message: '自我介紹不得超過160字!' })
 
     // email不可重複
     if (email && email !== currentUser.email) {
       User.findOne({ where: { email } })
         .then(duplicateEmail => {
-          if (duplicateEmail) return res.status(422).json({ status: 'error', message: 'email已註冊!' })
+          if (duplicateEmail) return res.status(422).json({ status: 'error', message: 'email 已重複註冊！' })
           next()
         })
         .catch(err => next(err))
@@ -120,14 +120,14 @@ const userController = {
     if (account && account !== currentUser.account) {
       User.findOne({ where: { account } })
         .then(duplicateAccount => {
-          if (duplicateAccount) return res.status(422).json({ status: 'error', message: 'account已註冊!' })
+          if (duplicateAccount) return res.status(422).json({ status: 'error', message: 'account 已重複註冊！' })
           next()
         })
         .catch(err => next(err))
     }
 
     // 確認密碼是否變更
-    if (password && password !== checkPassword) return res.status(422).json({ status: 'error', message: '密碼與確認密碼不一致' })
+    if (password && password !== checkPassword) return res.status(422).json({ status: 'error', message: '密碼與確認密碼不一致!' })
 
     // 確認是否有圖片
     const avatar = files?.avatar ? files.avatar[0] : null
@@ -135,8 +135,8 @@ const userController = {
 
     return Promise.all([
       User.findByPk(currentUser.id),
-      imgurFileHandler(avatar),
-      imgurFileHandler(cover)
+      helpers.imgurFileHandler(avatar),
+      helpers.imgurFileHandler(cover)
     ])
       .then(([user, avatarPath, coverPath]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
@@ -158,6 +158,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
+
   getUserTweets: (req, res, next) => {
     const { id } = req.params
     const currentUser = helpers.getUser(req)
@@ -177,16 +178,17 @@ const userController = {
     ])
       .then(([user, tweets]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在' })
+        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在!' })
         const data = tweets.map(t => ({
           ...t,
-          createdAt: relativeTime(t.createdAt),
+          createdAt: helpers.relativeTime(t.createdAt),
           isLiked: currentUser?.Likes?.some(currentUserLike => currentUserLike?.TweetId === t.id)
         }))
         res.status(200).json(data)
       })
       .catch(err => next(err))
   },
+
   getUserFollowings: (req, res, next) => {
     const { id } = req.params
     return Promise.all([
@@ -205,12 +207,13 @@ const userController = {
         if (!followings) res.status(404).json({ status: 'error', message: '使用者沒有追隨任何人!' })
         const data = followings.map(fi => ({
           ...fi,
-          createdAt: relativeTime(fi.createdAt)
+          createdAt: helpers.relativeTime(fi.createdAt)
         }))
         res.status(200).json(data)
       })
       .catch(err => next(err))
   },
+
   getUserFollowers: (req, res, next) => {
     const { id } = req.params
     const currentUser = helpers.getUser(req)
@@ -227,13 +230,12 @@ const userController = {
     ])
       .then(([user, followers]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (!followers) res.status(404).json({ status: 'error', message: '使用者沒有任何追隨者!' })
+        if (followers.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有任何追隨者!' })
         const data = followers.map(fi => ({
           ...fi,
-          createdAt: relativeTime(fi.createdAt),
+          createdAt: helpers.relativeTime(fi.createdAt),
           isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
         }))
-        console.log(currentUser)
         res.status(200).json(data)
       })
       .catch(err => next(err))
@@ -267,7 +269,7 @@ const userController = {
           ...li,
           Tweet: {
             ...li.Tweet,
-            createdAt: relativeTime(li.Tweet.createdAt)
+            createdAt: helpers.relativeTime(li.Tweet.createdAt)
           }
         }))
         return res.status(200).json(likeData)
@@ -295,7 +297,7 @@ const userController = {
         if (replies.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有留下任何評論!' })
         const data = replies.map(rp => ({
           ...rp,
-          createdAt: relativeTime(rp.createdAt)
+          createdAt: helpers.relativeTime(rp.createdAt)
         }))
         return res.status(200).json(data)
       })

@@ -1,6 +1,5 @@
 const { Tweet, User, sequelize, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
-const { relativeTime } = require('../helpers/date-helper')
 
 const tweetController = {
   postTweet: (req, res, next) => {
@@ -11,11 +10,12 @@ const tweetController = {
     return Tweet.create({
       UserId,
       description
-    }).then(postedTweet => res.status(200).json({ status: 'success', data: postedTweet })
+    }).then(postedTweet => res.status(200).json({ status: 'success', postedTweet })
     ).catch(err => next(err))
   },
+
   getTweets: (req, res, next) => {
-    const UserId = helpers.getUser(req).id
+    const currentUser = helpers.getUser(req)
     return Tweet.findAll({
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']],
@@ -27,18 +27,19 @@ const tweetController = {
       ]
     })
       .then(tweets => {
-        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在' })
+        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在!' })
         const data = tweets.map(t => ({
           ...t,
-          isLiked: UserId?.Likes?.some(UserLike => UserLike?.TweetId === t.id),
-          createdAt: relativeTime(t.createdAt)
+          isLiked: currentUser?.Likes?.some(UserLike => UserLike?.TweetId === t.id),
+          createdAt: helpers.relativeTime(t.createdAt)
         }))
         res.status(200).json(data)
       })
       .catch(err => next(err))
   },
+
   getTweet: (req, res, next) => {
-    const UserId = helpers.getUser(req).id
+    const currentUser = helpers.getUser(req)
     return Tweet.findByPk(req.params.tweet_id, {
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']],
@@ -54,24 +55,32 @@ const tweetController = {
     }).then(tweet => {
       if (!tweet) res.status(404).json({ status: 'error', message: '貼文不存在!' })
       const data = tweet
-      data.createdAt = relativeTime(data.createdAt)
-      data.isLiked = UserId?.Likes?.some(UserLike => UserLike?.TweetId === tweet.id)
+      data.createdAt = helpers.relativeTime(data.createdAt)
+      data.isLiked = currentUser?.Likes?.some(UserLike => UserLike?.TweetId === tweet.id)
       return res.status(200).json(data)
     }).catch(err => next(err))
   },
+
   getReplies: (req, res, next) => {
     const TweetId = Number(req.params.tweet_id)
     return Promise.all([Tweet.findByPk(TweetId), Reply.findAll({
       where: { TweetId },
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
     })])
       .then(([tweet, replies]) => {
         if (!tweet) res.status(404).json({ status: 'error', message: '貼文不存在!' })
-        return res.status(200).json(replies)
+        const data = replies.map(r => ({
+          ...r,
+          createdAt: helpers.relativeTime(r.createdAt)
+        }))
+        return res.status(200).json(data)
       })
       .catch(err => next(err))
   },
+
   postReply: (req, res, next) => {
     const TweetId = Number(req.params.tweet_id)
     const UserId = helpers.getUser(req).id
@@ -91,6 +100,7 @@ const tweetController = {
       })
       .catch(err => next(err))
   },
+
   likeTweet: (req, res, next) => {
     const TweetId = Number(req.params.id)
     const UserId = helpers.getUser(req).id
@@ -114,6 +124,7 @@ const tweetController = {
       .then(like => res.status(200).json(like))
       .catch(err => next(err))
   },
+
   unlikeTweet: (req, res, next) => {
     const TweetId = Number(req.params.id)
     const UserId = helpers.getUser(req).id
