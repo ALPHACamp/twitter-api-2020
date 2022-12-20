@@ -102,9 +102,9 @@ const tweetController = {
       })
     ])
       .then(([tweet, like]) => {
-        if (!tweet) throw new Error("Tweet didn't exist!")
-        if (like?.toJSON().UserId === currentUser.id) throw new Error('不能按自己的推文讚!')
-        if (like) throw new Error('You have liked this tweet!')
+        if (!tweet) throw new Error('推文不存在!')
+        if (like?.toJSON().UserId === currentUser.id) throw new Error('不能按讚自己的推文!')
+        if (like) throw new Error('你還沒按讚此推文!')
         return Like.create({
           UserId: currentUser.id,
           TweetId
@@ -124,7 +124,7 @@ const tweetController = {
       }
     })
       .then(like => {
-        if (!like) throw new Error("You haven't liked this tweet")
+        if (!like) throw new Error('你還沒按讚此推文!')
 
         return like.destroy()
       })
@@ -136,15 +136,15 @@ const tweetController = {
     const TweetId = req.params.tweet_id
     const UserId = helpers.getUser(req).id
     const { comment } = req.body
-    if (!comment) throw new Error('Comment is required!')
+    if (!comment) throw new Error('Comment欄位必填')
     if (!comment?.trim()) throw new Error('內容不可空白!')
     return Promise.all([
       User.findByPk(UserId),
       Tweet.findByPk(TweetId)
     ])
       .then(([user, tweet]) => {
-        if (!user) throw new Error("User didn't exist!")
-        if (!tweet) throw new Error("Tweet didn't exist!")
+        if (!user) throw new Error('使用者不存在!')
+        if (!tweet) throw new Error('推文不存在')
         return Reply.create({
           comment,
           TweetId,
@@ -188,7 +188,7 @@ const tweetController = {
           }))
       })
       .then(replies => {
-        if (!replies) throw new Error("Replies didn't exist!")
+        if (!replies) throw new Error('留言回覆不存在!')
         return res.json(replies)
       })
       .catch(err => next(err))

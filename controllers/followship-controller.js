@@ -15,8 +15,8 @@ const followshipController = {
       })
     ])
       .then(([user, followship]) => {
-        if (!user || user?.role === 'admin') throw new Error("User didn't exist!")
-        if (followship) throw new Error('You are already following this user!')
+        if (!user || user?.role === 'admin') throw new Error('使用者不存在!')
+        if (followship) throw new Error('你已經追蹤此使用者了!')
         return Followship.create({
           followerId: helpers.getUser(req).id,
           followingId: followingId
@@ -33,7 +33,7 @@ const followshipController = {
       }
     })
       .then(followship => {
-        if (!followship) throw new Error("You haven't followed this user!")
+        if (!followship) throw new Error('你還沒追蹤此使用者!')
         return followship.destroy()
       })
       .then(deleteFollowship => res.json(deleteFollowship))

@@ -116,7 +116,7 @@ const userController = {
           }))
       })
       .then(tweets => {
-        if (!tweets) throw new Error("Tweet didn't exist!")
+        if (!tweets) throw new Error('推文不存在!')
         return res.json(tweets)
       })
       .catch(err => next(err))
@@ -152,7 +152,7 @@ const userController = {
           }))
       })
       .then(replies => {
-        if (!replies) throw new Error("Replies didn't exist!")
+        if (!replies) throw new Error('留言回覆不存在!')
         return res.json(replies)
       })
       .catch(err => next(err))
@@ -192,7 +192,7 @@ const userController = {
           }))
       })
       .then(likes => {
-        if (!likes) throw new Error("Likes didn't exist!")
+        if (!likes) throw new Error('按讚不存在!')
         return res.json(likes)
       })
       .catch(err => next(err))
@@ -218,7 +218,7 @@ const userController = {
       nest: true
     })
       .then(followships => {
-        if (!followships) throw new Error("Followships didn't exist!")
+        if (!followships) throw new Error('追蹤關係不存在!')
         return res.json(followships)
       })
       .catch(err => next(err))
@@ -244,7 +244,7 @@ const userController = {
       nest: true
     })
       .then(followships => {
-        if (!followships) throw new Error("Followships didn't exist!")
+        if (!followships) throw new Error('追蹤關係不存在!')
         return res.json(followships)
       })
       .catch(err => next(err))
@@ -253,8 +253,8 @@ const userController = {
     const { name, introduction } = req.body
     const currentUser = helpers.getUser(req)
     const id = Number(req.params.id)
-    if (name?.length > 50) throw new Error('暱稱字數上限 50 字!')
-    if (introduction?.length > 160) throw new Error('自我介紹字數上限 160 字!')
+    if (name?.length > 50) throw new Error('暱稱 name 上限 50 字!')
+    if (introduction?.length > 160) throw new Error('自我介紹 introduction 上限 160 字!')
     if (id !== currentUser.id) throw new Error('You are not allowed to use!') // 待重構，把只能編輯自己的邏輯寫成另外一個auth middleware
     const { files } = req
     return Promise.all([
