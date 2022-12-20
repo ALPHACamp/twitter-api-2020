@@ -1,7 +1,7 @@
 const { User, Like, Tweet, Followship, Reply } = require('./../models')
 const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
-const { imgurFileHandler } = require('../helpers/file-helpers')
+// const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 
@@ -34,7 +34,6 @@ const userServices = {
         return bcrypt.hash(req.body.password, 10)
       })
       .then(user => {
-        console.log(user)
         if (user.account === account) throw new Error('Account already exists!')
         if (user.email === email) throw new Error('Email already exists!')
         return bcrypt.hash(req.body.password, 10)
@@ -70,13 +69,13 @@ const userServices = {
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    const { account, name, email, introduction, password } = req.body
+    const { account, name, email, introduction, password, avatar, cover } = req.body
     const UserId = req.params.userId
-    const { avatarFile, coverFile } = req
+    // const { avatarFile, coverFile } = req
     return Promise.all([
-      User.findByPk(UserId),
-      imgurFileHandler(avatarFile),
-      imgurFileHandler(coverFile)
+      User.findByPk(UserId)
+      // imgurFileHandler(avatarFile),
+      // imgurFileHandler(coverFile)
     ])
       .then(([user, avatarFilePath, coverFilePath]) => {
         if (!user) throw new Error("User didn't exist!")
@@ -86,8 +85,8 @@ const userServices = {
           email,
           introduction,
           password,
-          avatar: avatarFilePath,
-          cover: coverFilePath
+          avatar,
+          cover
         })
       })
       .then(updatedUser => {
@@ -100,12 +99,14 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followerId: UserId },
-      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }]
+      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }],
+      attributes: [
+        'id', 'followingId', 'followerId', 'createdAt', 'updatedAt',
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']]
     })
       .then(datas => {
         const followings = datas.map(data => ({
-          ...data.toJSON(),
-          isFollowed: helpers.getUser(req).Followings.some(f => f.id === data.followingId)
+          ...data.toJSON()
         }))
         cb(null, followings)
       })
@@ -115,12 +116,14 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followingId: UserId },
-      include: [{ model: User, as: 'followerUser', attributes: { exclude: ['password', 'role'] } }]
+      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }],
+      attributes: [
+        'id', 'followingId', 'followerId', 'createdAt', 'updatedAt',
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE following_id = followerId AND follower_id = ${UserId} )`), 'isFollowed']]
     })
       .then(datas => {
         const followers = datas.map(data => ({
-          ...data.toJSON(),
-          isFollowed: helpers.getUser(req).Followers.some(f => f.id === data.followerId)
+          ...data.toJSON()
         }))
         cb(null, followers)
       })
