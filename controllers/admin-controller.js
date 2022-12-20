@@ -19,7 +19,7 @@ const adminController = {
 			const usersData = await User.findAll({
 				nest: true,
 				raw: true,
-				where: { role: "user" },
+				// where: { role: "user" },
 				attributes: [
 					'id', 'account', 'email', 'name', 'avatar', 'introduction', 'cover', 'role', 'createdAt', 'updatedAt',
 					[sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)'), 'tweetCount'],
@@ -46,18 +46,17 @@ const adminController = {
 			return res.status(200).json(tweets)
 		} catch (err) { next(err) }
 	},
-	deleteTweet: (req, res, next) => {
-		return Tweet.findByPk(req.params.id)
-			.then(tweet => {
-				if (!tweet) {
-					return res.status(404).json(
-						{ status: '404', message: 'Tweet did not exist!' }
-					)
-				}
-				res.status(200).json(tweet)
-				return tweet.destroy()
-			})
-			.catch(err => next(err))
+	deleteTweet: async (req, res, next) => {
+		try {
+			const tweet = await Tweet.findByPk(req.params.id)
+			if (!tweet) {
+				return res.status(404).json(
+					{ status: '404', message: 'Tweet did not exist!' }
+				)
+			}
+			await res.status(200).json(tweet)
+			await tweet.destroy()
+		} catch (err) { next(err) }
 	}
 }
 
