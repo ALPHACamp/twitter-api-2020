@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { getUser ,imgurFileHandler} = require('../_helpers')
+const { getUser, imgurFileHandler } = require('../_helpers')
 const { User, Tweet, Followship, Like, Reply, sequelize } = require('../models')
 
 const userController = {
@@ -26,8 +26,8 @@ const userController = {
 				account,
 				name,
 				email,
-				role:'user',
-				avatar:'https://i.imgur.com/PuP3Fmn.jpg',
+				role: 'user',
+				avatar: 'https://i.imgur.com/PuP3Fmn.jpg',
 				password: hash,
 				cover: 'https://i.imgur.com/KNbtyGq.png'
 
@@ -76,7 +76,7 @@ const userController = {
 			})
 		])
 			.then(([user, tweets, following, follower]) => {
-				if (!user) throw new Error('user is invalidated',{},Error.prototype.code = 402)
+				if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
 				const userData = user.get({ plain: true })
 				delete userData.password
 				userData.followingCount = following.count
@@ -87,7 +87,7 @@ const userController = {
 			.catch(err => next(err))
 	},
 	putUser: (req, res, next) => {
-		const { account, name, email, password, introduction} = req.body
+		const { account, name, email, password, introduction } = req.body
 		const { file } = req
 		if (/\s/.test(account) || /\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
 
@@ -95,7 +95,7 @@ const userController = {
 			User.findByPk(req.params.id),
 			imgurFileHandler(file)
 		])
-			.then(([user,filePath]) => {
+			.then(([user, filePath]) => {
 				// console.log('上傳圖片',filePath)
 				// console.log('上傳圖片',user)
 				if (!user) throw new Error('User is not exist!')
@@ -104,9 +104,9 @@ const userController = {
 					name,
 					email,
 					password,
-					avatar:filePath||user.avatar,
+					avatar: filePath || user.avatar,
 					introduction,
-					cover:filePath||user.cover
+					cover: filePath || user.cover
 				})
 			})
 			.then((data) => {
@@ -160,42 +160,42 @@ const userController = {
 	},
 	getUserlikes: (req, res, next) => {
 		const id = req.params.id
-		  Like.findAll({
-		   where:{UserId:id},
-		   include: { 
-			model: Tweet,
-			attributes: {
-			 include: [
-			  [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'LikeCount'],
-			  [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'ReplyCount'],
-			  [sequelize.literal(`(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id AND user_id = ${getUser(req).id})`), 'isLiked'],
-			 ]
+		Like.findAll({
+			where: { UserId: id },
+			include: {
+				model: Tweet,
+				attributes: {
+					include: [
+						[sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'LikeCount'],
+						[sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'ReplyCount'],
+						[sequelize.literal(`(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id AND user_id = ${getUser(req).id})`), 'isLiked'],
+					]
+				},
+				include: [{
+					model: User,
+					attributes:
+						['id', 'name', 'account', 'avatar'],
+				}],
 			},
-			include: [{
-			 model:User,
-			 attributes:
-			 ['id', 'name','account','avatar'],
-			}],
-		   },
-		   order: [['createdAt', 'DESC']],
-		   nest:true,
-		   raw:true
-	  
-		  })
-		  .then((likeList)=>{
-		   res.status(200).json(likeList)
-		  })
-		  .catch(err => { next(err) })
+			order: [['createdAt', 'DESC']],
+			nest: true,
+			raw: true
+
+		})
+			.then((likeList) => {
+				res.status(200).json(likeList)
+			})
+			.catch(err => { next(err) })
 	},
 	getUserTweets: (req, res, next) => {
 		const currentUser = getUser(req).id
 		const id = req.params.id
 		Promise.all([
 			Tweet.findAll({
-				where:{UserId:id},
-				include:{
-					model:User,
-					attributes:['id','account','avatar','name']
+				where: { UserId: id },
+				include: {
+					model: User,
+					attributes: ['id', 'account', 'avatar', 'name']
 				},
 				order: [['createdAt', 'DESC']],
 				nest: true,
@@ -259,23 +259,23 @@ const userController = {
 			})
 			.catch(err => { next(err) })
 	},
-	getTopUser: (req,res,next)=>{
+	getTopUser: (req, res, next) => {
 		const queryUser = `SELECT * ,(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = ${getUser(req).id} AND Followships.follower_id = Users.id) AS isFollowing FROM Users ORDER BY (following_count *1) DESC LIMIT 0,10`
 		sequelize.query(queryUser)
-			.then((replyList)=>{
-				replyList[0].map((r)=>{delete r.password})
+			.then((replyList) => {
+				replyList[0].map((r) => { delete r.password })
 				const topUsers = replyList[0].filter(ru => ru.role === 'user')
 				res.status(200).json(topUsers)
 			})
-			.catch(err=>{next(err)})
-		},
-	getCurrentUser:(req, res, next) => {
+			.catch(err => { next(err) })
+	},
+	getCurrentUser: (req, res, next) => {
 		User.findByPk(getUser(req).id)
-		.then((user)=>{
-			delete user.get({plain:true}).password
-			res.status(200).json({ status: '200', message: 'JWT success',user })
-		})
-		.catch(err=>{next(err)})
+			.then((user) => {
+				delete user.get({ plain: true }).password
+				res.status(200).json({ status: '200', message: 'JWT success', user })
+			})
+			.catch(err => { next(err) })
 	}
 }
 
