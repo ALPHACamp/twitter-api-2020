@@ -3,7 +3,13 @@ const helpers = require('../_helpers')
 
 const authenticated = (req, res, next) => {
 	passport.authenticate('jwt', { session: false }, (err, user) => {
-		if (err || !user || user.role === 'admin') return res.status(401).json({ status: '401', message: 'unauthorized' })
+		
+		// if (err || !user || user.role === 'admin')
+		
+		if (err || !user)
+		
+		
+		{ return res.status(401).json({ status: '401', message: 'unauthorized' }) }
 		req.user = user.dataValues
 		next()
 	})(req, res, next)
