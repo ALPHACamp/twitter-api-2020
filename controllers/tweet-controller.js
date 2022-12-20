@@ -63,13 +63,13 @@ const tweetController = {
       })
     }
     if (!comment) {
-      return res.status(404).json({
+      return res.status(406).json({
         status: '406',
         message: 'Content is required!'
       })
     }
     if (comment.length > 140) {
-      return res.status(401).json({
+      return res.status(406).json({
         status: '406',
         message: 'Too many words!'
       })
@@ -117,7 +117,7 @@ const tweetController = {
       })
     }
     if (description.length > 140) {
-      return res.status(401).json({
+      return res.status(406).json({
         status: '406',
         message: 'Too many words!'
       })
@@ -146,7 +146,7 @@ const tweetController = {
         where: { UserId, TweetId }
       })
       if (like) {
-        return res.status(401).json({
+        return res.status(406).json({
           status: '406',
           message: 'You have already liked this tweet!'
         })
