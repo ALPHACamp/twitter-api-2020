@@ -21,7 +21,7 @@ const corsOptions = {
     'http://localhost:3005',
     'http://localhost:3006'
   ],
-  methods: ['GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: ['Content-Type', 'Authorization']
 }
 app.use(cors(corsOptions))
