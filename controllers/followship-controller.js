@@ -1,6 +1,5 @@
 const { User, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
-const { relativeTime } = require('../helpers/date-helper')
 
 const followshipController = {
   addFollowing: (req, res, next) => {
@@ -18,10 +17,11 @@ const followshipController = {
       return Followship.create({ followerId, followingId })
     }).then(followship => {
       const data = followship.toJSON()
-      data.createdAt = relativeTime(data.createdAt)
+      data.createdAt = helpers.relativeTime(data.createdAt)
       return res.status(200).json({ status: 'success', data })
     }).catch(err => next(err))
   },
+
   removeFollowing: (req, res, next) => {
     return Promise.all([
       User.findByPk(Number(req.params.followingId)),
@@ -39,6 +39,7 @@ const followshipController = {
       }).then((deletedFollowship) => res.status(200).json({ status: 'success', message: '取消追蹤成功!', deletedFollowship })
       ).catch(err => next(err))
   },
+
   getTopUsers: (req, res, next) => {
     const currentUser = helpers.getUser(req)
     return User.findAll({
