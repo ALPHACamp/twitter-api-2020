@@ -1,7 +1,7 @@
 const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -54,16 +54,19 @@ const adminController = {
       .catch(err => next(err))
   },
   deleteTweet: (req, res, next) => {
-    const { id } = req.params
-    return Tweet.findByPk(id)
-      .then(tweet => {
+    const TweetId = Number(req.params.id)
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.destroy({ where: { TweetId } }), // 刪除tweet一併去資料庫刪除like跟reply的資料
+      Reply.destroy({ where: { TweetId } })
+    ])
+      .then(([tweet, likes, replies]) => {
         if (!tweet) throw new Error('tweet not found')
         return tweet.destroy()
       })
       .then(() => res.status(200).json({ success: true, message: 'tweet has been deleted' }))
       .catch(err => next(err))
   }
-
 }
 
 module.exports = adminController
