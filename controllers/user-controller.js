@@ -63,7 +63,15 @@ const userController = {
       // 回傳新使用者資料，刪除password欄位
       const user = createdUser.toJSON()
       delete user.password
-      return res.json({ status: 'success', user })
+      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
+      res.json({
+        status: 'success',
+        data: {
+          token,
+          user
+        }
+      })
+      // return res.json({ status: 'success', user })
     } catch (err) {
       next(err)
     }

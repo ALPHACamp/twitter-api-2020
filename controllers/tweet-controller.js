@@ -6,7 +6,8 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const UserId = helpers.getUser(req).id
     const { description } = req.body
-    if (description.length > 140) res.status(400).json({ status: 'error', message: '內容不可超出140字' })
+    if (description.length > 140) res.status(422).json({ status: 'error', message: '推文字數超出140字限制!' })
+    if (!description || (description.trim() === '')) res.status(422).json({ status: 'error', message: '推文內容不可空白!' })
     return Tweet.create({
       UserId,
       description
@@ -76,7 +77,6 @@ const tweetController = {
     const UserId = helpers.getUser(req).id
     const { comment } = req.body
     if (!comment || (comment.trim() === '')) res.status(422).json({ status: 'error', message: '回覆內容不可空白!' })
-    if (comment.length > 140) res.status(422).json({ status: 'error', message: '回覆字數超出140字限制!' })
     return Tweet.findByPk(TweetId)
       .then(tweet => {
         if (!tweet) res.status(404).json({ status: 'error', message: '貼文不存在!' })
