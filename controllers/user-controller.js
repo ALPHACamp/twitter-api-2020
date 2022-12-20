@@ -84,16 +84,25 @@ const userController = {
   },
   getUser: (req, res, next) => {
     const { id } = req.params
-    User.findByPk(id, {
-      include: [
-        Tweet,
-        { model: User, as: 'Followings' },
-        { model: User, as: 'Followers' }
-      ]
-    })
-      .then((user) => {
-        if (!user) throw new Error('使用者不存在 !')
+    const loginUser = helpers.getUser(req)
 
+    return Promise.all([
+      User.findByPk(id, {
+        include: [
+          Tweet,
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ]
+      })
+    ])
+      .then(([user]) => {
+        if (!user) throw new Error('使用者不存在 !')
+        // 儲存登入者的追蹤者 id
+        const checkBox = []
+
+        loginUser.Followings.forEach((f) => {
+          checkBox.push(f.id)
+        })
         // 使用者推文數
         const tweetCount = user.Tweets.length
         // 使用者追蹤數
@@ -101,7 +110,7 @@ const userController = {
         // 使用者被追蹤數
         const followerCount = user.Followers.length
         // 登入者與個別使用者追蹤關係
-        const isFollowed = req.user.Followings.some((f) => f.id === user.id)
+        const isFollowed = checkBox.includes(user.id)
 
         user = user.toJSON()
         // 刪除非必要屬性
@@ -261,9 +270,8 @@ const userController = {
           list.avatar = followingsbox[index].result.avatar
           list.introduction = followingsbox[index].result.introduction
           list.isFollowed = checkBox.includes(list.followingId)
-          // 刪除 followerId 以及 舊的 followingId key
+          // 刪除 followerId
           delete list.followerId
-          delete list.followingId
         })
 
         res.status(200).send(followingList)
@@ -311,8 +319,7 @@ const userController = {
           list.avatar = followersbox[index].result.avatar
           list.introduction = followersbox[index].result.introduction
           list.isFollowed = checkBox.includes(list.followerId)
-          // 刪除 followingId 以及 舊的 followerId key
-          delete list.followerId
+          // 刪除 followingId
           delete list.followingId
         })
         res.status(200).send(followerList)
