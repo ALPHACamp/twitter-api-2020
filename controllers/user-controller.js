@@ -135,7 +135,7 @@ const userController = {
 			.then((followingList) => {
 				res.status(200).json(followingList)
 			})
-			.catch(err => { console.log(err) })
+			.catch(err => { next(err) })
 	},
 	getUserFollower: (req, res, next) => {
 		Followship.findAll({
@@ -156,7 +156,7 @@ const userController = {
 			.then((followingList) => {
 				res.status(200).json(followingList)
 			})
-			.catch(err => { console.log(err) })
+			.catch(err => { next(err) })
 	},
 	getUserlikes: (req, res, next) => {
 		const id = req.params.id
@@ -185,7 +185,7 @@ const userController = {
 		  .then((likeList)=>{
 		   res.status(200).json(likeList)
 		  })
-		  .catch(err => { console.log(err) })
+		  .catch(err => { next(err) })
 	},
 	getUserTweets: (req, res, next) => {
 		const currentUser = getUser(req).id
@@ -233,7 +233,7 @@ const userController = {
 				})
 				res.status(200).json(tweetList)
 			})
-			.catch(err => { console.log(err) })
+			.catch(err => { next(err) })
 	},
 	getUserRepliedTweets: (req, res, next) => {
 		const id = req.params.id
@@ -267,7 +267,7 @@ const userController = {
 				const topUsers = replyList[0].filter(ru => ru.role === 'user')
 				res.status(200).json(topUsers)
 			})
-			.catch(err=>{console.log(err)})
+			.catch(err=>{next(err)})
 		},
 	getCurrentUser:(req, res, next) => {
 		User.findByPk(getUser(req).id)

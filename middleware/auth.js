@@ -19,10 +19,8 @@ const userLoginAuth = (req, res, next)=>{
 	passport.authenticate('local', (err, user, info) =>{
 	  if (err) { return next(err) }
 	  if (!user) { return res.status(info.status||400).json(  {status:info.status||400,message:info.message }) }
-	  console.log('successful')
 	  req.user = user
 	  next()
-	//   req.user = user.dataValues
 	})(req, res, next) 
 }
 
