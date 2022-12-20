@@ -91,6 +91,15 @@ You would get
   "message": "unauthorized"
 }
 ```
+Failure | code: 404 找不到該推文(新增)
+
+```
+{
+    "status": "error",
+    "message": "Cannot find this tweet."
+}
+```
+Success | code: 204 沒有任何回覆(只會收到狀態碼，不會收到response body)
 
 Failure | code: 500 其他server error
 

@@ -38,21 +38,21 @@ Success | code: 200
 ```
 [
   {
-    "followerId" : 6,  // 追隨者id
-    "followingId": 3, // 這個用戶的id
-    "createdAt": 1670812139000, // 追蹤紀錄成立時間，以此排序
-    "updatedAt": 1670812139000, 
-    "Followers":  {
-      "id": 6,
-      "account": "mario",
-      "name": "Mario",
-      "avatar": "https://loremflickr.com/320/240/man,woman/?lock=45",
-      "introduction": "Nulla eros mauris, rhoncus eu mattis ut",
-      "isFollowed": false, // 登入的使用者是否已追隨清單上這個用戶(Mario)	 
-     }
+      "followerId" : 6,  // 追隨者id
+      "followingId": 3, // 這個用戶的id
+      "createdAt": 1670812139000, // 追蹤紀錄成立時間，以此排序
+      "updatedAt": 1670812139000, 
+      "Followers":  {
+        "id": 6,
+        "account": "mario",
+        "name": "Mario",
+        "avatar": "https://loremflickr.com/320/240/man,woman/?lock=45",
+        "introduction": "Nulla eros mauris, rhoncus eu mattis ut",
+        "isFollowed": false, // 登入的使用者是否已追隨清單上這個用戶(Mario)	 
+        }
   },
 	
-....// 依照追蹤紀錄時間先後排序，最新的排最前面 
+  ....// 依照追蹤紀錄時間先後排序，最新的排最前面 
 ]
 
 // 如果使用者沒有追隨者，會得到空陣列
