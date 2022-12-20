@@ -96,20 +96,21 @@ const userController = {
 			imgurFileHandler(file)
 		])
 			.then(([user,filePath]) => {
-				console.log('上傳圖片',filePath)
-				console.log('上傳圖片',user)
+				// console.log('上傳圖片',filePath)
+				// console.log('上傳圖片',user)
 				if (!user) throw new Error('User is not exist!')
 				return user.update({
 					account,
 					name,
 					email,
 					password,
-					avatar:filePath,
+					avatar:filePath||user.avatar,
 					introduction,
-					cover:filePath
+					cover:filePath||user.cover
 				})
 			})
 			.then((data) => {
+				console.log('上傳完',data)
 				delete data.get({ plain: true }).password
 				res.json(data)
 			})
