@@ -25,18 +25,19 @@ const userController = {
       next(err)
     }
   },
+
   signUp: async (req, res, next) => {
     try {
       const message = {}
       const { account, name, email, password, checkPassword } = req.body
-      if (password !== checkPassword) res.status(400).json({ status: 'error', message: '密碼與確認密碼不一致!' })
+      if (password !== checkPassword) res.status(422).json({ status: 'error', message: '密碼與確認密碼不一致!' })
       // 查詢資料庫帳號與信箱是否已註冊
       const [userAccount, userEmail] = await Promise.all([
         User.findOne({ where: { account } }),
         User.findOne({ where: { email } })
       ])
-      if (userAccount) message.account = '帳號重複註冊!'
-      if (userEmail) message.email = '信箱重複註冊!'
+      if (userAccount) message.account = 'account 已重複註冊！'
+      if (userEmail) message.email = 'email 已重複註冊！'
 
       // 若有任一錯誤，回傳錯誤訊息及原填載資料
       if (Object.keys(message).length !== 0) {
@@ -48,7 +49,6 @@ const userController = {
           email
         })
       }
-
       // 建立新使用者
       const createdUser = await User.create({
         account,
@@ -59,7 +59,6 @@ const userController = {
         avatar: 'https://i.imgur.com/zByqb7D.png',
         cover: 'https://loremflickr.com/1500/800/mountain'
       })
-
       // 回傳新使用者資料，刪除password欄位
       const user = createdUser.toJSON()
       delete user.password
@@ -76,6 +75,7 @@ const userController = {
       next(err)
     }
   },
+
   getUser: (req, res, next) => {
     const id = Number(req.params.id)
     return User.findByPk(id, {
@@ -98,6 +98,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
+
   putUser: (req, res, next) => {
     const { name, email, password, checkPassword, account, introduction } = req.body
     const currentUser = helpers.getUser(req)
@@ -126,7 +127,7 @@ const userController = {
     }
 
     // 確認密碼是否變更
-    if (password && password !== checkPassword) return res.status(422).json({ status: 'error', message: '密碼與確認密碼不一致' })
+    if (password && password !== checkPassword) return res.status(422).json({ status: 'error', message: '密碼與確認密碼不一致!' })
 
     // 確認是否有圖片
     const avatar = files?.avatar ? files.avatar[0] : null
@@ -157,6 +158,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
+
   getUserTweets: (req, res, next) => {
     const { id } = req.params
     const currentUser = helpers.getUser(req)
@@ -176,7 +178,7 @@ const userController = {
     ])
       .then(([user, tweets]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在' })
+        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在!' })
         const data = tweets.map(t => ({
           ...t,
           createdAt: relativeTime(t.createdAt),
@@ -186,6 +188,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
+
   getUserFollowings: (req, res, next) => {
     const { id } = req.params
     return Promise.all([
@@ -210,6 +213,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
+
   getUserFollowers: (req, res, next) => {
     const { id } = req.params
     const currentUser = helpers.getUser(req)

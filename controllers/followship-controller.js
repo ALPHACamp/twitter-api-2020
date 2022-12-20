@@ -22,6 +22,7 @@ const followshipController = {
       return res.status(200).json({ status: 'success', data })
     }).catch(err => next(err))
   },
+
   removeFollowing: (req, res, next) => {
     return Promise.all([
       User.findByPk(Number(req.params.followingId)),
@@ -39,6 +40,7 @@ const followshipController = {
       }).then((deletedFollowship) => res.status(200).json({ status: 'success', message: '取消追蹤成功!', deletedFollowship })
       ).catch(err => next(err))
   },
+
   getTopUsers: (req, res, next) => {
     const currentUser = helpers.getUser(req)
     return User.findAll({
