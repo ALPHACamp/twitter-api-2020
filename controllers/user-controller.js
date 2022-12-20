@@ -192,8 +192,7 @@ const userController = {
       // 找出使用者avatar & cover
       let avatar = files?.avatar || null
       let cover = files?.cover || null
-      // console.log('avatar: ', avatar)
-      // console.log('cover: ', cover)
+
       if (avatar) {
         avatar = await imgurFileHandler(avatar[0])
       }
@@ -201,18 +200,12 @@ const userController = {
         cover = await imgurFileHandler(cover[0])
       }
 
-      // 前端傳送 null 值給 avatar 或是 cover 的情況
-      if (!cover || !avatar) {
-        if (!cover) {
-          updateUser.update({
-            cover: null
-          })
-        }
-        if (!avatar) {
-          updateUser.update({
-            avatar: null
-          })
-        }
+      // 前端在刪除時，會傳送 null 值給
+      // 只需判斷 cover ，不須判斷 avatar，因為不能刪除 avatar
+      if (!cover) {
+        updateUser.update({
+          cover: null
+        })
       }
 
       // 使用者頁面更新
