@@ -121,7 +121,7 @@ const tweetController = {
           attributes: ['id', 'avatar', 'account', 'name']
         },
         limit,
-        offset
+        offset,
         order: [['createdAt', 'DESC']],
         where: { TweetId }
       })
