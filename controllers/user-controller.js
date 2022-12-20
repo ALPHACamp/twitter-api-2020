@@ -4,6 +4,7 @@ const db = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { User, Followship, Tweet, Reply, Like } = db
+const { Op } = require('sequelize')
 
 const userController = {
   register: (req, res, next) => {
@@ -287,6 +288,11 @@ const userController = {
   },
   getRecommendUsers: (req, res, next) => {
     return User.findAll({
+      where: {
+        id: {
+          [Op.ne]: helpers.getUser(req).id
+        }
+      },
       include: { model: User, as: 'Followers' },
       attributes: ['id', 'name', 'account', 'avatar'],
       limit: 10
