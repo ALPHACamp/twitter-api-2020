@@ -11,6 +11,12 @@ const tweetServices = {
     const offset = getOffset(limit, page)
 
     return Tweet.findAndCountAll({
+      include: [{
+        model: User,
+        attributes: {
+          exclude: ['password']
+        }
+      }],
       offset,
       order: [['createdAt', 'DESC']],
       nest: true,
