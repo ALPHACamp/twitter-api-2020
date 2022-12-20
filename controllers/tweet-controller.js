@@ -12,7 +12,7 @@ const tweetController = {
         where: { TweetId: tweetId },
         attributes: ['id', 'UserId', 'comment', 'createdAt'],
         include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'ASC']],
         limit,
         offset,
         raw: true,
@@ -39,7 +39,7 @@ const tweetController = {
             [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${loginUser} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
           ]
         },
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'ASC']],
         limit,
         offset,
         raw: true,

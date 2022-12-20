@@ -38,7 +38,7 @@ const adminController = {
         limit,
         offset,
         raw: true,
-        order: [[sequelize.literal('tweetCounts'), 'DESC'], ['role', 'DESC']]
+        order: [[sequelize.literal('tweetCounts'), 'DESC'], ['role', 'DESC'], ['id', 'ASC']]
       })
       res.status(200).json(users)
     } catch (err) {
@@ -52,7 +52,7 @@ const adminController = {
       const offset = (page - 1) * limit
       const tweets = await Tweet.findAll({
         include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'ASC']],
         limit,
         offset,
         raw: true,

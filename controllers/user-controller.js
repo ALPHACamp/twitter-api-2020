@@ -90,7 +90,7 @@ const userController = {
             [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${getUser(req).id} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
           ]
         },
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'ASC']],
         limit,
         offset,
         raw: true,
@@ -115,7 +115,7 @@ const userController = {
           { model: User, attributes: ['account', 'name', 'avatar'] },
           { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['id', 'account'] }] }
         ],
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'ASC']],
         limit,
         offset,
         raw: true,
@@ -148,7 +148,7 @@ const userController = {
             include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
           }
         ],
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'ASC']],
         limit,
         offset,
         raw: true,
@@ -174,7 +174,7 @@ const userController = {
             [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'isFollowed']
           ]
         },
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'ASC']],
         raw: true
       })
       res.status(200).json(followings)
@@ -197,7 +197,7 @@ const userController = {
             [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'isFollowed']
           ]
         },
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'ASC']],
         raw: true
       })
       res.status(200).json(followers)
@@ -215,7 +215,7 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCounts'],
           [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = User.id)`), 'isFollowed']
         ],
-        order: [[sequelize.literal('followerCounts'), 'DESC']],
+        order: [[sequelize.literal('followerCounts'), 'DESC'], ['id', 'ASC']],
         raw: true
       })
       res.status(200).json(users)
