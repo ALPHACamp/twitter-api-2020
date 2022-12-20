@@ -97,7 +97,18 @@ const tweetController = {
       if (!tweet) return res.status(404).json({ status: 'error', message: '找不到推文！' })
 
       const replies = await Reply.findAll({
-        include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        include: [
+          {
+            model: Tweet,
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'description'],
+              include: [
+                [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Tweet.UserId)'), 'postUserAccount']
+              ]
+            }
+          },
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        ],
         where: { TweetId },
         nest: true,
         raw: true
