@@ -1,4 +1,5 @@
 const { Followship, User, sequelize } = require('../models')
+const { Op } = require('sequelize')
 const helpers = require('../_helpers')
 
 const followshipController = {
@@ -9,6 +10,14 @@ const followshipController = {
           'id', 'name', 'account', 'avatar',
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'), 'followerCount']
         ],
+        where: {
+          id: {
+            [Op.not]: req.user.toJSON().id
+          },
+          role: {
+            [Op.not]: 'admin'
+          }
+        },
         order: [[sequelize.literal('followerCount'), 'DESC']],
         raw: true,
         nest: true

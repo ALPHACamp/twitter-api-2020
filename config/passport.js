@@ -19,14 +19,14 @@ passport.use(new LocalStrategy(
       //  account error
       const user = await User.findOne({ where: { account } })
       if (!user) {
-        const err = new Error('Incorrect account or password.')
+        const err = new Error('帳號或密碼錯誤!')
         err.status = 401
         throw err
       }
       // password error
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) {
-        const err = new Error('Incorrect account or password.')
+        const err = new Error('帳號或密碼錯誤!')
         err.status = 401
         throw err
       }
