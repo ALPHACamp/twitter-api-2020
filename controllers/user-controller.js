@@ -235,6 +235,8 @@ const userController = {
       Followship.findAll({ where: { followerId: id }, raw: true })
     ])
       .then(([trackData, followingList]) => {
+        // 若沒有跟隨者，回傳空陣列
+        if (!trackData) return res.status(200).send([])
         // 儲存登入者的追蹤者 id
         const checkBox = []
         // 登入者的追蹤者 id
@@ -284,6 +286,8 @@ const userController = {
       Followship.findAll({ where: { followingId: id }, raw: true })
     ])
       .then(([trackData, followerList]) => {
+        // 若沒有追隨者，回傳空陣列
+        if (!trackData) return res.status(200).send([])
         // 儲存登入者的追蹤者 id
         const checkBox = []
         // 登入者的追蹤者 id
