@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
+const helpers = require('../_helpers')
 
 const userServices = {
   signUp: (req, cb) => {
@@ -178,6 +179,7 @@ const userController = {
   },
   getFollowing: (req, res, next) => {
     const { id } = req.params
+    const user = helpers.getUser(req)
     return Promise.all([
       User.findByPk(id, {
         include: [
@@ -188,12 +190,14 @@ const userController = {
       Followship.findAll({ where: { followerId: id }, raw: true })
     ])
       .then(([trackData, followingList]) => {
-        //檢查特定使用者的追隨者
+        // 儲存登入者的追蹤者 id
         let checkBox = []
-        trackData.Followers.forEach((f) => {
+        // 登入者的追蹤者 id
+        user.Followings.forEach((f) => {
           checkBox.push(f.id)
         })
-        // 儲存追蹤者屬性
+
+        // 儲存追蹤者清單屬性
         let followingsbox = []
 
         trackData.Followings.forEach((l) => {
@@ -203,24 +207,29 @@ const userController = {
           data.name = l.name
           data.avatar = l.avatar
           data.introduction = l.introduction
-          console.log('data:', data)
           temp.result = data
           followingsbox.push(temp)
         })
-
         followingList.forEach((list, index) => {
+          //將 followingId 改成 id
+          list.id = list.followingId
           // 新增 isFollowed, name, introduction, avatar 屬性
           list.name = followingsbox[index].result.name
           list.avatar = followingsbox[index].result.avatar
           list.introduction = followingsbox[index].result.introduction
           list.isFollowed = checkBox.includes(list.followingId)
+          // 刪除 followerId 以及 舊的 followingId key
+          delete list.followerId
+          delete list.followingId
         })
+
         res.status(200).send(followingList)
       })
       .catch((err) => next(err))
   },
   getFollower: (req, res, next) => {
     const { id } = req.params
+    const user = helpers.getUser(req)
     return Promise.all([
       User.findByPk(id, {
         include: [
@@ -231,13 +240,14 @@ const userController = {
       Followship.findAll({ where: { followingId: id }, raw: true })
     ])
       .then(([trackData, followerList]) => {
-        //檢查特定使用者的追蹤者
+        // 儲存登入者的追蹤者 id
         let checkBox = []
-        trackData.Followings.forEach((f) => {
+        // 登入者的追蹤者 id
+        user.Followings.forEach((f) => {
           checkBox.push(f.id)
         })
 
-        // 儲存追隨者屬性
+        // 儲存追隨者清單屬性
         let followersbox = []
 
         trackData.Followers.forEach((l) => {
@@ -247,16 +257,20 @@ const userController = {
           data.name = l.name
           data.avatar = l.avatar
           data.introduction = l.introduction
-          console.log('data:', data)
           temp.result = data
           followersbox.push(temp)
         })
         followerList.forEach((list, index) => {
+          //將 followerId 改成 id
+          list.id = list.followerId
           // 新增 isFollowed, name, introduction, avatar 屬性
           list.name = followersbox[index].result.name
           list.avatar = followersbox[index].result.avatar
           list.introduction = followersbox[index].result.introduction
           list.isFollowed = checkBox.includes(list.followerId)
+          // 刪除 followingId 以及 舊的 followerId key
+          delete list.followerId
+          delete list.followingId
         })
         res.status(200).send(followerList)
       })
