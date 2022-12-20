@@ -19,6 +19,8 @@ const corsOptions = {
 const path = require('path')
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
+
+
 app.use(express.urlencoded({ extended: true }))
 app.use(passport.initialize())
 app.use(express.json())
