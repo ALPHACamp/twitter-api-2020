@@ -5,6 +5,6 @@ const userController = require('../../controllers/userController')
 const { signInFail } = require('../../middleware/error-handler')
 
 router.post('/users', userController.signUp)
-router.post('/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn, signInFail)
+router.post('/signIn', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn, signInFail)
 
 module.exports = router
