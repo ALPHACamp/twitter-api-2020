@@ -280,7 +280,15 @@ const userController = {
 
       const repliedTweets = await Reply.findAll({
         where: { UserId: id },
-        include: Tweet,
+        include: {
+          model: Tweet,
+          attributes: {
+            exclude: ['description', 'createdAt', 'updatedAt'],
+            include: [
+              [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Tweet.UserId)'), 'postUserAccount']
+            ]
+          }
+        },
         order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
