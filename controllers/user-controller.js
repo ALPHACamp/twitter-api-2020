@@ -233,7 +233,7 @@ const userController = {
   getLikes: (req, res, next) => {
     const UserId = req.params.id
     const currentUser = helpers.getUser(req).id
-    return Like.findAll({
+    return Promise.all([User.findByPk(UserId), Like.findAll({
       where: { UserId },
       include: {
         model: Tweet,
@@ -250,8 +250,10 @@ const userController = {
       order: [['createdAt', 'Desc']],
       raw: true,
       nest: true
-    })
-      .then(likes => {
+    })])
+      .then(([user, likes]) => {
+        if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
+        if (likes.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有按任何貼文Like!' })
         const likeData = likes.map(li => ({
           ...li,
           Tweet: {
@@ -281,7 +283,7 @@ const userController = {
     ])
       .then(([user, replies]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (!replies) res.status(404).json({ status: 'error', message: '使用者沒有留下任何評論!' })
+        if (replies.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有留下任何評論!' })
         const data = replies.map(rp => ({
           ...rp,
           createdAt: relativeTime(rp.createdAt)
