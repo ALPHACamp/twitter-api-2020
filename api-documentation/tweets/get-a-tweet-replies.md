@@ -36,24 +36,42 @@ Success | code: 200
 
 ```
 [
- {
-  "id": 9,// replyId in replies table
-  "comment": "Sed ut perspiciatis unde omnis iste natus",
-  "createdAt": 1670812139000,
-  "User": { // 寫reply的使用者
-    "id":2
-    "name":"user2",
-    "account":"user2",
-    "avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
+    {
+        "id": 34,
+        "comment": "Quae sit corrupti.",
+        "createdAt": 1671066800000,
+        "User": {
+            "id": 9,
+            "name": "user8",
+            "account": "user8",
+            "avatar": "https://loremflickr.com/320/240/girl/?lock=29.08188472012867"
+        },
+        "Tweet": {
+            "id": 12,
+            "User": {
+                "id": 3,
+                "account": "user2"
+            }
+        }
     },
-  "Tweet": {
-    "id": 3, // 回覆的teewtId
-    "User": {
-    "id": 6, // 推文的作者id
-    "account": "mario",
-    }
-   }
-  },
+    {
+        "id": 35,
+        "comment": "Sunt est non.",
+        "createdAt": 1671066800000,
+        "User": {
+            "id": 7,
+            "name": "user6",
+            "account": "user6",
+            "avatar": "https://loremflickr.com/320/240/girl/?lock=40.70390280327909"
+        },
+        "Tweet": {
+            "id": 12,
+            "User": {
+                "id": 3,
+                "account": "user2"
+            }
+        }
+    },
 
 	....// 依照時間先後排序，最新的排最前面
 ]

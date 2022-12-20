@@ -11,7 +11,16 @@ const app = express()
 const port = process.env.PORT || 3000
 
 const corsOptions = {
-  origin: ['https://s339428326.github.io', 'http://localhost:3000'],
+  origin: [
+    'https://s339428326.github.io',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    'http://localhost:3004',
+    'http://localhost:3005',
+    'http://localhost:3006'
+  ],
   methods: ['GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }
