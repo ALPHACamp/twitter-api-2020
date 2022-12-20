@@ -8,8 +8,7 @@ const userController = require('../controllers/user-controller')
 
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { userAuthenticated, userLoginAuth ,tokenAuthenticated} = require('../middleware/auth')
-const multer  = require('multer')
-const upload = multer({ dest: 'uploads/' })
+const upload = require('../middleware/multer')
 router.post('/login', userLoginAuth, userController.logIn)
 
 router.use('/admin', admin)
@@ -24,7 +23,7 @@ router.get('/users/:id/replied_tweets', userAuthenticated, userController.getUse
 router.get('/users/:id/followings', userAuthenticated, userController.getUserFollowing)
 router.get('/users/:id/followers', userAuthenticated, userController.getUserFollower)
 router.get('/users/:id', userAuthenticated, userController.getUser)
-router.put('/users/:id', userAuthenticated, upload.single('avatar'), userController.putUser)
+router.put('/users/:id', userAuthenticated ,upload.single('img'),userController.putUser)
 router.post('/users', userController.postUsers)
 
 router.get('/auth', tokenAuthenticated, userController.getCurrentUser)
