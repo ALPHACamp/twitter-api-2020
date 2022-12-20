@@ -24,7 +24,7 @@ router.get('/users/:id/replied_tweets', authenticated, userController.getUserRep
 router.get('/users/:id/followings', authenticated, userController.getUserFollowing)
 router.get('/users/:id/followers', authenticated, userController.getUserFollower)
 router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id', authenticated, upload.array('img',2),userController.putUser)
+router.put('/users/:id', authenticated, upload.single('img'),userController.putUser)
 router.post('/users', userController.postUsers)
 
 
