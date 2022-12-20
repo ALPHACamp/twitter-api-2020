@@ -11,13 +11,13 @@
 1. 打開你的終端機(terminal)，Clone 此專案至本機電腦
 
 ```
-git clone https://github.com/SimonHung8/twitter-api-2020.git
+git clone https://github.com/SimonHung8/twitter-api-2022.git
 ```
 
 2. 進入至專案資料夾
 
 ```
-cd twitter-api-2020
+cd twitter-api-2022
 ```
 
 3. 安裝 npm 相關套件
