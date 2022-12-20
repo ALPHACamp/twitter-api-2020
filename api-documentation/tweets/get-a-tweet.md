@@ -37,30 +37,22 @@ Success | code: 200
 ```
 
 {
-	"id": 2, // 貼文id
-	"description": "Sed ut perspiciatis unde omnis iste natus",
-	"createdAt": 1670812139000,
-	"replyCount": 13,
-	"likeCount": 76,
-	"isLiked": false,
-	"User": { // 發貼文的人(這個登入者)
-			"id":2
-			"name":"user2",
-			"account":"user2",
-			"avatar": "https://loremflickr.com/320/240/man,woman/?lock=36"
-	}
-},
-
-```
-
-Failure | code: 404 找不到該使用者
-
-```
-{
-  "status": "error",
-  "message": "User not found!"
+    "id": 14, // 貼文id
+    "description": "Sunt qui id ut optio.",
+    "createdAt": 1671066800000,
+    "replyCount": 3,
+    "likeCount": 0,
+    "isLiked": false,
+    "User": { // 發貼文的人(這個登入者)
+        "id": 3,
+        "name": "user2",
+        "account": "user2",
+        "avatar": "https://loremflickr.com/320/240/girl/?lock=67.72936483701146"
+    }
 }
+
 ```
+
 
 Failure | code: 404 找不到該推文(新增)
 

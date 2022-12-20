@@ -59,8 +59,8 @@ Failure | code: 404
 
 ```
 {
-  "status": "error",
-  "message": "Cannot find this tweet."
+    "status": "error",
+    "message": "Cannot find this tweet."
 }
 ```
 

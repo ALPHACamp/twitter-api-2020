@@ -70,7 +70,6 @@ const tweetController = {
       })
       if (!tweet) { return res.status(404).json({ status: 'error', message: 'Cannot find this tweet.' }) }
 
-
       // Transform data and response
       // Must add 'raw: true' in query to get plain object
 
@@ -83,10 +82,9 @@ const tweetController = {
     try {
       const TweetId = Number(sanitizedInput(req.params.tweet_id))
 
-
       // Check tweet existance
       const tweet = await Tweet.findByPk(TweetId)
-      if (!tweet) return res.status(404).json({ status: 'error', message: 'Cannot find this tweet.'})
+      if (!tweet) return res.status(404).json({ status: 'error', message: 'Cannot find this tweet.' })
 
       // Find all replies in database
 
