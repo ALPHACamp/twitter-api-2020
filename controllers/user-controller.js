@@ -100,20 +100,22 @@ const userController = {
     if (name.length > 50) res.status(422).json({ status: 'error', message: '使用者姓名不得超過50字!' })
 
     // email不可重複
-    if (email !== currentUser.email) {
+    if (email && email !== currentUser.email) {
       User.findOne({ where: { email } })
         .then(duplicateEmail => {
           if (duplicateEmail) return res.status(422).json({ status: 'error', message: 'email已註冊!' })
           next()
         })
+        .catch(err => next(err))
     }
     // account不可重複
-    if (account !== currentUser.account) {
+    if (account && account !== currentUser.account) {
       User.findOne({ where: { account } })
         .then(duplicateAccount => {
           if (duplicateAccount) return res.status(422).json({ status: 'error', message: 'account已註冊!' })
           next()
         })
+        .catch(err => next(err))
     }
 
     // 確認密碼是否變更
