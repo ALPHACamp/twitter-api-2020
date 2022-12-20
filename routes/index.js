@@ -7,10 +7,10 @@ const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
 
 const { generalErrorHandler } = require('../middleware/error-handler')
-const { authenticated ,userLoginAuth} = require('../middleware/auth')
+const { authenticated, userLoginAuth } = require('../middleware/auth')
 const upload = require('../middleware/multer')
 
-router.post('/login', userLoginAuth,userController.logIn)
+router.post('/login', userLoginAuth, userController.logIn)
 
 router.use('/admin', admin)
 router.use('/tweets', tweet)
@@ -24,7 +24,7 @@ router.get('/users/:id/replied_tweets', authenticated, userController.getUserRep
 router.get('/users/:id/followings', authenticated, userController.getUserFollowing)
 router.get('/users/:id/followers', authenticated, userController.getUserFollower)
 router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id', authenticated, upload.single('img'),userController.putUser)
+router.put('/users/:id', authenticated, upload.single('img'), userController.putUser)
 router.post('/users', userController.postUsers)
 
 
