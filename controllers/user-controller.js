@@ -112,7 +112,7 @@ const userController = {
     if (email !== currentUser.email) {
       User.findOne({ where: { email } })
         .then(duplicateEmail => {
-          if (duplicateEmail) return res.status(422).json({ status: 'error', message: 'email已註冊!' })
+          if (duplicateEmail) return res.status(422).json({ status: 'error', message: 'email 已重複註冊！' })
           next()
         })
     }
@@ -120,7 +120,7 @@ const userController = {
     if (account !== currentUser.account) {
       User.findOne({ where: { account } })
         .then(duplicateAccount => {
-          if (duplicateAccount) return res.status(422).json({ status: 'error', message: 'account已註冊!' })
+          if (duplicateAccount) return res.status(422).json({ status: 'error', message: 'account 已重複註冊！' })
           next()
         })
     }
@@ -232,7 +232,6 @@ const userController = {
           createdAt: relativeTime(fi.createdAt),
           isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
         }))
-        console.log(currentUser.Followers)
         res.status(200).json(data)
       })
       .catch(err => next(err))

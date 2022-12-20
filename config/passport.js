@@ -41,7 +41,7 @@ passport.use(new JWTStrategy(jwtOptions, async (req, jwtPayload, cb) => {
         { model: User, as: 'Followings' }
       ]
     })
-    req.user = user
+    // req.user = user
     return cb(null, user.toJSON())
   } catch (err) {
     return cb(err, false)

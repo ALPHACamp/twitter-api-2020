@@ -11,7 +11,7 @@ const tweetController = {
     return Tweet.create({
       UserId,
       description
-    }).then(postedTweet => res.status(200).json({ status: 'success', data: postedTweet })
+    }).then(postedTweet => res.status(200).json({ status: 'success', postedTweet })
     ).catch(err => next(err))
   },
   getTweets: (req, res, next) => {
@@ -27,7 +27,7 @@ const tweetController = {
       ]
     })
       .then(tweets => {
-        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在' })
+        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在!' })
         const data = tweets.map(t => ({
           ...t,
           isLiked: UserId?.Likes?.some(UserLike => UserLike?.TweetId === t.id),
@@ -38,7 +38,7 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
-    const UserId = helpers.getUser(req).id
+    const currentUser = helpers.getUser(req)
     return Tweet.findByPk(req.params.tweet_id, {
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']],
@@ -55,7 +55,7 @@ const tweetController = {
       if (!tweet) res.status(404).json({ status: 'error', message: '貼文不存在!' })
       const data = tweet
       data.createdAt = relativeTime(data.createdAt)
-      data.isLiked = UserId?.Likes?.some(UserLike => UserLike?.TweetId === tweet.id)
+      data.isLiked = currentUser?.Likes?.some(UserLike => UserLike?.TweetId === tweet.id)
       return res.status(200).json(data)
     }).catch(err => next(err))
   },
