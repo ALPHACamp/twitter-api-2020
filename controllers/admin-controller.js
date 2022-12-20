@@ -29,7 +29,7 @@ const adminController = {
 				],
 				order: [['createdAt', 'DESC']]
 			})
-			return res.status(200).json(usersData)
+			res.status(200).json(usersData)
 		} catch (err) { next(err) }
 	},
 	getTweets: async (req, res, next) => {
@@ -39,8 +39,7 @@ const adminController = {
 				raw: true,
 				include: {
 					model: User,
-					attributes: ['id', 'account', 'name', 'avatar', 'cover'],
-					where: { role: "user" },
+					attributes: ['id', 'account', 'name', 'avatar', 'cover']
 				},
 				order: [['createdAt', 'DESC']]
 			})

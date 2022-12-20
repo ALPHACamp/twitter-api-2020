@@ -92,8 +92,7 @@ const tweetController = {
         raw: true,
         include: {
           model: User,
-          attributes: ['id', 'account', 'name', 'avatar', 'cover'],
-          where: { role: "user" },
+          attributes: ['id', 'account', 'name', 'avatar', 'cover']
         },
         attributes: [
           'id', 'description', 'createdAt',
