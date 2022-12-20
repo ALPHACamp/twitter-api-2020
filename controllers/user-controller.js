@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { getUser } = require('../_helpers')
+const { getUser ,imgurFileHandler} = require('../_helpers')
 const { User, Tweet, Followship, Like, Reply, sequelize } = require('../models')
 
 const userController = {
@@ -48,6 +48,7 @@ const userController = {
 			.catch(err => next(err))
 	},
 	logIn: (req, res, next) => {
+		console.log(req.info)
 		const userData = getUser(req).toJSON()
 		delete userData.password
 		try {
@@ -86,22 +87,30 @@ const userController = {
 			.catch(err => next(err))
 	},
 	putUser: (req, res, next) => {
-		const { account, name, email, password, avatar, introduction, cover } = req.body
+		const { account, name, email, password, introduction} = req.body
+		const { file } = req
 		if (/\s/.test(account) || /\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
-		User.findByPk(req.params.id)
-			.then(user => {
+
+		Promise.all([
+			User.findByPk(req.params.id),
+			imgurFileHandler(file)
+		])
+			.then(([user,filePath]) => {
+				// console.log('上傳圖片',filePath)
+				// console.log('上傳圖片',user)
 				if (!user) throw new Error('User is not exist!')
 				return user.update({
 					account,
 					name,
 					email,
 					password,
-					avatar,
+					avatar:filePath||user.avatar,
 					introduction,
-					cover
+					cover:filePath||user.cover
 				})
 			})
 			.then((data) => {
+				console.log('上傳完',data)
 				delete data.get({ plain: true }).password
 				res.json(data)
 			})
