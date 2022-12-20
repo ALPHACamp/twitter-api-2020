@@ -13,7 +13,7 @@ const tweetController = {
           { model: User, attributes: ['id', 'account', 'name', 'avatar', 'cover'] },
         attributes: [
           'id', 'description', 'createdAt',
-          [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'tweetCount'],
           [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.tweet_id = Tweet.id AND Likes.user_id = ${currentUserId})`), 'isLiked']
         ],
@@ -92,7 +92,8 @@ const tweetController = {
         raw: true,
         include: {
           model: User,
-          attributes: ['id', 'account', 'name', 'avatar', 'cover']
+          attributes: ['id', 'account', 'name', 'avatar', 'cover'],
+          where: { role: "user" },
         },
         attributes: [
           'id', 'description', 'createdAt',
@@ -111,14 +112,14 @@ const tweetController = {
     const currentUserId = helpers.getUser(req).id
     const { description } = req.body
     if (!description) {
-      return res.status(401).json({
-        status: '401',
+      return res.status(406).json({
+        status: '406',
         message: 'Content is required!'
       })
     }
     if (description.length > 140) {
       return res.status(401).json({
-        status: '401',
+        status: '406',
         message: 'Too many words!'
       })
     }

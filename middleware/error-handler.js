@@ -1,5 +1,5 @@
-module.exports = {
-  generalErrorHandler (err, req, res, next) {
+
+const generalErrorHandler = (err, req, res, next) => {
     if (err instanceof Error) {
       res.status(err.code).json({ status: err.code, message: err.message })
     } else {
@@ -10,4 +10,7 @@ module.exports = {
     }
     next(err)
   }
+
+module.exports = {
+    generalErrorHandler
 }
