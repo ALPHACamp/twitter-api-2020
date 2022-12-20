@@ -15,6 +15,8 @@ router.get('/:id/followings', userController.getUserFollowings)
 router.get('/:id/followers', userController.getUserFollowers)
 // 修改個人帳號設定
 router.put('/:id/setting', userController.putUserSetting)
+// 修改個人資料中的背景圖
+router.patch('/:id/cover', upload.fields({ name: 'cover', maxCount: 1 }), userController.patchUserCover)
 // 修改個人資料
 router.put('/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUserProfile)
 // 取得使用者
