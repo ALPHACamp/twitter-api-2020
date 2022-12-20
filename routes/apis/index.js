@@ -8,18 +8,18 @@ const userController = require('../../controllers/user-controller')
 const tweetController = require('../../controllers/tweet-controller')
 const followshipController = require('../../controllers/followship-controller')
 
-const { authenticated, authenticatedUser } = require('../../middleware/api-auth')
+const { authenticated, authenticatedUser, authenticatedStatus } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 
 router.use('/admin', admin)
+
+router.get('/tokenAuthenticate', authenticatedStatus)
 
 router.post('/users', userController.register) // 註冊
 router.post('/login', passport.authenticate('local', { session: false }), userController.login)
 
 router.post('/followships', authenticated, authenticatedUser, followshipController.addFollow)
 router.delete('/followships/:followingId', authenticated, authenticatedUser, followshipController.removeFollow)
-
-
 
 router.get('/users/recommendUsers', authenticated, authenticatedUser, userController.getRecommendUsers)
 router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getUserFollowings)
