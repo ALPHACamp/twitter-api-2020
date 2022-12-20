@@ -6,7 +6,7 @@ const { sanitizedInput } = require('../helpers/sanitized')
 async function registerValidation (req, res, next) {
   const { account, name, email, password, checkPassword } = req.body
 
-  if (!account.trim() || !name.trim() || !email.trim() || !password.trim() || !checkPassword.trim()) {
+  if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) {
     return res.status(400).json({ status: 'error', message: 'All field are required!' })
   }
   if (!validator.isEmail(email)) {
@@ -64,7 +64,7 @@ async function userSettingValidation (req, res, next) {
   const loginUserId = helpers.getUser(req).id
   const { account, name, email, password, checkPassword } = req.body
 
-  if (!account.trim() || !name.trim() || !email.trim() || !password.trim() || !checkPassword.trim()) {
+  if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) {
     return res.status(400).json({ status: 'error', message: 'All field are required!' })
   }
   if (!validator.isEmail(email)) {
