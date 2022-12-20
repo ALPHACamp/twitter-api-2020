@@ -83,21 +83,15 @@ const userController = {
   },
   getUser: (req, res, next) => {
     const { id } = req.params
-    return Promise.all([
-      Followship.findOne({ where: { followingId: id }, raw: true }),
-      User.findByPk(id, {
-        include: [
-          Tweet,
-          { model: User, as: 'Followings' },
-          { model: User, as: 'Followers' }
-        ]
-      })
-    ])
-      .then(([track, user]) => {
+    User.findByPk(id, {
+      include: [
+        Tweet,
+        { model: User, as: 'Followings' },
+        { model: User, as: 'Followers' }
+      ]
+    })
+      .then((user) => {
         if (!user) throw new Error('使用者不存在 !')
-
-        // 若未被追蹤，都顯示 false
-        const trackData = track ? track.followingId === user.id : false
 
         // 使用者推文數
         const tweetCount = user.Tweets.length
@@ -105,8 +99,8 @@ const userController = {
         const followingCount = user.Followings.length
         // 使用者被追蹤數
         const followerCount = user.Followers.length
-        // 使用者與追蹤者關係
-        const isFollowed = trackData
+        // 登入者與個別使用者追蹤關係
+        const isFollowed = req.user.Followings.some((f) => f.id === user.id)
 
         user = user.toJSON()
         // 刪除非必要屬性
