@@ -55,6 +55,51 @@ module.exports = {
       created_at: new Date(),
       updated_at: new Date()
     }], {})
+
+    await queryInterface.bulkInsert('Users', [{
+      account: 'user6',
+      email: 'user6@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      name: 'user6',
+      created_at: new Date(),
+      updated_at: new Date()
+    }, {
+      account: 'user7',
+      email: 'user7@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      name: 'user7',
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      account: 'user8',
+      email: 'user8@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      name: 'user8',
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      account: 'user9',
+      email: 'user9@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      name: 'user9',
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      account: 'user10',
+      email: 'user10@example.com',
+      password: await bcrypt.hash('12345678', 10),
+      role: 'user',
+      name: 'user10',
+      created_at: new Date(),
+      updated_at: new Date()
+    }], {})
   },
 
   down: async (queryInterface, Sequelize) => {
