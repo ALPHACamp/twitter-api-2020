@@ -36,7 +36,7 @@ const followshipController = {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
         if (!followship) res.status(404).json({ status: 'error', message: '尚未追蹤這個使用者!' })
         return followship.destroy()
-      }).then((deletedFollowship) => res.status(200).json({ status: 'success', message: '取消追蹤成功!', deletedFollowship })
+      }).then(deletedFollowship => res.status(200).json({ status: 'success', message: '取消追蹤成功!', deletedFollowship })
       ).catch(err => next(err))
   },
   getTopUsers: (req, res, next) => {
