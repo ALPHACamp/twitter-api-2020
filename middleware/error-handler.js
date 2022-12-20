@@ -1,5 +1,5 @@
 module.exports = {
-  errorHandler(err, req, res, next) {
+  errorHandler (err, req, res, next) {
     if (err instanceof Error) {
       res.status(err.status || 500).json({
         status: 'error',
@@ -12,7 +12,7 @@ module.exports = {
       })
     }
   },
-  signInFail(err, req, res, next) {
+  signInFail (err, req, res, next) {
     if (err.status === 401 & err.name === 'AuthenticationError') {
       res.status(err.status).json({
         status: 'fail',
