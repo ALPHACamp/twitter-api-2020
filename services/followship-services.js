@@ -4,26 +4,23 @@ const helpers = require('../_helpers')
 const followshipServices = {
   getTopUsers: (req, cb) => {
     const limit = Number(req.query.top)
+    const UserId = helpers.getUser(req).id
     return Followship.findAll({
       attributes: [
         'followingId',
-        [sequelize.fn('COUNT', 'followingId'), 'followerCount']
+        [sequelize.literal('(SELECT name FROM Users WHERE id = followingId)'), 'name'],
+        [sequelize.literal('(SELECT account FROM Users WHERE id = followingId)'), 'account'],
+        [sequelize.literal('(SELECT avatar FROM Users WHERE id = followingId)'), 'avatar'],
+        [sequelize.fn('COUNT', 'followingId'), 'followerCount'],
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']
       ],
       order: [[sequelize.literal('followerCount'), 'DESC']],
       group: ['followingId'],
-      limit,
-      include: [
-        {
-          model: User,
-          as: 'followingUser',
-          attributes: ['id', 'avatar', 'name', 'account']
-        }
-      ]
+      limit
     })
       .then(users => {
         const popularUsers = users.map(user => ({
-          ...user.toJSON(),
-          isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.followingId)
+          ...user.toJSON()
         }))
         cb(null, popularUsers)
       })
