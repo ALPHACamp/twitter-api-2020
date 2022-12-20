@@ -37,7 +37,7 @@ function userProfileValidation (req, res, next) {
   const profileId = Number(sanitizedInput(req.params.id))
   const loginUserId = helpers.getUser(req).id
   const { name, introduction } = req.body
-  if (!name.trim()) {
+  if (!name?.trim()) {
     return res.status(400).json({ status: 'error', message: 'User name is required!' })
   }
   if (name?.length > 50) {
@@ -82,8 +82,12 @@ async function userSettingValidation (req, res, next) {
 
   const user = await User.findByPk(reqId)
   if (!user) return res.status(404).json({ status: 'error', message: 'User not found!' })
-  if (user.email === email) return res.status(422).json({ status: 'error', message: 'Email already exists!' })
-  if (user.account === account) return res.status(422).json({ status: 'error', message: 'Account name already exists!' })
+
+  const [otherUserEmail, otherUserAccount] = await Promise.all([User.findOne({ where: { email }, raw: true }), User.findOne({ where: { account }, raw: true })])
+  // account and email cannot be the same as others
+  if (email === otherUserEmail?.email && user?.id !== otherUserEmail?.id) return res.status(422).json({ status: 'error', message: 'Email already exists!' })
+
+  if (account === otherUserAccount?.account && user?.id !== otherUserAccount?.id) return res.status(422).json({ status: 'error', message: 'Account name already exists!' })
 
   req.userEdit = user
 
