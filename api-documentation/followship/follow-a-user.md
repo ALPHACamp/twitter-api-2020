@@ -46,8 +46,8 @@ Failure | code: 404
 
 ```
 {
-  "status": "error",
-  "message": "Cannot find this user."
+    "status": "error",
+    "message": "Cannot find this user."
 }
 ```
 
@@ -57,8 +57,8 @@ Failure | code: 422
 
 ```
 {
-  "status": "error",
-  "message": "You cannot follow yourself."
+    "status": "error",
+    "message": "You cannot follow yourself."
 }
 ```
 
@@ -68,8 +68,8 @@ Failure | code: 422
 
 ```
 {
-  "status": "error",
-  "message": "You have already followed this user."
+    "status": "error",
+    "message": "You have already followed this user."
 }
 ```
 
@@ -82,8 +82,8 @@ You would get
 
 ```
 {
-  "status": "error",
-  "message": "unauthorized"
+    "status": "error",
+    "message": "unauthorized"
 }
 ```
 Failure | code: 500 其他server error

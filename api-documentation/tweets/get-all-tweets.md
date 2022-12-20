@@ -34,20 +34,20 @@ Success | code: 200
 
 ```
 [
-  {
-      "id": 1,
-      "description": "Ducimus repudiandae porro saepe non.",
-      "createdAt": 1670812139000,
-      "replyCount": 3,
-      "likeCount": 0,
-      "User": {
-        "id": 2,
-        "name": "user1",
-        "account": "user1",
-        "avatar": "https://loremflickr.com/320/240/girl/?lock=6.568042719936207"
-  }  ,
-"isLiked": false
-},
+    {
+        "id": 1,
+        "description": "Ducimus repudiandae porro saepe non.",
+        "createdAt": 1670812139000,
+        "replyCount": 3,
+        "likeCount": 0,
+        "User": {
+          "id": 2,
+          "name": "user1",
+          "account": "user1",
+          "avatar": "https://loremflickr.com/320/240/girl/?lock=6.568042719936207"
+        },
+        "isLiked": false
+    },
 
  ....// 依照時間先後排序，最新的排最前面
 ]
@@ -81,7 +81,7 @@ Failure | code: 500 其他server error
 
 ```
 {
-  "status": "error",
-  "message": {{err message}}
+    "status": "error",
+    "message": {{err message}}
 }
 ```

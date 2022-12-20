@@ -46,8 +46,8 @@ Failure | code: 404
 
 ```
 {
-  "status": "error",
-  "message": "You have already unfollowed this user or you havn't followed this user."
+    "status": "error",
+    "message": "You have already unfollowed this user or you havn't followed this user."
 }
 ```
 
@@ -60,8 +60,8 @@ You would get
 
 ```
 {
-  "status": "error",
-  "message": "unauthorized"
+    "status": "error",
+    "message": "unauthorized"
 }
 ```
 
@@ -69,7 +69,7 @@ Failure | code: 500 其他server error
 
 ```
 {
-  "status": "error",
-  "message": {{err message}}
+    "status": "error",
+    "message": {{err message}}
 }
 ```
