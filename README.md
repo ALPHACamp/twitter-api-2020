@@ -14,40 +14,48 @@ cd twitter-api-2020
 ```
 npm install
 ```
-4.請將本地資料庫的 username、password 與 /config/config.json 中的 development 設定一致。
+4. 打開 Visual Studio Code
+```
+code .
+```
+5. 請將本地資料庫的 username、password 與 /config/config.json 中的 development 設定一致。
 ```
 "development": {
-  "username": "root",
-  "password": "password",
+  "username": "root", // 設定此項
+  "password": "password", // 設定此項
   "database": "ac_twitter_workspace",
   "host": "127.0.0.1",
   "dialect": "mysql"
 }
 ```
-5.於MySQL Workbench 建立資料庫
+6. 建立資料庫 [ 輸入於 MySQL Workbench 的 Query 介面 ]
 ```
 create database ac_twitter_workspace;
 create database ac_twitter_workspace_test;
 ```
-6. 建立資料表
+7. 建立資料表 [ 輸入於 Visual Studio Code 的 terminal 介面 ]
 ```
 npx sequelize db:migrate
 ```
-7. 建立種子資料
+8. 建立種子資料 [ 輸入於 Visual Studio Code 的 terminal 介面 ]
 ```
 npx sequelize db:seed:all
 ```
-8. 建立檔案 .env 並設定環境變數，可參考 .env.example
+9. 建立檔案 .env 並設定環境變數，可參考 .env.example
 ```
 JWT_SECRET=
 IMGUR_CLIENT_ID=
 ```
-9. 啟動伺服器
+10. 啟動伺服器
 ```
 npm run dev
 ```
 若終端機顯示 ```Example app listening on port 3000!```，表示啟動成功。
 
+## 測試網址
+```
+http://localhost:3000/
+```
 ## 測試帳號
 ```
 管理者

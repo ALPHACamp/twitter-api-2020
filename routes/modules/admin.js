@@ -7,4 +7,7 @@ router.get('/users', adminController.getUsers)
 router.get('/tweets', adminController.getTweets)
 // 管理者刪除貼文
 router.delete('/tweets/:id', adminController.deleteTweets)
+// 取得管理者個人資料
+router.get('/user', adminController.getAdmin)
+
 module.exports = router
