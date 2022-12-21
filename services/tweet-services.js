@@ -6,16 +6,15 @@ const tweetServices = {
   getTweets: (req, cb) => {
     // 預設可以再改
     const DEFAULT_LIMIT = 9
-    const page = Number(req.query.page) || 1
+    const DEAFULT_PAGE = 1
+    const page = Number(req.query.page) || DEAFULT_PAGE
     const limit = Number(req.query.limit) || DEFAULT_LIMIT
     const offset = getOffset(limit, page)
 
     return Tweet.findAndCountAll({
       include: [{
         model: User,
-        attributes: {
-          exclude: ['password']
-        }
+        attributes: { exclude: ['password'] }
       }, {
         model: Like,
         attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('likes.id'))), 'totalLikes']]
@@ -30,11 +29,12 @@ const tweetServices = {
       raw: true
     })
       .then(tweets => {
+        const descriptionEnd = 50
         const repliedTweetId = req.user?.Replies ? req.user.Replies.map(rt => rt.TweetId) : []
         const likedTweetId = req.user?.Likes ? req.user.Likes.map(lt => lt.TweetId) : []
         const data = tweets.rows.map(t => ({
           ...t,
-          description: t.description.substring(0, 50),
+          description: t.description.substring(0, descriptionEnd),
           isReplied: repliedTweetId.includes(t.id),
           isLiked: likedTweetId.includes(t.id)
         }))
@@ -48,18 +48,25 @@ const tweetServices = {
   getTweet: (req, cb) => {
     const id = req.params.tweet_id
     return Tweet.findByPk(id, {
-      include: [{ model: Reply, include: User }, {
-        model: Like, include: User
-      }]
+      include: [
+        { model: Reply, include: User },
+        { model: Like, include: User }
+      ]
     })
       .then(tweet => {
+        console.log(tweet.toJSON())
         if (!tweet) throw new Error("Tweet doesn't exist!")
         const repliesOfTweet = tweet.Replies
         const likesOfTweet = tweet.Likes
         const isReplied = repliesOfTweet ? repliesOfTweet.some(f => f.UserId === req.user.id) : []
         const isLiked = likesOfTweet ? likesOfTweet.some(f => f.UserId === req.user.id) : []
-        const data = { ...tweet.toJSON(), isReplied, isLiked }
-
+        const data = {
+          ...tweet.toJSON(),
+          totalReplies: repliesOfTweet.length,
+          totalLikes: likesOfTweet.length,
+          isReplied,
+          isLiked
+        }
         cb(null, data)
       })
       .catch(err => cb(err))
