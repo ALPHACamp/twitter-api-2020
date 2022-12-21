@@ -196,6 +196,7 @@ const tweetController = {
           const { id, name, account, avatar } = tweet.User.toJSON()
           tweet = {
             ...tweet.toJSON(),
+            isLike: tweet.Likes.map(t => t.id).includes(helpers.getUser(req).id),
             replyAmount: tweet.Replies.length,
             likedAmount: tweet.Likes.length,
             User: {
