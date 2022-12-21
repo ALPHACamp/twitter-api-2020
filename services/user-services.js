@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const assert = require('assert')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { uploadImgur } = require('../helpers/file-helpers')
+const helpers = require('../_helpers')
 
 const userServices = {
   // 使用者註冊
@@ -51,7 +52,7 @@ const userServices = {
   signIn: (req, cb) => {
     try {
       // 通過passport local驗證後的user
-      const userData = req.user
+      const userData = helpers.getUser(req)
       // 刪除機敏資訊
       delete userData.password
       // 發送註冊token
@@ -62,12 +63,29 @@ const userServices = {
     }
   },
   getUser: (req, cb) => {
-    return User.findByPk(req.params.user_id)
-      .then(user => {
-        if (!user) throw new Error("User didn't exist!")
+    return Promise.all([
+      User.findByPk(req.params.user_id),
+      Followship.findAndCountAll({
+        where: { followingId: req.params.user_id },
+        raw: true
+      }),
+      Followship.findAndCountAll({
+        where: { followerId: req.params.user_id },
+        raw: true
+      })
+    ])
+      .then(([user, followers, followings]) => {
+        assert(user, "User doesn't exit.")
         const userData = user.toJSON()
+        const isFollowed = followers.count ? followers.rows.some(f => f.followerId === helpers.getUser(req).id) : false
         delete userData.password
-        cb(null, userData)
+        const result = {
+          ...userData,
+          totalFollowers: followers.count,
+          totalFollowings: followings.count,
+          isFollowed
+        }
+        cb(null, result)
       })
       .catch(err => cb(err))
   },
@@ -77,17 +95,29 @@ const userServices = {
       where: {
         UserId
       },
+      include: [{
+        model: Like,
+        attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('likes.id'))), 'totalLikes']]
+      }, {
+        model: Reply,
+        attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('replies.id'))), 'totalReplies']]
+      }],
+      group: 'tweet.id',
       order: [['createdAt', 'DESC']],
       raw: true
-
     })
-      .then(tweetsOfUser => {
-        if (!tweetsOfUser) throw new Error('此用戶沒有發過推文!')
-        cb(null, tweetsOfUser)
+      .then(tweets => {
+        assert(tweets, 'Unexpected operation of database.')
+        const likedTweetId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(lt => lt.TweetId) : []
+        const data = tweets.map(t => ({
+          ...t,
+          isLiked: likedTweetId.includes(t.id)
+        }))
+        cb(null, data)
       })
       .catch(err => cb(err))
   },
-  getRepliesOfTweet: (req, cb) => {
+  getRepliesOfUser: (req, cb) => {
     const UserId = req.params.user_id
     return Reply.findAll({
       where: {
@@ -102,7 +132,7 @@ const userServices = {
 
     })
       .then(repliesOfTweet => {
-        if (!repliesOfTweet) throw new Error('此用戶沒有發過推文回覆!')
+        assert(repliesOfTweet, 'Unexpected operation of database.')
         cb(null, repliesOfTweet)
       })
       .catch(err => cb(err))
@@ -113,6 +143,21 @@ const userServices = {
       where: {
         UserId
       },
+      include: [
+        {
+          model: Tweet,
+          include: [{
+            model: User
+          },
+          {
+            model: Like,
+            attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('tweet.likes.id'))), 'totalLikes']]
+          }, {
+            model: Reply,
+            attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('tweet.replies.id'))), 'totalReplies']]
+          }]
+        }],
+      group: 'tweet.id',
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
@@ -120,7 +165,12 @@ const userServices = {
     })
       .then(likes => {
         assert(likes, 'Unexpected operation of database.')
-        cb(null, likes)
+        const likedTweetId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(lt => lt.TweetId) : []
+        const data = likes.map(t => ({
+          ...t,
+          isLiked: likedTweetId.includes(t.TweetId)
+        }))
+        cb(null, data)
       })
       .catch(err => cb(err))
   },
@@ -137,7 +187,11 @@ const userServices = {
     })
       .then(followings => {
         assert(followings, 'Unexpected operation of database.')
-        cb(null, followings)
+        const result = followings.map(f => ({
+          ...f,
+          isFollowed: helpers.getUser(req).Followings.some(uf => uf.Followship.followingId === f.followingId)
+        }))
+        cb(null, result)
       })
       .catch(err => cb(err))
   },
@@ -154,7 +208,11 @@ const userServices = {
     })
       .then(followers => {
         assert(followers, 'Unexpected operation of database.')
-        cb(null, followers)
+        const result = followers.map(f => ({
+          ...f,
+          isFollowed: helpers.getUser(req).Followings.some(uf => uf.Followship.followingId === f.followerId)
+        }))
+        cb(null, result)
       })
       .catch(err => cb(err))
   },
@@ -162,8 +220,8 @@ const userServices = {
     const { name, introduction } = req.body
     assert(name, 'User name is required!')
     // 從req取得file，若有file則存至變數，若無回傳null
-    const avatarFile = req.files ? req.files['avatar'][0] : null
-    const coverImageFile = req.files ? req.files['coverImage'][0] : null
+    const avatarFile = req.files ? req.files.avatar[0] : null
+    const coverImageFile = req.files ? req.files.coverImage[0] : null
     // 將file上傳至Imgur & 從資料庫搜尋欲修改的使用者資訊
     return Promise.all([
       uploadImgur(avatarFile),

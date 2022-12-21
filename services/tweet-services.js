@@ -6,8 +6,8 @@ const tweetServices = {
   getTweets: (req, cb) => {
     // 預設可以再改
     const DEFAULT_LIMIT = 9
-    const DEAFULT_PAGE = 1
-    const page = Number(req.query.page) || DEAFULT_PAGE
+    const DEFAULT_PAGE = 1
+    const page = Number(req.query.page) || DEFAULT_PAGE
     const limit = Number(req.query.limit) || DEFAULT_LIMIT
     const offset = getOffset(limit, page)
 
@@ -29,12 +29,10 @@ const tweetServices = {
       raw: true
     })
       .then(tweets => {
-        const descriptionEnd = 50
-        const repliedTweetId = req.user?.Replies ? req.user.Replies.map(rt => rt.TweetId) : []
-        const likedTweetId = req.user?.Likes ? req.user.Likes.map(lt => lt.TweetId) : []
+        const repliedTweetId = helpers.getUser(req)?.Replies ? helpers.getUser(req).Replies.map(rt => rt.TweetId) : []
+        const likedTweetId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(lt => lt.TweetId) : []
         const data = tweets.rows.map(t => ({
           ...t,
-          description: t.description.substring(0, descriptionEnd),
           isReplied: repliedTweetId.includes(t.id),
           isLiked: likedTweetId.includes(t.id)
         }))
@@ -54,12 +52,11 @@ const tweetServices = {
       ]
     })
       .then(tweet => {
-        console.log(tweet.toJSON())
         if (!tweet) throw new Error("Tweet doesn't exist!")
         const repliesOfTweet = tweet.Replies
         const likesOfTweet = tweet.Likes
-        const isReplied = repliesOfTweet ? repliesOfTweet.some(f => f.UserId === req.user.id) : []
-        const isLiked = likesOfTweet ? likesOfTweet.some(f => f.UserId === req.user.id) : []
+        const isReplied = repliesOfTweet ? repliesOfTweet.some(f => f.UserId === helpers.getUser(req).id) : []
+        const isLiked = likesOfTweet ? likesOfTweet.some(f => f.UserId === helpers.getUser(req).id) : []
         const data = {
           ...tweet.toJSON(),
           totalReplies: repliesOfTweet.length,
