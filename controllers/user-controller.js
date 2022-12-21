@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const dayjs = require('dayjs')
 const jwt = require('jsonwebtoken')
+const { Op } = require('sequelize')
 
 const helpers = require('../_helpers')
 const { User, Reply, Tweet, Like, Followship, sequelize } = require('../models')
@@ -251,7 +252,12 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
           [sequelize.literal(`(SELECT (COUNT(*) > 0) FROM Followships WHERE Followships.followerId = ${loginUserId} AND Followships.followingId = User.id)`), 'isFollowed']
         ],
-        order: [[sequelize.literal('followerCount'), 'DESC']],
+        where: {
+          role: {
+            [Op.ne]: 'admin'
+          }
+        },
+        order: [[sequelize.literal('followerCount'), 'DESC'], ['name', 'ASC']],
         limit: 10,
         raw: true,
         nest: true
