@@ -1,5 +1,5 @@
 const adminServices = require('../services/admin-services')
-const userServices = require('../services/user-services')
+const tweetServices = require('../services/tweet-services')
 const adminController = {
   loginAdmin: (req, res, next) => {
     adminServices.loginAdmin(req, (err, data) => err ? next(err) : res.json(data))
@@ -11,7 +11,7 @@ const adminController = {
     adminServices.deleteTweet(req, (err, data) => err ? next(err) : res.json(data))
   },
   getTweets: (req, res, next) => {
-    userServices.getTweets(req, (err, data) => err ? next(err) : res.json(data))
+    tweetServices.getTweets(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 module.exports = adminController
