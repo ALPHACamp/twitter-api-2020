@@ -25,8 +25,4 @@ router.use('/users', authenticated, authenticatedUser, user)
 // admin功能
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 
-router.use('/', (req, res) => {
-  res.json('api test main')
-})
-
 module.exports = router
