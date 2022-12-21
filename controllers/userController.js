@@ -13,8 +13,8 @@ const userController = {
   getTweetsOfUser: (req, res, next) => {
     userServices.getTweetsOfUser(req, (err, data) => err ? next(err) : res.json(data)) // 特別注意要是陣列
   },
-  getRepliesOfTweet: (req, res, next) => {
-    userServices.getRepliesOfTweet(req, (err, data) => err ? next(err) : res.json(data)) // 特別注意要是陣列
+  getRepliesOfUser: (req, res, next) => {
+    userServices.getRepliesOfUser(req, (err, data) => err ? next(err) : res.json(data)) // 特別注意要是陣列
   },
   getLikesOfUser: (req, res, next) => {
     userServices.getLikesOfUser(req, (err, data) => err ? next(err) : res.json(data)) // 特別注意要是陣列

@@ -21,11 +21,10 @@ const adminServices = {
       raw: true
     })
       .then(users => {
-        users.map(user => {
+        const data = users.map(user => {
           delete user.password
           return user
         })
-        const data = users
         cb(null, data)
       })
       .catch(err => cb(err))
