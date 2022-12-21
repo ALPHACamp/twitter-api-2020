@@ -76,20 +76,23 @@ const userController = {
 
   getUser: (req, res, next) => {
     const id = Number(req.params.id)
+    const currentUser = helpers.getUser(req)
     return User.findByPk(id, {
       where: { role: 'user' },
       attributes: {
         exclude: ['password', 'createdAt', 'updatedAt'],
         include: [
           [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
-          [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount']
+          [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount'],
+          [sequelize.literal('(SELECT COUNT(id)  FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetCount']
         ]
       }
     })
       .then(user => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
         const { ...userData } = {
-          ...user.toJSON()
+          ...user.toJSON(),
+          isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === user.id)
         }
         return res.status(200).json({ ...userData })
       })
@@ -104,10 +107,10 @@ const userController = {
 
     const { files } = req
 
-    if (Number(req.params.id) !== currentUser.id) res.status(401).json({ status: 'error', message: '無權編輯他人資料!' })
-    if (!name) res.status(422).json({ status: 'error', message: '暱稱為必填!' })
-    if (name.length > 50) res.status(422).json({ status: 'error', message: '暱稱不得超過50字!' })
-    if (introduction && introduction.length > 160) res.status(422).json({ status: 'error', message: '自我介紹不得超過160字!' })
+    if (Number(req.params.id) !== currentUser.id) return res.status(401).json({ status: 'error', message: '無權編輯他人資料!' })
+    if (!name) return res.status(422).json({ status: 'error', message: '暱稱為必填!' })
+    if (name.length > 50) return res.status(422).json({ status: 'error', message: '暱稱不得超過50字!' })
+    if (introduction && introduction.length > 160) return res.status(422).json({ status: 'error', message: '自我介紹不得超過160字!' })
 
     // 確認密碼是否變更
     if (password && password !== checkPassword) return res.status(422).json({ status: 'error', message: '密碼與確認密碼不一致!' })
@@ -120,8 +123,8 @@ const userController = {
       User.findByPk(currentUser.id),
       helpers.imgurFileHandler(avatar),
       helpers.imgurFileHandler(cover),
-      User.findOne({ where: { account } }),
-      User.findOne({ where: { email } })
+      User.findOne({ where: { account }, raw: true }),
+      User.findOne({ where: { email }, raw: true })
     ])
       .then(([user, avatarPath, coverPath, duplicateAccount, duplicateEmail]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
@@ -132,7 +135,7 @@ const userController = {
           email: email || user.email,
           password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
           account: account || user.account,
-          introduction: introduction || null,
+          introduction: introduction || '',
           avatar: avatarPath || user.avatar,
           cover: coverPath || user.cover
         })
@@ -178,6 +181,7 @@ const userController = {
 
   getUserFollowings: (req, res, next) => {
     const { id } = req.params
+    const currentUser = helpers.getUser(req)
     return Promise.all([
       User.findByPk(id),
       Followship.findAll({
@@ -191,10 +195,11 @@ const userController = {
     ])
       .then(([user, followings]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (!followings) res.status(404).json({ status: 'error', message: '使用者沒有追隨任何人!' })
+        if (followings.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有追隨任何人!' })
         const data = followings.map(fi => ({
           ...fi,
-          createdAt: helpers.relativeTime(fi.createdAt)
+          createdAt: helpers.relativeTime(fi.createdAt),
+          isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
         }))
         res.status(200).json(data)
       })
@@ -218,10 +223,10 @@ const userController = {
       .then(([user, followers]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
         if (followers.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有任何追隨者!' })
-        const data = followers.map(fi => ({
-          ...fi,
-          createdAt: helpers.relativeTime(fi.createdAt),
-          isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
+        const data = followers.map(fl => ({
+          ...fl,
+          createdAt: helpers.relativeTime(fl.createdAt),
+          isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fl.id)
         }))
         res.status(200).json(data)
       })
