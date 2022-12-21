@@ -87,35 +87,62 @@ const userController = {
 			.catch(err => next(err))
 	},
 	putUser: (req, res, next) => {
-		const { account, name, email, password, introduction } = req.body
+		const { account, name, email, password, checkPassword,introduction} = req.body
 		const { file } = req
-		if (/\s/.test(account) || /\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
+		if(account){if (/\s/.test(account)||account.length > 50) throw Error('Invalid Account!', {}, Error.prototype.code = 403)}
+		if(password && checkPassword){
+		 if ( password !==checkPassword ||/\s/.test(password)||password.length < 4 || password.length > 12) throw Error('Invalid Password!', {}, Error.prototype.code = 422)
+		}
+		if(name){if( name.length > 50) throw Error('Invalid name!', {}, Error.prototype.code = 403)}
+		if(email){if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw Error('Invalid email format!', {}, Error.prototype.code = 401)}
+		if(introduction){if( introduction.length > 160) throw Error('Invalid introduction!', {}, Error.prototype.code = 403)}
 
 		Promise.all([
-			User.findByPk(req.params.id),
-			imgurFileHandler(file)
+		 User.findByPk(req.params.id),
+		 imgurFileHandler(file),
+		(async()=>{ 
+			if(account){
+				userData = await User.findOne({where:{account:account},raw:true})
+				return userData
+			} 
+			return false
+		})(),
+		(async()=>{ 
+			if(email){
+				userData = await User.findOne({where:{email:email},raw:true})
+				return userData
+			} 
+			return false
+		})(),
+		 (async()=>{ 
+			if(password){
+				hash = await bcrypt.hash(password, 10)
+				return hash
+			}
+			return false
+		})(),
 		])
-			.then(([user, filePath]) => {
-				// console.log('上傳圖片',filePath)
-				// console.log('上傳圖片',user)
-				if (!user) throw new Error('User is not exist!')
-				return user.update({
-					account,
-					name,
-					email,
-					password,
-					avatar: filePath || user.avatar,
-					introduction,
-					cover: filePath || user.cover
-				})
-			})
-			.then((data) => {
-				// console.log('上傳完',data)
-				delete data.get({ plain: true }).password
-				res.json(data)
-			})
-			.catch(err => next(err))
-	},
+		 .then(([user,filePath,accountCheck,emailCheck,hash]) => {
+		  if (!user) throw new Error('User is not exist!', {}, Error.prototype.code = 412)
+		  if (accountCheck && user.account !== accountCheck.account) throw new Error('Account already exists!', {}, Error.prototype.code = 423)
+		  if (emailCheck && user.email !== emailCheck.email) throw new Error('Email already exists!', {}, Error.prototype.code = 408)
+
+		  return user.update({
+		   account:account||user.account,
+		   name:name||user.name,
+		   email:email||user.mail,
+		   password:hash||user.password,
+		   avatar:filePath||user.avatar,
+		   introduction:introduction||user.introduction,
+		   cover:filePath||user.cover
+		  })
+		 })
+		 .then((data) => {
+		  delete data.get({ plain: true }).password
+		  res.status(200).json(data)
+		 })
+		 .catch(err => next(err))
+	   },
 	getUserFollowing: (req, res, next) => {
 		Followship.findAll({
 			where: { followerId: req.params.id },
@@ -202,7 +229,7 @@ const userController = {
 				raw: true
 			}),
 			Like.findAll({
-				attributes: ['id', 'TweetId', 'UserId'],
+				attributes: ['id', 'TweetId'],
 				raw: true
 			}),
 			Reply.findAll({
@@ -212,25 +239,26 @@ const userController = {
 			)
 
 		])
-			.then(([tweetList, like, reply]) => {
-				tweetList.forEach((t) => {
-					t.likeCount = 0
-					t.replyCount = 0
-					t.liked = false
-					like.forEach((i) => {
-						if (t.id === i.TweetId) {
-							t.likeCount++
+			.then(([tweetList, likedata, reply]) => {
+				for(let i =0;i<tweetList.length;i++){
+					tweetList[i].likeCount = 0
+					tweetList[i].replyCount = 0
+					tweetList[i].like = false
+					for(let k=0;k<likedata.length;k++){
+						if (likedata[k].TweetId === tweetList[i].id) {
+							tweetList[i].likeCount++
 						}
-						if (i.UserId === currentUser && i.TweetId === t.id) {
-							t.liked = true
+						if (likedata[k].UserId === currentUser && likedata[k].TweetId === tweetList[i].id) {
+							tweetList[i].liked = true
 						}
-					})
-					reply.forEach((r) => {
-						if (r.TweetId === t.TweetId) {
-							t.replyCount++
+					}
+					for(let r=0;r<reply.length;r++){
+						if (reply[r].TweetId === tweetList[i].id) {
+							tweetList[i].replyCount++
 						}
-					})
-				})
+					}
+
+				}
 				res.status(200).json(tweetList)
 			})
 			.catch(err => { next(err) })
