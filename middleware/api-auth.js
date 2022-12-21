@@ -1,10 +1,17 @@
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
+const { User } = require('../models')
 
 const authenticated = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user) => {
+  passport.authenticate('jwt', { session: false }, async (err, user) => {
     if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
-    req.user = user.dataValues
+    // req.user = user.dataValues
+    const { id } = user.dataValues
+    await User.findByPk(id)
+      .then(user => {
+        req.user = user.toJSON()
+      })
+      .catch(err => next(err))
     next()
   })(req, res, next)
 }
