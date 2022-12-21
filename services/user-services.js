@@ -60,7 +60,8 @@ const userServices = {
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount']
       ],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(user => {
         if (!user) throw new Error('user do not exist.')
@@ -100,7 +101,8 @@ const userServices = {
       attributes: [
         'followingId', 'followerId',
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(followings => {
         cb(null, followings)
@@ -115,7 +117,8 @@ const userServices = {
       attributes: [
         'followingId', 'followerId',
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE following_id = followerId AND follower_id = ${UserId} )`), 'isFollowed']],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(followers =>
         cb(null, followers)
@@ -137,7 +140,8 @@ const userServices = {
         attributes: ['id', 'avatar', 'name', 'account']
       }],
       order: [['id', 'DESC']],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(tweets => {
         cb(null, tweets)
@@ -158,7 +162,8 @@ const userServices = {
         }
       },
       order: [['id', 'DESC']],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(replies => {
         cb(null, replies)
@@ -184,7 +189,8 @@ const userServices = {
         }
       },
       order: [['id', 'DESC']],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(likedTweets => cb(null, likedTweets))
       .catch(err => cb(err))

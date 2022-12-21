@@ -19,7 +19,8 @@ const followshipServices = {
       order: [[sequelize.literal('isFollowed'), 'DESC'], [sequelize.literal('followerCount'), 'DESC']],
       group: ['followingId'],
       limit,
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(users => {
         cb(null, users)

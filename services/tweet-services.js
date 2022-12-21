@@ -16,6 +16,7 @@ const tweetServices = {
         attributes: ['id', 'avatar', 'name', 'account']
       }],
       raw: true,
+      nest: true,
       order: [['id', 'DESC']]
     })
       .then(tweets => {
@@ -34,7 +35,8 @@ const tweetServices = {
         [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE tweet_id = Tweet.id AND user_id = ${userId})`), 'isLiked']
       ],
       include: [{ model: User, attributes: ['id', 'avatar', 'account', 'name'] }],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(tweet => {
         if (!tweet) throw new Error('Tweet does not exist!')
