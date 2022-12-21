@@ -10,16 +10,8 @@ const passport = require('./config/passport')
 
 const app = express()
 const port = process.env.PORT || 3000
-const corsOptions = {
-  origin: [
-    '*'
-  ],
-  methods: 'GET,PUT,POST,DELETE,OPTIONS',
-  allowedHeaders: ['Content-Type', 'Authorization']
-}
 
-app.use(cors(corsOptions))
-
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
