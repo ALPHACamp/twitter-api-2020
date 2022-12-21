@@ -19,13 +19,11 @@ const adminController = {
 			const usersData = await User.findAll({
 				nest: true,
 				raw: true,
-				// where: { role: "user" },
 				attributes: [
-					'id', 'account', 'email', 'name', 'avatar', 'introduction', 'cover', 'role', 'createdAt', 'updatedAt',
+					'id', 'account', 'email', 'name', 'avatar', 'introduction', 'cover', 'role', 'followingCount', 'createdAt', 'updatedAt',
 					[sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)'), 'tweetCount'],
 					[sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = User.id)'), 'likeCount'],
-					[sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.follower_id = User.id)'), 'followerCount'],
-					[sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = User.id)'), 'followingCount']
+					[sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.follower_id = User.id)'), 'followerCount']
 				],
 				order: [['createdAt', 'DESC']]
 			})
