@@ -1,13 +1,23 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like } = require('../models')
 // const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const assert = require('assert')
 const adminServices = {
 
   getUsers: (req, cb) => {
     return User.findAll({
-      // offset,
+      include: [{
+        model: Tweet,
+        attributes:
+           [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.fn('DISTINCT', Tweet.sequelize.col('tweets.id'))), 'totalTweets']],
+        include: [{
+          model: Like,
+          attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('tweets.likes.id'))), 'totalLikes']]
+        }]
+      }],
+      //  offset,
+      group: 'id',
       order: [['createdAt', 'DESC']],
-      // nest: true,
+      nest: true,
       raw: true
     })
       .then(users => {

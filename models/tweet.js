@@ -10,6 +10,9 @@ module.exports = (sequelize, DataTypes) => {
       // 和Reply的關聯
       Tweet.hasMany(models.Reply, { foreignKey: 'TweetId' })
       // 和User的關聯
+      Tweet.belongsTo(models.User, {
+        foreignKey: 'UserId'
+      })
     }
   }
   Tweet.init({
