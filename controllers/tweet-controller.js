@@ -103,7 +103,7 @@ const tweetController = {
       .then(([tweet, like]) => {
         if (!tweet) throw new Error('推文不存在!')
         if (like?.toJSON().UserId === currentUser.id) throw new Error('不能按讚自己的推文!')
-        if (like) throw new Error('你還沒按讚此推文!')
+        if (like) throw new Error('你已經按讚此推文了!')
         return Like.create({
           UserId: currentUser.id,
           TweetId
