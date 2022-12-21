@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../controllers/user-controller')
-const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
+const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/api-auth')
 const { apiErrorHandler } = require('../middleware/error-handler.js')
 
 const user = require('./modules/user')
@@ -13,9 +13,9 @@ const auth = require('./modules/auth')
 router.post('/users', userController.registerUser)
 router.use('/auth', auth)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
-router.use('/followships', authenticated, followship)
-router.use('/tweets', authenticated, tweet)
-router.use('/users', authenticated, user)
+router.use('/followships', authenticated, authenticatedUser, followship)
+router.use('/tweets', authenticated, authenticatedUser, tweet)
+router.use('/users', authenticated, authenticatedUser, user)
 
 router.use('/', apiErrorHandler)
 
