@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { getUser, imgurFileHandler } = require('../_helpers')
 const { User, Tweet, Followship, Like, Reply, sequelize } = require('../models')
+const id = require('faker/lib/locales/id_ID')
 
 const userController = {
 	postUsers: (req, res, next) => {
