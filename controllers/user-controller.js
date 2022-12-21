@@ -40,9 +40,10 @@ const userController = {
   },
   login: (req, res, next) => {
     try {
-      const userData = helpers.getUser(req).toJSON()
+      let userData = helpers.getUser(req).toJSON()
       if (userData.role !== 'user') throw new Error('Admin account cannot enter front-end!')
-      delete userData.password
+      userData = { id: userData.id }
+      // delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
         status: 'success',
