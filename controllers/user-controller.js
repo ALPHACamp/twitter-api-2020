@@ -258,7 +258,6 @@ const userController = {
           }
         },
         order: [[sequelize.literal('followerCount'), 'DESC'], ['name', 'ASC']],
-        limit: 10,
         raw: true,
         nest: true
       })
