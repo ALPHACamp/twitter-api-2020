@@ -1,5 +1,4 @@
 const passport = require('../config/passport')
-
 const helpers = require('../_helpers')
 
 const authenticated = (req, res, next) => {

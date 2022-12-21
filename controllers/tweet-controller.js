@@ -92,7 +92,7 @@ const tweetController = {
     const currentUser = helpers.getUser(req)
     const TweetId = req.params.id
     return Promise.all([
-      Tweet.findByPk(TweetId),
+      Tweet.findByPk(TweetId, { raw: true }),
       Like.findOne({
         where: {
           UserId: currentUser.id,
@@ -102,7 +102,7 @@ const tweetController = {
     ])
       .then(([tweet, like]) => {
         if (!tweet) throw new Error('推文不存在!')
-        if (like?.toJSON().UserId === currentUser.id) throw new Error('不能按讚自己的推文!')
+        if (tweet.UserId === currentUser.id) throw new Error('不能按讚自己的推文!')
         if (like) throw new Error('你已經按讚此推文了!')
         return Like.create({
           UserId: currentUser.id,
