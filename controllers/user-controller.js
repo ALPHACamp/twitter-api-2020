@@ -85,7 +85,10 @@ const userController = {
 				userData.tweetsCount = tweets.count
 				res.status(200).json(userData)
 			})
-			.catch(err => next(err))
+			.catch(err => {
+				console.log(err)
+				next(err)
+			})
 	},
 	putUser: (req, res, next) => {
 		const { account, name, email, password, checkPassword, introduction } = req.body
