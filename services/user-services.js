@@ -57,6 +57,7 @@ const userServices = {
     return User.findByPk(req.params.userId, {
       attributes: [
         'id', 'name', 'account', 'email', 'introduction', 'avatar', 'cover',
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE User_id = User.id)'), 'tweetCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount']
       ],
@@ -97,7 +98,7 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followerId: UserId },
-      include: [{ model: User, as: 'followingUser', attributes: ['name', 'avatar', 'account'] }],
+      include: [{ model: User, as: 'followingUser', attributes: ['name', 'avatar', 'account', 'introduction'] }],
       attributes: [
         'followingId', 'followerId',
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']],
@@ -113,7 +114,7 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followingId: UserId },
-      include: [{ model: User, as: 'followerUser', attributes: ['name', 'avatar', 'account'] }],
+      include: [{ model: User, as: 'followerUser', attributes: ['name', 'avatar', 'account', 'introduction'] }],
       attributes: [
         'followingId', 'followerId',
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE following_id = followerId AND follower_id = ${UserId} )`), 'isFollowed']],
