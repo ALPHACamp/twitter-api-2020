@@ -135,7 +135,6 @@ const tweetController = {
     const TweetId = req.params.tweet_id
     const UserId = helpers.getUser(req).id
     const { comment } = req.body
-    if (!comment) throw new Error('Comment欄位必填')
     if (!comment?.trim()) throw new Error('內容不可空白!')
     return Promise.all([
       User.findByPk(UserId),
