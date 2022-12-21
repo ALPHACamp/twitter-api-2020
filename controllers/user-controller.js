@@ -87,11 +87,7 @@ const userController = {
 			.catch(err => next(err))
 	},
 	putUser: (req, res, next) => {
-<<<<<<< HEAD
-		const { account, name, email, password, introduction } = req.body
-=======
 		const { account, name, email, password, checkPassword,introduction} = req.body
->>>>>>> origin
 		const { file } = req
 		if(account){if (/\s/.test(account)||account.length > 50) throw Error('Invalid Account!', {}, Error.prototype.code = 403)}
 		if(password && checkPassword){
