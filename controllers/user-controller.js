@@ -279,6 +279,8 @@ const userController = {
           temp.result = data
           followingsbox.push(temp)
         })
+
+        // console.log('followingsbox: ', followingsbox)
         followingList.forEach((list, index) => {
           // 將 followingId 改成 id
           list.id = list.followingId
@@ -290,6 +292,8 @@ const userController = {
           // 刪除 followerId
           delete list.followerId
         })
+        // 照日期排序 (新至舊)
+        followingList.sort((a, b) => b.createdAt - a.createdAt)
 
         res.status(200).send(followingList)
       })
@@ -330,6 +334,9 @@ const userController = {
           temp.result = data
           followersbox.push(temp)
         })
+        // 照日期排序 (新至舊)
+        followerList.sort((a, b) => b.createdAt - a.createdAt)
+
         followerList.forEach((list, index) => {
           // 將 followerId 改成 id
           list.id = list.followerId
@@ -341,6 +348,7 @@ const userController = {
           // 刪除 followingId
           delete list.followingId
         })
+
         res.status(200).send(followerList)
       })
       .catch((err) => next(err))
