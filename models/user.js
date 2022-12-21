@@ -29,7 +29,9 @@ module.exports = (sequelize, DataTypes) => {
     avatar: DataTypes.STRING,
     introduction: DataTypes.TEXT,
     cover: DataTypes.STRING,
-    role: DataTypes.STRING
+    role: DataTypes.STRING,
+    followerCount: DataTypes.INTEGER,
+    followingCount: DataTypes.INTEGER
   }, {
     // Other model options go here
     sequelize, // We need to pass the connection instance
