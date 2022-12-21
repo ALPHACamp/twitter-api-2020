@@ -5,6 +5,8 @@ const helpers = require('../_helpers')
 
 const replyServices = {
   getReplies: (req, cb) => {
+    const TweetId = req.params.tweet_id
+
     // 預設可以再改
     const DEFAULT_LIMIT = 9
     const page = Number(req.query.page) || 1
@@ -12,6 +14,13 @@ const replyServices = {
     const offset = getOffset(limit, page)
 
     return Reply.findAndCountAll({
+      where: { TweetId },
+      include: [{
+        model: User,
+        attributes: {
+          exclude: ['password']
+        }
+      }],
       offset,
       order: [['createdAt', 'DESC']],
       nest: true,
