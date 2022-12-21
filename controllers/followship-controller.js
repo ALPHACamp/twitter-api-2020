@@ -1,6 +1,5 @@
 const helpers = require('../_helpers')
 const { Followship, User } = require('../models')
-const user = require('../models/user')
 
 const followshipController = {
   addFollowing: (req, res, next) => {
@@ -63,7 +62,7 @@ const followshipController = {
         return Promise.all([
           followshipData.destroy(),
           User.update(
-            { followingCount: user.followingCount - 1 },
+            { followingCount: userData.followingCount - 1 },
             { where: { id: followingId } }
           )
         ])
