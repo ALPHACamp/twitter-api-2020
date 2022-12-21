@@ -228,7 +228,7 @@ const userController = {
 				raw: true
 			}),
 			Like.findAll({
-				attributes: ['id', 'TweetId'],
+				attributes: ['id', 'TweetId', 'UserId'],
 				raw: true
 			}),
 			Reply.findAll({
@@ -244,17 +244,17 @@ const userController = {
 					tweetList[i].liked = false
 					for (let k = 0; k < likedata.length; k++) {
 						if (likedata[k].TweetId === tweetList[i].id) {
-							// console.log('hello one')
+							console.log('hello one')
 							tweetList[i].likeCount++
 						}
 						if (likedata[k].UserId === currentUser && likedata[k].TweetId === tweetList[i].id) {
-							// console.log('hello two')
+							console.log('hello two')
 							tweetList[i].liked = true
 						}
 					}
 					for (let r = 0; r < reply.length; r++) {
 						if (reply[r].TweetId === tweetList[i].id) {
-							// console.log('hello three')
+							console.log('hello three')
 							tweetList[i].replyCount++
 						}
 					}
@@ -288,7 +288,7 @@ const userController = {
 			.catch(err => { next(err) })
 	},
 	getTopUser: (req, res, next) => {
-		const queryUser = `SELECT * ,(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = ${getUser(req).id} AND Followships.follower_id = Users.id) AS isFollowing FROM Users ORDER BY (following_count *1) DESC LIMIT 0,10`
+		const queryUser = `SELECT * ,(SELECT COUNT(id) FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Users.id) AS isFollowing FROM Users ORDER BY (following_count *1) DESC LIMIT 0,10`
 		sequelize.query(queryUser)
 			.then((replyList) => {
 				replyList[0].map((r) => { delete r.password })
