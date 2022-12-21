@@ -15,7 +15,8 @@ const userServices = {
     if (name.length > 50) throw new Error('字數超出上限！')
 
     return Promise.all([
-      User.findOne({ where: { account }, raw: true }),
+      // 先將 account 轉換成小寫
+      User.findOne({ where: { account: account.toLowerCase() }, raw: true }),
       User.findOne({ where: { email }, raw: true })
     ])
       .then(([userAccount, userEmail]) => {
@@ -139,16 +140,14 @@ const userController = {
       // console.log('typeof files:', typeof files) // **********確認前端送來的req，之後記得刪掉
       // 錯誤驗證
       if (id !== currentUserId) {
-        return res
-          .status(400)
-          .json({ success: false, message: 'permission denied' })
+        throw new Error('不可編輯他人資料 !')
       } // 不可編輯別人的檔案
       if (password !== checkPassword) {
-        throw new Error('password and checkPassword do not match')
+        throw new Error('密碼不一致 !')
       } // 密碼不相符
-      if (name?.length > 50) throw new Error('name is limited to 50 characters') // 名字太長
+      if (name?.length > 50) throw new Error('字數超出上限！') // 名字太長
       if (introduction?.length > 160) {
-        throw new Error('introduction is limited to 160 characters')
+        throw new Error('字數超出上限！')
       } // 自介太長
 
       const user = await User.findByPk(id)
