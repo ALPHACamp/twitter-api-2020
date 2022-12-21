@@ -30,7 +30,6 @@ module.exports = (sequelize, DataTypes) => {
     introduction: DataTypes.TEXT,
     cover: DataTypes.STRING,
     role: DataTypes.STRING,
-    followerCount: DataTypes.INTEGER,
     followingCount: DataTypes.INTEGER
   }, {
     // Other model options go here
