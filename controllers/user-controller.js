@@ -92,7 +92,9 @@ const userController = {
 	},
 	putUser: (req, res, next) => {
 		const { account, name, email, password, checkPassword, introduction } = req.body
-		const { file } = req
+		const { files } = req // file 改為 files
+		// Hello Gina，後來 Simon 大大幫我們找到bug了，我把這邊console.log出來。
+		console.log(files)
 		if (account) { if (/\s/.test(account) || account.length > 50) throw Error('Invalid Account!', {}, Error.prototype.code = 403) }
 		if (password && checkPassword) {
 			if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw Error('Invalid Password!', {}, Error.prototype.code = 422)
@@ -103,7 +105,8 @@ const userController = {
 
 		Promise.all([
 			User.findByPk(req.params.id),
-			imgurFileHandler(file),
+			imgurFileHandler(files.avatar[0]), // 根據 req.files 抓出來的，裡面有兩個物件，avatar 與 cover
+			imgurFileHandler(files.cover[0]),
 			(async () => {
 				if (account) {
 					userData = await User.findOne({ where: { account: account }, raw: true })
@@ -126,7 +129,12 @@ const userController = {
 				return false
 			})(),
 		])
-			.then(([user, filePath, accountCheck, emailCheck, hash]) => {
+			// 底下 then 回傳還需要修改，會接到 avatar 與 cover
+			// 然後 Simon 大大說如果還要優化，可以擋掉非圖片的檔案。
+			// [ERR_HTTP_INVALID_STATUS_CODE]: Invalid status code: LIMIT_UNEXPECTED_FILE 助教提醒我們要理解這行error的意思
+			// 因為 imgur 2的版本不支援 setClientId ，所以我先降版本至 1，這樣 npm run dev 就不會噴錯了，
+			// 現在可以順利接到圖片了，用 postman 測試是成功的喔！謝謝Gina!!!
+			.then(([user, fileAvatar, fileCover, accountCheck, emailCheck, hash]) => {
 				if (!user) throw new Error('User is not exist!', {}, Error.prototype.code = 412)
 				if (accountCheck && user.account !== accountCheck.account) throw new Error('Account already exists!', {}, Error.prototype.code = 423)
 				if (emailCheck && user.email !== emailCheck.email) throw new Error('Email already exists!', {}, Error.prototype.code = 408)
