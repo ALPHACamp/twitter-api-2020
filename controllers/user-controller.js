@@ -133,8 +133,16 @@ const userController = {
     try {
       const currentUserId = helpers.getUser(req)?.id
       const id = Number(req.params.id)
-      let { account, name, email, password, checkPassword, introduction } =
-        req.body
+      let {
+        account,
+        name,
+        email,
+        password,
+        checkPassword,
+        introduction,
+        avatar,
+        cover
+      } = req.body
       const { files } = req
       // console.log('files:', files) // **********確認前端送來的req，之後記得刪掉
       // console.log('typeof files:', typeof files) // **********確認前端送來的req，之後記得刪掉
@@ -189,29 +197,44 @@ const userController = {
       })
 
       // 找出使用者avatar & cover
-      let avatar = files?.avatar || null
-      let cover = files?.cover || null
+      // let avatar = files?.avatar || null
+      // let cover = files?.cover || null
+      let avatarFile = files?.avatar || null
+      let coverFile = files?.cover || null
 
-      if (avatar) {
-        avatar = await imgurFileHandler(avatar[0])
+      if (avatarFile) {
+        avatarFile = await imgurFileHandler(avatarFile[0])
       }
-      if (cover) {
-        cover = await imgurFileHandler(cover[0])
+      if (coverFile) {
+        coverFile = await imgurFileHandler(coverFile[0])
       }
 
-      // 前端在刪除時，會傳送 null 值給
+      // 前端在刪除時，會傳送 null 值給 cover
       // 只需判斷 cover ，不須判斷 avatar，因為不能刪除 avatar
-      if (!cover) {
-        updateUser.update({
-          cover: null
+
+      if (coverFile === null) {
+        await User.findByPk(currentUserId).then((user) => {
+          // 未上傳檔案
+          // 使用者本來有上傳過 cover，決定不編輯
+          if (user.cover !== null) {
+            updateUser.update({
+              cover: user.cover
+            })
+          }
+          // 使用者刪除 cover，前端傳來 deleteCover 字串
+          if (cover === 'deleteCover') {
+            updateUser.update({
+              cover: null
+            })
+          }
         })
       }
 
       // 使用者頁面更新
       const updateUserProfile = await updateUser.update({
         introduction: introduction,
-        avatar: avatar || user.avatar,
-        cover: cover || user.cover
+        avatar: avatarFile || user.avatar,
+        cover: coverFile || user.cover
       })
 
       const data = updateUserProfile.toJSON()
@@ -327,18 +350,18 @@ const userController = {
       where: { role: 'user' },
       include: [{ model: User, as: 'Followers' }]
     })
-      .then(users => {
+      .then((users) => {
         const result = users
-          .map(user => ({
+          .map((user) => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowed: req.user.Followings.some(f => f.id === user.id) // 登入者是否追隨名單中的使用者
+            isFollowed: req.user.Followings.some((f) => f.id === user.id) // 登入者是否追隨名單中的使用者
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
         const finalResult = result.slice(0, 9) // 取前10名
         res.status(200).send(finalResult)
       })
-      .catch(err => next(err))
+      .catch((err) => next(err))
   }
 }
 
