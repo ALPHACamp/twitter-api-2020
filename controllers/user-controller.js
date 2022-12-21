@@ -77,18 +77,17 @@ const userController = {
   getUser: (req, res, next) => {
     const id = Number(req.params.id)
     return User.findByPk(id, {
-      where: { id, role: 'user' },
+      where: { role: 'user' },
       attributes: {
         exclude: ['password', 'createdAt', 'updatedAt'],
         include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount']
+          [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount']
         ]
       }
     })
       .then(user => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (user.role === 'admin') res.status(404).json({ status: 'error', message: '帳號不存在!' })
         const { ...userData } = {
           ...user.toJSON()
         }

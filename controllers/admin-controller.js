@@ -72,13 +72,12 @@ const adminController = {
   getAdmin: (req, res, next) => {
     const id = helpers.getUser(req).id
     return User.findByPk(id, {
-      where: { id, role: 'admin' },
+      where: { role: 'admin' },
       attributes: { exclude: ['password', 'createdAt', 'updatedAt'] },
       nest: true
     })
       .then(user => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (user.role === 'user') res.status(404).json({ status: 'error', message: '帳號不存在!' })
         const { ...userData } = {
           ...user.toJSON()
         }
