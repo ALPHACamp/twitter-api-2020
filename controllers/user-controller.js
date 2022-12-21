@@ -207,7 +207,6 @@ const userController = {
 			order: [['createdAt', 'DESC']],
 			nest: true,
 			raw: true
-
 		})
 			.then((likeList) => {
 				res.status(200).json(likeList)
@@ -237,27 +236,28 @@ const userController = {
 				raw: true
 			},
 			)
-
 		])
 			.then(([tweetList, likedata, reply]) => {
 				for (let i = 0; i < tweetList.length; i++) {
 					tweetList[i].likeCount = 0
 					tweetList[i].replyCount = 0
-					tweetList[i].like = false
+					tweetList[i].liked = false
 					for (let k = 0; k < likedata.length; k++) {
 						if (likedata[k].TweetId === tweetList[i].id) {
+							// console.log('hello one')
 							tweetList[i].likeCount++
 						}
 						if (likedata[k].UserId === currentUser && likedata[k].TweetId === tweetList[i].id) {
+							// console.log('hello two')
 							tweetList[i].liked = true
 						}
 					}
 					for (let r = 0; r < reply.length; r++) {
 						if (reply[r].TweetId === tweetList[i].id) {
+							// console.log('hello three')
 							tweetList[i].replyCount++
 						}
 					}
-
 				}
 				res.status(200).json(tweetList)
 			})
