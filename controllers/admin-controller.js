@@ -50,7 +50,7 @@ const adminController = {
     return Tweet.findByPk(req.params.id)
       .then(tweet => {
         if (!tweet) {
-          const err = new Error("Tweet didn't exist!")
+          const err = new Error('推文不存在!')
           err.status = 404
           throw err
         }
