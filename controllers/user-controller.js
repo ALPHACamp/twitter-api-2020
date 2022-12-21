@@ -14,9 +14,16 @@ const userController = {
         throw new Error(errorMessage)
       }
       const { name, account, email, password } = req.body
+      const DEFAULT_INTRODUCTION = `Hello! My name is ${name}`
       const salt = await bcrypt.genSalt(10)
       const hash = await bcrypt.hash(password, salt)
-      await User.create({ name, account, email, password: hash })
+      await User.create({
+        name,
+        account,
+        email,
+        password: hash,
+        introduction: DEFAULT_INTRODUCTION
+      })
       // sign token
       const user = await User.findOne({
         where: { account, email, role: 'user' }
