@@ -23,7 +23,7 @@ router.get('/users/:id/replied_tweets', userAuthenticated, userController.getUse
 router.get('/users/:id/followings', userAuthenticated, userController.getUserFollowing)
 router.get('/users/:id/followers', userAuthenticated, userController.getUserFollower)
 router.get('/users/:id', userAuthenticated, userController.getUser)
-router.put('/users/:id', userAuthenticated ,upload.single('img'),userController.putUser)
+router.put('/users/:id', userAuthenticated ,upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]),userController.putUser)
 router.post('/users', userController.postUsers)
 
 router.get('/auth', tokenAuthenticated, userController.getCurrentUser)
