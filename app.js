@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000
 // 使用cors允許跨域連線
 app.use(
   cors({
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000', 'https://yvonne0414.github.io'],
     credentials: true
   })
 )
