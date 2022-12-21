@@ -325,20 +325,21 @@ const userController = {
   },
   getTopUsers: (req, res, next) => {
     User.findAll({
+      where: { role: 'user' },
       include: [{ model: User, as: 'Followers' }]
     })
-      .then((users) => {
+      .then(users => {
         const result = users
-          .map((user) => ({
+          .map(user => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowed: req.user.Followings.some((f) => f.id === user.id) // 登入者是否追隨名單中的使用者
+            isFollowed: req.user.Followings.some(f => f.id === user.id) // 登入者是否追隨名單中的使用者
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
         const finalResult = result.slice(0, 9) // 取前10名
         res.status(200).send(finalResult)
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   }
 }
 
