@@ -142,7 +142,7 @@ const tweetController = {
     ])
       .then(([user, tweet]) => {
         if (!user) throw new Error('使用者不存在!')
-        if (!tweet) throw new Error('推文不存在')
+        if (!tweet) throw new Error('推文不存在!')
         return Reply.create({
           comment,
           TweetId,

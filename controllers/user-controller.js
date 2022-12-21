@@ -22,7 +22,7 @@ const userController = {
   },
   signUp: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
-    if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw new Error('所有欄位皆為必填')
+    if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw new Error('所有欄位皆為必填!')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
     if (name?.length > 50) throw new Error('暱稱 name 上限 50 字!')
     return Promise.all([
@@ -251,11 +251,9 @@ const userController = {
   },
   putUserProfile: (req, res, next) => {
     const { name, introduction } = req.body
-    const currentUser = helpers.getUser(req)
     const id = Number(req.params.id)
     if (name?.length > 50) throw new Error('暱稱 name 上限 50 字!')
     if (introduction?.length > 160) throw new Error('自我介紹 introduction 上限 160 字!')
-    if (id !== currentUser.id) throw new Error('You are not allowed to use!') // 待重構，把只能編輯自己的邏輯寫成另外一個auth middleware
     const { files } = req
     return Promise.all([
       User.findByPk(id),
@@ -280,12 +278,10 @@ const userController = {
   },
   putUserSetting: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
-    const currentUser = helpers.getUser(req)
     const id = Number(req.params.id)
-    if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw new Error('所有欄位皆為必填')
+    if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw new Error('所有欄位皆為必填!')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
     if (name?.length > 50) throw new Error('暱稱 name 上限 50 字!')
-    if (id !== currentUser.id) throw new Error('You are not allowed to use!') // 待重構，把只能編輯自己的邏輯寫成另外一個auth middleware
     return Promise.all([
       User.findByPk(id),
       User.findOne({ where: { account } }),
@@ -312,9 +308,7 @@ const userController = {
       .catch(err => next(err))
   },
   patchUserCover: (req, res, next) => {
-    const currentUser = helpers.getUser(req)
     const id = Number(req.params.id)
-    if (id !== currentUser.id) throw new Error('You are not allowed to use!') // 待重構，把只能編輯自己的邏輯寫成另外一個auth middleware
     return User.findByPk(id)
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
