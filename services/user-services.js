@@ -187,7 +187,11 @@ const userServices = {
     })
       .then(followings => {
         assert(followings, 'Unexpected operation of database.')
-        cb(null, followings)
+        const result = followings.map(f => ({
+          ...f,
+          isFollowed: helpers.getUser(req).Followings.some(uf => uf.Followship.followingId === f.followingId)
+        }))
+        cb(null, result)
       })
       .catch(err => cb(err))
   },
