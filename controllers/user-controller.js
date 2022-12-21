@@ -77,18 +77,17 @@ const userController = {
   getUser: (req, res, next) => {
     const id = Number(req.params.id)
     return User.findByPk(id, {
-      where: { id, role: 'user' },
+      where: { role: 'user' },
       attributes: {
         exclude: ['password', 'createdAt', 'updatedAt'],
         include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount']
+          [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount']
         ]
       }
     })
       .then(user => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (user.role === 'admin') res.status(404).json({ status: 'error', message: '帳號不存在!' })
         const { ...userData } = {
           ...user.toJSON()
         }
@@ -98,33 +97,17 @@ const userController = {
   },
 
   putUser: (req, res, next) => {
-    const { name, email, password, checkPassword, account, introduction } = req.body
     const currentUser = helpers.getUser(req)
+    const { name, password, checkPassword, introduction } = req.body
+    const email = req.body.email || currentUser.email
+    const account = req.body.account || currentUser.account
+
     const { files } = req
 
     if (Number(req.params.id) !== currentUser.id) res.status(401).json({ status: 'error', message: '無權編輯他人資料!' })
     if (!name) res.status(422).json({ status: 'error', message: '暱稱為必填!' })
     if (name.length > 50) res.status(422).json({ status: 'error', message: '暱稱不得超過50字!' })
     if (introduction && introduction.length > 160) res.status(422).json({ status: 'error', message: '自我介紹不得超過160字!' })
-
-    // email不可重複
-    if (email && email !== currentUser.email) {
-      User.findOne({ where: { email } })
-        .then(duplicateEmail => {
-          if (duplicateEmail) return res.status(422).json({ status: 'error', message: 'email 已重複註冊！' })
-          next()
-        })
-        .catch(err => next(err))
-    }
-    // account不可重複
-    if (account && account !== currentUser.account) {
-      User.findOne({ where: { account } })
-        .then(duplicateAccount => {
-          if (duplicateAccount) return res.status(422).json({ status: 'error', message: 'account 已重複註冊！' })
-          next()
-        })
-        .catch(err => next(err))
-    }
 
     // 確認密碼是否變更
     if (password && password !== checkPassword) return res.status(422).json({ status: 'error', message: '密碼與確認密碼不一致!' })
@@ -136,10 +119,14 @@ const userController = {
     return Promise.all([
       User.findByPk(currentUser.id),
       helpers.imgurFileHandler(avatar),
-      helpers.imgurFileHandler(cover)
+      helpers.imgurFileHandler(cover),
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
     ])
-      .then(([user, avatarPath, coverPath]) => {
+      .then(([user, avatarPath, coverPath, duplicateAccount, duplicateEmail]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
+        if (duplicateAccount && duplicateAccount.id !== currentUser.id) return res.status(422).json({ status: 'error', message: 'account 已重複註冊！' })
+        if (duplicateEmail && duplicateEmail.id !== currentUser.id) return res.status(422).json({ status: 'error', message: 'email 已重複註冊！' })
         return user.update({
           name,
           email: email || user.email,
