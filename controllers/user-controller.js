@@ -251,7 +251,7 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
           [sequelize.literal(`(SELECT (COUNT(*) > 0) FROM Followships WHERE Followships.followerId = ${loginUserId} AND Followships.followingId = User.id)`), 'isFollowed']
         ],
-        order: [[sequelize.literal('followerCount'), 'DESC']],
+        order: [[sequelize.literal('followerCount'), 'DESC'], ['name', 'ASC']],
         limit: 10,
         raw: true,
         nest: true
