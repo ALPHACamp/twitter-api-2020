@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
 const { User, Like, Tweet, Followship, Reply, sequelize } = require('../models')
+const { Op } = require('sequelize')
 const { getUser, imgurFileHandler } = require('../_helpers')
 
 const userController = {
@@ -47,12 +48,14 @@ const userController = {
   getUsers: async (req, res, next) => {
     try {
       const top = Number(req.query.top)
+      const loginUser = getUser(req).dataValues.id
       const users = await User.findAll({
+        where: { role: { [Op.not]: 'admin' }, id: { [Op.not]: loginUser } },
         attributes: {
           exclude: ['email', 'introduction', 'password', 'role', 'cover', 'createdAt', 'updatedAt'],
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
-            [sequelize.literal('EXISTS (SELECT * from Followships where Followships.followingId = User.id) != 0'), 'isFollowed']
+            [sequelize.literal('EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id) != 0'), 'isFollowed']
           ]
         },
         // order: ['followerCount', 'DESC'],
