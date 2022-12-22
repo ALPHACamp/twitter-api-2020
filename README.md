@@ -4,9 +4,6 @@
 
 This is RESTful API server about Simple Twitter with fundamental operation of database, you can login by following account to start your twitter.
 
-**ScreenShot**
-![This is homepage](./public/screenshot.jpg)
-
 **Demo** is hosted [here](https://yuwen-ctw.github.io/simple_twitter/login).
 
 **Features**
