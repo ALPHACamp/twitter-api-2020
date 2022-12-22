@@ -9,13 +9,13 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       UserId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Users',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
+        type: Sequelize.INTEGER // 因為測試檔的關係不能放關聯，Tweet的CRUD會不過測試，因為這段"db.Tweet.create({ UserId: 1, description: 'hi' })"
+        // references: {
+        //   model: 'Users',
+        //   key: 'id'
+        // },
+        // onUpdate: 'CASCADE',
+        // onDelete: 'CASCADE'
       },
       description: {
         type: Sequelize.TEXT
