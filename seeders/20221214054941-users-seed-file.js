@@ -11,8 +11,8 @@ module.exports = {
       email: 'root@example.com',
       password: await bcrypt.hash('12345678', 10),
       introduction: faker.lorem.text(),
-      avatar: 'https://i.imgur.com/buZlxFF.jpeg',
-      cover_image: 'https://i.imgur.com/Uongp79.jpeg',
+      avatar: faker.image.avatar(),
+      cover_image: 'https://loremflickr.com/g/1079/359/moutain',
       role: 'admin',
       created_at: new Date(),
       updated_at: new Date()
@@ -45,7 +45,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       introduction: faker.lorem.text(),
       avatar: 'https://imgur.com/jt2Gsoe.jpeg',
-      cover_image: 'https://imgur.com/jt2Gsoe.jpeg',
+      cover_image: 'https://i.imgur.com/xLEsB6E.jpg',
       role: 'user',
       created_at: new Date(),
       updated_at: new Date()
@@ -67,7 +67,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       introduction: faker.lorem.text(),
       avatar: 'https://imgur.com/8R1V7JG.jpeg',
-      cover_image: 'https://imgur.com/8R1V7JG.jpeg',
+      cover_image: 'https://i.imgur.com/OrLvI90.jpg',
       role: 'user',
       created_at: new Date(),
       updated_at: new Date()

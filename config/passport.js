@@ -36,7 +36,8 @@ const jwtOptions = {
 passport.use(new JwtStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     include: [
-      { model: Reply, include: User }, { model: Like, include: User },
+      { model: Reply, include: User },
+      { model: Like, include: User },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
