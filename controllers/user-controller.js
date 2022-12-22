@@ -99,21 +99,50 @@ const userController = {
       .catch(err => next(err))
   },
 
-  putUser: (req, res, next) => {
+  putUserSetting: (req, res, next) => {
     const currentUser = helpers.getUser(req)
-    const { name, password, checkPassword, introduction } = req.body
+    const { password, checkPassword } = req.body
     const email = req.body.email || currentUser.email
     const account = req.body.account || currentUser.account
 
+    if (Number(req.params.id) !== currentUser.id) return res.status(401).json({ status: 'error', message: '無權編輯他人資料!' })
+
+    // 確認密碼是否變更
+    if (password && password !== checkPassword) return res.status(422).json({ status: 'error', message: '密碼與確認密碼不一致!' })
+
+    return Promise.all([
+      User.findByPk(currentUser.id),
+      User.findOne({ where: { account }, raw: true }),
+      User.findOne({ where: { email }, raw: true })
+    ])
+      .then(([user, duplicateAccount, duplicateEmail]) => {
+        if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
+        if (duplicateAccount && duplicateAccount.id !== currentUser.id) return res.status(422).json({ status: 'error', message: 'account 已重複註冊！' })
+        if (duplicateEmail && duplicateEmail.id !== currentUser.id) return res.status(422).json({ status: 'error', message: 'email 已重複註冊！' })
+        return user.update({
+          email: email || user.email,
+          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
+          account: account || user.account
+        })
+      })
+      .then(updatedUser => {
+        updatedUser.toJSON()
+        delete updatedUser.password
+        delete updatedUser.role
+        res.status(200).json({ status: 'success', message: '使用者資料更新成功!', updatedUser })
+      })
+      .catch(err => next(err))
+  },
+
+  putUserProfile: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
+    const { name, introduction } = req.body
     const { files } = req
 
     if (Number(req.params.id) !== currentUser.id) return res.status(401).json({ status: 'error', message: '無權編輯他人資料!' })
     if (!name) return res.status(422).json({ status: 'error', message: '暱稱為必填!' })
     if (name.length > 50) return res.status(422).json({ status: 'error', message: '暱稱不得超過50字!' })
     if (introduction && introduction.length > 160) return res.status(422).json({ status: 'error', message: '自我介紹不得超過160字!' })
-
-    // 確認密碼是否變更
-    if (password && password !== checkPassword) return res.status(422).json({ status: 'error', message: '密碼與確認密碼不一致!' })
 
     // 確認是否有圖片
     const avatar = files?.avatar ? files.avatar[0] : null
@@ -122,19 +151,12 @@ const userController = {
     return Promise.all([
       User.findByPk(currentUser.id),
       helpers.imgurFileHandler(avatar),
-      helpers.imgurFileHandler(cover),
-      User.findOne({ where: { account }, raw: true }),
-      User.findOne({ where: { email }, raw: true })
+      helpers.imgurFileHandler(cover)
     ])
-      .then(([user, avatarPath, coverPath, duplicateAccount, duplicateEmail]) => {
+      .then(([user, avatarPath, coverPath]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (duplicateAccount && duplicateAccount.id !== currentUser.id) return res.status(422).json({ status: 'error', message: 'account 已重複註冊！' })
-        if (duplicateEmail && duplicateEmail.id !== currentUser.id) return res.status(422).json({ status: 'error', message: 'email 已重複註冊！' })
         return user.update({
           name,
-          email: email || user.email,
-          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
-          account: account || user.account,
           introduction: introduction || '',
           avatar: avatarPath || user.avatar,
           cover: coverPath || user.cover
@@ -144,7 +166,7 @@ const userController = {
         updatedUser.toJSON()
         delete updatedUser.password
         delete updatedUser.role
-        res.status(200).json({ status: 'success', message: '使用者資料更新成功!', updatedUser })
+        res.status(200).json({ status: 'success', message: '使用者個人資料更新成功!', updatedUser })
       })
       .catch(err => next(err))
   },
