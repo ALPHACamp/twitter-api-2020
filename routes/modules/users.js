@@ -9,6 +9,8 @@ router.get('/:user_id/tweets', userController.getTweetsOfUser)
 router.get('/:user_id/likes', userController.getLikesOfUser)
 router.get('/:user_id/followings', userController.getFollowingsOfUser)
 router.get('/:user_id/followers', userController.getFollowersOfUser)
+router.put('/:user_id/setting', userController.settingUser)
+router.get('/top', userController.getTopUsers)
 router.get('/:user_id', userController.getUser)
 router.put('/:user_id', cpUpload, userController.editUser)
 

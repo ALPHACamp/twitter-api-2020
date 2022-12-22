@@ -64,7 +64,14 @@ const userServices = {
   },
   getUser: (req, cb) => {
     return Promise.all([
-      User.findByPk(req.params.user_id),
+      User.findOne({
+        where: { id: req.params.user_id },
+        include: [{
+          model: Tweet,
+          attributes:
+            [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.fn('DISTINCT', Tweet.sequelize.col('tweets.id'))), 'totalTweets']]
+        }]
+      }),
       Followship.findAndCountAll({
         where: { followingId: req.params.user_id },
         raw: true
@@ -104,7 +111,8 @@ const userServices = {
       }],
       group: 'tweet.id',
       order: [['createdAt', 'DESC']],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(tweets => {
         assert(tweets, 'Unexpected operation of database.')
@@ -245,6 +253,68 @@ const userServices = {
         cb(null, { updatedUser })
       })
       .catch(err => cb(err))
+  },
+  getTopUsers: (req, cb) => {
+    return User.findAll({
+      include: [{ model: User, as: 'Followers' }]
+    })
+      .then(users => {
+        const topUsers = users.map(user => ({
+          // 展開重新包裝
+          ...user.toJSON(),
+          // 計算追蹤者人數
+          followerCount: user.Followers.length,
+          // 判斷目前登入使用者是否已追蹤該 user 物件
+          isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
+        }))
+          .sort((a, b) => b.followerCount - a.followerCount).slice(0, 10)
+        cb(null, { topUsers })
+      })
+      .catch(err => cb(err))
+  },
+  settingUser: (req, cb) => {
+    const { account, email, password, checkPassword } = req.body
+    let name = req.body.name
+    // 驗證name內容是否超過上限字數，若超過則提示
+    const nameLengthLimit = 50
+    if (name.length > nameLengthLimit) {
+      throw new Error(
+        `Name的內容超過${nameLengthLimit}字, 請縮短!(${name.length}/${nameLengthLimit})`)
+    }
+    // 驗證兩次密碼輸入是否相符，若不符則提示錯誤訊息
+    if (password !== checkPassword) throw new Error('請再次確認密碼!')
+    // 若name未填，default為account
+    if (!name) name = account
+    // 使用者account & email在資料庫皆須為唯一，任一已存在資料庫則提示錯誤訊息
+    Promise.all([
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
+    ])
+      .then(([userFindByAccount, userFindByEmail]) => {
+        // account email註冊，後端驗證唯一性
+        assert(!userFindByAccount, 'Account 已存在!')
+        assert(!userFindByEmail, 'Email 已存在！')
+        // input驗證OK，bcrypt密碼
+        return Promise.all([bcrypt.hash(password, 10), User.findByPk(req.params.user_id)])
+      })
+      .then(([hash, user]) => {
+        console.log([hash, user])
+        assert(user, "User doesn't exit!")
+        return user.update({
+          name,
+          account,
+          email,
+          password: hash
+        })
+      })
+      .then(updatedUser => {
+        // 刪除機敏資訊
+        updatedUser = updatedUser.toJSON()
+        delete updatedUser.password
+        cb(null, { updatedUser })
+      })
+      .catch(err => cb(err))
   }
+
 }
 module.exports = userServices
