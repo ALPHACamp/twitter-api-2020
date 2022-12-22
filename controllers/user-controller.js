@@ -55,7 +55,7 @@ const userController = {
           exclude: ['email', 'introduction', 'password', 'role', 'cover', 'createdAt', 'updatedAt'],
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount'],
-            [sequelize.literal('EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id) != 0'), 'isFollowed']
+            [sequelize.literal(`EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id AND Followships.followerId = ${loginUser})`), 'isFollowed']
           ]
         },
         // order: ['followerCount', 'DESC'],
