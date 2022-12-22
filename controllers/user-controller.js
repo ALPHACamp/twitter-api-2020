@@ -76,30 +76,36 @@ const userController = {
 		 Followship.findAndCountAll({
 		  where: { followerId: id }
 		 }),
-		 Followship.findOne({
-		  where:{followerId:currentUser},
+		 Followship.findAll({
+		  where:{followingId:id},
 		  raw:true
 		 })
 		])
 		 .then(([user, tweets, follower, following,ifFollowing]) => {
+
 		  if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
 		  const userData = user.get({ plain: true })
+		  console.log('檢測',ifFollowing)
 		  delete userData.password
 		  userData.followingCount = following.count
 		  userData.followerCount = follower.count
 		  userData.tweetsCount = tweets.count
-		  if(ifFollowing.followingId === userData.id){
-		  userData.isfollowing = true
-		  }
+		  userData.isfollowing = false
+
+		  ifFollowing.forEach((f)=>{
+			if(f.followerId ===currentUser){
+				userData.isfollowing = true
+			}
+		  })
 		  res.status(200).json(userData)
 		 })
 		 .catch(err => next(err))
 	   },
-	putUser: (req, res, next) => {
+	putUser: async(req, res, next) => {
 		const { account, name, email, password, checkPassword, introduction } = req.body
 		const { files } = req // file 改為 files
 		// Hello Gina，後來 Simon 大大幫我們找到bug了，我把這邊console.log出來。
-		console.log('這邊',files.avatar[0])
+		// console.log('這邊',files.avatar[0])
 		if (account) { if (/\s/.test(account) || account.length > 50) throw Error('Invalid Account!', {}, Error.prototype.code = 403) }
 		if (password && checkPassword) {
 			if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw Error('Invalid Password!', {}, Error.prototype.code = 422)
@@ -107,25 +113,19 @@ const userController = {
 		if (name) { if (name.length > 50) throw Error('Invalid name!', {}, Error.prototype.code = 403) }
 		if (email) { if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw Error('Invalid email format!', {}, Error.prototype.code = 401) }
 		if (introduction) { if (introduction.length > 160) throw Error('Invalid introduction!', {}, Error.prototype.code = 403) }
-
+		let fileCover =null
+		let fileAvatar =null
+		
+		//圖片上傳imgur處理
+		if(files.avatar){
+			fileAvatar = await imgurFileHandler(files.avatar[0])
+		}
+		if(files.cover){
+			fileCover = await imgurFileHandler(files.cover[0])
+		}
+		
 		Promise.all([
 			User.findByPk(req.params.id),
-			(async () => {
-				if (files.avatar[0]) {
-					console.log('#######',files.avatar[0])
-					const fileAvatar = await imgurFileHandler(files.avatar[0])
-					console.log('＠＠＠是不是',fileAvatar)
-					return fileAvatar
-				}
-				return false
-			})(), // 根據 req.files 抓出來的，裡面有兩個物件，avatar 與 cover
-			(async () => {
-				if (files.cover[0]) {
-					const fileCover = await imgurFileHandler(files.cover[0])
-					return fileCover
-				}
-				return false
-			})(), 
 			(async () => {
 				if (account) {
 					userData = await User.findOne({ where: { account: account }, raw: true })
@@ -153,8 +153,7 @@ const userController = {
 			// [ERR_HTTP_INVALID_STATUS_CODE]: Invalid status code: LIMIT_UNEXPECTED_FILE 助教提醒我們要理解這行error的意思
 			// 因為 imgur 2的版本不支援 setClientId ，所以我先降版本至 1，這樣 npm run dev 就不會噴錯了，
 			// 現在可以順利接到圖片了，用 postman 測試是成功的喔！謝謝Gina!!!
-			.then(([user, accountCheck, emailCheck, hash]) => {
-				// console.log('=========fileAvatar',fileAvatar,fileCover)
+			.then(([user,accountCheck, emailCheck, hash]) => {
 				if (!user) throw new Error('User is not exist!', {}, Error.prototype.code = 412)
 				if (accountCheck && user.account !== accountCheck.account) throw new Error('Account already exists!', {}, Error.prototype.code = 423)
 				if (emailCheck && user.email !== emailCheck.email) throw new Error('Email already exists!', {}, Error.prototype.code = 408)
@@ -164,15 +163,13 @@ const userController = {
 					name: name || user.name,
 					email: email || user.mail,
 					password: hash || user.password,
-					avatar: user.avatar,
+					avatar: fileAvatar||user.avatar,
 					introduction: introduction || user.introduction,
-					cover: user.cover
+					cover: fileCover||user.cover
 				})
 			})
 			.then((data) => {
-				
 				delete data.get({ plain: true }).password
-				console.log('最後',data)
 				res.status(200).json(data)
 			})
 			.catch(err => next(err))
