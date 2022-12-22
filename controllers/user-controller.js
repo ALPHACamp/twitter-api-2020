@@ -85,7 +85,6 @@ const userController = {
 
 		  if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
 		  const userData = user.get({ plain: true })
-		  console.log('檢測',ifFollowing)
 		  delete userData.password
 		  userData.followingCount = following.count
 		  userData.followerCount = follower.count
