@@ -2,7 +2,7 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
 const bcrypt = require('bcryptjs')
-const { User, Reply, Tweet, Like } = require('../models')
+const { User, /* Reply, Tweet, */ Like } = require('../models')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 // set up Passport strategy
@@ -36,7 +36,7 @@ passport.use(new JWTStrategy(jwtOptions, async (req, jwtPayload, cb) => {
     const user = await User.findByPk(jwtPayload.id, {
       attributes: { exclude: ['password', 'createdAt', 'updatedAt'] },
       include: [
-        Reply, Tweet, Like,
+        /* Reply, Tweet, */ Like,
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
       ]

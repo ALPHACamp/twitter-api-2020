@@ -14,8 +14,11 @@ router.get('/:id/followings', userController.getUserFollowings)
 router.get('/:id/followers', userController.getUserFollowers)
 // 取得 user likes
 router.get('/:id/likes', userController.getLikes)
+// 更新使用者帳號資料
+router.put('/:id/setting', userController.putUserSetting)
 // 取得使用者資料
 router.get('/:id', userController.getUser)
-// 更新使用者資料
-router.put('/:id', cpUpload, userController.putUser)
+// 更新使用者個人資料
+router.put('/:id', cpUpload, userController.putUserProfile)
+
 module.exports = router
