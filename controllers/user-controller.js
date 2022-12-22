@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { getUser, imgurFileHandler,localFileHandler } = require('../_helpers')
+const { getUser, imgurFileHandler, localFileHandler } = require('../_helpers')
 const { User, Tweet, Followship, Like, Reply, sequelize } = require('../models')
 const id = require('faker/lib/locales/id_ID')
 
@@ -66,40 +66,41 @@ const userController = {
 		const id = req.params.id
 		const currentUser = getUser(req).id
 		return Promise.all([
-		 User.findByPk(id),
-		 Tweet.findAndCountAll({
-		  where: { UserId: id }
-		 }),
-		 Followship.findAndCountAll({
-		  where: { followingId: id }
-		 }),
-		 Followship.findAndCountAll({
-		  where: { followerId: id }
-		 }),
-		 Followship.findOne({
-		  where:{followerId:currentUser},
-		  raw:true
-		 })
+			User.findByPk(id),
+			Tweet.findAndCountAll({
+				where: { UserId: id }
+			}),
+			Followship.findAndCountAll({
+				where: { followingId: id }
+			}),
+			Followship.findAndCountAll({
+				where: { followerId: id }
+			}),
+			Followship.findOne({
+				where: { followerId: currentUser },
+				raw: true
+			})
 		])
-		 .then(([user, tweets, follower, following,ifFollowing]) => {
-		  if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
-		  const userData = user.get({ plain: true })
-		  delete userData.password
-		  userData.followingCount = following.count
-		  userData.followerCount = follower.count
-		  userData.tweetsCount = tweets.count
-		  if(ifFollowing.followingId === userData.id){
-		  userData.isfollowing = true
-		  }
-		  res.status(200).json(userData)
-		 })
-		 .catch(err => next(err))
-	   },
+			.then(([user, tweets, follower, following, ifFollowing]) => {
+				if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
+				const userData = user.get({ plain: true })
+				delete userData.password
+				userData.followingCount = following.count
+				userData.followerCount = follower.count
+				userData.tweetsCount = tweets.count
+				userData.isfollowing = false
+				if (ifFollowing.followingId === userData.id) {
+					userData.isfollowing = true
+				}
+				res.status(200).json(userData)
+			})
+			.catch(err => next(err))
+	},
 	putUser: (req, res, next) => {
 		const { account, name, email, password, checkPassword, introduction } = req.body
 		const { files } = req // file 改為 files
 		// Hello Gina，後來 Simon 大大幫我們找到bug了，我把這邊console.log出來。
-		console.log('這邊',files.avatar[0])
+		console.log('這邊', files.avatar[0])
 		if (account) { if (/\s/.test(account) || account.length > 50) throw Error('Invalid Account!', {}, Error.prototype.code = 403) }
 		if (password && checkPassword) {
 			if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw Error('Invalid Password!', {}, Error.prototype.code = 422)
@@ -112,9 +113,9 @@ const userController = {
 			User.findByPk(req.params.id),
 			(async () => {
 				if (files.avatar[0]) {
-					console.log('#######',files.avatar[0])
+					console.log('#######', files.avatar[0])
 					const fileAvatar = await imgurFileHandler(files.avatar[0])
-					console.log('＠＠＠是不是',fileAvatar)
+					console.log('＠＠＠是不是', fileAvatar)
 					return fileAvatar
 				}
 				return false
@@ -125,7 +126,7 @@ const userController = {
 					return fileCover
 				}
 				return false
-			})(), 
+			})(),
 			(async () => {
 				if (account) {
 					userData = await User.findOne({ where: { account: account }, raw: true })
@@ -170,9 +171,9 @@ const userController = {
 				})
 			})
 			.then((data) => {
-				
+
 				delete data.get({ plain: true }).password
-				console.log('最後',data)
+				console.log('最後', data)
 				res.status(200).json(data)
 			})
 			.catch(err => next(err))
