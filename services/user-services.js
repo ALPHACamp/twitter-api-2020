@@ -9,6 +9,7 @@ const userServices = {
   loginUser: (req, cb) => {
     try {
       const userData = helpers.getUser(req).toJSON()
+      if (userData.role === 'admin') throw new Error("account doesn't exist!")
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, {
@@ -33,11 +34,6 @@ const userServices = {
         if (userWithEmail) throw new Error('Email already exists!')
         return bcrypt.hash(req.body.password, 10)
       })
-      .then(user => {
-        if (user.account === account) throw new Error('Account already exists!')
-        if (user.email === email) throw new Error('Email already exists!')
-        return bcrypt.hash(req.body.password, 10)
-      })
       .then(hash => User.create({
         account,
         name,
@@ -48,6 +44,7 @@ const userServices = {
         cover: `https://loremflickr.com/820/312/space?random=${Math.random() * 100}`
       }))
       .then(user => {
+        user = user.toJSON()
         delete user.password
         cb(null, user)
       })
@@ -57,10 +54,12 @@ const userServices = {
     return User.findByPk(req.params.userId, {
       attributes: [
         'id', 'name', 'account', 'email', 'introduction', 'avatar', 'cover',
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE User_id = User.id)'), 'tweetCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount']
       ],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(user => {
         if (!user) throw new Error('user do not exist.')
@@ -69,26 +68,32 @@ const userServices = {
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    const { account, name, email, introduction, password, avatar, cover } = req.body
-    const UserId = req.params.userId
-    return Promise.all([
-      User.findByPk(UserId)
-    ])
-      .then(([user, avatarFilePath, coverFilePath]) => {
+    const { account, name, email, introduction, password, avatar, cover, checkPassword } = req.body
+    const UserId = Number(req.params.userId)
+    const currentUserId = helpers.getUser(req).id
+    if (UserId !== currentUserId) throw new Error('You can only edit your own profile!')
+    // password check
+    if (password !== checkPassword) throw new Error('Passwords do not match!')
+    return Promise.all([User.findByPk(UserId), User.findOne({ where: { account } }), User.findOne({ where: { email } })])
+      .then(([user, foundUserByAccount, foundUserByEmail]) => {
         if (!user) throw new Error("User didn't exist!")
+        // check if account and email exists in db
+        // if (foundUserByAccount?.account === user.account) throw new Error('Account already exists!')
+        // if (user.email !== email) throw new Error('email already exists!')
         return user.update({
           account,
           name,
           email,
           introduction,
-          password,
-          avatar,
-          cover
+          password: password ? bcrypt.hashSync(password, 10) : user.password,
+          avatar: avatar || user.avatar,
+          cover: cover || user.cover
         })
       })
-      .then(updatedUser => {
-        delete updatedUser.password
-        cb(null, { user: updatedUser })
+      .then(user => {
+        user = user.toJSON()
+        delete user.password
+        cb(null, user)
       })
       .catch(err => cb(err))
   },
@@ -96,13 +101,22 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followerId: UserId },
-      include: [{ model: User, as: 'followingUser', attributes: ['name', 'avatar', 'account'] }],
+      include: [{ model: User, as: 'followingUser', attributes: ['id', 'name', 'avatar', 'account', 'introduction'] }],
       attributes: [
         'followingId', 'followerId',
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']],
-      raw: true
+      raw: true,
+      nest: true
     })
-      .then(followings => {
+      .then(datas => {
+        const followings = datas.map(data => ({
+          ...data,
+          isFollowed: data.isFollowed === 1
+        }))
+        followings.forEach(f => {
+          delete f.followingId
+          delete f.followerId
+        })
         cb(null, followings)
       })
       .catch(err => cb(err))
@@ -111,25 +125,36 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followingId: UserId },
-      include: [{ model: User, as: 'followerUser', attributes: ['name', 'avatar', 'account'] }],
+      include: [{ model: User, as: 'followerUser', attributes: ['id', 'name', 'avatar', 'account', 'introduction'] }],
       attributes: [
         'followingId', 'followerId',
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE following_id = followerId AND follower_id = ${UserId} )`), 'isFollowed']],
-      raw: true
+      raw: true,
+      nest: true
     })
-      .then(followers =>
+      .then(datas => {
+        const followers = datas.map(data => ({
+          ...data,
+          isFollowed: data.isFollowed === 1
+        }))
+        followers.forEach(f => {
+          delete f.followingId
+          delete f.followerId
+        })
         cb(null, followers)
-      )
+      })
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
     const UserId = req.params.userId
+    const userId = helpers.getUser(req).id
     return Tweet.findAll({
       where: { UserId },
       attributes: {
         include: [
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE tweet_id = Tweet.id AND user_id = ${userId})`), 'isLiked']
         ]
       },
       include: [{
@@ -137,9 +162,15 @@ const userServices = {
         attributes: ['id', 'avatar', 'name', 'account']
       }],
       order: [['id', 'DESC']],
-      raw: true
+      raw: true,
+      nest: true
     })
-      .then(tweets => {
+      .then(datas => {
+        const tweets = datas.map(data => ({
+          ...data,
+          isLiked: data.isLiked === 1
+        }))
+        tweets.forEach(t => delete t.UserId)
         cb(null, tweets)
       })
       .catch(err => cb(err))
@@ -149,16 +180,22 @@ const userServices = {
     return Reply.findAll({
       where: { UserId },
       attributes: { exclude: ['TweetId'] },
-      include: {
-        model: Tweet,
-        attributes: ['id'],
-        include: {
+      include: [
+        {
+          model: Tweet,
+          attributes: ['id'],
+          include: {
+            model: User,
+            attributes: ['id', 'account']
+          }
+        },
+        {
           model: User,
-          attributes: ['account']
-        }
-      },
+          attributes: ['id', 'avatar', 'account', 'name']
+        }],
       order: [['id', 'DESC']],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(replies => {
         cb(null, replies)
@@ -184,9 +221,17 @@ const userServices = {
         }
       },
       order: [['id', 'DESC']],
-      raw: true
+      raw: true,
+      nest: true
     })
-      .then(likedTweets => cb(null, likedTweets))
+      .then(datas => {
+        const likedTweets = datas.map(t => (
+          {
+            ...t.Tweet,
+            isLiked: t.Tweet.isLiked === 1
+          }))
+        cb(null, likedTweets)
+      })
       .catch(err => cb(err))
   }
 }
