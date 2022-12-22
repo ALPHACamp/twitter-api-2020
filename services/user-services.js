@@ -102,7 +102,8 @@ const userServices = {
       }],
       group: 'tweet.id',
       order: [['createdAt', 'DESC']],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(tweets => {
         assert(tweets, 'Unexpected operation of database.')
@@ -127,7 +128,6 @@ const userServices = {
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
-
     })
       .then(repliesOfTweet => {
         assert(repliesOfTweet, 'Unexpected operation of database.')
@@ -181,7 +181,6 @@ const userServices = {
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
-
     })
       .then(followings => {
         assert(followings, 'Unexpected operation of database.')
@@ -202,7 +201,6 @@ const userServices = {
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
-
     })
       .then(followers => {
         assert(followers, 'Unexpected operation of database.')
