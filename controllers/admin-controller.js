@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const dayjs = require('dayjs')
 const { User, Tweet, sequelize } = require('../models')
-const { sanitizedInput } = require('../helpers/sanitized')
+const { sanitizedInput, checkUriParam } = require('../helpers/sanitized')
 const adminController = {
 
   signIn: (req, res, next) => {
@@ -56,7 +56,7 @@ const adminController = {
 
   deleteTweet: async (req, res, next) => {
     try {
-      const reqTweetId = Number(sanitizedInput(req.params.id))
+      const reqTweetId = Number(checkUriParam(sanitizedInput(req.params.id)))
       const tweet = await Tweet.findByPk(reqTweetId)
       if (!tweet) return res.status(404).json({ status: 'error', message: 'Tweet does not exist.' })
 

@@ -1,7 +1,7 @@
 const { User, Tweet, Like, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const dayjs = require('dayjs')
-const { sanitizedInput } = require('../helpers/sanitized')
+const { sanitizedInput, checkUriParam } = require('../helpers/sanitized')
 const tweetController = {
 
   getTweets: async (req, res, next) => {
@@ -54,7 +54,7 @@ const tweetController = {
   getOneTweet: async (req, res, next) => {
     try {
       const loginUserId = helpers.getUser(req).id
-      const TweetId = Number(sanitizedInput(req.params.tweet_id))
+      const TweetId = Number(checkUriParam(sanitizedInput(req.params.tweet_id)))
 
       const tweet = await Tweet.findOne({
         where: { id: TweetId },
@@ -80,7 +80,7 @@ const tweetController = {
 
   getReplies: async (req, res, next) => {
     try {
-      const TweetId = Number(sanitizedInput(req.params.tweet_id))
+      const TweetId = Number(checkUriParam(sanitizedInput(req.params.tweet_id)))
 
       // Check tweet existance
       const tweet = await Tweet.findByPk(TweetId)
@@ -115,7 +115,7 @@ const tweetController = {
   addReply: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
-      const TweetId = Number(sanitizedInput(req.params.tweet_id))
+      const TweetId = Number(checkUriParam(sanitizedInput(req.params.tweet_id)))
       const comment = req.body.comment
 
       const tweet = await Tweet.findByPk(TweetId)
@@ -135,7 +135,7 @@ const tweetController = {
   likeOneTweet: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
-      const TweetId = Number(sanitizedInput(req.params.tweet_id))
+      const TweetId = Number(checkUriParam(sanitizedInput(req.params.tweet_id)))
 
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) return res.status(404).json({ status: 'error', message: 'Cannot find this tweet.' })
@@ -151,7 +151,7 @@ const tweetController = {
   unlikeOneTweet: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
-      const TweetId = Number(sanitizedInput(req.params.tweet_id))
+      const TweetId = Number(checkUriParam(sanitizedInput(req.params.tweet_id)))
 
       const like = await Like.findOne({ where: { UserId, TweetId } })
       if (!like) return res.status(404).json({ status: 'error', message: "Cannot find this tweet or you havn't like this tweet." })
