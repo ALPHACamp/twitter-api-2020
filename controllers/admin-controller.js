@@ -25,12 +25,8 @@ const adminController = {
 					[sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = User.id)'), 'likeCount'],
 					[sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount']
 				],
-				order: [['createdAt', 'DESC']]
+				order: [[sequelize.literal('tweetCount'), 'DESC']]
 			})
-			const dataOrder = await usersData.sort(function (a, b) {
-				return a.tweetCount < b.tweetCount
-			})
-			console.log(dataOrder)
 			res.status(200).json(usersData)
 		} catch (err) { next(err) }
 	},
