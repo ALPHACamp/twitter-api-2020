@@ -30,6 +30,6 @@ app.use('/api', routes)
 // app.use('/', (req, res) => res.send('Hello World!'))
 // app.use(generalErrorHandler)
 
-app.listen(port, () => console.log(`E---xample app listening on port ${port}!!Let's go to http://localhost:${port}`))
+app.listen(port, () => console.log(`Example app listening on port ${port}!!Let's go to http://localhost:${port}`))
 
 module.exports = app
