@@ -78,8 +78,8 @@ const userServices = {
       .then(([user, foundUserByAccount, foundUserByEmail]) => {
         if (!user) throw new Error("User didn't exist!")
         // check if account and email exists in db
-        // if (foundUserByAccount?.account === user.account) throw new Error('Account already exists!')
-        // if (user.email !== email) throw new Error('email already exists!')
+        if (foundUserByAccount?.account && user.account !== account) throw new Error('Account already exists!')
+        if (foundUserByEmail?.email && user.email !== email) throw new Error('email already exists!')
         return user.update({
           account,
           name,
