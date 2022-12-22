@@ -22,7 +22,11 @@ const followshipServices = {
       raw: true,
       nest: true
     })
-      .then(users => {
+      .then(datas => {
+        const users = datas.map(data => ({
+          ...data,
+          isFollowed: data.isFollowed === 1
+        }))
         cb(null, users)
       })
       .catch(err => cb(err))

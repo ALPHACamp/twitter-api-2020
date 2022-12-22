@@ -9,6 +9,7 @@ const userServices = {
   loginUser: (req, cb) => {
     try {
       const userData = helpers.getUser(req).toJSON()
+      if (userData.role === 'admin') throw new Error("account doesn't exist!")
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, {
@@ -33,11 +34,6 @@ const userServices = {
         if (userWithEmail) throw new Error('Email already exists!')
         return bcrypt.hash(req.body.password, 10)
       })
-      .then(user => {
-        if (user.account === account) throw new Error('Account already exists!')
-        if (user.email === email) throw new Error('Email already exists!')
-        return bcrypt.hash(req.body.password, 10)
-      })
       .then(hash => User.create({
         account,
         name,
@@ -48,6 +44,7 @@ const userServices = {
         cover: `https://loremflickr.com/820/312/space?random=${Math.random() * 100}`
       }))
       .then(user => {
+        user = user.toJSON()
         delete user.password
         cb(null, user)
       })
@@ -71,26 +68,38 @@ const userServices = {
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    const { account, name, email, introduction, password, avatar, cover } = req.body
-    const UserId = req.params.userId
-    return Promise.all([
-      User.findByPk(UserId)
-    ])
-      .then(([user, avatarFilePath, coverFilePath]) => {
+    const { account, name, email, introduction, password, avatar, cover, checkPassword } = req.body
+    const UserId = Number(req.params.userId)
+    const currentUserId = helpers.getUser(req).id
+    if (UserId !== currentUserId) throw new Error('You can only edit your own profile!')
+    // password check
+    if (password !== checkPassword) throw new Error('Passwords do not match!')
+    return User.findByPk(UserId)
+      .then(user => {
         if (!user) throw new Error("User didn't exist!")
+        // check if account and email exists in db
+        // if (user.account !== account) {
+        //   User.findOne({ where: { account } })
+        //     .then(user => { if (user) throw new Error('Account already exists!') })
+        // }
+        // if (user.email !== email) {
+        //   User.findOne({ where: { email } })
+        //     .then(user => { if (user) throw new Error('email already exists!') })
+        // }
         return user.update({
           account,
           name,
           email,
           introduction,
-          password,
+          password: bcrypt.hashSync(password, 10),
           avatar,
           cover
         })
       })
-      .then(updatedUser => {
-        delete updatedUser.password
-        cb(null, { user: updatedUser })
+      .then(user => {
+        user = user.toJSON()
+        delete user.password
+        cb(null, user)
       })
       .catch(err => cb(err))
   },
@@ -105,7 +114,11 @@ const userServices = {
       raw: true,
       nest: true
     })
-      .then(followings => {
+      .then(datas => {
+        const followings = datas.map(data => ({
+          ...data,
+          isFollowed: data.isFollowed === 1
+        }))
         cb(null, followings)
       })
       .catch(err => cb(err))
@@ -121,9 +134,13 @@ const userServices = {
       raw: true,
       nest: true
     })
-      .then(followers =>
+      .then(datas => {
+        const followers = datas.map(data => ({
+          ...data,
+          isFollowed: data.isFollowed === 1
+        }))
         cb(null, followers)
-      )
+      })
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
@@ -159,7 +176,7 @@ const userServices = {
         attributes: ['id'],
         include: {
           model: User,
-          attributes: ['account']
+          attributes: ['id', 'name', 'account', 'avatar']
         }
       },
       order: [['id', 'DESC']],
@@ -193,7 +210,13 @@ const userServices = {
       raw: true,
       nest: true
     })
-      .then(likedTweets => cb(null, likedTweets))
+      .then(datas => {
+        const likedTweets = datas.map(data => ({
+          ...data,
+          isLiked: data.isLiked === 1
+        }))
+        cb(null, likedTweets)
+      })
       .catch(err => cb(err))
   }
 }

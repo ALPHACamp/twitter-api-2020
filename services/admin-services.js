@@ -7,6 +7,7 @@ const adminServices = {
   loginAdmin: (req, cb) => {
     try {
       const userData = helpers.getUser(req).toJSON()
+      if (userData.role === 'user') throw new Error("account doesn't exist!")
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, {

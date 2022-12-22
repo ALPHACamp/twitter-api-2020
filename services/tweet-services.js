@@ -19,7 +19,11 @@ const tweetServices = {
       nest: true,
       order: [['id', 'DESC']]
     })
-      .then(tweets => {
+      .then(datas => {
+        const tweets = datas.map(data => ({
+          ...data,
+          isLiked: data.isLiked === 1
+        }))
         cb(null, tweets)
       })
       .catch(err => cb(err))
@@ -40,6 +44,7 @@ const tweetServices = {
     })
       .then(tweet => {
         if (!tweet) throw new Error('Tweet does not exist!')
+        tweet.isLiked = tweet.isLiked === 1
         cb(null, tweet)
       })
       .catch(err => cb(err))
@@ -77,7 +82,7 @@ const tweetServices = {
   getReplies: (req, cb) => {
     const TweetId = req.params.tweetId
     return Tweet.findByPk(TweetId, {
-      include: { model: User, attributes: ['account'] },
+      include: { model: User, attributes: ['id', 'account', 'avatar', 'name'] },
       raw: true,
       nest: true
     })
