@@ -1,5 +1,6 @@
+const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Followship } = require('../models')
+const { User, Tweet, Followship, Like, Reply } = require('../models')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -363,6 +364,107 @@ const userController = {
           .sort((a, b) => b.followerCount - a.followerCount)
         const finalResult = result.slice(0, 9) // 取前10名
         res.status(200).send(finalResult)
+      })
+      .catch(err => next(err))
+  },
+  getUserTweets: (req, res, next) => {
+    const currentUserId = helpers.getUser(req)?.id // 正在使用網站的使用者id
+    const UserId = Number(req.params.id) // 要查看的特定使用者id
+
+    // 要撈特定使用者資料/tweet資料、現在使用者的like資料
+    return Promise.all([
+      User.findByPk(UserId),
+      Tweet.findAll({
+        where: { UserId },
+        attributes: [
+          'id', 'description', 'createdAt',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Replies AS replyCount WHERE tweet_id = Tweet.id)'), 'replyCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Likes AS likeCount WHERE tweet_id = Tweet.id)'), 'likeCount'
+          ]
+        ],
+        order: [['createdAt', 'DESC']],
+        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+        raw: true,
+        nest: true
+      }),
+      Like.findAll({ where: { UserId: currentUserId }, raw: true })
+    ])
+      .then(([user, tweets, likes]) => {
+        if (!user) throw new Error("User didn't exist")
+        // console.log(likes)
+        // console.log(tweets)
+        const userData = tweets.map(tweet => ({
+          ...tweet,
+          isLiked: likes.some(like => like.TweetId === tweet.id && currentUserId === like.UserId)
+        }))
+        res.status(200).json(userData)
+      })
+      .catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    // const currentUserId = helpers.getUser(req)?.id // 正在使用網站的使用者id
+    const UserId = Number(req.params.id) // 要查看的特定使用者id
+
+    // 要撈特定使用者資料/reply資料
+    return Promise.all([
+      User.findByPk(UserId),
+      Reply.findAll({
+        where: { UserId },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['id', 'account'] }] }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, replies]) => {
+        if (!user) throw new Error("User didn't exist")
+        res.status(200).json(replies)
+      })
+      .catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+    const currentUserId = helpers.getUser(req)?.id // 正在使用網站的使用者id
+    const UserId = Number(req.params.id) // 要查看的特定使用者id
+
+    return Promise.all([
+      User.findByPk(UserId),
+      // 用UserId去撈Like關聯tweet，找到使用者like過的tweet資料
+      // 再用tweet去關聯user跟like資料，取得tweet-user跟like資料，判斷登入使用者isliked布林值
+      Like.findAll({
+        where: { UserId },
+        include: [{
+          model: Tweet,
+          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Like }],
+          attributes: {
+            include: [
+              [
+                sequelize.literal('(SELECT COUNT(*) FROM Replies AS replyCount WHERE tweet_id = Tweet.id)'), 'replyCount' // 回傳留言數
+              ],
+              [
+                sequelize.literal('(SELECT COUNT(*) FROM Likes AS likeCount WHERE tweet_id = Tweet.id)'), 'likeCount' // 回傳按讚數
+              ]]
+          }
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, likes]) => {
+        if (!user) throw new Error("User didn't exist")
+        const data = likes.map(like => {
+          const { Likes, ...data } = like.Tweet.toJSON()
+          const userLikes = like.Tweet.toJSON().Likes
+          data.isLiked = userLikes.some(like => like.UserId === currentUserId)
+          data.TweetId = like.Tweet.toJSON().id
+          delete data.UserId
+          return data
+        })
+        res.status(200).json(data)
       })
       .catch(err => next(err))
   }
