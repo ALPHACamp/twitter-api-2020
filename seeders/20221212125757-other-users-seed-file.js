@@ -12,7 +12,7 @@ module.exports = {
 			introduction: faker.lorem.text().substring(0,160),
 			cover: `https://loremflickr.com/639/200/image?random=${Math.random() * 100}`,
 			role: 'user',
-			following_count: Math.floor(Math.random() * 500),
+			following_count: 0,
 			created_at: faker.datatype.datetime({ min: 1577836800000, max: 1623456000000 }),
 			updated_at: faker.datatype.datetime({ min: 1637836800000, max: 1663456000000 })
 		}))

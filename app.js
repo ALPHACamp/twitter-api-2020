@@ -5,7 +5,7 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const routes = require('./routes')
 const passport = require('./config/passport')
-require('dotenv').config()
+// require('dotenv').config()
 const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000

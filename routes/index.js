@@ -7,7 +7,7 @@ const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
 
 const { generalErrorHandler } = require('../middleware/error-handler')
-const { userAuthenticated, userLoginAuth ,tokenAuthenticated} = require('../middleware/auth')
+const { userAuthenticated, userLoginAuth ,admintokenAuthenticated} = require('../middleware/auth')
 const upload = require('../middleware/multer')
 router.post('/login', userLoginAuth, userController.logIn)
 
@@ -26,7 +26,8 @@ router.get('/users/:id', userAuthenticated, userController.getUser)
 router.put('/users/:id', userAuthenticated ,upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]),userController.putUser)
 router.post('/users', userController.postUsers)
 
-router.get('/auth', tokenAuthenticated, userController.getCurrentUser)
+router.get('/auth', userAuthenticated, userController.getCurrentUser)
+router.get('/auth/admin', admintokenAuthenticated, userController.getCurrentAdmin)
 
 router.get('/', (req, res) => res.send('Hello World!'))
 
