@@ -204,14 +204,12 @@ const userController = {
       include: {
         model: User,
         as: 'Followings',
-        attributes: [
-          'id',
-          'account',
-          'name',
-          'avatar',
-          'introduction',
-          [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.followerId = ${currentUser.id} AND Followships.followingId = Followings.id )`), 'isFollowed']
-        ]
+        attributes: {
+          exclude: ['password'],
+          include: [
+            [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.followerId = ${currentUser.id} AND Followships.followingId = Followings.id )`), 'isFollowed']
+          ]
+        }
       },
       order: [['createdAt', 'DESC']],
       raw: true,
@@ -230,14 +228,12 @@ const userController = {
       include: {
         model: User,
         as: 'Followers',
-        attributes: [
-          'id',
-          'account',
-          'name',
-          'avatar',
-          'introduction',
-          [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.followerId = ${currentUser.id} AND Followships.followingId = Followers.id )`), 'isFollowed']
-        ]
+        attributes: {
+          exclude: ['password'],
+          include: [
+            [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.followerId = ${currentUser.id} AND Followships.followingId = Followers.id )`), 'isFollowed']
+          ]
+        }
       },
       order: [['createdAt', 'DESC']],
       raw: true,

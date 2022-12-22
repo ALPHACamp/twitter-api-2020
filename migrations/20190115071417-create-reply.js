@@ -10,7 +10,7 @@ module.exports = {
       },
       UserId: {
         type: Sequelize.INTEGER,
-        reference: {
+        references: {
           model: 'Users',
           key: 'id'
         },
@@ -19,7 +19,7 @@ module.exports = {
       },
       TweetId: {
         type: Sequelize.INTEGER,
-        reference: {
+        references: {
           model: 'Tweets',
           key: 'id'
         },

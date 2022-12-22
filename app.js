@@ -18,6 +18,9 @@ app.use(passport.initialize())
 
 app.use('/api', routes)
 app.use('/', apiErrorHandler)
+app.use('/', (req, res) => {
+  res.send('Thanks AC!')
+})
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 

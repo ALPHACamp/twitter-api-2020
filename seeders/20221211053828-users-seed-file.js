@@ -23,7 +23,7 @@ module.exports = {
         name: `User${i + 1}`,
         email: `user${i + 1}@example.com`,
         password: bcrypt.hashSync('12345678', 10),
-        avatar: `https://loremflickr.com/320/320/man,woman/?random=${Math.random() * 100}`,
+        avatar: `https://loremflickr.com/320/320/man,woman/?lock=${Math.random() * 100}`,
         cover: 'https://i.imgur.com/dIsjVjn.jpeg',
         introduction: faker.lorem.sentence(7),
         role: 'user',
