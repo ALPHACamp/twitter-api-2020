@@ -302,7 +302,7 @@ const userController = {
           avatar: user.avatar,
           account: user.account,
           followerCount: user.Followers.length,
-          isFollow: user.Followers.some(f => f.id === user.id),
+          isFollow: user.Followers.some(f => f.id === helpers.getUser(req).id),
           isSelf: Number(user.id) === Number(helpers.getUser(req).id)
         }))
           .sort((a, b) => b.followerCount - a.followerCount)
