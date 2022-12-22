@@ -11,9 +11,9 @@ const followshipController = {
         where: { followerId, followingId }
       })
     ]).then(([followingUser, followships]) => {
-      if (!followingUser) res.status(404).json({ status: 'error', message: '帳號不存在!' })
+      if (!followingUser) return res.status(404).json({ status: 'error', message: '帳號不存在!' })
       if (followerId === followingId) return res.status(422).json({ status: 'error', message: '不能追蹤自己!' })
-      if (followships) res.status(422).json({ status: 'error', message: '已追蹤這個使用者!' })
+      if (followships) return res.status(422).json({ status: 'error', message: '已追蹤這個使用者!' })
       return Followship.create({ followerId, followingId })
     }).then(followship => {
       const data = followship.toJSON()
@@ -33,8 +33,8 @@ const followshipController = {
       })
     ])
       .then(([user, followship]) => {
-        if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (!followship) res.status(404).json({ status: 'error', message: '尚未追蹤這個使用者!' })
+        if (!user) return res.status(404).json({ status: 'error', message: '帳號不存在!' })
+        if (!followship) return res.status(404).json({ status: 'error', message: '尚未追蹤這個使用者!' })
         return followship.destroy()
       }).then(deletedFollowship => res.status(200).json({ status: 'success', message: '取消追蹤成功!', deletedFollowship })
       ).catch(err => next(err))
@@ -48,7 +48,7 @@ const followshipController = {
         'id', 'account', 'name', 'avatar', 'introduction',
         [sequelize.literal('(SELECT COUNT (id) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount']
       ],
-      order: [[sequelize.literal('followerCount'), 'DESC']],
+      order: [[sequelize.literal('followerCount'), 'DESC'], ['id', 'ASC']],
       raw: true,
       nest: true,
       limit: 10

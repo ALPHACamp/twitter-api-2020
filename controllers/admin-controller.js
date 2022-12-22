@@ -73,7 +73,7 @@ const adminController = {
     const id = helpers.getUser(req).id
     return User.findByPk(id, {
       where: { role: 'admin' },
-      attributes: { exclude: ['password', 'createdAt', 'updatedAt'] },
+      attributes: { exclude: ['password', 'avatar', 'cover', 'introduction', 'createdAt', 'updatedAt'] },
       nest: true
     })
       .then(user => {
