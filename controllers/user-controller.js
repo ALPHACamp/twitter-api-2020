@@ -6,7 +6,7 @@ const { Op } = require('sequelize')
 const helpers = require('../_helpers')
 const { User, Reply, Tweet, Like, Followship, sequelize } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helper')
-const { sanitizedInput } = require('../helpers/sanitized')
+const { sanitizedInput, checkUriParam } = require('../helpers/sanitized')
 const userController = {
 
   signUp: async (req, res, next) => {
@@ -44,7 +44,7 @@ const userController = {
 
   getUserProfile: async (req, res, next) => {
     try {
-      const reqId = Number(sanitizedInput(req.params.id))
+      const reqId = Number(checkUriParam(sanitizedInput(req.params.id)))
       const loginUserId = helpers.getUser(req).id
       const user = await User.findByPk(reqId, {
         attributes: ['id', 'account', 'name', 'email', 'avatar', 'cover', 'introduction',
@@ -66,7 +66,7 @@ const userController = {
 
   getUserReplies: async (req, res, next) => {
     try {
-      const reqId = Number(sanitizedInput(req.params.id))
+      const reqId = Number(checkUriParam(sanitizedInput(req.params.id)))
       const reqUser = await User.findByPk(reqId)
       if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
 
@@ -89,7 +89,7 @@ const userController = {
 
   getUserTweets: async (req, res, next) => {
     try {
-      const reqId = Number(sanitizedInput(req.params.id))
+      const reqId = Number(checkUriParam(sanitizedInput(req.params.id)))
       const loginUserId = helpers.getUser(req).id
       const reqUser = await User.findByPk(reqId)
       if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
@@ -118,7 +118,7 @@ const userController = {
 
   getUserLikes: async (req, res, next) => {
     try {
-      const reqId = Number(sanitizedInput(req.params.id))
+      const reqId = Number(checkUriParam(sanitizedInput(req.params.id)))
       const loginUserId = helpers.getUser(req).id
       const reqUser = await User.findByPk(reqId)
       if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
@@ -157,7 +157,7 @@ const userController = {
 
   getUserFollowers: async (req, res, next) => {
     try {
-      const reqId = Number(sanitizedInput(req.params.id))
+      const reqId = Number(checkUriParam(sanitizedInput(req.params.id)))
       const loginUserId = helpers.getUser(req).id
       const reqUser = await User.findByPk(reqId)
       if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
@@ -189,7 +189,7 @@ const userController = {
 
   getUserFollowings: async (req, res, next) => {
     try {
-      const reqId = Number(sanitizedInput(req.params.id))
+      const reqId = Number(checkUriParam(sanitizedInput(req.params.id)))
       const loginUserId = helpers.getUser(req).id
       const reqUser = await User.findByPk(reqId)
       if (!reqUser) return res.status(404).json({ status: 'error', message: 'User not found!' })
@@ -221,7 +221,7 @@ const userController = {
 
   putUserProfile: async (req, res, next) => {
     try {
-      const profileId = Number(sanitizedInput(req.params.id))
+      const profileId = Number(checkUriParam(sanitizedInput(req.params.id)))
       const { name, introduction } = req.body
       const { files } = req
 
@@ -306,7 +306,7 @@ const userController = {
   removeFollowing: async (req, res, next) => {
     try {
       const followerId = helpers.getUser(req).id
-      const followingId = Number(sanitizedInput(req.params.followingId))
+      const followingId = Number(checkUriParam(sanitizedInput(req.params.followingId)))
       // Check existance of followship
       const followship = await Followship.findOne({ where: { followerId, followingId } })
       if (!followship) return res.status(404).json({ status: 'error', message: "You have already unfollowed this user or you havn't followed this user." })
