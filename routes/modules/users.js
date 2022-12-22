@@ -1,33 +1,32 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../../controllers/user-controller')
-const user2Controller = require('../../controllers/user2-controller') // ********Evelyn 先註記一下 避免搞混
 const {
   authenticatedUser,
   authenticated
 } = require('../../middleware/api-auth')
 const upload = require('../../middleware/multer')
 
-// 查看特定使用者按過like的推文 ********Evelyn 先註記一下 避免搞混
+// 查看特定使用者按過like的推文
 router.get(
   '/:id/likes',
   authenticated,
   authenticatedUser,
-  user2Controller.getUserLikes
+  userController.getUserLikes
 )
-// 查看特定使用者發過的所有回覆 ********Evelyn 先註記一下 避免搞混
+// 查看特定使用者發過的所有回覆
 router.get(
   '/:id/replied_tweets',
   authenticated,
   authenticatedUser,
-  user2Controller.getUserReplies
+  userController.getUserReplies
 )
-// 查看特定使用者發過的所有推文 ********Evelyn 先註記一下 避免搞混
+// 查看特定使用者發過的所有推文
 router.get(
   '/:id/tweets',
   authenticated,
   authenticatedUser,
-  user2Controller.getUserTweets
+  userController.getUserTweets
 )
 
 // 擁有最多追隨者的使用者 (前10名)

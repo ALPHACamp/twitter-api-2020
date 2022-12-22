@@ -1,5 +1,6 @@
+const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Followship } = require('../models')
+const { User, Tweet, Followship, Like, Reply } = require('../models')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -48,7 +49,7 @@ const userServices = {
       })
 
       .then(() => cb(null, { success: 'true' }))
-      .catch((err) => cb(err))
+      .catch(err => cb(err))
   }
 }
 
@@ -63,7 +64,7 @@ const userController = {
     }
 
     User.findOne({ where: { account, role: 'user' }, raw: true })
-      .then((user) => {
+      .then(user => {
         if (!user) {
           throw new Error('帳號不存在！')
         }
@@ -81,7 +82,7 @@ const userController = {
         delete user.password
         return res.status(200).json({ success: true, token, user })
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
   getUser: (req, res, next) => {
     const { id } = req.params
@@ -101,7 +102,7 @@ const userController = {
         // 儲存登入者的追蹤者 id
         const checkBox = []
 
-        loginUser.Followings.forEach((f) => {
+        loginUser.Followings.forEach(f => {
           checkBox.push(f.id)
         })
         // 使用者推文數
@@ -127,7 +128,7 @@ const userController = {
 
         return res.status(200).send(user)
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
   putUser: async (req, res, next) => {
     try {
@@ -140,13 +141,10 @@ const userController = {
         password,
         checkPassword,
         introduction,
-        avatar,
         cover
       } = req.body
       const { files } = req
-      // console.log('files:', files) // **********確認前端送來的req，之後記得刪掉
-      // console.log('typeof files:', typeof files) // **********確認前端送來的req，之後記得刪掉
-      // 錯誤驗證
+
       if (id !== currentUserId) {
         throw new Error('不可編輯他人資料 !')
       } // 不可編輯別人的檔案
@@ -197,8 +195,6 @@ const userController = {
       })
 
       // 找出使用者avatar & cover
-      // let avatar = files?.avatar || null
-      // let cover = files?.cover || null
       let avatarFile = files?.avatar || null
       let coverFile = files?.cover || null
 
@@ -213,7 +209,7 @@ const userController = {
       // 只需判斷 cover ，不須判斷 avatar，因為不能刪除 avatar
 
       if (coverFile === null) {
-        await User.findByPk(currentUserId).then((user) => {
+        await User.findByPk(currentUserId).then(user => {
           // 未上傳檔案
           // 使用者本來有上傳過 cover，決定不編輯
           if (user.cover !== null) {
@@ -262,14 +258,14 @@ const userController = {
         // 儲存登入者的追蹤者 id
         const checkBox = []
         // 登入者的追蹤者 id
-        user.Followings.forEach((f) => {
+        user.Followings.forEach(f => {
           checkBox.push(f.id)
         })
 
         // 儲存追蹤者清單屬性
         const followingsbox = []
 
-        trackData.Followings.forEach((l) => {
+        trackData.Followings.forEach(l => {
           const temp = {}
           const data = {}
           data.id = l.id
@@ -297,7 +293,7 @@ const userController = {
 
         res.status(200).send(followingList)
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
   getFollower: (req, res, next) => {
     const { id } = req.params
@@ -317,14 +313,14 @@ const userController = {
         // 儲存登入者的追蹤者 id
         const checkBox = []
         // 登入者的追蹤者 id
-        user.Followings.forEach((f) => {
+        user.Followings.forEach(f => {
           checkBox.push(f.id)
         })
 
         // 儲存追隨者清單屬性
         const followersbox = []
 
-        trackData.Followers.forEach((l) => {
+        trackData.Followers.forEach(l => {
           const temp = {}
           const data = {}
           data.id = l.id
@@ -351,25 +347,126 @@ const userController = {
 
         res.status(200).send(followerList)
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
   getTopUsers: (req, res, next) => {
     User.findAll({
       where: { role: 'user' },
       include: [{ model: User, as: 'Followers' }]
     })
-      .then((users) => {
+      .then(users => {
         const result = users
-          .map((user) => ({
+          .map(user => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowed: req.user.Followings.some((f) => f.id === user.id) // 登入者是否追隨名單中的使用者
+            isFollowed: req.user.Followings.some(f => f.id === user.id) // 登入者是否追隨名單中的使用者
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
         const finalResult = result.slice(0, 9) // 取前10名
         res.status(200).send(finalResult)
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
+  },
+  getUserTweets: (req, res, next) => {
+    const currentUserId = helpers.getUser(req)?.id // 正在使用網站的使用者id
+    const UserId = Number(req.params.id) // 要查看的特定使用者id
+
+    // 要撈特定使用者資料/tweet資料、現在使用者的like資料
+    return Promise.all([
+      User.findByPk(UserId),
+      Tweet.findAll({
+        where: { UserId },
+        attributes: [
+          'id', 'description', 'createdAt',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Replies AS replyCount WHERE tweet_id = Tweet.id)'), 'replyCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Likes AS likeCount WHERE tweet_id = Tweet.id)'), 'likeCount'
+          ]
+        ],
+        order: [['createdAt', 'DESC']],
+        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+        raw: true,
+        nest: true
+      }),
+      Like.findAll({ where: { UserId: currentUserId }, raw: true })
+    ])
+      .then(([user, tweets, likes]) => {
+        if (!user) throw new Error("User didn't exist")
+        // console.log(likes)
+        // console.log(tweets)
+        const userData = tweets.map(tweet => ({
+          ...tweet,
+          isLiked: likes.some(like => like.TweetId === tweet.id && currentUserId === like.UserId)
+        }))
+        res.status(200).json(userData)
+      })
+      .catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    // const currentUserId = helpers.getUser(req)?.id // 正在使用網站的使用者id
+    const UserId = Number(req.params.id) // 要查看的特定使用者id
+
+    // 要撈特定使用者資料/reply資料
+    return Promise.all([
+      User.findByPk(UserId),
+      Reply.findAll({
+        where: { UserId },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['id', 'account'] }] }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, replies]) => {
+        if (!user) throw new Error("User didn't exist")
+        res.status(200).json(replies)
+      })
+      .catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+    const currentUserId = helpers.getUser(req)?.id // 正在使用網站的使用者id
+    const UserId = Number(req.params.id) // 要查看的特定使用者id
+
+    return Promise.all([
+      User.findByPk(UserId),
+      // 用UserId去撈Like關聯tweet，找到使用者like過的tweet資料
+      // 再用tweet去關聯user跟like資料，取得tweet-user跟like資料，判斷登入使用者isliked布林值
+      Like.findAll({
+        where: { UserId },
+        include: [{
+          model: Tweet,
+          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }, { model: Like }],
+          attributes: {
+            include: [
+              [
+                sequelize.literal('(SELECT COUNT(*) FROM Replies AS replyCount WHERE tweet_id = Tweet.id)'), 'replyCount' // 回傳留言數
+              ],
+              [
+                sequelize.literal('(SELECT COUNT(*) FROM Likes AS likeCount WHERE tweet_id = Tweet.id)'), 'likeCount' // 回傳按讚數
+              ]]
+          }
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, likes]) => {
+        if (!user) throw new Error("User didn't exist")
+        const data = likes.map(like => {
+          const { Likes, ...data } = like.Tweet.toJSON()
+          const userLikes = like.Tweet.toJSON().Likes
+          data.isLiked = userLikes.some(like => like.UserId === currentUserId)
+          data.TweetId = like.Tweet.toJSON().id
+          delete data.UserId
+          return data
+        })
+        res.status(200).json(data)
+      })
+      .catch(err => next(err))
   }
 }
 
