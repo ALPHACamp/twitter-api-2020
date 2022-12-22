@@ -82,9 +82,7 @@ const tweetServices = {
   getReplies: (req, cb) => {
     const TweetId = req.params.tweetId
     return Tweet.findByPk(TweetId, {
-      include: { model: User, attributes: ['id', 'account', 'avatar', 'name'] },
-      raw: true,
-      nest: true
+      include: { model: User, attributes: ['id', 'account', 'avatar', 'name'] }
     })
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
@@ -99,7 +97,8 @@ const tweetServices = {
             },
             { model: User, attributes: ['id', 'avatar', 'account', 'name'] }
           ],
-          raw: true
+          raw: true,
+          nest: true
         })
       })
       .then(replies => {
