@@ -6,7 +6,8 @@
   "scripts": {
     "start": "set \"NODE_ENV=development\" && node app.js",
     "dev": "set \"NODE_ENV=development\" && nodemon app.js",
-    "test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 15000"
+    "test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000",
+    "testck": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 15000"
   },
   "author": "",
   "license": "ISC",
