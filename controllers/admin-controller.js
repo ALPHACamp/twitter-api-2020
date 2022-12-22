@@ -27,10 +27,10 @@ const adminController = {
 				],
 				order: [['createdAt', 'DESC']]
 			})
-			// const dataOrder = await usersData.sort(function (a, b) {
-			// 	return a.tweetCount < b.tweetCount
-			// })
-			// console.log(dataOrder)
+			const dataOrder = await usersData.sort(function (a, b) {
+				return a.tweetCount < b.tweetCount
+			})
+			console.log(dataOrder)
 			res.status(200).json(usersData)
 		} catch (err) { next(err) }
 	},
