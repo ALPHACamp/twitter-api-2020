@@ -64,7 +64,7 @@ const userServices = {
   },
   getUser: (req, cb) => {
     return Promise.all([
-      User.findByPk(req.params.user_id),
+      User.findByPk(req.params.user_id, { attributes: { exclude: ['password'] }, raw: true }),
       Followship.findAndCountAll({
         where: { followingId: req.params.user_id },
         raw: true
@@ -76,11 +76,9 @@ const userServices = {
     ])
       .then(([user, followers, followings]) => {
         assert(user, "User doesn't exit.")
-        const userData = user.toJSON()
         const isFollowed = followers.count ? followers.rows.some(f => f.followerId === helpers.getUser(req).id) : false
-        delete userData.password
         const result = {
-          ...userData,
+          ...user,
           totalFollowers: followers.count,
           totalFollowings: followings.count,
           isFollowed
@@ -124,7 +122,7 @@ const userServices = {
         UserId
       },
       include: {
-        model: User, include: Tweet
+        model: User, include: Tweet, attributes: { exclude: ['password'] }
       },
       order: [['createdAt', 'DESC']],
       raw: true,
@@ -220,8 +218,8 @@ const userServices = {
     const { name, introduction } = req.body
     assert(name, 'User name is required!')
     // 從req取得file，若有file則存至變數，若無回傳null
-    const avatarFile = req.files ? req.files.avatar[0] : null
-    const coverImageFile = req.files ? req.files.coverImage[0] : null
+    const avatarFile = req.files.avatar ? req.files.avatar[0] : null
+    const coverImageFile = req.files.coverImage ? req.files.coverImage[0] : null
     // 將file上傳至Imgur & 從資料庫搜尋欲修改的使用者資訊
     return Promise.all([
       uploadImgur(avatarFile),

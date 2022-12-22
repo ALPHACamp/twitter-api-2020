@@ -11,7 +11,7 @@ module.exports = {
       email: 'root@example.com',
       password: await bcrypt.hash('12345678', 10),
       introduction: faker.lorem.text(),
-      avatar: faker.image.avatar(),
+      avatar: 'https://loremflickr.com/320/240/portrait/?lock=18',
       cover_image: 'https://loremflickr.com/g/1079/359/moutain',
       role: 'admin',
       created_at: new Date(),
