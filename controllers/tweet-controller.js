@@ -54,7 +54,8 @@ const tweetController = {
                 avatar
               },
               replyAmount: replies.length,
-              likeAmount: likes.length
+              likeAmount: likes.length,
+              isLike: likes.map(l => l.UserId).includes(helpers.getUser(req).id)
             })
           })
           .catch(err => next(err))
