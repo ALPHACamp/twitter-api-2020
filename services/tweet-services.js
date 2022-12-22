@@ -15,11 +15,14 @@ const tweetServices = {
         model: User,
         attributes: ['id', 'avatar', 'name', 'account']
       }],
+      raw: true,
+      nest: true,
       order: [['id', 'DESC']]
     })
       .then(datas => {
         const tweets = datas.map(data => ({
-          ...data.toJSON()
+          ...data,
+          isLiked: data.isLiked === 1
         }))
         cb(null, tweets)
       })
@@ -35,12 +38,13 @@ const tweetServices = {
         [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount'],
         [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE tweet_id = Tweet.id AND user_id = ${userId})`), 'isLiked']
       ],
-      include: [{ model: User, as: 'User', attributes: ['id', 'avatar', 'account', 'name'] }],
+      include: [{ model: User, attributes: ['id', 'avatar', 'account', 'name'] }],
       raw: true,
       nest: true
     })
       .then(tweet => {
         if (!tweet) throw new Error('Tweet does not exist!')
+        tweet.isLiked = tweet.isLiked === 1
         cb(null, tweet)
       })
       .catch(err => cb(err))
@@ -78,9 +82,7 @@ const tweetServices = {
   getReplies: (req, cb) => {
     const TweetId = req.params.tweetId
     return Tweet.findByPk(TweetId, {
-      include: { model: User, attributes: ['account'] },
-      raw: true,
-      nest: true
+      include: { model: User, attributes: ['id', 'account', 'avatar', 'name'] }
     })
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
