@@ -334,8 +334,6 @@ const userController = {
           temp.result = data
           followersbox.push(temp)
         })
-        // 照日期排序 (新至舊)
-        followerList.sort((a, b) => b.createdAt - a.createdAt)
 
         followerList.forEach((list, index) => {
           // 將 followerId 改成 id
@@ -348,6 +346,8 @@ const userController = {
           // 刪除 followingId
           delete list.followingId
         })
+        // 照日期排序 (新至舊)
+        followerList.sort((a, b) => b.createdAt - a.createdAt)
 
         res.status(200).send(followerList)
       })
