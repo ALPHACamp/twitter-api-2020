@@ -20,7 +20,7 @@ const adminServices = {
   },
   getUsers: (req, cb) => {
     return User.findAll({
-      attributes: ['id', 'account', 'name', 'avatar', 'cover',
+      attributes: ['id', 'account', 'name', 'email', 'avatar', 'cover',
         [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE user_id = User.id)'), 'tweetCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE user_id = User.id)'), 'replyCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Tweets JOIN Likes ON Tweets.id = Likes.tweet_id WHERE Tweets.user_id = User.id)'), 'likeCount'],

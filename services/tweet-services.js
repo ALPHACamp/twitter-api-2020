@@ -15,12 +15,10 @@ const tweetServices = {
         model: User,
         attributes: ['id', 'avatar', 'name', 'account']
       }],
+      raw: true,
       order: [['id', 'DESC']]
     })
-      .then(datas => {
-        const tweets = datas.map(data => ({
-          ...data.toJSON()
-        }))
+      .then(tweets => {
         cb(null, tweets)
       })
       .catch(err => cb(err))
@@ -35,9 +33,8 @@ const tweetServices = {
         [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount'],
         [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE tweet_id = Tweet.id AND user_id = ${userId})`), 'isLiked']
       ],
-      include: [{ model: User, as: 'User', attributes: ['id', 'avatar', 'account', 'name'] }],
-      raw: true,
-      nest: true
+      include: [{ model: User, attributes: ['id', 'avatar', 'account', 'name'] }],
+      raw: true
     })
       .then(tweet => {
         if (!tweet) throw new Error('Tweet does not exist!')
@@ -95,8 +92,7 @@ const tweetServices = {
             },
             { model: User, attributes: ['id', 'avatar', 'account', 'name'] }
           ],
-          raw: true,
-          nest: true
+          raw: true
         })
       })
       .then(replies => {

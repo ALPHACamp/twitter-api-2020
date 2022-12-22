@@ -56,7 +56,7 @@ const userServices = {
   getUser: (req, cb) => {
     return User.findByPk(req.params.userId, {
       attributes: [
-        'id', 'name', 'account', 'introduction', 'avatar', 'cover',
+        'id', 'name', 'account', 'email', 'introduction', 'avatar', 'cover',
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount']
       ],
@@ -71,11 +71,8 @@ const userServices = {
   editUser: (req, cb) => {
     const { account, name, email, introduction, password, avatar, cover } = req.body
     const UserId = req.params.userId
-    // const { avatarFile, coverFile } = req
     return Promise.all([
       User.findByPk(UserId)
-      // imgurFileHandler(avatarFile),
-      // imgurFileHandler(coverFile)
     ])
       .then(([user, avatarFilePath, coverFilePath]) => {
         if (!user) throw new Error("User didn't exist!")
@@ -99,15 +96,13 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followerId: UserId },
-      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }],
+      include: [{ model: User, as: 'followingUser', attributes: ['name', 'avatar', 'account'] }],
       attributes: [
-        'id', 'followingId', 'followerId', 'createdAt', 'updatedAt',
-        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']]
+        'followingId', 'followerId',
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']],
+      raw: true
     })
-      .then(datas => {
-        const followings = datas.map(data => ({
-          ...data.toJSON()
-        }))
+      .then(followings => {
         cb(null, followings)
       })
       .catch(err => cb(err))
@@ -116,17 +111,15 @@ const userServices = {
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followingId: UserId },
-      include: [{ model: User, as: 'followingUser', attributes: { exclude: ['password', 'role'] } }],
+      include: [{ model: User, as: 'followerUser', attributes: ['name', 'avatar', 'account'] }],
       attributes: [
-        'id', 'followingId', 'followerId', 'createdAt', 'updatedAt',
-        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE following_id = followerId AND follower_id = ${UserId} )`), 'isFollowed']]
+        'followingId', 'followerId',
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE following_id = followerId AND follower_id = ${UserId} )`), 'isFollowed']],
+      raw: true
     })
-      .then(datas => {
-        const followers = datas.map(data => ({
-          ...data.toJSON()
-        }))
+      .then(followers =>
         cb(null, followers)
-      })
+      )
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
@@ -139,12 +132,14 @@ const userServices = {
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount']
         ]
       },
-      include: [{ model: User }],
-      raw: true,
-      nest: true
+      include: [{
+        model: User,
+        attributes: ['id', 'avatar', 'name', 'account']
+      }],
+      order: [['id', 'DESC']],
+      raw: true
     })
       .then(tweets => {
-        // tweets.forEach(r => delete r.User.password)
         cb(null, tweets)
       })
       .catch(err => cb(err))
@@ -153,21 +148,43 @@ const userServices = {
     const UserId = req.params.userId
     return Reply.findAll({
       where: { UserId },
-      include: [{ model: User }],
-      raw: true,
-      nest: true
+      attributes: { exclude: ['TweetId'] },
+      include: {
+        model: Tweet,
+        attributes: ['id'],
+        include: {
+          model: User,
+          attributes: ['account']
+        }
+      },
+      order: [['id', 'DESC']],
+      raw: true
     })
       .then(replies => {
-        replies.forEach(r => delete r.User.password)
         cb(null, replies)
       })
       .catch(err => cb(err))
   },
   getLikedTweets: (req, cb) => {
     const UserId = req.params.userId
+    const userId = helpers.getUser(req).id
     return Like.findAll({
       where: { UserId },
-      include: [{ model: Tweet }]
+      attributes: ['id', 'TweetId'],
+      include: {
+        model: Tweet,
+        attributes: ['id', 'description', 'createdAt', 'updatedAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE tweet_id = Tweet.id AND user_id = ${userId})`), 'isLiked']
+        ],
+        include: {
+          model: User,
+          attributes: ['id', 'avatar', 'name', 'account']
+        }
+      },
+      order: [['id', 'DESC']],
+      raw: true
     })
       .then(likedTweets => cb(null, likedTweets))
       .catch(err => cb(err))
