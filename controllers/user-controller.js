@@ -66,43 +66,6 @@ const userController = {
 		const id = req.params.id
 		const currentUser = getUser(req).id
 		return Promise.all([
-<<<<<<< HEAD
-			User.findByPk(id),
-			Tweet.findAndCountAll({
-				where: { UserId: id }
-			}),
-			Followship.findAndCountAll({
-				where: { followingId: id }
-			}),
-			Followship.findAndCountAll({
-				where: { followerId: id }
-			}),
-			Followship.findOne({
-				where: { followerId: currentUser },
-				raw: true
-			})
-		])
-			.then(([user, tweets, follower, following, ifFollowing]) => {
-				if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
-				const userData = user.get({ plain: true })
-				delete userData.password
-				userData.followingCount = following.count
-				userData.followerCount = follower.count
-				userData.tweetsCount = tweets.count
-				userData.isfollowing = false
-				if (ifFollowing.followingId === userData.id) {
-					userData.isfollowing = true
-				}
-				res.status(200).json(userData)
-			})
-			.catch(err => next(err))
-	},
-	putUser: (req, res, next) => {
-		const { account, name, email, password, checkPassword, introduction } = req.body
-		const { files } = req // file 改為 files
-		// Hello Gina，後來 Simon 大大幫我們找到bug了，我把這邊console.log出來。
-		console.log('這邊', files.avatar[0])
-=======
 		 User.findByPk(id),
 		 Tweet.findAndCountAll({
 		  where: { UserId: id }
@@ -142,7 +105,6 @@ const userController = {
 		const { files } = req // file 改為 files
 		// Hello Gina，後來 Simon 大大幫我們找到bug了，我把這邊console.log出來。
 		// console.log('這邊',files.avatar[0])
->>>>>>> origin
 		if (account) { if (/\s/.test(account) || account.length > 50) throw Error('Invalid Account!', {}, Error.prototype.code = 403) }
 		if (password && checkPassword) {
 			if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw Error('Invalid Password!', {}, Error.prototype.code = 422)
