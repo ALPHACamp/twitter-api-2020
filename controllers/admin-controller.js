@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const { getOffset, getUser } = require('../_helpers')
 
 const superUser = { name: 'root', email: 'root@example.com' }
@@ -31,9 +31,13 @@ const adminController = {
       const offset = getOffset(limit, page)
 
       const users = await User.findAll({
-        attributes: {
-          exclude: ['password', 'introduction', 'cover', 'createdAt', 'updatedAt']
-        },
+        attributes: ['id', 'name', 'account', 'avatar', 'cover',
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetsCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets JOIN Likes on Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'), 'tweetsLikedCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount']
+        ],
+
         limit,
         offset,
         nest: true,
