@@ -24,7 +24,7 @@ module.exports = {
 			introduction: faker.lorem.text().substring(0,160),
 			cover: `https://loremflickr.com/639/200/image/?random=${Math.random() * 100}`,
 			role: 'user',
-			following_count: Math.floor(Math.random() * 500),
+			following_count: 0,
 			created_at: new Date(),
 			updated_at: new Date()
 

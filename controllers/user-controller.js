@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { getUser, imgurFileHandler } = require('../_helpers')
+const { getUser, imgurFileHandler,localFileHandler } = require('../_helpers')
 const { User, Tweet, Followship, Like, Reply, sequelize } = require('../models')
 const id = require('faker/lib/locales/id_ID')
 
@@ -64,37 +64,42 @@ const userController = {
 	},
 	getUser: (req, res, next) => {
 		const id = req.params.id
+		const currentUser = getUser(req).id
 		return Promise.all([
-			User.findByPk(id),
-			Tweet.findAndCountAll({
-				where: { UserId: id }
-			}),
-			Followship.findAndCountAll({
-				where: { followingId: id }
-			}),
-			Followship.findAndCountAll({
-				where: { followerId: id }
-			})
+		 User.findByPk(id),
+		 Tweet.findAndCountAll({
+		  where: { UserId: id }
+		 }),
+		 Followship.findAndCountAll({
+		  where: { followingId: id }
+		 }),
+		 Followship.findAndCountAll({
+		  where: { followerId: id }
+		 }),
+		 Followship.findOne({
+		  where:{followerId:currentUser},
+		  raw:true
+		 })
 		])
-			.then(([user, tweets, follower, following]) => {
-				if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
-				const userData = user.get({ plain: true })
-				delete userData.password
-				userData.followingCount = following.count
-				userData.followerCount = follower.count
-				userData.tweetsCount = tweets.count
-				res.status(200).json(userData)
-			})
-			.catch(err => {
-				console.log(err)
-				next(err)
-			})
-	},
+		 .then(([user, tweets, follower, following,ifFollowing]) => {
+		  if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
+		  const userData = user.get({ plain: true })
+		  delete userData.password
+		  userData.followingCount = following.count
+		  userData.followerCount = follower.count
+		  userData.tweetsCount = tweets.count
+		  if(ifFollowing.followingId === userData.id){
+		  userData.isfollowing = true
+		  }
+		  res.status(200).json(userData)
+		 })
+		 .catch(err => next(err))
+	   },
 	putUser: (req, res, next) => {
 		const { account, name, email, password, checkPassword, introduction } = req.body
 		const { files } = req // file 改為 files
 		// Hello Gina，後來 Simon 大大幫我們找到bug了，我把這邊console.log出來。
-		console.log(files)
+		console.log('這邊',files.avatar[0])
 		if (account) { if (/\s/.test(account) || account.length > 50) throw Error('Invalid Account!', {}, Error.prototype.code = 403) }
 		if (password && checkPassword) {
 			if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw Error('Invalid Password!', {}, Error.prototype.code = 422)
@@ -105,8 +110,22 @@ const userController = {
 
 		Promise.all([
 			User.findByPk(req.params.id),
-			imgurFileHandler(files.avatar[0]), // 根據 req.files 抓出來的，裡面有兩個物件，avatar 與 cover
-			imgurFileHandler(files.cover[0]),
+			(async () => {
+				if (files.avatar[0]) {
+					console.log('#######',files.avatar[0])
+					const fileAvatar = await imgurFileHandler(files.avatar[0])
+					console.log('＠＠＠是不是',fileAvatar)
+					return fileAvatar
+				}
+				return false
+			})(), // 根據 req.files 抓出來的，裡面有兩個物件，avatar 與 cover
+			(async () => {
+				if (files.cover[0]) {
+					const fileCover = await imgurFileHandler(files.cover[0])
+					return fileCover
+				}
+				return false
+			})(), 
 			(async () => {
 				if (account) {
 					userData = await User.findOne({ where: { account: account }, raw: true })
@@ -134,7 +153,8 @@ const userController = {
 			// [ERR_HTTP_INVALID_STATUS_CODE]: Invalid status code: LIMIT_UNEXPECTED_FILE 助教提醒我們要理解這行error的意思
 			// 因為 imgur 2的版本不支援 setClientId ，所以我先降版本至 1，這樣 npm run dev 就不會噴錯了，
 			// 現在可以順利接到圖片了，用 postman 測試是成功的喔！謝謝Gina!!!
-			.then(([user, fileAvatar, fileCover, accountCheck, emailCheck, hash]) => {
+			.then(([user, accountCheck, emailCheck, hash]) => {
+				// console.log('=========fileAvatar',fileAvatar,fileCover)
 				if (!user) throw new Error('User is not exist!', {}, Error.prototype.code = 412)
 				if (accountCheck && user.account !== accountCheck.account) throw new Error('Account already exists!', {}, Error.prototype.code = 423)
 				if (emailCheck && user.email !== emailCheck.email) throw new Error('Email already exists!', {}, Error.prototype.code = 408)
@@ -144,13 +164,15 @@ const userController = {
 					name: name || user.name,
 					email: email || user.mail,
 					password: hash || user.password,
-					avatar: filePath || user.avatar,
+					avatar: user.avatar,
 					introduction: introduction || user.introduction,
-					cover: filePath || user.cover
+					cover: user.cover
 				})
 			})
 			.then((data) => {
+				
 				delete data.get({ plain: true }).password
+				console.log('最後',data)
 				res.status(200).json(data)
 			})
 			.catch(err => next(err))
@@ -186,7 +208,7 @@ const userController = {
 					[sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.follower_id)'), 'name'],
 					[sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.follower_id)'), 'introduction'],
 					[sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.follower_id)'), 'avatar'],
-					[sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.following_id)`), 'Following']
+					[sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${getUser(req).id} AND Followships.following_id = Followship.follower_id)`), 'Following']
 				]
 			},
 			order: [['createdAt', 'DESC']],
@@ -256,17 +278,17 @@ const userController = {
 					tweetList[i].liked = false
 					for (let k = 0; k < likedata.length; k++) {
 						if (likedata[k].TweetId === tweetList[i].id) {
-							console.log('hello one')
+							// console.log('hello one')
 							tweetList[i].likeCount++
 						}
 						if (likedata[k].UserId === currentUser && likedata[k].TweetId === tweetList[i].id) {
-							console.log('hello two')
+							// console.log('hello two')
 							tweetList[i].liked = true
 						}
 					}
 					for (let r = 0; r < reply.length; r++) {
 						if (reply[r].TweetId === tweetList[i].id) {
-							console.log('hello three')
+							// console.log('hello three')
 							tweetList[i].replyCount++
 						}
 					}
@@ -314,6 +336,14 @@ const userController = {
 			.then((user) => {
 				delete user.get({ plain: true }).password
 				res.status(200).json({ status: '200', message: 'JWT success', user })
+			})
+			.catch(err => { next(err) })
+	},
+	getCurrentAdmin: (req, res, next) => {
+		User.findByPk(getUser(req).id)
+			.then((admin) => {
+				delete admin.get({ plain: true }).password
+				res.status(200).json({ status: '200', message: 'JWT success', admin })
 			})
 			.catch(err => { next(err) })
 	}
