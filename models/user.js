@@ -4,9 +4,21 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate (models) {
       // Relation(s)
-      User.hasMany(models.Reply, { foreignKey: 'UserId' })
-      User.hasMany(models.Tweet, { foreignKey: 'UserId' })
-      User.hasMany(models.Like, { foreignKey: 'UserId' })
+      User.hasMany(models.Reply, {
+        foreignKey: 'UserId',
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      })
+      User.hasMany(models.Tweet, {
+        foreignKey: 'UserId',
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      })
+      User.hasMany(models.Like, {
+        foreignKey: 'UserId',
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      })
       User.belongsToMany(models.User, {
         through: models.Followship,
         foreignKey: 'followingId',
