@@ -74,12 +74,19 @@ const userServices = {
     if (UserId !== currentUserId) throw new Error('You can only edit your own profile!')
     // password check
     if (password !== checkPassword) throw new Error('Passwords do not match!')
-    return Promise.all([User.findByPk(UserId), User.findOne({ where: { account } }), User.findOne({ where: { email } })])
-      .then(([user, foundUserByAccount, foundUserByEmail]) => {
+    // check if account and email exists in db
+    return Promise.all([
+      User.findByPk(UserId),
+      User.findOne({ where: { account: account || null } }),
+      User.findOne({ where: { email: email || null } })
+    ])
+      .then(([
+        user,
+        foundUserByAccount,
+        foundUserByEmail]) => {
         if (!user) throw new Error("User didn't exist!")
-        // check if account and email exists in db
         if (foundUserByAccount?.account && user.account !== account) throw new Error('Account already exists!')
-        if (foundUserByEmail?.email && user.email !== email) throw new Error('email already exists!')
+        if (foundUserByEmail?.email && user.email !== email) throw new Error('Email already exists!')
         return user.update({
           account,
           name,
@@ -97,7 +104,7 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
-  getUserFollowings: (req, cb) => {
+  getUserFollowings: (req, cb) => { // Keep followingId for test
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followerId: UserId },
@@ -113,15 +120,11 @@ const userServices = {
           ...data,
           isFollowed: data.isFollowed === 1
         }))
-        followings.forEach(f => {
-          delete f.followingId
-          delete f.followerId
-        })
         cb(null, followings)
       })
       .catch(err => cb(err))
   },
-  getUserFollowers: (req, cb) => {
+  getUserFollowers: (req, cb) => { // Keep followerId for test
     const UserId = req.params.userId
     return Followship.findAll({
       where: { followingId: UserId },
@@ -137,10 +140,6 @@ const userServices = {
           ...data,
           isFollowed: data.isFollowed === 1
         }))
-        followers.forEach(f => {
-          delete f.followingId
-          delete f.followerId
-        })
         cb(null, followers)
       })
       .catch(err => cb(err))
@@ -210,7 +209,7 @@ const userServices = {
       attributes: ['id', 'TweetId'],
       include: {
         model: Tweet,
-        attributes: ['id', 'description', 'createdAt', 'updatedAt',
+        attributes: ['description', 'createdAt', 'updatedAt',
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE tweet_id = Tweet.id)'), 'likedCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE tweet_id = Tweet.id AND user_id = ${userId})`), 'isLiked']
@@ -228,6 +227,7 @@ const userServices = {
         const likedTweets = datas.map(t => (
           {
             ...t.Tweet,
+            TweetId: t.TweetId,
             isLiked: t.Tweet.isLiked === 1
           }))
         cb(null, likedTweets)
