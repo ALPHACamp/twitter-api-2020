@@ -14,7 +14,7 @@
 ## Heroku 部屬
 [Simple Twitter](https://young-springs-47906.herokuapp.com)  
 ## 專案開發人員
-[JasonChou](https://github.com/JasonChou524)  
+[Ryan Chou](https://github.com/csw8524)  
 [Snow](https://github.com/SnowWuChiKuo)  
 ## 前端專案
 [前端repo](https://github.com/william8815/simple-twitter)
