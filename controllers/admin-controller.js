@@ -2,6 +2,7 @@ const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 
 const { Tweet, User, Like } = require('../models')
+const { Op } = require('sequelize')
 
 const adminController = {
   login: (req, res, next) => {
@@ -23,6 +24,11 @@ const adminController = {
   },
   getUsers: (req, res, next) => {
     return User.findAll({
+      where: {
+        id: {
+          [Op.ne]: helpers.getUser(req).id
+        }
+      },
       include: [
         { model: Tweet, include: Like },
         { model: User, as: 'Followers' },
