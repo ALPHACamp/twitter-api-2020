@@ -68,7 +68,6 @@ const userController = {
           user
         }
       })
-      // return res.json({ status: 'success', user })
     } catch (err) {
       next(err)
     }
@@ -84,15 +83,15 @@ const userController = {
         include: [
           [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
           [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount'],
-          [sequelize.literal('(SELECT COUNT(id)  FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetCount']
+          [sequelize.literal('(SELECT COUNT(id)  FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetCount'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.follower_id = ${currentUser.id} AND Followships.following_id = User.id )`), 'isFollowed']
         ]
       }
     })
       .then(user => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
         const { ...userData } = {
-          ...user.toJSON(),
-          isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === user.id)
+          ...user.toJSON()
         }
         return res.status(200).json({ ...userData })
       })
@@ -281,10 +280,7 @@ const userController = {
         if (likes.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有按任何貼文Like!' })
         const likeData = likes.map(li => ({
           ...li,
-          Tweet: {
-            ...li.Tweet,
-            createdAt: helpers.relativeTime(li.Tweet.createdAt)
-          }
+          createdAt: helpers.relativeTime(li.createdAt)
         }))
         return res.status(200).json(likeData)
       })
@@ -298,7 +294,15 @@ const userController = {
       Reply.findAll({
         where: { UserId: id },
         include: [
-          { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: ['UserId'],
+            include: {
+              model: User,
+              attributes: ['account', 'id']
+            }
+          }
         ],
         attributes: { exclude: ['updatedAt'] },
         order: [['createdAt', 'DESC']],
