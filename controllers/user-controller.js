@@ -278,18 +278,23 @@ const userController = {
   },
   putUserSetting: async (req, res, next) => {
     try {
+      const currentUser = helpers.getUser(req)
       const { account, name, email, password, checkPassword } = req.body
-      const id = Number(req.params.id)
+      const paramsId = Number(req.params.id)
       if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw new Error('所有欄位皆為必填!')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
       if (name?.length > 50) throw new Error('暱稱 name 上限 50 字!')
       const [user, userFoundByAccount, userFoundByEmail] = await Promise.all([
-        User.findByPk(id),
+        User.findByPk(paramsId),
         User.findOne({ where: { account }, raw: true }),
         User.findOne({ where: { email }, raw: true })
       ])
-      if (account === userFoundByAccount?.account) throw new Error('account 已重複註冊!')
-      if (email === userFoundByEmail?.email) throw new Error('email 已重複註冊!')
+      if (!userFoundByAccount) {
+        next()
+      } else if (userFoundByAccount?.id !== currentUser.id) {
+        throw new Error('account 已重複註冊!')
+      }
+      if (userFoundByEmail?.id !== currentUser.id) throw new Error('email 已重複註冊!')
       const renewUser = await user.update({
         account,
         name,

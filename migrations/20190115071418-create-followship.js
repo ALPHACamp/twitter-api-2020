@@ -9,10 +9,22 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       followerId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        reference: {
+          model: 'Users',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       followingId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        reference: {
+          model: 'Users',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       createdAt: {
         allowNull: false,
