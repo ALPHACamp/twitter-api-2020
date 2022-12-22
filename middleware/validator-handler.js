@@ -101,5 +101,33 @@ module.exports = {
     }
 
     next()
+  },
+  tweetValidator: async (req, res, next) => {
+    //  執行驗證
+    await body('description').trim().not().isEmpty().withMessage('推文不可空白66666666!').bail().isLength({ max: 140 }).withMessage('字數超出上限！').run(req)
+    //  驗證結果
+    const errors = validationResult(req)
+    //  結果有錯
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        status: 'error',
+        message: errors.array()[0].msg
+      })
+    }
+    next()
+  },
+  replyValidator: async (req, res, next) => {
+    //  執行驗證
+    await body('comment').trim().not().isEmpty().withMessage('回覆不可空白777777!').bail().isLength({ max: 140 }).withMessage('字數超出上限！').run(req)
+    //  驗證結果
+    const errors = validationResult(req)
+    //  結果有錯
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        status: 'error',
+        message: errors.array()[0].msg
+      })
+    }
+    next()
   }
 }
