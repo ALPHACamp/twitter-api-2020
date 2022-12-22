@@ -149,7 +149,7 @@ const userController = {
   },
   putUserProfile: async (req, res, next) => {
     try {
-      // 回傳null則代表刪除資料
+      // 未回傳則代表不改變資料
       const { id } = req.params
       const { name, introduction } = req.body
       const { files } = req
@@ -177,8 +177,8 @@ const userController = {
 
       let updatedUser = await user.update({
         name,
-        avatar: avatarPath,
-        cover: coverPath,
+        avatar: avatarPath || user.avatar,
+        cover: coverPath || user.cover,
         introduction
       })
 
