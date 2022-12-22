@@ -83,15 +83,15 @@ const userController = {
 		])
 			.then(([user, tweets, follower, following, ifFollowing]) => {
 				if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
-				const userData = user.get({ plain: true })
-				delete userData.password
-				userData.followingCount = following.count
-				userData.followerCount = follower.count
-				userData.tweetsCount = tweets.count
-				userData.isfollowing = false
-				if (ifFollowing.followingId === userData.id) {
-					userData.isfollowing = true
-				}
+				// const userData = user.get({ plain: true })
+				// delete userData.password
+				// userData.followingCount = following.count
+				// userData.followerCount = follower.count
+				// userData.tweetsCount = tweets.count
+				// userData.isfollowing = false
+				// if (ifFollowing.followingId === userData.id) {
+				// 	userData.isfollowing = true
+				// }
 				res.status(200).json(userData)
 			})
 			.catch(err => next(err))
