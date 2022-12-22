@@ -10,12 +10,13 @@ module.exports = {
       },
       UserId: {
         type: Sequelize.INTEGER,
-        references: {
-          model: 'Users',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
+        // cannot add below reference due to model test file...
+        // references: {
+        //   model: 'Users',
+        //   key: 'id'
+        // },
+        // onUpdate: 'CASCADE',
+        // onDelete: 'CASCADE'
       },
       description: {
         type: Sequelize.TEXT
