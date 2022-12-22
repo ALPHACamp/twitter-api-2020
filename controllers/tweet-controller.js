@@ -75,18 +75,6 @@ const tweetController = {
     try {
       const UserId = helpers.getUser(req).id
       const description = req.body.description.trim()
-      if (!description) {
-        return res.status(422).json({
-          status: 'error',
-          message: '推文不可空白！'
-        })
-      }
-      if (description.length > 140) {
-        return res.status(422).json({
-          status: 'error',
-          message: '字數超出上限！'
-        })
-      }
       await Tweet.create({
         UserId,
         description
@@ -144,18 +132,6 @@ const tweetController = {
         return res.status(404).json({
           status: 'error',
           message: '推文不存在！'
-        })
-      }
-      if (!comment) {
-        return res.status(422).json({
-          status: 'error',
-          message: '回覆不可空白！'
-        })
-      }
-      if (comment.length > 140) {
-        return res.status(422).json({
-          status: 'error',
-          message: '字數超出上限！'
         })
       }
       await Reply.create({
