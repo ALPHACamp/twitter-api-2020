@@ -1,11 +1,11 @@
 # Simple Twitter API
-It's an API server for [Simple Twitter](https://youtu.be/CNYJ6v5D1O4) website.
+It's an API server for [Simple Twitter](https://gino-hsu.github.io/simple-twitter/) website.
 
 You can login with the accounts below:
 | system     | account | password |
 | ---------- | ------- | -------- |
-| foreground | user1   | 12345678 |
 | background | root    | 12345678 |
+| foreground | user1   | 12345678 |
 
 Visit the [Frontend Repo](https://github.com/Gino-Hsu/simple-twitter). 
 
@@ -90,7 +90,7 @@ Example app listening on port 3000!
 | **Admin**                            |        |                                                                                |
 | Login to background for admin        | POST   | [/api/admin/signin](api-doc/admin/signin.md)                                   |
 | Get all users for admin              | GET    | [/api/admin/users](api-doc/admin/get-users.md)                                 |
-| Get all tweets for admin              | GET    | [/api/admin/tweets]                                                            |
+| Get all tweets for admin              | GET    | [/api/admin/tweets](api-doc/admin/delete-tweet.md)                         |
 | Delete a tweet for admin             | DELETE | [/api/admin/tweets/:id](api-doc/admin/delete-tweet.md)                         |
 | **User**                             |        |                                                                                |
 | Login to foreground for user         | POST   | [/api/users/signin](api-doc/user/signin.md)                                    |
