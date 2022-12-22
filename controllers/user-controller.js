@@ -82,8 +82,6 @@ const userController = {
   },
   getUserTweets: (req, res, next) => {
     return Tweet.findAll({
-      // raw: true,
-      // nest: true,
       where: {
         UserId: req.params.id
       },
@@ -102,14 +100,11 @@ const userController = {
               userName: tweet.User.name,
               avatar: tweet.User.avatar
             },
-            // userAccount: tweet.User.account,
-            // userName: tweet.User.name,
-            // avatar: tweet.User.avatar,
             createdAt: tweet.createdAt,
             updatedAt: tweet.updatedAt,
             likedAmount: tweet.Likes.length,
             repliedAmount: tweet.Replies.length,
-            isLike: tweet.Likes.map(t => t.id).includes(helpers.getUser(req).id)
+            isLike: tweet.Likes.map(t => t.UserId).includes(helpers.getUser(req).id)
           }
         })
         res.status(200).json(tweets)
