@@ -13,6 +13,7 @@ module.exports = {
         avatar: `https://loremflickr.com/320/240/cat?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
         role: 'admin',
+        cover: `https://loremflickr.com/400/200/mountain?random=${Math.random() * 100}`,
         created_at: new Date(),
         updated_at: new Date()
       }, {
@@ -23,6 +24,7 @@ module.exports = {
         avatar: `https://loremflickr.com/320/240/cat?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
         role: 'user',
+        cover: `https://loremflickr.com/400/200/mountain?random=${Math.random() * 100}`,
         created_at: new Date(),
         updated_at: new Date()
       }, {
@@ -33,6 +35,7 @@ module.exports = {
         avatar: `https://loremflickr.com/320/240/cat?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
         role: 'user',
+        cover: `https://loremflickr.com/400/200/mountain?random=${Math.random() * 100}`,
         created_at: new Date(),
         updated_at: new Date()
       }, {
@@ -43,6 +46,7 @@ module.exports = {
         avatar: `https://loremflickr.com/320/240/cat?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
         role: 'user',
+        cover: `https://loremflickr.com/400/200/mountain?random=${Math.random() * 100}`,
         created_at: new Date(),
         updated_at: new Date()
       }, {
@@ -53,6 +57,7 @@ module.exports = {
         avatar: `https://loremflickr.com/320/240/cat?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
         role: 'user',
+        cover: `https://loremflickr.com/400/200/mountain?random=${Math.random() * 100}`,
         created_at: new Date(),
         updated_at: new Date()
       }, {
@@ -63,6 +68,7 @@ module.exports = {
         avatar: `https://loremflickr.com/320/240/cat?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
         role: 'user',
+        cover: `https://loremflickr.com/400/200/mountain?random=${Math.random() * 100}`,
         created_at: new Date(),
         updated_at: new Date()
       }
