@@ -10,7 +10,7 @@ const userController = {
     try {
       const userData = req.user.toJSON()
       delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
         status: 'success',
         token,
@@ -276,36 +276,32 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  putUserSetting: (req, res, next) => {
-    const { account, name, email, password, checkPassword } = req.body
-    const id = Number(req.params.id)
-    if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw new Error('所有欄位皆為必填!')
-    if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
-    if (name?.length > 50) throw new Error('暱稱 name 上限 50 字!')
-    return Promise.all([
-      User.findByPk(id),
-      User.findOne({ where: { account } }),
-      User.findOne({ where: { email } })
-    ])
-      .then(([user, userFoundByAccount, userFoundByEmail]) => {
-        if (account === userFoundByAccount?.toJSON().account) throw new Error('account 已重複註冊!')
-        if (email === userFoundByEmail?.toJSON().email) throw new Error('email 已重複註冊!')
-        return user
+  putUserSetting: async (req, res, next) => {
+    try {
+      const { account, name, email, password, checkPassword } = req.body
+      const id = Number(req.params.id)
+      if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw new Error('所有欄位皆為必填!')
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
+      if (name?.length > 50) throw new Error('暱稱 name 上限 50 字!')
+      const [user, userFoundByAccount, userFoundByEmail] = await Promise.all([
+        User.findByPk(id),
+        User.findOne({ where: { account }, raw: true }),
+        User.findOne({ where: { email }, raw: true })
+      ])
+      if (account === userFoundByAccount?.account) throw new Error('account 已重複註冊!')
+      if (email === userFoundByEmail?.email) throw new Error('email 已重複註冊!')
+      const renewUser = await user.update({
+        account,
+        name,
+        email,
+        password: bcrypt.hashSync(password, 10)
       })
-      .then(user => {
-        return user.update({
-          account,
-          name,
-          email,
-          password: bcrypt.hashSync(password, 10)
-        })
-      })
-      .then(renewUser => {
-        const userData = renewUser.toJSON()
-        delete userData.password
-        res.json({ status: 'success', message: '帳號內容已成功修改!', renewUser: userData })
-      })
-      .catch(err => next(err))
+      const userData = renewUser.toJSON()
+      delete userData.password
+      res.json({ status: 'success', message: '帳號內容已成功修改!', renewUser: userData })
+    } catch (error) {
+      next(error)
+    }
   },
   patchUserCover: (req, res, next) => {
     const id = Number(req.params.id)
