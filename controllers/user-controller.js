@@ -62,40 +62,7 @@ const userController = {
 			next(err)
 		}
 	},
-	getUser: (req, res, next) => {
-		const id = req.params.id
-		const currentUser = getUser(req).id
-		return Promise.all([
-			User.findByPk(id),
-			Tweet.findAndCountAll({
-				where: { UserId: id }
-			}),
-			Followship.findAndCountAll({
-				where: { followingId: id }
-			}),
-			Followship.findAndCountAll({
-				where: { followerId: id }
-			}),
-			Followship.findOne({
-				where: { followerId: currentUser },
-				raw: true
-			})
-		])
-			.then(([user, tweets, follower, following, ifFollowing]) => {
-				if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
-				const userData = user.get({ plain: true })
-				delete userData.password
-				userData.followingCount = following.count
-				userData.followerCount = follower.count
-				userData.tweetsCount = tweets.count
-				userData.isfollowing = false
-				if (ifFollowing.followingId === userData.id) {
-					userData.isfollowing = true
-				}
-				res.status(200).json(userData)
-			})
-			.catch(err => next(err))
-	},
+	
 	putUser: (req, res, next) => {
 		const { account, name, email, password, checkPassword, introduction } = req.body
 		const { files } = req // file 改為 files
