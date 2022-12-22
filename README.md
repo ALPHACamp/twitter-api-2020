@@ -1,6 +1,6 @@
 # Simple Twitter API
 * Simple Twitter 是復刻 Twitter 的練習專案，使用者可以在平台上發表自己的意見並與其他使用者互動。
-* 專案的開發方式為前後分離，此 Repo 為後端的 eb API
+* 專案的開發方式為前後分離，此 Repo 為後端的 Web API
 * [前端 Repo](https://github.com/kignite/simple-twitter-frontend)
 <br />
 
@@ -59,14 +59,14 @@ localhost:3000
   * 新增推文
   * 回覆推文
   * 查看推文內容及回覆
-  * 對推文按 Like/Unlike
+  * 對推文按 Like / Unlike
   * 查看任意使用者：
     * 新增的推文
     * 回覆過的推文
-    * 按過 like 的推文
-    * 專注清單
+    * 按 like 的推文
+    * 關注清單
     * 跟隨者清單
-  * 追蹤/取消追蹤其他使用者
+  * 追蹤 / 取消追蹤其他使用者
   * 查看追蹤數最高的 10 位使用者
   * 修改自己的名稱、自我介紹、大頭照與個人頁橫幅背景
   * 修改自己的帳號、名稱、email 與密碼 
