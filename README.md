@@ -52,7 +52,7 @@ git clone https://github.com/miaout11/twitter-api-2020
 #### Switch to project folder
 
 ```
-cd twitter-api-2020
+cd twitter-api-2022
 ```
 
 #### Open project
