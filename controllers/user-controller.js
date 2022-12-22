@@ -68,7 +68,6 @@ const userController = {
           user
         }
       })
-      // return res.json({ status: 'success', user })
     } catch (err) {
       next(err)
     }
