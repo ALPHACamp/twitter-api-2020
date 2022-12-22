@@ -12,7 +12,7 @@ module.exports = {
     )
     const userTweets = []
 
-    users.forEach((userId) => {
+    users.forEach(userId => {
       for (let i = 0; i < 10; i++) {
         userTweets.push({
           user_id: userId.id,

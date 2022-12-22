@@ -48,7 +48,7 @@ const userServices = {
       })
 
       .then(() => cb(null, { success: 'true' }))
-      .catch((err) => cb(err))
+      .catch(err => cb(err))
   }
 }
 
@@ -63,7 +63,7 @@ const userController = {
     }
 
     User.findOne({ where: { account, role: 'user' }, raw: true })
-      .then((user) => {
+      .then(user => {
         if (!user) {
           throw new Error('帳號不存在！')
         }
@@ -81,7 +81,7 @@ const userController = {
         delete user.password
         return res.status(200).json({ success: true, token, user })
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
   getUser: (req, res, next) => {
     const { id } = req.params
@@ -101,7 +101,7 @@ const userController = {
         // 儲存登入者的追蹤者 id
         const checkBox = []
 
-        loginUser.Followings.forEach((f) => {
+        loginUser.Followings.forEach(f => {
           checkBox.push(f.id)
         })
         // 使用者推文數
@@ -127,7 +127,7 @@ const userController = {
 
         return res.status(200).send(user)
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
   putUser: async (req, res, next) => {
     try {
@@ -140,13 +140,10 @@ const userController = {
         password,
         checkPassword,
         introduction,
-        avatar,
         cover
       } = req.body
       const { files } = req
-      // console.log('files:', files) // **********確認前端送來的req，之後記得刪掉
-      // console.log('typeof files:', typeof files) // **********確認前端送來的req，之後記得刪掉
-      // 錯誤驗證
+
       if (id !== currentUserId) {
         throw new Error('不可編輯他人資料 !')
       } // 不可編輯別人的檔案
@@ -197,8 +194,6 @@ const userController = {
       })
 
       // 找出使用者avatar & cover
-      // let avatar = files?.avatar || null
-      // let cover = files?.cover || null
       let avatarFile = files?.avatar || null
       let coverFile = files?.cover || null
 
@@ -213,7 +208,7 @@ const userController = {
       // 只需判斷 cover ，不須判斷 avatar，因為不能刪除 avatar
 
       if (coverFile === null) {
-        await User.findByPk(currentUserId).then((user) => {
+        await User.findByPk(currentUserId).then(user => {
           // 未上傳檔案
           // 使用者本來有上傳過 cover，決定不編輯
           if (user.cover !== null) {
@@ -262,14 +257,14 @@ const userController = {
         // 儲存登入者的追蹤者 id
         const checkBox = []
         // 登入者的追蹤者 id
-        user.Followings.forEach((f) => {
+        user.Followings.forEach(f => {
           checkBox.push(f.id)
         })
 
         // 儲存追蹤者清單屬性
         const followingsbox = []
 
-        trackData.Followings.forEach((l) => {
+        trackData.Followings.forEach(l => {
           const temp = {}
           const data = {}
           data.id = l.id
@@ -297,7 +292,7 @@ const userController = {
 
         res.status(200).send(followingList)
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
   getFollower: (req, res, next) => {
     const { id } = req.params
@@ -317,14 +312,14 @@ const userController = {
         // 儲存登入者的追蹤者 id
         const checkBox = []
         // 登入者的追蹤者 id
-        user.Followings.forEach((f) => {
+        user.Followings.forEach(f => {
           checkBox.push(f.id)
         })
 
         // 儲存追隨者清單屬性
         const followersbox = []
 
-        trackData.Followers.forEach((l) => {
+        trackData.Followers.forEach(l => {
           const temp = {}
           const data = {}
           data.id = l.id
@@ -351,25 +346,25 @@ const userController = {
 
         res.status(200).send(followerList)
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
   getTopUsers: (req, res, next) => {
     User.findAll({
       where: { role: 'user' },
       include: [{ model: User, as: 'Followers' }]
     })
-      .then((users) => {
+      .then(users => {
         const result = users
-          .map((user) => ({
+          .map(user => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowed: req.user.Followings.some((f) => f.id === user.id) // 登入者是否追隨名單中的使用者
+            isFollowed: req.user.Followings.some(f => f.id === user.id) // 登入者是否追隨名單中的使用者
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
         const finalResult = result.slice(0, 9) // 取前10名
         res.status(200).send(finalResult)
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   }
 }
 
