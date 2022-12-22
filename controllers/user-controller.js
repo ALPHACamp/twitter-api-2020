@@ -30,7 +30,8 @@ const userController = {
 				role: 'user',
 				avatar: 'https://i.imgur.com/PuP3Fmn.jpg',
 				password: hash,
-				cover: 'https://i.imgur.com/KNbtyGq.png'
+				cover: 'https://i.imgur.com/KNbtyGq.png',
+				introduction:'Hello world!'
 
 			}))
 			.then((user) => {
