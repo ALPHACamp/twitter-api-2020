@@ -58,7 +58,7 @@ const userController = {
             [sequelize.literal(`EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id AND Followships.followerId = ${loginUser})`), 'isFollowed']
           ]
         },
-        // order: ['followerCount', 'DESC'],
+        order: [[sequelize.literal('followerCount'), 'DESC']],
         limit: top || null
       })
       return res.status(200).json({ status: 'success', data: users })
@@ -69,10 +69,15 @@ const userController = {
   postUser: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
+      // eslint-disable-next-line no-useless-escape
+      const regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/
       if (!account || !name || !email || !password || !checkPassword) return res.status(400).json({ status: 'error', message: '所有欄位都是必填！' })
       if (account.trim() === '' || name.trim() === '' || email.trim() === '') return res.status(400).json({ status: 'error', message: '所有欄位都是必填！' })
       if (name.length > 50) return res.status(400).json({ status: 'error', message: '超過name字數上限50字！' })
       if (password !== checkPassword) return res.status(400).json({ status: 'error', message: '密碼與密碼確認不相同！' })
+      if (!regex.test(email)) {
+        return res.status(400).json({ status: 'error', message: '信箱格式不正確！' })
+      }
 
       const user1 = await User.findOne({ where: { email } })
       if (user1) return res.status(400).json({ status: 'error', message: 'email 已重複註冊！' })
