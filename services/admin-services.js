@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const { User, Tweet, Like } = require('../models')
 // const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const assert = require('assert')
@@ -13,6 +14,14 @@ const adminServices = {
           model: Like,
           attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('tweets.likes.id'))), 'totalLikes']]
         }]
+      }, {
+        model: User,
+        as: 'Followings',
+        attributes: [[User.sequelize.fn('COUNT', User.sequelize.fn('DISTINCT', User.sequelize.col('followings.id'))), 'followingCount']]
+      }, {
+        model: User,
+        as: 'Followers',
+        attributes: [[User.sequelize.fn('COUNT', User.sequelize.fn('DISTINCT', User.sequelize.col('followers.id'))), 'followerCount']]
       }],
       //  offset,
       attributes: { exclude: ['password'] },
