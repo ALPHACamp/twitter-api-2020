@@ -161,7 +161,8 @@ const userServices = {
         {
           model: Tweet,
           include: [{
-            model: User
+            model: User,
+            attributes: { exclude: ['password'] }
           },
           {
             model: Like,
@@ -205,6 +206,7 @@ const userServices = {
       .then(followings => {
         assert(followings, 'Unexpected operation of database.')
         const result = followings.map(f => ({
+          followingId: f.Followings.id,
           ...f.Followings,
           isFollowed: helpers.getUser(req).Followings.some(uf => uf.Followship.followingId === f.Followings.id)
         }))
@@ -229,6 +231,7 @@ const userServices = {
       .then(followers => {
         assert(followers, 'Unexpected operation of database.')
         const result = followers.map(f => ({
+          followerId: f.Followers.id,
           ...f.Followers,
           isFollowed: helpers.getUser(req).Followings.some(uf => uf.Followship.followingId === f.Followers.id)
         }))
@@ -240,8 +243,8 @@ const userServices = {
     const { name, introduction } = req.body
     assert(name, 'User name is required!')
     // 從req取得file，若有file則存至變數，若無回傳null
-    const avatarFile = req.files.avatar ? req.files.avatar[0] : null
-    const coverImageFile = req.files.coverImage ? req.files.coverImage[0] : null
+    const avatarFile = req.files?.avatar ? req.files.avatar[0] : null
+    const coverImageFile = req.files?.coverImage ? req.files.coverImage[0] : null
     // 將file上傳至Imgur & 從資料庫搜尋欲修改的使用者資訊
     return Promise.all([
       uploadImgur(avatarFile),
@@ -249,7 +252,7 @@ const userServices = {
       User.findByPk(req.params.user_id)
     ])
       .then(([avatarFilePath, coverImageFilePath, user]) => {
-        assert(name, "User doesn't exit!")
+        // assert(user, "User doesn't exit!")
         // 更新此使用者資訊，若無傳進新file則使用原圖
         return user.update({
           name,
