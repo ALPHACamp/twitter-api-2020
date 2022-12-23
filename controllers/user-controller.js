@@ -11,7 +11,8 @@ const userController = {
 		if (password !== checkPassword) throw Error('Passwords do not match!', {}, Error.prototype.code = 422)
 		if (/\s/.test(account) || /\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
 		if (password.length < 4 || password.length > 12) throw Error('Password over!', {}, Error.prototype.code = 412)
-		if (account.length > 50 || name.length > 50) throw Error('Name or account over!', {}, Error.prototype.code = 403)
+		if (account.length > 50 ) throw Error('Account is over!', {}, Error.prototype.code = 403)
+		if (name.length > 50) throw Error('Name is over!', {}, Error.prototype.code = 413)
 		if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw Error('Invalid email format!', {}, Error.prototype.code = 401)
 
 		Promise.all([
@@ -30,7 +31,8 @@ const userController = {
 				role: 'user',
 				avatar: 'https://i.imgur.com/PuP3Fmn.jpg',
 				password: hash,
-				cover: 'https://i.imgur.com/KNbtyGq.png'
+				cover: 'https://i.imgur.com/KNbtyGq.png',
+				introduction:'Hello world!'
 
 			}))
 			.then((user) => {
@@ -105,12 +107,12 @@ const userController = {
 		const { files } = req // file 改為 files
 		// Hello Gina，後來 Simon 大大幫我們找到bug了，我把這邊console.log出來。
 		// console.log('這邊',files.avatar[0])
-		if (account) { if (/\s/.test(account) || account.length > 50) throw Error('Invalid Account!', {}, Error.prototype.code = 403) }
+		if (account) { if (/\s/.test(account) || account.length > 50) throw Error('Account is over!', {}, Error.prototype.code = 403) }
 		if (password && checkPassword) {
 			if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw Error('Invalid Password!', {}, Error.prototype.code = 422)
 		}
-		if (name) { if (name.length > 50) throw Error('Invalid name!', {}, Error.prototype.code = 403) }
-		if (email) { if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw Error('Invalid email format!', {}, Error.prototype.code = 401) }
+		if (name) { if (name.length > 50) throw Error('Invalid name!', {}, Error.prototype.code = 413) }
+		if (email) { if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw Error('Invalid email format!', {}, Error.prototype.code = 411) }
 		if (introduction) { if (introduction.length > 160) throw Error('Invalid introduction!', {}, Error.prototype.code = 403) }
 		let fileCover =null
 		let fileAvatar =null
@@ -163,7 +165,7 @@ const userController = {
 					email: email || user.mail,
 					password: hash || user.password,
 					avatar: fileAvatar||user.avatar,
-					introduction: introduction || user.introduction,
+					introduction: introduction,
 					cover: fileCover||user.cover
 				})
 			})
