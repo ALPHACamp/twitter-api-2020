@@ -97,15 +97,12 @@ const userController = {
   putUserAccount: async (req, res, next) => {
     try {
       const { id } = req.params
+      const user = await User.findByPk(id)
       // 未回傳則預設不修改
       const { account, name, email, password, checkPassword } = req.body
 
       // 確認回傳不可為空白
       if ((account && account.trim() === '') || (name && name.trim() === '') || (email && email.trim() === '')) return res.status(400).json({ status: 'error', message: '所有欄位都是必填！' })
-
-      // 確定使用者存在
-      const user = await User.findByPk(id)
-      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
 
       // 只能更改自己的資料
       if (getUser(req).dataValues.id !== Number(id)) return res.status(401).json({ status: 'error', message: '無權限更改此使用者！' })
@@ -151,7 +148,7 @@ const userController = {
     try {
       // 未回傳則代表不改變資料
       const { id } = req.params
-      const { name, introduction } = req.body
+      const { name, introduction, deleteCover, deleteAvatar } = req.body
       const { files } = req
 
       if (!name) return res.status(400).json({ status: 'error', message: 'name是必填！' })
@@ -172,8 +169,17 @@ const userController = {
       if (introduction && introduction.length > 160) return status(400).json({ status: 'error', message: '超過introduction字數上限160字！' })
 
       // 圖片上傳imgur
-      const avatarPath = await imgurFileHandler(avatar)
-      const coverPath = await imgurFileHandler(cover)
+      let avatarPath = await imgurFileHandler(avatar)
+      let coverPath = await imgurFileHandler(cover)
+
+      // 刪除圖片改為預設
+      if (Number(deleteCover) === 1) {
+        coverPath = 'https://i.imgur.com/wvu5KGx.png'
+      }
+
+      if (Number(deleteAvatar) === 1) {
+        avatarPath = 'https://i.imgur.com/Djq8vQ2.png'
+      }
 
       let updatedUser = await user.update({
         name,

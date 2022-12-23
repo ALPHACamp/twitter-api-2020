@@ -37,7 +37,7 @@ const adminController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerCount']
         ],
-
+        order: [[sequelize.literal('tweetsCount'), 'DESC']],
         limit,
         offset,
         nest: true,
