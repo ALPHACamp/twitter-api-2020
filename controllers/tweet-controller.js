@@ -54,7 +54,7 @@ const tweetController = {
     }).then(tweet => {
       if (!tweet) return res.status(404).json({ status: 'error', message: '貼文不存在!' })
       const data = tweet
-      data.createdAt = helpers.date(tweet.createdAt).format('A hh:mm YYYY年MM月DD日')
+      data.createdAt = helpers.date(tweet.createdAt).format('A hh:mm．YYYY年MM月DD日')
       data.isLiked = currentUser?.Likes?.some(UserLike => UserLike?.TweetId === tweet.id)
       return res.status(200).json(data)
     }).catch(err => next(err))

@@ -281,7 +281,7 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeCount'],
           [sequelize.literal('(SELECT COUNT(*)  FROM Replies WHERE Replies.tweet_id = Tweet.id)'),
             'replyCount'],
-          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${currentUser} AND Likes.tweet_id = Tweet.id)`), 'Liked']
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${currentUser} AND Likes.tweet_id = Tweet.id)`), 'isLiked']
         ]
       },
       order: [['createdAt', 'Desc']],
@@ -294,7 +294,7 @@ const userController = {
         const likeData = likes.map(li => ({
           ...li,
           createdAt: helpers.relativeTime(li.createdAt),
-          isLiked: Boolean(li.Tweet.Liked)
+          isLiked: Boolean(li.Tweet.isLiked)
         }))
         return res.status(200).json(likeData)
       })
