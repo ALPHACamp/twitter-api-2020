@@ -53,13 +53,14 @@ const userController = {
     const currentUser = helpers.getUser(req)
     return User.findByPk(currentUser.id, {
       attributes: {
-        exclude: ['password'],
+        exclude: ['password', 'role', 'createdAt', 'updatedAt'],
         include: [
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id )'), 'tweetCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id )'), 'followerCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id )'), 'followingCount']
         ]
-      }
+      },
+      raw: true
     })
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
@@ -69,16 +70,18 @@ const userController = {
   },
   getUser: (req, res, next) => {
     const currentUser = helpers.getUser(req)
-    return User.findByPk(req.params.id, {
+    const paramsId = Number(req.params.id)
+    return User.findByPk(paramsId, {
       attributes: {
-        exclude: ['password'],
+        exclude: ['password', 'role', 'createdAt', 'updatedAt'],
         include: [
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id )'), 'tweetCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id )'), 'followerCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id )'), 'followingCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.followerId = ${currentUser.id} AND Followships.followingId = User.id )`), 'isFollowed']
         ]
-      }
+      },
+      raw: true
     })
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
@@ -93,12 +96,12 @@ const userController = {
       include: [
         {
           model: User,
-          attributes: {
-            exclude: ['password']
-          }
+          attributes: ['id', 'account', 'name']
         }],
       attributes: {
+        exclude: ['createdAt', 'updatedAt'],
         include: [
+          'id', 'UserId', 'description',
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id )'), 'replyCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id )'), 'likeCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${currentUser.id} AND Likes.TweetId = Tweet.id )`), 'isLiked']
@@ -124,19 +127,18 @@ const userController = {
   getUserReplies: (req, res, next) => {
     return Reply.findAll({
       where: { UserId: req.params.id },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
       include: [
         {
           model: User,
-          attributes: {
-            exclude: ['password']
-          }
+          attributes: ['id', 'account', 'name']
         },
         {
           model: Tweet,
           attributes: ['UserId'],
           include: {
             model: User,
-            attributes: ['account', 'name']
+            attributes: ['account']
           }
         }
       ],
@@ -161,6 +163,7 @@ const userController = {
     const currentUser = helpers.getUser(req)
     return Like.findAll({
       where: { UserId: req.params.id },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
       include: [
         {
           model: Tweet,
@@ -174,9 +177,7 @@ const userController = {
           ],
           include: {
             model: User,
-            attributes: {
-              exclude: ['password']
-            }
+            attributes: ['id', 'account', 'name']
           }
         }
       ],
@@ -201,6 +202,7 @@ const userController = {
     const currentUser = helpers.getUser(req)
     return Followship.findAll({
       where: { followerId: req.params.id },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
       include: {
         model: User,
         as: 'Followings',
@@ -225,6 +227,7 @@ const userController = {
     const currentUser = helpers.getUser(req)
     return Followship.findAll({
       where: { followingId: req.params.id },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
       include: {
         model: User,
         as: 'Followers',

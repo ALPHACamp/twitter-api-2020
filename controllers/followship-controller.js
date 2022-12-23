@@ -42,13 +42,11 @@ const followshipController = {
   getTopUsers: (req, res, next) => {
     const currentUser = helpers.getUser(req)
     return User.findAll({
-      attributes: {
-        exclude: ['password'],
-        include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id )'), 'followerCount'],
-          [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.followerId = ${currentUser.id} AND Followships.followingId = User.id )`), 'isFollowed']
-        ]
-      },
+      attributes: [
+        'id', 'account', 'name',
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id )'), 'followerCount'],
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.followerId = ${currentUser.id} AND Followships.followingId = User.id )`), 'isFollowed']
+      ],
       order: [
         [sequelize.literal('followerCount'), 'DESC'], ['createdAt', 'DESC']
       ],
