@@ -7,7 +7,7 @@
 | 後台       | root    | 12345678 |
 | 前台       | user1   | 12345678 |
 
-- 拜訪 [ 前端 Repo](https://github.com/Gino-Hsu/simple-twitter)。
+- 查看 [ 前端 Repo](https://github.com/Gino-Hsu/simple-twitter)。
 
 ## 產品功能
 
@@ -23,7 +23,8 @@
 - 瀏覽一則推文中的全部回覆
 - 可以 like / unlike 單則推文
 - 可以 follow / unfollow 其他使用者
-- 取得使用者個人介面：查看該使用者所有推文、回覆、喜歡的推文，以及追隨者、關注者名單 
+- 取得使用者個人介面：查看該使用者所有推文、回覆、喜歡的推文，以及跟隨者、關注者名單
+- 查看推薦跟隨的前十大名單 
 
 ## 安裝流程
 
@@ -35,7 +36,7 @@
 git clone https://github.com/seanlin1125/twitter-api-2022.git
 ```
 
-2. 安裝必要的套件
+2. 安裝專案套件
 
 ```
 npm install
@@ -44,35 +45,35 @@ npm install
 3. 安裝 nodemon 
 
 ```
-npm i nodemon
+npm install nodemon
 ```
 
-4. 根據 .env.example 設定環境變數在 .env 檔案 
+4. 根據 .env.example 設定環境變數在新增的 .env 檔案 
 
 ```
 touch .env
 ```
 
-5. 修改 config.json 為你自己的 MySQL username, password, and database
+5. 在 config.json 中設定自己的 MySQL 配置
 
 ```
 "development": {
-    "username": "<your username>",
-    "password": "<your password>",
-    "database": "<your database>",
+    "username": "<使用者名稱>",
+    "password": "<使用者密碼>",
+    "database": "<資料庫名稱>",
     "host": "127.0.0.1",
     "dialect": "mysql"
 }
 ```
 
-6. 建立資料庫 tables and seeders 
+6. 建立資料庫後執行migration創建資料表。並導入種子資料(若需要)
 
 ```
 npx sequelize db:migrate
 npx sequelize db:seed:all
 ```
 
-7. 啟動伺服器
+7. 執行專案
 
 ```
 npm run dev
@@ -85,7 +86,7 @@ Example app listening on port 3000!
 ```
 
 ## Routes Table and API Doc
-- 完整 API 文件 [（查看）](https://www.notion.so/API-97143e51c9b942e581c492980639f125)。
+- [完整 API 文件](https://www.notion.so/API-97143e51c9b942e581c492980639f125)。
  
 | Feature                       | Method | Route                                          |
 | ----------------------------- | ------ | ---------------------------------------------- |
@@ -101,9 +102,9 @@ Example app listening on port 3000!
 | 取得特定使用者個人資料            | GET    | /api/users/:id                                 |
 | 取得使用者發過的所有推文          | GET    | /api/users/:id/tweets                          |
 | 取得使用者發過的所有回覆          | GET    | /api/users/:id/replied_tweets                  |
-| 取得使用者喜歡的內容             | GET    | /api/users/:id/likes                            |
-| 取得使用者正在關注的名單          | GET    | /api/users/:id/followings                       |
-| 取得使用者正在跟隨的名單          | GET    | /api/users/:id/followers                        |
+| 取得使用者喜歡的推文             | GET    | /api/users/:id/likes                            |
+| 取得使用者正在跟隨的名單          | GET    | /api/users/:id/followings                       |
+| 取得正在跟隨使用者的名單          | GET    | /api/users/:id/followers                        |
 | 修改個人資料                    | PUT    | /api/users/:id                                  |
 | 修改個人帳號設定                 | PUT    | /api/users/:id/setting                          |
 | 移除使用者封面照片               | PATCH  | /api/users/:id/cover                            |
