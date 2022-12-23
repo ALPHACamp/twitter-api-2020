@@ -1,59 +1,59 @@
 # Simple Twitter API
-It's an API server for [Simple Twitter](https://gino-hsu.github.io/simple-twitter/) website.
+此專案提供 API 給 [Simple Twitter](https://gino-hsu.github.io/simple-twitter/) 使用。
 
-You can login with the accounts below:
+您可以使用以下帳戶登入:
 | system     | account | password |
 | ---------- | ------- | -------- |
-| background | root    | 12345678 |
-| foreground | user1   | 12345678 |
+| 後台       | root    | 12345678 |
+| 前台       | user1   | 12345678 |
 
-Visit the [Frontend Repo](https://github.com/Gino-Hsu/simple-twitter). 
+- 拜訪 [ 前端 Repo](https://github.com/Gino-Hsu/simple-twitter)。
 
-## Features
+## 產品功能
 
-### Foreground for normal user
-- Register and signin
-- Edit user's own account setting and profile
-- Post a tweet and delete user's own tweet
-- Post a reply and delete user's own reply
-- Get all tweets and a tweet's reply
-- Like and unlike a tweet
-- Follow and unfollow a user
-- Get a user's profile, tweets, replies, liked tweets, followers, and followings 
+### 後台（管理者）
+- 登入後可查看所有使用者資訊
+- 查看所有推文，並刪除推文
 
-### Background for admin user
-- Signin to get all users
-- Get all tweets and delete a tweet
+### 前台（一般使用者）
+- 註冊並登入
+- 編輯使用者個人帳戶設定，以及個人資料
+- 新增推文、回覆
+- 瀏覽全部推文
+- 瀏覽一則推文中的全部回覆
+- 可以 like / unlike 單則推文
+- 可以 follow / unfollow 其他使用者
+- 取得使用者個人介面：查看該使用者所有推文、回覆、喜歡的推文，以及追隨者、關注者名單 
 
-## Getting Start
+## 安裝流程
 
-0. Install Node.js@14.16.0, npm, and MySQL
+0. 安裝 Node.js@14.16.0 、 npm、 及 MySQL
 
-1. Clone the project
+1. Clone 專案至本機電腦
 
 ```
 git clone https://github.com/seanlin1125/twitter-api-2022.git
 ```
 
-2. Install the required dependencies
+2. 安裝必要的套件
 
 ```
 npm install
 ```
 
-3. Install nodemon 
+3. 安裝 nodemon 
 
 ```
 npm i nodemon
 ```
 
-4. Set environment variables in .env file according to .env.example
+4. 根據 .env.example 設定環境變數在 .env 檔案 
 
 ```
 touch .env
 ```
 
-5. Modify config.json with your own MySQL username, password, and database
+5. 修改 config.json 為你自己的 MySQL username, password, and database
 
 ```
 "development": {
@@ -65,57 +65,59 @@ touch .env
 }
 ```
 
-6. Create tables and seeders 
+6. 建立資料庫 tables and seeders 
 
 ```
 npx sequelize db:migrate
 npx sequelize db:seed:all
 ```
 
-7. Start the server
+7. 啟動伺服器
 
 ```
 npm run dev
 ```
 
-8. Execute successfully if seeing following message
+8. 看到以下訊息表示執行成功！
 
 ```
 Example app listening on port 3000!
 ```
 
 ## Routes Table and API Doc
-| Feature                              | Method | Route                                                                          |
-| ------------------------------------ | ------ | ------------------------------------------------------------------------------ |
-| **Admin**                            |        |                                                                                |
-| Login to background for admin        | POST   | [/api/admin/signin](api-doc/admin/signin.md)                                   |
-| Get all users for admin              | GET    | [/api/admin/users](api-doc/admin/get-users.md)                                 |
-| Get all tweets for admin              | GET    | [/api/admin/tweets](api-doc/admin/delete-tweet.md)                         |
-| Delete a tweet for admin             | DELETE | [/api/admin/tweets/:id](api-doc/admin/delete-tweet.md)                         |
-| **User**                             |        |                                                                                |
-| Login to foreground for user         | POST   | [/api/users/signin](api-doc/user/signin.md)                                    |
-| Register an account                  | POST   | [/api/users](api-doc/user/signup.md)                                           |
-| Get current user                     | GET    | [/api/current_user](api-doc/user/get-current-user.md)                          |
-| Get the user’s profile               | GET    | [/api/users/:id](api-doc/user/get-user-profile.md)                             |
-| Get a user’s all tweets              | GET    | [/api/users/:id/tweets](api-doc/user/get-user-tweets.md)                       |
-| Get a user’s all replies             | GET    | [/api/users/:id/replied_tweets](api-doc/user/get-user-replies.md)              |
-| Get a user’s all liked tweets        | GET    | [/api/users/:id/likes](api-doc/user/get-user-liked-tweets.md)                  |
-| Get a user’s all followings          | GET    | [/api/users/:id/followings](api-doc/user/get-user-followings.md)               |
-| Get a user’s all followers           | GET    | [/api/users/:id/followers](api-doc/user/get-user-followers.md)                 |
-| Edit user’s own profile              | PUT    | [/api/users/:id](api-doc/user/put-user-profile.md)                             |
-| Edit user’s own account              | PUT    | [/api/users/:id/setting](api-doc/user/put-user-setting.md)                     |
-| Delete user’s own cover              | PATCH  | [/api/users/:id/cover](api-doc/user                      )                     |
-| **Tweet**                            |        |                                                                                |
-| Add a tweet                          | POST   | [/api/tweets](api-doc/tweet/add-tweet.md)                                      |
-| Get all tweets                       | GET    | [/api/tweets](api-doc/tweet/get-tweets.md)                                     |
-| Get a tweet                          | GET    | [/api/tweets/:id](api-doc/tweet/get-tweet.md)                                  |
-| **Reply**                            |        |                                                                                |
-| Add a reply related to a tweet       | POST   | [/api/tweets/:tweet_id/replies](api-doc/tweet/add-tweet-reply.md)              |
-| Get a tweet’s all replies            | GET    | [/api/tweets/:tweet_id/replies](api-doc/tweet/get-tweet-replies.md)            |
-| **Like**                             |        |                                                                                |
-| Like a tweet                         | POST   | [/api/tweets/:id/like](api-doc/tweet/add-tweet-like.md)                        |
-| Unlike a tweet                       | POST   | [/api/tweets/:id/unlike](api-doc/tweet/delete-tweet-like.md)                   |
-| **Followship**                       |        |                                                                                |
-| Follow a user                        | POST   | [/api/followships](api-doc/followship/add-following.md)                        |
-| Unfollow a user                      | DELETE | [/api/followships/:followingId](api-doc/followship/delete-following.md)        |
-| Get top 10 users with most followers | GET    | [/api/followships/top](api-doc/user/get-top-users.md)                          |
+- 完整 API 文件 [（查看）](https://www.notion.so/API-97143e51c9b942e581c492980639f125)。
+ 
+| Feature                       | Method | Route                                          |
+| ----------------------------- | ------ | ---------------------------------------------- |
+| **Admin**                     |        |                                                |
+| 後台使用者登入                  | POST   | /api/admin/signin                              |
+| 取得所有使用者的資料             | GET    | /api/admin/users                               |
+| 取得所有貼文                    | GET    | /api/admin/tweets                              |
+| 刪除特定推文                    | DELETE | /api/admin/tweets/:id                          |
+| **User**                      |        |                                                |
+| 前台使用者註冊                  | POST   | /api/users                                     |
+| 前台使用者登入                  | POST   | /api/users/signin                              |
+| 取得當前登入使用者的資料          | GET    | /api/current_user                              |
+| 取得特定使用者個人資料            | GET    | /api/users/:id                                 |
+| 取得使用者發過的所有推文          | GET    | /api/users/:id/tweets                          |
+| 取得使用者發過的所有回覆          | GET    | /api/users/:id/replied_tweets                  |
+| 取得使用者喜歡的內容             | GET    | /api/users/:id/likes                            |
+| 取得使用者正在關注的名單          | GET    | /api/users/:id/followings                       |
+| 取得使用者正在跟隨的名單          | GET    | /api/users/:id/followers                        |
+| 修改個人資料                    | PUT    | /api/users/:id                                  |
+| 修改個人帳號設定                 | PUT    | /api/users/:id/setting                          |
+| 移除使用者封面照片               | PATCH  | /api/users/:id/cover                            |
+| **Tweet**                     |        |                                                 |
+| 新增推文                       | POST   | /api/tweets                                     |
+| 取得所有推文                    | GET    | /api/tweets                                     |
+| 取得特定推文                    | GET    | /api/tweets/:tweet_id                                 |
+| **Reply**                     |        |                                                 |
+| 在特定推文新增回覆               | POST   | /api/tweets/:tweet_id/replies                   |
+| 取得特定推文的所有回覆            | GET    | /api/tweets/:tweet_id/replies                   |
+| **Like**                      |        |                                                 |
+| 將推文加入喜歡                  | POST   | /api/tweets/:id/like                            |
+| 將推文移除喜歡                  | POST   | /api/tweets/:id/unlike                          |
+| **Followship**                |        |                                                 |
+| 新增跟隨                       | POST   | /api/followships                                 |
+| 取消跟隨                       | DELETE | /api/followships/:followingId                    |
+| 推薦跟隨名單                    | GET    | /api/followships/top                             |
