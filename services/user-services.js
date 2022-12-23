@@ -83,11 +83,9 @@ const userServices = {
     ])
       .then(([user, followers, followings]) => {
         assert(user, "User doesn't exit.")
-        const userData = user.toJSON()
         const isFollowed = followers.count ? followers.rows.some(f => f.followerId === helpers.getUser(req).id) : false
-        delete userData.password
         const result = {
-          ...userData,
+          ...user,
           totalFollowers: followers.count,
           totalFollowings: followings.count,
           isFollowed
@@ -143,7 +141,6 @@ const userServices = {
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
-
     })
       .then(repliesOfTweet => {
         assert(repliesOfTweet, 'Unexpected operation of database.')
@@ -197,7 +194,6 @@ const userServices = {
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
-
     })
       .then(followings => {
         assert(followings, 'Unexpected operation of database.')
@@ -218,7 +214,6 @@ const userServices = {
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
-
     })
       .then(followers => {
         assert(followers, 'Unexpected operation of database.')
@@ -234,8 +229,8 @@ const userServices = {
     const { name, introduction } = req.body
     assert(name, 'User name is required!')
     // 從req取得file，若有file則存至變數，若無回傳null
-    const avatarFile = req.files ? req.files.avatar[0] : null
-    const coverImageFile = req.files ? req.files.coverImage[0] : null
+    const avatarFile = req.files.avatar ? req.files.avatar[0] : null
+    const coverImageFile = req.files.coverImage ? req.files.coverImage[0] : null
     // 將file上傳至Imgur & 從資料庫搜尋欲修改的使用者資訊
     return Promise.all([
       uploadImgur(avatarFile),

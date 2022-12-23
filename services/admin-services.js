@@ -15,17 +15,14 @@ const adminServices = {
         }]
       }],
       //  offset,
+      attributes: { exclude: ['password'] },
       group: 'id',
       order: [['createdAt', 'DESC']],
       nest: true,
       raw: true
     })
       .then(users => {
-        const data = users.map(user => {
-          delete user.password
-          return user
-        })
-        cb(null, data)
+        cb(null, users)
       })
       .catch(err => cb(err))
   }, // 軟刪除?
