@@ -9,7 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       UserId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER
         // cannot add below reference due to model test file...
         // references: {
         //   model: 'Users',

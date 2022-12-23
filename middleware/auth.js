@@ -18,9 +18,14 @@ function authenticatedSuccess (req, res, next) {
   res.status(200).json({ status: 'success', message: 'Token valid!' })
 }
 
+function authenticatedUser (req, res, next) {
+  if (helpers.getUser(req).role === 'user') return next()
+  return res.status(403).json({ status: 'error', message: 'permission denied' })
+}
+
 function authenticatedAdmin (req, res, next) {
   if (helpers.getUser(req).role === 'admin') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 
-module.exports = { authenticated, authenticatedSuccess, authenticatedAdmin }
+module.exports = { authenticated, authenticatedSuccess, authenticatedUser, authenticatedAdmin }
