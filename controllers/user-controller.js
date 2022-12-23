@@ -99,9 +99,9 @@ const userController = {
           attributes: ['id', 'account', 'name']
         }],
       attributes: {
-        exclude: ['createdAt', 'updatedAt'],
+        exclude: ['updatedAt'],
         include: [
-          'id', 'UserId', 'description',
+          'id', 'UserId', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id )'), 'replyCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id )'), 'likeCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${currentUser.id} AND Likes.TweetId = Tweet.id )`), 'isLiked']
@@ -127,7 +127,7 @@ const userController = {
   getUserReplies: (req, res, next) => {
     return Reply.findAll({
       where: { UserId: req.params.id },
-      attributes: { exclude: ['createdAt', 'updatedAt'] },
+      attributes: { exclude: ['updatedAt'] },
       include: [
         {
           model: User,
@@ -163,14 +163,12 @@ const userController = {
     const currentUser = helpers.getUser(req)
     return Like.findAll({
       where: { UserId: req.params.id },
-      attributes: { exclude: ['createdAt', 'updatedAt'] },
+      attributes: { exclude: ['updatedAt'] },
       include: [
         {
           model: Tweet,
           attributes: [
-            'id',
-            'UserId',
-            'description',
+            'id', 'UserId', 'description',
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id )'), 'replyCount'],
             [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id )'), 'likeCount'],
             [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${currentUser.id} AND Likes.TweetId = Tweet.id )`), 'isLiked']
@@ -202,7 +200,7 @@ const userController = {
     const currentUser = helpers.getUser(req)
     return Followship.findAll({
       where: { followerId: req.params.id },
-      attributes: { exclude: ['createdAt', 'updatedAt'] },
+      attributes: { exclude: ['updatedAt'] },
       include: {
         model: User,
         as: 'Followings',

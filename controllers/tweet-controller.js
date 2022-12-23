@@ -24,11 +24,10 @@ const tweetController = {
       include: [
         {
           model: User,
-          attributes: {
-            exclude: ['password']
-          }
+          attributes: ['id', 'account', 'name', 'avatar']
         }],
       attributes: {
+        exclude: ['updatedAt'], // 如果把createdAt也拿掉，會影響到下面relativeTime的呈現時間
         include: [
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id )'), 'replyCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id )'), 'likeCount'],
@@ -57,12 +56,12 @@ const tweetController = {
       include: [
         {
           model: User,
-          attributes: {
-            exclude: ['password']
-          }
+          attributes: ['id', 'account', 'name', 'avatar']
         }],
       attributes: {
+        exclude: ['updatedAt'],
         include: [
+          'id', 'UserId', 'description',
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id )'), 'replyCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id )'), 'likeCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${currentUser.id} AND Likes.TweetId = Tweet.id )`), 'isLiked']
