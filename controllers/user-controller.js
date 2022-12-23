@@ -54,7 +54,7 @@ const userController = {
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
         role: 'user',
-        avatar: 'https://i.imgur.com/zByqb7D.png',
+        avatar: 'https://i.imgur.com/zC0XOiB.png',
         cover: 'https://loremflickr.com/1500/800/mountain'
       })
       // 回傳新使用者資料，刪除password欄位
@@ -208,7 +208,7 @@ const userController = {
       Followship.findAll({
         attributes: { exclude: 'updatedAt' },
         order: [['createdAt', 'DESC']],
-        include: { model: User, as: 'FollowingUser', attributes: ['id', 'account', 'name', 'avatar'] },
+        include: { model: User, as: 'FollowingUser', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] },
         where: { followerId: id },
         raw: true,
         nest: true
@@ -220,7 +220,13 @@ const userController = {
         const data = followings.map(fi => ({
           ...fi,
           createdAt: helpers.relativeTime(fi.createdAt),
-          isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
+          // isFollowed: currentUser?.Followings?.some(currentUserFollow => currentUserFollow?.followingId === fi.id)
+          isFollowed: currentUser?.Followings?.map(currentUserFollow => {
+            console.log(`currentUserFollow:${currentUserFollow}`)
+            console.log(`currentUserFollow.followingId:${currentUserFollow.followingId}`)
+            console.log(`fl.id:${fi.id}`)
+            return currentUserFollow?.followingId === fi.id
+          })
         }))
         res.status(200).json(data)
       })
@@ -235,7 +241,7 @@ const userController = {
       Followship.findAll({
         attributes: { exclude: 'updatedAt' },
         order: [['createdAt', 'DESC']],
-        include: { model: User, as: 'FollowerUser', attributes: ['id', 'account', 'name', 'avatar'] },
+        include: { model: User, as: 'FollowerUser', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] },
         where: { followingId: id },
         raw: true,
         nest: true
@@ -246,9 +252,15 @@ const userController = {
         if (followers.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有任何追隨者!' })
         const data = followers.map(fl => ({
           ...fl,
-          createdAt: helpers.relativeTime(fl.createdAt),
-          isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fl.id)
+          createdAt: helpers.relativeTime(fl.createdAt)/*,
+          isFollowed: currentUser?.Followings?.map((currentUserFollow) => {
+            console.log(`currentUserFollow:${currentUserFollow}`)
+            console.log(`currentUserFollow.followingId:${currentUserFollow.id}`)
+            console.log(`fl.id:${fl.id}`)
+            return currentUserFollow?.followingId === fl.id
+          }) */
         }))
+        console.log(currentUser.Followings)
         res.status(200).json(data)
       })
       .catch(err => next(err))
