@@ -51,38 +51,37 @@ const tweetController = {
       res.status(200).json(replyList)
     } catch (err) { next(err) }
   },
-  postTweetReply: (req, res, next) => {
-    const { comment } = req.body
-    const tweetId = req.params.id
-    const currentUserId = helpers.getUser(req).id
-    const tweet = Tweet.findByPk(tweetId)
-    if (!tweet) {
-      return res.status(404).json({
-        status: '404',
-        message: 'Tweet did not exist!'
+  postTweetReply: async (req, res, next) => {
+    try {
+      const { comment } = req.body
+      const tweetId = req.params.id
+      const currentUserId = helpers.getUser(req).id
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) {
+        return res.status(404).json({
+          status: '404',
+          message: 'Tweet did not exist!'
+        })
+      }
+      if (!comment) {
+        return res.status(406).json({
+          status: '406',
+          message: 'Content is required!'
+        })
+      }
+      if (comment.length > 140) {
+        return res.status(406).json({
+          status: '406',
+          message: 'Too many words!'
+        })
+      }
+      const reply = await Reply.create({
+        UserId: currentUserId,
+        TweetId: tweetId,
+        comment
       })
-    }
-    if (!comment) {
-      return res.status(406).json({
-        status: '406',
-        message: 'Content is required!'
-      })
-    }
-    if (comment.length > 140) {
-      return res.status(406).json({
-        status: '406',
-        message: 'Too many words!'
-      })
-    }
-    Reply.create({
-      UserId: currentUserId,
-      TweetId: tweetId,
-      comment
-    })
-      .then(reply => {
-        res.status(200).json(reply)
-      })
-      .catch(err => next(err))
+      return res.status(200).json(reply)
+    } catch (err) { next(err) }
   },
   getTweets: async (req, res, next) => {
     try {
