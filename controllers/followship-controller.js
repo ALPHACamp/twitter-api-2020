@@ -46,7 +46,8 @@ const followshipController = {
       where: { role: 'user' },
       attributes: [
         'id', 'account', 'name', 'avatar', 'introduction',
-        [sequelize.literal('(SELECT COUNT (id) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount']
+        [sequelize.literal('(SELECT COUNT (id) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
+        [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${currentUser.id} AND Followships.following_id = User.id)`), 'isFollowed']
       ],
       order: [[sequelize.literal('followerCount'), 'DESC'], ['id', 'ASC']],
       raw: true,
@@ -54,8 +55,8 @@ const followshipController = {
       limit: 10
     }).then(users => {
       const data = users.map(u => ({
-        ...u,
-        isFollowed: currentUser?.Followings?.some(currentUserFollow => currentUserFollow?.id === u.id)
+        ...u
+        // isFollowed: currentUser?.Followings?.some(currentUserFollow => currentUserFollow?.id === u.id)
       }))
       return res.status(200).json(data)
     }).catch(err => next(err))

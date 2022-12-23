@@ -208,7 +208,13 @@ const userController = {
       Followship.findAll({
         attributes: { exclude: 'updatedAt' },
         order: [['createdAt', 'DESC']],
-        include: { model: User, as: 'FollowingUser', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] },
+        include: {
+          model: User,
+          as: 'FollowingUser',
+          attributes: ['id', 'account', 'name', 'avatar', 'introduction',
+            [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${currentUser.id} AND Followships.following_id = Followship.following_id)`), 'isFollowed']
+          ]
+        },
         where: { followerId: id },
         raw: true,
         nest: true
@@ -219,14 +225,8 @@ const userController = {
         if (followings.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有追隨任何人!' })
         const data = followings.map(fi => ({
           ...fi,
-          createdAt: helpers.relativeTime(fi.createdAt),
-          // isFollowed: currentUser?.Followings?.some(currentUserFollow => currentUserFollow?.followingId === fi.id)
-          isFollowed: currentUser?.Followings?.map(currentUserFollow => {
-            console.log(`currentUserFollow:${currentUserFollow}`)
-            console.log(`currentUserFollow.followingId:${currentUserFollow.followingId}`)
-            console.log(`fl.id:${fi.id}`)
-            return currentUserFollow?.followingId === fi.id
-          })
+          createdAt: helpers.relativeTime(fi.createdAt)
+          // isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
         }))
         res.status(200).json(data)
       })
@@ -241,7 +241,13 @@ const userController = {
       Followship.findAll({
         attributes: { exclude: 'updatedAt' },
         order: [['createdAt', 'DESC']],
-        include: { model: User, as: 'FollowerUser', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] },
+        include: {
+          model: User,
+          as: 'FollowerUser',
+          attributes: ['id', 'account', 'name', 'avatar', 'introduction',
+            [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${currentUser.id} AND Followships.following_id = Followship.follower_id)`), 'isFollowed']
+          ]
+        },
         where: { followingId: id },
         raw: true,
         nest: true
@@ -249,16 +255,10 @@ const userController = {
     ])
       .then(([user, followers]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (followers.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有任何追隨者!' })
         const data = followers.map(fl => ({
           ...fl,
-          createdAt: helpers.relativeTime(fl.createdAt)/*,
-          isFollowed: currentUser?.Followings?.map((currentUserFollow) => {
-            console.log(`currentUserFollow:${currentUserFollow}`)
-            console.log(`currentUserFollow.followingId:${currentUserFollow.id}`)
-            console.log(`fl.id:${fl.id}`)
-            return currentUserFollow?.followingId === fl.id
-          }) */
+          createdAt: helpers.relativeTime(fl.createdAt)
+          // isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fl.id)
         }))
         console.log(currentUser.Followings)
         res.status(200).json(data)
@@ -288,11 +288,12 @@ const userController = {
       nest: true
     })])
       .then(([user, likes]) => {
-        if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (likes.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有按任何貼文Like!' })
+        if (!user) return res.status(404).json({ status: 'error', message: '帳號不存在!' })
+        if (likes.length === 0) return res.status(404).json({ status: 'error', message: '使用者沒有點任何貼文Like!' })
         const likeData = likes.map(li => ({
           ...li,
-          createdAt: helpers.relativeTime(li.createdAt)
+          createdAt: helpers.relativeTime(li.createdAt),
+          isLiked: Boolean(li.Tweet.isLiked)
         }))
         return res.status(200).json(likeData)
       })
@@ -324,7 +325,6 @@ const userController = {
     ])
       .then(([user, replies]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (replies.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有留下任何評論!' })
         const data = replies.map(rp => ({
           ...rp,
           createdAt: helpers.relativeTime(rp.createdAt)
