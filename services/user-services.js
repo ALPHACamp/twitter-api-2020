@@ -66,6 +66,7 @@ const userServices = {
     return Promise.all([
       User.findOne({
         where: { id: req.params.user_id },
+        attributes: { exclude: ['password'] },
         include: [{
           model: Tweet,
           attributes:
