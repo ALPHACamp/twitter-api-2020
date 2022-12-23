@@ -24,7 +24,7 @@ passport.use('local', new LocalStrategy(
 				if (user.dataValues.role !== 'user') return cb(null, false, { status: 423, message: 'you aren’t registered!' })
 				bcrypt.compare(password, user.password)
 					.then(res => {
-						if (!res) return cb(null, false, { status: '402', message: 'account or password invalid!' })
+						if (!res) return cb(null, false, { status: 402, message: 'account or password invalid!' })
 						return cb(null, user)
 					})
 			})
@@ -46,7 +46,7 @@ passport.use('localAdmin', new LocalStrategy(
 				if (user.dataValues.role !== 'admin') return cb(null, false, { status: 423, message: "you aren’t registered!" })
 				bcrypt.compare(password, user.password)
 					.then(res => {
-						if (!res) return cb(null, false, { status: "402", message: 'account or password invalid!' })
+						if (!res) return cb(null, false, { status: 402, message: 'account or password invalid!' })
 						return cb(null, user)
 					})
 			})
