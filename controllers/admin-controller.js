@@ -15,7 +15,7 @@ const adminController = {
       order: [[sequelize.literal('tweetCount'), 'DESC']]
     })
       .then(users => {
-        res.status(200).json(users)
+        return res.status(200).json(users)
       })
       .catch(err => next(err))
   },
@@ -23,7 +23,7 @@ const adminController = {
   signIn: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      if (userData.role !== 'admin') res.status(404).json({ status: 'error', message: '帳號不存在!' })
+      if (userData.role !== 'admin') return res.status(404).json({ status: 'error', message: '帳號不存在!' })
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
@@ -46,13 +46,13 @@ const adminController = {
       nest: true
     })
       .then(tweets => {
-        if (!tweets) res.status(404).json({ status: 'error', message: '貼文不存在!' })
+        if (!tweets) return res.status(404).json({ status: 'error', message: '貼文不存在!' })
         const data = tweets.map(t => ({
           ...t,
           description: t.description.substring(0, 50),
           createdAt: helpers.relativeTime(t.createdAt)
         }))
-        res.status(200).json(data)
+        return res.status(200).json(data)
       })
       .catch(err => next(err))
   },
@@ -63,7 +63,7 @@ const adminController = {
       where: { id: tweetId }
     })
       .then(deletedTweet => {
-        if (!deletedTweet) res.status(404).json({ status: 'error', message: '貼文不存在!' })
+        if (!deletedTweet) return res.status(404).json({ status: 'error', message: '貼文不存在!' })
         return res.status(200).json({ status: 'success', message: '貼文已刪除!' })
       })
       .catch(err => next(err))
@@ -77,7 +77,7 @@ const adminController = {
       nest: true
     })
       .then(user => {
-        if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
+        if (!user) return res.status(404).json({ status: 'error', message: '帳號不存在!' })
         const { ...userData } = {
           ...user.toJSON()
         }
