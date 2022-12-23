@@ -15,7 +15,8 @@ router.use('/auth', auth)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/followships', authenticated, authenticatedUser, followship)
 router.use('/tweets', authenticated, authenticatedUser, tweet)
-router.use('/users', authenticated, authenticatedUser, user)
+// router.use('/users', authenticated, authenticatedUser, user)
+router.use('/users', authenticated, user)// for development
 
 router.use('/', apiErrorHandler)
 
