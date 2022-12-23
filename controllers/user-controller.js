@@ -54,7 +54,7 @@ const userController = {
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
         role: 'user',
-        avatar: 'https://i.imgur.com/zByqb7D.png',
+        avatar: 'https://i.imgur.com/zC0XOiB.png',
         cover: 'https://loremflickr.com/1500/800/mountain'
       })
       // 回傳新使用者資料，刪除password欄位
@@ -208,7 +208,13 @@ const userController = {
       Followship.findAll({
         attributes: { exclude: 'updatedAt' },
         order: [['createdAt', 'DESC']],
-        include: { model: User, as: 'FollowingUser', attributes: ['id', 'account', 'name', 'avatar'] },
+        include: {
+          model: User,
+          as: 'FollowingUser',
+          attributes: ['id', 'account', 'name', 'avatar', 'introduction',
+            [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${currentUser.id} AND Followships.following_id = Followship.following_id)`), 'isFollowed']
+          ]
+        },
         where: { followerId: id },
         raw: true,
         nest: true
@@ -219,8 +225,8 @@ const userController = {
         if (followings.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有追隨任何人!' })
         const data = followings.map(fi => ({
           ...fi,
-          createdAt: helpers.relativeTime(fi.createdAt),
-          isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
+          createdAt: helpers.relativeTime(fi.createdAt)
+          // isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fi.id)
         }))
         res.status(200).json(data)
       })
@@ -235,7 +241,13 @@ const userController = {
       Followship.findAll({
         attributes: { exclude: 'updatedAt' },
         order: [['createdAt', 'DESC']],
-        include: { model: User, as: 'FollowerUser', attributes: ['id', 'account', 'name', 'avatar'] },
+        include: {
+          model: User,
+          as: 'FollowerUser',
+          attributes: ['id', 'account', 'name', 'avatar', 'introduction',
+            [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.follower_id = ${currentUser.id} AND Followships.following_id = Followship.follower_id)`), 'isFollowed']
+          ]
+        },
         where: { followingId: id },
         raw: true,
         nest: true
@@ -243,11 +255,10 @@ const userController = {
     ])
       .then(([user, followers]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (followers.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有任何追隨者!' })
         const data = followers.map(fl => ({
           ...fl,
-          createdAt: helpers.relativeTime(fl.createdAt),
-          isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fl.id)
+          createdAt: helpers.relativeTime(fl.createdAt)
+          // isFollowed: currentUser?.Followers?.some(currentUserFollow => currentUserFollow?.followerId === fl.id)
         }))
         res.status(200).json(data)
       })
@@ -277,10 +288,10 @@ const userController = {
     })])
       .then(([user, likes]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (likes.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有按任何貼文Like!' })
         const likeData = likes.map(li => ({
           ...li,
-          createdAt: helpers.relativeTime(li.createdAt)
+          createdAt: helpers.relativeTime(li.createdAt),
+          isLiked: Boolean(li.Tweet.isLiked)
         }))
         return res.status(200).json(likeData)
       })
@@ -312,7 +323,6 @@ const userController = {
     ])
       .then(([user, replies]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (replies.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有留下任何評論!' })
         const data = replies.map(rp => ({
           ...rp,
           createdAt: helpers.relativeTime(rp.createdAt)
