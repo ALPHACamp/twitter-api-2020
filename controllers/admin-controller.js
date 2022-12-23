@@ -2,63 +2,64 @@ const { User, Tweet, sequelize } = require('../models')
 const { dateFormat } = require('../helpers/date-helper')
 
 const adminController = {
-  getUsers: (req, res, next) => {
-    return User.findAll({
-      attributes: {
-        exclude: ['password', 'role', 'createdAt', 'updatedAt'],
+  getUsers: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        attributes: {
+          exclude: ['password', 'role', 'createdAt', 'updatedAt'],
+          include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id )'), 'tweetCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id )'), 'likeCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id )'), 'followerCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id )'), 'followingCount']
+          ]
+        },
+        order: [[sequelize.literal('tweetCount'), 'DESC']],
+        raw: true
+      })
+      res.status(200).json(users)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        attributes: { exclude: ['updatedAt'] },
         include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id )'), 'tweetCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id )'), 'likeCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id )'), 'followerCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id )'), 'followingCount']
-        ]
-      },
-      order: [
-        [sequelize.literal('tweetCount'), 'DESC']
-      ],
-      raw: true
-    })
-      .then(users => {
-        res.json(users)
+          {
+            model: User,
+            attributes: {
+              exclude: ['password', 'role', 'createdAt', 'updatedAt']
+            }
+          }],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
-      .catch(err => next(err))
+      const tweetsData = tweets.map(tweet => ({
+        ...tweet,
+        description: tweet.description.substring(0, 50),
+        relativeTime: dateFormat(tweet.createdAt).fromNow()
+      }))
+      res.status(200).json(tweetsData)
+    } catch (error) {
+      next(error)
+    }
   },
-  getTweets: (req, res, next) => {
-    return Tweet.findAll({
-      attributes: { exclude: ['updatedAt'] },
-      include: [
-        {
-          model: User,
-          attributes: {
-            exclude: ['password', 'role', 'createdAt', 'updatedAt']
-          }
-        }],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(tweets => {
-        const tweetsData = tweets.map(tweet => ({
-          ...tweet,
-          description: tweet.description.substring(0, 50),
-          relativeTime: dateFormat(tweet.createdAt).fromNow()
-        }))
-        res.json(tweetsData)
-      })
-      .catch(err => next(err))
-  },
-  deleteTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.id)
-      .then(tweet => {
-        if (!tweet) {
-          const err = new Error('推文不存在!')
-          err.status = 404
-          throw err
-        }
-        return tweet.destroy()
-      })
-      .then(deletedTweet => res.json({ tweet: deletedTweet }))
-      .catch(err => next(err))
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (!tweet) {
+        const err = new Error('推文不存在!')
+        err.status = 404
+        throw err
+      }
+      const deletedTweet = await tweet.destroy()
+      res.status(200).json({ tweet: deletedTweet })
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
