@@ -8,7 +8,7 @@ const followshipController = {
     if (currentUserId === Number(followingId)) {
       return res.status(406).json({
         status: '406',
-        message: 'You can not follow yourself!'
+        message: 'You can not follow yourself'
       })
     }
     return Promise.all([
@@ -25,6 +25,12 @@ const followshipController = {
           status: '404',
           message: 'You have already followed this user!'
         })
+        if (!user) {
+          return res.status(406).json({
+            status: '406',
+            message: 'User not exist!'
+          })
+        }
         return Promise.all([
           Followship.create({
             followerId: currentUserId,
@@ -42,7 +48,6 @@ const followshipController = {
       .catch(err => next(err))
   },
   removeFollowing: (req, res, next) => {
-
     const currentUserId = helpers.getUser(req).id
     const followingId = req.params.followingId
     Promise.all([
@@ -59,16 +64,16 @@ const followshipController = {
           status: '404',
           message: 'You have not followed this user!'
         })
-        return Promise.all([
+        Promise.all([
           followshipData.destroy(),
           User.update(
             { followingCount: userData.followingCount - 1 },
             { where: { id: followingId } }
           )
         ])
+          .then(([followshipData, userData]) =>
+            res.status(200).json(followshipData))
       })
-      .then(([followshipData, userData]) =>
-        res.status(200).json(followshipData))
       .catch(err => next(err))
   }
 }
