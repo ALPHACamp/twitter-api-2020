@@ -2,7 +2,6 @@ const { Tweet, User, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const { relativeTime, tweetSimplifyTime, tweetDetailTime } = require('../helpers/date-helper')
 const { getOffset } = require('../helpers/pagination-helper')
-
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
