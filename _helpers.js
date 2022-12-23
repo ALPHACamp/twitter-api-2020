@@ -12,9 +12,11 @@ function getUser (req) {
 
 const imgurFileHandler = file => {
   return new Promise(async (resolve, reject) => {
+    console.log('有沒有進handler')
     if (!file) return resolve(null)
     const img = await imgur.uploadFile(file.path)
       .then((img) => {
+        console.log('有沒有進handler下面',img)
         resolve(img?.link || null)
       })
       .catch(err => reject(err))    
