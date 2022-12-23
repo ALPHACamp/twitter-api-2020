@@ -1,23 +1,23 @@
 const { Tweet, User, sequelize } = require('../models')
 const { relativeTime } = require('../helpers/date-helper')
-const { getOffset } = require('../helpers/pagination-helper')
+// const { getOffset } = require('../helpers/pagination-helper')
 
 const adminController = {
   getTweets: async (req, res, next) => {
     try {
-      //  lazy loading
-      const DEFAULT_LIMIT = 10
-      const page = Number(req.query.page) || 1
-      const limit = Number(req.query.limit) || DEFAULT_LIMIT
-      const offset = getOffset(limit, page)
+      // //  lazy loading
+      // const DEFAULT_LIMIT = 10
+      // const page = Number(req.query.page) || 1
+      // const limit = Number(req.query.limit) || DEFAULT_LIMIT
+      // const offset = getOffset(limit, page)
 
       const tweets = await Tweet.findAll({
         include: {
           model: User, attributes: ['id', 'name', 'account', 'avatar']
         },
         order: [['createdAt', 'DESC']],
-        limit,
-        offset,
+        // limit,
+        // offset,
         nest: true,
         raw: true
       })
