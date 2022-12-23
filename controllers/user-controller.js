@@ -96,7 +96,7 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name']
+            attributes: ['id', 'account', 'name', 'avatar']
           }],
         attributes: {
           exclude: ['updatedAt'],
@@ -130,7 +130,7 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name']
+            attributes: ['id', 'account', 'name', 'avatar']
           },
           {
             model: Tweet,
@@ -173,7 +173,7 @@ const userController = {
             ],
             include: {
               model: User,
-              attributes: ['id', 'account', 'name']
+              attributes: ['id', 'account', 'name', 'avatar']
             }
           }
         ],

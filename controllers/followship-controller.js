@@ -50,7 +50,7 @@ const followshipController = {
       const currentUser = helpers.getUser(req)
       const users = await User.findAll({
         attributes: [
-          'id', 'account', 'name',
+          'id', 'account', 'name', 'avatar',
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id )'), 'followerCount'],
           [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.followerId = ${currentUser.id} AND Followships.followingId = User.id )`), 'isFollowed']
         ],
