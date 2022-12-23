@@ -58,7 +58,7 @@ const userController = {
             [sequelize.literal(`EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id AND Followships.followerId = ${loginUser})`), 'isFollowed']
           ]
         },
-        // order: ['followerCount', 'DESC'],
+        order: [[sequelize.literal('followerCount'), 'DESC']],
         limit: top || null
       })
       return res.status(200).json({ status: 'success', data: users })
