@@ -42,13 +42,11 @@ passport.use('localAdmin', new LocalStrategy(
 	(req, account, password, cb) => {
 		User.findOne({ where: { account } })
 			.then(user => {
-				if (!user) return cb(null, false, { status: '401', message: 'you aren’t registered!' })
-
-				if (user.dataValues.role !== 'admin') return cb(null, false, { status: '401', message: "you aren’t registered!" })
-
+				if (!user) return cb(null, false, { status: 423, message: "you aren’t registered!" })
+				if (user.dataValues.role !== 'admin') return cb(null, false, { status: 423, message: "you aren’t registered!" })
 				bcrypt.compare(password, user.password)
 					.then(res => {
-						if (!res) return cb(null, false, { status: "403", message: 'account or password invalid!' })
+						if (!res) return cb(null, false, { status: 402, message: 'account or password invalid!' })
 						return cb(null, user)
 					})
 			})

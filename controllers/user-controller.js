@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { getUser, imgurFileHandler,localFileHandler } = require('../_helpers')
+const { getUser, imgurFileHandler, localFileHandler } = require('../_helpers')
 const { User, Tweet, Followship, Like, Reply, sequelize } = require('../models')
 const id = require('faker/lib/locales/id_ID')
 
@@ -291,7 +291,10 @@ const userController = {
 						}
 					}
 				}
-				res.status(200).json(tweetList)
+				const tweetListOrder = tweetList.sort(function (a, b) {
+					return a.createdAt > b.createdAt
+				})
+				res.status(200).json(tweetListOrder)
 			})
 			.catch(err => { next(err) })
 	},

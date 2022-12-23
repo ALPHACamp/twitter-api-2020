@@ -25,7 +25,7 @@ const adminController = {
 					[sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = User.id)'), 'likeCount'],
 					[sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.follower_id = User.id)'), 'followerCount']
 				],
-				order: [['createdAt', 'DESC']]
+				order: [[sequelize.literal('tweetCount'), 'DESC']]
 			})
 			res.status(200).json(usersData)
 		} catch (err) { next(err) }
