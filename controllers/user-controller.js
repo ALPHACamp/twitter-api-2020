@@ -11,7 +11,7 @@ const userController = {
 		if (password !== checkPassword) throw Error('Passwords do not match!', {}, Error.prototype.code = 422)
 		if (/\s/.test(account) || /\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
 		if (password.length < 4 || password.length > 12) throw Error('Password over!', {}, Error.prototype.code = 412)
-		if (account.length > 50 ) throw Error('Account is over!', {}, Error.prototype.code = 403)
+		if (account.length > 50) throw Error('Account is over!', {}, Error.prototype.code = 403)
 		if (name.length > 50) throw Error('Name is over!', {}, Error.prototype.code = 413)
 		if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw Error('Invalid email format!', {}, Error.prototype.code = 401)
 
@@ -32,7 +32,7 @@ const userController = {
 				avatar: 'https://i.imgur.com/PuP3Fmn.jpg',
 				password: hash,
 				cover: 'https://i.imgur.com/KNbtyGq.png',
-				introduction:'Hello world!'
+				introduction: 'Hello world!'
 
 			}))
 			.then((user) => {
@@ -68,41 +68,41 @@ const userController = {
 		const id = req.params.id
 		const currentUser = getUser(req).id
 		return Promise.all([
-		 User.findByPk(id),
-		 Tweet.findAndCountAll({
-		  where: { UserId: id }
-		 }),
-		 Followship.findAndCountAll({
-		  where: { followingId: id }
-		 }),
-		 Followship.findAndCountAll({
-		  where: { followerId: id }
-		 }),
-		 Followship.findAll({
-		  where:{followingId:id},
-		  raw:true
-		 })
+			User.findByPk(id),
+			Tweet.findAndCountAll({
+				where: { UserId: id }
+			}),
+			Followship.findAndCountAll({
+				where: { followingId: id }
+			}),
+			Followship.findAndCountAll({
+				where: { followerId: id }
+			}),
+			Followship.findAll({
+				where: { followingId: id },
+				raw: true
+			})
 		])
-		 .then(([user, tweets, follower, following,ifFollowing]) => {
+			.then(([user, tweets, follower, following, ifFollowing]) => {
 
-		  if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
-		  const userData = user.get({ plain: true })
-		  delete userData.password
-		  userData.followingCount = following.count
-		  userData.followerCount = follower.count
-		  userData.tweetsCount = tweets.count
-		  userData.isfollowing = false
+				if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
+				const userData = user.get({ plain: true })
+				delete userData.password
+				userData.followingCount = following.count
+				userData.followerCount = follower.count
+				userData.tweetsCount = tweets.count
+				userData.isfollowing = false
 
-		  ifFollowing.forEach((f)=>{
-			if(f.followerId ===currentUser){
-				userData.isfollowing = true
-			}
-		  })
-		  res.status(200).json(userData)
-		 })
-		 .catch(err => next(err))
-	   },
-	putUser: async(req, res, next) => {
+				ifFollowing.forEach((f) => {
+					if (f.followerId === currentUser) {
+						userData.isfollowing = true
+					}
+				})
+				res.status(200).json(userData)
+			})
+			.catch(err => next(err))
+	},
+	putUser: async (req, res, next) => {
 		const { account, name, email, password, checkPassword, introduction } = req.body
 		const { files } = req // file 改為 files
 		// Hello Gina，後來 Simon 大大幫我們找到bug了，我把這邊console.log出來。
@@ -114,17 +114,17 @@ const userController = {
 		if (name) { if (name.length > 50) throw Error('Invalid name!', {}, Error.prototype.code = 413) }
 		if (email) { if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw Error('Invalid email format!', {}, Error.prototype.code = 411) }
 		if (introduction) { if (introduction.length > 160) throw Error('Invalid introduction!', {}, Error.prototype.code = 403) }
-		let fileCover =null
-		let fileAvatar =null
-		
+		let fileCover = null
+		let fileAvatar = null
+
 		//圖片上傳imgur處理
-		if(files.avatar){
+		if (files.avatar) {
 			fileAvatar = await imgurFileHandler(files.avatar[0])
 		}
-		if(files.cover){
+		if (files.cover) {
 			fileCover = await imgurFileHandler(files.cover[0])
 		}
-		
+
 		Promise.all([
 			User.findByPk(req.params.id),
 			(async () => {
@@ -154,7 +154,7 @@ const userController = {
 			// [ERR_HTTP_INVALID_STATUS_CODE]: Invalid status code: LIMIT_UNEXPECTED_FILE 助教提醒我們要理解這行error的意思
 			// 因為 imgur 2的版本不支援 setClientId ，所以我先降版本至 1，這樣 npm run dev 就不會噴錯了，
 			// 現在可以順利接到圖片了，用 postman 測試是成功的喔！謝謝Gina!!!
-			.then(([user,accountCheck, emailCheck, hash]) => {
+			.then(([user, accountCheck, emailCheck, hash]) => {
 				if (!user) throw new Error('User is not exist!', {}, Error.prototype.code = 412)
 				if (accountCheck && user.account !== accountCheck.account) throw new Error('Account already exists!', {}, Error.prototype.code = 423)
 				if (emailCheck && user.email !== emailCheck.email) throw new Error('Email already exists!', {}, Error.prototype.code = 408)
@@ -164,9 +164,9 @@ const userController = {
 					name: name || user.name,
 					email: email || user.mail,
 					password: hash || user.password,
-					avatar: fileAvatar||user.avatar,
+					avatar: fileAvatar || user.avatar,
 					introduction: introduction,
-					cover: fileCover||user.cover
+					cover: fileCover || user.cover
 				})
 			})
 			.then((data) => {
