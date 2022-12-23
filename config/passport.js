@@ -20,8 +20,8 @@ passport.use('local', new LocalStrategy(
 	(req, account, password, cb) => {
 		User.findOne({ where: { account } })
 			.then(user => {
-				if (!user) return cb(null, false, { status: '423', message: 'you aren’t registered!' })
-				if (user.dataValues.role !== 'user') return cb(null, false, { status: '423', message: 'you aren’t registered!' })
+				if (!user) return cb(null, false, { status: 423, message: 'you aren’t registered!' })
+				if (user.dataValues.role !== 'user') return cb(null, false, { status: 423, message: 'you aren’t registered!' })
 				bcrypt.compare(password, user.password)
 					.then(res => {
 						if (!res) return cb(null, false, { status: '402', message: 'account or password invalid!' })
@@ -42,8 +42,8 @@ passport.use('localAdmin', new LocalStrategy(
 	(req, account, password, cb) => {
 		User.findOne({ where: { account } })
 			.then(user => {
-				if (!user) return cb(null, false, { status: '423', message: "you aren’t registered!" })
-				if (user.dataValues.role !== 'admin') return cb(null, false, { status: '423', message: "you aren’t registered!" })
+				if (!user) return cb(null, false, { status: 423, message: "you aren’t registered!" })
+				if (user.dataValues.role !== 'admin') return cb(null, false, { status: 423, message: "you aren’t registered!" })
 				bcrypt.compare(password, user.password)
 					.then(res => {
 						if (!res) return cb(null, false, { status: "402", message: 'account or password invalid!' })
