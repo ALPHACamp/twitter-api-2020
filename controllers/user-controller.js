@@ -288,17 +288,14 @@ const userController = {
 					tweetList[i].liked = false
 					for (let k = 0; k < likedata.length; k++) {
 						if (likedata[k].TweetId === tweetList[i].id) {
-							// console.log('hello one')
 							tweetList[i].likeCount++
 						}
 						if (likedata[k].UserId === currentUser && likedata[k].TweetId === tweetList[i].id) {
-							// console.log('hello two')
 							tweetList[i].liked = true
 						}
 					}
 					for (let r = 0; r < reply.length; r++) {
 						if (reply[r].TweetId === tweetList[i].id) {
-							// console.log('hello three')
 							tweetList[i].replyCount++
 						}
 					}
