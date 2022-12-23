@@ -31,15 +31,13 @@ const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET
 }
-passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
-    include: [
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
-    ]
-  })
-    .then(user => cb(null, user))
-    .catch(err => cb(err))
+passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
+  try {
+    const user = await User.findByPk(jwtPayload.id)
+    if (user) return cb(null, user)
+  } catch (err) {
+    cb(err, false)
+  }
 }))
 
 module.exports = passport
