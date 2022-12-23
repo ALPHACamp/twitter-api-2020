@@ -97,15 +97,12 @@ const userController = {
   putUserAccount: async (req, res, next) => {
     try {
       const { id } = req.params
+      const user = await User.findByPk(id)
       // 未回傳則預設不修改
       const { account, name, email, password, checkPassword } = req.body
 
       // 確認回傳不可為空白
       if ((account && account.trim() === '') || (name && name.trim() === '') || (email && email.trim() === '')) return res.status(400).json({ status: 'error', message: '所有欄位都是必填！' })
-
-      // 確定使用者存在
-      const user = await User.findByPk(id)
-      if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
 
       // 只能更改自己的資料
       if (getUser(req).dataValues.id !== Number(id)) return res.status(401).json({ status: 'error', message: '無權限更改此使用者！' })
