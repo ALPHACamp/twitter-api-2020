@@ -93,38 +93,50 @@ const userController = {
 				userData.tweetsCount = tweets.count
 				userData.isfollowing = false
 
-				ifFollowing.forEach((f) => {
-					if (f.followerId === currentUser) {
-						userData.isfollowing = true
-					}
-				})
-				res.status(200).json(userData)
-			})
-			.catch(err => next(err))
-	},
-	putUser: async (req, res, next) => {
-		const { account, name, email, password, checkPassword, introduction } = req.body
+		  ifFollowing.forEach((f)=>{
+			if(f.followerId ===currentUser){
+				userData.isfollowing = true
+			}
+		  })
+		  res.status(200).json(userData)
+		 })
+		 .catch(err => next(err))
+	   },
+	putUser: (req, res, next) => {
+		const body = JSON.stringify(req.body)
+		const trueBody = JSON.parse(body)
+		console.log('trueBody',trueBody)
+		const { account, name, email, password, checkPassword, introduction } = trueBody
+		// console.log('req.body',req)
 		const { files } = req // file 改為 files
 		// Hello Gina，後來 Simon 大大幫我們找到bug了，我把這邊console.log出來。
 		// console.log('這邊',files.avatar[0])
-		if (account) { if (/\s/.test(account) || account.length > 50) throw Error('Account is over!', {}, Error.prototype.code = 403) }
-		if (password && checkPassword) {
-			if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw Error('Invalid Password!', {}, Error.prototype.code = 422)
+		if (account) { if (/\s/.test(account) || account.length > 50) throw new Error('Account is over!', {}, Error.prototype.code = 403) }
+		if (password || checkPassword) {
+			if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw new Error('Invalid Password!', {}, Error.prototype.code = 422)
 		}
-		if (name) { if (name.length > 50) throw Error('Invalid name!', {}, Error.prototype.code = 413) }
-		if (email) { if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw Error('Invalid email format!', {}, Error.prototype.code = 411) }
-		if (introduction) { if (introduction.length > 160) throw Error('Invalid introduction!', {}, Error.prototype.code = 403) }
-		let fileCover = null
-		let fileAvatar = null
-
+		if (name) { if (name.length > 50) throw new Error('Invalid name!', {}, Error.prototype.code = 413) }
+		if (email) { if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw new Error('Invalid email format!', {}, Error.prototype.code = 411) }
+		if (introduction) { if (introduction.length > 160) throw new Error('Invalid introduction!', {}, Error.prototype.code = 403) }
+		let fileCover =null
+		let fileAvatar =null
+		
 		//圖片上傳imgur處理
-		if (files.avatar) {
-			fileAvatar = await imgurFileHandler(files.avatar[0])
-		}
-		if (files.cover) {
-			fileCover = await imgurFileHandler(files.cover[0])
+
+		async function fileTest (){
+			if(files){
+				if(files.avatar){
+					fileAvatar = await imgurFileHandler(files.avatar[0])
+				}
+				if(files.cover){
+					fileCover = await imgurFileHandler(files.cover[0])
+				}
+			}
 		}
 
+		fileTest()
+
+		
 		Promise.all([
 			User.findByPk(req.params.id),
 			(async () => {
@@ -173,7 +185,7 @@ const userController = {
 				delete data.get({ plain: true }).password
 				res.status(200).json(data)
 			})
-			.catch(err => next(err))
+			.catch(err => console.log('測試',err.message))
 	},
 	getUserFollowing: (req, res, next) => {
 		Followship.findAll({
