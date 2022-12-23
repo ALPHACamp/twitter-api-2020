@@ -3,7 +3,6 @@ const { User, Tweet, Like } = require('../models')
 // const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const assert = require('assert')
 const adminServices = {
-
   getUsers: (req, cb) => {
     return User.findAll({
       include: [{
