@@ -66,6 +66,7 @@ const userServices = {
     return Promise.all([
       User.findOne({
         where: { id: req.params.user_id },
+        attributes: { exclude: ['password'] },
         include: [{
           model: Tweet,
           attributes:
@@ -188,40 +189,48 @@ const userServices = {
       .catch(err => cb(err))
   },
   getFollowingsOfUser: (req, cb) => {
-    const followerId = req.params.user_id
-    return Followship.findAll({
-      where: {
-        followerId
-      },
-      order: [['createdAt', 'DESC']],
+    return User.findAll({
+      where: { id: req.params.user_id },
+      attributes: [],
+      include: [{
+        model: User,
+        as: 'Followings',
+        attributes: {
+          exclude: ['password']
+        }
+      }],
       raw: true,
       nest: true
     })
       .then(followings => {
         assert(followings, 'Unexpected operation of database.')
         const result = followings.map(f => ({
-          ...f,
-          isFollowed: helpers.getUser(req).Followings.some(uf => uf.Followship.followingId === f.followingId)
+          ...f.Followings,
+          isFollowed: helpers.getUser(req).Followings.some(uf => uf.Followship.followingId === f.Followings.id)
         }))
         cb(null, result)
       })
       .catch(err => cb(err))
   },
   getFollowersOfUser: (req, cb) => {
-    const followingId = req.params.user_id
-    return Followship.findAll({
-      where: {
-        followingId
-      },
-      order: [['createdAt', 'DESC']],
+    return User.findAll({
+      where: { id: req.params.user_id },
+      attributes: [],
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: {
+          exclude: ['password']
+        }
+      }],
       raw: true,
       nest: true
     })
       .then(followers => {
         assert(followers, 'Unexpected operation of database.')
         const result = followers.map(f => ({
-          ...f,
-          isFollowed: helpers.getUser(req).Followings.some(uf => uf.Followship.followingId === f.followerId)
+          ...f.Followers,
+          isFollowed: helpers.getUser(req).Followings.some(uf => uf.Followship.followingId === f.Followers.id)
         }))
         cb(null, result)
       })
