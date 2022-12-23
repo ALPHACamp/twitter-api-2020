@@ -101,7 +101,7 @@ const userController = {
   putUserSetting: (req, res, next) => {
     const currentUser = helpers.getUser(req)
     const { password, checkPassword, email, account, name } = req.body
-    if (!password || !checkPassword || !email || !account || !name) return res.status(422).json({ status: 'error', message: '欄位不得空白!' })
+    if (!password || !checkPassword || !email || !account || !name) return res.status(422).json({ status: 'error', message: '所有欄位不得空白!' })
 
     if (Number(req.params.id) !== currentUser.id) return res.status(401).json({ status: 'error', message: '無權編輯他人資料!' })
 
