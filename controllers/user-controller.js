@@ -255,6 +255,7 @@ const userController = {
     ])
       .then(([user, followers]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
+        if (followers.length === 0) return res.status(404).json({ status: 'error', message: '使用者沒有追隨者!' })
         const data = followers.map(fl => ({
           ...fl,
           createdAt: helpers.relativeTime(fl.createdAt)
@@ -280,7 +281,7 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeCount'],
           [sequelize.literal('(SELECT COUNT(*)  FROM Replies WHERE Replies.tweet_id = Tweet.id)'),
             'replyCount'],
-          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${currentUser} AND Likes.tweet_id = Tweet.id)`), 'isLiked']
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${currentUser} AND Likes.tweet_id = Tweet.id)`), 'Liked']
         ]
       },
       order: [['createdAt', 'Desc']],
@@ -293,7 +294,7 @@ const userController = {
         const likeData = likes.map(li => ({
           ...li,
           createdAt: helpers.relativeTime(li.createdAt),
-          isLiked: Boolean(li.Tweet.isLiked)
+          isLiked: Boolean(li.Tweet.Liked)
         }))
         return res.status(200).json(likeData)
       })
@@ -325,6 +326,7 @@ const userController = {
     ])
       .then(([user, replies]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
+        if (replies.length === 0) return res.status(404).json({ status: 'error', message: '使用者沒有回覆任何一則留言!' })
         const data = replies.map(rp => ({
           ...rp,
           createdAt: helpers.relativeTime(rp.createdAt)
