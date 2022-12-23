@@ -55,7 +55,7 @@ const userController = {
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
         role: 'user',
         avatar: 'https://i.imgur.com/zC0XOiB.png',
-        cover: 'https://loremflickr.com/1500/800/mountain'
+        cover: 'https://i.imgur.com/D6f1MZe.png'
       })
       // 回傳新使用者資料，刪除password欄位
       const user = createdUser.toJSON()
@@ -100,9 +100,8 @@ const userController = {
 
   putUserSetting: (req, res, next) => {
     const currentUser = helpers.getUser(req)
-    const { password, checkPassword } = req.body
-    const email = req.body.email || currentUser.email
-    const account = req.body.account || currentUser.account
+    const { password, checkPassword, email, account, name } = req.body
+    if (!password || !checkPassword || !email || !account || !name) return res.status(422).json({ status: 'error', message: '欄位不得空白!' })
 
     if (Number(req.params.id) !== currentUser.id) return res.status(401).json({ status: 'error', message: '無權編輯他人資料!' })
 
@@ -222,7 +221,6 @@ const userController = {
     ])
       .then(([user, followings]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (followings.length === 0) res.status(404).json({ status: 'error', message: '使用者沒有追隨任何人!' })
         const data = followings.map(fi => ({
           ...fi,
           createdAt: helpers.relativeTime(fi.createdAt)
@@ -255,7 +253,6 @@ const userController = {
     ])
       .then(([user, followers]) => {
         if (!user) res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (followers.length === 0) return res.status(404).json({ status: 'error', message: '使用者沒有追隨者!' })
         const data = followers.map(fl => ({
           ...fl,
           createdAt: helpers.relativeTime(fl.createdAt)
@@ -290,7 +287,6 @@ const userController = {
     })])
       .then(([user, likes]) => {
         if (!user) return res.status(404).json({ status: 'error', message: '帳號不存在!' })
-        if (likes.length === 0) return res.status(404).json({ status: 'error', message: '使用者沒有點任何貼文Like!' })
         const likeData = likes.map(li => ({
           ...li,
           createdAt: helpers.relativeTime(li.createdAt),
