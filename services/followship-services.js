@@ -53,7 +53,7 @@ const followshipServices = {
         })
       })
       .then(followship => {
-        cb(null, { status: 'success', followship })
+        cb(null, { success: true, followship })
       })
       .catch(err => cb(err))
   },
@@ -68,7 +68,7 @@ const followshipServices = {
         if (!followship) throw new Error("You haven't followed this user!")
         return followship.destroy()
       })
-      .then(deletedFollowship => cb(null, { status: 'success', deletedFollowship }))
+      .then(deletedFollowship => cb(null, { success: true, deletedFollowship }))
       .catch(err => cb(err))
   }
 }

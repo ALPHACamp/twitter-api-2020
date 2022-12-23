@@ -13,7 +13,7 @@ const userServices = {
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, {
-        status: 'success',
+        success: true,
         token,
         user: userData
       })
@@ -130,6 +130,7 @@ const userServices = {
       attributes: [
         'followingId', 'followerId',
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']],
+      order: [['id', 'DESC']],
       raw: true,
       nest: true
     })
@@ -150,6 +151,7 @@ const userServices = {
       attributes: [
         'followingId', 'followerId',
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE following_id = followerId AND follower_id = ${UserId} )`), 'isFollowed']],
+      order: [['id', 'DESC']],
       raw: true,
       nest: true
     })
