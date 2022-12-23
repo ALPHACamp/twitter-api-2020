@@ -5,7 +5,7 @@ const adminController = {
   getUsers: (req, res, next) => {
     return User.findAll({
       attributes: {
-        exclude: ['password'],
+        exclude: ['password', 'role', 'createdAt', 'updatedAt'],
         include: [
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id )'), 'tweetCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id )'), 'likeCount'],
@@ -25,11 +25,12 @@ const adminController = {
   },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
+      attributes: { exclude: ['updatedAt'] },
       include: [
         {
           model: User,
           attributes: {
-            exclude: ['password']
+            exclude: ['password', 'role', 'createdAt', 'updatedAt']
           }
         }],
       order: [['createdAt', 'DESC']],

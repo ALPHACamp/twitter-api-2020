@@ -26,10 +26,11 @@ const followshipController = {
       .catch(err => next(err))
   },
   removeFollowing: (req, res, next) => {
+    const followingId = Number(req.params.followingId)
     Followship.findOne({
       where: {
         followerId: helpers.getUser(req).id,
-        followingId: req.params.followingId
+        followingId: followingId
       }
     })
       .then(followship => {

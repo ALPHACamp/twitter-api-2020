@@ -157,19 +157,18 @@ const tweetController = {
   getReplies: (req, res, next) => {
     return Reply.findAll({
       where: { TweetId: req.params.tweet_id },
+      attributes: { exclude: ['updatedAt'] },
       include: [
         {
           model: User,
-          attributes: {
-            exclude: ['password']
-          }
+          attributes: ['id', 'account', 'name', 'avatar']
         },
         {
           model: Tweet,
           attributes: ['UserId'],
           include: {
             model: User,
-            attributes: ['account', 'name']
+            attributes: ['account']
           }
         }
       ],
