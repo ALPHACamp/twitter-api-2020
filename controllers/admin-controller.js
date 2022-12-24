@@ -24,11 +24,6 @@ const adminController = {
   },
   getUsers: (req, res, next) => {
     return User.findAll({
-      where: {
-        id: {
-          [Op.ne]: helpers.getUser(req).id
-        }
-      },
       include: [
         { model: Tweet, include: Like },
         { model: User, as: 'Followers' },
