@@ -96,8 +96,8 @@ const userController = {
             description: tweet.description,
             User: {
               id: tweet.UserId,
-              userAccount: tweet.User.account,
-              userName: tweet.User.name,
+              account: tweet.User.account,
+              name: tweet.User.name,
               avatar: tweet.User.avatar
             },
             createdAt: tweet.createdAt,
