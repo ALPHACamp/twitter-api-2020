@@ -294,6 +294,7 @@ const userServices = {
       .catch(err => cb(err))
   },
   settingUser: (req, cb) => {
+    if (Number(req.params.user_id) !== helpers.getUser(req).id) throw new Error("You can't set other's account!")
     const { account, email, password, checkPassword } = req.body
     let name = req.body.name
     // 驗證name內容是否超過上限字數，若超過則提示
@@ -313,8 +314,8 @@ const userServices = {
     ])
       .then(([userFindByAccount, userFindByEmail]) => {
         // account email註冊，後端驗證唯一性
-        assert(!userFindByAccount, 'Account 已存在!')
-        assert(!userFindByEmail, 'Email 已存在！')
+        if (userFindByAccount && userFindByAccount.id !== helpers.getUser(req).id) throw new Error('Account 已存在!')
+        if (userFindByEmail && userFindByEmail.id !== helpers.getUser(req).id) throw new Error('Email 已存在！')
         // input驗證OK，bcrypt密碼
         return Promise.all([bcrypt.hash(password, 10), User.findByPk(req.params.user_id)])
       })
