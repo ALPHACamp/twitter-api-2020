@@ -103,7 +103,7 @@ const userController = {
             createdAt: tweet.createdAt,
             updatedAt: tweet.updatedAt,
             likedAmount: tweet.Likes.length,
-            repliedAmount: tweet.Replies.length,
+            replyAmount: tweet.Replies.length,
             isLike: tweet.Likes.map(t => t.UserId).includes(helpers.getUser(req).id)
           }
         })
@@ -221,7 +221,7 @@ const userController = {
               avatar
             },
             likedAmount: like.Tweet.Likes.length,
-            repliedAmount: like.Tweet.Replies.length,
+            replyAmount: like.Tweet.Replies.length,
             isLike: true
           }
           delete tweet.Replies
