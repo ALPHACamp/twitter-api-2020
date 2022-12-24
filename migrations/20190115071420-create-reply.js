@@ -13,14 +13,18 @@ module.exports = {
         reference: {
           model: 'Users',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       tweet_id: {
         type: Sequelize.INTEGER,
         reference: {
           model: 'Tweets',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       comment: {
         type: Sequelize.TEXT
