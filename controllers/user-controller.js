@@ -102,90 +102,76 @@ const userController = {
 		 })
 		 .catch(err => next(err))
 	   },
-	putUser: (req, res, next) => {
-		const body = JSON.stringify(req.body)
-		const trueBody = JSON.parse(body)
-		console.log('trueBody',trueBody)
-		const { account, name, email, password, checkPassword, introduction } = trueBody
-		// console.log('req.body',req)
-		const { files } = req // file 改為 files
-		// Hello Gina，後來 Simon 大大幫我們找到bug了，我把這邊console.log出來。
-		// console.log('這邊',files.avatar[0])
-		if (account) { if (/\s/.test(account) || account.length > 50) throw new Error('Account is over!', {}, Error.prototype.code = 403) }
-		if (password || checkPassword) {
-			if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw new Error('Invalid Password!', {}, Error.prototype.code = 422)
-		}
-		if (name) { if (name.length > 50) throw new Error('Invalid name!', {}, Error.prototype.code = 413) }
-		if (email) { if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw new Error('Invalid email format!', {}, Error.prototype.code = 411) }
-		if (introduction) { if (introduction.length > 160) throw new Error('Invalid introduction!', {}, Error.prototype.code = 403) }
-		let fileCover =null
-		let fileAvatar =null
-		
-		//圖片上傳imgur處理
+	putUser: async (req, res, next) => {
+		const account = req.body.account || null
+		const name = req.body.name|| null
+		const email = req.body.email|| null
+		const password = req.body.password|| null
+		const checkPassword = req.body.checkPassword|| null
+		const introduction  = req.body.introduction|| null
+		const { files } = req
+		let fileCover = null
+		let fileAvatar = null
+		try{
+			if (account) { if (/\s/.test(account) || account.length > 50) throw new Error('Account is over!', {}, Error.prototype.code = 403) }
+			if (password || checkPassword) {
+				if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw new Error('Invalid Password!', {}, Error.prototype.code = 422)
+			}
+			if (name) { if (name.length > 50) throw new Error('Invalid name!', {}, Error.prototype.code = 413) }
+			if (email) { if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw new Error('Invalid email format!', {}, Error.prototype.code = 411) }
+			if (introduction) { if (introduction.length > 160) throw new Error('Invalid introduction!', {}, Error.prototype.code = 403) }
 
-		async function fileTest (){
 			if(files){
+				// console.log('有沒有進files')
 				if(files.avatar){
+					// console.log('有沒有進files裡面',files.avatar[0])
 					fileAvatar = await imgurFileHandler(files.avatar[0])
 				}
 				if(files.cover){
+					// console.log('有沒有進files cover',files.cover[0])
 					fileCover = await imgurFileHandler(files.cover[0])
 				}
 			}
-		}
+			console.log(fileAvatar,fileCover)
+			const user = await User.findByPk(req.params.id,{raw: true })
+			if (!user) throw new Error('User is not exist!', {}, Error.prototype.code = 412)
+			// console.log('測試user',user)
+			let accountCheck = null
+			let emailCheck = null
+			let hash = null
 
-		fileTest()
-
-		
-		Promise.all([
-			User.findByPk(req.params.id),
-			(async () => {
-				if (account) {
-					userData = await User.findOne({ where: { account: account }, raw: true })
-					return userData
-				}
-				return false
-			})(),
-			(async () => {
-				if (email) {
-					userData = await User.findOne({ where: { email: email }, raw: true })
-					return userData
-				}
-				return false
-			})(),
-			(async () => {
-				if (password) {
-					hash = await bcrypt.hash(password, 10)
-					return hash
-				}
-				return false
-			})(),
-		])
-			// 底下 then 回傳還需要修改，會接到 avatar 與 cover
-			// 然後 Simon 大大說如果還要優化，可以擋掉非圖片的檔案。
-			// [ERR_HTTP_INVALID_STATUS_CODE]: Invalid status code: LIMIT_UNEXPECTED_FILE 助教提醒我們要理解這行error的意思
-			// 因為 imgur 2的版本不支援 setClientId ，所以我先降版本至 1，這樣 npm run dev 就不會噴錯了，
-			// 現在可以順利接到圖片了，用 postman 測試是成功的喔！謝謝Gina!!!
-			.then(([user,accountCheck, emailCheck, hash]) => {
-				if (!user) throw new Error('User is not exist!', {}, Error.prototype.code = 412)
+			if(account){
+				console.log('have account?')
+				accountCheck = await User.findOne({ where: { account }},{raw: true }) 
 				if (accountCheck && user.account !== accountCheck.account) throw new Error('Account already exists!', {}, Error.prototype.code = 423)
+			}
+			// console.log('測試accountCheck',accountCheck)
+			if (email) {
+				emailCheck = await User.findOne({ where: { email }, raw: true })
 				if (emailCheck && user.email !== emailCheck.email) throw new Error('Email already exists!', {}, Error.prototype.code = 408)
+			}
+			// console.log('測試emailCheck',emailCheck)
 
-				return user.update({
-					account: account || user.account,
-					name: name || user.name,
-					email: email || user.mail,
-					password: hash || user.password,
-					avatar: fileAvatar||user.avatar,
-					introduction: introduction,
-					cover: fileCover||user.cover
-				})
-			})
-			.then((data) => {
-				delete data.get({ plain: true }).password
-				res.status(200).json(data)
-			})
-			.catch(err => console.log('測試',err.message))
+			if (password) {
+			hash = await bcrypt.hash(password, 10)
+			}
+
+			// console.log('測試trycatch')
+			const userUpdate = await User.update({
+				account: account || user.account,
+				name: name || user.name,
+				email: email || user.mail,
+				password: hash || user.password,
+				avatar: fileAvatar||user.avatar,
+				introduction: introduction,
+				cover: fileCover||user.cover
+			},{where:{id:req.params.id}}
+			)
+			const data = await User.findByPk(req.params.id,{raw: true })
+			delete data.password
+			res.status(200).json(data)
+
+		}catch (err) { next(err) }
 	},
 	getUserFollowing: (req, res, next) => {
 		Followship.findAll({
