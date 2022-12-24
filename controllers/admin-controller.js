@@ -81,7 +81,7 @@ const adminController = {
       })
       const data = tweets.map(tweet => ({
         ...tweet.toJSON(),
-        description: tweet?.description.slice(0, 50)
+        description: tweet?.description
       }))
       return res.status(200).json(data)
     } catch (err) { next(err) }
