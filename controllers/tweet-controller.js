@@ -170,6 +170,9 @@ const tweetController = {
       .catch(err => next(err))
   },
   replyTweet: (req, res, next) => {
+    const { comment } = req.body
+    if (comment.length > 100) throw new Error('comment is limited to 100 words!')
+    if (!comment.trim()) throw new Error('comment can not be blank!')
     return Reply.create({
       comment: req.body.comment,
       UserId: helpers.getUser(req).id,
