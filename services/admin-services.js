@@ -25,12 +25,12 @@ const adminServices = {
       //  offset,
       attributes: { exclude: ['password'] },
       group: 'id',
-      order: [['createdAt', 'DESC']],
       nest: true,
       raw: true
     })
       .then(users => {
-        cb(null, users)
+        const result = users.sort((a, b) => b.Tweets.totalTweets - a.Tweets.totalTweets)
+        cb(null, result)
       })
       .catch(err => cb(err))
   }, // 軟刪除?
