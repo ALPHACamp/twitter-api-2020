@@ -24,11 +24,6 @@ const adminController = {
   },
   getUsers: (req, res, next) => {
     return User.findAll({
-      where: {
-        id: {
-          [Op.ne]: helpers.getUser(req).id
-        }
-      },
       include: [
         { model: Tweet, include: Like },
         { model: User, as: 'Followers' },
@@ -70,25 +65,47 @@ const adminController = {
   },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      include: User,
+      include: {
+        model: User,
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'avatar'
+        ]
+      },
+      attributes: [
+        'id',
+        'description',
+        'UserId',
+        'createdAt',
+        'updatedAt'
+      ],
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
-        tweets = tweets.map(tweet => {
-          const { id, account, name, avatar } = tweet.User
-          tweet = {
-            ...tweet.toJSON(),
-            User: {
-              id,
-              account,
-              name,
-              avatar
-            }
-          }
-          return tweet
-        })
         res.json(tweets)
       })
+    // return Tweet.findAll({
+    //   include: User,
+    //   order: [['createdAt', 'DESC']]
+    // })
+    //   .then(tweets => {
+    //     tweets = tweets.map(tweet => {
+    //       const { id, account, name, avatar } = tweet.User
+    //       tweet = {
+    //         ...tweet.toJSON(),
+    //         User: {
+    //           id,
+    //           account,
+    //           name,
+    //           avatar
+    //         }
+    //       }
+    //       return tweet
+    //     })
+    //     res.json(tweets)
+    //   })
       .catch(err => {
         next(err)
       })
