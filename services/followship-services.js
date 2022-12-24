@@ -5,19 +5,13 @@ const followshipServices = {
   getTopUsers: (req, cb) => {
     const limit = Number(req.query.top)
     const UserId = helpers.getUser(req).id
-    return Followship.findAll({
-      include: {
-        model: User, as: 'followingUser', attributes: ['id', 'avatar', 'name', 'account']
-      },
+    return User.findAll({
       attributes: [
-        'followingId',
-        [sequelize.literal('(SELECT account FROM Users WHERE id = followingId)'), 'account'],
-        [sequelize.literal('(SELECT avatar FROM Users WHERE id = followingId)'), 'avatar'],
-        [sequelize.fn('COUNT', 'followingId'), 'followerCount'],
-        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']
+        'id', 'avatar', 'name', 'account',
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = user.id)'), 'followerCount'],
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = user.id)`), 'isFollowed']
       ],
-      order: [[sequelize.literal('isFollowed'), 'DESC'], [sequelize.literal('followerCount'), 'DESC']],
-      group: ['followingId'],
+      order: [[sequelize.literal('followerCount'), 'DESC']],
       limit,
       raw: true,
       nest: true
