@@ -202,7 +202,7 @@ const userController = {
           model: User,
           as: 'Followings',
           attributes: {
-            exclude: ['password'],
+            exclude: ['password', 'role', 'createdAt', 'updatedAt'],
             include: [
               [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.followerId = ${currentUser.id} AND Followships.followingId = Followings.id )`), 'isFollowed']
             ]
@@ -223,12 +223,12 @@ const userController = {
       const currentUser = helpers.getUser(req)
       const followships = await Followship.findAll({
         where: { followingId: req.params.id },
-        attributes: { exclude: ['createdAt', 'updatedAt'] },
+        attributes: { exclude: ['updatedAt'] },
         include: {
           model: User,
           as: 'Followers',
           attributes: {
-            exclude: ['password'],
+            exclude: ['password', 'role', 'createdAt', 'updatedAt'],
             include: [
               [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.followerId = ${currentUser.id} AND Followships.followingId = Followers.id )`), 'isFollowed']
             ]
