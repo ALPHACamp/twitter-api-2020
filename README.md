@@ -43,7 +43,7 @@ https://quiet-mountain-47605.herokuapp.com/
 #### Clone the repo
 
 ```
-git clone https://github.com/miaout11/twitter-api-2022
+git clone https://github.com/miaout11/twitter-api-2022.git
 ```
 
 #### Switch to project folder
