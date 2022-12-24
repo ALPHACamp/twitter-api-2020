@@ -17,8 +17,8 @@ const userController = {
       User.findOne({ where: { email: req.body.email } })
     ])
       .then(([userByAccount, userByEmail]) => {
-        if (userByAccount) throw new Error('Account already exists!')
-        if (userByEmail) throw new Error('Email already exists!')
+        if (userByAccount) throw new Error('account 已重複註冊！')
+        if (userByEmail) throw new Error('email 已重複註冊！')
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => User.create({
