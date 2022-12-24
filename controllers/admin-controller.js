@@ -3,7 +3,17 @@ const { User, Tweet, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const adminController = {
-	
+	login: (req, res, next) => {
+		const adminData = helpers.getUser(req).toJSON()
+		delete adminData.password
+		try {
+			const token = jwt.sign(adminData, process.env.JWT_SECRET, { expiresIn: '30d' })
+			res.status(200).json({
+				token,
+				user: adminData
+			})
+		} catch (err) { next(err) }
+	},
 	getUsers: async (req, res, next) => {
 		try {
 			const usersData = await User.findAll({
