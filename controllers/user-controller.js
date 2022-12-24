@@ -173,7 +173,7 @@ const userController = {
 				email: email || user.mail,
 				password: hash || user.password,
 				avatar: fileAvatar||user.avatar,
-				introduction: introduction,
+				introduction: introduction || user.introduction,
 				cover: fileCover||user.cover
 			},{where:{id:req.params.id}}
 			)
