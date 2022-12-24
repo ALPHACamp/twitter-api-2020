@@ -49,7 +49,8 @@ const adminController = {
   },
   deleteTweet: async (req, res, next) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.id)
+      const paramsId = Number(req.params.id)
+      const tweet = await Tweet.findByPk(paramsId)
       if (!tweet) {
         const err = new Error('推文不存在!')
         err.status = 404

@@ -119,10 +119,11 @@ const tweetController = {
   // 將推文移除喜歡
   removeLike: async (req, res, next) => {
     try {
+      const paramsId = Number(req.params.id)
       const like = await Like.findOne({
         where: {
           UserId: helpers.getUser(req).id,
-          TweetId: req.params.id
+          TweetId: paramsId
         }
       })
       if (!like) throw new Error('你還沒按讚此推文!')

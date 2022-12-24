@@ -91,8 +91,9 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const currentUser = helpers.getUser(req)
+      const paramsId = Number(req.params.id)
       const tweets = await Tweet.findAll({
-        where: { UserId: req.params.id },
+        where: { UserId: paramsId },
         include: [
           {
             model: User,
@@ -124,8 +125,9 @@ const userController = {
   },
   getUserReplies: async (req, res, next) => {
     try {
+      const paramsId = Number(req.params.id)
       const replies = await Reply.findAll({
-        where: { UserId: req.params.id },
+        where: { UserId: paramsId },
         attributes: { exclude: ['updatedAt'] },
         include: [
           {
@@ -159,8 +161,9 @@ const userController = {
   getUserLikedTweets: async (req, res, next) => {
     try {
       const currentUser = helpers.getUser(req)
+      const paramsId = Number(req.params.id)
       const likes = await Like.findAll({
-        where: { UserId: req.params.id },
+        where: { UserId: paramsId },
         attributes: { exclude: ['updatedAt'] },
         include: [
           {
@@ -195,8 +198,9 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       const currentUser = helpers.getUser(req)
+      const paramsId = Number(req.params.id)
       const followships = await Followship.findAll({
-        where: { followerId: req.params.id },
+        where: { followerId: paramsId },
         attributes: { exclude: ['updatedAt'] },
         include: {
           model: User,
@@ -221,8 +225,9 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const currentUser = helpers.getUser(req)
+      const paramsId = Number(req.params.id)
       const followships = await Followship.findAll({
-        where: { followingId: req.params.id },
+        where: { followingId: paramsId },
         attributes: { exclude: ['updatedAt'] },
         include: {
           model: User,
