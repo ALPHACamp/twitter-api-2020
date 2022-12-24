@@ -5,12 +5,21 @@ const { Tweet, User, Like, Reply, Followship } = require('../models')
 const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      include: { model: User, attributes: ['id', 'account', 'name', 'avatar', 'background'] },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
+      include: [Reply, Like, { model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
+        tweets = tweets.map(tweet => {
+          tweet = {
+            ...tweet.toJSON(),
+            isLike: tweet.Likes.map(t => t.UserId).includes(helpers.getUser(req).id),
+            replyAmount: tweet.Replies.length,
+            likedAmount: tweet.Likes.length
+          }
+          delete tweet.Replies
+          delete tweet.Likes
+          return tweet
+        })
         res.json(tweets)
       })
 
