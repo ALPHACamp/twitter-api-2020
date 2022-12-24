@@ -93,99 +93,37 @@ const userController = {
 				userData.tweetsCount = tweets.count
 				userData.isfollowing = false
 
-		  ifFollowing.forEach((f)=>{
-			if(f.followerId ===currentUser){
-				userData.isfollowing = true
-			}
-		  })
-		  res.status(200).json(userData)
-		 })
-		 .catch(err => next(err))
-	   },
-	putUser: (req, res, next) => {
-		const body = JSON.stringify(req.body)
-		const trueBody = JSON.parse(body)
-		console.log('trueBody',trueBody)
-		const { account, name, email, password, checkPassword, introduction } = trueBody
-		// console.log('req.body',req)
-		const { files } = req // file 改為 files
-		// Hello Gina，後來 Simon 大大幫我們找到bug了，我把這邊console.log出來。
-		// console.log('這邊',files.avatar[0])
-		if (account) { if (/\s/.test(account) || account.length > 50) throw new Error('Account is over!', {}, Error.prototype.code = 403) }
-		if (password || checkPassword) {
-			if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw new Error('Invalid Password!', {}, Error.prototype.code = 422)
-		}
-		if (name) { if (name.length > 50) throw new Error('Invalid name!', {}, Error.prototype.code = 413) }
-		if (email) { if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw new Error('Invalid email format!', {}, Error.prototype.code = 411) }
-		if (introduction) { if (introduction.length > 160) throw new Error('Invalid introduction!', {}, Error.prototype.code = 403) }
-		let fileCover =null
-		let fileAvatar =null
-		
-		//圖片上傳imgur處理
-
-		async function fileTest (){
-			if(files){
-				if(files.avatar){
-					fileAvatar = await imgurFileHandler(files.avatar[0])
-				}
-				if(files.cover){
-					fileCover = await imgurFileHandler(files.cover[0])
-				}
-			}
-		}
-
-		fileTest()
-
-		
-		Promise.all([
-			User.findByPk(req.params.id),
-			(async () => {
-				if (account) {
-					userData = await User.findOne({ where: { account: account }, raw: true })
-					return userData
-				}
-				return false
-			})(),
-			(async () => {
-				if (email) {
-					userData = await User.findOne({ where: { email: email }, raw: true })
-					return userData
-				}
-				return false
-			})(),
-			(async () => {
-				if (password) {
-					hash = await bcrypt.hash(password, 10)
-					return hash
-				}
-				return false
-			})(),
-		])
-			// 底下 then 回傳還需要修改，會接到 avatar 與 cover
-			// 然後 Simon 大大說如果還要優化，可以擋掉非圖片的檔案。
-			// [ERR_HTTP_INVALID_STATUS_CODE]: Invalid status code: LIMIT_UNEXPECTED_FILE 助教提醒我們要理解這行error的意思
-			// 因為 imgur 2的版本不支援 setClientId ，所以我先降版本至 1，這樣 npm run dev 就不會噴錯了，
-			// 現在可以順利接到圖片了，用 postman 測試是成功的喔！謝謝Gina!!!
-			.then(([user, accountCheck, emailCheck, hash]) => {
-				if (!user) throw new Error('User is not exist!', {}, Error.prototype.code = 412)
-				if (accountCheck && user.account !== accountCheck.account) throw new Error('Account already exists!', {}, Error.prototype.code = 423)
-				if (emailCheck && user.email !== emailCheck.email) throw new Error('Email already exists!', {}, Error.prototype.code = 408)
-
-				return user.update({
-					account: account || user.account,
-					name: name || user.name,
-					email: email || user.mail,
-					password: hash || user.password,
-					avatar: fileAvatar || user.avatar,
-					introduction: introduction,
-					cover: fileCover || user.cover
+				ifFollowing.forEach((f) => {
+					if (f.followerId === currentUser) {
+						userData.isfollowing = true
+					}
 				})
+				res.status(200).json(userData)
 			})
-			.then((data) => {
-				delete data.get({ plain: true }).password
-				res.status(200).json(data)
+			.catch(err => next(err))
+	},
+	putUser: async (req, res, next) => {
+		try {
+			const reqUserId = Number(req.params.id)
+			const { name, introduction, cover } = req.body
+			const { files } = req
+
+			const option = { name, introduction }
+			console.log(option)
+			if (files?.avatar) option.avatar = await imgurFileHandler(files.avatar[0])
+			option.cover = files?.cover ? await imgurFileHandler(files.cover[0]) : null // 未上傳cover可以是空白
+			if (cover) delete option.cover // 如果有字串，cover不做更動沿用上次的url
+
+			//  更新資料
+			const user = await User.findByPk(reqUserId)
+			await user.update(option)
+
+			res.status(200).json({
+				status: 'success'
 			})
-			.catch(err => console.log('測試',err.message))
+		} catch (err) {
+			next(err)
+		}
 	},
 	getUserFollowing: (req, res, next) => {
 		Followship.findAll({
@@ -303,6 +241,7 @@ const userController = {
 				const tweetListOrder = tweetList.sort(function (a, b) {
 					return a.createdAt > b.createdAt
 				})
+
 				res.status(200).json(tweetListOrder)
 			})
 			.catch(err => { next(err) })
