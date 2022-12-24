@@ -61,18 +61,18 @@ const userController = {
       User.findByPk(req.params.id),
       Followship.findOne({
         where: {
-          followerId: helpers.getUser(req), // 6 測試用DB裡面的6和下面的4即可得到true
+          followerId: helpers.getUser(req).id, // 6 測試用DB裡面的6和下面的4即可得到true
           followingId: req.params.id // 4
         }
       }),
-      Followship.findAndCountAll({ where: { followerId: helpers.getUser(req) } }),
-      Followship.findAndCountAll({ where: { followingId: helpers.getUser(req) } })
+      Followship.findAndCountAll({ where: { followerId: req.params.id } }),
+      Followship.findAndCountAll({ where: { followingId: req.params.id } })
     ])
       .then(([user, followship, followerCount, followingCount]) => {
         if (!user) throw new Error("User didn't exist!")
         user = user.toJSON()
         user.isSelf = Number(req.params.id) === Number(helpers.getUser(req).id)
-        user.isfollow = followship !== null
+        user.isFollow = followship !== null
         user.followingAmount = followerCount.count
         user.followerAmount = followingCount.count
         delete user.password
