@@ -11,8 +11,16 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: 'CASCADE'
       })
 
-      User.hasMany(models.Reply, { foreignKey: 'UserId' })
-      User.hasMany(models.Like, { foreignKey: 'UserId' })
+      User.hasMany(models.Reply, {
+        foreignKey: 'UserId',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      })
+      User.hasMany(models.Like, {
+        foreignKey: 'UserId',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      })
       User.belongsToMany(User, {
         through: models.Followship,
         foreignKey: 'followingId',
