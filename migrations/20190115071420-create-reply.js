@@ -10,17 +10,21 @@ module.exports = {
       },
       user_id: {
         type: Sequelize.INTEGER,
-        reference: {
+        references: {
           model: 'Users',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       tweet_id: {
         type: Sequelize.INTEGER,
-        reference: {
+        references: {
           model: 'Tweets',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       comment: {
         type: Sequelize.TEXT

@@ -53,7 +53,7 @@ const tweetController = {
   },
   postTweetReply: async (req, res, next) => {
     try {
-      const { comment } = req.body
+      const comment = req.body.comment.trim()
       const tweetId = req.params.id
       const currentUserId = helpers.getUser(req).id
       const tweet = await Tweet.findByPk(tweetId)
@@ -108,7 +108,7 @@ const tweetController = {
   },
   postTweets: (req, res, next) => {
     const currentUserId = helpers.getUser(req).id
-    const { description } = req.body
+    const description = req.body.description.trim()
     if (!description) {
       return res.status(406).json({
         status: '406',

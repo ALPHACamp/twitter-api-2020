@@ -5,9 +5,11 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      User.hasMany(models.Tweet, { foreignKey: 'UserId' })
-      User.hasMany(models.Reply, { foreignKey: 'UserId' })
-      User.hasMany(models.Like, { foreignKey: 'UserId' })
+      User.hasMany(models.Tweet, {
+        foreignKey: 'UserId',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      })
       User.belongsToMany(User, {
         through: models.Followship,
         foreignKey: 'followingId',
@@ -17,6 +19,16 @@ module.exports = (sequelize, DataTypes) => {
         through: models.Followship,
         foreignKey: 'followerId',
         as: 'Followings'
+      })
+      User.hasMany(models.Like, {
+        foreignKey: 'UserId',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      })
+      User.hasMany(models.Reply, {
+        foreignKey: 'UserId',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       })
     }
   }

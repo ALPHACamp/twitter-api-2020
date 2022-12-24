@@ -11,7 +11,7 @@ const userController = {
 		if (password !== checkPassword) throw Error('Passwords do not match!', {}, Error.prototype.code = 422)
 		if (/\s/.test(account) || /\s/.test(password)) throw Error('Can not have space!', {}, Error.prototype.code = 402)
 		if (password.length < 4 || password.length > 12) throw Error('Password over!', {}, Error.prototype.code = 412)
-		if (account.length > 50 ) throw Error('Account is over!', {}, Error.prototype.code = 403)
+		if (account.length > 50) throw Error('Account is over!', {}, Error.prototype.code = 403)
 		if (name.length > 50) throw Error('Name is over!', {}, Error.prototype.code = 413)
 		if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw Error('Invalid email format!', {}, Error.prototype.code = 401)
 
@@ -33,7 +33,7 @@ const userController = {
 				avatar: 'https://i.imgur.com/PuP3Fmn.jpg',
 				password: hash,
 				cover: 'https://i.imgur.com/KNbtyGq.png',
-				introduction:'Hello world!'
+				introduction: 'Hello world!'
 
 			}))
 			.then((user) => {
@@ -69,30 +69,30 @@ const userController = {
 		const id = req.params.id
 		const currentUser = getUser(req).id
 		return Promise.all([
-		 User.findByPk(id),
-		 Tweet.findAndCountAll({
-		  where: { UserId: id }
-		 }),
-		 Followship.findAndCountAll({
-		  where: { followingId: id }
-		 }),
-		 Followship.findAndCountAll({
-		  where: { followerId: id }
-		 }),
-		 Followship.findAll({
-		  where:{followingId:id},
-		  raw:true
-		 })
+			User.findByPk(id),
+			Tweet.findAndCountAll({
+				where: { UserId: id }
+			}),
+			Followship.findAndCountAll({
+				where: { followingId: id }
+			}),
+			Followship.findAndCountAll({
+				where: { followerId: id }
+			}),
+			Followship.findAll({
+				where: { followingId: id },
+				raw: true
+			})
 		])
-		 .then(([user, tweets, follower, following,ifFollowing]) => {
+			.then(([user, tweets, follower, following, ifFollowing]) => {
 
-		  if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
-		  const userData = user.get({ plain: true })
-		  delete userData.password
-		  userData.followingCount = following.count
-		  userData.followerCount = follower.count
-		  userData.tweetsCount = tweets.count
-		  userData.isfollowing = false
+				if (!user) throw new Error('user is invalidated', {}, Error.prototype.code = 402)
+				const userData = user.get({ plain: true })
+				delete userData.password
+				userData.followingCount = following.count
+				userData.followerCount = follower.count
+				userData.tweetsCount = tweets.count
+				userData.isfollowing = false
 
 		  ifFollowing.forEach((f)=>{
 			if(f.followerId ===currentUser){
@@ -284,17 +284,14 @@ const userController = {
 					tweetList[i].liked = false
 					for (let k = 0; k < likedata.length; k++) {
 						if (likedata[k].TweetId === tweetList[i].id) {
-							// console.log('hello one')
 							tweetList[i].likeCount++
 						}
 						if (likedata[k].UserId === currentUser && likedata[k].TweetId === tweetList[i].id) {
-							// console.log('hello two')
 							tweetList[i].liked = true
 						}
 					}
 					for (let r = 0; r < reply.length; r++) {
 						if (reply[r].TweetId === tweetList[i].id) {
-							// console.log('hello three')
 							tweetList[i].replyCount++
 						}
 					}
@@ -302,6 +299,7 @@ const userController = {
 				const tweetListOrder = tweetList.sort(function (a, b) {
 					return a.createdAt > b.createdAt
 				})
+
 				res.status(200).json(tweetListOrder)
 			})
 			.catch(err => { next(err) })
