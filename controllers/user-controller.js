@@ -20,6 +20,7 @@ const userController = {
 			User.findOne({ where: { account } })
 		])
 			.then(([userEmail, userAccount]) => {
+				if (userEmail && userAccount) throw new Error('Account and Email already exists!', {}, Error.prototype.code = 405)
 				if (userEmail) throw new Error('Email already exists!', {}, Error.prototype.code = 408)
 				if (userAccount) throw new Error('Account already exists!', {}, Error.prototype.code = 423)
 				return bcrypt.hash(password, 10)
@@ -115,14 +116,14 @@ const userController = {
 		try{
 			if (account) { if (/\s/.test(account) || account.length > 50) throw new Error('Account is over!', {}, Error.prototype.code = 403) }
 			if (password || checkPassword) {
-				if (password !== checkPassword || /\s/.test(password) || password.length < 4 || password.length > 12) throw new Error('Invalid Password!', {}, Error.prototype.code = 422)
+				if (password !== checkPassword ) throw new Error('PasswordCheck is not equal to password!', {}, Error.prototype.code = 407)
+				if (/\s/.test(password) || password.length < 4 || password.length > 12) throw new Error('Invalid Password!', {}, Error.prototype.code = 422)
 			}
 			if (name) { if (name.length > 50) throw new Error('Invalid name!', {}, Error.prototype.code = 413) }
 			if (email) { if (!email.match(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/)) throw new Error('Invalid email format!', {}, Error.prototype.code = 411) }
 			if (introduction) { if (introduction.length > 160) throw new Error('Invalid introduction!', {}, Error.prototype.code = 403) }
 
 			if(files){
-				// console.log('有沒有進files')
 				if(files.avatar){
 					// console.log('有沒有進files裡面',files.avatar[0])
 					fileAvatar = await imgurFileHandler(files.avatar[0])
@@ -135,28 +136,37 @@ const userController = {
 			console.log(fileAvatar,fileCover)
 			const user = await User.findByPk(req.params.id,{raw: true })
 			if (!user) throw new Error('User is not exist!', {}, Error.prototype.code = 412)
-			// console.log('測試user',user)
-			let accountCheck = null
-			let emailCheck = null
+			let nowStatusIndex = 0
+			let responseData = []
+			responseData.push({"status":200})
+			responseData.push({"status":423,"message":"Account already exists!"})
+			responseData.push({"status":408,"message":"Email already exists!"})
+			responseData.push({"status":405,"message":"Account and Email already exists!"})
 			let hash = null
 
+			// 帳號要改的話 CODE:423
 			if(account){
 				console.log('have account?')
-				accountCheck = await User.findOne({ where: { account }},{raw: true }) 
-				if (accountCheck && user.account !== accountCheck.account) throw new Error('Account already exists!', {}, Error.prototype.code = 423)
+				let accountCheck = await User.findOne({ where: { account },raw: true }) 
+				if (accountCheck && user.account !== accountCheck.account) nowStatusIndex += 1
 			}
-			// console.log('測試accountCheck',accountCheck)
+
+			// 信箱要改的話 CODE:408
 			if (email) {
-				emailCheck = await User.findOne({ where: { email }, raw: true })
-				if (emailCheck && user.email !== emailCheck.email) throw new Error('Email already exists!', {}, Error.prototype.code = 408)
+				console.log('have email?')
+				let emailCheck = await User.findOne({ where: { email }}, {raw: true })
+				if (emailCheck && user.email !== emailCheck.email) nowStatusIndex += 2
 			}
-			// console.log('測試emailCheck',emailCheck)
+
+			// 確認驗證結果
+			if(nowStatusIndex !== 0){
+				throw new Error(responseData[nowStatusIndex].message, {}, Error.prototype.code = responseData[nowStatusIndex].status)
+			}
 
 			if (password) {
 			hash = await bcrypt.hash(password, 10)
 			}
 
-			// console.log('測試trycatch')
 			const userUpdate = await User.update({
 				account: account || user.account,
 				name: name || user.name,
