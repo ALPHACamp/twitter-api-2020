@@ -1,7 +1,7 @@
 const { User, Like, Tweet, Followship, Reply } = require('./../models')
 const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
-// const { imgurFileHandler } = require('../helpers/file-helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 
@@ -86,7 +86,8 @@ const userServices = {
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    const { account, name, email, introduction, password, avatar, cover, checkPassword } = req.body
+    const { account, name, email, introduction, password, checkPassword } = req.body
+    const { files } = req
     const UserId = Number(req.params.userId)
     const { id, role } = helpers.getUser(req)
     if (role !== 'admin' && UserId !== id) throw new Error('You can only edit your own profile!') // add role !== 'admin' for development purposes
@@ -96,12 +97,14 @@ const userServices = {
     return Promise.all([
       User.findByPk(UserId),
       User.findOne({ where: { account: account || null } }),
-      User.findOne({ where: { email: email || null } })
+      User.findOne({ where: { email: email || null } }),
+      imgurFileHandler(files?.avatar[0]),
+      imgurFileHandler(files?.cover[0])
     ])
       .then(([
         user,
         foundUserByAccount,
-        foundUserByEmail]) => {
+        foundUserByEmail, avatar, cover]) => {
         if (!user) throw new Error("User didn't exist!")
         if (foundUserByAccount?.account && user.account !== account) throw new Error('Account already exists!')
         if (foundUserByEmail?.email && user.email !== email) throw new Error('Email already exists!')
