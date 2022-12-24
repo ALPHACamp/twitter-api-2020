@@ -113,12 +113,12 @@ const userController = {
   },
   putUser: (req, res, next) => { // 這個還沒檢查格式
     if (Number(req.params.id) !== helpers.getUser(req).id) throw new Error('permission denied.')
-    const { name, introduction, avatar, background } = req.body
-    // const { files } = req
+    const { name, introduction } = req.body
+    const { files } = req
     const nameMax = 50
     const introMax = 160
-    // const avatar = files?.avatar ? files.avatar[0] : null
-    // const background = files?.background ? files.background[0] : null
+    const avatar = files?.avatar ? files.avatar[0] : null
+    const background = files?.background ? files.background[0] : null
     return Promise.all([
       User.findByPk(req.params.id),
       imgurFileHandler(avatar),
