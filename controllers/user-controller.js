@@ -287,9 +287,10 @@ const userController = {
   getRecommendUsers: (req, res, next) => {
     return User.findAll({
       where: {
-        id: {
-          [Op.ne]: helpers.getUser(req).id
-        }
+        [Op.and]: [
+          { id: { [Op.ne]: helpers.getUser(req).id } },
+          { role: { [Op.ne]: 'admin' } }
+        ]
       },
       include: { model: User, as: 'Followers' },
       attributes: ['id', 'name', 'account', 'avatar'],
@@ -308,6 +309,29 @@ const userController = {
           .sort((a, b) => b.followerCount - a.followerCount)
         res.status(200).json(result)
       })
+    // return User.findAll({
+    //   where: {
+    //     id: {
+    //       [Op.ne]: helpers.getUser(req).id
+    //     }
+    //   },
+    //   include: { model: User, as: 'Followers' },
+    //   attributes: ['id', 'name', 'account', 'avatar'],
+    //   limit: 10
+    // })
+    //   .then(users => {
+    //     const result = users.map(user => ({
+    //       id: user.id,
+    //       name: user.name,
+    //       avatar: user.avatar,
+    //       account: user.account,
+    //       followerCount: user.Followers.length,
+    //       isFollow: user.Followers.some(f => f.id === helpers.getUser(req).id),
+    //       isSelf: Number(user.id) === Number(helpers.getUser(req).id)
+    //     }))
+    //       .sort((a, b) => b.followerCount - a.followerCount)
+    //     res.status(200).json(result)
+    //   })
       .catch(err => next(err))
   }
 }
