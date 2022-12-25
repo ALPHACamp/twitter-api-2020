@@ -8,23 +8,22 @@ const adminServices = {
       include: [{
         model: Tweet,
         attributes:
-          [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.fn('DISTINCT', Tweet.sequelize.col('Tweets.id'))), 'totalTweets']],
+          [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.col('Tweets.id')), 'totalTweets']],
         include: [{
           model: Like,
-          attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('Tweets.Likes.id'))), 'totalLikes']]
+          attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.col('Tweets.Likes.id')), 'totalLikes']]
         }]
       }, {
         model: User,
         as: 'Followings',
-        attributes: [[User.sequelize.fn('COUNT', User.sequelize.fn('DISTINCT', User.sequelize.col('Followings.id'))), 'followingCount']]
+        attributes: [[User.sequelize.fn('COUNT', User.sequelize.col('Followings.id')), 'followingCount']]
       }, {
         model: User,
         as: 'Followers',
-        attributes: [[User.sequelize.fn('COUNT', User.sequelize.fn('DISTINCT', User.sequelize.col('Followers.id'))), 'followerCount']]
+        attributes: [[User.sequelize.fn('COUNT', User.sequelize.col('Followers.id')), 'followerCount']]
       }],
       //  offset,
       attributes: { exclude: ['password'] },
-      group: ['id'],
       nest: true,
       raw: true
     })
