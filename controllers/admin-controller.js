@@ -57,7 +57,8 @@ const adminController = {
         throw err
       }
       const deletedTweet = await tweet.destroy()
-      res.status(200).json({ tweet: deletedTweet })
+      const deletedTweetData = deletedTweet.toJSON()
+      res.status(200).json(deletedTweetData)
     } catch (error) {
       next(error)
     }

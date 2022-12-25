@@ -42,6 +42,11 @@ const tweetController = {
         raw: true,
         nest: true
       })
+      if (!tweets) {
+        const err = new Error('推文不存在!')
+        err.status = 404
+        throw err
+      }
       const newTweets = tweets.map(tweet => ({
         ...tweet,
         relativeTime: dateFormat(tweet.createdAt).fromNow()
