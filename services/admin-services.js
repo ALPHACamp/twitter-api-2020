@@ -6,21 +6,22 @@ const adminServices = {
   getUsers: (req, cb) => {
     return User.findAll({
       include: [{
-        model: Tweet,
-        attributes:
-          [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.col('Tweets.id')), 'totalTweets']],
-        include: [{
-          model: Like,
-          attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.col('Tweets.Likes.id')), 'totalLikes']]
-        }]
-      }, {
-        model: User,
-        as: 'Followings',
-        attributes: [[User.sequelize.fn('COUNT', User.sequelize.col('Followings.id')), 'followingCount']]
-      }, {
-        model: User,
-        as: 'Followers',
-        attributes: [[User.sequelize.fn('COUNT', User.sequelize.col('Followers.id')), 'followerCount']]
+        model: Tweet
+      //   ,
+      //   attributes:
+      //     [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.col('Tweets.id')), 'totalTweets']],
+      //   include: [{
+      //     model: Like,
+      //     attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.col('Tweets.Likes.id')), 'totalLikes']]
+      //   }]
+      // }, {
+      //   model: User,
+      //   as: 'Followings',
+      //   attributes: [[User.sequelize.fn('COUNT', User.sequelize.col('Followings.id')), 'followingCount']]
+      // }, {
+      //   model: User,
+      //   as: 'Followers',
+      //   attributes: [[User.sequelize.fn('COUNT', User.sequelize.col('Followers.id')), 'followerCount']]
       }],
       //  offset,
       attributes: { exclude: ['password'] },

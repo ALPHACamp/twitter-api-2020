@@ -162,14 +162,16 @@ const userServices = {
           include: [{
             model: User,
             attributes: { exclude: ['password'] }
-          },
-          {
-            model: Like,
-            attributes: [[sequelize.fn('COUNT', sequelize.col('Tweet.likes.id')), 'totalLikes']]
-          }, {
-            model: Reply,
-            attributes: [[sequelize.fn('COUNT', sequelize.col('Tweet.replies.id')), 'totalReplies']]
-          }]
+          }
+          // ,
+          // {
+          //   model: Like,
+          //   attributes: [[sequelize.fn('COUNT', sequelize.col('Tweet.likes.id')), 'totalLikes']]
+          // }, {
+          //   model: Reply,
+          //   attributes: [[sequelize.fn('COUNT', sequelize.col('Tweet.replies.id')), 'totalReplies']]
+          // }
+        ]
         }],
       // group: 'Tweet.id',
       order: [['createdAt', 'DESC']],
