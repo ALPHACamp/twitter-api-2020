@@ -70,7 +70,7 @@ const userServices = {
         include: [{
           model: Tweet,
           attributes:
-            [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.fn('DISTINCT', Tweet.sequelize.col('tweets.id'))), 'totalTweets']]
+            [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.fn('DISTINCT', Tweet.sequelize.col('Tweets.id'))), 'totalTweets']]
         }],
         nest: true,
         raw: true
@@ -165,10 +165,10 @@ const userServices = {
           },
           {
             model: Like,
-            attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('Tweet.Likes.id'))), 'totalLikes']]
+            attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('Tweets.Likes.id'))), 'totalLikes']]
           }, {
             model: Reply,
-            attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('Tweet.Replies.id'))), 'totalReplies']]
+            attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('Tweets.Replies.id'))), 'totalReplies']]
           }]
         }],
       group: 'tweet.id',
