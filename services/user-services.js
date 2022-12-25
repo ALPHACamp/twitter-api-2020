@@ -70,7 +70,7 @@ const userServices = {
         include: [{
           model: Tweet,
           attributes:
-            []
+            [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE UserId = User.id )'), 'tweetCount']
         }],
         nest: true,
         raw: true
