@@ -256,6 +256,7 @@ const userController = {
           ]
         },
         where: { followerId: id },
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
@@ -284,6 +285,7 @@ const userController = {
           ]
         },
         where: { followingId: id },
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
