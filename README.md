@@ -20,28 +20,26 @@
 
 ## 一、下載複製專案
 
-1. Fork 專案
-2. git clone https://github.com/weizi0328/twitter-api-2020.git
+[clone 專案]
+
+```
+$ git clone https://github.com/weizi0328/twitter-api-2020.git
+```
 
 ## 二、初始化
-#### [Initialize]
+
+### [Initialize]
+
 ```
 npm install
 ```
 
 ### [設定資料庫]
-▲需要與 config/config.json 一致
+《需要與 config/config.json 一致》
 
 #### [在MYSQL設定新增資料庫]
 ```
-drop database if exists eshopping_sequelize;
-create database eshopping_sequelize;
-use eshopping_sequelize;
-```
-
-#### [初始化資料庫]
-```
-$ npx sequelize init
+create database ac_twitter_workspace;
 ```
 
 #### [資料表建立]
