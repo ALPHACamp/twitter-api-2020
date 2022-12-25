@@ -220,7 +220,7 @@ const userController = {
           delete tweet.Likes
           return tweet
         })
-        tweets.sort((a, b) => b.createdAt - a.createdAt)
+        tweets.sort((a, b) => b.id - a.id)
         res.json(tweets)
       })
       .catch(err => next(err))
