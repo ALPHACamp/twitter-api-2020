@@ -116,10 +116,10 @@ const userServices = {
         if (foundUserByAccount?.account && user.account !== account) throw new Error('帳號已被使用!')
         if (foundUserByEmail?.email && user.email !== email) throw new Error('信箱已被使用!')
         return user.update({
-          account,
-          name,
-          email,
-          introduction,
+          account: account || user.account,
+          name: name || user.name,
+          email: email || user.email,
+          introduction: introduction || user.introduction,
           password: password ? bcrypt.hashSync(password, 10) : user.password,
           avatar: avatar || user.avatar,
           cover: cover || user.cover
