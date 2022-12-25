@@ -29,7 +29,7 @@ passport.use(new LocalStrategy(
   (account, password, done) => {
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) throw new Error('account do not match!')
+        if (!user) throw new Error('帳號不存在！')
         bcrypt.compare(password, user.password).then(res => {
           if (res) { return done(null, user) }
           throw new Error('Passwords do not match!')
