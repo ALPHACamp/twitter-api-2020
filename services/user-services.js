@@ -165,10 +165,10 @@ const userServices = {
           },
           {
             model: Like,
-            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLikes']]
+            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.Like_id'))), 'totalLikes']]
           }, {
             model: Reply,
-            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReplies']]
+            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.Replies_id'))), 'totalReplies']]
           }]
         }],
       group: 'Tweet.id',
