@@ -67,4 +67,4 @@ npx mocha test/{{ Model or Request }}/{{Model or Request}}.spec.js --exit
 https://www.notion.so/Twitter-API-DOC-aa3701046a1d48e5a7e63dcb8a8f3395
 
 ## Developer 
-[CK](https://github.com/Gincoolwant)[Shane Lin](https://github.com/shanelin0904)
+[CK](https://github.com/Gincoolwant) [Shane Lin](https://github.com/shanelin0904)
