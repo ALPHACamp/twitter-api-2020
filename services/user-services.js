@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const assert = require('assert')
-const { User, Tweet, Reply, Like, Followship,sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { uploadImgur } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
 
@@ -165,10 +165,10 @@ const userServices = {
           },
           {
             model: Like,
-            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweet.Likes.id'))), 'totalLikes']]
+            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLikes']]
           }, {
             model: Reply,
-            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweet.Replies.id'))), 'totalReplies']]
+            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReplies']]
           }]
         }],
       group: 'Tweet.id',
