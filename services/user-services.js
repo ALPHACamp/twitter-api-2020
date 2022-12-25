@@ -70,7 +70,7 @@ const userServices = {
         include: [{
           model: Tweet,
           attributes:
-            [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.fn('DISTINCT', Tweet.sequelize.col('tweets.id'))), 'totalTweets']]
+            []
         }],
         nest: true,
         raw: true
@@ -152,7 +152,6 @@ const userServices = {
   },
   getLikesOfUser: (req, cb) => {
     const UserId = req.params.user_id
-    console.log(UserId)
     return Like.findAll({
       where: {
         UserId
