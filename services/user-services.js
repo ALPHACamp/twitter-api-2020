@@ -4,6 +4,7 @@ const assert = require('assert')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { uploadImgur } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
+const { Op } = require('sequelize')
 
 const userServices = {
   // 使用者註冊
@@ -162,6 +163,7 @@ const userServices = {
       include: [
         {
           model: Tweet,
+          where: { id: { [Op.ne]: null } },
           attributes: {
             include: [
               [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'totalReplies'],
