@@ -199,6 +199,7 @@ const userServices = {
           exclude: ['password']
         }
       }],
+      order: [[{ model: User, as: 'Followings' }, Followship, 'createdAt', 'DESC']],
       raw: true,
       nest: true
     })
@@ -224,6 +225,7 @@ const userServices = {
           exclude: ['password']
         }
       }],
+      order: [[{ model: User, as: 'Followers' }, Followship, 'createdAt', 'DESC']],
       raw: true,
       nest: true
     })
@@ -270,10 +272,18 @@ const userServices = {
   },
   getTopUsers: (req, cb) => {
     return User.findAll({
-      include: [{ model: User, as: 'Followers' }]
+      where: { role: 'user' },
+      include: [
+        {
+          model: User,
+          as: 'Followers',
+          attributes: { exclude: ['password'] }
+        }
+      ],
+      attributes: { exclude: ['password'] }
     })
       .then(users => {
-        let topUsers = users.map(user => ({
+        const topUsers = users.map(user => ({
           // 展開重新包裝
           ...user.toJSON(),
           // 計算追蹤者人數
@@ -282,13 +292,6 @@ const userServices = {
           isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
         }))
           .sort((a, b) => b.followerCount - a.followerCount).slice(0, 10)
-
-        function arrayRemove (arr, value) {
-          return arr.filter(function (user) {
-            return user.role !== value
-          })
-        }
-        topUsers = arrayRemove(topUsers, 'admin')
         cb(null, { topUsers })
       })
       .catch(err => cb(err))
@@ -320,7 +323,6 @@ const userServices = {
         return Promise.all([bcrypt.hash(password, 10), User.findByPk(req.params.user_id)])
       })
       .then(([hash, user]) => {
-        console.log([hash, user])
         assert(user, "User doesn't exit!")
         return user.update({
           name,
