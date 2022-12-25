@@ -6,7 +6,17 @@ const adminServices = {
   getUsers: (req, cb) => {
     return User.findAll({
       //  offset,
-      attributes: { exclude: ['password'] },
+
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.User_id = User.id)'), 'totalTweets'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.User_id = User.id)'), 'totalLikes'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount']
+        ],
+        exclude: ['password']
+      },
+      order: [[sequelize.literal('totalTweets'), 'DESC'], ['role', 'DESC'], ['id', 'ASC']],
       nest: true,
       raw: true
     })

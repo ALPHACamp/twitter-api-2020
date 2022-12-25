@@ -158,17 +158,24 @@ const userServices = {
       },
       order: [['createdAt', 'DESC']],
       raw: true,
-      nest: true
-
+      nest: true,
+      include: [
+        {
+          model: Tweet,
+          attributes: {
+            include: [
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'totalReplies'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'totalLikes'],
+              [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${helpers.getUser(req).id} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
+            ]
+          },
+          include: [{ model: User, attributes: { exclude: ['password'] } }]
+        }
+      ]
     })
       .then(likes => {
         assert(likes, 'Unexpected operation of database.')
-        const likedTweetId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(lt => lt.TweetId) : []
-        const data = likes.map(t => ({
-          ...t,
-          isLiked: likedTweetId.includes(t.TweetId)
-        }))
-        cb(null, data)
+        cb(null, likes)
       })
       .catch(err => cb(err))
   },
