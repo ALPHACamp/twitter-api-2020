@@ -276,10 +276,7 @@ const tweetController = {
             model: User,
             as: 'Followings',
             attributes: ['id'],
-            include: {
-              model: Tweet,
-              include: [Reply, Like, { model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
-            }
+            include: { model: Tweet, include: [Reply, Like, { model: User, attributes: ['id', 'account', 'name', 'avatar'] }] }
           }
         })
       })

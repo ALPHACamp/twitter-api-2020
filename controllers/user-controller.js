@@ -203,23 +203,15 @@ const userController = {
         UserId: req.params.id
       },
       include: [
-        { model: Tweet, include: [Reply, Like] },
-        User
+        { model: Tweet, include: [Reply, Like, { model: User, attributes: ['id', 'account', 'name', 'avatar'] }] }
       ]
     })
       .then(likes => {
         const tweets = likes.map(like => {
           const TweetId = like.Tweet.id
-          const { id, name, account, avatar } = like.User
           const tweet = {
             TweetId,
             ...like.Tweet.toJSON(),
-            User: {
-              id,
-              account,
-              name,
-              avatar
-            },
             likedAmount: like.Tweet.Likes.length,
             replyAmount: like.Tweet.Replies.length,
             isLike: true
