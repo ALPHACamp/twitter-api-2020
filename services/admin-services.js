@@ -8,11 +8,7 @@ const adminServices = {
       include: [{
         model: Tweet,
         attributes:
-          [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets']],
-        include: [{
-          model: Like,
-          attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.Like_id'))), 'totalLikes']]
-        }]
+          [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets']]
       }, {
         model: User,
         as: 'Followings',
