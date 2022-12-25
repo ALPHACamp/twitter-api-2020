@@ -48,12 +48,11 @@ Example app listening on port3000
 ### Automated test
 Execute all tests by setting 
 ```
-NODE_ENV=test
 npm run test
 ```
 Execute single test by setting 
 ```
-NODE_ENV=test
+NODE_ENV=test 
 npx mocha test/{{ Model or Request }}/{{Model or Request}}.spec.js --exit
 ```
 
