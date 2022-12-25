@@ -4,7 +4,6 @@ const assert = require('assert')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { uploadImgur } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
-const { Op } = require('sequelize')
 
 const userServices = {
   // 使用者註冊
