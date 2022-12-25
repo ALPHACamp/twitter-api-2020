@@ -27,7 +27,8 @@ const adminServices = {
         [sequelize.literal('(SELECT COUNT(*) FROM Tweets JOIN Likes ON Tweets.id = Likes.tweet_id WHERE Tweets.user_id = User.id)'), 'likeCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount']
-      ]
+      ],
+      order: [[sequelize.literal('tweetCount'), 'DESC']]
     })
       .then(users => {
         return cb(null, users)
@@ -41,7 +42,7 @@ const adminServices = {
         if (!tweet) throw new Error('Tweet does not exist!')
         return tweet.destroy()
       })
-      .then(deletedTweet => cb(null, { status: 'success', deletedTweet })
+      .then(deletedTweet => cb(null, { success: true, deletedTweet })
       )
       .catch(err => cb(err))
   }

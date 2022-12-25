@@ -1,7 +1,7 @@
 const { User, Like, Tweet, Followship, Reply } = require('./../models')
 const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
-// const { imgurFileHandler } = require('../helpers/file-helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 
@@ -13,7 +13,7 @@ const userServices = {
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, {
-        status: 'success',
+        success: true,
         token,
         user: userData
       })
@@ -50,6 +50,24 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
+  getCurrentUser: (req, cb) => {
+    const currentUserId = helpers.getUser(req).id
+    return User.findByPk(currentUserId, {
+      attributes: [
+        'id', 'name', 'account', 'email', 'introduction', 'avatar', 'cover',
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE User_id = User.id)'), 'tweetCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount']
+      ],
+      raw: true,
+      nest: true
+    })
+      .then(user => {
+        if (!user) throw new Error('user do not exist.')
+        cb(null, user)
+      })
+      .catch(err => cb(err))
+  },
   getUser: (req, cb) => {
     return User.findByPk(req.params.userId, {
       attributes: [
@@ -68,22 +86,25 @@ const userServices = {
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    const { account, name, email, introduction, password, avatar, cover, checkPassword } = req.body
+    const { account, name, email, introduction, password, checkPassword } = req.body
+    const { files } = req
     const UserId = Number(req.params.userId)
-    const currentUserId = helpers.getUser(req).id
-    if (UserId !== currentUserId) throw new Error('You can only edit your own profile!')
+    const { id, role } = helpers.getUser(req)
+    if (role !== 'admin' && UserId !== id) throw new Error('You can only edit your own profile!') // add role !== 'admin' for development purposes
     // password check
     if (password !== checkPassword) throw new Error('Passwords do not match!')
     // check if account and email exists in db
     return Promise.all([
       User.findByPk(UserId),
       User.findOne({ where: { account: account || null } }),
-      User.findOne({ where: { email: email || null } })
+      User.findOne({ where: { email: email || null } }),
+      imgurFileHandler(files?.avatar[0]),
+      imgurFileHandler(files?.cover[0])
     ])
       .then(([
         user,
         foundUserByAccount,
-        foundUserByEmail]) => {
+        foundUserByEmail, avatar, cover]) => {
         if (!user) throw new Error("User didn't exist!")
         if (foundUserByAccount?.account && user.account !== account) throw new Error('Account already exists!')
         if (foundUserByEmail?.email && user.email !== email) throw new Error('Email already exists!')
@@ -112,6 +133,7 @@ const userServices = {
       attributes: [
         'followingId', 'followerId',
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']],
+      order: [['id', 'DESC']],
       raw: true,
       nest: true
     })
@@ -132,6 +154,7 @@ const userServices = {
       attributes: [
         'followingId', 'followerId',
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE following_id = followerId AND follower_id = ${UserId} )`), 'isFollowed']],
+      order: [['id', 'DESC']],
       raw: true,
       nest: true
     })

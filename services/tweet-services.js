@@ -17,7 +17,8 @@ const tweetServices = {
       }],
       raw: true,
       nest: true,
-      order: [['id', 'DESC']]
+      order: [['id', 'DESC']],
+      limit: 10 // temp for dev
     })
       .then(datas => {
         const tweets = datas.map(data => ({
@@ -76,7 +77,7 @@ const tweetServices = {
           comment
         })
       })
-      .then(postedReply => cb(null, { status: 'success', postedReply }))
+      .then(postedReply => cb(null, { success: true, postedReply }))
       .catch(err => cb(err))
   },
   getReplies: (req, cb) => {
@@ -98,7 +99,9 @@ const tweetServices = {
             { model: User, attributes: ['id', 'avatar', 'account', 'name'] }
           ],
           raw: true,
-          nest: true
+          nest: true,
+          order: [['id', 'DESC']],
+          limit: 5 // temp for dev
         })
       })
       .then(replies => {
@@ -127,7 +130,7 @@ const tweetServices = {
         })
       })
       .then(result => {
-        cb(null, { status: 'success', result })
+        cb(null, { success: true, result })
       })
       .catch(err => cb(err))
   },
@@ -144,7 +147,7 @@ const tweetServices = {
         if (!like) throw new Error("You haven't liked this tweet!")
         return like.destroy()
       })
-      .then(deletedLike => cb(null, { status: 'success', deletedLike }))
+      .then(deletedLike => cb(null, { success: true, deletedLike }))
       .catch(err => cb(err))
   }
 }
