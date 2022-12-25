@@ -157,36 +157,35 @@ const userServices = {
       where: {
         UserId
       },
-      // include: [
-      //   {
-      //     model: Tweet,
-      //     include: [{
-      //       model: User,
-      //       attributes: { exclude: ['password'] }
-      //     },
-      //     {
-      //       model: Like,
-      //       attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('tweet.likes.id'))), 'totalLikes']]
-      //     }, {
-      //       model: Reply,
-      //       attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('tweet.replies.id'))), 'totalReplies']]
-      //     }]
-      //   }],
-      // group: 'tweet.id',
+      include: [
+        {
+          model: Tweet,
+          include: [{
+            model: User,
+            attributes: { exclude: ['password'] }
+          },
+          {
+            model: Like,
+            attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('tweet.likes.id'))), 'totalLikes']]
+          }, {
+            model: Reply,
+            attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('tweet.replies.id'))), 'totalReplies']]
+          }]
+        }],
+      group: 'tweet.id',
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
 
     })
       .then(likes => {
-        console.log(111)
         assert(likes, 'Unexpected operation of database.')
-        console.log(222, likes)
         const likedTweetId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(lt => lt.TweetId) : []
         const data = likes.map(t => ({
           ...t,
           isLiked: likedTweetId.includes(t.TweetId)
         }))
+        console.log(data)
         cb(null, data)
       })
       .catch(err => cb(err))
