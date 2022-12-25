@@ -2,20 +2,18 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const followers = await queryInterface.sequelize.query(
-      'SELECT id FROM Users;',
+    const users = await queryInterface.sequelize.query(
+      "SELECT id FROM Users WHERE role='user';",
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-    const followings = await queryInterface.sequelize.query(
-      'SELECT id FROM Users;',
-      { type: queryInterface.sequelize.QueryTypes.SELECT }
-    )
+
     const followerIdArr = []
     const followingIdArr = []
 
     while (followerIdArr.length < 30) {
-      const followerId = followers[Math.floor(Math.random() * followers.length)].id
-      const followingId = followings[Math.floor(Math.random() * followings.length)].id
+      const followerId = users[Math.floor(Math.random() * users.length)].id
+      const followingId = users[Math.floor(Math.random() * users.length)].id
+
       if (followerId !== followingId) {
         followerIdArr.push(followerId)
         followingIdArr.push(followingId)
