@@ -136,8 +136,7 @@ const userServices = {
         model: User,
         attributes: {
           exclude: ['password']
-        },
-        include: Tweet
+        }
       }, {
         model: Tweet, include: [{ model: User, attributes: [['account', 'ownerAccount']] }]
       }],

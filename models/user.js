@@ -12,12 +12,12 @@ module.exports = (sequelize, DataTypes) => {
       // 和Tweet的關聯
       User.hasMany(models.Tweet, { foreignKey: 'UserId' })
       //  建立followrship關聯
-      User.belongsToMany(User, {
+      User.belongsToMany(models.User, {
         through: models.Followship,
         foreignKey: 'followingId',
         as: 'Followers'
       })
-      User.belongsToMany(User, {
+      User.belongsToMany(models.User, {
         through: models.Followship,
         foreignKey: 'followerId',
         as: 'Followings'
