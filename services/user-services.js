@@ -85,7 +85,6 @@ const userServices = {
       })
     ])
       .then(([user, followers, followings]) => {
-        console.log(user)
         assert(user, "User doesn't exit.")
         const isFollowed = followers.count ? followers.rows.some(f => f.followerId === helpers.getUser(req).id) : false
         const result = {
@@ -185,7 +184,6 @@ const userServices = {
           ...t,
           isLiked: likedTweetId.includes(t.TweetId)
         }))
-        console.log(data)
         cb(null, data)
       })
       .catch(err => cb(err))
