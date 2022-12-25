@@ -70,7 +70,7 @@ const userServices = {
         include: [{
           model: Tweet,
           attributes:
-            [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE UserId = User.id )'), 'tweetCount']
+            [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.fn('DISTINCT', Tweet.sequelize.col('tweets.id'))), 'totalTweets']]
         }],
         nest: true,
         raw: true
@@ -85,6 +85,7 @@ const userServices = {
       })
     ])
       .then(([user, followers, followings]) => {
+        console.log(user)
         assert(user, "User doesn't exit.")
         const isFollowed = followers.count ? followers.rows.some(f => f.followerId === helpers.getUser(req).id) : false
         const result = {
