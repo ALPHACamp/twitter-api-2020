@@ -177,7 +177,7 @@ const userController = {
 
       const option = { name, introduction }
       if (files?.avatar) option.avatar = await imgurFileHandler(files.avatar[0])
-      option.cover = files?.cover ? await imgurFileHandler(files.cover[0]) : null // 未上傳cover可以是空白
+      option.cover = files?.cover ? await imgurFileHandler(files.cover[0]) : 'https://i.imgur.com/bW0IDLD.png' // 未上傳cover就換成預設封面
       if (cover) delete option.cover // 如果有字串，cover不做更動沿用上次的url
 
       //  更新資料
