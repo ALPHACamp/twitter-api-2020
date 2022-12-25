@@ -2,12 +2,8 @@ const multer = require('multer')
 const upload = multer({
   dest: 'temp/',
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg') {
-      cb(null, true)
-    } else {
-      cb(null, false)
-      return cb(new Error('Only .png, .jpg and .jpeg format allowed!'))
-    }
+    if (file && !file.mimetype.includes('image')) cb(new Error('Image file only!'))
+    cb(null, true)
   }
 })
 module.exports = upload
