@@ -72,6 +72,7 @@ const userServices = {
           attributes:
             [[sequelize.fn('COUNT', sequelize.col('Tweets.id')), 'totalTweets']]
         }],
+        group: 'id',
         nest: true,
         raw: true
       }),
