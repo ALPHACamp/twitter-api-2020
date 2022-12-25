@@ -164,7 +164,7 @@ const userServices = {
             attributes: { exclude: ['password'] }
           }]
         }],
-      group: 'Tweet.id',
+      // group: 'Tweet.id',
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
