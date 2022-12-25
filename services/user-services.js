@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const assert = require('assert')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship,sequelize } = require('../models')
 const { uploadImgur } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
 
@@ -70,7 +70,7 @@ const userServices = {
         include: [{
           model: Tweet,
           attributes:
-            [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.fn('DISTINCT', Tweet.sequelize.col('tweets.id'))), 'totalTweets']]
+            [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('tweets.id'))), 'totalTweets']]
         }],
         nest: true,
         raw: true
@@ -105,10 +105,10 @@ const userServices = {
       },
       include: [{
         model: Like,
-        attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('likes.id'))), 'totalLikes']]
+        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLikes']]
       }, {
         model: Reply,
-        attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('replies.id'))), 'totalReplies']]
+        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReplies']]
       }],
       group: 'tweet.id',
       order: [['createdAt', 'DESC']],
@@ -165,10 +165,10 @@ const userServices = {
           },
           {
             model: Like,
-            attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('tweet.likes.id'))), 'totalLikes']]
+            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('tweet.likes.id'))), 'totalLikes']]
           }, {
             model: Reply,
-            attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('tweet.replies.id'))), 'totalReplies']]
+            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('tweet.replies.id'))), 'totalReplies']]
           }]
         }],
       group: 'tweet.id',
