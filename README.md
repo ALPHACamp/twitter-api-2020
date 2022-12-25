@@ -37,12 +37,12 @@ npm install
 ### [設定資料庫]
 《需要與 config/config.json 一致》
 
-#### [在MYSQL設定新增資料庫]
+### [在MYSQL設定新增資料庫]
 ```
 create database ac_twitter_workspace;
 ```
 
-#### [資料表建立]
+### [資料表建立]
 ```
 $ npx sequelize-cli db:migrate
 ```
