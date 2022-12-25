@@ -88,7 +88,8 @@ const userServices = {
   editUser: (req, cb) => {
     const { account, name, email, introduction, password, checkPassword } = req.body
     const { files } = req
-    console.log(files)
+    const avatarData = files?.avatar ? files.avatar[0] : null
+    const coverData = files?.cover ? files.cover[0] : null
     const UserId = Number(req.params.userId)
     const { id, role } = helpers.getUser(req)
     if (role !== 'admin' && UserId !== id) throw new Error('不可更改其他使用者資料!') // add role !== 'admin' for development purposes
@@ -99,8 +100,8 @@ const userServices = {
       User.findByPk(UserId),
       User.findOne({ where: { account: account || null } }),
       User.findOne({ where: { email: email || null } }),
-      imgurFileHandler(files?.avatar[0]),
-      imgurFileHandler(files?.cover[0])
+      imgurFileHandler(avatarData),
+      imgurFileHandler(coverData)
     ])
       .then(([
         user,

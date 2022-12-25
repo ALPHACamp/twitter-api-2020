@@ -16,7 +16,7 @@ const followshipServices = {
         [sequelize.fn('COUNT', 'followingId'), 'followerCount'],
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']
       ],
-      // order: [[sequelize.literal('followerCount'), 'DESC']],
+      order: [[sequelize.literal('followerCount'), 'DESC']],
       group: ['followingId'],
       limit,
       raw: true,
