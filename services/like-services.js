@@ -22,8 +22,7 @@ const likeServices = {
         })
       })
       .then(addLike => {
-        console.log(addLike)
-        cb(null, { addLike })
+        cb(null, { addLike: addLike.toJSON() })
       })
       .catch(err => cb(err))
   },
