@@ -177,17 +177,8 @@ const userController = {
       if (introduction && introduction.length > 160) return status(400).json({ status: 'error', message: '超過introduction字數上限160字！' })
 
       // 圖片上傳imgur
-      let avatarPath = await imgurFileHandler(avatar)
-      let coverPath = await imgurFileHandler(cover)
-
-      // 刪除圖片改為預設
-      if (Number(deleteCover) === 1) {
-        coverPath = 'https://i.imgur.com/wvu5KGx.png'
-      }
-
-      if (Number(deleteAvatar) === 1) {
-        avatarPath = 'https://i.imgur.com/Djq8vQ2.png'
-      }
+      const avatarPath = await imgurFileHandler(avatar)
+      const coverPath = await imgurFileHandler(cover)
 
       let updatedUser = await user.update({
         name,
@@ -195,6 +186,19 @@ const userController = {
         cover: coverPath || user.cover,
         introduction
       })
+
+      // 刪除圖片
+      if (Number(deleteCover) === 1) {
+        updatedUser = await user.update({
+          cover: null
+        })
+      }
+
+      if (Number(deleteAvatar) === 1) {
+        updatedUser = await user.update({
+          avatar: null
+        })
+      }
 
       updatedUser = updatedUser.toJSON()
       delete updatedUser.password
