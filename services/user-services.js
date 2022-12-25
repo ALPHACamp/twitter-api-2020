@@ -156,15 +156,6 @@ const userServices = {
       where: {
         UserId
       },
-      include: [
-        {
-          model: Tweet,
-          include: [{
-            model: User,
-            attributes: { exclude: ['password'] }
-          }]
-        }],
-      group: 'Tweet.id',
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true

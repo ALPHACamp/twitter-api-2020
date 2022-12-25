@@ -5,27 +5,13 @@ const assert = require('assert')
 const adminServices = {
   getUsers: (req, cb) => {
     return User.findAll({
-      include: [{
-        model: Tweet,
-        attributes:
-          [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets']]
-      }, {
-        model: User,
-        as: 'Followings',
-        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.id'))), 'followingCount']]
-      }, {
-        model: User,
-        as: 'Followers',
-        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.id'))), 'followerCount']]
-      }],
       //  offset,
       attributes: { exclude: ['password'] },
-      group: 'User.id',
       nest: true,
       raw: true
     })
       .then(users => {
-        const result = users.sort((a, b) => b.Tweets.totalTweets - a.Tweets.totalTweets)
+        const result = users
         cb(null, result)
       })
       .catch(err => cb(err))
