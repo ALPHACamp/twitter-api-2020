@@ -18,7 +18,7 @@ const tweetServices = {
       raw: true,
       nest: true,
       order: [['id', 'DESC']],
-      limit: 10 // temp for dev
+      limit: 3 // temp for dev
     })
       .then(datas => {
         const tweets = datas.map(data => ({
@@ -101,7 +101,7 @@ const tweetServices = {
           raw: true,
           nest: true,
           order: [['id', 'DESC']],
-          limit: 5 // temp for dev
+          limit: 1 // temp for dev
         })
       })
       .then(replies => {
