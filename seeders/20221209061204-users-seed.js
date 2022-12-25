@@ -12,8 +12,8 @@ module.exports = {
       email: ' root@example.com',
       password: bcrypt.hashSync(DEFAULT_PASSWORD, bcrypt.genSaltSync(10)),
       introduction: faker.lorem.sentence(10),
-      avatar: `https://loremflickr.com/320/240/man,woman/?random=${Math.floor(Math.random() * 100)}`,
-      cover: 'https://picsum.photos/1500/800',
+      avatar: 'https://loremflickr.com/320/240/man,woman/?lock=100',
+      cover: 'https://picsum.photos/id/100/1500/800',
       role: 'admin',
       createdAt: new Date(),
       updatedAt: new Date()
@@ -24,8 +24,8 @@ module.exports = {
       email: `user${i + 1}@example.com`,
       password: bcrypt.hashSync(DEFAULT_PASSWORD, bcrypt.genSaltSync(10)),
       introduction: faker.lorem.sentence(10),
-      avatar: `https://loremflickr.com/320/240/man,woman/?random=${Math.floor(Math.random() * 100)}`,
-      cover: 'https://picsum.photos/1500/800',
+      avatar: `https://loremflickr.com/320/240/man,woman/?lock=${i}`,
+      cover: `https://picsum.photos/id/${i}/1500/800`,
       role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
