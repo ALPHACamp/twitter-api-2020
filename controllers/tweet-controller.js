@@ -119,7 +119,11 @@ const tweetController = {
       UserId: helpers.getUser(req).id
     })
       .then(newTweet => {
-        res.json({ newTweet })
+        Tweet.findByPk(newTweet.id)
+          .then(tweet => {
+            res.json(tweet)
+          })
+        // res.json(newTweet)
       })
       .catch(err => next(err))
   },
@@ -188,7 +192,11 @@ const tweetController = {
       TweetId: req.params.tweet_id
     })
       .then(newReply => {
-        res.json(newReply)
+        Reply.findByPk(newReply.id)
+          .then(reply => {
+            res.json(reply)
+          })
+        // res.json(newReply)
       })
       .catch(err => next(err))
   },
