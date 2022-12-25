@@ -7,7 +7,7 @@ const adminServices = {
   loginAdmin: (req, cb) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      if (userData.role === 'user') throw new Error("account doesn't exist!")
+      if (userData.role === 'user') throw new Error('帳號不存在!')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, {
@@ -39,7 +39,7 @@ const adminServices = {
     const TweetId = req.params.tweetId
     return Tweet.findByPk(TweetId)
       .then(tweet => {
-        if (!tweet) throw new Error('Tweet does not exist!')
+        if (!tweet) throw new Error('推文不存在!')
         return tweet.destroy()
       })
       .then(deletedTweet => cb(null, { success: true, deletedTweet })

@@ -9,7 +9,7 @@ const userServices = {
   loginUser: (req, cb) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      if (userData.role === 'admin') throw new Error("account doesn't exist!")
+      if (userData.role === 'admin') throw new Error('帳號不存在!')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, {
@@ -24,14 +24,14 @@ const userServices = {
   registerUser: (req, cb) => {
     const { account, name, email, password, checkPassword } = req.body
     // password check
-    if (password !== checkPassword) throw new Error('Passwords do not match!')
+    if (password !== checkPassword) throw new Error('密碼不相符!')
     // account and email check
     return Promise.all([
       User.findOne({ where: { account } }), User.findOne({ where: { email } })
     ])
       .then(([userWithAccount, userWithEmail]) => {
-        if (userWithAccount) throw new Error('Account already exists!')
-        if (userWithEmail) throw new Error('Email already exists!')
+        if (userWithAccount) throw new Error('帳號已被使用!')
+        if (userWithEmail) throw new Error('信箱已被使用!')
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => User.create({
@@ -63,7 +63,7 @@ const userServices = {
       nest: true
     })
       .then(user => {
-        if (!user) throw new Error('user do not exist.')
+        if (!user) throw new Error('使用者不存在!')
         cb(null, user)
       })
       .catch(err => cb(err))
@@ -80,7 +80,7 @@ const userServices = {
       nest: true
     })
       .then(user => {
-        if (!user) throw new Error('user do not exist.')
+        if (!user) throw new Error('使用者不存在!')
         cb(null, user)
       })
       .catch(err => cb(err))
@@ -90,9 +90,9 @@ const userServices = {
     const { files } = req
     const UserId = Number(req.params.userId)
     const { id, role } = helpers.getUser(req)
-    if (role !== 'admin' && UserId !== id) throw new Error('You can only edit your own profile!') // add role !== 'admin' for development purposes
+    if (role !== 'admin' && UserId !== id) throw new Error('不可更改其他使用者資料!') // add role !== 'admin' for development purposes
     // password check
-    if (password !== checkPassword) throw new Error('Passwords do not match!')
+    if (password !== checkPassword) throw new Error('密碼不相符!')
     // check if account and email exists in db
     return Promise.all([
       User.findByPk(UserId),
@@ -105,9 +105,9 @@ const userServices = {
         user,
         foundUserByAccount,
         foundUserByEmail, avatar, cover]) => {
-        if (!user) throw new Error("User didn't exist!")
-        if (foundUserByAccount?.account && user.account !== account) throw new Error('Account already exists!')
-        if (foundUserByEmail?.email && user.email !== email) throw new Error('Email already exists!')
+        if (!user) throw new Error('帳號不存在!')
+        if (foundUserByAccount?.account && user.account !== account) throw new Error('帳號已被使用!')
+        if (foundUserByEmail?.email && user.email !== email) throw new Error('信箱已被使用!')
         return user.update({
           account,
           name,
