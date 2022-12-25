@@ -42,7 +42,7 @@ node app.js
 ```
 9. When the following words appear on the terminal, it means the execution is successful
 ```
-Example app listening on port
+Example app listening on port3000
 ```
 
 ### Automated test
