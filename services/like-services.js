@@ -14,16 +14,17 @@ const likeServices = {
     ])
       .then(([tweet, like]) => {
         // 後端驗證資料庫回傳
-        console.log(111)
         assert(tweet, "The tweet doesn't exit!")
         assert(!like, "You've liked this tweet already!")
-        console.log(222)
         return Like.create({
           UserId,
           TweetId
         })
       })
-      .then(addLike => cb(null, { addLike }))
+      .then(addLike => {
+        console.log(addLike)
+        cb(null, { addLike })
+      })
       .catch(err => cb(err))
   },
   // 收回like
