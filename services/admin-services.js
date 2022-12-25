@@ -24,7 +24,7 @@ const adminServices = {
       }],
       //  offset,
       attributes: { exclude: ['password'] },
-      group: 'id',
+      group: 'User.id',
       nest: true,
       raw: true
     })
