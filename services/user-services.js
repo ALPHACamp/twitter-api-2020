@@ -162,13 +162,6 @@ const userServices = {
           include: [{
             model: User,
             attributes: { exclude: ['password'] }
-          },
-          {
-            model: Like,
-            attributes: [[sequelize.fn('COUNT', sequelize.col('Tweet.Likes.id')), 'totalLikes']]
-          }, {
-            model: Reply,
-            attributes: [[sequelize.fn('COUNT', sequelize.col('Tweet.Replies.id')), 'totalReplies']]
           }]
         }],
       group: 'Tweet.id',
@@ -178,6 +171,7 @@ const userServices = {
 
     })
       .then(likes => {
+        console.log(3333)
         if (!likes) {
           console.log(122233)
         }
