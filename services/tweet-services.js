@@ -1,4 +1,4 @@
-const { Tweet, Like, Reply, User } = require('../models')
+const { Tweet, Like, Reply, User, sequelize } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const helpers = require('../_helpers')
 
@@ -17,10 +17,10 @@ const tweetServices = {
         attributes: { exclude: ['password'] }
       }, {
         model: Like,
-        attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.col('Likes.id')), 'totalLikes']]
+        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLikes']]
       }, {
         model: Reply,
-        attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.col('Replies.id')), 'totalReplies']]
+        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReplies']]
       }],
       group: 'Tweet.id',
       offset,

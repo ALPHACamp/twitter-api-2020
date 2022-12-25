@@ -71,7 +71,7 @@ const userServices = {
         include: [{
           model: Tweet,
           attributes:
-            [[sequelize.fn('COUNT', sequelize.col('Tweets.id')), 'totalTweets']]
+            [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets']]
         }],
         nest: true,
         raw: true
@@ -106,10 +106,10 @@ const userServices = {
       },
       include: [{
         model: Like,
-        attributes: [[sequelize.fn('COUNT', sequelize.col('Likes.id')), 'totalLikes']]
+        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLikes']]
       }, {
         model: Reply,
-        attributes: [[sequelize.fn('COUNT', sequelize.col('Replies.id')), 'totalReplies']]
+        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReplies']]
       }],
       group: 'Tweet.id',
       order: [['createdAt', 'DESC']],
@@ -157,36 +157,26 @@ const userServices = {
       where: {
         UserId
       },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true,
       include: [
         {
           model: Tweet,
-          where: { id: { [Op.ne]: null } },
-          include: [{
-            model: User,
-            attributes: { exclude: ['password'] }
+          attributes: {
+            include: [
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'totalReplies'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'totalLikes'],
+              [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${helpers.getUser(req).id} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
+            ]
           },
-          {
-            model: Like,
-            attributes: [[sequelize.fn('COUNT', sequelize.col('Tweet.Likes.id')), 'totalLikes']]
-          }, {
-            model: Reply,
-            attributes: [[sequelize.fn('COUNT', sequelize.col('Tweet.Replies.id')), 'totalReplies']]
-          }]
-        }],
-      group: 'Tweet.id',
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-
+          include: [{ model: User, attributes: { exclude: ['password'] } }]
+        }
+      ]
     })
       .then(likes => {
         assert(likes, 'Unexpected operation of database.')
-        const likedTweetId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(lt => lt.TweetId) : []
-        const data = likes.map(t => ({
-          ...t,
-          isLiked: likedTweetId.includes(t.TweetId)
-        }))
-        cb(null, data)
+        cb(null, likes)
       })
       .catch(err => cb(err))
   },
