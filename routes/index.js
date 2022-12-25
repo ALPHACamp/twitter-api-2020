@@ -17,6 +17,9 @@ router.post('/api/admin/login', passport.authenticate('local', { session: false 
 
 router.post('/api/users', accountFormValidator, userController.signUp)
 
+// 確認token是否存在
+router.get('/api/users/token', authenticated, userController.getUserTokenStatus)
+
 // modules
 router.use('/api/users', authenticated, authenticatedUser, user)
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
