@@ -21,9 +21,7 @@ const likeServices = {
           TweetId
         })
       })
-      .then(addLike => {
-        cb(null, { addLike: addLike.toJSON() })
-      })
+      .then(addLike => cb(null, { addLike }))
       .catch(err => cb(err))
   },
   // 收回like
