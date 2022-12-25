@@ -70,7 +70,7 @@ const userServices = {
         include: [{
           model: Tweet,
           attributes:
-            [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.fn('DISTINCT', Tweet.sequelize.col('Tweets.id'))), 'totalTweets']]
+            [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets']]
         }],
         nest: true,
         raw: true
@@ -105,10 +105,10 @@ const userServices = {
       },
       include: [{
         model: Like,
-        attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('Likes.id'))), 'totalLikes']]
+        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLikes']]
       }, {
         model: Reply,
-        attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('Replies.id'))), 'totalReplies']]
+        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReplies']]
       }],
       group: 'tweet.id',
       order: [['createdAt', 'DESC']],
@@ -165,10 +165,10 @@ const userServices = {
           },
           {
             model: Like,
-            attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('Tweet.Likes.id'))), 'totalLikes']]
+            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweet.Likes.id'))), 'totalLikes']]
           }, {
             model: Reply,
-            attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('Tweet.Replies.id'))), 'totalReplies']]
+            attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweet.Replies.id'))), 'totalReplies']]
           }]
         }],
       group: 'tweet.id',
