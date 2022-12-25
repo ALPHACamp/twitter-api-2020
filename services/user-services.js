@@ -4,6 +4,7 @@ const assert = require('assert')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { uploadImgur } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
+const { Op } = require('sequelize')
 
 const userServices = {
   // 使用者註冊
@@ -67,11 +68,11 @@ const userServices = {
       User.findOne({
         where: { id: req.params.user_id },
         attributes: { exclude: ['password'] },
-        // include: [{
-        //   model: Tweet,
-        //   attributes:
-        //     [[sequelize.fn('COUNT', sequelize.col('Tweets.id')), 'totalTweets']]
-        // }],
+        include: [{
+          model: Tweet,
+          attributes:
+            [[sequelize.fn('COUNT', sequelize.col('Tweets.id')), 'totalTweets']]
+        }],
         nest: true,
         raw: true
       }),
@@ -159,6 +160,7 @@ const userServices = {
       include: [
         {
           model: Tweet,
+          where: { id: { [Op.ne]: null } },
           include: [{
             model: User,
             attributes: { exclude: ['password'] }
