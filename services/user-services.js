@@ -178,6 +178,7 @@ const userServices = {
 
     })
       .then(likes => {
+        console.log(likes)
         assert(likes, 'Unexpected operation of database.')
         const likedTweetId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(lt => lt.TweetId) : []
         const data = likes.map(t => ({
