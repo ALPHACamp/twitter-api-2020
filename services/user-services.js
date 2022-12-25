@@ -157,22 +157,22 @@ const userServices = {
       where: {
         UserId
       },
-      include: [
-        {
-          model: Tweet,
-          include: [{
-            model: User,
-            attributes: { exclude: ['password'] }
-          },
-          {
-            model: Like,
-            attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('tweet.likes.id'))), 'totalLikes']]
-          }, {
-            model: Reply,
-            attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('tweet.replies.id'))), 'totalReplies']]
-          }]
-        }],
-      group: 'tweet.id',
+      // include: [
+      //   {
+      //     model: Tweet,
+      //     include: [{
+      //       model: User,
+      //       attributes: { exclude: ['password'] }
+      //     },
+      //     {
+      //       model: Like,
+      //       attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('tweet.likes.id'))), 'totalLikes']]
+      //     }, {
+      //       model: Reply,
+      //       attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('tweet.replies.id'))), 'totalReplies']]
+      //     }]
+      //   }],
+      // group: 'tweet.id',
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
