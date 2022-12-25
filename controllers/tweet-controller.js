@@ -7,7 +7,7 @@ const tweetController = {
     return Tweet.findAll({
       include: [Reply, Like, { model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       limit: 10,
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'ASC']]
     })
       .then(tweets => {
         tweets = tweets.map(tweet => {
