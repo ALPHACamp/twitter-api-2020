@@ -49,7 +49,7 @@ $ npx sequelize-cli db:migrate
 
 ### [種子資料建立]
 ```
-$ npx sequelize db:seed:undo:all
+$ npx sequelize db:seed:all
 ```
 
 ### [設定環境變數]
