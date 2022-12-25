@@ -67,12 +67,11 @@ const userServices = {
       User.findOne({
         where: { id: req.params.user_id },
         attributes: { exclude: ['password'] },
-        include: [{
-          model: Tweet,
-          attributes:
-            [[sequelize.fn('COUNT', sequelize.col('Tweets.id')), 'totalTweets']]
-        }],
-        group: 'id',
+        // include: [{
+        //   model: Tweet,
+        //   attributes:
+        //     [[sequelize.fn('COUNT', sequelize.col('Tweets.id')), 'totalTweets']]
+        // }],
         nest: true,
         raw: true
       }),
