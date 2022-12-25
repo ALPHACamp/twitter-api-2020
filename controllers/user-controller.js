@@ -204,7 +204,8 @@ const userController = {
       },
       include: [
         { model: Tweet, include: [Reply, Like, { model: User, attributes: ['id', 'account', 'name', 'avatar'] }] }
-      ]
+      ],
+      order: [['createdAt', 'DESC'], ['id', 'DESC']]
     })
       .then(likes => {
         const tweets = likes.map(like => {
@@ -220,7 +221,6 @@ const userController = {
           delete tweet.Likes
           return tweet
         })
-        tweets.sort((a, b) => b.id - a.id)
         res.json(tweets)
       })
       .catch(err => next(err))
