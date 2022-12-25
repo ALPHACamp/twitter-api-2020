@@ -17,12 +17,12 @@ const tweetServices = {
         attributes: { exclude: ['password'] }
       }, {
         model: Like,
-        attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('Likes.id'))), 'totalLikes']]
+        attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.col('Likes.id')), 'totalLikes']]
       }, {
         model: Reply,
-        attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.fn('DISTINCT', Reply.sequelize.col('Replies.id'))), 'totalReplies']]
+        attributes: [[Reply.sequelize.fn('COUNT', Reply.sequelize.col('Replies.id')), 'totalReplies']]
       }],
-      group: 'tweet.id',
+      group: 'Tweet.id',
       offset,
       order: [['createdAt', 'DESC']],
       nest: true,
