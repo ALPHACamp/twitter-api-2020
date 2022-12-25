@@ -6,11 +6,11 @@ For local user make sure you've installed Node.js@14.16.0, npm, and MySQL
 ### Initialized 
 1. Switch to your Terminal(for MacOS) or git-bash(for Windows)
 ```
-git clone https://github.com/shanelin0904/twitter-api-2022.git
+git clone https://github.com/shanelin0904/twitter-api-2020.git
 ```
 2. Change direction to this project
 ```
-cd twitter-api-2022
+cd twitter-api-2020
 ```
 3. Install required dependencies
 ```
