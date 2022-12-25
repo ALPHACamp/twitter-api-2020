@@ -152,6 +152,7 @@ const userServices = {
   },
   getLikesOfUser: (req, cb) => {
     const UserId = req.params.user_id
+    console.log(UserId)
     return Like.findAll({
       where: {
         UserId
