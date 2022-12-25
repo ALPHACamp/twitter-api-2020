@@ -88,6 +88,7 @@ const userServices = {
   editUser: (req, cb) => {
     const { account, name, email, introduction, password, checkPassword } = req.body
     const { files } = req
+    console.log(files)
     const UserId = Number(req.params.userId)
     const { id, role } = helpers.getUser(req)
     if (role !== 'admin' && UserId !== id) throw new Error('不可更改其他使用者資料!') // add role !== 'admin' for development purposes
