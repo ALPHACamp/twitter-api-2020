@@ -1,35 +1,27 @@
 // eslint-disable-next-line no-unused-vars
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, sequelize } = require('../models')
 // const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const assert = require('assert')
 const adminServices = {
   getUsers: (req, cb) => {
     return User.findAll({
-      include: [{
-        model: Tweet,
-        attributes:
-          [[Tweet.sequelize.fn('COUNT', Tweet.sequelize.fn('DISTINCT', Tweet.sequelize.col('tweets.id'))), 'totalTweets']],
-        include: [{
-          model: Like,
-          attributes: [[Like.sequelize.fn('COUNT', Like.sequelize.fn('DISTINCT', Like.sequelize.col('tweets.likes.id'))), 'totalLikes']]
-        }]
-      }, {
-        model: User,
-        as: 'Followings',
-        attributes: [[User.sequelize.fn('COUNT', User.sequelize.fn('DISTINCT', User.sequelize.col('followings.id'))), 'followingCount']]
-      }, {
-        model: User,
-        as: 'Followers',
-        attributes: [[User.sequelize.fn('COUNT', User.sequelize.fn('DISTINCT', User.sequelize.col('followers.id'))), 'followerCount']]
-      }],
       //  offset,
-      attributes: { exclude: ['password'] },
-      group: 'id',
+
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.User_id = User.id)'), 'totalTweets'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.User_id = User.id)'), 'totalLikes'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount']
+        ],
+        exclude: ['password']
+      },
+      order: [[sequelize.literal('totalTweets'), 'DESC'], ['role', 'DESC'], ['id', 'ASC']],
       nest: true,
       raw: true
     })
       .then(users => {
-        const result = users.sort((a, b) => b.Tweets.totalTweets - a.Tweets.totalTweets)
+        const result = users
         cb(null, result)
       })
       .catch(err => cb(err))
