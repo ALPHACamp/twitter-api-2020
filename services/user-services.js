@@ -162,6 +162,13 @@ const userServices = {
           include: [{
             model: User,
             attributes: { exclude: ['password'] }
+          },
+          {
+            model: Like,
+            attributes: [[sequelize.fn('COUNT', sequelize.col('Tweet.likes.id')), 'totalLikes']]
+          }, {
+            model: Reply,
+            attributes: [[sequelize.fn('COUNT', sequelize.col('Tweet.replies.id')), 'totalReplies']]
           }]
         }],
       // group: 'Tweet.id',
@@ -171,10 +178,6 @@ const userServices = {
 
     })
       .then(likes => {
-        console.log(3333)
-        if (!likes) {
-          console.log(122233)
-        }
         assert(likes, 'Unexpected operation of database.')
         const likedTweetId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(lt => lt.TweetId) : []
         const data = likes.map(t => ({
