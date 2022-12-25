@@ -5,13 +5,19 @@ const followshipServices = {
   getTopUsers: (req, cb) => {
     const limit = Number(req.query.top)
     const UserId = helpers.getUser(req).id
-    return User.findAll({
+    return Followship.findAll({
+      include: {
+        model: User, as: 'followingUser', attributes: ['id', 'avatar', 'name', 'account']
+      },
       attributes: [
-        'id', 'avatar', 'name', 'account',
-        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = user.id)'), 'followerCount'],
-        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = user.id)`), 'isFollowed']
+        'followingId',
+        [sequelize.literal('(SELECT account FROM Users WHERE id = followingId)'), 'account'],
+        [sequelize.literal('(SELECT avatar FROM Users WHERE id = followingId)'), 'avatar'],
+        [sequelize.fn('COUNT', 'followingId'), 'followerCount'],
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']
       ],
       order: [[sequelize.literal('followerCount'), 'DESC']],
+      group: ['followingId'],
       limit,
       raw: true,
       nest: true
@@ -28,7 +34,7 @@ const followshipServices = {
   addFollowing: (req, cb) => {
     const { id } = req.body
     const followerId = helpers.getUser(req).id
-    if (+id === followerId) throw new Error('You cannot follow yourself!')
+    if (+id === followerId) throw new Error('無法追蹤自己!')
     return Promise.all([
       User.findByPk(id),
       Followship.findOne({
@@ -39,8 +45,8 @@ const followshipServices = {
       })
     ])
       .then(([user, followship]) => {
-        if (!user) throw new Error("User didn't exist!")
-        if (followship) throw new Error('You are already following this user!')
+        if (!user) throw new Error('使用者不存在!')
+        if (followship) throw new Error('您已經在追隨該使者!')
         return Followship.create({
           followerId: helpers.getUser(req).id,
           followingId: req.body.id
@@ -59,7 +65,7 @@ const followshipServices = {
       }
     })
       .then(followship => {
-        if (!followship) throw new Error("You haven't followed this user!")
+        if (!followship) throw new Error('您尚未追隨該使用者!')
         return followship.destroy()
       })
       .then(deletedFollowship => cb(null, { success: true, deletedFollowship }))

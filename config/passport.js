@@ -21,9 +21,9 @@ passport.use(new LocalStrategy(
   (req, account, password, cb) => {
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) throw new Error("account doesn't exist!")
+        if (!user) throw new Error('帳號不存在!')
         bcrypt.compare(password, user.password).then(res => {
-          if (!res) throw new Error('password or account is incorrect!')
+          if (!res) throw new Error('帳號或密碼不正確!')
           return cb(null, user)
         })
           .catch(err => cb(err))
@@ -50,22 +50,5 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
     })
     .catch(err => cb(err))
 }))
-// // serialize and deserialize user
-// passport.serializeUser((user, cb) => {
-//   cb(null, user.id)
-// })
-// passport.deserializeUser((id, cb) => {
-//   return User.findByPk(id, {
-//     include: [
-//       { model: Tweet, as: 'LikedTweets' },
-//       { model: User, as: 'Followers' },
-//       { model: User, as: 'Followings' }
-//     ]
-//   })
-//     .then(user => {
-//       user = user.toJSON()
-//       return cb(null, user)
-//     })
-// })
 
 module.exports = passport

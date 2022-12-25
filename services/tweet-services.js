@@ -44,7 +44,7 @@ const tweetServices = {
       nest: true
     })
       .then(tweet => {
-        if (!tweet) throw new Error('Tweet does not exist!')
+        if (!tweet) throw new Error('推文不存在!')
         tweet.isLiked = tweet.isLiked === 1
         cb(null, tweet)
       })
@@ -55,7 +55,7 @@ const tweetServices = {
     const UserId = helpers.getUser(req).id
     return User.findByPk(UserId)
       .then(user => {
-        if (!user) throw new Error("User didn't exist!")
+        if (!user) throw new Error('使用者不存在!')
         return Tweet.create({
           description,
           UserId
@@ -70,7 +70,7 @@ const tweetServices = {
     const UserId = helpers.getUser(req).id
     return Tweet.findByPk(TweetId)
       .then(tweet => {
-        if (!tweet) throw new Error("Tweet didn't exist!")
+        if (!tweet) throw new Error('推文不存在!')
         return Reply.create({
           UserId,
           TweetId,
@@ -86,7 +86,7 @@ const tweetServices = {
       include: { model: User, attributes: ['id', 'account', 'avatar', 'name'] }
     })
       .then(tweet => {
-        if (!tweet) throw new Error("Tweet didn't exist!")
+        if (!tweet) throw new Error('推文不存在!')
         return Reply.findAll({
           where: { TweetId },
           attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
@@ -122,8 +122,8 @@ const tweetServices = {
       })
     ])
       .then(([user, like]) => {
-        if (!user) throw new Error("User didn't exist!")
-        if (like) throw new Error('Tweet has already been liked!')
+        if (!user) throw new Error('使用者不存在!')
+        if (like) throw new Error('您已經按讚過了!')
         return Like.create({
           TweetId,
           UserId
@@ -144,7 +144,7 @@ const tweetServices = {
       }
     })
       .then(like => {
-        if (!like) throw new Error("You haven't liked this tweet!")
+        if (!like) throw new Error('您尚未對此推文按讚')
         return like.destroy()
       })
       .then(deletedLike => cb(null, { success: true, deletedLike }))
