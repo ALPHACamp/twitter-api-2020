@@ -69,18 +69,21 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
+    const UserId = helpers.getUser(req).id
     return User.findByPk(req.params.userId, {
       attributes: [
         'id', 'name', 'account', 'email', 'introduction', 'avatar', 'cover',
         [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE User_id = User.id)'), 'tweetCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount'],
-        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount']
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount'],
+        [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = User.id )`), 'isFollowed']
       ],
       raw: true,
       nest: true
     })
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
+        user.isFollowed = user.isFollowed === 1
         cb(null, user)
       })
       .catch(err => cb(err))
