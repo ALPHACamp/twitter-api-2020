@@ -239,13 +239,13 @@ const userController = {
   },
   getFollowings: async (req, res, next) => {
     try {
-      const loginUser = getUser(req).toJSON()
+      const loginUser = getUser(req).dataValues
       const { id } = req.params
       const user = await User.findByPk(id)
 
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
 
-      let followships = await Followship.findAll({
+      const followships = await Followship.findAll({
         attributes: {
           exclude: ['updatedAt'],
           include: [
@@ -253,7 +253,8 @@ const userController = {
             [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Followship.followingId)'), 'UserInfo.acocunt'],
             [sequelize.literal('(SELECT Users.name FROM Users WHERE Users.id = Followship.followingId)'), 'UserInfo.name'],
             [sequelize.literal('(SELECT Users.introduction FROM Users WHERE Users.id = Followship.followingId)'), 'UserInfo.introduction'],
-            [sequelize.literal('(SELECT Users.avatar FROM Users WHERE Users.id = Followship.followingId)'), 'UserInfo.avatar']
+            [sequelize.literal('(SELECT Users.avatar FROM Users WHERE Users.id = Followship.followingId)'), 'UserInfo.avatar'],
+            [sequelize.literal(`EXISTS(SELECT * FROM Followships WHERE Followships.followingId = Followship.followingId AND Followships.followerId = ${loginUser.id})`), 'isFollowed']
           ]
         },
         where: { followerId: id },
@@ -262,11 +263,6 @@ const userController = {
         nest: true
       })
 
-      followships = followships.map(followship => ({
-        ...followship,
-        isFollowed: loginUser.Followings.some(following => following.id === followship.followingId)
-      }))
-
       return res.status(200).json(followships)
     } catch (err) {
       next(err)
@@ -274,13 +270,13 @@ const userController = {
   },
   getFollowers: async (req, res, next) => {
     try {
-      const loginUser = getUser(req).toJSON()
+      const loginUser = getUser(req).dataValues
       const { id } = req.params
       const user = await User.findByPk(id)
 
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
 
-      let followships = await Followship.findAll({
+      const followships = await Followship.findAll({
         attributes: {
           exclude: ['updatedAt'],
           include: [
@@ -288,7 +284,8 @@ const userController = {
             [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Followship.followerId)'), 'UserInfo.acocunt'],
             [sequelize.literal('(SELECT Users.name FROM Users WHERE Users.id = Followship.followerId)'), 'UserInfo.name'],
             [sequelize.literal('(SELECT Users.introduction FROM Users WHERE Users.id = Followship.followerId)'), 'UserInfo.introduction'],
-            [sequelize.literal('(SELECT Users.avatar FROM Users WHERE Users.id = Followship.followerId)'), 'UserInfo.avatar']
+            [sequelize.literal('(SELECT Users.avatar FROM Users WHERE Users.id = Followship.followerId)'), 'UserInfo.avatar'],
+            [sequelize.literal(`EXISTS(SELECT * FROM Followships WHERE Followships.followingId = Followship.followerId AND Followships.followerId = ${loginUser.id})`), 'isFollowed']
           ]
         },
         where: { followingId: id },
@@ -296,11 +293,6 @@ const userController = {
         raw: true,
         nest: true
       })
-
-      followships = followships.map(followship => ({
-        ...followship,
-        isFollowed: loginUser.Followings.some(following => following.id === followship.followerId)
-      }))
 
       return res.status(200).json(followships)
     } catch (err) {
