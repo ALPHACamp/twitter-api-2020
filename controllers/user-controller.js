@@ -239,20 +239,21 @@ const userController = {
   },
   getFollowings: async (req, res, next) => {
     try {
+      const loginUser = getUser(req).toJSON()
       const { id } = req.params
       const user = await User.findByPk(id)
 
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
 
-      const followings = await Followship.findAll({
+      let followships = await Followship.findAll({
         attributes: {
           exclude: ['updatedAt'],
           include: [
-            [sequelize.literal('(SELECT Users.id FROM Users WHERE Users.id = Followship.FollowingId)'), 'UserInfo.id'],
-            [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Followship.FollowingId)'), 'UserInfo.acocunt'],
-            [sequelize.literal('(SELECT Users.name FROM Users WHERE Users.id = Followship.FollowingId)'), 'UserInfo.name'],
-            [sequelize.literal('(SELECT Users.introduction FROM Users WHERE Users.id = Followship.FollowingId)'), 'UserInfo.introduction'],
-            [sequelize.literal('(SELECT Users.avatar FROM Users WHERE Users.id = Followship.FollowingId)'), 'UserInfo.avatar']
+            [sequelize.literal('(SELECT Users.id FROM Users WHERE Users.id = Followship.followingId)'), 'UserInfo.id'],
+            [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Followship.followingId)'), 'UserInfo.acocunt'],
+            [sequelize.literal('(SELECT Users.name FROM Users WHERE Users.id = Followship.followingId)'), 'UserInfo.name'],
+            [sequelize.literal('(SELECT Users.introduction FROM Users WHERE Users.id = Followship.followingId)'), 'UserInfo.introduction'],
+            [sequelize.literal('(SELECT Users.avatar FROM Users WHERE Users.id = Followship.followingId)'), 'UserInfo.avatar']
           ]
         },
         where: { followerId: id },
@@ -261,27 +262,33 @@ const userController = {
         nest: true
       })
 
-      return res.status(200).json(followings)
+      followships = followships.map(followship => ({
+        ...followship,
+        isFollowed: loginUser.Followings.some(following => following.id === followship.followingId)
+      }))
+
+      return res.status(200).json(followships)
     } catch (err) {
       next(err)
     }
   },
   getFollowers: async (req, res, next) => {
     try {
+      const loginUser = getUser(req).toJSON()
       const { id } = req.params
       const user = await User.findByPk(id)
 
       if (!user) return res.status(404).json({ status: 'error', message: '找不到使用者！' })
 
-      const followings = await Followship.findAll({
+      let followships = await Followship.findAll({
         attributes: {
           exclude: ['updatedAt'],
           include: [
-            [sequelize.literal('(SELECT Users.id FROM Users WHERE Users.id = Followship.FollowerId)'), 'UserInfo.id'],
-            [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Followship.FollowerId)'), 'UserInfo.acocunt'],
-            [sequelize.literal('(SELECT Users.name FROM Users WHERE Users.id = Followship.FollowerId)'), 'UserInfo.name'],
-            [sequelize.literal('(SELECT Users.introduction FROM Users WHERE Users.id = Followship.FollowerId)'), 'UserInfo.introduction'],
-            [sequelize.literal('(SELECT Users.avatar FROM Users WHERE Users.id = Followship.FollowerId)'), 'UserInfo.avatar']
+            [sequelize.literal('(SELECT Users.id FROM Users WHERE Users.id = Followship.followerId)'), 'UserInfo.id'],
+            [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Followship.followerId)'), 'UserInfo.acocunt'],
+            [sequelize.literal('(SELECT Users.name FROM Users WHERE Users.id = Followship.followerId)'), 'UserInfo.name'],
+            [sequelize.literal('(SELECT Users.introduction FROM Users WHERE Users.id = Followship.followerId)'), 'UserInfo.introduction'],
+            [sequelize.literal('(SELECT Users.avatar FROM Users WHERE Users.id = Followship.followerId)'), 'UserInfo.avatar']
           ]
         },
         where: { followingId: id },
@@ -290,7 +297,12 @@ const userController = {
         nest: true
       })
 
-      return res.status(200).json(followings)
+      followships = followships.map(followship => ({
+        ...followship,
+        isFollowed: loginUser.Followings.some(following => following.id === followship.followerId)
+      }))
+
+      return res.status(200).json(followships)
     } catch (err) {
       next(err)
     }
