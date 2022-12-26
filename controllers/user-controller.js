@@ -225,7 +225,8 @@ const userController = {
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
             [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
             [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${UserId} AND Likes.TweetId = Tweet.id)`), 'isLiked'], 'createdAt'
-          ]
+          ],
+          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         },
         nest: true,
         raw: true,
@@ -314,7 +315,8 @@ const userController = {
             include: [
               [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Tweet.UserId)'), 'postUserAccount']
             ]
-          }
+          },
+          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         },
         order: [['createdAt', 'DESC']],
         raw: true,
