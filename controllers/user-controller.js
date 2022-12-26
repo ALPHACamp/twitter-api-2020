@@ -9,6 +9,9 @@ const userController = {
   getUser: (req, res, next) => {
     userServices.getUser(req, (err, data) => err ? next(err) : res.json(data))
   },
+  getCurrentUser: (req, res, next) => {
+    userServices.getCurrentUser(req, (err, data) => err ? next(err) : res.json(data))
+  },
   editUser: (req, res, next) => {
     userServices.editUser(req, (err, data) => err ? next(err) : res.json(data))
   },

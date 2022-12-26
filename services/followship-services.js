@@ -16,7 +16,7 @@ const followshipServices = {
         [sequelize.fn('COUNT', 'followingId'), 'followerCount'],
         [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE follower_id = ${UserId} AND following_id = followingId )`), 'isFollowed']
       ],
-      order: [[sequelize.literal('isFollowed'), 'DESC'], [sequelize.literal('followerCount'), 'DESC']],
+      order: [[sequelize.literal('followerCount'), 'DESC']],
       group: ['followingId'],
       limit,
       raw: true,
@@ -34,7 +34,7 @@ const followshipServices = {
   addFollowing: (req, cb) => {
     const { id } = req.body
     const followerId = helpers.getUser(req).id
-    if (+id === followerId) throw new Error('You cannot follow yourself!')
+    if (+id === followerId) throw new Error('無法追蹤自己!')
     return Promise.all([
       User.findByPk(id),
       Followship.findOne({
@@ -45,15 +45,15 @@ const followshipServices = {
       })
     ])
       .then(([user, followship]) => {
-        if (!user) throw new Error("User didn't exist!")
-        if (followship) throw new Error('You are already following this user!')
+        if (!user) throw new Error('使用者不存在!')
+        if (followship) throw new Error('您已經在追隨該使者!')
         return Followship.create({
           followerId: helpers.getUser(req).id,
           followingId: req.body.id
         })
       })
       .then(followship => {
-        cb(null, { status: 'success', followship })
+        cb(null, { success: true, followship })
       })
       .catch(err => cb(err))
   },
@@ -65,10 +65,10 @@ const followshipServices = {
       }
     })
       .then(followship => {
-        if (!followship) throw new Error("You haven't followed this user!")
+        if (!followship) throw new Error('您尚未追隨該使用者!')
         return followship.destroy()
       })
-      .then(deletedFollowship => cb(null, { status: 'success', deletedFollowship }))
+      .then(deletedFollowship => cb(null, { success: true, deletedFollowship }))
       .catch(err => cb(err))
   }
 }

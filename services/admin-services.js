@@ -7,7 +7,7 @@ const adminServices = {
   loginAdmin: (req, cb) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      if (userData.role === 'user') throw new Error("account doesn't exist!")
+      if (userData.role === 'user') throw new Error('帳號不存在!')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, {
@@ -27,7 +27,8 @@ const adminServices = {
         [sequelize.literal('(SELECT COUNT(*) FROM Tweets JOIN Likes ON Tweets.id = Likes.tweet_id WHERE Tweets.user_id = User.id)'), 'likeCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount']
-      ]
+      ],
+      order: [[sequelize.literal('tweetCount'), 'DESC']]
     })
       .then(users => {
         return cb(null, users)
@@ -38,10 +39,10 @@ const adminServices = {
     const TweetId = req.params.tweetId
     return Tweet.findByPk(TweetId)
       .then(tweet => {
-        if (!tweet) throw new Error('Tweet does not exist!')
+        if (!tweet) throw new Error('推文不存在!')
         return tweet.destroy()
       })
-      .then(deletedTweet => cb(null, { status: 'success', deletedTweet })
+      .then(deletedTweet => cb(null, { success: true, deletedTweet })
       )
       .catch(err => cb(err))
   }
