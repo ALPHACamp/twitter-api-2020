@@ -311,7 +311,8 @@ const userController = {
             include: [
               [sequelize.literal('(SELECT Users.account FROM Users WHERE Users.id = Tweet.UserId)'), 'postUserAccount']
             ]
-          }
+          },
+          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         },
         order: [['createdAt', 'DESC']],
         raw: true,
