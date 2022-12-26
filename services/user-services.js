@@ -89,12 +89,12 @@ const userServices = {
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    const { account, name, email, introduction, password, checkPassword } = req.body
+    const { account, name, email, introduction, password, checkPassword, cover } = req.body
     const { files } = req
     const avatarData = files?.avatar ? files.avatar[0] : null
     const coverData = files?.cover ? files.cover[0] : null
     // const avatarString = avatar
-    // const coverString = cover
+    const coverString = cover
     const UserId = Number(req.params.userId)
     const { id, role } = helpers.getUser(req)
     if (role !== 'admin' && UserId !== id) throw new Error('不可更改其他使用者資料!') // add role !== 'admin' for development purposes
@@ -122,7 +122,7 @@ const userServices = {
           introduction: introduction || user.introduction,
           password: password ? bcrypt.hashSync(password, 10) : user.password,
           avatar: avatar || user.avatar,
-          cover: cover || user.cover
+          cover: cover || (coverString ? null : user.cover)
         })
       })
       .then(user => {
