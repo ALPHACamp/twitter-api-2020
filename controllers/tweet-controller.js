@@ -6,7 +6,7 @@ const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       include: [Reply, Like, { model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
-      limit: 10,
+      limit: 20,
       order: [['createdAt', 'DESC'], ['id', 'DESC']]
     })
       .then(tweets => {
