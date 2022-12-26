@@ -122,7 +122,7 @@ const userServices = {
           introduction: introduction || user.introduction,
           password: password ? bcrypt.hashSync(password, 10) : user.password,
           avatar: avatar || user.avatar,
-          cover: cover || (coverString ? null : user.cover)
+          cover: cover || ((coverString === 'delete') ? null : user.cover)
         })
       })
       .then(user => {
