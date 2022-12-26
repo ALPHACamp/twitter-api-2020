@@ -14,7 +14,7 @@ git clone https://github.com/ping8601/twitter-api/
 npm install
 ```
 3. Add a file .env in the project folder and add required environment variables mentioned in .env.example
-4. Create a MySQL data base with the name ac_twitter_workspace
+4. Create a MySQL database with the name ac_twitter_workspace
 5. Update the username and password information in the file config/config.json according to your database
 ```bash
 "development": {
@@ -30,20 +30,19 @@ npm install
 npx sequelize db:migrate
 ```
 7. Add seed data into the database
-8. Create the data tables in the database
 ```bash
 npx sequelize db:seed:all
 ```
-9. Start the server
+8. Start the server
 ```bash
 npm run dev
 ```
-10. If you see this message, the server is successfully started
+9. If you see this message, the server is successfully started
 ```bash
 Example app listening on port 3000!
 ```
-11. Open your brower and enter the link http://localhost:3000 to start exploring the website!
-12. Use the test accounts to login or register your own acocunt.
+10. Open your brower and enter the link http://localhost:3000 to start exploring the website!
+11. Use the test accounts to login or register your own acocunt.
 ```bash
 `Admin`
 account: root
@@ -66,7 +65,7 @@ account: user5
 password: 12345678
 --------------------------
 ```
-13. Press control + c to end the server
+12. Press control + c to end the server
 
 ## API Documents
 https://www.notion.so/Backend-API-09f30c304d2b4e3086c16f28b245093c
