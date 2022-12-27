@@ -22,6 +22,7 @@ router.post('/followships', authenticated, authenticatedUser, followshipControll
 router.delete('/followships/:followingId', authenticated, authenticatedUser, followshipController.removeFollow)
 
 router.get('/users/recommendUsers', authenticated, authenticatedUser, userController.getRecommendUsers)
+router.get('/users/self', authenticated, authenticatedUser, userController.getUserSelf)
 router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getUserFollowers)
 router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getUserLikes)
