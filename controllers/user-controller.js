@@ -80,6 +80,23 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  getUserSelf: (req, res, next) => {
+    return Promise.all([
+      User.findByPk(helpers.getUser(req).id),
+      Followship.findAndCountAll({ where: { followerId: helpers.getUser(req).id } }),
+      Followship.findAndCountAll({ where: { followingId: helpers.getUser(req).id } })
+    ])
+      .then(([user, followerCount, followingCount]) => {
+        user = user.toJSON()
+        user.isSelf = Number(req.params.id) === Number(helpers.getUser(req).id)
+        user.isFollow = false
+        user.followingAmount = followerCount.count
+        user.followerAmount = followingCount.count
+        delete user.password
+        res.status(200).json(user)
+      })
+      .catch(err => next(err))
+  },
   getUserTweets: (req, res, next) => {
     return Tweet.findAll({
       where: {
