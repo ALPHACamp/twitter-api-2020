@@ -88,7 +88,7 @@ const userController = {
     ])
       .then(([user, followerCount, followingCount]) => {
         user = user.toJSON()
-        user.isSelf = Number(req.params.id) === Number(helpers.getUser(req).id)
+        user.isSelf = true
         user.isFollow = false
         user.followingAmount = followerCount.count
         user.followerAmount = followingCount.count
