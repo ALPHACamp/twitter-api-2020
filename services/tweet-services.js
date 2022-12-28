@@ -27,7 +27,7 @@ const tweetServices = {
       raw: true
     })
       .then(tweets => {
-        cb(null, tweets.rows)
+        cb(null, { tweets: tweets.rows })
       })
       .catch(err => cb(err))
   },

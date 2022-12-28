@@ -76,7 +76,7 @@ const userServices = {
     })
       .then(user => {
         assert(user, "User doesn't exit.")
-        cb(null, user)
+        cb(null, { user })
       })
       .catch(err => cb(err))
   },
