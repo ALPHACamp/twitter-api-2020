@@ -1,45 +1,33 @@
 const { Tweet, Like, Reply, User, sequelize } = require('../models')
-const { getOffset, getPagination } = require('../helpers/pagination-helper')
+// const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const helpers = require('../_helpers')
 
 const tweetServices = {
   getTweets: (req, cb) => {
-    // 預設可以再改
-    const DEFAULT_LIMIT = 9
-    const DEFAULT_PAGE = 1
-    const page = Number(req.query.page) || DEFAULT_PAGE
-    const limit = Number(req.query.limit) || DEFAULT_LIMIT
-    const offset = getOffset(limit, page)
+    // 分頁
+    // const DEFAULT_LIMIT = 9
+    // const DEFAULT_PAGE = 1
+    // const page = Number(req.query.page) || DEFAULT_PAGE
+    // const limit = Number(req.query.limit) || DEFAULT_LIMIT
+    // const offset = getOffset(limit, page)
+    const userId = helpers.getUser(req).id
 
     return Tweet.findAndCountAll({
+      attributes: ['id', 'description', 'createdAt',
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'totalReplies'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'totalLikes'],
+        [sequelize.literal(`(EXISTS(SELECT * FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${userId}))`), 'isLiked']
+      ],
       include: [{
         model: User,
-        attributes: { exclude: ['password'] }
-      }, {
-        model: Like,
-        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLikes']]
-      }, {
-        model: Reply,
-        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReplies']]
+        attributes: ['id', 'name', 'account', 'avatar']
       }],
-      group: 'Tweet.id',
-      offset,
       order: [['createdAt', 'DESC']],
       nest: true,
       raw: true
     })
       .then(tweets => {
-        const repliedTweetId = helpers.getUser(req)?.Replies ? helpers.getUser(req).Replies.map(rt => rt.TweetId) : []
-        const likedTweetId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(lt => lt.TweetId) : []
-        const data = tweets.rows.map(t => ({
-          ...t,
-          isReplied: repliedTweetId.includes(t.id),
-          isLiked: likedTweetId.includes(t.id)
-        }))
-        return cb(null,
-          data,
-          { pagination: getPagination(limit, page, tweets.count) }
-        )
+        cb(null, { tweets: tweets.rows })
       })
       .catch(err => cb(err))
   },
