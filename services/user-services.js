@@ -64,37 +64,19 @@ const userServices = {
     }
   },
   getUser: (req, cb) => {
-    return Promise.all([
-      User.findOne({
-        where: { id: req.params.user_id },
-        attributes: { exclude: ['password'] },
-        include: [{
-          model: Tweet,
-          attributes:
-            [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets']]
-        }],
-        nest: true,
-        raw: true
-      }),
-      Followship.findAndCountAll({
-        where: { followingId: req.params.user_id },
-        raw: true
-      }),
-      Followship.findAndCountAll({
-        where: { followerId: req.params.user_id },
-        raw: true
-      })
-    ])
-      .then(([user, followers, followings]) => {
+    const userId = helpers.getUser(req).id
+    return User.findOne({
+      where: { id: req.params.user_id },
+      attributes: ['id', 'name', 'account', 'avatar',
+        [sequelize.literal(`(EXISTS(SELECT * FROM Followships WHERE Followships.following_id = User.id AND Followships.follower_id = ${userId}))`), 'isFollowed'], [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followerCounts'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followingCounts']
+      ],
+      nest: true,
+      raw: true
+    })
+      .then(user => {
         assert(user, "User doesn't exit.")
-        const isFollowed = followers.count ? followers.rows.some(f => f.followerId === helpers.getUser(req).id) : false
-        const result = {
-          ...user,
-          totalFollowers: followers.count,
-          totalFollowings: followings.count,
-          isFollowed
-        }
-        cb(null, result)
+        cb(null, user)
       })
       .catch(err => cb(err))
   },
@@ -264,29 +246,18 @@ const userServices = {
       .catch(err => cb(err))
   },
   getTopUsers: (req, cb) => {
+    const userId = helpers.getUser(req).id
     return User.findAll({
       where: { role: 'user' },
-      include: [
-        {
-          model: User,
-          as: 'Followers',
-          attributes: { exclude: ['password'] }
-        }
+      attributes: ['id', 'name', 'account', 'avatar',
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCounts'],
+        [sequelize.literal(`(EXISTS(SELECT * FROM Followships WHERE Followships.following_id = User.id AND Followships.follower_id = ${userId}))`), 'isFollowed']
       ],
-      attributes: { exclude: ['password'] }
+      order: [[sequelize.literal('followerCounts'), 'DESC']],
+      raw: true,
+      nest: true
     })
-      .then(users => {
-        const topUsers = users.map(user => ({
-          // 展開重新包裝
-          ...user.toJSON(),
-          // 計算追蹤者人數
-          followerCount: user.Followers.length,
-          // 判斷目前登入使用者是否已追蹤該 user 物件
-          isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
-        }))
-          .sort((a, b) => b.followerCount - a.followerCount).slice(0, 10)
-        cb(null, { topUsers })
-      })
+      .then(topUsers => cb(null, { topUsers }))
       .catch(err => cb(err))
   },
   settingUser: (req, cb) => {

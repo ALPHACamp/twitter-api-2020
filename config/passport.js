@@ -4,7 +4,7 @@ const JwtStrategy = require('passport-jwt').Strategy
 const ExtractJwt = require('passport-jwt').ExtractJwt
 const bcrypt = require('bcryptjs')
 
-const { User, Like, Reply } = require('../models')
+const { User, Like } = require('../models')
 
 passport.use(new LocalStrategy(
   // customize user field
@@ -36,7 +36,6 @@ const jwtOptions = {
 passport.use(new JwtStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     include: [
-      { model: Reply, include: User },
       { model: Like, include: User },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
