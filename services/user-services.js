@@ -67,7 +67,7 @@ const userServices = {
     const userId = helpers.getUser(req).id
     return User.findOne({
       where: { id: req.params.user_id },
-      attributes: ['id', 'name', 'account', 'avatar', 'coverImage',
+      attributes: ['id', 'name', 'account', 'avatar', 'coverImage', 'introduction',
         [sequelize.literal(`(EXISTS(SELECT * FROM Followships WHERE Followships.following_id = User.id AND Followships.follower_id = ${userId}))`), 'isFollowed'], [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followerCounts'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followingCounts'],
         [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetsCounts']
