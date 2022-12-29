@@ -21,6 +21,7 @@ const userServices = {
     if (password !== checkPassword) throw new Error('請再次確認密碼!')
     // 若name未填，default為account
     if (!name) name = account
+
     // 使用者account & email在資料庫皆須為唯一，任一已存在資料庫則提示錯誤訊息
     Promise.all([
       User.findOne({ where: { account } }),
