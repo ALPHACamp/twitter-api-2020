@@ -288,7 +288,6 @@ const userController = {
         User.findOne({ where: { account }, raw: true }),
         User.findOne({ where: { email }, raw: true })
       ])
-      // 重複的判斷方式：用req.body.account/email從資料庫篩出來的user除非是自己本人，不然req.body.account/email不能等於currentUser(本人)的account/email。換句話說，只要從資料庫篩出來的user的id跟currentUser(本人)的id不同，req.body.account/email就不能等於user(資料庫篩的)的account/email
       if ((account === userFoundByAccount?.account) && (userFoundByAccount?.id !== currentUser.id)) throw new Error('account 已重複註冊!')
       if ((email === userFoundByEmail?.email) && (userFoundByEmail?.id !== currentUser.id)) throw new Error('email 已重複註冊!')
       const renewUser = await user.update({
