@@ -36,7 +36,7 @@ https://quiet-mountain-47605.herokuapp.com/
 
 - [API Documents](https://gabby-chimpanzee-de2.notion.site/API-Documents-8fbcef78100c4d3ebde095c3031a0856)
 
-## Satrt to build a local API server
+## Start to build a local API server
 
 #### Please make sure you have installed Node.js, Express and MySQL.
 
