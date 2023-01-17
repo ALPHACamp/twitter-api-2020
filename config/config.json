@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "root",
+    "username": "admin",
     "password": "password",
-    "database": "ac_twitter_workspace",
-    "host": "127.0.0.1",
+    "database": "simple-twitter",
+    "host": "simple-twitter.cza18o28fvj0.ap-northeast-1.rds.amazonaws.com",
     "dialect": "mysql"
   },
   "test": {
