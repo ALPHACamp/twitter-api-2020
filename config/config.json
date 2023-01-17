@@ -2,7 +2,7 @@
   "development": {
     "username": "admin",
     "password": "password",
-    "database": "simple-twitter",
+    "database": "simple_twitter",
     "host": "simple-twitter.cza18o28fvj0.ap-northeast-1.rds.amazonaws.com",
     "dialect": "mysql"
   },
