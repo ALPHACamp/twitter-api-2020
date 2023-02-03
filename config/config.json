@@ -30,7 +30,6 @@
   },
   "ghactions": {
     "username": "root",
-    "password": "root",
     "database": "ac_twitter",
     "host": "mysql",
     "dialect": "mysql"

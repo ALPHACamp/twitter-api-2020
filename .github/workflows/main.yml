@@ -14,12 +14,12 @@ jobs:
 
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:8.0.21
         env:
-          MYSQL_ROOT_PASSWORD: root 
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: ac_twitter
         ports:
-          - 33306:3306
+          - 3306:3306
         options:
           --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
@@ -36,4 +36,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
+    - run: npm install sequelize-cli -g
+    - run: sequelize db:migrate
     - run: npm test
