@@ -1,8 +1,24 @@
-'use strict';
+'use strict'
+const {
+  Model
+} = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  const Like = sequelize.define('Like', {
-  }, {});
-  Like.associate = function(models) {
-  };
-  return Like;
-};
+  class Like extends Model {
+    static associate(models) {
+      Like.belongsTo(models.User, { foreignKey: 'UserId' })
+      Like.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
+    }
+  }
+  Like.init({
+    // Model attributes are defined here
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER
+  }, {
+    // Other model options go here
+    sequelize, // We need to pass the connection instance
+    modelName: 'Like', // We need to choose the model name
+    tableName: 'Likes',
+    underscored: true
+  })
+  return Like
+}
