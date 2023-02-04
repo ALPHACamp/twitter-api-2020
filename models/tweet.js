@@ -1,8 +1,30 @@
-'use strict';
+'use strict'
+const {
+  Model
+} = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  const Tweet = sequelize.define('Tweet', {
-  }, {});
-  Tweet.associate = function(models) {
-  };
-  return Tweet;
-};
+  class Tweet extends Model {
+    static associate (models) {
+      // 和Like的關聯
+      Tweet.hasMany(models.Like, { foreignKey: 'TweetId' })
+      // 和Reply的關聯
+      Tweet.hasMany(models.Reply, { foreignKey: 'TweetId' })
+      // 和User的關聯
+      Tweet.belongsTo(models.User, {
+        foreignKey: 'UserId'
+      })
+    }
+  }
+  Tweet.init({
+    description: DataTypes.TEXT,
+    UserId: DataTypes.INTEGER,
+    deletedAt: DataTypes.DATE
+  }, {
+    sequelize,
+    modelName: 'Tweet',
+    tableName: 'Tweets',
+    paranoid: true,
+    underscored: true
+  })
+  return Tweet
+}
