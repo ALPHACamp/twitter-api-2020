@@ -11,6 +11,7 @@ const corsOption = {
   origin: [
     'https://m790101.github.io',
     'http://localhost:3000',
+    'http://localhost:10000',
     'http://localhost:8080',
     'http://localhost:8000'
   ],
