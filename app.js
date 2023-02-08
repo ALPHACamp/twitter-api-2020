@@ -13,7 +13,8 @@ const corsOption = {
     'http://localhost:3000',
     'http://localhost:10000',
     'http://localhost:8080',
-    'http://localhost:8000'
+    'http://localhost:8000',
+    'http://localhost:8081'
   ],
   methods: 'GET,HEAD,PUT,POST,DELETE,OPTIONS',
   allowedHeaders: ['Content-Type', 'Authorization']
