@@ -26,7 +26,7 @@ const port = process.env.PORT || 3000
 require('./models')
 
 // middleware
-app.use(cors(corsOption))
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json()) // set response format
 app.use(passport.initialize()) // init passport.js
