@@ -29,6 +29,7 @@ app.use(express.json()) // set response format
 app.use(passport.initialize()) // init passport.js
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(cors())
+app.use('/test', (req, res) => res.json('成功'))
 app.use('/api', routes)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
