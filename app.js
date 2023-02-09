@@ -1,15 +1,32 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const express = require('express')
-const helpers = require('./_helpers');
+const methodOverride = require('method-override')
+const cors = require('cors')
+
+const routes = require('./routes')
 
 const app = express()
-const port = 3000
+const PORT = process.env.PORT || 3000
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+// 使用cors允許跨域連線
+app.use(
+  cors({
+    origin: ['http://localhost:3000', 'https://yvonne0414.github.io'],
+    credentials: true
+  })
+)
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+// use method-override
+app.use(methodOverride('_method'))
+
+// use body parser to handle all the request
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
+app.use(routes)
+
+app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
 
 module.exports = app
