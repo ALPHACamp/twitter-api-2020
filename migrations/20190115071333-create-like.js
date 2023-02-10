@@ -13,7 +13,9 @@ module.exports = {
         references: {
           model: 'Users',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       Tweet_id: {
         type: Sequelize.INTEGER,
