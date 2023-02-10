@@ -20,7 +20,9 @@ module.exports = {
         references: {
           model: 'Tweets',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       is_liked: {
         type: Sequelize.BOOLEAN,
