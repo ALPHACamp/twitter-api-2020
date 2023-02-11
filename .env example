@@ -1,0 +1,2 @@
+JWT_SECRET= #輸入你的JWT SECRET
+IMGUR_Client_ID= #IMGUR存取帳號

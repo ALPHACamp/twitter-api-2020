@@ -1,15 +1,20 @@
 const express = require('express')
-const helpers = require('./_helpers');
+const cors = require('cors')
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+const routes = require('./routes/')
 
 const app = express()
-const port = 3000
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+app.use(cors()) // using default set CORS header
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.use(routes)
+
+const port = process.env.PORT || 3000
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
