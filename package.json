@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "build":"",
     "start": "set \"NODE_ENV=development\" && node app.js",
     "dev": "set \"NODE_ENV=development\" && nodemon app.js",
     "lint": "eslint \"**/*.js\" --fix",
