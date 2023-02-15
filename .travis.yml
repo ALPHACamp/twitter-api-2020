@@ -17,3 +17,7 @@ before_install:
 # 在執行測試之前的指令
 before_script:
   - sequelize db:migrate
+
+ # 設定參數(Travis CI 會按照參數分別執行)
+env:
+ - NODE_ENV=travis JWT_SECRET=alphacamp
