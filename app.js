@@ -10,14 +10,17 @@ const passport = require('./config/passport')
 
 const app = express()
 const port = process.env.PORT || 3000
-app.use(function (req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  next()
-})
-app.use(cors())
+
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'https://afternoon-basin-44531.herokuapp.com/'
+  ],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
+
+app.use(cors(corsOptions))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
