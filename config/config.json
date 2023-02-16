@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "admin",
-    "password": "ginomustsleep",
-    "database": "simple_twitter",
-    "host": "database-1.c2b0b1jxs3x9.ap-northeast-1.rds.amazonaws.com",
+    "username": "root",
+    "password": "password",
+    "database": "ac_twitter_workspace",
+    "host": "127.0.0.1",
     "dialect": "mysql"
   },
   "test": {
@@ -15,7 +15,7 @@
     "logging": false
   },
   "production": {
-    "use_env_variable": "CLEARDB_DATABASE_URL"
+    "use_env_variable": "DATABASE_URL"
   },
   "travis": {
     "username": "travis",
