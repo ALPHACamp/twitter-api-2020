@@ -1,6 +1,6 @@
 const chai = require('chai')
 const sinon = require('sinon')
-const proxyquire = require('proxyquire');
+const proxyquire = require('proxyquire')
 chai.use(require('sinon-chai'))
 
 const { expect } = require('chai')
@@ -37,7 +37,7 @@ describe('# User Model', () => {
     it('called User.init with the correct parameters', () => {
       expect(User.init).to.have.been.calledWithMatch(
         {
-          name: DataTypes.STRING,
+          name: DataTypes.STRING
         }
       )
     })
