@@ -1,8 +1,8 @@
 
 function getUser(req) {
-  return req.user;
+  return req.user
 }
 
 module.exports = {
-  getUser,
-};
+  getUser
+}
