@@ -1,8 +1,8 @@
-'use strict';
+'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Reply = sequelize.define('Reply', {
-  }, {});
-  Reply.associate = function(models) {
-  };
-  return Reply;
-};
+  }, {})
+  Reply.associate = function (models) {
+  }
+  return Reply
+}
