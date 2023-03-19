@@ -10,8 +10,8 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       role: 'admin',
       name: 'root',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }, {
       account: 'user1',
       email: 'user1@example.com',
@@ -21,8 +21,8 @@ module.exports = {
       cover: `https://loremflickr.com/720/240/landscape?random=${Math.random() * 100}`,
       introduction: faker.lorem.words(Math.random() * 10),
       role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }, {
       account: 'user2',
       email: 'user2@example.com',
@@ -32,8 +32,8 @@ module.exports = {
       cover: `https://loremflickr.com/720/240/landscape?random=${Math.random() * 100}`,
       introduction: faker.lorem.words(Math.random() * 10),
       role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }, {
       account: 'user3',
       email: 'user3@example.com',
@@ -43,8 +43,8 @@ module.exports = {
       cover: `https://loremflickr.com/720/240/landscape?random=${Math.random() * 100}`,
       introduction: faker.lorem.words(Math.random() * 10),
       role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }, {
       account: 'user4',
       email: 'user4@example.com',
@@ -54,8 +54,8 @@ module.exports = {
       cover: `https://loremflickr.com/720/240/landscape?random=${Math.random() * 100}`,
       introduction: faker.lorem.words(Math.random() * 10),
       role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }, {
       account: 'user5',
       email: 'user5@example.com',
@@ -65,8 +65,8 @@ module.exports = {
       cover: `https://loremflickr.com/720/240/landscape?random=${Math.random() * 100}`,
       introduction: faker.lorem.words(Math.random() * 10),
       role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }], {})
   },
   down: async (queryInterface, Sequelize) => { // 清空資料表中所有資料

@@ -2,19 +2,12 @@
 const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    static associate(models) {
+    static associate (models) {
       // define association here
       // 一對多關聯
       User.hasMany(models.Tweet, { foreignKey: 'UserId' })
       User.hasMany(models.Reply, { foreignKey: 'UserId' })
       User.hasMany(models.Like, { foreignKey: 'UserId' })
-
-      // 透過Like表建立一對多關聯
-      User.belongsToMany(models.Tweet, {
-        through: models.Like,
-        foreignKey: 'UserId',
-        as: 'LikedTweets' // 關聯名稱
-      })
 
       // 追隨關聯
       User.belongsToMany(User, {
@@ -27,7 +20,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'followerId',
         as: 'Followings'
       })
-
     }
   }
 

@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 const faker = require('faker')
 
 module.exports = {
@@ -16,10 +16,10 @@ module.exports = {
       const userIds = users.map(user => user.id).slice(1).sort(() => Math.random() - 0.5).slice(0, 3)
       return userIds.map(userId => ({
         comment: faker.lorem.lines(1),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        UserId: userId,
-        TweetId: tweet.id
+        created_at: new Date(),
+        updated_at: new Date(),
+        user_id: userId,
+        tweet_id: tweet.id
       }))
     })
 

@@ -14,9 +14,9 @@ module.exports = {
       for (let i = 0; i < 10; i++) {
         tweets.push({
           description: faker.lorem.lines(1),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          UserId: user.id
+          created_at: new Date(),
+          updated_at: new Date(),
+          user_id: user.id
         })
       }
     })
