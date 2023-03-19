@@ -7,16 +7,25 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
+      account: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       email: {
         type: Sequelize.STRING,
       },
       password: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       name: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       avatar: {
+        type: Sequelize.STRING,
+      },
+      coverImage: {
         type: Sequelize.STRING,
       },
       introduction: {
