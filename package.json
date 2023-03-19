@@ -6,7 +6,8 @@
   "scripts": {
     "start": "NODE_ENV=development node app.js",
     "dev": "NODE_ENV=development nodemon app.js",
-    "test": "mocha test --exit --recursive --timeout 5000"
+    "test": "mocha test --exit --recursive --timeout 5000",
+    "seed": "npx sequelize db:seed:all"
   },
   "author": "",
   "license": "ISC",
