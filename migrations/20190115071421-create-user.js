@@ -24,6 +24,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       cover_page: {
+        defaultValue: 'https://i.imgur.com/wDLUUyD.png',
         type: Sequelize.STRING
       },
       introduction: {
