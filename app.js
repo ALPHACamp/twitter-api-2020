@@ -8,7 +8,6 @@ const port = 3000;
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 }
-
 app.get('/', (req, res) => res.send('Hello World!'));
 app.listen(port, () => console.log(`Example app li stening on port ${port}!`));
 
