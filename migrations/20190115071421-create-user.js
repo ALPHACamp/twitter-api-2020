@@ -29,15 +29,15 @@ module.exports = {
       introduction: {
         type: Sequelize.TEXT
       },
-      is_admin: {
+      isAdmin: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
