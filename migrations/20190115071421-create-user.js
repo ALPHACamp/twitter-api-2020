@@ -24,7 +24,8 @@ module.exports = {
         type: 'varchar(160)'
       },
       role: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'user'
       },
       created_at: {
         allowNull: false,
