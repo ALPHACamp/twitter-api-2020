@@ -1,6 +1,6 @@
 "use strict";
 const bcrypt = require("bcryptjs");
-const faker = require("faker");
+const { faker } = require("@faker-js/faker");
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     // - 一個 admin 和 5 個一般用戶
@@ -15,7 +15,7 @@ module.exports = {
               password: bcrypt.hashSync("12345678", 10),
               isAdmin: true,
               avatar: faker.image.avatar(),
-              cover: faker.image.nature(),
+              cover: faker.image.nature(640, 480, true),
               introduction: faker.lorem.paragraph(4),
               createdAt: new Date(),
               updatedAt: new Date(),
@@ -27,7 +27,7 @@ module.exports = {
               password: bcrypt.hashSync("12345678", 10),
               isAdmin: false,
               avatar: faker.image.avatar(),
-              cover: faker.image.nature(),
+              cover: faker.image.nature(640, 480, true),
               introduction: faker.lorem.paragraph(4),
               createdAt: new Date(),
               updatedAt: new Date(),
