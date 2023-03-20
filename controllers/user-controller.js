@@ -76,7 +76,7 @@ const userController = {
     }
   }, //喜歡功能
   addLike: (req, res, next) => {
-    const { TweetId } = req.params.id
+    const TweetId = req.params.id
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({
