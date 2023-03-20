@@ -8,16 +8,6 @@ const passport = require('./config/passport')
 const app = express()
 const port = 3000
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next) {
-  // passport.authenticate('jwt', { ses...
-  passport.authenticate('jwt', { session: false }, (err, user) => {
-    if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
-
-    next()
-  })(req, res, next)
-}
-
 app.use(express.urlencoded({ extended: true }))
 
 app.get('/', (req, res) => res.send('Hello World!'))
