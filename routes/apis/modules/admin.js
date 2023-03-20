@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+
 const adminController = require('../../../controllers/admin-controller')
 
 router.get('/tweets', adminController.getTweet)
@@ -8,3 +9,4 @@ router.get('/tweets', adminController.getTweet)
 // router.post('/signin', userController.signIn)
 
 module.exports = router
+
