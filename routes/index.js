@@ -4,8 +4,11 @@ const admin = require('./modules/admin')
 const users = require('./modules/users')
 const tweets = require('./modules/tweets')
 const followships = require('./modules/followships')
+
 const adminController = require('../controllers/admin-controller')
+
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
+
 const { errorHandler } = require('../middleware/error-handler')
 
 router.use('/users', users)
