@@ -17,9 +17,9 @@ const userController = {
       const userData = user.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET)
-      return res.json({
+      return res.status(200).json({
         status: 'success',
-        message: 'Successfully login',
+        message: 'Successfully sign in',
         data: {
           token,
           user: userData
@@ -65,10 +65,10 @@ const userController = {
       })
       const userData = newUser.toJSON()
       delete userData.password
-      return res.json({
+      return res.status(200).json({
         status: 'success',
         message: 'Successfully sign up',
-        data: { userData }
+        data: { user: userData }
       })
     } catch (err) {
       next(err)
