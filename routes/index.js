@@ -8,13 +8,7 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../mid
 
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/signup', userController.signUp)
-router.use('/', (req, res) => {
-  res.json('api test')
-})
-router.get('/', (req, res) => {
-  res.json('Hello world')
-})
-router.use('/tweets', tweet)
+router.use('/tweets', authenticated, authenticatedUser, tweet)
 router.use('/', apiErrorHandler)
 
 module.exports = router
