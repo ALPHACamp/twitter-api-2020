@@ -26,19 +26,23 @@ module.exports = (sequelize, DataTypes) => {
       })
     }
   };
-  User.init({
-    email: DataTypes.STRING,
-    password: DataTypes.STRING,
-    name: DataTypes.STRING,
-    avatar: DataTypes.STRING,
-    introduction: DataTypes.TEXT,
-    role: DataTypes.STRING,
-    cover: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'User',
-    tableName: 'Users',
-    underscored: true
-  })
+  User.init(
+    {
+      email: DataTypes.STRING,
+      password: DataTypes.STRING,
+      name: DataTypes.STRING,
+      avatar: DataTypes.STRING,
+      account: DataTypes.STRING,
+      introduction: DataTypes.TEXT,
+      role: DataTypes.STRING,
+      cover: DataTypes.STRING
+    },
+    {
+      sequelize,
+      modelName: 'User',
+      tableName: 'Users',
+      underscored: true
+    }
+  )
   return User
 }
