@@ -9,4 +9,5 @@ parserOptions:
 rules: {
   semi: ["error", "never"],
   arrow-parens: ["error", "as-needed"],
+  no-path-concat: ["error", "never"]
 }
