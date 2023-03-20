@@ -62,24 +62,4 @@ passport.use(
   })
 );
 
-// set serialize and deserialize
-passport.serializeUsers((user, cb) => {
-  cb(null, user.id);
-});
-
-passport.deserializeUser(async (id, cb) => {
-  try {
-    const user = await User.findByPk(id, {
-      include: [
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' },
-      ],
-    });
-
-    cb(null, user.toJSON());
-  } catch (err) {
-    cb(err);
-  }
-});
-
 module.exports = passport;
