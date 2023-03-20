@@ -76,7 +76,7 @@ const userController = {
     }
   }, //喜歡功能
   addLike: (req, res, next) => {
-    const { TweetId } = req.params
+    const { TweetId } = req.params.id
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({
@@ -107,7 +107,7 @@ const userController = {
     return Like.findOne({
       where: {
         UserId: req.user.id,
-        TweetId: req.params.TweetId
+        TweetId: req.params.id
       }
     })
       .then(like => {
