@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       },
     },
-    { sequelize, modelName: "Tweet", tableName: "Tweets", underscored: true }
+    { sequelize, modelName: "Reply", tableName: "Replies", underscored: true }
   );
   Reply.associate = function (models) {
     Reply.belongsTo(models.User)
