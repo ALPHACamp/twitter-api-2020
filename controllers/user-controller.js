@@ -11,6 +11,7 @@ const userController = {
     try {
       const user = await User.findOne({ where: { email } })
       if (!user) return res.status(404).json({ status: 'error', message: 'User does not exist' })
+      if (user.role === 'admin') return res.status(404).json({ status: 'error', message: 'User does not exist' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'Incorrect password' })
       }
