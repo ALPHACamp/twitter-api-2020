@@ -4,10 +4,12 @@ module.exports = (sequelize, DataTypes) => {
     "Like",
     {
       UserId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
+        allowNull: false
       },
       TweetId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
+        allowNull: false
       },
     },
     {

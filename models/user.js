@@ -41,9 +41,9 @@ module.exports = (sequelize, DataTypes) => {
     underscored: true
   })
   User.associate = function (models) {
-    User.hasMany(models.Tweet, { foreignKey: 'userId' })
-    User.hasMany(models.Reply, { foreignKey: 'userId' })
-    User.hasMany(models.Like, { foreignKey: 'userId' })
+    User.hasMany(models.Tweet, { foreignKey: 'UserId' })
+    User.hasMany(models.Reply, { foreignKey: 'UserId' })
+    User.hasMany(models.Like, { foreignKey: 'UserId' })
     User.belongsToMany(User, {
       through: models.Followship,
       foreignKey: 'followingId',
