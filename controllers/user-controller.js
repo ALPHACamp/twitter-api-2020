@@ -17,6 +17,7 @@ const userController = {
   },
   signUp: (req, res, next) => {
     if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match!')
+    if (req.body.name.length > 50) throw new Error('name 字數大於 50')
 
     User.findOne({ where: { email: req.body.email } })
       .then(user => {
