@@ -5,14 +5,14 @@ const express = require('express')
 
 const methodOverride = require('method-override')
 const passport = require('./config/passport')
-const { apis } = require('./routes')
+const { routes } = require('./routes')
 const app = express()
 const port = process.env.PORT || 3000
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
 app.use(methodOverride('_method'))
-app.use('/api', apis)
+app.use('/api', routes)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
