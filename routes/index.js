@@ -19,4 +19,3 @@ router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/', apiErrorHandler)
 
 module.exports = router
-
