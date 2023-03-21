@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Like } = require('../models')
+const { imgurFileHandler } = require('../helpers/file-helpers')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const userController = {
   // 登入
   signIn: async (req, res, next) => {
@@ -74,54 +75,105 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  }, //喜歡功能
-  addLike: (req, res, next) => {
-    const TweetId = req.params.id
-    return Promise.all([
-      Tweet.findByPk(TweetId),
-      Like.findOne({
-        where: {
-          UserId: req.user.id,
-          TweetId
-        }
+  },
+  getUser: async (req, res, next) => {
+    const { id } = req.params
+    try {
+      const user = await User.findByPk(id, {
+        attributes: { exclude: ['password', 'createdAt', 'updatedAt'] } // 可以排除敏感資料
       })
-    ])
-      .then(([tweet, like]) => {
-        if (!tweet) { return res.status(400).json({ status: 'error', message: "Tweet didn't exist!" }) }
-        if (like) { return res.status(400).json({ status: 'error', message: 'You have liked this tweet!' }) }
-
-        return Like.create({
-          userId: req.user.id,
-          TweetId
-        })
+      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'User not found' })
+      const userData = user.toJSON()
+      delete userData.role
+      return res.status(200).json(userData)
+    } catch (err) { next(err) }
+  },
+  getUserTweets: async (req, res, next) => {
+    const { id } = req.params
+    try {
+      const user = await User.findByPk(id)
+      if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
+      const tweets = await Tweet.findAll({ raw: true, nest: true, order: [['createdAt', 'DESC']], where: { UserId: id } })
+      if (!tweets) return res.status(404).json({ status: 'error', message: 'Tweets not found' })
+      return res.status(200).json(tweets)
+    } catch (err) { next(err) }
+  },
+  getUserReplies: async (req, res, next) => {
+    const { id } = req.params
+    try {
+      const user = await User.findByPk(id)
+      if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
+      const replies = await Reply.findAll({ raw: true, nest: true, order: [['createdAt', 'DESC']], where: { UserId: id } })
+      if (!replies) return res.status(404).json({ status: 'error', message: 'Replies not found' })
+      return res.status(200).json(replies)
+    } catch (err) { next(err) }
+  },
+  getUserLikes: async (req, res, next) => {
+    const { id } = req.params
+    try {
+      const user = await User.findByPk(id)
+      if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
+      const likes = await Like.findAll({ raw: true, nest: true, order: [['createdAt', 'DESC']], where: { UserId: id } })
+      return res.status(200).json(likes)
+    } catch (err) { next(err) }
+  },
+  getUserFollowing: async (req, res, next) => {
+    const { id } = req.params
+    try {
+      const user = await User.findByPk(id)
+      if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
+      const userFollowings = await Followship.findAll({
+        where: { followerId: id },
+        include: [{ model: User, as: 'Followings' }],
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
       })
-      .then(() => {
-        return res.json({
-          status: 'success',
-          message: 'Successfully liked the tweet'
-        })
+      return res.status(200).json(userFollowings)
+    } catch (err) { next(err) }
+  },
+  getUserFollower: async (req, res, next) => {
+    const { id } = req.params
+    try {
+      const user = await User.findByPk(id)
+      if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
+      const userFollowers = await Followship.findAll({
+        where: { followingId: id },
+        include: [{ model: User, as: 'Followers' }],
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
       })
-      .catch(err => next(err))
-  },//移除喜歡功能
-  removeLike: (req, res, next) => {
-    return Like.findOne({
-      where: {
-        UserId: req.user.id,
-        TweetId: req.params.id
+      return res.status(200).json(userFollowers)
+    } catch (err) { next(err) }
+  },
+  putUser: async (req, res, next) => {
+    const { id } = req.params
+    const { name, introduction } = req.body
+    const { avatar = null, cover = null } = req.files || {}
+    if (name.length < 1 || name.length > 50) {
+      return res.status(400).json({ status: 'error', message: 'Name should be less than 50' })
+    }
+    if (introduction.length > 160) return res.status(400).json({ status: 'error', message: 'introduction should be less than 160 characters' })
+    try {
+      const user = await User.findByPk(id)
+      if (!user) return res.status(404).json({ status: 'error', message: 'User not found' })
+      const filePaths = {
+        updatedAvatar: avatar ? await imgurFileHandler(avatar[0]) : null,
+        updatedCover: cover ? await imgurFileHandler(cover[0]) : null
       }
-    })
-      .then(like => {
-        if (!like) { return res.status(400).json({ status: 'error', message: "You haven't liked this tweet" }) }
-
-        return like.destroy()
+      const updatedUser = await user.update({
+        name,
+        avatar: filePaths.updatedAvatar || user.avatar,
+        cover: filePaths.updatedCover || user.cover,
+        introduction
       })
-      .then(() => {
-        return res.json({
-          status: 'success',
-          message: 'Successfully unliked the tweet'
-        })
+      return res.status(200).json({
+        status: 'success',
+        message: 'Successfully updated user',
+        data: { user: updatedUser }
       })
-      .catch(err => next(err))
+    } catch (err) { next(err) }
   }
 }
 module.exports = userController
