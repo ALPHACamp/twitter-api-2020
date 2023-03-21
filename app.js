@@ -3,12 +3,20 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
+
 const passport = require('./config/passport')
-const helpers = require('./helpers/auth-helper');
+const helpers = require('./helpers/auth-helper')
 const routes = require('./routes/index')
 
 const app = express()
 const port = 3000
+
+
+
+// use helpers.getUser(req) to replace req.user
+function authenticated (req, res, next) {
+  // passport.authenticate('jwt', { ses...
+};
 
 
 // use helpers.getUser(req) to replace req.user
