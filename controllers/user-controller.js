@@ -1,4 +1,5 @@
-const bcrypt = require('bcryptjs')
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { User } = require("../models");
 
 const userController = {
@@ -44,7 +45,35 @@ const userController = {
     }
   },
   signIn: async (req, res, next) => {
-
+    const { account, password } = req.body;
+    try {
+      const foundUser = await User.findOne({ where: { account } });
+      if (!foundUser) {
+        const error = new Error("帳號不存在!");
+        error.status = 404;
+        throw error;
+      }
+      const isMatch = await bcrypt.compare(password, foundUser.password);
+      if (!isMatch) {
+        const error = new Error("密碼不正確!");
+        error.status = 400;
+        throw error;
+      }
+      const user = foundUser.toJSON();
+      delete data.password;
+      const token = jwt.sign(user, process.env.JWT_SECRET, {
+        expiresIn: "30d",
+      });
+      return res.json({
+        status: "success",
+        data: {
+          token,
+          user
+        },
+      });
+    } catch (error) {
+      return next(error);
+    }
   },
 };
 
