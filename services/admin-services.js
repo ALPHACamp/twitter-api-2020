@@ -5,7 +5,9 @@ const adminServices = {
   // 推文
   getTweets: (req, cb) => {
     Tweet.findAll({
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
     })
       .then(tweets => cb(null, tweets))
       .catch(err => cb(err))
@@ -79,7 +81,7 @@ const adminServices = {
         })
         return updatedUser
       })
-      .then(users => cb(null, { users }))
+      .then(users => cb(null, users))
       .catch(err => cb(err))
   }
 }

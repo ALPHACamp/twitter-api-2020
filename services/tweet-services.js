@@ -5,7 +5,9 @@ const tweetServices = {
   // 推文
   getTweets: (req, cb) => {
     Tweet.findAll({
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      nest: true,
+      raw: true
     })
       .then(tweets => cb(null, tweets))
       .catch(err => cb(err))
@@ -18,7 +20,7 @@ const tweetServices = {
       }],
       order: [['createdAt', 'DESC']]
     })
-      .then(tweets => cb(null, tweets))
+      .then(tweet => cb(null, tweet))
       .catch(err => cb(err))
   },
   postTweet: (req, cb) => {
@@ -27,7 +29,7 @@ const tweetServices = {
     if (description.length > 140) throw new Error('字數超過140')
     Tweet.create({
       description,
-      UserId: helpers.getUser.id
+      UserId: helpers.getUser(req) ? helpers.getUser(req).id : req.user.id
     }
     )
       .then(newtweet => cb(null, newtweet))
@@ -37,9 +39,11 @@ const tweetServices = {
   getReplies: (req, cb) => {
     Reply.findAll({
       where: { TweetId: req.params.id },
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      nest: true,
+      raw: true
     })
-      .then(tweets => cb(null, tweets))
+      .then(replies => cb(null, replies))
       .catch(err => cb(err))
   },
   postReply: (req, cb) => {
@@ -47,7 +51,7 @@ const tweetServices = {
     if (comment.trim().length === 0) throw new Error('內容不可空白')
     Reply.create({
       comment,
-      UserId: helpers.getUser.id,
+      UserId: helpers.getUser(req) ? helpers.getUser(req).id : req.user.id,
       TweetId: req.params.id
     })
       .then(reply => cb(null, reply))
@@ -57,13 +61,13 @@ const tweetServices = {
   postLike: (req, cb) => {
     Like.findOne({
       where: {
-        UserId: helpers.getUser.id,
+        UserId: helpers.getUser(req) ? helpers.getUser(req).id : req.user.id,
         TweetId: req.params.id
       }
     }).then(like => {
       if (!like) {
         return Like.create({
-          UserId: helpers.getUser.id,
+          UserId: helpers.getUser(req) ? helpers.getUser(req).id : req.user.id,
           TweetId: req.params.id
         })
       } else return like
@@ -74,7 +78,7 @@ const tweetServices = {
   postUnLike: (req, cb) => {
     Like.findOne({
       where: {
-        UserId: helpers.getUser.id,
+        UserId: helpers.getUser(req) ? helpers.getUser(req).id : req.user.id,
         TweetId: req.params.id
       }
     }).then(like => {
