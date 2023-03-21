@@ -1,7 +1,7 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Followship = sequelize.define(
-    "Followship",
+    'Followship',
     {
       followerId: {
         type: DataTypes.INTEGER,
@@ -10,15 +10,16 @@ module.exports = (sequelize, DataTypes) => {
       followingId: {
         type: DataTypes.INTEGER,
         allowNull: false
-      },
+      }
     },
     {
       sequelize,
-      modelName: "Followship",
-      tableName: "Followships",
+      modelName: 'Followship',
+      tableName: 'Followships',
       underscored: true,
+      timestamps: false
     }
-  );
+  )
   Followship.associate = function (models) {
   }
   return Followship

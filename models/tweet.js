@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       }
     },
-    { sequelize, modelName: 'Tweet', tableName: 'Tweets', underscored: true }
+    { sequelize, modelName: 'Tweet', tableName: 'Tweets', underscored: true, timestamps: false }
   )
   Tweet.associate = function (models) {
     Tweet.hasMany(models.Reply, { foreignKey: 'TweetId' })

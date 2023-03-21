@@ -38,7 +38,8 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'User',
     tableName: 'Users',
-    underscored: true
+    underscored: true,
+    timestamps: false
   })
   User.associate = function (models) {
     User.hasMany(models.Tweet, { foreignKey: 'UserId' })
