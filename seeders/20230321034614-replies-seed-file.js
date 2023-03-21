@@ -4,7 +4,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const commentsPerTweet = 3
     const users = await queryInterface.sequelize.query(
-      'SELECT id FROM Users;',
+      "SELECT id FROM Users WHERE role = 'user';",
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const tweets = await queryInterface.sequelize.query(
@@ -18,7 +18,7 @@ module.exports = {
       Array.from({ length: totalTweets }, (_, index) => ({
         User_id: users[Math.floor(Math.random() * users.length)].id,
         Tweet_id: tweets[Math.floor(index / commentsPerTweet)].id, // 使每篇Tweet有三個留言
-        comment: faker.lorem.text(),
+        comment: faker.lorem.sentence().substring(0, 140),
         created_at: new Date(),
         updated_at: new Date()
       }))
