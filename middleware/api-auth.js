@@ -3,10 +3,13 @@ const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
     // 處理驗證成功的時候要放入 req.user 的狀況
-    req.logIn(user, function (err) {
-      if (err) { return next(err); }
-      return res.send(user);
+    req.logIn(user, err => {
+      if (err) {
+        return next(err)
+      }
+      return user
     })
+    next()
   })(req, res, next)
 }
 const authenticatedAdmin = (req, res, next) => {
