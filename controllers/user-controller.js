@@ -15,6 +15,9 @@ const userController = {
   },
   getUserTweets: (req, res, next) => {
     userServices.getUserTweets(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  getLikeTweets: (req, res, next) => {
+    userServices.getLikeTweets(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 
