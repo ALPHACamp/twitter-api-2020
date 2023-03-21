@@ -17,6 +17,21 @@ const tweetController = {
     })
       .then(tweets => res.status(200).json(tweets))
       .catch(err => next(err))
+  },
+  getTweet: (req, res, next) => {
+    return Tweet.findByPk(req.params.id, {
+      raw: true,
+      nest: true,
+      attributes: {
+        exclude: ['UserId'],
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCounts'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts']]
+      },
+      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+    })
+      .then(tweet => res.status(200).json(tweet))
+      .catch(err => next(err))
   }
 }
 module.exports = tweetController
