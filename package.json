@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^7.6.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
@@ -18,7 +19,6 @@
     "dotenv": "^10.0.0",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
-    "faker": "^5.5.3",
     "imgur": "^1.0.2",
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
