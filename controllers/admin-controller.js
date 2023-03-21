@@ -7,7 +7,7 @@ const adminController = {
       return res.status(400).json({ status: 'error', message: 'Email and password are required' })
     }
     try {
-      const user = await User.findOne({ where: { email } })     
+      const user = await User.findOne({ where: { email } })
       if (!user) return res.status(404).json({ status: 'error', message: 'User does not exist' })
       if (user.role === 'user') return res.status(404).json({ status: 'error', message: 'User does not exist' })
       if (!bcrypt.compareSync(password, user.password)) {
@@ -30,6 +30,20 @@ const adminController = {
   },
   getTweet: async (req, res, next) => {
     res.json({ data: { test: '測試' } })
+  },
+  deleteTweet: (req, res, next) => {
+    return Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) { return res.status(400).json({ status: 'error', message: "Tweet didn't exist!" }) }
+        return tweet.destroy()
+      })
+      .then(() => {
+        return res.json({
+          status: 'success',
+          message: 'Successfully deleted the tweet'
+        })
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = adminController
