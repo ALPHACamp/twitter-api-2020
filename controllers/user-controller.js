@@ -10,23 +10,26 @@ const userController = {
       if (!err && !user) {
         const error = new Error('輸入資料不可為空值!')
         error.status = 400
-        next(error)
+        return next(error)
       }
 
       if (err || !user) {
         if (err.status === 401) {
-          next(err)
+          return next(err)
         }
+      }
+      if (user.role !== 'user') {
+        const error = new Error('驗證失敗!')
+        error.status = 401
+        return next(error)
       }
       try {
         const userData = user.toJSON()
         delete userData.password
         const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
         res.json({
-          status: 'success',
-          data: {
-            token
-          }
+          token,
+          user: { id: userData.id }
         })
       } catch (err) {
         return next(err)
@@ -81,6 +84,36 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  getUser: (req, res, next) => {
+    User.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+      .then(user => {
+        if (!user) {
+          const error = new Error('此使用者不存在!')
+          error.status = 404
+          throw error
+        }
+        return user
+      })
+      .then(user => {
+        const userData = user.toJSON()
+        // count followers and following
+        userData.followerCounts = userData.Followers.length
+        userData.followingCounts = userData.Followings.length
+        userData.isFollowed = userData.Followers?.some(follower => follower.id === req.user.id)
+        userData.isCurrentUser = req.user.id === user.id
+        // delete unused properties
+        delete userData.password
+        delete userData.Followers
+        delete userData.Followings
+
+        res.json(userData)
+      })
+  },
   putUserSetting: (req, res, next) => {
     const { id } = req.params
     if (Number(id) !== Number(req.user.id)) {
@@ -130,4 +163,5 @@ const userController = {
       .catch(err => next(err))
   }
 }
+
 module.exports = userController
