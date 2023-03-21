@@ -19,6 +19,20 @@ const userController = require('../controllers/user-controller');
 // register
 router.post('/users', userController.signUp);
 
+// login
+router.post(
+  '/admin/signin',
+  passport.authenticate('local', { session: false }),
+  authenticatedAdmin,
+  userController.signIn
+);
+router.post(
+  '/users/signin',
+  passport.authenticate('local', { session: false }),
+  authenticatedUser,
+  userController.signIn
+);
+
 router.use('/admin', authenticated, authenticatedAdmin, admin);
 
 router.use('/users', authenticated, authenticatedUser, users);
