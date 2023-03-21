@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const passport = require('passport');
+const passport = require('../config/passport');
 
 const admin = require('./modules/admin');
 
@@ -14,6 +14,10 @@ const {
 } = require('../middleware/api-auth');
 
 const { apiErrorHandler } = require('../middleware/error-handle');
+const userController = require('../controllers/user-controller');
+
+// register
+router.post('/users', userController.signUp);
 
 router.use('/admin', authenticated, authenticatedAdmin, admin);
 
