@@ -1,12 +1,11 @@
-const { Tweet, Reply } = require('../models')
+const { Tweet, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
-
 
 const tweetController = {
   postTweet: async (req, res, next) => {
     const { description } = req.body
     const UserId = helpers.getUser(req)?.id
-    if (description.length > 140 || description.length < 1) return res.status(400).json({ status: "error", message: "Content should be less than 140 characters and not empty" })
+    if (description.length > 140 || description.length < 1) return res.status(400).json({ status: 'error', message: 'Content should be less than 140 characters and not empty' })
     try {
       const tweet = await Tweet.create({
         description,
@@ -26,13 +25,13 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({ raw: true, nest: true, order: [['createdAt', 'DESC']] })
-      if (!tweets) return res.status(404).json({ status: "error", message: "Not found" })
+      if (!tweets) return res.status(404).json({ status: 'error', message: 'Not found' })
       const shortenedTweets = tweets.map(tweet => {
-        const shortenedDescription = tweet.description.length > 50 ? tweet.description.slice(0, 50) + '...' : tweet.description;
+        const shortenedDescription = tweet.description.length > 50 ? tweet.description.slice(0, 50) + '...' : tweet.description
         return {
           ...tweet,
           description: shortenedDescription
-        };
+        }
       })
       return res.status(200).json(shortenedTweets)
     } catch (err) {
@@ -43,7 +42,7 @@ const tweetController = {
     const id = req.params.tweet_id
     try {
       const tweet = await Tweet.findOne({ id })
-      if (!tweet) return res.status(404).json({ status: "error", message: "Not found" })
+      if (!tweet) return res.status(404).json({ status: 'error', message: 'Not found' })
       return res.status(200).json(tweet)
     } catch (err) {
       next(err)
@@ -53,9 +52,9 @@ const tweetController = {
     const TweetId = req.params.tweet_id
     try {
       const replies = await Reply.findAll({ raw: true, nest: true, order: [['createdAt', 'DESC']], where: { TweetId } })
-      if (!replies) return res.status(404).json({ status: "error", message: "Not found" })
+      if (!replies) return res.status(404).json({ status: 'error', message: 'Not found' })
       const shortenedReplies = replies.map(reply => {
-        const shortenedComment = reply.comment.length > 50 ? reply.comment.slice(0, 50) + '...' : reply.comment;
+        const shortenedComment = reply.comment.length > 50 ? reply.comment.slice(0, 50) + '...' : reply.comment
         return {
           ...reply,
           comment: shortenedComment
@@ -81,7 +80,55 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
-  },
+  }, // 喜歡功能
+  addLike: (req, res, next) => {
+    const TweetId = req.params.id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) { return res.status(400).json({ status: 'error', message: "Tweet didn't exist!" }) }
+        if (like) { return res.status(400).json({ status: 'error', message: 'You have liked this tweet!' }) }
+
+        return Like.create({
+          UserId: helpers.getUser(req).id,
+          TweetId
+        })
+      })
+      .then(() => {
+        return res.json({
+          status: 'success',
+          message: 'Successfully liked the tweet'
+        })
+      })
+      .catch(err => next(err))
+  }, // 移除喜歡功能
+  removeLike: (req, res, next) => {
+    return Like.findOne({
+      where: {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.id
+      }
+    })
+      .then(like => {
+        if (!like) { return res.status(400).json({ status: 'error', message: "You haven't liked this tweet" }) }
+
+        return like.destroy()
+      })
+      .then(() => {
+        return res.json({
+          status: 'success',
+          message: 'Successfully unliked the tweet'
+        })
+      })
+      .catch(err => next(err))
+  }
 }
 
 module.exports = tweetController
