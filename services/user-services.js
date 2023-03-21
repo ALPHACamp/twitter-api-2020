@@ -72,8 +72,7 @@ const userServices = {
       const userId = req.params.id
       const nowUser = helpers.getUser(req)
       const { account, name, email, password, checkPassword } = req.body
-      if (!account || !name || !email || !password) throw new Error('還有欄位沒填')
-      if (account.trim().length === 0 || name.trim().length === 0 || email.trim().length === 0 || password.trim().length === 0) throw new Error('還有欄位沒填')
+      if (!account?.trim().length === 0 || !name?.trim().length === 0 || !email.trim()?.length === 0 || !password?.trim().length === 0) throw new Error('還有欄位沒填')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不一樣!')
       if (name && name.length > 50) throw new Error('暱稱上限50字!')
       const [user, userAccount, userEmail] = await Promise.all([
