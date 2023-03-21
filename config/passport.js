@@ -52,10 +52,9 @@ passport.use(
       const user = await User.findByPk(jwtpayload.id, {
         include: [
           { model: User, as: 'Followers' },
-          { model: User, as: 'Following' },
+          { model: User, as: 'Followings' },
         ],
       });
-
       if (!user) {
         return cb(null, false, { message: 'Account or password is incorrect' });
       }

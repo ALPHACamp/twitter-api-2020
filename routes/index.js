@@ -16,7 +16,7 @@ const {
 
 const { apiErrorHandler } = require('../middleware/error-handler');
 
-router.use('/tweets', tweet);
+router.use('/tweets', authenticated, tweet);
 
 router.use('/admin', authenticated, authenticatedAdmin, admin);
 
