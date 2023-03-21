@@ -13,15 +13,17 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           account: 'root',
           role: 'admin',
-          avatar: `https://loremflickr.com/320/240/man/?random=${
-            Math.random() * 100
-          }`,
-          cover: `https://loremflickr.com/1440/480/city/?random=${
-            Math.random() * 100
-          }`,
+          avatar: faker.image.avatar(),
+          cover: 'https://imgur.com/a/lGG5iGQ',
           introduction: faker.lorem.text().substring(0, 160),
-          created_at: new Date(),
-          updated_at: new Date()
+          created_at: faker.date.between(
+            '2019-01-01T00:00:00.000Z',
+            '2019-02-01T00:00:00.000Z'
+          ),
+          updated_at: faker.date.between(
+            '2019-03-01T00:00:00.000Z',
+            '2019-04-01T00:00:00.000Z'
+          )
         },
         {
           name: 'user1',
@@ -29,15 +31,17 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           account: 'user1',
           role: 'user',
-          avatar: `https://loremflickr.com/320/240/woman/?random=${
-            Math.random() * 100
-          }`,
-          cover: `https://loremflickr.com/1440/480/city/?random=${
-            Math.random() * 100
-          }`,
+          avatar: faker.image.avatar(),
+          cover: 'https://imgur.com/a/lGG5iGQ',
           introduction: faker.lorem.text().substring(0, 160),
-          created_at: new Date(),
-          updated_at: new Date()
+          created_at: faker.date.between(
+            '2019-01-01T00:00:00.000Z',
+            '2019-02-01T00:00:00.000Z'
+          ),
+          updated_at: faker.date.between(
+            '2019-03-01T00:00:00.000Z',
+            '2019-04-01T00:00:00.000Z'
+          )
         },
         {
           name: 'user2',
@@ -45,15 +49,17 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           account: 'user2',
           role: 'user',
-          avatar: `https://loremflickr.com/320/240/woman/?random=${
-            Math.random() * 100
-          }`,
-          cover: `https://loremflickr.com/1440/480/city/?random=${
-            Math.random() * 100
-          }`,
+          avatar: faker.image.avatar(),
+          cover: 'https://imgur.com/a/lGG5iGQ',
           introduction: faker.lorem.text().substring(0, 160),
-          created_at: new Date(),
-          updated_at: new Date()
+          created_at: faker.date.between(
+            '2019-01-01T00:00:00.000Z',
+            '2019-02-01T00:00:00.000Z'
+          ),
+          updated_at: faker.date.between(
+            '2019-03-01T00:00:00.000Z',
+            '2019-04-01T00:00:00.000Z'
+          )
         },
         {
           name: 'user3',
@@ -61,15 +67,17 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           account: 'user3',
           role: 'user',
-          avatar: `https://loremflickr.com/320/240/woman/?random=${
-            Math.random() * 100
-          }`,
-          cover: `https://loremflickr.com/1440/480/city/?random=${
-            Math.random() * 100
-          }`,
+          avatar: faker.image.avatar(),
+          cover: 'https://imgur.com/a/lGG5iGQ',
           introduction: faker.lorem.text().substring(0, 160),
-          created_at: new Date(),
-          updated_at: new Date()
+          created_at: faker.date.between(
+            '2019-01-01T00:00:00.000Z',
+            '2019-02-01T00:00:00.000Z'
+          ),
+          updated_at: faker.date.between(
+            '2019-03-01T00:00:00.000Z',
+            '2019-04-01T00:00:00.000Z'
+          )
         },
         {
           name: 'user4',
@@ -77,15 +85,17 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           account: 'user4',
           role: 'user',
-          avatar: `https://loremflickr.com/320/240/woman/?random=${
-            Math.random() * 100
-          }`,
-          cover: `https://loremflickr.com/1440/480/city/?random=${
-            Math.random() * 100
-          }`,
+          avatar: faker.image.avatar(),
+          cover: 'https://imgur.com/a/lGG5iGQ',
           introduction: faker.lorem.text().substring(0, 160),
-          created_at: new Date(),
-          updated_at: new Date()
+          created_at: faker.date.between(
+            '2019-01-01T00:00:00.000Z',
+            '2019-02-01T00:00:00.000Z'
+          ),
+          updated_at: faker.date.between(
+            '2019-03-01T00:00:00.000Z',
+            '2019-04-01T00:00:00.000Z'
+          )
         },
         {
           name: 'user5',
@@ -93,15 +103,17 @@ module.exports = {
           password: await bcrypt.hash('12345678', 10),
           account: 'user5',
           role: 'user',
-          avatar: `https://loremflickr.com/320/240/woman/?random=${
-            Math.random() * 100
-          }`,
-          cover: `https://loremflickr.com/1440/480/city/?random=${
-            Math.random() * 100
-          }`,
+          avatar: faker.image.avatar(),
+          cover: 'https://imgur.com/a/lGG5iGQ',
           introduction: faker.lorem.text().substring(0, 160),
-          created_at: new Date(),
-          updated_at: new Date()
+          created_at: faker.date.between(
+            '2019-01-01T00:00:00.000Z',
+            '2019-02-01T00:00:00.000Z'
+          ),
+          updated_at: faker.date.between(
+            '2019-03-01T00:00:00.000Z',
+            '2019-04-01T00:00:00.000Z'
+          )
         }
       ],
       {}
