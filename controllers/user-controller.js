@@ -74,54 +74,6 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  }, //喜歡功能
-  addLike: (req, res, next) => {
-    const TweetId = req.params.id
-    return Promise.all([
-      Tweet.findByPk(TweetId),
-      Like.findOne({
-        where: {
-          UserId: req.user.id,
-          TweetId
-        }
-      })
-    ])
-      .then(([tweet, like]) => {
-        if (!tweet) { return res.status(400).json({ status: 'error', message: "Tweet didn't exist!" }) }
-        if (like) { return res.status(400).json({ status: 'error', message: 'You have liked this tweet!' }) }
-
-        return Like.create({
-          userId: req.user.id,
-          TweetId
-        })
-      })
-      .then(() => {
-        return res.json({
-          status: 'success',
-          message: 'Successfully liked the tweet'
-        })
-      })
-      .catch(err => next(err))
-  },//移除喜歡功能
-  removeLike: (req, res, next) => {
-    return Like.findOne({
-      where: {
-        UserId: req.user.id,
-        TweetId: req.params.id
-      }
-    })
-      .then(like => {
-        if (!like) { return res.status(400).json({ status: 'error', message: "You haven't liked this tweet" }) }
-
-        return like.destroy()
-      })
-      .then(() => {
-        return res.json({
-          status: 'success',
-          message: 'Successfully unliked the tweet'
-        })
-      })
-      .catch(err => next(err))
   }
 }
 module.exports = userController
