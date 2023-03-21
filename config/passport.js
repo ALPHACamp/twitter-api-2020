@@ -8,8 +8,8 @@ const ExtractJWT = passportJWT.ExtractJwt
 
 passport.use(new LocalStrategy(
   {
-    usernameField: 'account',
-    passwordField: 'password'
+    // 因為只有usernameField變成account，所以只改這個
+    usernameField: 'account'
   },
   (account, password, cb) => {
     User.findOne({ where: { account } })
@@ -26,6 +26,16 @@ passport.use(new LocalStrategy(
       .catch(error => cb(error))
   }
 ))
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET
+}
+passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
+  User.findByPk(jwtPayload.id)
+    .then(user => cb(null, user))
+    .catch(err => cb(err))
+}))
 
 passport.serializeUser((user, cb) => {
   cb(null, user.id)
