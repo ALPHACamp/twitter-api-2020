@@ -1,8 +1,8 @@
-'use strict';
+'use strict'
 const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class Followship extends Model {
-    static associate(models) {
+    static associate (models) {
       // define association here
     }
   }
