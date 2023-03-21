@@ -80,6 +80,54 @@ const userController = {
         })
       })
       .catch(err => next(err))
+  },
+  putUserSetting: (req, res, next) => {
+    const { id } = req.params
+    if (Number(id) !== Number(req.user.id)) {
+      const error = new Error('只能修改自己的資料!')
+      error.status = 403
+      throw error
+    }
+    const { name, account, email, password, checkPassword } = req.body
+    if (!name.trim() || !account.trim() || !email.trim()) {
+      const error = new Error('輸入資料不可為空值!')
+      error.status = 400
+      throw error
+    }
+    if ((password || checkPassword) && password !== checkPassword) {
+      const error = new Error('密碼輸入不相符!')
+      error.status = 403
+      throw error
+    }
+    return Promise.all([
+      User.findByPk(id),
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
+    ])
+      .then(async ([theUser, findAccount, findEmail]) => {
+        if (findAccount && Number(findAccount.id) !== Number(id)) {
+          const error = new Error('account 已重複註冊！')
+          error.status = 403
+          throw error
+        }
+        if (findEmail && Number(findEmail.id) !== Number(id)) {
+          const error = new Error('email 已重複註冊！')
+          error.status = 403
+          throw error
+        }
+        return theUser.update({
+          name,
+          account,
+          email,
+          password: password ? await bcrypt.hash(password, 10) : theUser.password
+        })
+      })
+      .then(updateUser => {
+        const data = updateUser.toJSON();
+        ['role', 'avatar', 'coverPage', 'password', 'introduction'].forEach(e => delete data[e])
+        res.status(200).json({ status: 'success', data })
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = userController
