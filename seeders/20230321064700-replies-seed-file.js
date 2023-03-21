@@ -8,12 +8,12 @@ module.exports = {
         type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const tweets = await queryInterface.sequelize.query(
-      'SELECT id FROM Tweets;',
+      'SELECT * FROM Tweets',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     await queryInterface.bulkInsert(
       'Replies',
-      Array.from({ length: 150 }, () => ({
+      Array.from({ length: 150 }, (num, i) => ({
         UserId: users[Math.floor(Math.random() * users.length)].id,
         TweetId: tweets[Math.floor(Math.random() * tweets.length)].id,
         comment:faker.lorem.text().substring(0, 50),
