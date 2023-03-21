@@ -3,8 +3,8 @@ const faker = require('faker')
 module.exports = {
   up: async(queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
-      'SELECT * FROM Users WHERE role = ?',
-      { replacements: ['user'],
+      `SELECT * FROM Users WHERE role = 'user'`,
+      { 
         type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const tweets = await queryInterface.sequelize.query(
@@ -23,7 +23,7 @@ module.exports = {
     )
   },
 
-  down: (queryInterface, Sequelize) => {
+  down: async(queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Replies', {})
   }
 };
