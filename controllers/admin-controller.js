@@ -1,4 +1,4 @@
-const { Followship, Like, Reply, Tweet, User } = require('../models')
+const { Like, Tweet, User } = require('../models')
 
 const adminController = {
   getUsers: (req, res, next) => {
@@ -6,8 +6,8 @@ const adminController = {
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
-        { model: Like, as: 'likeId' },
-        { model: Tweet, as: 'tweetId' }
+        { model: Like },
+        { model: Tweet }
       ]
     })
       .then(users => {

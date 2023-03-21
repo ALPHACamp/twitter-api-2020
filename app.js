@@ -19,7 +19,7 @@ function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
-app.use('/api', routes)
+app.use(routes)
 // app.get('/', (req, res) => res.send('Hello World!'))
 // app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 // (上1) 原本的，下面若不影響 test 就殺
