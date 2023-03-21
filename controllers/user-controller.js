@@ -8,7 +8,7 @@ const userController = {
     passport.authenticate('local', { session: false, failWithError: true }, (err, user, info) => {
       // err: null & user: false => 400
       if (!err && !user) {
-        const error = new Error('輸入不可為空值!')
+        const error = new Error('輸入資料不可為空值!')
         error.status = 400
         next(error)
       }
