@@ -55,7 +55,6 @@ passport.use(
           { model: User, as: 'Followings' },
         ],
       });
-
       if (!user) {
         return cb(null, false, { message: 'Account or password is incorrect' });
       }
