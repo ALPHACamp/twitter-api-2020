@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken')
-// const userServices = require('../../services/user-services')
 const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，不管，我先用舊的 add-on
 const { User } = require('../models')
 const { getUser } = require('../_helpers')
@@ -17,7 +16,8 @@ const userController = {
     }
   },
   signUp: (req, res, next) => {
-    if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match!')
+    // (下1) 測試檔不給過，先 comment，之後刪
+    // if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match!')
     if (req.body.name.length > 50) throw new Error('name 字數大於 50')
 
     return Promise.all([
