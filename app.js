@@ -1,5 +1,5 @@
 const express = require('express')
-const helpers = require('./_helpers');
+const helpers = require('./helpers');
 const routes = require('./routes/index')
 
 const app = express()
