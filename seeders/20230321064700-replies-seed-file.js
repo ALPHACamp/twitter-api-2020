@@ -1,5 +1,5 @@
 'use strict';
-
+const faker = require('faker')
 module.exports = {
   up: async(queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
@@ -13,12 +13,12 @@ module.exports = {
     )
     await queryInterface.bulkInsert(
       'Replies',
-      Array.from({ length: 150 }, (num, i) => ({
-        UserId: users[Math.floor(Math.random() * users.length)].id,
-        TweetId: tweets[Math.floor(Math.random() * tweets.length)].id,
+      Array.from({ length: 150 }, (num, index) => ({
+        UserId: users[ index % 5 ].id,
+        TweetId: tweets[ index % 50].id,
         comment:faker.lorem.text().substring(0, 50),
-        created_at: new Date(),
-        updated_at: new Date()
+        createdAt: new Date(),
+        updatedAt: new Date()
       }))
     )
   },
