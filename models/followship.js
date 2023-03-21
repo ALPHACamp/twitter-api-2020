@@ -4,7 +4,7 @@ const {
 } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class FollowShip extends Model {
-    static associate(models) { }
+    static associate (models) { }
   }
   FollowShip.init(
     {
@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: 'Followship',
-      tableName: 'Followships',
+      tableName: 'Followships'
     }
   )
   return FollowShip
