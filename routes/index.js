@@ -2,6 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 const passport = require('passport');
+const tweet = require('./modules/tweet');
 
 const admin = require('./modules/admin');
 
@@ -13,7 +14,9 @@ const {
   authenticatedUser,
 } = require('../middleware/api-auth');
 
-const { apiErrorHandler } = require('../middleware/error-handle');
+const { apiErrorHandler } = require('../middleware/error-handler');
+
+router.use('/tweets', authenticated, tweet);
 
 router.use('/admin', authenticated, authenticatedAdmin, admin);
 
