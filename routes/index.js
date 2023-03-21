@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const admin = require('./modules/admin')
-const user = require('./modules/user')
+const users = require('./modules/users')
+const tweets = require('./modules/tweets')
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
 const { errorHandler } = require('../middleware/error-handler')
@@ -13,7 +14,8 @@ router.post('/users/login', userController.login)
 router.post('/users', userController.signUp)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
-router.use('/users', authenticated, user)
+router.use('/users', authenticated, users)
+router.use('/tweets', authenticated, tweets)
 
 router.use('/', errorHandler)
 
