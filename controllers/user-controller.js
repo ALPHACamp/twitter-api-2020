@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
+const validator = require('validator')
 
 const { getUser } = require('../_helpers')
+
+const { User } = require('../models')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -15,6 +19,56 @@ const userController = {
           user: userData,
         },
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  signUp: async (req, res, next) => {
+    try {
+      //check if all the required fields are filled out correctly
+      const errors = []
+      const { account, name, email, password, checkPassword } = req.body
+
+      if (!account || !name || !email || !password || !checkPassword) {
+        errors.push('All fields are required!')
+      }
+      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
+        errors.push('The name cannot exceed 50 characters.')
+      }
+      if (password && !validator.isByteLength(password, { min: 8, max:20 })) {
+        errors.push('The password length should be between 8 to 20 characters.')
+      }
+      if (password !== checkPassword) {
+        errors.push('Passwords do not match!')
+      }
+      if (email && !validator.isEmail(email)) {
+        errors.push('Please enter the correct email address!')
+      }
+      if (errors.length) {
+        return res.status(400).json({ status: 'error', errors })
+      }
+
+      // Check if account and email are unique
+      const [inputAccount, inputEmail] = await Promise.all([
+        User.findOne({ where: { account } }),
+        User.findOne({ where: { email } }),
+      ])
+      if (inputAccount) throw new Error('Account already exists')
+      if (inputEmail) throw new Error('Email already exists')
+
+      // Hash password
+      const salt = await bcrypt.genSalt(10)
+      const hashedPassword = await bcrypt.hash(password, salt)
+
+      // Create user in DB
+      await User.create({
+        account,
+        name,
+        email,
+        password: hashedPassword,
+      })
+
+      return res.status(200).json({ status: 'success', message: 'Successfully signed up!' })
     } catch (err) {
       next(err)
     }
