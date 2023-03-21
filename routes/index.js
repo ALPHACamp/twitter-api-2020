@@ -10,7 +10,7 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 router.use('/api/admin', admin)
 // router.get('/api/admin/restaurants', authenticated, apiErrorHandler)
 
-router.post('/api/signup', userController.signUp)
+router.post('/api/users', userController.signUp) // 註冊帳號路由
 // (下1) session: false 的功能，把 cookie/session 功能關掉，不管理它
 router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn) // 注意是 post
 

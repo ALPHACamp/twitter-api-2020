@@ -12,9 +12,12 @@ module.exports = {
   // },
   apiErrorHandler (err, req, res, next) {
     if (err instanceof Error) {
+      //! 測試檔檢出錯誤，跑到這了
       res.status(err.status || 500).json({ // err.status 若有值，就是狀態碼
         status: 'error',
-        message: `${err.name}: ${err.message}}`
+        // message: `${err.name}: ${err.message}}`
+        // 為只顯示訊息，先改成下1，等全部完成後看起來沒問題，再殺掉吧...
+        message: `${err.message}`
       })
     } else {
       res.status(500).json({

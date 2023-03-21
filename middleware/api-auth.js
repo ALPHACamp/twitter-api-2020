@@ -1,4 +1,6 @@
 const passport = require('../config/passport')
+// (下1) 真麻煩，不知這到底有何用
+// const { getUser } = require('../_helpers') // 用 getUser(...) 取代 req.user
 // const authenticated = passport.authenticate('jwt', { session: false }) // 過去寫法
 // (下) 為了增加 json 而改的寫法
 const authenticated = (req, res, next) => {
