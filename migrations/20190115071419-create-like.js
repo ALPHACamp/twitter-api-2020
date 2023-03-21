@@ -9,11 +9,9 @@ module.exports = {
       },
       User_id: {
         type: Sequelize.INTEGER,
-        allowNull: false,
       },
       Tweet_id: {
         type: Sequelize.INTEGER,
-        allowNull: false,
       },
       created_at: {
         allowNull: false,
