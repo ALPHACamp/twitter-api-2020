@@ -1,4 +1,5 @@
 const passport = require('../config/passport')
+const { getUser } = require('../_helpers') // 用 getUser(...) 取代 req.user
 // const authenticated = passport.authenticate('jwt', { session: false }) // 過去寫法
 // (下) 為了增加 json 而改的寫法
 const authenticated = (req, res, next) => {
@@ -11,7 +12,7 @@ const authenticated = (req, res, next) => {
     })(req, res, next) // 這裡是 IIFE，因為 Fn. 內有 Fn. (authenticated 內有 (err, user)...)，需再被 invoke
 }
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user?.isAdmin) return next()
+  if (getUser(req)?.isAdmin) return next()
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 module.exports = {
