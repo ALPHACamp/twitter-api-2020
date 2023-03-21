@@ -28,7 +28,7 @@ module.exports = {
     userSeedData[1].account = 'user1'
     userSeedData[1].email = 'user1@example.com'
 
-    await queryInterface.bulkInsert('users', userSeedData)
+    await queryInterface.bulkInsert('Users', userSeedData)
   },
 
   down: async (queryInterface, Sequelize) => {
