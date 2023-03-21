@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { ensureAuthenticated } = require('../helpers/auth-helper')
 const { User } = require("../models");
 
 const userController = {
@@ -59,7 +60,10 @@ const userController = {
         error.status = 400;
         throw error;
       }
-      const user = foundUser.toJSON();
+      const user = {
+        ...foundUser.toJSON(),
+        isAuthenticated: ensureAuthenticated(req)
+      }
       delete user.password;
       const token = jwt.sign(user, process.env.JWT_SECRET, {
         expiresIn: "30d",
