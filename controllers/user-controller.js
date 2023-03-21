@@ -26,7 +26,7 @@ const userController = {
         throw error;
       }
       if (isAccountExist) {
-        const error = new Error("email 已重複註冊！");
+        const error = new Error("account 已重複註冊！");
         error.status = 400;
         throw error;
       }
@@ -60,7 +60,7 @@ const userController = {
         throw error;
       }
       const user = foundUser.toJSON();
-      delete data.password;
+      delete user.password;
       const token = jwt.sign(user, process.env.JWT_SECRET, {
         expiresIn: "30d",
       });

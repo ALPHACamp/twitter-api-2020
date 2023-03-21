@@ -10,17 +10,19 @@ const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET,
 };
-passport.use(new JWTStrategy(jwtOptions), async (jwt_payload, done) => {
-  try {
-    const foundUser = await User.findByPk(jwt_payload.id);
+passport.use(
+  new JWTStrategy(jwtOptions, async (jwt_payload, done) => {
+    try {
+      const foundUser = await User.findByPk(jwt_payload.id);
 
-    if (!foundUser) return done(null, false);
+      if (!foundUser) return done(null, false);
 
-    return done(null, foundUser);
-  } catch (error) {
-    return done(error, null);
-  }
-});
+      return done(null, foundUser);
+    } catch (error) {
+      return done(error, null);
+    }
+  })
+);
 
 // - Local Strategy
 passport.use(
