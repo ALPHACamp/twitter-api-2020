@@ -7,8 +7,8 @@ const admin = require('./modules/admin')
 const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
-// (下1) 純測試，之後得改
-router.get('/api/admin/restaurants', authenticated, apiErrorHandler)
+router.use('/api/admin', admin)
+// router.get('/api/admin/restaurants', authenticated, apiErrorHandler)
 
 router.post('/api/users', userController.signUp) // 註冊帳號路由
 // (下1) session: false 的功能，把 cookie/session 功能關掉，不管理它

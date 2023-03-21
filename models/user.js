@@ -12,9 +12,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate (models) {
       // define association here
-      User.hasMany(models.Reply, { foreignKey: 'replyId' })
-      User.hasMany(models.Tweet, { foreignKey: 'tweetId' })
-      User.hasMany(models.Like, { foreignKey: 'likeId' })
+      User.hasMany(models.Reply, { foreignKey: 'userId' })
+      User.hasMany(models.Tweet, { foreignKey: 'userId' })
+      User.hasMany(models.Like, { foreignKey: 'userId' })
       User.belongsToMany(User, {
         through: models.Followship,
         foreignKey: 'followingId',
