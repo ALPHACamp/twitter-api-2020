@@ -1,4 +1,6 @@
+const Helpers = require('faker/lib/helpers');
 const { Tweet, User } = require('../models');
+const helpers = require('../_helpers');
 
 const tweetController = {
   getAllTweets: async (req, res, next) => {
@@ -16,7 +18,8 @@ const tweetController = {
   },
   addNewTweet: async (req, res, next) => {
     try {
-      const { UserId, description } = req.body;
+      const UserId = helpers.getUser(req).id;
+      const { description } = req.body;
       if (!UserId) throw new Error('UserId is required!');
       const newTweet = await Tweet.create({
         UserId,
