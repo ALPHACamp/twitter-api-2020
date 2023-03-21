@@ -32,7 +32,7 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, done) => {
   return User.findByPk(jwtPayload.id, {
     attributes: ['id', 'name', 'account', 'email', 'role']
   })
-    .then(user => done(null, user))
+    .then(user => done(null, user.toJSON()))
     .catch(error => done(error))
 }))
 
