@@ -30,6 +30,20 @@ const adminController = {
   },
   getTweet: async (req, res, next) => {
     res.json({ data: { test: '測試' } })
+  },
+  deleteTweet: (req, res, next) => {
+    return Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) { return res.status(400).json({ status: 'error', message: "Tweet didn't exist!" }) }
+        return tweet.destroy()
+      })
+      .then(() => {
+        return res.json({
+          status: 'success',
+          message: 'Successfully deleted the tweet'
+        })
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = adminController
