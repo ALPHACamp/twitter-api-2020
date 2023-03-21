@@ -37,7 +37,7 @@ const userController = {
       next(err);
     }
   },
-  signIn: async (res, next) => {
+  signIn: async (req, res, next) => {
     try {
       const userData = getUser(req).toJSON();
 

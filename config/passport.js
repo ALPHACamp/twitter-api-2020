@@ -16,8 +16,7 @@ passport.use(
     },
     async (account, password, cb) => {
       try {
-        const user = await User.findOne({ where: { account, password } });
-
+        const user = await User.findOne({ where: { account } });
         if (!user) {
           return cb(null, false, {
             message: 'This account is not registered!',
