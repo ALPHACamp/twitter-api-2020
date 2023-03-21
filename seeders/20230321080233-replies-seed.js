@@ -7,7 +7,7 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     );
     const users = await queryInterface.sequelize.query(
-      'SELECT id FROM Users;',
+      `SELECT id FROM Users WHERE role = 'user';`,
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     );
 

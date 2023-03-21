@@ -70,18 +70,24 @@ module.exports = {
           created_at: new Date(),
           updated_at: new Date(),
         },
+        {
+          account: 'user5',
+          email: 'user5@example.com',
+          password: await bcrypt.hash('12345678', 10),
+          name: 'user5',
+          avatar: `https://loremflickr.com/320/240/person/?lock=${
+            Math.random() * 100
+          }`,
+          introduction: 'Hi!',
+          role: 'user',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
       ],
       {}
     );
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkInsert('Users', null, {});
-    /*
-      Add reverting commands here.
-      Return a promise to correctly handle asynchronicity.
-
-      Example:
-      return queryInterface.bulkDelete('People', null, {});
-    */
+    await queryInterface.bulkDelete('Users', null, {});
   },
 };
