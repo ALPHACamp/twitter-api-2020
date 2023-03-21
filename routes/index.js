@@ -7,12 +7,12 @@ const admin = require('./modules/admin')
 const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
-// (下1) 純測試，之後得改
-router.get('/api/admin/restaurants', authenticated, apiErrorHandler)
+router.use('/admin', admin)
+// router.get('/api/admin/restaurants', authenticated, apiErrorHandler)
 
-router.post('/api/signup', userController.signUp)
+router.post('/signup', userController.signUp)
 // (下1) session: false 的功能，把 cookie/session 功能關掉，不管理它
-router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn) // 注意是 post
+router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn) // 注意是 post
 
 router.get('/', (req, res, next) => res.send('twitter api'))
 
