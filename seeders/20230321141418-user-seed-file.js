@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
         password: hashedPassword,
         name: faker.internet.userName(),
         avatar: 'https://raw.githubusercontent.com/LJBL22/react_twitter/3d808b59166970aa7c34cbb78dba58d70b11fc63/src/logo.svg',
-        coverUrl: 'https://github.com/LJBL22/react_twitter/blob/main/src/assets/images/defaultCover.jpg?raw=true',
+        cover_url: 'https://github.com/LJBL22/react_twitter/blob/main/src/assets/images/defaultCover.jpg?raw=true',
         introduction: faker.lorem.paragraph(),
         role: 'user',
         created_at: new Date(),
