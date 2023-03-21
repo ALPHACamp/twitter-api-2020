@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { ensureAuthenticated } = require('../helpers/auth-helper')
+const { ensureAuthenticated } = require("../helpers/auth-helper");
 const { User } = require("../models");
 
 const userController = {
@@ -31,15 +31,23 @@ const userController = {
         error.status = 400;
         throw error;
       }
-      const newUser = await User.create({
+      const user = await User.create({
         name,
         account,
         email,
         password,
       });
+      const foundUser = await User.findByPk(user.id);
+      const newUser = {
+        ...foundUser.toJSON(),
+        isAuthenticated: ensureAuthenticated(req),
+      };
+      delete newUser.password;
       return res.json({
         status: "success",
-        data: newUser,
+        data: {
+          newUser,
+        },
       });
     } catch (error) {
       return next(error);
@@ -60,19 +68,19 @@ const userController = {
         error.status = 400;
         throw error;
       }
-      const user = {
+      const loginUser = {
         ...foundUser.toJSON(),
-        isAuthenticated: ensureAuthenticated(req)
-      }
-      delete user.password;
-      const token = jwt.sign(user, process.env.JWT_SECRET, {
+        isAuthenticated: ensureAuthenticated(req),
+      };
+      delete loginUser.password;
+      const token = jwt.sign(loginUser, process.env.JWT_SECRET, {
         expiresIn: "30d",
       });
       return res.json({
         status: "success",
         data: {
           token,
-          user
+          loginUser,
         },
       });
     } catch (error) {
