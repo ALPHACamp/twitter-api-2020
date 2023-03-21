@@ -3,29 +3,24 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Tweet extends Model {
+  class Like extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Tweet.belongsTo(models.User, { foreignKey: 'userId'})
-      Tweet.belongsToMany(models.User, {
-        through: models.Like,
-        foreignKey: 'TweetId',
-        as: 'LikedUsers'
-      })
+      // define association here
     }
   };
-  Tweet.init({
-    description: DataTypes.TEXT,
-    userId: DataTypes.INTEGER
+  Like.init({
+    userId: DataTypes.INTEGER,
+    tweetId: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Tweet',
-    tableName: 'Tweets',
+    modelName: 'Like',
+    tableName: 'Likes',
     underscored: true,
   });
-  return Tweet;
+  return Like;
 };

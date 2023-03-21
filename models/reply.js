@@ -10,14 +10,14 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Reply.belongsTo(model.User, { foreignKey: "userId" })
-      Reply.belongsTo(model.Tweet, { foreignKey: "tweetId" })
+      Reply.belongsTo(models.User, { foreignKey: "userId" })
+      Reply.belongsTo(models.Tweet, { foreignKey: "tweetId" })
     }
   };
   Reply.init({
     comment: DataTypes.TEXT,
-    user_id: DataTypes.INTEGER,
-    tweet_id: DataTypes.INTEGER
+    userId: DataTypes.INTEGER,
+    tweetId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Reply',
