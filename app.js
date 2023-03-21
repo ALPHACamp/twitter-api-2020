@@ -10,9 +10,9 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+// function authenticated(req, res, next){
+//   // passport.authenticate('jwt', { ses...
+// };
 
 app.use(express.json())
 app.use(routes)
