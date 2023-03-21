@@ -1,32 +1,28 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../../controllers/user-controller')
-
-// 登入
-router.post('/signin', userController.signIn)
+const { authenticatedOwner } = require('../../middleware/auth')
+const upload = require('../../middleware/multer')
 
 // 粉絲清單
-router.get('/:id/followers',)
+router.get('/:id/followers', userController.getUserFollower)
 
 // 追蹤清單
-router.get('/:id/followings',)
+router.get('/:id/followings', userController.getUserFollowing)
 
 // 點讚清單
-router.get('/:id/likes',)
+router.get('/:id/likes', userController.getUserLikes)
 
 // 留言清單
-router.get('/:id/replied_tweets',)
+router.get('/:id/replied_tweets', userController.getUserReplies)
 
 // 推文清單
-router.get('/:id/tweets',)
+router.get('/:id/tweets', userController.getUserTweets)
 
 // 個人資料
-router.get('/:id',)
+router.get('/:id', userController.getUser)
 
 // 編輯個人資料
-router.put('/:id',)
-
-// 註冊
-router.post('/', userController.signUp)
+router.put('/:id', authenticatedOwner, upload, userController.putUser)
 
 module.exports = router

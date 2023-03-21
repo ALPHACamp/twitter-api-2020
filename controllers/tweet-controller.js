@@ -41,7 +41,7 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     const id = req.params.tweet_id
     try {
-      const tweet = await Tweet.findOne({ id })
+      const tweet = await Tweet.findOne({ where: { id } })
       if (!tweet) return res.status(404).json({ status: 'error', message: 'Not found' })
       return res.status(200).json(tweet)
     } catch (err) {
