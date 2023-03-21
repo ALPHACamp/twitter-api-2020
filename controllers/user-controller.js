@@ -19,14 +19,31 @@ const userController = {
     if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match!')
     if (req.body.name.length > 50) throw new Error('name 字數大於 50')
 
-    User.findOne({ where: { email: req.body.email } })
-      .then(user => {
-        if (user) throw new Error('Email already exists!')
-
-        return bcrypt.hash(req.body.password, 10)
+    Promise.all([
+      User.findOne({ where: { email: req.body.email } }),
+      User.findOne({ where: { account: req.body.account } })
+    ])
+      .then(([emailResult, accountResult]) => {
+        if (emailResult && accountResult) throw new Error('email 與 account 都重複註冊！')
+        if (emailResult) throw new Error('email 已重複註冊！')
+        if (accountResult) throw new Error('account 已重複註冊！')
       })
+    // User.findOne({
+    //   where: {
+    //     [Op.or]: [
+    //       { email: req.body.email },
+    //       { account: req.body.account }]
+    //   }
+    // })
+    //   .then(user => {
+    //     if (user) throw new Error('email 已重複註冊！')
+
+    //     return bcrypt.hash(req.body.password, 10)
+    //   })
+      .then(() => bcrypt.hash(req.body.password, 10))
       .then(hash =>
         User.create({
+          account: req.body.account,
           name: req.body.name,
           email: req.body.email,
           password: hash
