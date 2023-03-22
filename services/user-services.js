@@ -186,27 +186,58 @@ const userServices = {
     try {
       const userId = req.params.id
       const nowUser = helpers.getUser(req)
-      const following = await Followship.findAll({
+      const following = await User.findAll({
         where: {
-          followerId: userId
+          id: userId
         },
-        include: {
+        attributes: {
+          include: [
+            'id', 'name', 'avatar', 'account', 'introduction',
+            [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.follower_id = ${nowUser.id} AND Followships.following_id = Followings.id)`), 'isFollowed']
+          ],
+          exclude: ['password', 'role', 'createdAt', 'updatedAt']
+        },
+        include: [{
           model: User,
           as: 'Followings',
-          attributes: {
-            exclude: ['password', 'role', 'createdAt', 'updatedAt'],
-            include: [
-              'id', 'name', 'avatar', 'account', 'introduction',
-              [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.follower_id = ${nowUser.id} AND Followships.following_id = Followings.id)`), 'isFollowed']
-            ]
-          }
-        },
+          attributes: ['id', 'name', 'avatar', 'account', 'introduction']
+        }],
         order: [['createdAt', 'DESC']],
         raw: true,
-        nest: true
+        nest: false
       })
       if (!following) throw new Error('沒有追蹤!')
       cb(null, following)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getUsersFollowers: async (req, cb) => {
+    try {
+      const userId = req.params.id
+      const nowUser = helpers.getUser(req)
+      const follower = await User.findAll({
+        where: {
+          id: userId
+        },
+        attributes: {
+          include: [
+            'id', 'name', 'avatar', 'account', 'introduction',
+            [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.follower_id = ${nowUser.id} AND Followships.following_id = Users.id)`), 'isFollowed']
+          ],
+          exclude: ['password', 'role', 'createdAt', 'updatedAt']
+        },
+        include: [{
+          model: User,
+          as: 'Followers',
+          attributes: ['id', 'name', 'avatar', 'account', 'introduction']
+        }],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: false
+      })
+      if (!follower) throw new Error('沒有追隨!')
+      cb(null, follower)
     } catch (err) {
       cb(err)
     }
