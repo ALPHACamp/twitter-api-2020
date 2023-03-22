@@ -66,7 +66,21 @@ const adminController = {
         res.json(usersData)
       })
       .catch(err => next(err))
+  },
+  deleteTweet: (req, res, next) => {
+    Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) {
+          const err = new Error('此推文不存在！')
+          err.status = 404
+          throw err
+        }
+        return tweet.destroy()
+      })
+      .then(deletedTweet => res.status(200).send())
+      .catch(err => next(err))
   }
+
 }
 
 module.exports = adminController
