@@ -8,6 +8,11 @@ const authenticated = (req, res, next) => {
   })(req, res, next)
 }
 
+const authenticatedUser = (req, res, next) => {
+  if (req.user && req.user.role !== 'admin') return next()
+  return res.status(403).json({ status: 'error', message: '驗證失敗！' })
+}
+
 const authenticatedAdmin = (req, res, next) => {
   if (req.user && req.user.role !== 'user') return next()
   return res.status(403).json({ status: 'error', message: '驗證失敗！' })
@@ -15,5 +20,6 @@ const authenticatedAdmin = (req, res, next) => {
 
 module.exports = {
   authenticated,
+  authenticatedUser,
   authenticatedAdmin
 }

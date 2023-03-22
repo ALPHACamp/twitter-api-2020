@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const bcrypt = require('bcryptjs')
 const passport = require('../config/passport')
+const { getUser } = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   login: (req, res, next) => {
@@ -104,8 +106,8 @@ const userController = {
         // count followers and following
         userData.followerCounts = userData.Followers.length
         userData.followingCounts = userData.Followings.length
-        userData.isFollowed = userData.Followers?.some(follower => follower.id === req.user.id)
-        userData.isCurrentUser = req.user.id === user.id
+        userData.isFollowed = userData.Followers?.some(follower => follower.id === getUser(req).id)
+        userData.isCurrentUser = getUser(req).id === user.id
         // delete unused properties
         delete userData.password
         delete userData.Followers
@@ -116,7 +118,7 @@ const userController = {
   },
   putUserSetting: (req, res, next) => {
     const { id } = req.params
-    if (Number(id) !== Number(req.user.id)) {
+    if (Number(id) !== Number(getUser(req).dataValues.id)) {
       const error = new Error('只能修改自己的資料!')
       error.status = 403
       throw error
@@ -159,6 +161,58 @@ const userController = {
         const data = updateUser.toJSON();
         ['role', 'avatar', 'coverPage', 'password', 'introduction'].forEach(e => delete data[e])
         res.status(200).json({ status: 'success', data })
+      })
+      .catch(err => next(err))
+  },
+  putUser: (req, res, next) => {
+    if (Number(req.params.id) !== Number(getUser(req).dataValues.id)) {
+      const error = new Error('只能修改自己的資料!')
+      error.status = 403
+      throw error
+    }
+    const { name, introduction } = req.body
+    if (!name.trim()) {
+      const error = new Error('輸入資料不可為空值!')
+      error.status = 400
+      throw error
+    }
+    if (introduction.length > 160) {
+      const error = new Error('自我介紹數字上限 160 字!')
+      error.status = 400
+      throw error
+    }
+    if (name.length > 50) {
+      const error = new Error('暱稱上限 50 字！')
+      error.status = 400
+      throw error
+    }
+
+    const avatar = req.files ? req.files.avatar : undefined
+    const coverPage = req.files ? req.files.coverPage : undefined
+
+    User.findByPk(req.params.id).then(user => {
+      if (!user) {
+        const error = new Error('此使用者不存在!')
+        error.status = 404
+        throw error
+      }
+      return user
+    })
+      .then(async user => {
+        const avatarFilePath = avatar ? await imgurFileHandler(avatar[0]) : user.avatar
+        const coverPageFilePath = coverPage ? await imgurFileHandler(coverPage[0]) : user.coverPage
+        return user.update({
+          name,
+          introduction,
+          avatar: avatarFilePath,
+          coverPage: coverPageFilePath
+        })
+      })
+      .then(updatedUser => {
+        const { id, name, introduction, avatar, coverPage } = updatedUser.toJSON()
+        res.status(200).json({
+          id, name, introduction, avatar, coverPage
+        })
       })
       .catch(err => next(err))
   }
