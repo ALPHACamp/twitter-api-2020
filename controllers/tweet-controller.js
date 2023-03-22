@@ -77,6 +77,26 @@ const tweetController = {
         reply
       }))
       .catch(err => next(err))
+  },
+  getReplies: (req, res, next) => {
+    const id = req.params.tweet_id
+
+    return Reply.findAll({
+      where: { TweetId: id },
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        {
+          model: Tweet,
+          attributes: ['UserId'],
+          include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        }
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(replies => res.json(replies))
+      .catch(err => next(err))
   }
 }
 
