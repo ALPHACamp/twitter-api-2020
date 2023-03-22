@@ -1,6 +1,6 @@
 const express = require('express')
-const passport = require('passport')
 const router = express.Router()
+const passport = require('passport')
 
 const adminController = require('../../controllers/admin-controller')
 
