@@ -1,5 +1,4 @@
 const passport = require('../config/passport')
-const helpers = require('../_helpers')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -8,14 +7,14 @@ const authenticated = (req, res, next) => {
         status: 'error',
         message: 'unauthorized'
       })
-    } else if (user && user.role !== 'user') {
+    } else if (user && user.account === 'root') {
       return res.status(403).json({
         status: 'error',
         message: 'forbidden'
       })
-    } 
+    }
 
-    helpers.getUser(req) = user
+    req.user = user
     next()
   })(req, res, next)
 }
@@ -27,14 +26,14 @@ const authenticatedAdmin = (req, res, next) => {
         status: 'error',
         message: 'unauthorized'
       })
-    } else if (user && user.role !== 'admin') {
+    } else if (user && user.account !== 'root') {
       return res.status(403).json({
         status: 'error',
         message: 'forbidden'
       })
-    } 
+    }
 
-    helpers.getUser(req) = user
+    req.user = user
     next()
   })(req, res, next)
 }
