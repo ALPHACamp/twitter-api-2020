@@ -1,21 +1,30 @@
 const passport = require('../config/passport')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 
 // use helpers.getUser(req) to replace req.user
-const authenticated = (req, res, next) => {
-  // passport.authenticate('jwt', { ses...
+const authenticatedUser = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
-    if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
-    next()
+    if (err || !user) return res.status(401).json({ status: 'error', message: 'JWT token failed!' })
+    
+    req.user = user
+
+    if (helpers.getUser(req) && helpers.getUser(req).role !== 'admin') return next()
+    return res.status(403).json({ status: 'error', message: 'Permission denied.' })
   })(req, res, next)
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (getUser(req) && getUser(req).isAdmin) return next()
-  return res.status(403).json({ status: 'error', message: 'permission denied' })
+  passport.authenticate('jwt', { session: false }, (err, user) => {
+    if (err || !user) return res.status(401).json({ status: 'error', message: 'JWT token failed!' })
+
+    req.user = user
+
+    if (helpers.getUser(req) && helpers.getUser(req).role === 'admin') return next()
+    return res.status(403).json({ status: 'error', message: 'Permission denied.' })
+  })(req, res, next)
 }
 
 module.exports = {
-  authenticated,
+  authenticatedUser,
   authenticatedAdmin,
 }
