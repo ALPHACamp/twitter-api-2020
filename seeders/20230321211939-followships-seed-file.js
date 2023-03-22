@@ -8,7 +8,7 @@ module.exports = {
       "SELECT id FROM Users WHERE role = 'user';",
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-    // 所有使用者Like數總和
+    // 所有使用者Followships數總和
     const totalFollowships = users.length * userFollowingCounts
 
     await queryInterface.bulkInsert(

@@ -60,7 +60,7 @@ const userService = {
   getUser: (req, cb) => {
     const userId = helpers.getUser(req).id
     return User.findOne({
-      where: { id: req.params.user_id },
+      where: { id: req.params.userId },
       attributes: [
         'id',
         'account',
