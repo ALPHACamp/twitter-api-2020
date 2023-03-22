@@ -1,5 +1,4 @@
-const Helpers = require('faker/lib/helpers');
-const { Tweet, User } = require('../models');
+const { Tweet, User, Reply } = require('../models');
 const helpers = require('../_helpers');
 
 const tweetController = {
@@ -13,7 +12,7 @@ const tweetController = {
       });
       return res.status(200).json(tweets);
     } catch (err) {
-      next(err);
+      return next(err);
     }
   },
   addNewTweet: async (req, res, next) => {
@@ -27,7 +26,7 @@ const tweetController = {
       });
       return res.status(200).json(newTweet);
     } catch (err) {
-      next(err);
+      return next(err);
     }
   },
   getTweet: async (req, res, next) => {
@@ -41,7 +40,39 @@ const tweetController = {
       });
       return res.status(200).json(tweet);
     } catch (err) {
-      next(err);
+      return next(err);
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const TweetId = req.params.tweetId;
+      const replies = await Reply.findAll({
+        where: { TweetId },
+        raw: true,
+        nest: true,
+        include: [{ model: User, attributes: ['account', 'name'] }],
+        order: [['updatedAt', 'DESC']],
+      });
+      return res.status(200).json(replies);
+    } catch (err) {
+      return next(err);
+    }
+  },
+  postReply: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id;
+      const TweetId = req.params.tweetId;
+      const { comment } = req.body;
+      if (!UserId || !TweetId)
+        throw new Error('User id or Tweet id is required!');
+      const newReply = await Reply.create({
+        UserId,
+        TweetId,
+        comment,
+      });
+      return res.status(200).json(newReply);
+    } catch (err) {
+      return next(err);
     }
   },
 };
