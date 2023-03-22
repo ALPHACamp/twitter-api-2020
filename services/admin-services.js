@@ -11,8 +11,10 @@ const adminServices = {
       return cb(null, {
         status: 'success',
         message: '成功登入',
-        token,
-        userData
+        data: {
+          token,
+          userData
+        }
       })
     } catch (err) {
       cb(err)
