@@ -12,6 +12,11 @@ module.exports = {
       },
       Tweet_id: {
         type: Sequelize.INTEGER,
+        onDelete: 'CASCADE',
+        references: {
+          model: 'Tweets',
+          key: 'id',
+        },
       },
       comment: {
         type: Sequelize.TEXT,
