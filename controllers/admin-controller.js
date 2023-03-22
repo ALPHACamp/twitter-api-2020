@@ -66,6 +66,28 @@ const adminController = {
         res.json(usersData)
       })
       .catch(err => next(err))
+  },
+  getTweets: (req, res, next) => {
+    Tweet.findAll({
+      attributes: {
+        exclude: ['UserId']
+      },
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      raw: true,
+      nest: true
+    })
+      .then(tweets => {
+        const tweetData = tweets.map(tweet =>
+          ({
+            ...tweet,
+            description: tweet.description.substring(0, 50)
+          }))
+        res.json(tweetData)
+      })
+      .catch(err => next(err))
   }
 }
 
