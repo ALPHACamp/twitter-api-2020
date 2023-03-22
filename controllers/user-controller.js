@@ -93,16 +93,39 @@ const userController = {
     }
   },
   putUser: async (req, res, next) => {
-    const { id, name, introduction, avatar, cover } = req.body
+    const { id } = req.params
+    const { name, introduction, avatar, cover } = req.body
     try {
       if (introduction.length > 160 || name.length > 50) {
         const error = new Error("字數超出上限！");
         error.status = 400;
         throw error;
       }
-      console.log(getUser(req))
-
-
+      if (getUser(req).id !== Number(id)) {
+        const error = new Error("無法更改他人資料!");
+        error.status = 401;
+        throw error;
+      }
+      const foundUser = await User.findByPk(id)
+      if (!foundUser) {
+        const error = new Error("使用者不存在!");
+        error.status = 404;
+        throw error;
+      }
+      const updatedUser = await foundUser.update({
+        name,
+        introduction
+      })
+      const userData = {
+        ...updatedUser.toJSON(),
+        isAuthenticated: ensureAuthenticated(req)
+      }
+      return res.json({
+        status: "success",
+        data: {
+          updatedUser: userData
+        }
+      })
     } catch (error) {
       return next(error)
     }
