@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，不管，我先用舊的 add-on
-const { User, Tweet } = require('../models')
-// const { getUser } = require('../_helpers')
+const { User, Tweet, Reply } = require('../models')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -70,16 +69,20 @@ const userController = {
   },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      // where: { userId: req.params.id },
-      where: { UserId: req.params.id }, // 這是為了測試檔的嘗試
+      where: { UserId: req.params.id }, // 為了測試檔而改成這樣
       raw: true,
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => res.status(200).json(tweets))
-      // .then(tweets => {
-      //   console.log(tweets)
-      //   return res.status(200).json(tweets)
-      // })
+      .catch(err => next(err))
+  },
+  getReplies: (req, res, next) => {
+    return Reply.findAll({
+      where: { UserId: req.params.id },
+      raw: true,
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => res.status(200).json(replies))
       .catch(err => next(err))
   }
 }

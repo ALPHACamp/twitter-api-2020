@@ -10,7 +10,10 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 // router.get('/api/admin/restaurants', authenticated, apiErrorHandler)
 
+// (下1) 單一 user 的所有推文
 router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getTweets)
+// (下1) 單一 user 的所有回覆
+router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getReplies)
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 router.post('/api/users', userController.signUp) // 註冊帳號路由
