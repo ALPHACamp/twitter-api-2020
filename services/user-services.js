@@ -139,8 +139,8 @@ const userServices = {
           attributes: {
             include: [
               'id', 'UserId', 'description',
-              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
-              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeCount'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'repliesCount'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likesCount'],
               [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${nowUser.id} AND Likes.tweet_id = Tweet.id)`), 'liked']
             ]
           },
@@ -153,9 +153,31 @@ const userServices = {
         raw: true,
         nest: true
       })
-      console.log(LikeTweets)
       if (!LikeTweets) throw new Error('此推文不存在')
       cb(null, LikeTweets)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getRepliedTweets: async (req, cb) => {
+    try {
+      const userId = req.params.id
+      const RepliedTweets = await Reply.findAll({
+        where: { UserId: userId },
+        include: {
+          model: Tweet,
+          attributes: ['id'],
+          include: [{
+            model: User,
+            attributes: ['id', 'name', 'avatar', 'account']
+          }]
+        },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      if (!RepliedTweets) throw new Error('此推文不存在')
+      cb(null, RepliedTweets)
     } catch (err) {
       cb(err)
     }
