@@ -1,4 +1,5 @@
-const { Tweet } = require('../models')
+const { Tweet, User } = require('../models')
+const user = require('../models/user')
 const adminController = {
   // 登入
   signIn: async (req, res, next) => {
@@ -27,9 +28,18 @@ const adminController = {
     } catch (err) {
       next(err)
     }
-  },
+  }, // 推文清單(每筆資料顯示推文內容的前50字)
   getTweet: async (req, res, next) => {
-    res.json({ data: { test: '測試' } })
+    return Tweet.findAll({
+      raw: true
+    }).then(tweets => {
+      const data = tweets.map(t => ({
+        ...t,
+        description: t.description.substring(0, 50)
+      }))
+      return res.status(200).json(data)
+    })
+      .catch(err => next(err))
   },
   deleteTweet: (req, res, next) => {
     return Tweet.findByPk(req.params.id)
@@ -42,6 +52,28 @@ const adminController = {
           status: 'success',
           message: 'Successfully deleted the tweet'
         })
+      })
+      .catch(err => next(err))
+  },
+  getUsers: (req, res, next) => {
+    return User.findAll({
+      raw: true
+      // include: [
+      //   { model: Tweet, as: 'TweetLikes' },
+      //   { model: User, as: 'Usertweets' },
+      //   { model: User, as: 'Followers' },
+      //   { model: User, as: 'Followings' }
+      // ]
+    })
+      .then(users => {
+        // const data = users.map(u => ({
+        //   ...u,
+        //   followersCount: User.Followers.length, // 跟隨者人數
+        //   followingsCount: User.Followings.length, // 關注人數
+        //   tweetsCount: User.Usertweets.length, // 使用者的 Tweet 累積總量
+        //   tweetLikesCount: Tweet.TweetLikes.length // 推文被 like 的數量
+        // }))
+        return res.status(200).json(users)
       })
       .catch(err => next(err))
   }

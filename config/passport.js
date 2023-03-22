@@ -9,7 +9,8 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id) // 看到時候需要什麼資料，直接在這裡改
+  User.findByPk(jwtPayload.id, {
+  }) // 看到時候需要什麼資料，直接在這裡改
     .then(user => cb(null, user))
     .catch(err => cb(err))
 }))
