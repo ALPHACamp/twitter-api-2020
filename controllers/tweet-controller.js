@@ -13,6 +13,21 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          { model: Reply, attributes: ['id'] },
+          { model: Like, attributes: ['id'] }
+        ],
+        order: [['updatedAt', 'DESC']]
+      })
+      res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
