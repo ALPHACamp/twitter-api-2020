@@ -5,6 +5,7 @@ const { authenticated } = require('../middleware/auth')
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
 
+router.post('/users', userController.signup)
 router.post('/:role/signin', userController.signin)
 
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
