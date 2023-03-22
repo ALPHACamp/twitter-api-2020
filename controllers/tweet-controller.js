@@ -1,4 +1,4 @@
-const { Tweet, User } = require('../models')
+const { Tweet, User, Like } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -28,12 +28,30 @@ const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       include: { model: User },
-      order: [['updatedAt', 'DESC']],
+      order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
     })
       .then(tweets => {
         res.json(tweets)
+      })
+      .catch(err => next(err))
+  },
+  getTweet: (req, res, next) => {
+    const id = req.params.tweet_id
+
+    return Tweet.findByPk(id, {
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar']},
+        { model: Like, attributes: ['deleted'] }
+      ],
+      raw: true,
+      nest: true
+    })
+      .then(tweet => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+
+        res.json(tweet)
       })
       .catch(err => next(err))
   }
