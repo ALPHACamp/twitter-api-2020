@@ -7,15 +7,15 @@ module.exports = {
       'SELECT id FROM Users;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-
     const tweets = []
     users.shift()
     users.forEach(user => {
       for (let i = 0; i < 10; i++) {
+        const randomOffset = Math.floor(Math.random() * 1000 * 60 * 60 * 24 * 365)
         tweets.push({
           description: faker.lorem.lines(1),
-          created_at: new Date(),
-          updated_at: new Date(),
+          created_at: new Date(Date.now() - randomOffset).toISOString().replace('T', ' ').replace('Z', ''),
+          updated_at: new Date(Date.now() - randomOffset).toISOString().replace('T', ' ').replace('Z', ''),
           user_id: user.id
         })
       }

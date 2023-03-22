@@ -11,16 +11,18 @@ module.exports = {
       'SELECT id FROM Tweets;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-
     const replies = tweets.flatMap(tweet => {
       const userIds = users.map(user => user.id).slice(1).sort(() => Math.random() - 0.5).slice(0, 3)
-      return userIds.map(userId => ({
-        comment: faker.lorem.lines(1),
-        created_at: new Date(),
-        updated_at: new Date(),
-        user_id: userId,
-        tweet_id: tweet.id
-      }))
+      return userIds.map(userId => {
+        const randomOffset = Math.floor(Math.random() * 1000 * 60)
+        return {
+          comment: faker.lorem.lines(1),
+          created_at: new Date(Date.now() - randomOffset).toISOString().replace('T', ' ').replace('Z', ''),
+          updated_at: new Date(Date.now() - randomOffset).toISOString().replace('T', ' ').replace('Z', ''),
+          user_id: userId,
+          tweet_id: tweet.id
+        }
+      })
     })
 
     await queryInterface.bulkInsert('Replies', replies
