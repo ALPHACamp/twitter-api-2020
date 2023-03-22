@@ -46,6 +46,30 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const data = await User.findByPk(id, {
+        attributes: { exclude: ['password', 'role'] },
+        include: [
+          { model: User, as: 'Followers', attributes: ['id'] },
+          { model: User, as: 'Followings', attributes: ['id'] }
+        ]
+      })
+      if (!data) throw new Error('查無此使用者')
+      const user = {
+        ...data.toJSON(),
+        followers: data.Followers?.length,
+        followings: data.Followings?.length,
+        isMyself: helpers.getUser(req).id === Number(id)
+      }
+      delete user.Followers
+      delete user.Followings
+      res.json(user)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
