@@ -5,14 +5,14 @@ const { User } = require("../models");
 
 const userController = {
   signUp: async (req, res, next) => {
-    const { name, account, email, password, passwordConfirm } = req.body;
+    const { name, account, email, password, checkPassword } = req.body;
     try {
       if (!name || !account || !email || !password) {
         const error = new Error("欄位不可空白!");
         error.status = 400;
         throw error;
       }
-      if (password !== passwordConfirm) {
+      if (password !== checkPassword) {
         const error = new Error("密碼與確認密碼不符!");
         error.status = 400;
         throw error;

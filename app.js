@@ -23,8 +23,9 @@ function authenticated (req, res, next) {
 // function authenticated(req, res, next){
 //   // passport.authenticate('jwt', { ses...
 // };
-app.use(passport.initialize())
+app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+app.use(passport.initialize())
 app.use(routes)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
