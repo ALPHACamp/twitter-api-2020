@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { getUser, ensureAuthenticated } = require("../helpers/auth-helper");
+const imgurFileHandler = require("../helpers/file-helper");
+const { getUser } = require("../helpers/auth-helper");
 const { User } = require("../models");
 
 const userController = {
@@ -38,16 +39,11 @@ const userController = {
         password: bcrypt.hashSync(password, 10),
       });
       const foundUser = await User.findByPk(user.id);
-      const newUser = {
-        ...foundUser.toJSON(),
-        isAuthenticated: ensureAuthenticated(req),
-      };
+      const newUser = foundUser.toJSON();
       delete newUser.password;
       return res.json({
         status: "success",
-        data: {
-          newUser,
-        },
+        data: { newUser },
       });
     } catch (error) {
       return next(error);
@@ -73,10 +69,7 @@ const userController = {
         error.status = 400;
         throw error;
       }
-      const loginUser = {
-        ...foundUser.toJSON(),
-        isAuthenticated: ensureAuthenticated(req),
-      };
+      const loginUser = foundUser.toJSON();
       delete loginUser.password;
       const token = jwt.sign(loginUser, process.env.JWT_SECRET, {
         expiresIn: "30d",
@@ -93,8 +86,11 @@ const userController = {
     }
   },
   putUser: async (req, res, next) => {
-    const { id } = req.params
-    const { name, introduction, avatar, cover } = req.body
+    const { id } = req.params;
+    const { name, introduction } = req.body;
+    const { avatar, cover } = req.files;
+    const avatarFile = avatar ? avatar[0] : null;
+    const coverFile = cover ? cover[0] : null;
     try {
       if (introduction.length > 160 || name.length > 50) {
         const error = new Error("字數超出上限！");
@@ -106,30 +102,32 @@ const userController = {
         error.status = 401;
         throw error;
       }
-      const foundUser = await User.findByPk(id)
+      const [foundUser, avatarLink, coverLink] = await Promise.all([
+        User.findByPk(id),
+        imgurFileHandler(avatarFile),
+        imgurFileHandler(coverFile),
+      ]);
       if (!foundUser) {
         const error = new Error("使用者不存在!");
         error.status = 404;
         throw error;
       }
-      const updatedUser = await foundUser.update({
+      const data = await foundUser.update({
         name,
-        introduction
-      })
-      const userData = {
-        ...updatedUser.toJSON(),
-        isAuthenticated: ensureAuthenticated(req)
-      }
+        introduction,
+        avatar: avatarLink || foundUser.avatar,
+        cover: coverLink || foundUser.cover,
+      });
+      const updatedUser = data.toJSON();
+      delete updatedUser.password;
       return res.json({
         status: "success",
-        data: {
-          updatedUser: userData
-        }
-      })
+        data: { updatedUser },
+      });
     } catch (error) {
-      return next(error)
+      return next(error);
     }
-  }
+  },
 };
 
 module.exports = userController;
