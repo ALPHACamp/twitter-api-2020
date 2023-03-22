@@ -42,7 +42,7 @@ const tweetController = {
 
     return Tweet.findByPk(id, {
       include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar']},
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
         { model: Like, attributes: ['deleted'] }
       ],
       raw: true,
