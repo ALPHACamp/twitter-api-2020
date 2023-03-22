@@ -1,6 +1,6 @@
 
 function getUser (req) {
-  return req.user
+  return req.user.toJSON() || null
 }
 
 module.exports = {

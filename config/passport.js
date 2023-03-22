@@ -36,7 +36,8 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
         Tweet,
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
-      ]
+      ],
+      nest: true
     })
     cb(null, user)
   } catch (error) {
