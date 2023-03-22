@@ -2,7 +2,7 @@ const passport = require('passport')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { valueTrim } = require('../helpers/obj-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
@@ -124,6 +124,37 @@ const userController = {
         password: bcrypt.hashSync(password, 10)
       })
       res.status(200).end()
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+      const user = await User.findByPk(UserId, { raw: true, attributes: ['id'] })
+      if (!user) throw new Error('使用者不存在')
+      const data = await Tweet.findAll({
+        where: { UserId },
+        attributes: ['id', 'description', 'updatedAt'],
+        order: [['updatedAt', 'DESC']],
+        include: [
+          { model: Reply, attributes: ['id'] },
+          { model: Like, attributes: ['id'] }
+        ]
+      })
+      const signinUser = helpers.getUser(req)
+      const userTweets = data.map(el => {
+        const tweet = {
+          ...el.toJSON(),
+          replies: el.Replies.length,
+          likes: el.Likes.length,
+          isLike: (signinUser.Likes) ? signinUser.Likes.some(like => like.TweetId === el.id) : false
+        }
+        delete tweet.Replies
+        delete tweet.Likes
+        return tweet
+      })
+      res.json(userTweets)
     } catch (err) {
       next(err)
     }
