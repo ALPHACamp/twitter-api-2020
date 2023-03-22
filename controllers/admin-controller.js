@@ -1,5 +1,6 @@
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
 const { Tweet, User } = require('../models')
-const user = require('../models/user')
 const adminController = {
   // 登入
   signIn: async (req, res, next) => {

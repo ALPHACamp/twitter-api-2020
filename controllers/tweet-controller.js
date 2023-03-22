@@ -25,7 +25,7 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({ raw: true, nest: true, order: [['createdAt', 'DESC']] })
-      if (!tweets) return res.status(404).json({ status: 'error', message: 'Not found' })
+      if (!tweets) return res.status(404).json({ status: 'error', message: 'Tweets not found' })
       const shortenedTweets = tweets.map(tweet => {
         const shortenedDescription = tweet.description.length > 50 ? tweet.description.slice(0, 50) + '...' : tweet.description
         return {
@@ -41,9 +41,26 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     const id = req.params.tweet_id
     try {
-      const tweet = await Tweet.findOne({ where: { id } })
-      if (!tweet) return res.status(404).json({ status: 'error', message: 'Not found' })
+      const tweet = await Tweet.findByPk(id)
+      if (!tweet) return res.status(404).json({ status: 'error', message: 'Tweet not found' })
       return res.status(200).json(tweet)
+    } catch (err) {
+      next(err)
+    }
+  },
+  deleteTweet: async (req, res, next) => {
+    const TweetId = req.params.tweet_id
+    try {
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) return res.status(404).json({ status: 'error', message: 'Tweet not found' })
+      // 非推文者不得執行刪除操作
+      if (tweet.UserId !== helpers.getUser(req).id) return res.status(403).json({ status: 'error', message: 'Permission denied' })
+      await tweet.destroy()
+      return res.status(200).json({
+        status: 'success',
+        message: 'Successfully deleted tweet',
+        data: { tweet }
+      })
     } catch (err) {
       next(err)
     }
