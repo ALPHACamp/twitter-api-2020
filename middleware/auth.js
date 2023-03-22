@@ -25,6 +25,13 @@ const authenticatedUser = (req, res, next) => {
   next()
 }
 
+const checkFieldNotEmpty = (req, res, next) => {
+  const { account, password } = req.body
+  if (!account || !password) throw createError(400, '欄位不得為空')
+
+  next()
+}
+
 module.exports = {
-  authenticated, authenticatedAdmin, authenticatedUser
+  authenticated, authenticatedAdmin, authenticatedUser, checkFieldNotEmpty
 }
