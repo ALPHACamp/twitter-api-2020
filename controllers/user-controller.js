@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const createError = require('http-errors')
 const { getUser } = require('../_helpers')
 const { User, Tweet, Like, Reply, sequelize } = require('../models')
+const imgurFileHandler = require('../helpers/file-helpers')
 
 const userController = {
   login: (req, res, next) => {
@@ -45,6 +46,86 @@ const userController = {
           message: '註冊成功'
         })
       })
+      .catch(error => next(error))
+  },
+  getUser: (req, res, next) => {
+    const { id } = req.params
+
+    return User.findByPk(id, {
+      attributes: [
+        'id', 'account', 'name', 'introduction', 'avatar', 'cover', 'role',
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount']
+      ]
+    })
+      .then(user => {
+        if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
+
+        return res.json(user)
+      })
+      .catch(error => next(error))
+  },
+  putUser: (req, res, next) => {
+    const id = Number(req.params.id)
+    const { name, introduction } = req.body
+    const { files } = req
+
+    // 為通過測試不能做欄位不得為空錯誤訊息回傳
+    // if (!name || !introduction || !files?.avatar || !files?.cover) throw createError(400, '欄位不得為空')
+    if (name.length > 50) throw createError(422, '名稱不能超過 50 個字')
+    if (introduction.length > 160) throw createError(422, '自我介紹不能超過 160 個字')
+
+    return Promise.all([
+      User.findByPk(id),
+      imgurFileHandler(files?.avatar ? files.avatar[0] : null),
+      imgurFileHandler(files?.cover ? files.cover[0] : null)
+    ])
+      .then(([user, avatarPath, coverPath]) => user.update({
+        name,
+        introduction,
+        avatar: avatarPath || user.avatar,
+        cover: coverPath || user.cover
+      })
+      )
+      .then(() => res.json({
+        status: 'success',
+        message: '成功更新使用者個人資料'
+      }))
+      .catch(error => next(error))
+  },
+  getUserSetting: (req, res, next) => {
+    const { id } = req.params
+
+    return User.findByPk(id, {
+      attributes: ['id', 'account', 'name', 'email']
+    })
+      .then(user => res.json(user))
+      .catch(error => next(error))
+  },
+  putUserSetting: (req, res, next) => {
+    const { id } = req.params
+    const { account, name, email, password, checkPassword } = req.body
+
+    if (!account || !name || !email || !password || !checkPassword) throw createError(400, '欄位不得為空')
+    if (name.length > 50) throw createError(422, '名稱不能超過 50 個字')
+    if (!validator.isEmail(email)) throw createError(422, 'Email 格式有誤')
+    if (password !== checkPassword) throw createError(422, '兩次輸入的密碼不相同')
+
+    return Promise.all([
+      User.findByPk(id),
+      User.findOne({ where: { account }, raw: true }),
+      User.findOne({ where: { email }, raw: true })
+    ])
+      .then(([user, foundAccount, foundEmail]) => {
+        if (foundAccount && foundAccount.account !== user.account) throw createError(422, 'Account 重複註冊')
+        if (foundEmail && foundEmail.email !== user.email) throw createError(422, 'Email 重複註冊')
+
+        return user.update({ account, name, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)) })
+      })
+      .then(() => res.json({
+        status: 'success',
+        message: '該使用者帳號設定更新成功'
+      }))
       .catch(error => next(error))
   },
   // 查看特定使用者發過的推文
