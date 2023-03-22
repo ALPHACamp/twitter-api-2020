@@ -12,8 +12,6 @@ router.use((req, res, next) => {
   next()
 })
 
-router.use('/users', authenticated, users)
-router.use('/admin', admin)
 router.post('/users', userController.signUp)
 router.post('/admin/login', passport.authenticate('local', { session: false, failureMessage: true, failWithError: true }), adminController.signIn, adminController.signInFail)
 router.post('/users/login', passport.authenticate('local', { session: false, failureMessage: true, failWithError: true }), userController.signIn, userController.signInFail)
