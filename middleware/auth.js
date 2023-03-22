@@ -1,5 +1,5 @@
 const createError = require('http-errors')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const passport = require('../config/passport')
 
 const authenticated = (req, res, next) => {
@@ -12,14 +12,14 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  const loginUser = getUser(req)
+  const loginUser = helpers.getUser(req)
   if (loginUser.role !== 'admin') throw createError(403, '沒有使用該頁面的權限')
 
   next()
 }
 
 const authenticatedUser = (req, res, next) => {
-  const loginUser = getUser(req)
+  const loginUser = helpers.getUser(req)
   if (loginUser.role !== 'user') throw createError(403, '沒有使用該頁面的權限')
 
   next()
