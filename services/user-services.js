@@ -113,9 +113,9 @@ const userServices = {
           'UserId',
           'description',
           'createdAt',
-          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeCount'],
-          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${nowUser.id} AND Likes.tweet_id = Tweet.id)`), 'liked']
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyNum'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeNum'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${nowUser.id} AND Likes.tweet_id = Tweet.id)`), 'isliked']
         ]
       },
       order: [['createdAt', 'DESC']],
@@ -139,9 +139,9 @@ const userServices = {
           attributes: {
             include: [
               'id', 'UserId', 'description',
-              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'repliesCount'],
-              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likesCount'],
-              [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${nowUser.id} AND Likes.tweet_id = Tweet.id)`), 'liked']
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyNum'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeNum'],
+              [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${nowUser.id} AND Likes.tweet_id = Tweet.id)`), 'isliked']
             ]
           },
           include: [{
@@ -178,6 +178,35 @@ const userServices = {
       })
       if (!RepliedTweets) throw new Error('此推文不存在')
       cb(null, RepliedTweets)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getUsersFollowings: async (req, cb) => {
+    try {
+      const userId = req.params.id
+      const nowUser = helpers.getUser(req)
+      const following = await Followship.findAll({
+        where: {
+          followerId: userId
+        },
+        include: {
+          model: User,
+          as: 'Followings',
+          attributes: {
+            exclude: ['password', 'role', 'createdAt', 'updatedAt'],
+            include: [
+              'id', 'name', 'avatar', 'account', 'introduction',
+              [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.follower_id = ${nowUser.id} AND Followships.following_id = Followings.id)`), 'isFollowed']
+            ]
+          }
+        },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      if (!following) throw new Error('沒有追蹤!')
+      cb(null, following)
     } catch (err) {
       cb(err)
     }
