@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express.Router()
 
-const passport = require('../../config/passport')
+const passport = require('../../../config/passport')
 
-const userController = require('../../controllers/user-controller')
+const userController = require('../../../controllers/user-controller')
 
 router.get('/:userId/tweets', userController.getUserTweets)
 router.get('/:userId/replied-tweets', userController.getUserReplies)
