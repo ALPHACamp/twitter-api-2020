@@ -13,6 +13,7 @@ router.post('/users', userController.signup)
 router.post('/:role/signin', userController.signin)
 
 router.post('/tweets/:id/like', authenticated, tweetController.addTweetLike)
+router.post('/tweets/:id/unlike', authenticated, tweetController.removeTweetLike)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
