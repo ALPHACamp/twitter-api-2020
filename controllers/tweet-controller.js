@@ -1,5 +1,5 @@
 const { Reply, Tweet, User } = require('../models')
-const { getUser } = require('../helpers/auth-helpers')
+const { getUser } = require('../_helpers')
 
 const tweetController = {
   postTweet: (req, res, next) => {
@@ -11,7 +11,7 @@ const tweetController = {
       userId: getUser(req).id,
       description
     })
-      .then(tweet => res.json({ status: 'success', tweet }))
+      .then(tweet => res.status(200).json({ status: 'success', tweet }))
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
@@ -20,7 +20,7 @@ const tweetController = {
       raw: true,
       nest: true
     })
-      .then(tweets => res.json({ status: 'success', tweets }))
+      .then(tweets => res.status(200).json({ status: 'success', tweets }))
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
@@ -38,6 +38,38 @@ const tweetController = {
       .then(tweet => {
         if (!tweet) throw new Error('推文不存在')
         res.json({ status: 'success', tweet })
+      })
+      .catch(err => next(err))
+  },
+  postReply: (req, res, next) => {
+    const { comment } = req.body
+    if (!comment.trim()) throw new Error('回覆內容不能空白')
+    Tweet.findByPk(req.params.tweet_id, {
+      include: { model: User }
+    })
+      .then(tweet => {
+        if (!tweet) throw new Error('推文不存在')
+        return Reply.create({
+          userId: getUser(req).id,
+          tweetId: tweet.id,
+          comment
+        })
+      })
+      .then(reply => res.status(200).json({ status: 'success', reply }))
+      .catch(err => next(err))
+  },
+  getReply: (req, res, next) => {
+    Tweet.findByPk(req.params.tweet_id)
+      .then(tweet => {
+        if (!tweet) throw new Error('推文不存在')
+        return Reply.findAll(
+          { where: { tweetId: tweet.id } }
+        )
+      })
+      .then(replies => {
+        const data = []
+        replies.forEach(reply => data.push(reply))
+        res.status(200).json(data)
       })
       .catch(err => next(err))
   }
