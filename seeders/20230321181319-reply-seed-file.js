@@ -7,8 +7,8 @@ module.exports = {
 
     await queryInterface.bulkInsert('Replies', Array.from({ length: 150 }, (_, index) => ({
       comment: faker.lorem.text(20),
-      created_at: new Date(),
-      updated_at: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       TweetId: tweets[index % 50].id,
       UserId: users[index % 5].id
     })))

@@ -9,8 +9,8 @@ module.exports = {
       role: 'admin',
       name: 'root',
       account: 'root',
-      created_at: new Date(),
-      updated_at: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/people,casual/?random=${Math.random() * 100}`,
       cover: `https://loremflickr.com/320/240/scenary,city/?random=${Math.random() * 100}`
 
@@ -20,8 +20,8 @@ module.exports = {
       role: 'user',
       account: 'user1',
       name: 'user1',
-      created_at: new Date(),
-      updated_at: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/people,casual/?random=${Math.random() * 100}`,
       cover: `https://loremflickr.com/320/240/scenary,city/?random=${Math.random() * 100}`
     }, {
@@ -30,8 +30,8 @@ module.exports = {
       role: 'user',
       name: 'user2',
       account: 'user2',
-      created_at: new Date(),
-      updated_at: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/people,casual/?random=${Math.random() * 100}`,
       cover: `https://loremflickr.com/320/240/scenary,city/?random=${Math.random() * 100}`
     }, {
@@ -40,8 +40,8 @@ module.exports = {
       role: 'user',
       name: 'user3',
       account: 'user3',
-      created_at: new Date(),
-      updated_at: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/people,casual/?random=${Math.random() * 100}`,
       cover: `https://loremflickr.com/320/240/scenary,city/?random=${Math.random() * 100}`
     }, {
@@ -50,8 +50,8 @@ module.exports = {
       role: 'user',
       name: 'user4',
       account: 'user4',
-      created_at: new Date(),
-      updated_at: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/people,casual/?random=${Math.random() * 100}`,
       cover: `https://loremflickr.com/320/240/scenary,city/?random=${Math.random() * 100}`
     }, {
@@ -60,8 +60,8 @@ module.exports = {
       role: 'user',
       name: 'user5',
       account: 'user5',
-      created_at: new Date(),
-      updated_at: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/people,casual/?random=${Math.random() * 100}`,
       cover: `https://loremflickr.com/320/240/scenary,city/?random=${Math.random() * 100}`
     }], {})
