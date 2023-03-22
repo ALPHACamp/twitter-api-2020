@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
 
 const userServices = {
@@ -70,14 +71,21 @@ const userServices = {
     try {
       const userId = req.params.id
       const nowUser = helpers.getUser(req)
+      if (Number(userId) !== nowUser.id) throw new Error('無權限修改其他使用者資料')
+
       const { account, name, email, password, checkPassword } = req.body
-      if (!account?.trim().length === 0 || !name?.trim().length === 0 || !email.trim()?.length === 0 || !password?.trim().length === 0) throw new Error('還有欄位沒填')
+      const { Avatar, Cover } = req.files
+
+      if (!account?.trim().length === 0 || !name?.trim().length === 0 || !email?.trim().length === 0 || !password?.trim().length === 0) throw new Error('還有欄位沒填')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不一樣!')
       if (name && name.length > 50) throw new Error('暱稱上限50字!')
-      const [user, userAccount, userEmail] = await Promise.all([
+
+      const [user, userAccount, userEmail, filePathAvatar, filePathCover] = await Promise.all([
         User.findByPk(userId),
-        User.findOne({ where: { account }, raw: true }),
-        User.findOne({ where: { email }, raw: true })
+        account ? User.findOne({ where: { account }, raw: true }) : Promise.resolve(null),
+        email ? User.findOne({ where: { email }, raw: true }) : Promise.resolve(null),
+        Avatar ? imgurFileHandler(Avatar[0]) : Promise.resolve(null),
+        Cover ? imgurFileHandler(Cover[0]) : Promise.resolve(null)
       ])
       if (userAccount && userAccount.id !== nowUser.id) throw new Error('帳戶名稱已經註冊過!')
       if (userEmail && userEmail.id !== nowUser.id) throw new Error('信箱已經註冊過!')
@@ -85,7 +93,9 @@ const userServices = {
         account,
         name,
         email,
-        password: bcrypt.hashSync(password, 10)
+        avatar: filePathAvatar || user.avatar,
+        cover: filePathCover || user.cover,
+        password: password ? bcrypt.hashSync(password, 10) : user.password
       })
       const newData = updateUser.toJSON()
       delete newData.password
