@@ -7,7 +7,6 @@ router.delete('/tweets/:id', adminController.deleteTweet)
 
 router.get('/tweets', adminController.getTweet)
 
-router.get('/users',)
+router.get('/users', adminController.getUsers)
 
 module.exports = router
-
