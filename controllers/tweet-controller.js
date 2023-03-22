@@ -1,4 +1,4 @@
-const { Tweet, User, sequelize } = require('../models')
+const { Tweet, User, Reply, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 const tweetController = {
   getTweets: (req, res, next) => {
@@ -74,6 +74,61 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweetReplies: (req, res, next) => {
+    const TweetId = req.params.tweet_id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Reply.findAll({
+        attributes: ['id', 'comment'],
+        where: { TweetId },
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      })
+    ])
+      .then(([tweet, replies]) => {
+        if (!tweet) {
+          const error = new Error('此推文不存在！')
+          error.status = 404
+          throw error
+        }
+        return res.status(200).json(replies)
+      })
+      .catch(err => next(err))
+  },
+  postTweetReplies: async (req, res, next) => {
+    try {
+      const UserId = getUser(req).dataValues.id
+      const TweetId = req.params.tweet_id
+      const { comment } = req.body
+
+      if (!comment) {
+        const error = new Error('內容不可空白！')
+        error.status = 400
+        throw error
+      }
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
+        const error = new Error('此推文不存在！')
+        error.status = 404
+        throw error
+      }
+      const user = await User.findByPk(UserId)
+      if (!user) throw new Error('使用者不存在!')
+
+      const reply = await Reply.create({ TweetId, comment, UserId })
+
+      const data = {
+        ...reply.dataValues,
+        user: user.dataValues
+      }
+      Object.keys(data.user).forEach(e => {
+        if (!['id', 'name', 'account', 'avatar'].includes(e)) return delete data.user[e]
+      })
+      delete data.UserId
+      delete data.TweetId
+
+      return res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 module.exports = tweetController
