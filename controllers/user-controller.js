@@ -99,7 +99,66 @@ const userController = {
       next(err);
     }
   },
-  editUser: async (req, res, next) => {
+  editUserSetting: async (req, res, next) => {
+    try {
+      const UserId = req.params.id;
+      const currentId = getUser(req).id;
+      const { account, name, email, password, checkPassword } = req.body;
+
+      const user = await User.findByPk(UserId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      if (currentId !== user.id) {
+        throw new Error('You are not authorized to edit this user');
+      }
+
+      if (!account || !name || !email || !password || !checkPassword) {
+        throw new Error('All fields are required');
+      }
+
+      if (account !== user.account) {
+        if (await User.findOne({ where: { account } })) {
+          throw new Error('This account already exists');
+        }
+      }
+
+      if (email !== user.email) {
+        if (await User.findOne({ where: { email } })) {
+          throw new Error('This email already exists');
+        }
+      }
+
+      if (name.length > 50) {
+        throw new Error('Name is longer than 50 characters');
+      }
+      if (password !== checkPassword) {
+        throw new Error('Passwords do not match');
+      }
+
+      const userUpdated = await user.update({
+        account,
+        name,
+        email,
+        password: password ? bcrypt.hashSync(password, 10) : password,
+      });
+
+      res.status(200).json({
+        status: 'success',
+        message: 'User is updated successfully',
+        userUpdated: {
+          account: userUpdated.account,
+          name: userUpdated.name,
+          email: userUpdated.email,
+        },
+      });
+    } catch (err) {
+      err.status = 400;
+      next(err);
+    }
+  },
+  editUserProfile: async (req, res, next) => {
     try {
     } catch (err) {
       next(err);
