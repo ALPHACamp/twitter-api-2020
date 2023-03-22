@@ -154,7 +154,38 @@ const userController = {
         delete tweet.Likes
         return tweet
       })
-      res.json(userTweets)
+      res.status(200).json(userTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+      const user = await User.findByPk(UserId, { raw: true, attributes: ['id'] })
+      if (!user) throw new Error('使用者不存在')
+      const data = await Reply.findAll({
+        where: { UserId },
+        order: [['updatedAt', 'DESC']],
+        attributes: ['comment', 'updatedAt'],
+        include: [
+          {
+            model: Tweet,
+            attributes: ['id'],
+            include: [{ model: User, attributes: ['id', 'name'] }]
+          }
+        ]
+      })
+      const userReplies = data.map(el => {
+        const reply = {
+          ...el.toJSON(),
+          tweeterId: el.Tweet.User.id,
+          tweeterName: el.Tweet.User.name
+        }
+        delete reply.Tweet
+        return reply
+      })
+      res.status(200).json(userReplies)
     } catch (err) {
       next(err)
     }
