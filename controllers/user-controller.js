@@ -15,7 +15,7 @@ const userController = {
       try {
         // 登入完後要發出jwt token
         const token = jwt.sign(helpers.getUser(req), process.env.JWT_SECRET, { expiresIn: '1d' }) // expiresIn: token的有效日期是一天
-        res.json({
+        res.status(200).json({
           token,
           user: helpers.getUser(req)
         })
@@ -43,7 +43,7 @@ const userController = {
         email,
         password: bcrypt.hashSync(password, 10)
       })
-      res.json(user)
+      res.status(200).json(user)
     } catch (err) {
       next(err)
     }
@@ -59,15 +59,17 @@ const userController = {
         ]
       })
       if (!data) throw new Error('查無此使用者')
+      const signinUser = helpers.getUser(req)
       const user = {
         ...data.toJSON(),
         followers: data.Followers?.length,
         followings: data.Followings?.length,
-        isMyself: helpers.getUser(req).id === Number(id)
+        isMyself: helpers.getUser(req).id === Number(id),
+        isFollowing: (signinUser.Followings) ? signinUser.Followings.some(following => following.id === Number(id)) : false
       }
       delete user.Followers
       delete user.Followings
-      res.json(user)
+      res.status(200).json(user)
     } catch (err) {
       next(err)
     }
@@ -93,7 +95,7 @@ const userController = {
         avatar: images?.avatar ? images.avatar : user.toJSON().avatar,
         cover: images?.cover ? images.cover : user.toJSON().cover
       })
-      res.json(editedUser)
+      res.status(200).json(editedUser)
     } catch (err) {
       next(err)
     }
