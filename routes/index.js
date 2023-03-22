@@ -11,7 +11,7 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../mid
 
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/signup', userController.signUp)
-router.use('/users', user)
+router.use('/users', authenticated, authenticatedUser, user)
 router.use('/followships', authenticated, authenticatedUser, followship)
 router.use('/tweets', authenticated, authenticatedUser, tweet)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
