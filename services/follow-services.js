@@ -1,4 +1,4 @@
-const { User, Followship } = require('../models')
+const { User, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const followServices = {
@@ -50,6 +50,22 @@ const followServices = {
       })
       const removeFollowing = follow.toJSON()
       cb(null, removeFollowing)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  topFollow: async (req, cb) => {
+    try {
+      const user = await User.findAll({
+        attributes: [
+          'id', 'name', 'account', 'avatar',
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followingNum']
+        ],
+        order: [[sequelize.literal('followingNum'), 'DESC']],
+        raw: true,
+        nest: true
+      })
+      cb(null, user)
     } catch (err) {
       cb(err)
     }

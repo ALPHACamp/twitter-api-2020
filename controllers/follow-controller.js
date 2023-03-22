@@ -6,6 +6,9 @@ const followController = {
   },
   deleteFollow: (req, res, next) => {
     followServices.deleteFollow(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  topFollow: (req, res, next) => {
+    followServices.topFollow(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 

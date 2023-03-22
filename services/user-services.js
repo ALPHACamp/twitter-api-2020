@@ -90,7 +90,7 @@ const userServices = {
 
       if (userAccount && userAccount.id !== nowUser.id) throw new Error('帳戶名稱已經註冊過!')
       if (userEmail && userEmail.id !== nowUser.id) throw new Error('信箱已經註冊過!')
-      
+
       const updateUser = await user.update({
         account,
         name,
