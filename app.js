@@ -4,15 +4,9 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const session = require('express-session')
 const passport = require('./config/passport')
-const helpers = require('./_helpers')
-const methodOverride = require('method-override')
-const routes = require('./routes')
 
 const app = express()
 const port = process.env.PORT || 3000
-app.use(methodOverride('_method'))
-app.use(express.urlencoded({ extended: true }))
-
 const { apis } = require('./routes')
 app.use(express.urlencoded({ extended: true }))// req.body
 app.use(express.json())// json
@@ -29,6 +23,7 @@ app.use((req, res, next) => {
   req.session.messages = [] // 重設錯誤訊息
   next()
 })
+
 
 app.use('/api', apis)
 app.get('/', (req, res) => res.send('Hello World!'))

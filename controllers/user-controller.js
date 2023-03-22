@@ -1,15 +1,14 @@
-const jwt = require('jsonwebtoken')
-const { Op } = require('sequelize')
+const { User } = require('../models')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Followship, Reply, Like } = require('../models')
+const { Op } = require('sequelize')
+const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
-const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
   signUp: async (req, res, next) => {
     try {
-      const { account, name, email, password, checkPassword } = req.body
-      if (!email || !name || !account || !password || !checkPassword) throw new Error('請填寫所有欄位!')
-      if (password !== checkPassword) throw new Error('密碼與確認密碼不一致!')// 確認密碼一致
+      const { account, name, email, password, passwordCheck } = req.body
+      if (!email || !name || !account || !password || !passwordCheck) throw new Error('請填寫所有欄位!')
+      if (password !== passwordCheck) throw new Error('密碼與確認密碼不一致!')// 確認密碼一致
       const user = await User.findOne({ // account 和 email 不能與其他人重複
         where: {
           [Op.or]: [
@@ -327,4 +326,4 @@ const userController = {
     return finalform
   }
 }
-module.exports = { userController }
+module.exports =  userController 
