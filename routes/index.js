@@ -18,6 +18,14 @@ const {
 
 const { apiErrorHandler } = require('../middleware/error-handler');
 const userController = require('../controllers/user-controller');
+const adminController = require('../controllers/admin-controller');
+const tweetController = require('../controllers/tweet-controller');
+
+// cors header setting middleware
+// const corsSet = (req, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', 'https://localhost:7000');
+//   next();
+// };
 
 // register
 router.post('/users', userController.signUp);
@@ -36,12 +44,13 @@ router.post(
   authenticatedAdmin,
   userController.signIn
 );
+router.get('/tweets', authenticated, tweetController.getAllTweets);
 
 router.use('/admin', authenticated, authenticatedAdmin, admin);
 
 router.use('/users', authenticated, authenticatedUser, users);
 
-router.use('/tweets', authenticated, tweet);
+router.use('/tweets', authenticated, authenticatedUser, tweet);
 
 router.get('/', (req, res) =>
   res.send(`You did not pass the authentication. Here is routes/index.js
