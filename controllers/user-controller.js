@@ -117,8 +117,8 @@ const userController = {
       User.findOne({ where: { email }, raw: true })
     ])
       .then(([user, foundAccount, foundEmail]) => {
-        if (foundAccount) throw createError(422, 'Account 重複註冊')
-        if (foundEmail) throw createError(422, 'Email 重複註冊')
+        if (foundAccount && foundAccount.account !== user.account) throw createError(422, 'Account 重複註冊')
+        if (foundEmail && foundEmail.email !== user.email) throw createError(422, 'Email 重複註冊')
 
         return user.update({ account, name, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)) })
       })
