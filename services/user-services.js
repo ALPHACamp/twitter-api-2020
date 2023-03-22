@@ -73,7 +73,7 @@ const userServices = {
       const nowUser = helpers.getUser(req)
       if (Number(userId) !== nowUser.id) throw new Error('無權限修改其他使用者資料')
 
-      const { account, name, email, password, checkPassword } = req.body
+      const { account, name, email, password, checkPassword, introduction } = req.body
       const { Avatar, Cover } = req.files || {}
 
       if (!account?.trim().length === 0 || !name?.trim().length === 0 || !email?.trim().length === 0 || !password?.trim().length === 0) throw new Error('還有欄位沒填')
@@ -95,6 +95,7 @@ const userServices = {
         account,
         name,
         email,
+        introduction: introduction || user.introduction,
         avatar: filePathAvatar || user.avatar,
         cover: filePathCover || user.cover,
         password: password ? bcrypt.hashSync(password, 10) : user.password
