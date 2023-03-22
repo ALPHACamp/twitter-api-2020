@@ -80,19 +80,51 @@ const userController = {
       imgurFileHandler(files?.avatar ? files.avatar[0] : null),
       imgurFileHandler(files?.cover ? files.cover[0] : null)
     ])
-      .then(([user, avatarPath, coverPath]) => {
-        if (!user) throw createError(404, '帳號不存在')
-
-        return user.update({
-          name,
-          introduction,
-          avatar: avatarPath || user.avatar,
-          cover: coverPath || user.cover
-        })
+      .then(([user, avatarPath, coverPath]) => user.update({
+        name,
+        introduction,
+        avatar: avatarPath || user.avatar,
+        cover: coverPath || user.cover
       })
+      )
       .then(() => res.json({
         status: 'success',
         message: '成功更新使用者個人資料'
+      }))
+      .catch(error => next(error))
+  },
+  getUserSetting: (req, res, next) => {
+    const { id } = req.params
+
+    return User.findByPk(id, {
+      attributes: ['id', 'account', 'name', 'email', 'role']
+    })
+      .then(user => res.json(user))
+      .catch(error => next(error))
+  },
+  putUserSetting: (req, res, next) => {
+    const { id } = req.params
+    const { account, name, email, password, checkPassword } = req.body
+
+    if (!account || !name || !email || !password || !checkPassword) throw createError(400, '欄位不得為空')
+    if (name.length > 50) throw createError(422, '名稱不能超過 50 個字')
+    if (!validator.isEmail(email)) throw createError(422, 'Email 格式有誤')
+    if (password !== checkPassword) throw createError(422, '兩次輸入的密碼不相同')
+
+    return Promise.all([
+      User.findByPk(id),
+      User.findOne({ where: { account }, raw: true }),
+      User.findOne({ where: { email }, raw: true })
+    ])
+      .then(([user, foundAccount, foundEmail]) => {
+        if (foundAccount) throw createError(422, 'Account 重複註冊')
+        if (foundEmail) throw createError(422, 'Email 重複註冊')
+
+        return user.update({ account, name, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)) })
+      })
+      .then(() => res.json({
+        status: 'success',
+        message: '該使用者帳號設定更新成功'
       }))
       .catch(error => next(error))
   },
