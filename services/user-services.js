@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const assert = require('assert')
 
 const helpers = require('../_helpers')
-const { User } = require('../models')
+const { User, sequelize } = require('../models')
 
 const userService = {
   signUp: (req, cb) => {
@@ -56,6 +56,51 @@ const userService = {
     } catch (err) {
       cb(err)
     }
+  },
+  getUser: (req, cb) => {
+    const userId = helpers.getUser(req).id
+    return User.findOne({
+      where: { id: req.params.user_id },
+      attributes: [
+        'id',
+        'account',
+        'name',
+        'avatar',
+        'introduction',
+        'cover',
+        [
+          sequelize.literal(
+            `(EXISTS(SELECT * FROM Followships WHERE Followships.following_id = User.id AND Followships.follower_id = ${userId}))`
+          ),
+          'isFollowed'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'
+          ),
+          'followerCounts'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'
+          ),
+          'followingCounts'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Tweets WHERE Tweets.User_id = User.id)'
+          ),
+          'tweetsCounts'
+        ]
+      ],
+      nest: true,
+      raw: true
+    })
+      .then(user => {
+        assert(user, '使用者不存在！')
+        cb(null, { user })
+      })
+      .catch(err => cb(err))
   }
 }
 
