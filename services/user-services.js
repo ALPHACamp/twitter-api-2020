@@ -7,7 +7,6 @@ const userServices = {
   signIn: (req, cb) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      if (userData.role !== 'user') throw new Error('帳號不存在')
 
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -103,7 +102,7 @@ const userServices = {
       where: { UserId: userId },
       include: [
         {
-          model: User,
+          model: Tweet,
           attributes: ['id', 'account', 'avatar', 'name']
         }
       ],
@@ -128,6 +127,38 @@ const userServices = {
         cb(null, tweets)
       })
       .catch(err => cb(err))
+  },
+  getLikeTweets: async (req, cb) => {
+    try {
+      const nowUser = helpers.getUser(req)
+      const userId = req.params.id
+      const LikeTweets = await Like.findAll({
+        where: { UserId: userId },
+        include: {
+          model: Tweet,
+          attributes: {
+            include: [
+              'id', 'UserId', 'description',
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likeCount'],
+              [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.user_id = ${nowUser.id} AND Likes.tweet_id = Tweet.id)`), 'liked']
+            ]
+          },
+          include: [{
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatar']
+          }]
+        },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      console.log(LikeTweets)
+      if (!LikeTweets) throw new Error('此推文不存在')
+      cb(null, LikeTweets)
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 
