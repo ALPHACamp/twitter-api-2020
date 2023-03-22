@@ -25,6 +25,13 @@ const authenticatedUser = (req, res, next) => {
   next()
 }
 
+const authenticatedSelf = (req, res, next) => {
+  const loginUser = helpers.getUser(req)
+  if (loginUser.id !== Number(req.params.id)) throw createError(403, '沒有使用該頁面的權限')
+
+  next()
+}
+
 const checkFieldNotEmpty = (req, res, next) => {
   const { account, password } = req.body
   if (!account || !password) throw createError(400, '欄位不得為空')
@@ -33,5 +40,5 @@ const checkFieldNotEmpty = (req, res, next) => {
 }
 
 module.exports = {
-  authenticated, authenticatedAdmin, authenticatedUser, checkFieldNotEmpty
+  authenticated, authenticatedAdmin, authenticatedUser, authenticatedSelf, checkFieldNotEmpty
 }
