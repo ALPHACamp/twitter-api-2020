@@ -18,9 +18,19 @@ const tweetController = {
       })
       .then(tweet => {
         res.json({
-          status: 'success',
-          data: tweet
+          tweet
         })
+      })
+      .catch(err => next(err))
+  },
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      include: { model: User }
+    })
+      .then(data => {
+        const tweets = data.map(tweet => tweet.toJSON())
+        console.log('tweets', tweets)
+        res.json(tweets)
       })
       .catch(err => next(err))
   }

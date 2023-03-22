@@ -10,6 +10,7 @@ router.post('/users/signin', passport.authenticate('local', { session: false }),
 router.post('/users', userController.signUp)
 
 router.post('/tweets', authenticated, tweetController.postTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
 
 router.use('/', apiErrorHandler)
 
