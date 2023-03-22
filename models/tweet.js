@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Tweet.init({
-    userId: DataTypes.INTEGER,
+    UserId: DataTypes.INTEGER, // 因為測試檔 (test/request/user.spec.js) 而改大駝峰
     description: DataTypes.TEXT
   }, {
     sequelize,
