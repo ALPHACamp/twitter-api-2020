@@ -1,4 +1,4 @@
-const { Tweet, User, Like } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -53,6 +53,29 @@ const tweetController = {
 
         res.json(tweet)
       })
+      .catch(err => next(err))
+  },
+  postReply: (req, res, next) => {
+    const { comment } = req.body
+    if (!comment) throw new Error('comment is required')
+
+    const user = helpers.getUser(req)
+    const UserId = user.id
+    const TweetId = req.params.tweet_id
+
+    return User.findByPk(UserId)
+      .then(user => {
+        if (!user) throw new Error("User didn't exist!")
+
+        return Reply.create({
+          UserId,
+          TweetId,
+          comment
+        })
+      })
+      .then(reply => res.json({
+        reply
+      }))
       .catch(err => next(err))
   }
 }
