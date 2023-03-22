@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const { User } = require('../models')
 const { valueTrim } = require('../helpers/obj-helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signin: [
@@ -67,6 +68,60 @@ const userController = {
       delete user.Followers
       delete user.Followings
       res.json(user)
+    } catch (err) {
+      next(err)
+    }
+  },
+  editUserProfile: async (req, res, next) => {
+    try {
+      const signinUser = helpers.getUser(req)
+      const { id } = req.params
+      if (signinUser.id !== Number(id)) throw new Error('無編輯權限')
+      const { name, introduction } = valueTrim(req.body)
+      if (!name) throw new Error('名稱不可為空白')
+      if (name.length > 50) throw new Error('名稱不可超過50字')
+      if (introduction.length > 160) throw new Error('自我介紹不可超過160字')
+      const user = await User.findByPk(id, {
+        attributes: { exclude: ['password'] }
+      })
+      if (!user) throw new Error('使用者不存在')
+
+      const images = (!req.files) ? null : await imgurFileHandler(req.files) // 回傳為物件，{avatar: '...', cover: '...'}
+      const editedUser = await user.update({
+        name,
+        introduction,
+        avatar: images?.avatar ? images.avatar : user.toJSON().avatar,
+        cover: images?.cover ? images.cover : user.toJSON().cover
+      })
+      res.json(editedUser)
+    } catch (err) {
+      next(err)
+    }
+  },
+  editUserAccount: async (req, res, next) => {
+    try {
+      const signinUser = helpers.getUser(req)
+      const { id } = req.params
+      if (signinUser.id !== Number(id)) throw new Error('無編輯權限')
+      const { account, name, email, password, checkPassword } = valueTrim(req.body)
+      if (!account || !name || !email || !password || !checkPassword) throw new Error('所有欄位皆不可為空白')
+      if (name.length > 50) throw new Error('名稱不可超過50字')
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不符')
+      const [existAccount, existEmail, user] = await Promise.all([
+        User.findOne({ where: { role: 'user', account }, attributes: ['id'], raw: true }),
+        User.findOne({ where: { role: 'user', email }, attributes: ['id'], raw: true }),
+        User.findByPk(id, { attributes: { exclude: ['password', 'role'] } })
+      ])
+      if (existAccount && existAccount.id !== Number(id)) throw new Error('account 已重複註冊！')
+      if (existEmail && existEmail.id !== Number(id)) throw new Error('email 已重複註冊！')
+      if (!user) throw new Error('使用者不存在')
+      await user.update({
+        account,
+        name,
+        email,
+        password: bcrypt.hashSync(password, 10)
+      })
+      res.status(200).end()
     } catch (err) {
       next(err)
     }
