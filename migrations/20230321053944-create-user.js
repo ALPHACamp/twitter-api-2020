@@ -23,7 +23,7 @@ module.exports = {
       avatar: {
         type: Sequelize.STRING
       },
-      coverUrl: {
+      cover_url: {
         type: Sequelize.STRING
       },
       introduction: {
