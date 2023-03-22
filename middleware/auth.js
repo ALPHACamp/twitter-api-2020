@@ -1,7 +1,7 @@
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
-const authenticated(req, res, next) {
+const authenticated = (req, res, next) => {
   // passport.authenticate('jwt', { ses...
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err || !user) return res.status(401).json({ status: 'error', message: '尚未登入' })
