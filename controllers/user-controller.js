@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { getUser } = require('../_helpers');
 const { User, Tweet, Reply, Like, FollowShip } = require('../models');
+const { imgurFileHandler } = require('../helpers/file-helpers');
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -95,6 +96,12 @@ const userController = {
       res.status(200).json({ user, tweets, replies, likes });
     } catch (err) {
       err.status = 400;
+      next(err);
+    }
+  },
+  editUser: async (req, res, next) => {
+    try {
+    } catch (err) {
       next(err);
     }
   },
