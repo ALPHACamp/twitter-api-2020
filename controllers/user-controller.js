@@ -25,36 +25,38 @@ const userController = {
   },
   signUp: async (req, res, next) => {
     try {
-      //check if all the required fields are filled out correctly
-      const errors = []
       const { account, name, email, password, checkPassword } = req.body
-
+      const errors = []
+      
+      //check if all the required fields are filled out correctly
       if (!account || !name || !email || !password || !checkPassword) {
         errors.push('All fields are required!')
       }
-      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
+      if (name && !validator.isByteLength(name, { max: 50 })) {
         errors.push('The name cannot exceed 50 characters.')
       }
-      if (password && !validator.isByteLength(password, { min: 8, max:20 })) {
+      if (password && !validator.isByteLength(password, { min: 8, max: 20 })) {
         errors.push('The password length should be between 8 to 20 characters.')
       }
       if (password !== checkPassword) {
         errors.push('Passwords do not match!')
       }
       if (email && !validator.isEmail(email)) {
-        errors.push('Please enter the correct email address!')
-      }
-      if (errors.length) {
-        return res.status(400).json({ status: 'error', errors })
+        errors.push('Please enter the valid email address!')
       }
 
       // Check if account and email are unique
-      const [inputAccount, inputEmail] = await Promise.all([
+      const [userAccount, userEmail] = await Promise.all([
         User.findOne({ where: { account } }),
         User.findOne({ where: { email } }),
       ])
-      if (inputAccount) throw new Error('Account already exists')
-      if (inputEmail) throw new Error('Email already exists')
+      if (userAccount) errors.push('Account already exists')
+      if (userEmail) errors.push('Email already exists')
+
+      // Return error message if there are errors
+      if (errors.length) {
+        return res.status(400).json({ status: 'error', errors })
+      }
 
       // Hash password
       const salt = await bcrypt.genSalt(10)
