@@ -26,7 +26,7 @@ module.exports = {
     const replies = totalTweets.map((tweet, i) => ({
       UserId: totalUsers[i].id,
       TweetId: tweet.id,
-      comment: faker.lorem.words(140),
+      comment: faker.lorem.words(5),
       createdAt: new Date(),
       updatedAt: new Date()
     }))

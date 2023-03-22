@@ -28,7 +28,7 @@ module.exports = {
       account: user.account,
       role: user.role,
       avatar: faker.image.cats(360, 360, true),
-      introduction: faker.lorem.text(),
+      introduction: faker.lorem.words(5),
       createdAt: new Date(),
       updatedAt: new Date()
     })))
