@@ -97,7 +97,7 @@ const userController = {
     const { id } = req.params
 
     return User.findByPk(id, {
-      attributes: ['id', 'account', 'name', 'email', 'role']
+      attributes: ['id', 'account', 'name', 'email']
     })
       .then(user => res.json(user))
       .catch(error => next(error))
