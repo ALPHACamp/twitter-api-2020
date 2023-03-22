@@ -55,6 +55,49 @@ const userController = {
       next(err);
     }
   },
+  getUser: async (req, res, next) => {
+    try {
+      const UserId = req.params.id;
+      const user = await User.findOne({
+        where: { id: UserId },
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'account', 'avatar', 'name'],
+          },
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'account', 'avatar', 'name'],
+          },
+        ],
+        attributes: { exclude: ['password'] },
+      });
+
+      const tweets = await Tweet.findAll({
+        where: { UserId },
+        order: [['createdAt', 'DESC']],
+      });
+      const replies = await Reply.findAll({
+        where: { UserId },
+        order: [['createdAt', 'DESC']],
+      });
+      const likes = await Like.findAll({
+        where: { UserId },
+        order: [['createdAt', 'DESC']],
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      res.status(200).json({ user, tweets, replies, likes });
+    } catch (err) {
+      err.status = 400;
+      next(err);
+    }
+  },
 };
 
 module.exports = userController;
