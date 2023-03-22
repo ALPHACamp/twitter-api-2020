@@ -4,6 +4,8 @@ const helpers = require('../_helpers')
 const tweetController = {
   postTweet: (req, res, next) => {
     const { description } = req.body
+    if (!description) throw new Error('description is required')
+
     const user = helpers.getUser(req)
     const UserId = user.id
 
@@ -25,11 +27,12 @@ const tweetController = {
   },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      include: { model: User }
+      include: { model: User },
+      order: [['updatedAt', 'DESC']],
+      raw: true,
+      nest: true
     })
-      .then(data => {
-        const tweets = data.map(tweet => tweet.toJSON())
-        console.log('tweets', tweets)
+      .then(tweets => {
         res.json(tweets)
       })
       .catch(err => next(err))
