@@ -12,11 +12,18 @@ const authenticated = (req, res, next) => {
       next()
     })(req, res, next) // 這裡是 IIFE，因為 Fn. 內有 Fn. (authenticated 內有 (err, user)...)，需再被 invoke
 }
+
 const authenticatedAdmin = (req, res, next) => {
   if (req.user?.isAdmin) return next()
-  return res.status(403).json({ status: 'error', message: 'permission denied' })
+  return res.status(403).json({ status: 'error', message: 'permission denied. You are user' })
+}
+
+const authenticatedUser = (req, res, next) => {
+  if (!req.user?.isAdmin) return next()
+  return res.status(403).json({ status: 'error', message: 'permission denied. Your are admin.' })
 }
 module.exports = {
   authenticated,
-  authenticatedAdmin
+  authenticatedAdmin,
+  authenticatedUser
 }

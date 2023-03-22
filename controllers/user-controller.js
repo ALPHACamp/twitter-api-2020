@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，不管，我先用舊的 add-on
 const { User } = require('../models')
-const { getUser } = require('../_helpers')
+// const { getUser } = require('../_helpers')
 
 const userController = {
   signIn: (req, res, next) => {
     try {
-      const userData = getUser(req).toJSON()
+      const userData = req.user.toJSON()
       delete userData.password // 刪除 .password 這個 property
       // (下1) 發出 jwt token，要擺兩個引數，第一個，要包進去的資料，第二個，要放 secret key
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 30 天過期，可調
