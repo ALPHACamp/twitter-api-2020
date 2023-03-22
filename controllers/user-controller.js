@@ -47,6 +47,23 @@ const userController = {
       })
       .catch(error => next(error))
   },
+  getUser: (req, res, next) => {
+    const { id } = req.params
+
+    return User.findByPk(id, {
+      attributes: [
+        'id', 'account', 'name', 'introduction', 'avatar', 'cover', 'role',
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount']
+      ]
+    })
+      .then(user => {
+        if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
+
+        return res.json(user)
+      })
+      .catch(error => next(error))
+  },
   // 查看特定使用者發過的推文
   getUserTweets: (req, res, next) => {
     // login user 一包資料
