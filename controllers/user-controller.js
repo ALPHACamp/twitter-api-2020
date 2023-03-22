@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，不管，我先用舊的 add-on
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 // const { getUser } = require('../_helpers')
 
 const userController = {
@@ -55,6 +55,31 @@ const userController = {
         delete result.password // 避免不必要資料外洩
         res.status(200).json({ status: 'success', user: result })
       })
+      .catch(err => next(err))
+  },
+  getUser: (req, res, next) => {
+    return User.findByPk(req.params.id, { raw: true })
+      .then(user => {
+        if (!user) return res.status(404).json({ message: 'Can not find this user.' })
+        delete user.password
+        // return res.status(200).json({ status: 'success', user })
+        // 因為測試檔，所以物件格式不能像 (上1) 一樣加工，必須做成 (下1)
+        return res.status(200).json(user)
+      })
+      .catch(err => next(err))
+  },
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      // where: { userId: req.params.id },
+      where: { UserId: req.params.id }, // 這是為了測試檔的嘗試
+      raw: true,
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => res.status(200).json(tweets))
+      // .then(tweets => {
+      //   console.log(tweets)
+      //   return res.status(200).json(tweets)
+      // })
       .catch(err => next(err))
   }
 }
