@@ -7,6 +7,7 @@ const tweetController = require('../controllers/tweet-controller')
 
 router.post('/:role/signin', userController.signin)
 
+router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
 
 router.use('/', errorHandler) // 錯誤處理
