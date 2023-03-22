@@ -36,8 +36,7 @@ const userController = {
     res.json({ status: 'success', user: createdUser })
   }),
   signIn: tryCatch((req, res) => {
-    const userData = getUser(req)
-    console.log(userData)
+    const userData = getUser(req).toJSON
     delete userData.password
     if (userData.role === 'admin') {
       throw new ReqError('帳號不存在！')
