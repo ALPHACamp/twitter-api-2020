@@ -43,6 +43,20 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  addTweetLike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+      const UserId = helper.getUser(req).id
+      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+      if (!tweet) throw new Error('推文不存在')
+      const like = await Like.findOne({ where: { TweetId, UserId } })
+      if (like) throw new Error('已按過喜歡')
+      await Like.create({ TweetId, UserId })
+      res.status(200).end()
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
