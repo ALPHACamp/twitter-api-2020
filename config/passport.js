@@ -18,17 +18,13 @@ passport.use(
       try {
         const user = await User.findOne({ where: { account } });
         if (!user) {
-          return cb(null, false, {
-            message: 'This account is not registered!',
-          });
+          throw new Error('This account is not registered!');
         }
 
         const res = await bcrypt.compare(password, user.password);
 
         if (!res) {
-          return cb(null, false, {
-            message: 'Account or password is incorrect',
-          });
+          throw new Error('Account or password is incorrect');
         }
 
         return cb(null, user);
