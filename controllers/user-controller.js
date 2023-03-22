@@ -5,12 +5,12 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const userController = {
   // 登入
   signIn: async (req, res, next) => {
-    const { email, password } = req.body
-    if (!email || !password) {
-      return res.status(400).json({ status: 'error', message: 'Email and password are required' })
+    const { account, password } = req.body
+    if (!account || !password) {
+      return res.status(400).json({ status: 'error', message: 'Account and password are required' })
     }
     try {
-      const user = await User.findOne({ where: { email } })
+      const user = await User.findOne({ where: { account } })
       if (!user) return res.status(404).json({ status: 'error', message: 'User does not exist' })
       if (user.role === 'admin') return res.status(404).json({ status: 'error', message: 'User does not exist' })
       if (!bcrypt.compareSync(password, user.password)) {
