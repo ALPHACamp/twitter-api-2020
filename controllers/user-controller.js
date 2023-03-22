@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { ensureAuthenticated } = require("../helpers/auth-helper");
+const { getUser, ensureAuthenticated } = require("../helpers/auth-helper");
 const { User } = require("../models");
 
 const userController = {
@@ -92,6 +92,21 @@ const userController = {
       return next(error);
     }
   },
+  putUser: async (req, res, next) => {
+    const { id, name, introduction, avatar, cover } = req.body
+    try {
+      if (introduction.length > 160 || name.length > 50) {
+        const error = new Error("字數超出上限！");
+        error.status = 400;
+        throw error;
+      }
+      console.log(getUser(req))
+
+
+    } catch (error) {
+      return next(error)
+    }
+  }
 };
 
 module.exports = userController;
