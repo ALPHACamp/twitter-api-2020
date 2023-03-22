@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const userController = require("../controllers/user-controller");
+const tweetController = require('../controllers/tweet-controller')
 const { errorHandler } = require("../middleware/error-handler");
 const { authenticatedUser } = require("../middleware/auth");
 const upload = require("../middleware/multer");
@@ -16,6 +17,8 @@ router.put(
 );
 router.post("/api/users/signin", userController.signIn);
 
-router.use("/", errorHandler);
+router.get('/api/tweets', tweetController.getTweets)
+
+router.use('/', errorHandler)
 
 module.exports = router;
