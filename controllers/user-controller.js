@@ -88,7 +88,9 @@ const userController = {
   putUser: async (req, res, next) => {
     const { id } = req.params;
     const { name, introduction } = req.body;
-    const { avatar, cover } = req.files;
+    // - 若有傳任一張圖片 req.files 才存在
+    const avatar = req.files?.avatar; 
+    const cover = req.files?.cover;
     const avatarFile = avatar ? avatar[0] : null;
     const coverFile = cover ? cover[0] : null;
     try {
@@ -128,6 +130,9 @@ const userController = {
       return next(error);
     }
   },
+  putUserSetting: (req, res, next) => {
+
+  }
 };
 
 module.exports = userController;
