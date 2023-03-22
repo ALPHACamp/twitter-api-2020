@@ -3,6 +3,7 @@ const createError = require('http-errors')
 const passport = require('../config/passport')
 const errorHandler = require('../middleware/error-handler')
 const userController = require('../controllers/user-controller')
+const { authenticated, authenticatedUser } = require('../middleware/auth')
 
 router.post('/users/login', (req, res, next) => {
   const { account, password } = req.body
@@ -13,8 +14,8 @@ router.post('/users/login', (req, res, next) => {
 
 router.post('/users', userController.register)
 // 查看特定使用者發過的推文
-router.get('/users/:id/tweets', userController.getUserTweets)
-router.get('/users/:id/replied_tweets', userController.getUserReplies)
+router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
+router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserReplies)
 
 router.use('/', errorHandler)
 
