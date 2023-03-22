@@ -8,7 +8,7 @@ module.exports = {
       description: faker.lorem.text(20),
       createdAt: new Date(),
       updatedAt: new Date(),
-      UserId: users[index % 5].id,
+      UserId: users[index % 5].id
     })))
   },
 
