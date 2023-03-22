@@ -4,10 +4,10 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "NODE_ENV=development node app.js",
-    "dev": "NODE_ENV=development nodemon app.js",
+    "start": "cross-env NODE_ENV=development node app.js",
+    "dev": "cross-env NODE_ENV=development nodemon app.js",
     "lint": "eslint \"**/*.js\" --fix",
-    "test": "mocha test --exit --recursive --timeout 5000"
+    "test": "cross-env NODE_ENV=test mocha test --exit --recursive --timeout 5000"
   },
   "author": "",
   "license": "ISC",
@@ -17,8 +17,14 @@
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
+    "cross-env": "^7.0.3",
     "dayjs": "^1.10.6",
     "dotenv": "^10.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
     "express": "^4.17.1",
     "express-session": "^1.17.2",
     "faker": "^4.1.0",
@@ -33,12 +39,7 @@
     "sequelize": "^6.6.5",
     "sequelize-cli": "^6.2.0",
     "sinon": "^10.0.0",
-    "sinon-chai": "^3.3.0",
-    "eslint": "^7.32.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.23.4",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.0"
+    "sinon-chai": "^3.3.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.20",
