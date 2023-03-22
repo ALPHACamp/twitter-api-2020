@@ -11,6 +11,7 @@ router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 // router.get('/api/admin/restaurants', authenticated, apiErrorHandler)
 
 router.get('/api/users/:id/tweets', authenticated, authenticatedUser, (req, res) => res.send('用戶認證 success'))
+router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 router.post('/api/users', userController.signUp) // 註冊帳號路由
 // (下1) session: false 的功能，把 cookie/session 功能關掉，不管理它

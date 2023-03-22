@@ -56,6 +56,17 @@ const userController = {
         res.status(200).json({ status: 'success', user: result })
       })
       .catch(err => next(err))
+  },
+  getUser: (req, res, next) => {
+    return User.findByPk(req.params.id, { raw: true })
+      .then(user => {
+        if (!user) return res.status(404).json({ message: 'Can not find this user.' })
+        delete user.password
+        // return res.status(200).json({ status: 'success', user })
+        // 因為測試檔，所以物件格式不能像 (上1) 一樣加工，必須做成 (下1)
+        return res.status(200).json(user)
+      })
+      .catch(err => next(err))
   }
 }
 
