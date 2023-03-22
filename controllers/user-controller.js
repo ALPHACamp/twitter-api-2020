@@ -2,14 +2,14 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const validator = require('validator')
 
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 
 const { User } = require('../models')
 
 const userController = {
   signIn: async (req, res, next) => {
     try {
-      const userData = getUser(req).toJSON()
+      const userData = helpers.getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       return res.json({
