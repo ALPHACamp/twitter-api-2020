@@ -1,16 +1,16 @@
 const express = require('express')
-const route = express.Router()
+const router = express.Router()
 
 const tweetController = require('../../../controllers/tweet-controller')
 
-route.get('/:tweetId/replies', tweetController.getReplies)
-route.post('/:tweetId/replies', tweetController.postReply)
-route.get('/:tweetId', tweetController.getTweet)
+router.get('/:tweetId/replies', tweetController.getReplies)
+router.post('/:tweetId/replies', tweetController.postReply)
+router.get('/:tweetId', tweetController.getTweet)
 
-route.post('/tweetId/like', tweetController.addLike)
-route.post('/tweetId/unlike', tweetController.removeLike)
+router.post('/tweetId/like', tweetController.addLike)
+router.post('/tweetId/unlike', tweetController.removeLike)
 
-route.post('/', tweetController.postTweet)
-route.get('/', tweetController.getTweets)
+router.post('/', tweetController.postTweet)
+router.get('/', tweetController.getTweets)
 
-module.exports = route
+module.exports = router

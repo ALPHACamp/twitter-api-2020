@@ -1,3 +1,3 @@
 const apis = require('./apis')
 
-module.exports = apis
+module.exports = { apis }
