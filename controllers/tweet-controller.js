@@ -1,4 +1,4 @@
-const { Tweet, User, Reply } = require('../models');
+const { Tweet, User, Reply, Like } = require('../models');
 const helpers = require('../_helpers');
 
 const tweetController = {
@@ -71,6 +71,49 @@ const tweetController = {
         comment,
       });
       return res.status(200).json(newReply);
+    } catch (err) {
+      return next(err);
+    }
+  },
+  addLike: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id;
+      const TweetId = req.params.tweetId;
+      if (!UserId || !TweetId)
+        throw new Error('User id or Tweet id is required!');
+
+      // check tweet exists or not
+      const tweet = await Tweet.findByPk(TweetId);
+      if (!tweet)
+        return res.status(404).json({ message: 'Tweet id not found' });
+
+      const [info, created] = await Like.findOrCreate({
+        where: { UserId, TweetId },
+      });
+      if (!created) throw new Error('已經喜歡過此篇推文');
+      return res.status(200).json({ message: '新增成功！' });
+    } catch (err) {
+      return next(err);
+    }
+  },
+  removeLike: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id;
+      const TweetId = req.params.tweetId;
+      if (!UserId || !TweetId)
+        throw new Error('User id or Tweet id is required!');
+
+      const tweet = await Tweet.findByPk(TweetId);
+      if (!tweet)
+        return res.status(404).json({ message: 'Tweet id not found' });
+
+      const unlike = await Like.destroy({
+        where: { UserId, TweetId },
+      });
+
+      if (!unlike) throw new Error('已取消過讚在這篇推文');
+
+      return res.status(200).json({ message: '刪除成功' });
     } catch (err) {
       return next(err);
     }
