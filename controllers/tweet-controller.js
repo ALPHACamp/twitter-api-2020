@@ -161,6 +161,36 @@ const tweetController = {
         res.status(200).json(data)
       })
       .catch(err => next(err))
+  },
+  postTweetUnlike: (req, res, next) => {
+    const UserId = getUser(req).dataValues.id
+    const TweetId = req.params.id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: { TweetId, UserId }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) {
+          const error = new Error('此推文不存在！')
+          error.status = 404
+          throw error
+        }
+        if (!like) {
+          const error = new Error('使用者未按讚此推文！')
+          error.status = 400
+          throw error
+        }
+        return like.destroy()
+      })
+      .then(destroyLike => {
+        const data = { ...destroyLike.toJSON(), tweet: { id: TweetId } }
+        delete data.UserId
+        delete data.TweetId
+        res.status(200).json(data)
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = tweetController
