@@ -74,7 +74,7 @@ const userServices = {
       if (Number(userId) !== nowUser.id) throw new Error('無權限修改其他使用者資料')
 
       const { account, name, email, password, checkPassword } = req.body
-      const { Avatar, Cover } = req.files
+      const { Avatar, Cover } = req.files || {}
 
       if (!account?.trim().length === 0 || !name?.trim().length === 0 || !email?.trim().length === 0 || !password?.trim().length === 0) throw new Error('還有欄位沒填')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不一樣!')

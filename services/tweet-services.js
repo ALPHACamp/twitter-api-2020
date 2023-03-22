@@ -16,7 +16,7 @@ const tweetServices = {
     Tweet.findByPk(req.params.id, {
       include: [{
         model: Reply,
-        order: [['createdAt', 'DESC']]
+        order: [[Reply, 'createdAt', 'DESC']]
       }],
       order: [['createdAt', 'DESC']]
     })
