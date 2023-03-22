@@ -18,8 +18,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Reply.init({
-    userId: DataTypes.STRING,
-    tweetId: DataTypes.STRING,
+    UserId: DataTypes.STRING, // 因測試檔，改大駝峰
+    TweetId: DataTypes.STRING, // 因為測試檔，而改大駝峰
     comment: DataTypes.TEXT
   }, {
     sequelize,

@@ -1,5 +1,5 @@
 const { Reply, Tweet, User } = require('../models')
-const { getUser } = require('../_helpers')
+const { getUser } = require('../helpers/auth-helpers')
 
 const tweetController = {
   postTweet: (req, res, next) => {
@@ -20,6 +20,7 @@ const tweetController = {
       raw: true,
       nest: true
     })
+
       .then(tweets => res.status(200).json({ status: 'success', tweets }))
       .catch(err => next(err))
   },
