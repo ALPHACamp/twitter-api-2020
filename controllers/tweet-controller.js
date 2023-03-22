@@ -28,6 +28,21 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweet: async (req, res, next) => {
+    try {
+      const TweetId = req.params.tweet_id
+      const tweet = await Tweet.findByPk(TweetId, {
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          { model: Reply, attributes: ['id'] },
+          { model: Like, attributes: ['id'] }
+        ]
+      })
+      res.status(200).json(tweet)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
