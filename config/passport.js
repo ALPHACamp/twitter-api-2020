@@ -14,7 +14,7 @@ passport.use(
       usernameField: 'account',
       passwordField: 'password',
     },
-    async (req, account, password, cb) => {
+    async (account, password, cb) => {
       try {
         const user = await User.findOne({ where: { account, password } });
 
@@ -24,7 +24,7 @@ passport.use(
           });
         }
 
-        const res = bcrypt.compare(password, user.password);
+        const res = await bcrypt.compare(password, user.password);
 
         if (!res) {
           return cb(null, false, {
