@@ -1,7 +1,7 @@
 const { Op } = require('sequelize')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
-const { User } = db
+const { User, Followship } = db
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 
@@ -43,6 +43,54 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  addFollowing: (req, res, next) => {
+    const user = helpers.getUser(req)
+    const followerId = user.id
+    const followingId = Number(req.body.id)
+
+    return Promise.all([
+      User.findAll({
+        raw: true,
+        attributes: ['id']
+      }),
+      Followship.findOne({ where: { [Op.and]: [{ followerId }, { followingId }] } })
+    ])
+      .then(([users, followship]) => {
+        if (!users.some(user => user.id === followingId)) throw new Error("User didn't exist!")
+        if (followship) throw new Error('You have followed this user!')
+        if (followerId === followingId) throw new Error("You can't follow yourself!")
+
+        return Followship.create({
+          followerId,
+          followingId
+        })
+          .then(followship => { res.json({ followship }) })
+      })
+      .catch(err => next(err))
+  },
+  removeFollowing: (req, res, next) => {
+    const user = helpers.getUser(req)
+    const followerId = user.id
+    const followingId = Number(req.params.followingId)
+
+    return Promise.all([
+      User.findAll({
+        raw: true,
+        attributes: ['id']
+      }),
+      Followship.findOne({ where: { [Op.and]: [{ followerId }, { followingId }] } })
+    ])
+      .then(([users, followship]) => {
+        if (!users.some(user => user.id === followingId)) throw new Error("User didn't exist!")
+        if (!followship) throw new Error("You didn't follow this user!")
+
+        return followship.destroy()
+      })
+      .then(followship => {
+        res.json({ followship })
+      })
+      .catch(err => next(err))
   }
 }
 
