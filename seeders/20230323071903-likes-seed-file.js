@@ -1,5 +1,4 @@
 'use strict'
-const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -8,18 +7,21 @@ module.exports = {
       'SELECT id FROM Users WHERE is_admin = 0;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
+    const tweets = await queryInterface.sequelize.query(
+      'SELECT id FROM Tweets;',
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
 
-    await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: users.length * 10 }, (_, i) => ({
-        // description: faker.lorem.text(), // 會過字數上限，先不用
-        description: faker.lorem.words(10),
+    await queryInterface.bulkInsert('Likes',
+      Array.from({ length: users.length * 3 }, (_, i) => ({
         created_at: new Date(),
         updated_at: new Date(),
-        user_id: users[i % users.length].id
+        user_id: users[i % users.length].id,
+        tweet_id: tweets[Math.floor(Math.random() * tweets.length)].id
       }))
     )
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Tweets', {})
+    await queryInterface.bulkDelete('Likes', {})
   }
 }

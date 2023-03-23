@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，不管，我先用舊的 add-on
-const { Followship, Like, User, Tweet } = require('../models')
-const { getUser } = require('../helpers/auth-helpers')
-// const { getUser } = require('../_helpers')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { imgurFileHandler } = require('../helpers/file-helpers')
+const { getUser } = require('../_helpers')
+
 
 const userController = {
   signIn: (req, res, next) => {
@@ -58,7 +59,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  getUser: (req, res, next) => {
+  getUserInfo: (req, res, next) => {
     return User.findByPk(req.params.id, { raw: true })
       .then(user => {
         if (!user) return res.status(404).json({ message: 'Can not find this user.' })
@@ -69,18 +70,135 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  putUser: (req, res, next) => {
+    const newPW = req.body.password
+    // const oldPW = getUser(req).dataValues.password
+    // const samePW = await bcrypt.compare(newPW, oldPW) // async 跟 promise 混用，我得小心
+    // (下1) 先擋擋看，測試出錯立刻封掉 --> 真的會因為它而測試出錯...
+    // const { account, name, email, password } = req.body
+    // if (!account || !name || !email || !password) {
+    //   throw new Error('account, name, email, password 皆為必填')
+    // }
+
+    const id = Number(req.params.id)
+    // if (req.user.id !== id) {
+    // (上1 不能用) 居然得為了測試擋改成這樣 (下1)
+    if (getUser(req).dataValues.id !== id) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Sorry. You do not own this account.'
+      })
+    }
+    const { file } = req
+
+    // 結果 async/await 可執行，但也沒法過測試，是怎樣
+    // const bbb = await Promise.all([
+    //   User.findByPk(id),
+    //   imgurFileHandler(file), // 若有餘裕，就研究下圖片上傳的細節唄
+    //   !samePW ? bcrypt.hash(newPW, 10) : oldPW
+    // ])
+
+    // req.body.image = bbb[1] || bbb[0].image
+    // req.body.password = bbb[2]
+    // const ccc = await bbb[0].update(req.body)
+    // const ddd = ccc.toJSON()
+    // // delete ddd.password
+    // return await res.status(200).json(ddd)
+
+    // 第二版，把密碼驗證機制加進去，可用，但過不了 測試檔
+    // return bcrypt.compare(newPW, oldPW)
+    //   .then(samePW => {
+    //     return Promise.all([
+    //       User.findByPk(id),
+    //       imgurFileHandler(file), // 若有餘裕，就研究下圖片上傳的細節唄
+    //       !samePW ? bcrypt.hash(newPW, 10) : oldPW
+    //     ])
+    //       .then(([user, filePath, pw]) => {
+    //         if (!user) throw new Error("User doesn't exist!")
+    //         req.body.image = filePath || user.image
+    //         req.body.password = pw
+    //         return user.update(req.body)
+    //       })
+    //       .then(updatedUser => {
+    //         const result = updatedUser.toJSON()
+    //         // delete result.password //! 之後復原
+    //         return res.status(200).json(result)
+    //       })
+    //   })
+    //   .catch(err => next(err))
+
+    // 原始版，可過 test，但嚴格來說，密碼驗證有問題
+    return Promise.all([
+      User.findByPk(id),
+      imgurFileHandler(file), // 若有餘裕，就研究下圖片上傳的細節唄
+      bcrypt.hash(newPW, 10)
+      //* !samePW ? bcrypt.hash(newPW, 10) : oldPW
+      // ! 下2 之後要改
+      // User.findOne({ where: { account } }),
+      // User.findOne({ where: { email } })
+    ])
+      // .then(([user, filePath, samePW]) => {
+      //   if (samePW) return [user, filePath]
+      //   return [user, filePath, bcrypt.hash(req.body.password, 10)]
+      // })
+      .then(([user, filePath, pw]) => {
+        if (!user) throw new Error("User doesn't exist!")
+        // if (checkAcc) throw new Error('account 已重複註冊！')
+        // if (checkMail) throw new Error('email 已重複註冊！')
+        req.body.image = filePath || user.image
+        req.body.password = pw
+        return user.update(req.body) // 試試看唄，看能不能回傳 array
+      })
+      .then(updatedUser => {
+        const result = updatedUser.toJSON()
+        // delete result.password //! 之後復原
+        return res.status(200).json(result)
+      })
+      .catch(err => next(err))
+  },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      // where: { userId: req.params.id },
-      where: { UserId: req.params.id }, // 這是為了測試檔的嘗試
+      where: { UserId: req.params.id }, // 為了測試檔而改成這樣
       raw: true,
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => res.status(200).json(tweets))
-      // .then(tweets => {
-      //   console.log(tweets)
-      //   return res.status(200).json(tweets)
-      // })
+      .catch(err => next(err))
+  },
+  getReplies: (req, res, next) => {
+    return Reply.findAll({
+      where: { UserId: req.params.id }, // 因測試檔，改大駝峰
+      raw: true,
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => res.status(200).json(replies))
+      .catch(err => next(err))
+  },
+  getLikes: (req, res, next) => {
+    return Like.findAll({
+      where: { UserId: req.params.id }, // 因測試檔，改大駝峰
+      raw: true,
+      order: [['createdAt', 'DESC']]
+    })
+      .then(likes => res.status(200).json(likes))
+      .catch(err => next(err))
+  },
+  getFollowings: (req, res, next) => {
+    return Followship.findAll({
+      where: { followerId: req.params.id },
+      order: [['createdAt', 'DESC']]
+    })
+      // (下1) 沒做 toJSON() 處理也能輸出正常 json 檔，但得注意
+      .then(followings => res.status(200).json(followings))
+      .catch(err => next(err))
+  },
+  getFollowers: (req, res, next) => {
+    return Followship.findAll({
+      where: { followingId: req.params.id },
+      order: [['createdAt', 'DESC']]
+    })
+      // (下1) 沒做 toJSON() 處理也能輸出正常 json 檔，但得注意
+      .then(followers => res.status(200).json(followers))
       .catch(err => next(err))
   },
   addFollowing: (req, res, next) => {

@@ -1,6 +1,8 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+
+const path = require('path')
 const express = require('express')
 const helpers = require('./_helpers')
 
@@ -13,6 +15,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json()) // 為了使用 API，引入 body parser 接收 json 功能 (內建於 express)
 app.use(passport.initialize())
 app.use(methodOverride('_method'))
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 // use helpers.getUser(req) to replace req.user
 function authenticated (req, res, next) {
