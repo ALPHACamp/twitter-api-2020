@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const assert = require('assert')
 
 const helpers = require('../_helpers')
-const { User, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 
 const userService = {
   signUp: (req, cb) => {
@@ -92,13 +92,42 @@ const userService = {
           ),
           'tweetsCounts'
         ]
-      ],
-      nest: true,
-      raw: true
+      ]
     })
       .then(user => {
         assert(user, '使用者不存在！')
-        cb(null, { user })
+        const { ...userData } = {
+          ...user.toJSON()
+        }
+        return cb(null, userData)
+      })
+      .catch(err => cb(err))
+  },
+  getTweetsOfUser: (req, cb) => {
+    const UserId = req.params.userId
+    return Tweet.findAll({
+      where: {
+        UserId
+      },
+      include: [{
+        model: Like,
+        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLikes'], [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE User_id = ${helpers.getUser(req).id} AND Tweet_id = Tweet.id)`), 'isLiked']]
+      }, {
+        model: Reply,
+        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReplies']]
+      }],
+      group: 'Tweet.id',
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(tweets => {
+        assert(tweets, '此使用者沒有推文！')
+        const data = tweets.map(t => ({
+          ...t,
+          isLiked: Boolean(t.Likes.isLiked)
+        }))
+        cb(null, data)
       })
       .catch(err => cb(err))
   }
