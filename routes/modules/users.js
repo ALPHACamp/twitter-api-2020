@@ -19,6 +19,12 @@ router.get('/:id/replied_tweets', userController.getUserReplies)
 // 推文清單
 router.get('/:id/tweets', userController.getUserTweets)
 
+// 個人設定
+router.get('/:id/setting', authenticatedOwner, userController.getUserSetting)
+
+// 編輯個人設定
+router.put('/:id/setting', authenticatedOwner, userController.putUserSetting)
+
 // 個人資料
 router.get('/:id', userController.getUser)
 
