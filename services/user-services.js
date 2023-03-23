@@ -76,7 +76,7 @@ const userServices = {
       const { account, name, email, password, checkPassword, introduction } = req.body
       const { Avatar, Cover } = req.files || {}
 
-      if (!account?.trim().length === 0 || !name?.trim().length === 0 || !email?.trim().length === 0 || !password?.trim().length === 0) throw new Error('還有欄位沒填')
+      if (account?.trim().length === 0 || name?.trim().length === 0 || email?.trim().length === 0 || password?.trim().length === 0) throw new Error('還有欄位沒填')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不一樣!')
       if (name && name.length > 50) throw new Error('暱稱上限50字!')
 
