@@ -293,6 +293,8 @@ const userController = {
           },
         ],
         order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true,
       });
 
       if (!replies) throw new Error(`This user doesn't have any replies`);
@@ -300,6 +302,53 @@ const userController = {
       res.status(200).json(replies);
     } catch (err) {
       err.status = 400;
+      next(err);
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const UserId = req.params.id;
+      const likes = await Like.findAll({
+        where: { UserId },
+        attributes: [
+          'TweetId',
+          'createdAt',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(Tweet_id) FROM Replies WHERE Tweet.Id = Tweet_id)'
+            ),
+            'RepliesCount',
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(Tweet_id) FROM Likes WHERE Tweet.Id = Tweet_id)'
+            ),
+            'likesCount',
+          ],
+        ],
+        include: [
+          {
+            model: Tweet,
+            as: 'Tweet',
+            attributes: ['description'],
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'avatar', 'account', 'name'],
+              },
+            ],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+
+      const modifiedLikes = likes.map((like) => ({
+        ...like.toJSON(),
+        isLiked: true,
+      }));
+
+      res.status(200).json(modifiedLikes);
+    } catch (err) {
       next(err);
     }
   },
