@@ -189,6 +189,47 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+      const user = await User.findByPk(UserId, { raw: true, attributes: ['id'] })
+      if (!user) throw new Error('使用者不存在')
+      const data = await Like.findAll({
+        where: { UserId },
+        order: [['createdAt', 'DESC']],
+        attributes: ['id', 'TweetId', 'createdAt'],
+        include: [
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+              { model: Reply, attributes: ['id'] },
+              { model: Like, attributes: ['id'] }
+            ]
+          }
+        ]
+      })
+      const signinUser = helpers.getUser(req)
+      const userLikes = data.map(el => {
+        const Like = {
+          ...el.toJSON(),
+          tweeterId: el.Tweet.User.id,
+          account: el.Tweet.User.account,
+          name: el.Tweet.User.name,
+          avatar: el.Tweet.User.avatar,
+          description: el.Tweet.description,
+          replies: el.Tweet.Replies?.length,
+          likes: el.Tweet.Likes?.length,
+          isLike: (signinUser.Likes) ? signinUser.Likes.some(like => like.TweetId === el.TweetId) : false
+        }
+        delete Like.Tweet
+        return Like
+      })
+      res.status(200).json(userLikes)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
