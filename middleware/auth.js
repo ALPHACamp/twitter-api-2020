@@ -6,7 +6,7 @@ const authenticatedUser = (req, res, next) => {
     if (error || !user || user.isAdmin) {
       return res.status(401).json({ status: "error", message: "unauthorized" });
     }
-    req.user = user;
+    req.user = user.dataValues;
     next();
   })(req, res, next);
 };
@@ -19,7 +19,7 @@ const authenticatedAdmin = (req, res, next) => {
         .status(403)
         .json({ status: "error", message: "permisson denied" });
     }
-    req.user = user;
+    req.user = user.dataValues;
     next();
   })(req, res, next);
 };
