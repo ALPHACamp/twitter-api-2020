@@ -13,6 +13,8 @@ router.use('/admin', admin)
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/users', userController.signUp)
 
+router.post('/tweets/:id/like', authenticated, tweetController.likeTweet)
+router.post('/tweets/:id/unlike', authenticated, tweetController.unlikeTweet)
 router.post('/tweets/:tweet_id/replies', authenticated, tweetController.postReply)
 router.get('/tweets/:tweet_id/replies', authenticated, tweetController.getReplies)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
