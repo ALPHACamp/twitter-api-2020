@@ -22,6 +22,7 @@ const adminServices = {
   },
   getUsers: (req, cb) => {
     return User.findAll({
+      where: { role: 'user' },
       attributes: {
         include: [
           [
