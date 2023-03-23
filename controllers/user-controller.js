@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Reply, sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../_helpers')
@@ -13,21 +13,17 @@ const userController = {
           throw error
         }
 
-        return res.json({ status: 'success', user })
+        return res.json({ status: 'success', ...user.toJSON() })
       })
       .catch(error => next(error))
   },
 
   getUserTweets: (req, res, next) => {
-    return Tweet.findAll({
-      where: { userId: req.params.userId },
-      limit: 5,
-      include: User,
-      attributes: ['user_id'],
-      order: [['created_at', 'desc']],
-      raw: true,
-      nest: true
-    })
+    return sequelize.query('SELECT description FROM tweets WHERE user_id = :userId ORDER BY created_at LIMIT 5',
+      {
+        replacements: { userId: req.params.userId },
+        type: sequelize.QueryTypes.SELECT
+      })
       .then(tweets => {
         if (!tweets) {
           const error = new Error("Tweets don't exist!")
@@ -35,21 +31,17 @@ const userController = {
           throw error
         }
 
-        return res.json({ status: 'success', tweets })
+        return res.json(tweets)
       })
       .catch(error => next(error))
   },
 
   getUserReplies: (req, res, next) => {
-    return Reply.findAll({
-      where: { userId: req.params.userId },
-      limit: 5,
-      include: User,
-      attributes: ['user_id'],
-      order: [['created_at', 'desc']],
-      raw: true,
-      nest: true
-    })
+    return sequelize.query('SELECT comment FROM replies WHERE user_id = :userId ORDER BY created_at LIMIT 5',
+      {
+        replacements: { userId: req.params.userId },
+        type: sequelize.QueryTypes.SELECT
+      })
       .then(replies => {
         if (!replies) {
           const error = new Error("Replies don't exist!")
@@ -57,21 +49,17 @@ const userController = {
           throw error
         }
 
-        return res.json({ status: 'success', replies })
+        return res.json(replies)
       })
       .catch(error => next(error))
   },
 
   getUserLikes: (req, res, next) => {
-    return Like.findAll({
-      where: { userId: req.params.userId },
-      limit: 5,
-      include: User,
-      attributes: ['user_id'],
-      order: [['created_at', 'desc']],
-      raw: true,
-      nest: true
-    })
+    return sequelize.query('SELECT Tweet_id TweetId FROM likes WHERE User_id = :userId',
+      {
+        replacements: { userId: req.params.userId },
+        type: sequelize.QueryTypes.SELECT
+      })
       .then(likes => {
         if (!likes) {
           const error = new Error("likes don't exist!")
@@ -79,34 +67,29 @@ const userController = {
           throw error
         }
 
-        return res.json({ status: 'success', likes })
+        return res.json(likes)
       })
       .catch(error => next(error))
   },
 
   getUserFollowers: (req, res, next) => {
-    return Followship.findAll({
-      where: { followingId: req.params.userId },
-      include: User,
-      attributes: ['user_id'],
-      order: [['created_at', 'desc']],
-      raw: true,
-      nest: true
-    })
-      .then(followers => res.json({ status: 'success', followers }))
+    return sequelize.query('SELECT Follower_id followerId FROM users u JOIN followships f ON u.id = f.Following_Id WHERE u.id = :userId',
+      {
+        replacements: { userId: req.params.userId },
+        type: sequelize.QueryTypes.SELECT
+      })
+      .then(followers => res.json(followers))
       .catch(error => next(error))
   },
 
+  // 不能直接從followship去找，要從user
   getUserFollowings: (req, res, next) => {
-    return Followship.findAll({
-      where: { followerId: req.params.userId },
-      include: User,
-      attributes: ['user_id'],
-      order: [['created_at', 'desc']],
-      raw: true,
-      nest: true
-    })
-      .then(followings => res.json({ status: 'success', followings }))
+    return sequelize.query('SELECT Following_id followingId FROM users u JOIN followships f ON u.id = f.Follower_Id WHERE u.id = :userId',
+      {
+        replacements: { userId: req.params.userId },
+        type: sequelize.QueryTypes.SELECT
+      })
+      .then(followings => res.json(followings))
       .catch(error => next(error))
   },
 
@@ -175,14 +158,13 @@ const userController = {
   putUser: (req, res, next) => {
     const { file } = req
     const { name, introduction } = req.body
-
     return Promise.all([
       User.findByPk(req.params.userId),
-      imgurFileHandler(...file)
+      imgurFileHandler(file)
     ])
       .then(([user, ...filePath]) => {
         if (!user) {
-          const error = new Error('User already exist!')
+          const error = new Error("User didn't exist!")
           error.status = 404
           throw error
         }

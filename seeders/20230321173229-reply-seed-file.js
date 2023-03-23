@@ -13,7 +13,7 @@ module.exports = {
       return {
         tweet_id: tweetId,
         comment: faker.lorem.paragraph(),
-        created_at: new Date(),
+        created_at: faker.date.past(),
         updated_at: new Date()
       }
     })
