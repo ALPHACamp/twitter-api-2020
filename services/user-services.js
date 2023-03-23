@@ -28,16 +28,16 @@ const adminServices = {
         attributes: {
           include: [
             [
-              sequelize.literal('(SELECT COUNT(*)FROM Tweets WHERE UserId = User.id)'), 'TweetsCounts'
+              sequelize.literal('(SELECT COUNT(*)FROM Tweets WHERE User_id = User.id)'), 'TweetsCounts'
             ],
             [
-              sequelize.literal('(SELECT COUNT(*)FROM Followships AS Followers WHERE followingId = User.id)'), 'followerCounts'
+              sequelize.literal('(SELECT COUNT(*)FROM Followships AS Followers WHERE following_id = User.id)'), 'followerCounts'
             ],
             [
-              sequelize.literal('(SELECT COUNT(*)FROM Followships AS Followings WHERE followerId = User.id)'), 'followingCounts'
+              sequelize.literal('(SELECT COUNT(*)FROM Followships AS Followings WHERE follower_id = User.id)'), 'followingCounts'
             ],
             [
-              sequelize.literal('(SELECT COUNT(*)FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweetId WHERE Tweets.UserId = User.id )'), 'LikedCounts'
+              sequelize.literal('(SELECT COUNT(*)FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweet_id WHERE Tweets.User_id = User.id)'), 'LikedCounts'
             ]
           ],
           exclude: [
