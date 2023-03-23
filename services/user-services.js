@@ -98,7 +98,7 @@ const userService = {
         assert(user, '使用者不存在！')
         const { ...userData } = {
           ...user.toJSON(),
-          isFollowed: Boolean(user.isFollowed)
+          isFollowed: Boolean(user.dataValues.isFollowed)
         }
         return cb(null, userData)
       })
