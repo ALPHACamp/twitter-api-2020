@@ -17,7 +17,10 @@ const tweetController = {
     tweetServices.replyTweet(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   likeTweet: (req, res, next) => {
-    tweetServices.likeTweet(req, (err, data) => err ? next(err) : res.status(200).json(data))
+    tweetServices.likeTweet(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', messages: '已成功like推文', data }))
+  },
+  unlikeTweet: (req, res, next) => {
+    tweetServices.unlikeTweet(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', messages: '已成功unlike推文', data }))
   }
 }
 

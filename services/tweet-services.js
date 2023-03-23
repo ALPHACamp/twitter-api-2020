@@ -119,6 +119,28 @@ const tweetServices = {
       })
       .then(liked => cb(null, { liked }))
       .catch(err => cb(err))
+  },
+  unlikeTweet: (req, cb) => {
+    const userId = helpers.getUser(req).id
+    const TweetId = req.params.tweetId
+    return Promise.all([
+      User.findByPk(userId),
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          UserId: userId,
+          TweetId
+        }
+      })
+    ])
+      .then(([user, tweet, like]) => {
+        assert(user, '使用者不存在')
+        assert(tweet, '推文不存在')
+        assert(like, '尚未 like 推文')
+        return like.destroy()
+      })
+      .then(unlike => cb(null, { unlike }))
+      .catch(err => cb(err))
   }
 }
 
