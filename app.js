@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
+const cors = require('cors')
 const express = require('express')
 const helpers = require('./_helpers')
 
@@ -17,6 +18,8 @@ function authenticated (req, res, next) {
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+
+app.use(cors())
 
 app.use('/api', routes)
 
