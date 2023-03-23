@@ -3,7 +3,7 @@ const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const createError = require('http-errors')
 const helpers = require('../_helpers')
-const { User, Tweet, Like, Reply, sequelize } = require('../models')
+const { User, Tweet, Like, Reply, Followship, sequelize } = require('../models')
 const imgurFileHandler = require('../helpers/file-helpers')
 
 const userController = {
@@ -228,6 +228,31 @@ const userController = {
           ...like.toJSON(),
           isLiked: like.UserId === loginUser.id
         }))
+        return res.json(result)
+      })
+      .catch(error => next(error))
+  },
+  getUserFollowings: (req, res, next) => {
+    const { id } = req.params
+    const loginUser = helpers.getUser(req)
+
+    return Promise.all([
+      User.findByPk(id),
+      Followship.findAll({
+        where: { followerId: id },
+        attributes: { exclude: ['updatedAt'] },
+        include: { model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'introduction', 'avatar'] },
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, followings]) => {
+        if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
+
+        const result = followings.map(following => ({
+          ...following.toJSON(),
+          isFollowed: following.followerId === loginUser.id
+        }))
+
         return res.json(result)
       })
       .catch(error => next(error))
