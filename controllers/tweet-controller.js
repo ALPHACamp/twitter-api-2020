@@ -80,7 +80,7 @@ const tweetController = {
     return Promise.all([
       Tweet.findByPk(TweetId),
       Reply.findAll({
-        attributes: ['id', 'comment'],
+        attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
         where: { TweetId },
         include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       })
