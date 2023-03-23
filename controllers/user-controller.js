@@ -2,14 +2,15 @@ const jwt = require('jsonwebtoken')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const createError = require('http-errors')
-const { getUser } = require('../_helpers')
-const { User, Tweet, Like, Reply, sequelize } = require('../models')
+const helpers = require('../_helpers')
+const { User, Tweet, Like, Reply, Followship, sequelize } = require('../models')
 const imgurFileHandler = require('../helpers/file-helpers')
+const timeFormat = require('../helpers/date-helpers')
 
 const userController = {
   login: (req, res, next) => {
     try {
-      const loginUser = getUser(req)
+      const loginUser = helpers.getUser(req)
       if ((req.originalUrl === '/api/users/login' && loginUser.role !== 'user') || (req.originalUrl === '/api/admin/login' && loginUser.role !== 'admin')) throw createError(404, '帳號不存在')
 
       const token = jwt.sign({ id: loginUser.id }, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -131,7 +132,7 @@ const userController = {
   // 查看特定使用者發過的推文
   getUserTweets: (req, res, next) => {
     // login user 一包資料
-    const loginUser = getUser(req)
+    const loginUser = helpers.getUser(req)
     // 動態 id user
     const UserId = Number(req.params.id)
 
@@ -164,6 +165,7 @@ const userController = {
         if (!user) throw createError(404, '該使用者不存在')
         const result = tweets.map(tweet => ({
           ...tweet,
+          createdAt: timeFormat(tweet.createdAt),
           // like 為 true 條件：查找 like table 裡的 userId 是否有 login 本人
           // 這裡有點抖抖，有需要再加 like.TweetId === tweet.id 判斷？
           isLiked: likes.some(like => like.UserId === loginUser.id)
@@ -197,9 +199,101 @@ const userController = {
         // 401: 請先登入 & 403:沒有使用該頁面的權限，在 middleware/auth
         if (!user) throw createError(404, '該使用者不存在')
 
-        return res.json(replies)
+        const result = replies.map(reply => ({
+          ...reply.toJSON(),
+          createdAt: timeFormat(reply.createdAt)
+        }))
+        return res.json(result)
       })
       .catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+    const { id } = req.params
+    const loginUser = helpers.getUser(req)
+
+    return Promise.all([
+      User.findByPk(id),
+      Like.findAll({
+        where: { UserId: id },
+        attributes: ['id', 'UserId', 'TweetId', 'createdAt'],
+        include: {
+          model: Tweet,
+          attributes: ['id', 'description', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCount']
+          ],
+          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        },
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, likes]) => {
+        if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
+
+        const result = likes.map(like => {
+          const { Tweet, ...data } = like.toJSON()
+          return {
+            ...data,
+            Tweet: {
+              ...Tweet,
+              createdAt: timeFormat(Tweet.createdAt)
+            },
+            isLiked: like.UserId === loginUser.id
+          }
+        })
+        return res.json(result)
+      })
+      .catch(error => next(error))
+  },
+  getUserFollowings: (req, res, next) => {
+    const { id } = req.params
+    const loginUser = helpers.getUser(req)
+
+    return Promise.all([
+      User.findByPk(id),
+      Followship.findAll({
+        where: { followerId: id },
+        attributes: { exclude: ['updatedAt'] },
+        include: { model: User, as: 'Followings', attributes: ['account', 'name', 'introduction', 'avatar'] },
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, followings]) => {
+        if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
+
+        const result = followings.map(following => ({
+          ...following.toJSON(),
+          isFollowed: following.followerId === loginUser.id
+        }))
+
+        return res.json(result)
+      })
+      .catch(error => next(error))
+  },
+  getUserFollowers: (req, res, next) => {
+    const { id } = req.params
+    const loginUser = helpers.getUser(req)
+
+    return Promise.all([
+      User.findByPk(id),
+      Followship.findAll({
+        where: { followingId: id },
+        attributes: { exclude: ['updatedAt'] },
+        include: { model: User, as: 'Followers', attributes: ['account', 'name', 'introduction', 'avatar'] },
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, followers]) => {
+        if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
+
+        const result = followers.map(follower => ({
+          ...follower.toJSON(),
+          isFollowed: follower.followerId === loginUser.id
+        }))
+
+        return res.json(result)
+      })
+      .catch(error => next(error))
   }
 }
 
