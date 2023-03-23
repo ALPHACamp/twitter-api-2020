@@ -81,26 +81,26 @@ const userController = {
       next(err)
     }
   },
-  getRepliedTweets: async (req, res, next) => {
-    const { userId } = req.params
-    const reply = await Reply.findAll({
-      where: { UserId: userId },
-      include: [
-        { model: User },
-        {
-          model: Tweet,
-          include: [{ model: User, attributes: ["account"] }],
-        },
-      ],
-      order: [["createdAt", "DESC"]],
-      raw: true,
-      nest: true,
-    })
-      .then(() => {
-        if (!reply) throw new Error("Reply does not exist!");
-        return res.status(200).json({ reply });
+  getRepliedTweets: async(req, res, next) => {
+    try{
+      const { userId } = req.params;
+      let reply = await Reply.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: User },
+          {
+            model: Tweet,
+            include: [{ model: User, attributes: ["account"] }],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+        raw: true,
+        nest: true,
       })
-      .catch((error) => next(error));
+        if (!reply) throw new Error("Reply does not exist!");
+        return res.status(200).json(reply);
+      
+    }catch(error){return res.status(500).json({ status: 'error', message: error })}
   }
 }
 
