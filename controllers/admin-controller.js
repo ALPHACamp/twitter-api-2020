@@ -7,7 +7,7 @@ const adminController = {
     adminServices.deleteTweet(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getUsers: (req, res, next) => {
-    adminServices.getUsers(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+    adminServices.getUsers(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 module.exports = adminController
