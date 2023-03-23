@@ -97,6 +97,51 @@ const tweetController = {
     })
       .then(replies => res.json(replies))
       .catch(err => next(err))
+  },
+  likeTweet: (req, res, next) => {
+    const { id } = req.params
+    const user = helpers.getUser(req)
+    const UserId = user.id
+
+    return Promise.all([
+      Tweet.findByPk(id),
+      Like.findOne({
+        where: {
+          TweetId: id,
+          UserId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        if (like) throw new Error('You have liked this tweet!')
+
+        return Like.create({
+          TweetId: id,
+          UserId
+        })
+      })
+      .then(like => res.json(like))
+      .catch(err => next(err))
+  },
+  unlikeTweet: (req, res, next) => {
+    const { id } = req.params
+    const user = helpers.getUser(req)
+    const UserId = user.id
+
+    return Like.findOne({
+      where: {
+        TweetId: id,
+        UserId
+      }
+    })
+      .then(like => {
+        if (!like) throw new Error("You haven't liked this tweet")
+
+        return like.destroy()
+      })
+      .then(like => res.json(like))
+      .catch(err => next(err))
   }
 }
 
