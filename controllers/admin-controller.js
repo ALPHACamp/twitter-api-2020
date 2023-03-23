@@ -1,4 +1,5 @@
-const { User, sequelize } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
+const createError = require('http-errors')
 
 const adminController = {
   getUsers: (req, res, next) => {
@@ -13,6 +14,20 @@ const adminController = {
       raw: true
     })
       .then(users => res.json(users))
+      .catch(error => next(error))
+  },
+  deleteTweet: (req, res, next) => {
+    const { id } = req.params
+    return Tweet.findByPk(id)
+      .then(tweet => {
+        if (!tweet) throw createError(404, '推文不存在')
+
+        return tweet.destroy()
+      })
+      .then(() => res.json({
+        status: 'success',
+        message: '推文刪除成功'
+      }))
       .catch(error => next(error))
   }
 }
