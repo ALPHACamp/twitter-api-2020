@@ -22,7 +22,6 @@ const adminServices = {
       .catch(err => cb(err))
   },
   getUsers: (req, cb) => {
-    // 分別撈取User以及Tweet Like數量的資料
     User.findAll({
       attributes: {
         include: [
@@ -43,8 +42,6 @@ const adminServices = {
         // 調整回傳的使用者資料
         const updatedUser = users.map(user => {
           delete user.password
-          delete user.Followers
-          delete user.Followings
           return user
         })
         return updatedUser
