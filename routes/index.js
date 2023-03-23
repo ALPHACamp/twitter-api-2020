@@ -7,6 +7,11 @@ const upload = require("../middleware/multer");
 
 router.post("/api/users", userController.signUp);
 router.put(
+  "/api/users/:id/setting",
+  authenticatedUser,
+  userController.putUserSetting
+);
+router.put(
   "/api/users/:id",
   upload.fields([
     { name: "avatar", maxCount: 1 },
@@ -16,6 +21,7 @@ router.put(
   userController.putUser
 );
 router.post("/api/users/signin", userController.signIn);
+
 
 router.get(
   "/api/tweets/:tweet_id",
@@ -27,6 +33,7 @@ router.post("/api/tweets", authenticatedUser, tweetController.postTweet);
 
 router.delete('/api/followships/:followingId', authenticatedUser, userController.removeFollowing)
 router.post('/api/followships', authenticatedUser, userController.addFollowing)
+
 
 router.use("/", errorHandler);
 

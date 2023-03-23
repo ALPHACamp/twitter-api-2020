@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { Op } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
 const { User, Followship } = require("../models");
@@ -130,7 +131,61 @@ const userController = {
       return next(error);
     }
   },
-  putUserSetting: (req, res, next) => {},
+  putUserSetting: async (req, res, next) => {
+    const { id } = req.params;
+    const { name, account, email, password, checkPassword } = req.body;
+    try {
+      if (getUser(req).id !== Number(id)) {
+        const error = new Error("無法更改他人資料!");
+        error.status = 401;
+        throw error;
+      }
+      if (!name || !account || !email || !password || !checkPassword) {
+        const error = new Error("欄位不可空白!");
+        error.status = 400;
+        throw error;
+      }
+      if (password !== checkPassword) {
+        const error = new Error("密碼與確認密碼不符!");
+        error.status = 400;
+        throw error;
+      }
+      const [isEmailExist, isAccountExist] = await Promise.all([
+        User.findOne({ where: { email, id: { [Op.ne]: id } } }),
+        User.findOne({ where: { account, id: { [Op.ne]: id } } }),
+      ]);
+      if (isEmailExist) {
+        const error = new Error("email 已重複註冊！");
+        error.status = 400;
+        throw error;
+      }
+      if (isAccountExist) {
+        const error = new Error("account 已重複註冊！");
+        error.status = 400;
+        throw error;
+      }
+      const foundUser = await User.findByPk(id);
+      if (!foundUser) {
+        const error = new Error("使用者不存在!");
+        error.status = 404;
+        throw error;
+      }
+      const data = await foundUser.update({
+        name,
+        account,
+        email,
+        password: bcrypt.hashSync(password, 10),
+      });
+      const updatedUser = data.toJSON();
+      delete updatedUser.password;
+      return res.json({
+        status: "success",
+        data: { updatedUser },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
   addFollowing: async (req, res, next) => {
     const { id } = req.body;
     try {
@@ -206,11 +261,11 @@ const userController = {
       return res.json({
         status: "success",
         data: { deletedFollowship },
-      });
+         });
     } catch (error) {
       return next(error);
     }
-  },
+  }
 };
 
 module.exports = userController;
