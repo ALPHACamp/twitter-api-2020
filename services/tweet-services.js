@@ -1,8 +1,7 @@
-// const assert = require('assert')
+const assert = require('assert')
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
 const { User, Tweet, Reply, Like } = require('../models')
-const { assert } = require('chai')
 
 const tweetServices = {
   getTweets: (req, cb) => {
