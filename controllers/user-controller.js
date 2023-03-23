@@ -91,6 +91,34 @@ const userController = {
         res.json({ followship })
       })
       .catch(err => next(err))
+  },
+  getTopFollow: (req, res, next) => {
+    const user = helpers.getUser(req)
+    const userId = Number(user.id)
+
+    return User.findAll({
+      where: { role: 'user' },
+      attributes: ['id', 'account', 'name', 'avatar'],
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: ['id']
+      }]
+    })
+      .then(users => {
+        const topUsers = users.map(user => {
+          const userData = {
+            ...user.toJSON(),
+            followerCounts: user.Followers.length,
+            isFollowed: user.Followers.some(follower => follower.id === userId)
+          }
+          delete userData.Followers
+          return userData
+        })
+        res.json({
+          topUsers: topUsers.sort((a, b) => b.followerCounts - a.followerCounts).slice(0, 10)
+        })
+      })
   }
 }
 
