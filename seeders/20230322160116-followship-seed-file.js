@@ -1,5 +1,7 @@
 'use strict'
 
+const faker = require('faker')
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const DEFAULT_NUMBER = 15
@@ -15,7 +17,7 @@ module.exports = {
       users.map(user => ({
         follower_id: user.follower_id,
         following_id: user.following_id,
-        created_at: new Date(),
+        created_at: faker.date.between('2023-03-01T00:00:00.000Z', '2023-03-20T00:00:00.000Z'),
         updated_at: new Date()
       })), {})
   },
