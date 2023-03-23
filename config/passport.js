@@ -13,7 +13,7 @@ passport.use(
     {
       usernameField: 'email',
       passwordField: 'password',
-      passReqToCallback: true,
+      passReqToCallback: true
     },
     async (req, email, password, cb) => {
       try {
@@ -33,7 +33,7 @@ passport.use(
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
+  secretOrKey: process.env.JWT_SECRET
 }
 passport.use(
   new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
@@ -41,8 +41,8 @@ passport.use(
       const user = await User.findByPk(jwtPayload.id, {
         include: [
           { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' },
-        ],
+          { model: User, as: 'Followings' }
+        ]
       })
       return cb(null, user)
     } catch (err) {

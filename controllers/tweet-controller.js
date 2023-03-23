@@ -6,11 +6,20 @@ const tweetController = {
     try {
       const tweets = await Tweet.findAll({
         order: [['createdAt', 'DESC']],
-        include: [User, Reply, Like, { model: User, as: 'LikedUsers' }],
+        include: [User, Reply, Like, { model: User, as: 'LikedUsers' }]
       })
-      
+
       const tweetsData = tweets.reduce((result, tweet) => {
-        const { id, UserId, description, createdAt, User, Replies, Likes, LikedUsers } = tweet
+        const {
+          id,
+          UserId,
+          description,
+          createdAt,
+          User,
+          Replies,
+          Likes,
+          LikedUsers
+        } = tweet
         result.push({
           id,
           UserId,
@@ -21,7 +30,7 @@ const tweetController = {
           avatar: User.avatar,
           repliedCount: Replies.length,
           likedCount: Likes.length,
-          isLike: LikedUsers.some((u) => u.id === helpers.getUser(req).id),
+          isLike: LikedUsers.some((u) => u.id === helpers.getUser(req).id)
         })
         return result
       }, [])
@@ -29,8 +38,7 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
-  },
+  }
 }
-
 
 module.exports = tweetController
