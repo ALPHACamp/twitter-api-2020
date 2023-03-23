@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
-const { User, Followship } = require("../models");
+const { User, Followship, sequelize } = require("../models");
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -86,6 +86,48 @@ const userController = {
       return next(error);
     }
   },
+  getUser: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const foundUser = await User.findByPk(id, {
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                `(SELECT COUNT(*) FROM Followships WHERE followingId = ${id})`
+              ),
+              "followerCounts",
+            ],
+            [
+              sequelize.literal(
+                `(SELECT COUNT(*) FROM Followships WHERE followerId = ${id})`
+              ),
+              "followingCounts",
+            ],
+          ],
+        },
+      });
+      if (!foundUser) {
+        const error = new Error("使用者不存在!");
+        error.status = 404;
+        throw error;
+      }
+      if (foundUser.isAdmin) {
+        const error = new Error("無法存取管理員資料!");
+        error.status = 403;
+        throw error;
+      }
+      const user = foundUser.toJSON()
+      delete user.password;
+      return res.json({
+        status: "success",
+        ...user,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+
   putUser: async (req, res, next) => {
     const { id } = req.params;
     const { name, introduction } = req.body;
@@ -228,9 +270,6 @@ const userController = {
   },
   removeFollowing: async (req, res, next) => {
     const { followingId } = req.params;
-    console.log("================");
-    console.log("followingId is " + followingId);
-    console.log("================");
     try {
       if (getUser(req).id === Number(followingId)) {
         const error = new Error("無法追蹤自己!");
@@ -261,11 +300,11 @@ const userController = {
       return res.json({
         status: "success",
         data: { deletedFollowship },
-         });
+      });
     } catch (error) {
       return next(error);
     }
-  }
+  },
 };
 
 module.exports = userController;
