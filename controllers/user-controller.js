@@ -106,8 +106,8 @@ const userController = {
         // count followers and following
         userData.followerCounts = userData.Followers.length
         userData.followingCounts = userData.Followings.length
-        userData.isFollowed = userData.Followers?.some(follower => follower.id === getUser(req).id)
-        userData.isCurrentUser = getUser(req).id === user.id
+        userData.isFollowed = userData.Followers?.some(follower => follower.id === getUser(req).dataValues.id)
+        userData.isCurrentUser = getUser(req).dataValues.id === user.id
         // delete unused properties
         delete userData.password
         delete userData.Followers
@@ -216,6 +216,37 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  getUserFollowings: (req, res, next) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        attributes: {
+          exclude: ['Followship']
+        },
+        include: [
+          { model: User, as: 'Followings', attributes: ['id', 'name', 'avatar', 'introduction'] }
+        ]
+      }),
+      User.findByPk(getUser(req).dataValues.id, {
+        attributes: ['id'],
+        include: [
+          { model: User, as: 'Followings', attributes: ['id'] }
+        ]
+      })
+    ])
+      .then(([targetUser, currentUser]) => {
+        const followings = targetUser.toJSON().Followings.map(following => ({
+          followingId: following.id,
+          name: following.name,
+          avatar: following.avatar,
+          introduction: following.introduction,
+          isFollowed: currentUser.toJSON().Followings.some(currentUserfollowing => currentUserfollowing.id === following.id),
+          isCurrentUser: following.id === getUser(req).dataValues.id
+        }))
+
+        return res.json(followings)
+      })
+      .catch(err => next(err))
+  },
   getTopUsers: (req, res, next) => {
     User.findAll({
       attributes: ['id', 'name', 'account', 'avatar'],
@@ -229,8 +260,8 @@ const userController = {
           .map(user => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowed: req.user.Followings.some(f => f.id === user.id),
-            isCurrentUser: getUser(req).id === user.id
+            isFollowed: req.user.dataValues.Followings.some(f => f.id === user.id),
+            isCurrentUser: getUser(req).dataValues.id === user.id
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
           .slice(0, 10)
