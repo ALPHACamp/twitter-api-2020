@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，不管，我先用舊的 add-on
-const { User, Tweet } = require('../models')
+const { Followship, Like, User, Tweet } = require('../models')
+const { getUser } = require('../helpers/auth-helpers')
 // const { getUser } = require('../_helpers')
 
 const userController = {
@@ -80,6 +81,76 @@ const userController = {
       //   console.log(tweets)
       //   return res.status(200).json(tweets)
       // })
+      .catch(err => next(err))
+  },
+  addFollowing: (req, res, next) => {
+    const userId = Number(req.query.id) // 目標使用者
+    return User.findByPk(getUser(req).id) // 登入的使用者
+      .then(user => {
+        // if (!user || !userId) {
+        //   return res.status(404).json({ status: 'error', message: 'Cannot find this user' })
+        // }
+        // if (user.id === userId) throw new Error('不能追蹤自己')
+        return Followship.create({
+          followerId: user.id,
+          followingId: userId
+        })
+      })
+      .then(followship => {
+        // if (followship) return res.status(409).json({ status: 'error', message: 'you already followed this user.' })
+        return res.status(200).json(followship)
+      })
+      .catch(err => next(err))
+  },
+  removeFollowing: (req, res, next) => {
+    const { followingId } = req.params
+    return User.findByPk(getUser(req).id)
+      .then(user => {
+        return Followship.findOne({
+          where: {
+            followerId: user.id,
+            followingId
+          }
+        })
+      })
+      .then(followship => {
+        followship.destroy()
+        return res.status(200).json({ message: 'success', followship })
+      })
+      .catch(err => next(err))
+  },
+  // getFollowship: (req, res, next) => {
+
+  // },
+  addLike: (req, res, next) => {
+    const tweetId = req.params.id
+    return User.findOne(getUser(req).id)
+      .then(user => {
+        return Like.create({
+          UserId: user.id,
+          TweetId: tweetId
+        })
+      })
+      .then(like => {
+        return res.status(200).json({ message: 'success', like })
+      })
+      .catch(err => next(err))
+  },
+  removeLike: (req, res, next) => {
+    const tweetId = req.params.id
+    return User.findOne(getUser(req).id)
+      .then(user => {
+        return Like.findOne({
+          where: {
+            UserId: user.id,
+            TweetId: tweetId
+          }
+        })
+      })
+      .then(like => {
+        like.destroy()
+        return res.status(200).json({ message: 'success', like })
+      })
       .catch(err => next(err))
   }
 }
