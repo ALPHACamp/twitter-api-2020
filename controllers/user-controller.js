@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { Tweet, User, Reply, Like, sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
 const passport = require('../config/passport')
 const { getUser } = require('../_helpers')
@@ -216,6 +216,42 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  getUserLikes: (req, res, next) => {
+    User.findByPk(req.params.id).then(user => {
+      if (!user) {
+        const error = new Error('此使用者不存在!')
+        error.status = 404
+        throw error
+      }
+    })
+      .then(() => {
+        Like.findAll({
+          where: {
+            UserId: req.params.id
+          },
+          raw: true,
+          nest: true,
+          order: [['createdAt', 'DESC']],
+          attributes: {
+            exclude: ['UserId'],
+            include: [
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCounts'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts']
+            ]
+          },
+          include: [
+            {
+              model: Tweet,
+              attributes: ['id', 'description'],
+              include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+            }
+          ]
+        })
+          .then(likes => {
+            return res.status(200).json(likes)
+          })
+      }).catch(err => next(err))
+  },
   getTopUsers: (req, res, next) => {
     User.findAll({
       attributes: ['id', 'name', 'account', 'avatar'],
@@ -229,7 +265,7 @@ const userController = {
           .map(user => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowed: req.user.Followings.some(f => f.id === user.id),
+            isFollowed: getUser(req).Followings.some(f => f.id === user.id),
             isCurrentUser: getUser(req).id === user.id
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
