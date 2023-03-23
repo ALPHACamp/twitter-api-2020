@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
 
@@ -18,7 +18,7 @@ module.exports = {
             cover: `https://loremflickr.com/639/200/landscapepainting/?random=${Math.random() * 100}`,
             role: 'admin',
             createdAt: new Date(),
-            updatedAt: new Date(),
+            updatedAt: new Date()
           },
           {
             name: 'user1',
@@ -30,8 +30,8 @@ module.exports = {
             cover: `https://loremflickr.com/639/200/landscapepainting/?random=${Math.random() * 100}`,
             role: 'user',
             createdAt: new Date(),
-            updatedAt: new Date(),
-          },
+            updatedAt: new Date()
+          }
         ],
         {}
       ),
@@ -46,14 +46,14 @@ module.exports = {
           introduction: faker.lorem.text().substring(0, 160),
           cover: `https://loremflickr.com/639/200/landscapepainting/?random=${Math.random() * 100}`,
           createdAt: new Date(),
-          updatedAt: new Date(),
+          updatedAt: new Date()
         })),
         {}
-      ),
+      )
     ])
   },
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Users', null, { truncate: true })
-  },
+  }
 }
