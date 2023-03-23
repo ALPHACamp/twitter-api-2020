@@ -223,7 +223,11 @@ const userController = {
           exclude: ['Followship']
         },
         include: [
-          { model: User, as: 'Followings', attributes: ['id', 'name', 'avatar', 'introduction'] }
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'name', 'avatar', 'introduction', 'createdAt']
+          }
         ]
       }),
       User.findByPk(getUser(req).dataValues.id, {
@@ -235,6 +239,7 @@ const userController = {
     ])
       .then(([targetUser, currentUser]) => {
         const followings = targetUser.toJSON().Followings.map(following => ({
+          createdAt: following.createdAt,
           followingId: following.id,
           name: following.name,
           avatar: following.avatar,
@@ -242,6 +247,7 @@ const userController = {
           isFollowed: currentUser.toJSON().Followings.some(currentUserfollowing => currentUserfollowing.id === following.id),
           isCurrentUser: following.id === getUser(req).dataValues.id
         }))
+          .sort((a, b) => (new Date(b.createdAt)).getTime() - (new Date(a.createdAt)).getTime())
 
         return res.json(followings)
       })
@@ -296,7 +302,7 @@ const userController = {
           .map(user => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowed: req.user.dataValues.Followings.some(f => f.id === user.id),
+            isFollowed: getUser(req).dataValues.Followings.some(f => f.id === user.id),
             isCurrentUser: getUser(req).dataValues.id === user.id
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
