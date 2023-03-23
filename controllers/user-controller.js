@@ -4,6 +4,7 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { getUser } = require('../_helpers')
 
+
 const userController = {
   signIn: (req, res, next) => {
     try {
@@ -198,6 +199,76 @@ const userController = {
     })
       // (下1) 沒做 toJSON() 處理也能輸出正常 json 檔，但得注意
       .then(followers => res.status(200).json(followers))
+      .catch(err => next(err))
+  },
+  addFollowing: (req, res, next) => {
+    const userId = Number(req.query.id) // 目標使用者
+    return User.findByPk(getUser(req).id) // 登入的使用者
+      .then(user => {
+        // if (!user || !userId) {
+        //   return res.status(404).json({ status: 'error', message: 'Cannot find this user' })
+        // }
+        // if (user.id === userId) throw new Error('不能追蹤自己')
+        return Followship.create({
+          followerId: user.id,
+          followingId: userId
+        })
+      })
+      .then(followship => {
+        // if (followship) return res.status(409).json({ status: 'error', message: 'you already followed this user.' })
+        return res.status(200).json(followship)
+      })
+      .catch(err => next(err))
+  },
+  removeFollowing: (req, res, next) => {
+    const { followingId } = req.params
+    return User.findByPk(getUser(req).id)
+      .then(user => {
+        return Followship.findOne({
+          where: {
+            followerId: user.id,
+            followingId
+          }
+        })
+      })
+      .then(followship => {
+        followship.destroy()
+        return res.status(200).json({ message: 'success', followship })
+      })
+      .catch(err => next(err))
+  },
+  // getFollowship: (req, res, next) => {
+
+  // },
+  addLike: (req, res, next) => {
+    const tweetId = req.params.id
+    return User.findOne(getUser(req).id)
+      .then(user => {
+        return Like.create({
+          UserId: user.id,
+          TweetId: tweetId
+        })
+      })
+      .then(like => {
+        return res.status(200).json({ message: 'success', like })
+      })
+      .catch(err => next(err))
+  },
+  removeLike: (req, res, next) => {
+    const tweetId = req.params.id
+    return User.findOne(getUser(req).id)
+      .then(user => {
+        return Like.findOne({
+          where: {
+            UserId: user.id,
+            TweetId: tweetId
+          }
+        })
+      })
+      .then(like => {
+        like.destroy()
+        return res.status(200).json({ message: 'success', like })
+      })
       .catch(err => next(err))
   }
 }

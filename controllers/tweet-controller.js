@@ -4,13 +4,16 @@ const { getUser } = require('../helpers/auth-helpers')
 const tweetController = {
   postTweet: (req, res, next) => {
     const { description } = req.body
-    if (!getUser(req)) return res.status(404).json({ message: 'Can not find this user.' })
-    if (!description.trim()) return res.status(400).json({ message: '推文不能為空白' })
+    // if (!description.trim()) return res.status(400).json({ message: '推文不能為空白' })
     // if (description.length > 140) return res.status(400).json({ message: '推文字數限制在 140 以內' })
-    return Tweet.create({
-      UserId: getUser(req).id,
-      description
-    })
+    User.findByPk(getUser(req).id)
+      .then(user => {
+        // if (!user) return res.status(404).json({ message: 'Can not find this user.' })
+        return Tweet.create({
+          UserId: user.id,
+          description
+        })
+      })
       .then(tweet => {
         return res.status(200).json({ tweet })
       })
@@ -53,7 +56,7 @@ const tweetController = {
     })
       .then(tweet => {
         // if (!tweet) return res.status(404).json({ message: '推文不存在' })
-        Reply.create({
+        return Reply.create({
           UserId: getUser(req).id,
           TweetId: tweet.id,
           comment
