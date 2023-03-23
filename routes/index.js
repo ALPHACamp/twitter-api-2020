@@ -21,9 +21,15 @@ router.post('/api/signin', passport.authenticate('local', { session: false }), u
 router.post('/api/tweets/:tweet_id/replies', auth, isUser, tweetController.postReply)
 router.get('/api/tweets/:tweet_id/replies', auth, isUser, tweetController.getReply)
 
+router.post('/api/tweets/:id/like', auth, isUser, userController.addLike)
+router.post('/api/tweets/:id/unlike', auth, isUser, userController.removeLike)
+
 router.get('/api/tweets/:id', auth, isUser, tweetController.getTweet)
 router.get('/api/tweets', auth, isUser, tweetController.getTweets)
 router.post('/api/tweets', auth, isUser, tweetController.postTweet)
+
+router.post('/api/followships', auth, isUser, userController.addFollowing)
+router.delete('/api/followships/:followingId', auth, isUser, userController.removeFollowing)
 
 router.use('/', apiErrorHandler)
 
