@@ -3,6 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const express = require('express')
 const helpers = require('./_helpers')
+const cors = require('cors')
 const { apis } = require('./routes')
 
 const app = express()
@@ -16,6 +17,7 @@ function authenticated (req, res, next) {
 // app.get('/', (req, res) => res.send('Hello World!'))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+app.use(cors())
 
 app.use('/api', apis)
 
