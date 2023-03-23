@@ -1,4 +1,4 @@
-const { Tweet, User, Like } = require('../models')
+const { Tweet, User } = require('../models')
 const Sequelize = require('sequelize')
 
 const adminServices = {
@@ -23,60 +23,44 @@ const adminServices = {
   },
   getUsers: (req, cb) => {
     // 分別撈取User以及Tweet Like數量的資料
-    Promise.all([
-      User.findAll({
-        attributes: {
-          include: [
-            [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('tweets.id'))), 'tweetsCounts'],
-            [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followers.id'))), 'followersCounts'],
-            [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followings.id'))), 'followingsCounts']
-          ]
+    User.findAll({
+      attributes: {
+        include: [
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('tweets.id'))), 'tweetsCounts'],
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followers.id'))), 'followersCounts'],
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followings.id'))), 'followingsCounts'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Tweets JOIN Likes on Tweets.id = Likes.tweet_id WHERE Tweets.user_id = User.id)'), 'tweetsLikedCount']
+        ]
+      },
+      include: [
+        {
+          model: Tweet,
+          attributes: []
         },
-        include: [
-          {
-            model: Tweet,
-            attributes: []
-          },
-          {
-            model: User,
-            as: 'Followers',
-            attributes: []
-          },
-          {
-            model: User,
-            as: 'Followings',
-            attributes: []
-          }
-        ],
-        group: ['User.id'],
-        order: [
-          [Sequelize.fn('COUNT', Sequelize.col('tweets.id')), 'DESC']
-        ],
-        nest: true,
-        raw: true
-      }),
-      Tweet.findAll({
-        attributes: [
-          'UserId',
-          [Sequelize.fn('COUNT', Sequelize.col('likes.id')), 'likeCounts']
-        ],
-        include: [
-          {
-            model: Like,
-            attributes: []
-          }
-        ],
-        group: ['UserId'],
-        nest: true,
-        raw: true
-      })])
-      .then(([users, likes]) => {
+        {
+          model: User,
+          as: 'Followers',
+          attributes: []
+        },
+        {
+          model: User,
+          as: 'Followings',
+          attributes: []
+        }
+      ],
+      group: ['User.id'],
+      order: [
+        [Sequelize.fn('COUNT', Sequelize.col('tweets.id')), 'DESC']
+      ],
+      nest: true,
+      raw: true
+    })
+      .then(users => {
         // 調整回傳的使用者資料
         const updatedUser = users.map(user => {
           delete user.password
           delete user.Followers
           delete user.Followings
-          user.likeCounts = likes.find(x => x.UserId === user.id)?.likeCounts || 0
           return user
         })
         return updatedUser
