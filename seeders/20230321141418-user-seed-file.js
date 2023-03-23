@@ -5,7 +5,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const hashedPassword = await bcrypt.hash('12345678', 10)
     // 先產出所有user seed data後再調整
-    let userSeedData = Array.from({ length: 20 }).map(item => {
+    const userSeedData = Array.from({ length: 20 }).map(item => {
       return {
         email: faker.internet.email(),
         account: faker.internet.userName(),
