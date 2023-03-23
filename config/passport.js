@@ -8,12 +8,12 @@ const ExtractJWT = passportJWT.ExtractJwt
 
 passport.use(new LocalStrategy(
   {
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
   },
-  (req, email, password, cb) => {
-    User.findOne({ where: { email } })
+  (req, account, password, cb) => {
+    User.findOne({ where: { account } })
       .then(user => {
         if (!user) {
           const error = new Error('驗證失敗！')
