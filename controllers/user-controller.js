@@ -22,6 +22,7 @@ const userController = {
       }
       const userData = user.toJSON()
       delete userData.password
+      delete userData.role
       const token = jwt.sign(userData, process.env.JWT_SECRET)
       return res.status(200).json({
         status: 'success',
@@ -71,6 +72,7 @@ const userController = {
       })
       const userData = newUser.toJSON()
       delete userData.password
+      delete userData.role
       return res.status(200).json({
         status: 'success',
         message: 'Successfully sign up',
@@ -95,7 +97,7 @@ const userController = {
           [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id )'), 'tweet_count'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowerId = User.id )'), 'following_count'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships  WHERE Followships.FollowingId = User.id )'), 'follower_count'],
-          [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id )'), 'total_like']
+          [Sequelize.literal('(SELECT COUNT(*) FROM Likes JOIN Tweets ON Likes.TweetId = Tweets.id WHERE Tweets.UserId = User.id )'), 'total_like']
         ]
       })
       if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'User not found' })
@@ -285,61 +287,6 @@ const userController = {
         data: { user: updatedUser }
       })
     } catch (err) { next(err) }
-  },
-  addFollowing: async (req, res, next) => {
-    const ownerId = helpers.getUser(req)?.id
-    const userId = req.body?.id
-    if (ownerId === userId) return res.status(400).json({ status: 'error', message: 'You can not follow yourself' })
-    try {
-      const [user, followship] = await Promise.all([
-        User.findByPk(userId),
-        Followship.findOne({
-          where: {
-            followerId: ownerId,
-            followingId: userId
-          }
-        })
-      ])
-      if (!user) return res.status(404).json({ status: 'error', message: 'User not found' })
-      if (followship) return res.status(400).json({ status: 'error', message: 'You are already following this user!' })
-      await Followship.create({
-        followerId: ownerId,
-        followingId: userId
-      })
-      return res.json({
-        status: 'success',
-        message: 'Successfully followed the user',
-        data: { user }
-      })
-    } catch (err) {
-      next(err)
-    }
-  },
-  removeFollowing: async (req, res, next) => {
-    const ownerId = helpers.getUser(req).id
-    const userId = req.params?.followingId
-    if (ownerId === userId) return res.status(400).json({ status: 'error', message: 'You can not follow yourself and certainly can not undo' })
-    try {
-      const [user, followship] = await Promise.all([
-        User.findByPk(userId),
-        Followship.findOne({
-          where: {
-            followerId: ownerId,
-            followingId: userId
-          }
-        })
-      ])
-      if (!user) return res.status(404).json({ status: 'error', message: 'User not found' })
-      if (!followship) return res.status(400).json({ status: 'error', message: 'You are not followed this user!' })
-      await followship.destroy()
-      return res.json({
-        status: 'success',
-        message: 'Successfully unfollowed the user',
-        data: { user }
-      })
-    } catch (err) {
-      next(err)
-    }
   },
   getUserSetting: async (req, res, next) => {
     try {

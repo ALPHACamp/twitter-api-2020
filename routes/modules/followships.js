@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const userController = require('../../controllers/user-controller')
+const followshipController = require('../../controllers/followship-controller')
 
-router.post('/', userController.addFollowing)
-router.delete('/:followingId', userController.removeFollowing)
+router.post('/', followshipController.addFollowing)
+router.delete('/:followingId', followshipController.removeFollowing)
 
 module.exports = router

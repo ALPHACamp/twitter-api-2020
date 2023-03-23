@@ -4,7 +4,7 @@ const { Tweet, User, Sequelize, Reply } = require('../models')
 const adminController = {
   // 登入
   signIn: async (req, res, next) => {
-    const { email, password } = req.body
+    const { email, password } = req.body ?? {}
     if (!email || !password) {
       return res.status(400).json({ status: 'error', message: 'Email and password are required' })
     }
@@ -98,7 +98,7 @@ const adminController = {
           [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id )'), 'tweet_count'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowerId = User.id )'), 'following_count'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships  WHERE Followships.FollowingId = User.id )'), 'follower_count'],
-          [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id )'), 'total_like']
+          [Sequelize.literal('(SELECT COUNT(*) FROM Likes JOIN Tweets ON Likes.TweetId = Tweets.id WHERE Tweets.UserId = User.id )'), 'total_like']
         ],
         order: [['createdAt', 'DESC']],
         nest: true,
