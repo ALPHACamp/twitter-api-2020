@@ -61,6 +61,8 @@ const userController = {
       const UserId = req.params.id;
       const user = await User.findOne({
         where: { id: UserId },
+        raw: true,
+        next: true,
         include: [
           {
             model: User,
@@ -72,21 +74,11 @@ const userController = {
             as: 'Followings',
             attributes: ['id', 'account', 'avatar', 'name'],
           },
+          { model: Tweet },
+          { model: Reply },
+          { model: Like },
         ],
         attributes: { exclude: ['password'] },
-      });
-
-      const tweets = await Tweet.findAll({
-        where: { UserId },
-        order: [['createdAt', 'DESC']],
-      });
-      const replies = await Reply.findAll({
-        where: { UserId },
-        order: [['createdAt', 'DESC']],
-      });
-      const likes = await Like.findAll({
-        where: { UserId },
-        order: [['createdAt', 'DESC']],
       });
 
       if (!user) {
@@ -170,8 +162,8 @@ const userController = {
       const UserId = req.params.id;
       const currentUser = getUser(req);
       const { name, introduction } = req.body;
-      let avatar = req.file?.avatar || null;
-      let coverImage = req.file?.cover_image || null;
+      let avatar = req.files?.avatar || null;
+      let coverImage = req.files?.cover_image || null;
 
       if (currentUser.id !== Number(UserId)) {
         throw new Error('You are not authorized to edit this user');
@@ -190,7 +182,6 @@ const userController = {
       }
 
       if (avatar) avatar = await imgurFileHandler(avatar[0]);
-
       if (coverImage) coverImage = await imgurFileHandler(coverImage[0]);
 
       const user = await User.findByPk(UserId);
@@ -202,7 +193,7 @@ const userController = {
         name,
         introduction,
         avatar: avatar || currentUser.avatar,
-        cover_image: coverImage || currentUser.coverImage,
+        coverImage: coverImage || currentUser.cover_image,
       });
 
       res.status(200).json({
@@ -212,7 +203,7 @@ const userController = {
           name: userUpdated.name,
           introduction: userUpdated.introduction,
           avatar: userUpdated.avatar,
-          cover_image: userUpdated.cover_image,
+          cover_image: userUpdated.coverImage,
         },
       });
     } catch (err) {

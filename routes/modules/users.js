@@ -7,10 +7,7 @@ const userController = require('../../controllers/user-controller');
 
 router.put(
   '/:id',
-  upload.fields([
-    { name: 'avatar', maxCount: 1 },
-    { name: 'cover_image', maxCount: 1 },
-  ]),
+  upload.fields([{ name: 'avatar' }, { name: 'cover_image' }]),
   userController.editUserProfile
 );
 
