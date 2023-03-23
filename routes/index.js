@@ -21,6 +21,7 @@ router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 
+router.get('/followships/top', authenticated, userController.getTopFollow)
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 router.post('/followships', authenticated, userController.addFollowing)
 
