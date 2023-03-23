@@ -10,6 +10,7 @@ const replyController = require('../controllers/reply-controller')
 
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 
+router.get('/followers', authenticated, userController.getFollowersRank)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
 router.get('/users/:id/likes', authenticated, userController.getUserLikes)
@@ -18,6 +19,7 @@ router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.put('/users/:id/account', authenticated, userController.editUserAccount)
 router.put('/users/:id', authenticated, uploadMultiple, userController.editUserProfile)
 router.get('/users/:id', authenticated, userController.getUser)
+
 router.post('/users', userController.signup)
 router.post('/:role/signin', userController.signin)
 

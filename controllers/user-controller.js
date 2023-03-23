@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const { User, Tweet, Reply, Like, sequelize } = require('../models')
-const { QueryTypes } = require('sequelize')
+const { Sequelize, QueryTypes, Op } = require('sequelize')
 const { valueTrim } = require('../helpers/obj-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
@@ -284,6 +284,40 @@ const userController = {
         isFollowing: signinUser.Followings?.some(following => following.id === el.followingId)
       }))
       res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowersRank: async (req, res, next) => {
+    try {
+      const order = req.query.order || 'DESC'
+      const limit = Number(req.query.limit) || 10
+      const signinUser = helpers.getUser(req)
+      const data = await User.findAll({
+        where: {
+          role: { [Op.eq]: 'user' },
+          id: { [Op.ne]: signinUser.id }
+        },
+        attributes: {
+          include: [
+            [
+              Sequelize.literal('(SELECT COUNT(*) FROM followships AS followship WHERE followship.followingId = user.id)'),
+              'followers'
+            ]
+          ],
+          exclude: ['email', 'cover', 'introduction', 'role', 'password', 'createdAt', 'updatedAt']
+        },
+        order: [
+          [Sequelize.literal('followers'), order],
+          ['id', 'ASC']
+        ],
+        limit
+      })
+      const users = data.map(el => ({
+        ...el.toJSON(),
+        isFollowing: signinUser.Followings?.some(following => following.id === el.id)
+      }))
+      res.status(200).json(users)
     } catch (err) {
       next(err)
     }
