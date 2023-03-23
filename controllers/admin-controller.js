@@ -1,7 +1,7 @@
 const adminServices = require('../services/admin-services')
 const adminController = {
   getTweets: (req, res, next) => {
-    adminServices.getTweets(req, (err, data) => err ? next(err) : res.json(data))
+    adminServices.getTweets(req, (err, data) => err ? next(err) : res.json({ satautn: 'success', data }))
   },
   deleteTweet: (req, res, next) => {
     adminServices.deleteTweet(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
