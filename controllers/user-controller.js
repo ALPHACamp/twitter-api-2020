@@ -215,6 +215,29 @@ const userController = {
         })
       })
       .catch(err => next(err))
+  },
+  getTopUsers: (req, res, next) => {
+    User.findAll({
+      attributes: ['id', 'name', 'account', 'avatar'],
+      include: [
+        { model: User, as: 'Followers', attributes: ['id'] },
+        { model: User, as: 'Followings', attributes: ['id'] }
+      ]
+    })
+      .then(users => {
+        const userData = users
+          .map(user => ({
+            ...user.toJSON(),
+            followerCount: user.Followers.length,
+            isFollowed: req.user.Followings.some(f => f.id === user.id),
+            isCurrentUser: getUser(req).id === user.id
+          }))
+          .sort((a, b) => b.followerCount - a.followerCount)
+          .slice(0, 10)
+
+        res.json(userData)
+      })
+      .catch(err => next(err))
   }
 }
 

@@ -16,6 +16,7 @@ router.post('/users', userController.signUp)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/users', authenticated, authenticatedUser, users)
 router.use('/tweets', authenticated, tweets)
+router.get('/top_followed_users', authenticated, userController.getTopUsers)
 
 router.use('/', errorHandler)
 
