@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const { User, Reply, sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../_helpers')
@@ -19,15 +19,11 @@ const userController = {
   },
 
   getUserTweets: (req, res, next) => {
-    return Tweet.findAll({
-      where: { userId: req.params.userId },
-      limit: 5,
-      include: User,
-      attributes: ['user_id', 'description'],
-      order: [['created_at', 'desc']],
-      raw: true,
-      nest: true
-    })
+    return sequelize.query('SELECT description FROM tweets WHERE user_id = :userId ORDER BY created_at LIMIT 5',
+      {
+        replacements: { userId: req.params.userId },
+        type: sequelize.QueryTypes.SELECT
+      })
       .then(tweets => {
         if (!tweets) {
           const error = new Error("Tweets don't exist!")
@@ -41,15 +37,11 @@ const userController = {
   },
 
   getUserReplies: (req, res, next) => {
-    return Reply.findAll({
-      where: { userId: req.params.userId },
-      limit: 5,
-      include: User,
-      attributes: ['user_id', 'comment'],
-      order: [['created_at', 'desc']],
-      raw: true,
-      nest: true
-    })
+    return sequelize.query('SELECT comment FROM replies WHERE user_id = :userId ORDER BY created_at LIMIT 5',
+      {
+        replacements: { userId: req.params.userId },
+        type: sequelize.QueryTypes.SELECT
+      })
       .then(replies => {
         if (!replies) {
           const error = new Error("Replies don't exist!")
