@@ -22,28 +22,15 @@ const adminServices = {
       .catch(err => cb(err))
   },
   getUsers: (req, cb) => {
-    // 分別撈取User以及Tweet Like數量的資料
     User.findAll({
       attributes: {
         include: [
           [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.user_id = User.id)'), 'tweetsCount'],
-          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followers.id'))), 'followersCount'],
-          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followings.id'))), 'followingsCount'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followersCount'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingsCount'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Tweets JOIN Likes on Tweets.id = Likes.tweet_id WHERE Tweets.user_id = User.id)'), 'tweetsLikedCount']
         ]
       },
-      include: [
-        {
-          model: User,
-          as: 'Followers',
-          attributes: []
-        },
-        {
-          model: User,
-          as: 'Followings',
-          attributes: []
-        }
-      ],
       group: ['User.id'],
       order: [
         [Sequelize.literal('tweetsCount'), 'DESC']
@@ -55,8 +42,6 @@ const adminServices = {
         // 調整回傳的使用者資料
         const updatedUser = users.map(user => {
           delete user.password
-          delete user.Followers
-          delete user.Followings
           return user
         })
         return updatedUser
