@@ -14,7 +14,6 @@ module.exports = {
 
     await queryInterface.bulkInsert('Likes',
       Array.from({ length: users.length * 3 }, (_, i) => ({
-        // description: faker.lorem.text(), // 會過字數上限，先不用
         created_at: new Date(),
         updated_at: new Date(),
         user_id: users[i % users.length].id,

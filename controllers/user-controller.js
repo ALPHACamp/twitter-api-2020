@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，不管，我先用舊的 add-on
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { getUser } = require('../_helpers')
 
@@ -180,6 +180,24 @@ const userController = {
       order: [['createdAt', 'DESC']]
     })
       .then(likes => res.status(200).json(likes))
+      .catch(err => next(err))
+  },
+  getFollowings: (req, res, next) => {
+    return Followship.findAll({
+      where: { followerId: req.params.id },
+      order: [['createdAt', 'DESC']]
+    })
+      // (下1) 沒做 toJSON() 處理也能輸出正常 json 檔，但得注意
+      .then(followings => res.status(200).json(followings))
+      .catch(err => next(err))
+  },
+  getFollowers: (req, res, next) => {
+    return Followship.findAll({
+      where: { followingId: req.params.id },
+      order: [['createdAt', 'DESC']]
+    })
+      // (下1) 沒做 toJSON() 處理也能輸出正常 json 檔，但得注意
+      .then(followers => res.status(200).json(followers))
       .catch(err => next(err))
   }
 }

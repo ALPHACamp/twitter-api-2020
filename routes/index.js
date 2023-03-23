@@ -16,6 +16,8 @@ router.use('/api/admin', auth, isAdmin, admin)
 router.get('/api/users/:id/tweets', auth, isUser, userController.getTweets)
 // (下1) 單一 user 的所有回覆
 router.get('/api/users/:id/replied_tweets', auth, isUser, userController.getReplies)
+router.get('/api/users/:id/followers', auth, isUser, userController.getFollowers) // 取得某 user 的跟隨者資料
+router.get('/api/users/:id/followings', auth, isUser, userController.getFollowings) // 取得某 user 跟隨的使用者資料
 router.get('/api/users/:id/likes', auth, isUser, userController.getLikes) // 取得 like 資料
 router.get('/api/users/:id', auth, isUser, userController.getUserInfo)
 
