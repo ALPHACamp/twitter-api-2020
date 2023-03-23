@@ -4,7 +4,7 @@ const { Tweet, User, Sequelize, Reply } = require('../models')
 const adminController = {
   // 登入
   signIn: async (req, res, next) => {
-    const { email, password } = req.body
+    const { email, password } = req.body ?? {}
     if (!email || !password) {
       return res.status(400).json({ status: 'error', message: 'Email and password are required' })
     }
