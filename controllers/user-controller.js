@@ -2,7 +2,8 @@ const passport = require('passport')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const { QueryTypes } = require('sequelize')
 const { valueTrim } = require('../helpers/obj-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
@@ -227,6 +228,34 @@ const userController = {
         return Like
       })
       res.status(200).json(userLikes)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const followingId = req.params.id
+      const user = await User.findByPk(followingId)
+      if (!user) throw new Error('使用者不存在')
+      const data = await sequelize.query(
+        `
+        SELECT followerId, name, avatar, introduction
+        FROM followships JOIN users ON users.id = followships.followerId
+        WHERE followingId = ?
+        ORDER BY followships.createdAt DESC
+        `,
+        {
+          replacements: [followingId],
+          raw: true,
+          type: QueryTypes.SELECT
+        }
+      )
+      const signinUser = helpers.getUser(req)
+      const followers = data.map(el => ({
+        ...el,
+        isFollowing: signinUser.Followings?.some(following => following.id === el.followerId)
+      }))
+      res.status(200).json(followers)
     } catch (err) {
       next(err)
     }
