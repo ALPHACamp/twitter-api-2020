@@ -90,6 +90,42 @@ const adminServices = {
           })
       })
       .catch(err => cb(err))
+  },
+  getUser: (req, cb) => {
+    const { id } = req.params
+    User.findAll({
+      where: {
+        id: id,
+        role: 'user'
+      }
+    }, {
+      attributes: {
+        include: [
+          [
+            sequelize.literal('(SELECT COUNT(*)FROM Tweets WHERE User_id = User.id)'), 'TweetsCounts'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*)FROM Followships AS Followers WHERE following_id = User.id)'), 'followerCounts'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*)FROM Followships AS Followings WHERE follower_id = User.id)'), 'followingCounts'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*)FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweet_id WHERE Tweets.User_id = User.id)'), 'LikedCounts'
+          ]
+        ],
+        exclude: [
+          'password',
+          'updatedAt',
+          'createdAt'
+        ]
+      },
+      raw: true
+    })
+      .then(user => {
+        cb(null, user[0])
+      })
+      .catch(err => cb(err))
   }
 }
 module.exports = adminServices
