@@ -6,6 +6,12 @@ const followshipController = {
       const followerId = getUser(req).dataValues.id
       const followingId = req.body.id
 
+      if (Number(followingId) === Number(followerId)) {
+        const error = new Error('使用者不能追蹤自己！')
+        error.status = 400
+        throw error
+      }
+
       const user = await User.findByPk(followingId)
       if (!user) {
         const error = new Error('追蹤對象不存在！')
@@ -28,6 +34,12 @@ const followshipController = {
     try {
       const followerId = getUser(req).dataValues.id
       const { followingId } = req.params
+
+      if (Number(followingId) === Number(followerId)) {
+        const error = new Error('使用者不能取消追蹤自己！')
+        error.status = 400
+        throw error
+      }
 
       const user = await User.findByPk(followingId)
       if (!user) {
