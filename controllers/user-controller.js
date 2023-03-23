@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 
 const helpers = require('../_helpers')
-
+const sequelize = require('sequelize')
 const { User } = require('../models')
 
 const userController = {
@@ -75,6 +75,16 @@ const userController = {
       next(err)
     }
   },
+  getUserLikes: (req, res, next) => {
+    const { userId } = req.params
+    User.findByPk(userId, {
+      include: [{model: like, include:[{model: tweet, include: [Like, Reply, User]}]}],
+      order: 
+
+    })
+
+
+  }
 }
 
 module.exports = userController
