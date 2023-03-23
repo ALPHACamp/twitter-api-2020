@@ -84,13 +84,13 @@ const userController = {
   getRepliedTweets: async(req, res, next) => {
     try{
       const { userId } = req.params;
-      let reply = await Reply.findAll({
+      const reply = await Reply.findAll({
         where: { UserId: userId },
         include: [
-          { model: User },
+          { model: User, attributes: ['name']},
           {
             model: Tweet,
-            include: [{ model: User, attributes: ["account"] }],
+            include: [{ model: User, attributes: ['name', 'account','createdAt'] }],
           },
         ],
         order: [["createdAt", "DESC"]],
