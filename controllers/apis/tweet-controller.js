@@ -9,6 +9,9 @@ const tweetController = {
   },
   postTweet: (req, res, next) => {
     tweetServices.postTweet(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getTweetReplies: (req, res, next) => {
+    tweetServices.getTweetReplies(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 

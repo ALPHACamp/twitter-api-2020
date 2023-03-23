@@ -1,7 +1,7 @@
 // const assert = require('assert')
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const { assert } = require('chai')
 
 const tweetServices = {
@@ -65,6 +65,20 @@ const tweetServices = {
         })
       })
       .then(tweet => cb(null, tweet))
+      .catch(err => cb(err))
+  },
+  getTweetReplies: (req, cb) => {
+    const tweetId = req.params.tweetId
+    return Reply.findAll({
+      where: { TweetId: tweetId },
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']],
+      nest: true,
+      raw: true
+    })
+      .then(replies => cb(null, replies))
       .catch(err => cb(err))
   }
 }
