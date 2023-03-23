@@ -25,6 +25,8 @@ router.get(
 router.get("/api/tweets", authenticatedUser, tweetController.getTweets);
 router.post("/api/tweets", authenticatedUser, tweetController.postTweet);
 
+router.post('/api/followships', authenticatedUser, userController.addFollowing)
+
 router.use("/", errorHandler);
 
 module.exports = router;

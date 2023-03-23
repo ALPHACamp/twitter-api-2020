@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
-const { User } = require("../models");
+const { User, Followship } = require("../models");
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -89,7 +89,7 @@ const userController = {
     const { id } = req.params;
     const { name, introduction } = req.body;
     // - 若有傳任一張圖片 req.files 才存在
-    const avatar = req.files?.avatar; 
+    const avatar = req.files?.avatar;
     const cover = req.files?.cover;
     const avatarFile = avatar ? avatar[0] : null;
     const coverFile = cover ? cover[0] : null;
@@ -130,9 +130,33 @@ const userController = {
       return next(error);
     }
   },
-  putUserSetting: (req, res, next) => {
-
-  }
+  putUserSetting: (req, res, next) => {},
+  addFollowing: async (req, res, next) => {
+    const { id } = req.body;
+    try {
+      if (getUser(req).id === Number(id)) {
+        const error = new Error("無法追蹤自己!");
+        error.status = 400;
+        throw error;
+      }
+      const foundUser = await User.findByPk(id, { raw: true })
+      if (foundUser.isAdmin) {
+        const error = new Error("無法追蹤管理員!");
+        error.status = 400;
+        throw error;
+      }
+      const createdFollowship = await Followship.create({
+        followerId: getUser(req).id,
+        followingId: Number(id),
+      });
+      return res.json({
+        status: "success",
+        data: { createdFollowship },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
 };
 
 module.exports = userController;
