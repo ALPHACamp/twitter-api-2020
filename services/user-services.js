@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
 const db = require('../models')
-const { User } = db
+const { User, sequelize } = db
 
 const adminServices = {
   postSignIn: (req, cb) => {
@@ -21,18 +21,42 @@ const adminServices = {
       cb(err)
     }
   },
-  getTopUsers: (req, res, next) => {
+  getTopUsers: (next, cb) => {
     try {
-      User.findAll({ include: [{ model: User, as: 'Followers' }] })
-        .then(users => {
-          users = users.map(user => ({
-            ...user.toJSON(),
-            followerCount: user.Followers.length,
-            isFollowed: req.user.Followings.some(f => f.id === user.id)
-          }))
-          users = users.sort((a, b) => b.followerCount - a.followerCount)
-          res.json({ status: 'success', data: { users } })
-        })
+      User.findAll({
+        where: { role: 'user' },
+        attributes: {
+          include: [
+            [
+              sequelize.literal('(SELECT COUNT(*)FROM Tweets WHERE UserId = User.id)'), 'TweetsCounts'
+            ],
+            [
+              sequelize.literal('(SELECT COUNT(*)FROM Followships AS Followers WHERE followingId = User.id)'), 'followerCounts'
+            ],
+            [
+              sequelize.literal('(SELECT COUNT(*)FROM Followships AS Followings WHERE followerId = User.id)'), 'followingCounts'
+            ],
+            [
+              sequelize.literal('(SELECT COUNT(*)FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweetId WHERE Tweets.UserId = User.id )'), 'LikedCounts'
+            ]
+          ],
+          exclude: [
+            'introduction',
+            'password',
+            'updatedAt',
+            'createdAt'
+          ]
+        },
+        order: [
+          [sequelize.literal('followerCounts'), 'DESC']
+        ]
+      })
+        .then(users => cb(null, {
+          status: 'success',
+          data: {
+            usersData: [...users]
+          }
+        }))
     } catch (err) {
       next(err)
     }

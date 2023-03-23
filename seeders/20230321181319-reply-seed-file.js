@@ -1,5 +1,6 @@
 'use strict'
 const faker = require('faker')
+const { shuffledArray } = require('../helpers/math-helpers.js')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query("SELECT id FROM Users WHERE role = 'user';", { type: queryInterface.sequelize.QueryTypes.SELECT })
@@ -7,10 +8,10 @@ module.exports = {
 
     await queryInterface.bulkInsert('Replies', Array.from({ length: 150 }, (_, index) => ({
       comment: faker.lorem.text(20),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      TweetId: tweets[index % 50].id,
-      UserId: users[index % 5].id
+      created_at: new Date(),
+      updated_at: new Date(),
+      TweetId: shuffledArray(tweets)[index % 50].id,
+      UserId: shuffledArray(users)[index % 5].id
     })))
   },
 
