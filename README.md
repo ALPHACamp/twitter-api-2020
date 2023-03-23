@@ -17,7 +17,7 @@ npm install
 ### Create the seed data
 ### Run the service
 ```
-npm run test
+npm run dev
 ```
 
 ### Test accounts
