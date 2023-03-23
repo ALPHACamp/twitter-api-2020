@@ -58,7 +58,7 @@ const tweetController = {
       await tweet.destroy()
       return res.status(200).json({
         status: 'success',
-        message: 'Successfully deleted tweet',
+        message: 'Successfully deleted the tweet',
         data: { tweet }
       })
     } catch (err) {

@@ -10,7 +10,8 @@ const jwtOptions = {
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
-  }) // 看到時候需要什麼資料，直接在這裡改
+    attributes: { exclude: ['password', 'createdAt', 'updatedAt'] } // 這是會回傳給req.user的當前使用者資料，不需要取太多
+  })
     .then(user => cb(null, user))
     .catch(err => cb(err))
 }))

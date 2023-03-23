@@ -114,17 +114,30 @@ const userController = {
           'id',
           'description',
           'createdAt',
+          'updatedAt',
           [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id )'), 'reply_count'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id )'), 'like_count'],
           [Sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${ownerId} AND Likes.TweetId = Tweet.id )`), 'is_liked']
         ],
-        include: [{
-          model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
-        }],
-        order: [['createdAt', 'DESC']],
-        nest: true,
-        raw: true
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          },
+          {
+            model: Reply,
+            attributes: { exclude: 'TweetId' },
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'name', 'account', 'avatar']
+              }
+            ]
+          }
+        ],
+        order: [['updatedAt', 'DESC']],
+        nest: true
+        // 使用 raw: true 會造成回覆資料只有一筆，故移除
       })
       if (!tweets) return res.status(404).json({ status: 'error', message: 'Tweets not found' })
       return res.status(200).json(tweets)
@@ -139,12 +152,12 @@ const userController = {
         where: { UserId: id },
         include: [{
           model: Tweet,
-          attributes: ['id', 'description', 'createdAt']
+          attributes: ['id', 'description', 'updatedAt']
         }, {
           model: User,
           attributes: ['id', 'name', 'account', 'avatar']
         }],
-        order: [['createdAt', 'DESC']],
+        order: [['updatedAt', 'DESC']],
         nest: true,
         raw: true
       })
@@ -259,56 +272,65 @@ const userController = {
       })
       return res.status(200).json({
         status: 'success',
-        message: 'Successfully updated user',
+        message: 'Successfully updated the user',
         data: { user: updatedUser }
       })
     } catch (err) { next(err) }
-  }, // 加逗點，新增以下
-  addFollowing: (req, res, next) => {
-    const userId = req.body.id
-    Promise.all([
-      User.findByPk(userId),
-      Followship.findOne({
-        where: {
-          followerId: helpers.getUser(req).id,
-          followingId: userId
-        }
-      })
-    ])
-      .then(([user, followship]) => {
-        if (!user) return res.status(404).json({ status: 'error', message: 'User not found' })
-        if (followship) { return res.status(404).json({ status: 'error', message: 'You are already following this user!' }) }
-        return Followship.create({
-          followerId: helpers.getUser(req).id,
-          followingId: userId
-        })
-      })
-      .then(() => {
-        return res.json({
-          status: 'success',
-          message: 'Successfully unliked the tweet'
-        })
-      })
-      .catch(err => next(err))
   },
-  removeFollowing: (req, res, next) => {
-    Followship.findOne({
-      where: {
-        followerId: helpers.getUser(req).id,
-        followingId: req.params.followingId
-      }
-    })
-      .then(followship => {
-        if (!followship) throw new Error("You haven't followed this user!")
-        return followship.destroy()
-      })
-      .then(() => {
-        return res.json({
-          status: 'success',
-          message: 'Successfully unliked the tweet'
+  addFollowing: async (req, res, next) => {
+    const ownerId = helpers.getUser(req).id
+    const userId = req.body.id
+    if (ownerId === userId) return res.status(400).json({ status: 'error', message: 'You can not follow yourself' })
+    try {
+      const [user, followship] = await Promise.all([
+        User.findByPk(userId),
+        Followship.findOne({
+          where: {
+            followerId: ownerId,
+            followingId: userId
+          }
         })
+      ])
+      if (!user) return res.status(404).json({ status: 'error', message: 'User not found' })
+      if (followship) return res.status(400).json({ status: 'error', message: 'You are already following this user!' })
+      await Followship.create({
+        followerId: ownerId,
+        followingId: userId
       })
-      .catch(err => next(err))
+      return res.json({
+        status: 'success',
+        message: 'Successfully followed the user',
+        data: { user }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  removeFollowing: async (req, res, next) => {
+    const ownerId = helpers.getUser(req).id
+    const userId = req.params.followingId
+    if (ownerId === userId) return res.status(400).json({ status: 'error', message: 'You can not follow yourself and certainly can not undo' })
+    try {
+      const [user, followship] = await Promise.all([
+        User.findByPk(userId),
+        Followship.findOne({
+          where: {
+            followerId: ownerId,
+            followingId: userId
+          }
+        })
+      ])
+      if (!user) return res.status(404).json({ status: 'error', message: 'User not found' })
+      if (!followship) return res.status(400).json({ status: 'error', message: 'You are not followed this user!' })
+      await followship.destroy()
+      return res.json({
+        status: 'success',
+        message: 'Successfully unfollowed the user',
+        data: { user }
+      })
+    } catch (err) {
+      next(err)
+    }
   },
   getUserSetting: async (req, res, next) => {
     try {
@@ -320,7 +342,7 @@ const userController = {
       delete user.role
       return res.status(200).json({
         status: 'success',
-        message: 'Successfully get user',
+        message: 'Successfully get the user',
         data: { user }
       })
     } catch (err) {
@@ -363,7 +385,7 @@ const userController = {
       delete newUser.role
       return res.status(200).json({
         status: 'success',
-        message: 'Successfully updated user',
+        message: 'Successfully updated the user',
         data: { user: newUser }
       })
     } catch (err) {
