@@ -219,14 +219,11 @@ const userController = {
   getUserFollowings: (req, res, next) => {
     return Promise.all([
       User.findByPk(req.params.id, {
-        attributes: {
-          exclude: ['Followship']
-        },
         include: [
           {
             model: User,
             as: 'Followings',
-            attributes: ['id', 'name', 'avatar', 'introduction', 'createdAt']
+            attributes: ['id', 'name', 'avatar', 'introduction']
           }
         ]
       }),
@@ -239,7 +236,7 @@ const userController = {
     ])
       .then(([targetUser, currentUser]) => {
         const followings = targetUser.toJSON().Followings.map(following => ({
-          createdAt: following.createdAt,
+          createdAt: following.Followship.createdAt,
           followingId: following.id,
           name: following.name,
           avatar: following.avatar,
@@ -250,6 +247,40 @@ const userController = {
           .sort((a, b) => (new Date(b.createdAt)).getTime() - (new Date(a.createdAt)).getTime())
 
         return res.json(followings)
+      })
+      .catch(err => next(err))
+  },
+  getUserFollowers: (req, res, next) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'name', 'avatar', 'introduction']
+          }
+        ]
+      }),
+      User.findByPk(getUser(req).dataValues.id, {
+        attributes: ['id'],
+        include: [
+          { model: User, as: 'Followers', attributes: ['id'] }
+        ]
+      })
+    ])
+      .then(([targetUser, currentUser]) => {
+        const followers = targetUser.toJSON().Followers.map(follower => ({
+          createdAt: follower.Followship.createdAt,
+          followerId: follower.id,
+          name: follower.name,
+          avatar: follower.avatar,
+          introduction: follower.introduction,
+          isFollowed: currentUser.toJSON().Followers.some(currentUserfollower => currentUserfollower.id === follower.id),
+          isCurrentUser: follower.id === getUser(req).dataValues.id
+        }))
+          .sort((a, b) => (new Date(b.createdAt)).getTime() - (new Date(a.createdAt)).getTime())
+
+        return res.json(followers)
       })
       .catch(err => next(err))
   },
