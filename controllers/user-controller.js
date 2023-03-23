@@ -9,7 +9,7 @@ const helpers = require('../_helpers')
 const userController = {
   // 登入
   signIn: async (req, res, next) => {
-    const { account, password } = req.body
+    const { account, password } = req.body ?? {}
     if (!account || !password) {
       return res.status(400).json({ status: 'error', message: 'Account and password are required' })
     }
@@ -37,7 +37,7 @@ const userController = {
   },
   // 註冊
   signUp: async (req, res, next) => {
-    const { account, name, email, password, checkPassword } = req.body
+    const { account, name, email, password, checkPassword } = req.body ?? {}
     if (!account || !name || !email || !password) {
       return res.status(400).json({ status: 'error', message: 'All fields are required' })
     }
@@ -81,7 +81,7 @@ const userController = {
     }
   },
   getUser: async (req, res, next) => {
-    const { id } = req.params
+    const id = req.params?.id
     try {
       const user = await User.findByPk(id, {
         attributes: [
@@ -105,8 +105,8 @@ const userController = {
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
-    const ownerId = helpers.getUser(req).id
-    const { id } = req.params
+    const ownerId = helpers.getUser(req)?.id
+    const id = req.params?.id
     try {
       const user = await User.findByPk(id)
       if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
@@ -128,13 +128,14 @@ const userController = {
           },
           {
             model: Reply,
-            attributes: { exclude: 'TweetId' },
+            attributes: { exclude: ['UserId', 'TweetId'] },
             include: [
               {
                 model: User,
                 attributes: ['id', 'name', 'account', 'avatar']
               }
-            ]
+            ],
+            order: [['updatedAt', 'DESC']]
           }
         ],
         order: [['updatedAt', 'DESC']],
@@ -146,30 +147,35 @@ const userController = {
     } catch (err) { next(err) }
   },
   getUserReplies: async (req, res, next) => {
-    const { id } = req.params
+    const id = req.params?.id
     try {
       const user = await User.findByPk(id)
       if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
       const replies = await Reply.findAll({
         where: { UserId: id },
+        attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
         include: [{
           model: Tweet,
-          attributes: ['id', 'description', 'updatedAt']
+          attributes: ['id', 'description', 'createdAt', 'updatedAt'],
+          include: [{
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          }]
         }, {
           model: User,
           attributes: ['id', 'name', 'account', 'avatar']
         }],
         order: [['updatedAt', 'DESC']],
         nest: true,
-        raw: true
+        naw: true
       })
       if (!replies) return res.status(404).json({ status: 'error', message: 'Replies not found' })
       return res.status(200).json(replies)
     } catch (err) { next(err) }
   },
   getUserLikes: async (req, res, next) => {
-    const ownerId = helpers.getUser(req).id
-    const { id } = req.params
+    const ownerId = helpers.getUser(req)?.id
+    const id = req.params?.id
     try {
       const user = await User.findByPk(id)
       if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
@@ -181,6 +187,7 @@ const userController = {
             'id',
             'description',
             'createdAt',
+            'updatedAt',
             [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id )'), 'reply_count'],
             [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id )'), 'like_count'],
             [Sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${ownerId} AND Likes.TweetId = Tweet.id )`), 'is_liked']
@@ -190,7 +197,7 @@ const userController = {
             attributes: ['id', 'name', 'account', 'avatar']
           }]
         }],
-        order: [['createdAt', 'DESC']],
+        order: [['updatedAt', 'DESC']],
         nest: true,
         raw: true
       })
@@ -198,8 +205,8 @@ const userController = {
     } catch (err) { next(err) }
   },
   getUserFollowing: async (req, res, next) => {
-    const ownerId = helpers.getUser(req).id
-    const { id } = req.params
+    const ownerId = helpers.getUser(req)?.id
+    const id = req.params?.id
     try {
       const user = await User.findByPk(id)
       if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
@@ -225,8 +232,8 @@ const userController = {
     } catch (err) { next(err) }
   },
   getUserFollower: async (req, res, next) => {
-    const ownerId = helpers.getUser(req).id
-    const { id } = req.params
+    const ownerId = helpers.getUser(req)?.id
+    const id = req.params?.id
     try {
       const user = await User.findByPk(id)
       if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
@@ -252,8 +259,8 @@ const userController = {
     } catch (err) { next(err) }
   },
   putUser: async (req, res, next) => {
-    const { id } = req.params
-    const { name, introduction } = req.body
+    const id = req.params?.id
+    const { name, introduction } = req.body ?? {}
     const { avatar = null, cover = null } = req.files || {}
     if (name.length < 1 || name.length > 50) {
       return res.status(400).json({ status: 'error', message: 'Name should be less than 50' })
@@ -280,8 +287,8 @@ const userController = {
     } catch (err) { next(err) }
   },
   addFollowing: async (req, res, next) => {
-    const ownerId = helpers.getUser(req).id
-    const userId = req.body.id
+    const ownerId = helpers.getUser(req)?.id
+    const userId = req.body?.id
     if (ownerId === userId) return res.status(400).json({ status: 'error', message: 'You can not follow yourself' })
     try {
       const [user, followship] = await Promise.all([
@@ -310,7 +317,7 @@ const userController = {
   },
   removeFollowing: async (req, res, next) => {
     const ownerId = helpers.getUser(req).id
-    const userId = req.params.followingId
+    const userId = req.params?.followingId
     if (ownerId === userId) return res.status(400).json({ status: 'error', message: 'You can not follow yourself and certainly can not undo' })
     try {
       const [user, followship] = await Promise.all([
@@ -352,8 +359,8 @@ const userController = {
     }
   },
   putUserSetting: async (req, res, next) => {
-    const { account, name, email, password } = req.body
-    const originalUserData = helpers.getUser(req).toJSON()
+    const { account, name, email, password } = req.body ?? {}
+    const originalUserData = helpers.getUser(req)?.toJSON()
     try {
       // 重複帳號
       let duplicateAccount = null

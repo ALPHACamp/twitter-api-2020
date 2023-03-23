@@ -6,7 +6,7 @@ const tweetController = require('../../controllers/tweet-controller')
 router.post('/:tweet_id/replies', tweetController.postReply)
 
 // 瀏覽特定推文下留言
-router.get('/:tweet_id/replies', tweetController.getReply)
+router.get('/:tweet_id/replies', tweetController.getReplies)
 
 // 對特定推文表達喜歡
 router.post('/:id/like', tweetController.addLike)
