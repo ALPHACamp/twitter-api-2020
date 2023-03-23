@@ -1,10 +1,10 @@
 const passport = require('../config/passport')
-
+const { AuthError, AutherError } = require('../helpers/errorInstance')
 const { getUser } = require('../_helpers')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
-    if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
+    if (err || !user) next(new AuthError('非法token~~~'))
     req.user = user
     next()
   })(req, res, next)
@@ -12,7 +12,7 @@ const authenticated = (req, res, next) => {
 const authenticatedAdmin = (req, res, next) => {
   if (getUser(req) && req.user.role === 'admin') return next()
 
-  return res.status(403).json({ status: 'error', message: 'permission denied' })
+  return next(new AutherError('他不是管理員！'))
 }
 module.exports = {
   authenticated,

@@ -8,7 +8,7 @@ module.exports = {
     } else {
       res.status(500).json({
         status: 'error',
-        message: `${err}`
+        message: '伺服器出事拉～～～'
       })
     }
     next(err)

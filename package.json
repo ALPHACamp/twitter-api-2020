@@ -8,6 +8,7 @@
 		"dev": "set \"NODE_ENV=development\" nodemon app.js",
 		"devMac": "export NODE_ENV=development && nodemon app.js",
 		"test": "mocha test --exit --recursive --timeout 5000",
+		"testR": "npx mocha test/requests --exit",
 		"lint": "eslint \"**/*.js\" --fix",
 		"seed": "npx sequelize db:seed:all",
 		"dseed": "npx sequelize db:seed:undo:all",

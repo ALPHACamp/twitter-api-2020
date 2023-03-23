@@ -4,7 +4,6 @@ const userController = require('../../controllers/user-controller')
 const upload = require('../../middleware/multer')
 
 router.post('/test-token', userController.userVerify)
-router.get('/tweets', userController.getUserTweets)
 router.get('/:id/tweets', userController.getTweets)
 router.get('/:id/replied_tweets', userController.getReplies)
 router.get('/:id/likes', userController.getLikes)
