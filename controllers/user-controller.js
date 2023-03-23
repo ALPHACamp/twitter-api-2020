@@ -4,14 +4,16 @@ const validator = require('validator')
 
 const helpers = require('../_helpers')
 
-const { User } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 
 const userController = {
   signIn: async (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
       delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const token = jwt.sign(userData, process.env.JWT_SECRET, {
+        expiresIn: '30d'
+      })
       return res.json({
         status: 'success',
         data: {
@@ -36,7 +38,9 @@ const userController = {
         errors.push('The name cannot exceed 50 characters.')
       }
       if (password && !validator.isByteLength(password, { min: 8, max: 20 })) {
-        errors.push('The password length should be between 8 to 20 characters.')
+        errors.push(
+          'The password length should be between 8 to 20 characters.'
+        )
       }
       if (password !== checkPassword) {
         errors.push('Passwords do not match!')
@@ -70,10 +74,33 @@ const userController = {
         password: hashedPassword
       })
 
-      return res.status(200).json({ status: 'success', message: 'Successfully signed up!' })
+      return res
+        .status(200)
+        .json({ status: 'success', message: 'Successfully signed up!' })
     } catch (err) {
       next(err)
     }
+  },
+  getRepliedTweets: async(req, res, next) => {
+    try{
+      const { userId } = req.params;
+      const reply = await Reply.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: User, attributes: ['name']},
+          {
+            model: Tweet,
+            include: [{ model: User, attributes: ['name', 'account','createdAt'] }],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+        raw: true,
+        nest: true,
+      })
+        if (!reply) throw new Error("Reply does not exist!");
+        return res.status(200).json(reply);
+      
+    }catch(error){return res.status(500).json({ status: 'error', message: error })}
   }
 }
 

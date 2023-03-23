@@ -5,7 +5,6 @@ const helpers = require('../_helpers')
 const authenticatedUser = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err || !user) return res.status(401).json({ status: 'error', message: 'JWT token failed!' })
-
     req.user = user
 
     if (helpers.getUser(req) && helpers.getUser(req).role !== 'admin') return next()
