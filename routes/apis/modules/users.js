@@ -14,6 +14,4 @@ router.get('/:userId', userController.getUser)
 router.put('/:userId', upload.single('file'), userController.putUser)
 router.patch('/:userId', userController.patchUser)
 
-router.post('/', userController.signUp)
-
 module.exports = router
