@@ -5,6 +5,7 @@ const createError = require('http-errors')
 const helpers = require('../_helpers')
 const { User, Tweet, Like, Reply, Followship, sequelize } = require('../models')
 const imgurFileHandler = require('../helpers/file-helpers')
+const timeFormat = require('../helpers/date-helpers')
 
 const userController = {
   login: (req, res, next) => {
@@ -164,6 +165,7 @@ const userController = {
         if (!user) throw createError(404, '該使用者不存在')
         const result = tweets.map(tweet => ({
           ...tweet,
+          createdAt: timeFormat(tweet.createdAt),
           // like 為 true 條件：查找 like table 裡的 userId 是否有 login 本人
           // 這裡有點抖抖，有需要再加 like.TweetId === tweet.id 判斷？
           isLiked: likes.some(like => like.UserId === loginUser.id)
@@ -197,7 +199,11 @@ const userController = {
         // 401: 請先登入 & 403:沒有使用該頁面的權限，在 middleware/auth
         if (!user) throw createError(404, '該使用者不存在')
 
-        return res.json(replies)
+        const result = replies.map(reply => ({
+          ...reply.toJSON(),
+          createdAt: timeFormat(reply.createdAt)
+        }))
+        return res.json(result)
       })
       .catch(err => next(err))
   },
@@ -224,10 +230,17 @@ const userController = {
       .then(([user, likes]) => {
         if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
 
-        const result = likes.map(like => ({
-          ...like.toJSON(),
-          isLiked: like.UserId === loginUser.id
-        }))
+        const result = likes.map(like => {
+          const { Tweet, ...data } = like.toJSON()
+          return {
+            ...data,
+            Tweet: {
+              ...Tweet,
+              createdAt: timeFormat(Tweet.createdAt)
+            },
+            isLiked: like.UserId === loginUser.id
+          }
+        })
         return res.json(result)
       })
       .catch(error => next(error))
