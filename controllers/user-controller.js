@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
 const helpers = require('../_helpers')
+
 const userController = {
   // 登入
   signIn: async (req, res, next) => {
@@ -262,6 +263,52 @@ const userController = {
         data: { user: updatedUser }
       })
     } catch (err) { next(err) }
+  }, // 加逗點，新增以下
+  addFollowing: (req, res, next) => {
+    const userId = req.body.id
+    Promise.all([
+      User.findByPk(userId),
+      Followship.findOne({
+        where: {
+          followerId: helpers.getUser(req).id,
+          followingId: userId
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+        if (!user) return res.status(404).json({ status: 'error', message: 'User not found' })
+        if (followship) { return res.status(404).json({ status: 'error', message: 'You are already following this user!' }) }
+        return Followship.create({
+          followerId: helpers.getUser(req).id,
+          followingId: userId
+        })
+      })
+      .then(() => {
+        return res.json({
+          status: 'success',
+          message: 'Successfully unliked the tweet'
+        })
+      })
+      .catch(err => next(err))
+  },
+  removeFollowing: (req, res, next) => {
+    Followship.findOne({
+      where: {
+        followerId: helpers.getUser(req).id,
+        followingId: req.params.followingId
+      }
+    })
+      .then(followship => {
+        if (!followship) throw new Error("You haven't followed this user!")
+        return followship.destroy()
+      })
+      .then(() => {
+        return res.json({
+          status: 'success',
+          message: 'Successfully unliked the tweet'
+        })
+      })
+      .catch(err => next(err))
   },
   getUserSetting: async (req, res, next) => {
     try {
