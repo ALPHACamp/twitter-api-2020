@@ -4,8 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "SET NODE_ENV=development & node app.js",
-    "dev": "nodemon app.js",
+    "start": "SET NODE_ENV=development&&node app.js",
+    "dev": "SET NODE_ENV=development&&nodemon app.js",
     "lint": "eslint \"**/*.js\" --fix",
     "test": "mocha tests --exit --recursive --timeout 5000"
   },
