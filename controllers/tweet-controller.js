@@ -138,6 +138,40 @@ const tweetController = {
       return next(err);
     }
   },
+  // 取得特定推文的所有回覆
+  getReplies: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweet_id;
+      const tweet = await Tweet.findByPk(tweetId);
+      if (!tweet) {
+        const err = new Error("該貼文不存在");
+        err.status = 404;
+        throw err;
+      }
+      const replies = await Reply.findAll({
+        raw: true,
+        nest: true,
+        include: {
+          model: User,
+          attributes: ["id", "name", "account", "avatar"],
+        },
+        where: { TweetId: tweetId },
+        attributes: ["comment", "createdAt"],
+        order: [["createdAt", "DESC"]],
+      });
+      if (!replies) {
+        const err = new Error("該貼文沒有任何留言回覆");
+        err.status = 404;
+        throw err;
+      }
+      return res.json({
+        status: "success",
+        replies,
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
 };
 
 module.exports = tweetController;
