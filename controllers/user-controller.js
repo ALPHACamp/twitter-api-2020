@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
-const { User } = require("../models");
+const { User, Followship } = require("../models");
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -186,6 +186,86 @@ const userController = {
       return next(error);
     }
   },
+  addFollowing: async (req, res, next) => {
+    const { id } = req.body;
+    try {
+      if (getUser(req).id === Number(id)) {
+        const error = new Error("無法追蹤自己!");
+        error.status = 400;
+        throw error;
+      }
+      const [foundUser, followship] = await Promise.all([
+        User.findByPk(id, { raw: true }),
+        Followship.findOne({
+          where: {
+            followerId: getUser(req).id,
+            followingId: Number(id),
+          },
+        }),
+      ]);
+      if (foundUser.isAdmin) {
+        const error = new Error("無法追蹤管理員!");
+        error.status = 400;
+        throw error;
+      }
+      if (followship) {
+        const error = new Error("已經追蹤過此使用者!");
+        error.status = 400;
+        throw error;
+      }
+      // - 新增追蹤
+      const createdFollowship = await Followship.create({
+        followerId: getUser(req).id,
+        followingId: Number(id),
+      });
+      return res.json({
+        status: "success",
+        data: { createdFollowship },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+  removeFollowing: async (req, res, next) => {
+    const { followingId } = req.params;
+    console.log("================");
+    console.log("followingId is " + followingId);
+    console.log("================");
+    try {
+      if (getUser(req).id === Number(followingId)) {
+        const error = new Error("無法追蹤自己!");
+        error.status = 400;
+        throw error;
+      }
+      const [foundUser, followship] = await Promise.all([
+        User.findByPk(followingId, { raw: true }),
+        Followship.findOne({
+          where: {
+            followerId: getUser(req).id,
+            followingId: Number(followingId),
+          },
+        }),
+      ]);
+      if (foundUser.isAdmin) {
+        const error = new Error("無法取消追蹤管理員!");
+        error.status = 400;
+        throw error;
+      }
+      if (!followship) {
+        const error = new Error("尚未追蹤過此使用者!");
+        error.status = 400;
+        throw error;
+      }
+      // - 取消追蹤
+      const deletedFollowship = await followship.destroy();
+      return res.json({
+        status: "success",
+        data: { deletedFollowship },
+         });
+    } catch (error) {
+      return next(error);
+    }
+  }
 };
 
 module.exports = userController;
