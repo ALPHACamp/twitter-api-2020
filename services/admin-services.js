@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
 const db = require('../models')
-const { User, sequelize, Tweet } = db
+const { User, sequelize, Tweet, Reply, Like } = db
 const adminServices = {
   signIn: (req, cb) => {
     const userData = getUser(req).toJSON()
@@ -75,7 +75,24 @@ const adminServices = {
         })
       })
       .catch(err => cb(err))
+  },
+  deleteTweet: (req, cb) => {
+    return Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) {
+          const err = new Error('此貼文不存在!')
+          err.status = 404
+          throw err
+        }
+        Reply.destroy({ where: { TweetId: req.params.id } })
+        Like.destroy({ where: { TweetId: req.params.id } })
+        return tweet.destroy()
+      })
+      .then(deletedTweet => cb(null, {
+        status: 'success',
+        deletedTweet
+      }))
+      .catch(err => cb(err))
   }
-
 }
 module.exports = adminServices
