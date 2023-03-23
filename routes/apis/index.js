@@ -1,12 +1,13 @@
+const passport = require('passport')
 const router = require('express').Router()
+
+const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
+const { apiErrorHandler } = require('../../middleware/error-handler')
+const adminController = require('../../controllers/admin-controller')
+const userController = require('../../controllers/user-controller')
+const tweets = require('./tweet')
 const users = require('./user')
 const admin = require('./admin')
-const tweets = require('./tweet')
-const passport = require('passport')
-const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
-const userController = require('../../controllers/user-controller')
-const adminController = require('../../controllers/admin-controller')
-const { apiErrorHandler } = require('../../middleware/error-handler')
 
 router.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json')

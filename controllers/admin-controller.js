@@ -1,27 +1,27 @@
 const { User, Tweet, Like, Reply } = require('../models')
 const { getUser } = require('../_helpers')
+const { tryCatch } = require('../helpers/tryCatch')
+const { ReqError, AuthError } = require('../helpers/errorInstance')
 const jwt = require('jsonwebtoken')
 
 const adminController = {
-  signIn: (req, res, next) => {
-    try {
-      const userData = getUser(req)
-      delete userData.password
-      if (userData.role === 'user') return res.json({ status: 'error', message: '帳號不存在！' })
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.json({
-        status: 'success',
-        data: {
-          token,
-          user: userData
-        }
-      })
-    } catch (err) {
-      next(err)
-    }
-  },
+  signIn: tryCatch(async (req, res) => {
+    const userData = getUser(req).toJSON()
+    delete userData.password
+    if (userData.role === 'user') throw new ReqError('帳號不存在！')
+    const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+    res.json({
+      status: 'success',
+      data: {
+        token,
+        user: userData
+      }
+    })
+  }),
   signInFail: (error, req, res, next) => {
-    return res.status(401).send({ status: 'error', error, reason: req.session.messages })
+    if (error instanceof ReqError) return next(error)
+    error = new AuthError(req.session.messages)
+    next(error)
   },
   getUsers: async (req, res, next) => { // 可優化 查詢條件,排除password和不必要的資料
     try {
