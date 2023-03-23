@@ -88,3 +88,5 @@ typings/
 
 # custom
 models/user-origin.js
+temp/
+upload/
