@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
 const db = require('../models')
-const { User, sequelize } = db
+const { User, sequelize, Tweet } = db
 const adminServices = {
   signIn: (req, cb) => {
     const userData = getUser(req).toJSON()
@@ -22,23 +22,23 @@ const adminServices = {
   },
   getUsers: (req, cb) => {
     return User.findAll({
-      where: { role: 'user' },
+      // where: { role: 'user' },
       attributes: {
         include: [
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM Tweets WHERE UserId = User.id
+            sequelize.literal(`(SELECT COUNT(*)FROM Tweets WHERE User_id = User.id
                 )`), 'TweetsCounts'
           ],
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM Followships AS Followers WHERE followingId = User.id
+            sequelize.literal(`(SELECT COUNT(*)FROM Followships AS Followers WHERE following_id = User.id
                 )`), 'followerCounts'
           ],
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM Followships AS Followings WHERE followerId = User.id
+            sequelize.literal(`(SELECT COUNT(*)FROM Followships AS Followings WHERE follower_id = User.id
                 )`), 'followingCounts'
           ],
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweetId WHERE Tweets.UserId = User.id 
+            sequelize.literal(`(SELECT COUNT(*)FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweet_id WHERE Tweets.User_id = User.id 
             )`), 'LikedCounts'
           ]
         ],
@@ -51,15 +51,31 @@ const adminServices = {
       },
       order: [
         [sequelize.literal('tweetsCounts'), 'DESC']
-      ]
+      ],
+      raw: true,
+      nest: true
     })
-      .then(users => cb(null, {
-        status: 'success',
-        data: {
-          usersData: [...users]
-        }
-      }))
+      .then(users => cb(null, users
+      ))
+      .catch(err => cb(err))
+  },
+  getTweets: (req, cb) => {
+    return Tweet.findAll({
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => {
+        cb(null, {
+          status: 'success',
+          data: {
+            tweetsData: [
+              ...tweets
+            ]
+          }
+        })
+      })
       .catch(err => cb(err))
   }
+
 }
 module.exports = adminServices

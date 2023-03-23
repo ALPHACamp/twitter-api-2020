@@ -12,7 +12,7 @@ app.use(passport.initialize()) // 初始化 Passport
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-app.use('/v1/api', router) // 使用api路由
+app.use('/api', router) // 使用api路由
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

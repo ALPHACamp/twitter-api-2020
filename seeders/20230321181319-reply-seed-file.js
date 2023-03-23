@@ -10,8 +10,8 @@ module.exports = {
       comment: faker.lorem.text(20),
       created_at: new Date(),
       updated_at: new Date(),
-      TweetId: shuffledArray(tweets)[index % 50].id,
-      UserId: shuffledArray(users)[index % 5].id
+      Tweet_id: shuffledArray(tweets)[index % 50].id,
+      User_id: shuffledArray(users)[index % 5].id
     })))
   },
 
