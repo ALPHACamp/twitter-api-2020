@@ -86,21 +86,21 @@ const userController = {
     const reply = await Reply.findAll({
       where: { UserId: userId },
       include: [
-        { model: User, attributes: { exclude: ['password'] } },
+        { model: User },
         {
           model: Tweet,
-          include: [{ model: User, attributes: [['account']] }]
-        }
+          include: [{ model: User, attributes: ["account"] }],
+        },
       ],
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
       raw: true,
-      nest: true
+      nest: true,
     })
       .then(() => {
-        if (!reply) throw new Error('Reply does not exist!')
-        return res.json({ comment: reply.comment })
+        if (!reply) throw new Error("Reply does not exist!");
+        return res.status(200).json({ reply });
       })
-      .catch((error) => next(error))
+      .catch((error) => next(error));
   }
 }
 
