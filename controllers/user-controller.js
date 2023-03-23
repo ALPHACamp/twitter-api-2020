@@ -16,8 +16,8 @@ const userController = {
         status: 'success',
         data: {
           token,
-          user: userData,
-        },
+          user: userData
+        }
       })
     } catch (err) {
       next(err)
@@ -27,8 +27,8 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
       const errors = []
-      
-      //check if all the required fields are filled out correctly
+
+      // check if all the required fields are filled out correctly
       if (!account || !name || !email || !password || !checkPassword) {
         errors.push('All fields are required!')
       }
@@ -48,7 +48,7 @@ const userController = {
       // Check if account and email are unique
       const [userAccount, userEmail] = await Promise.all([
         User.findOne({ where: { account } }),
-        User.findOne({ where: { email } }),
+        User.findOne({ where: { email } })
       ])
       if (userAccount) errors.push('Account already exists')
       if (userEmail) errors.push('Email already exists')
@@ -67,7 +67,7 @@ const userController = {
         account,
         name,
         email,
-        password: hashedPassword,
+        password: hashedPassword
       })
 
       return res.status(200).json({ status: 'success', message: 'Successfully signed up!' })
@@ -77,13 +77,36 @@ const userController = {
   },
   getUserLikes: (req, res, next) => {
     const { userId } = req.params
-    User.findByPk(userId, {
-      include: [{model: like, include:[{model: tweet, include: [Like, Reply, User]}]}],
-      order: 
-
-    })
-
-
+    return Promise.all([
+      User.findByPk(userId, {
+        include: [
+          {
+            model: Like,
+            include: [{ model: Tweet, include: [Like, Reply, User] }]
+          }
+        ],
+        order: [[sequelize.literal('`Likes`.`createdAt`'), 'DESC']]
+      }),
+      Like.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: Tweet, include: [{ model: User, as: 'LikedUsers' }] }
+        ]
+      })
+    ])
+      .then(([user, likes]) => {
+        if (!user) {
+          return res.status(404).json({
+            status: 'error', message: 'User not found!'
+          })
+        }
+        likes = likes.map(like => ({
+          ...like.toJSON(),
+          likeCount: user.LikedUsers.length,
+          isLiked: 
+        }))
+      })
+      .catch(err => next(err))
   }
 }
 
