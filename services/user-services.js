@@ -16,7 +16,7 @@ const userServices = {
       cb(err)
     }
   },
-  signUp: (req, cb) => {
+  postUsers: (req, cb) => {
     const { account, name, email, password, checkPassword } = req.body
     if (!account?.trim().length === 0 || !name?.trim().length === 0 || !email.trim()?.length === 0 || !password?.trim().length === 0) throw new Error('還有欄位沒填')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不同!')
@@ -43,7 +43,7 @@ const userServices = {
         newUser = newUser.toJSON()
         delete newUser.password
         delete newUser.role
-        cb(null, { user: newUser })
+        cb(null, newUser)
       })
       .catch(err => cb(err))
   },
@@ -115,7 +115,7 @@ const userServices = {
       where: { UserId: userId },
       include: [
         {
-          model: Tweet,
+          model: User,
           attributes: ['id', 'account', 'avatar', 'name']
         }
       ],
@@ -217,7 +217,7 @@ const userServices = {
         }],
         order: [['createdAt', 'DESC']],
         raw: true,
-        nest: false
+        nest: true
       })
       if (!following) throw new Error('沒有追蹤!')
       cb(null, following)
