@@ -9,8 +9,8 @@ module.exports = {
       comment: faker.lorem.text(20),
       created_at: new Date(),
       updated_at: new Date(),
-      TweetId: tweets[index % 50].id,
-      UserId: users[index % 5].id
+      Tweet_id: tweets[index % 50].id,
+      User_id: users[index % 5].id
     })))
   },
 

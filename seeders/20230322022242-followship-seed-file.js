@@ -7,10 +7,10 @@ module.exports = {
     await queryInterface.bulkInsert('Followships', Array.from({ length: 20 }, (_, index) => ({
       created_at: new Date(),
       updated_at: new Date(),
-      followingId: users[4 - index % 5].id,
-      followerId: users[index % 5].id
+      following_id: users[4 - index % 5].id,
+      follower_id: users[index % 5].id
     })))
-    await queryInterface.sequelize.query('DELETE FROM followships WHERE followingId = followerId;', { type: queryInterface.sequelize.QueryTypes.DELETE })
+    await queryInterface.sequelize.query('DELETE FROM followships WHERE following_id = follower_id;', { type: queryInterface.sequelize.QueryTypes.DELETE })
   },
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('followships', null, {})
