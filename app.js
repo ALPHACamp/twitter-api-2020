@@ -16,11 +16,11 @@ const port = process.env.PORT || 3000;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use(passport.initialize());
+
 app.use(methodOverride('_method'));
 
 app.use('/upload', express.static(path.join(__dirname, 'upload')));
-
-app.use(passport.initialize());
 
 app.use('/api', routes);
 

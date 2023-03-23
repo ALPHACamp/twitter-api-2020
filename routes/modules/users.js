@@ -1,11 +1,22 @@
 const express = require('express');
 
 const router = express.Router();
+const upload = require('../../middleware/multer');
 
 const userController = require('../../controllers/user-controller');
 
-router.get('/:id', userController.getUser);
+router.put(
+  '/:id',
+  upload.fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cover_image', maxCount: 1 },
+  ]),
+  userController.editUserProfile
+);
+
 router.put('/:id/setting', userController.editUserSetting);
+
+router.get('/:id', userController.getUser);
 
 router.get('/', (req, res) =>
   res.send(`You pass the authentication to here by path /users`)

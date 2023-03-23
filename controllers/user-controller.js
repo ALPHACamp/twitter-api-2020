@@ -114,7 +114,13 @@ const userController = {
         throw new Error('You are not authorized to edit this user');
       }
 
-      if (!account || !name || !email || !password || !checkPassword) {
+      if (
+        !account.trim() ||
+        !name.trim() ||
+        !email.trim() ||
+        !password.trim() ||
+        !checkPassword.trim()
+      ) {
         throw new Error('All fields are required');
       }
 
@@ -133,6 +139,7 @@ const userController = {
       if (name.length > 50) {
         throw new Error('Name is longer than 50 characters');
       }
+
       if (password !== checkPassword) {
         throw new Error('Passwords do not match');
       }
@@ -160,7 +167,56 @@ const userController = {
   },
   editUserProfile: async (req, res, next) => {
     try {
+      const UserId = req.params.id;
+      const currentUser = getUser(req);
+      const { name, introduction } = req.body;
+      let avatar = req.file?.avatar || null;
+      let coverImage = req.file?.cover_image || null;
+
+      if (currentUser.id !== Number(UserId)) {
+        throw new Error('You are not authorized to edit this user');
+      }
+
+      if (name.length > 50) {
+        throw new Error('Name is longer than 50 characters');
+      }
+
+      if (!name.trim()) {
+        throw new Error('Name is required');
+      }
+
+      if (introduction.length > 160) {
+        throw new Error('Introduction is longer than 160 characters');
+      }
+
+      if (avatar) avatar = await imgurFileHandler(avatar[0]);
+
+      if (coverImage) coverImage = await imgurFileHandler(coverImage[0]);
+
+      const user = await User.findByPk(UserId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const userUpdated = await user.update({
+        name,
+        introduction,
+        avatar: avatar || currentUser.avatar,
+        cover_image: coverImage || currentUser.coverImage,
+      });
+
+      res.status(200).json({
+        status: 'success',
+        message: 'User Profile is updated successfully',
+        userUpdated: {
+          name: userUpdated.name,
+          introduction: userUpdated.introduction,
+          avatar: userUpdated.avatar,
+          cover_image: userUpdated.cover_image,
+        },
+      });
     } catch (err) {
+      err.status = 400;
       next(err);
     }
   },
