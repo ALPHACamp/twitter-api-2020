@@ -241,7 +241,7 @@ const userController = {
       Followship.findAll({
         where: { followerId: id },
         attributes: { exclude: ['updatedAt'] },
-        include: { model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'introduction', 'avatar'] },
+        include: { model: User, as: 'Followings', attributes: ['account', 'name', 'introduction', 'avatar'] },
         order: [['createdAt', 'DESC']]
       })
     ])
@@ -251,6 +251,31 @@ const userController = {
         const result = followings.map(following => ({
           ...following.toJSON(),
           isFollowed: following.followerId === loginUser.id
+        }))
+
+        return res.json(result)
+      })
+      .catch(error => next(error))
+  },
+  getUserFollowers: (req, res, next) => {
+    const { id } = req.params
+    const loginUser = helpers.getUser(req)
+
+    return Promise.all([
+      User.findByPk(id),
+      Followship.findAll({
+        where: { followingId: id },
+        attributes: { exclude: ['updatedAt'] },
+        include: { model: User, as: 'Followers', attributes: ['account', 'name', 'introduction', 'avatar'] },
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, followers]) => {
+        if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
+
+        const result = followers.map(follower => ({
+          ...follower.toJSON(),
+          isFollowed: follower.followerId === loginUser.id
         }))
 
         return res.json(result)
