@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { Tweet, User, Reply, Like, sequelize } = require('../models')
+const { Tweet, User, Like, sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
 const passport = require('../config/passport')
 const { getUser } = require('../_helpers')
@@ -106,8 +106,8 @@ const userController = {
         // count followers and following
         userData.followerCounts = userData.Followers.length
         userData.followingCounts = userData.Followings.length
-        userData.isFollowed = userData.Followers?.some(follower => follower.id === getUser(req).id)
-        userData.isCurrentUser = getUser(req).id === user.id
+        userData.isFollowed = userData.Followers?.some(follower => follower.id === getUser(req).dataValues.id)
+        userData.isCurrentUser = getUser(req).dataValues.id === user.id
         // delete unused properties
         delete userData.password
         delete userData.Followers
@@ -216,6 +216,43 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  getUserFollowings: (req, res, next) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        attributes: {
+          exclude: ['Followship']
+        },
+        include: [
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'name', 'avatar', 'introduction', 'createdAt']
+          }
+        ]
+      }),
+      User.findByPk(getUser(req).dataValues.id, {
+        attributes: ['id'],
+        include: [
+          { model: User, as: 'Followings', attributes: ['id'] }
+        ]
+      })
+    ])
+      .then(([targetUser, currentUser]) => {
+        const followings = targetUser.toJSON().Followings.map(following => ({
+          createdAt: following.createdAt,
+          followingId: following.id,
+          name: following.name,
+          avatar: following.avatar,
+          introduction: following.introduction,
+          isFollowed: currentUser.toJSON().Followings.some(currentUserfollowing => currentUserfollowing.id === following.id),
+          isCurrentUser: following.id === getUser(req).dataValues.id
+        }))
+          .sort((a, b) => (new Date(b.createdAt)).getTime() - (new Date(a.createdAt)).getTime())
+
+        return res.json(followings)
+      })
+      .catch(err => next(err))
+  },
   getUserLikes: (req, res, next) => {
     User.findByPk(req.params.id).then(user => {
       if (!user) {
@@ -265,8 +302,8 @@ const userController = {
           .map(user => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowed: getUser(req).Followings.some(f => f.id === user.id),
-            isCurrentUser: getUser(req).id === user.id
+            isFollowed: getUser(req).dataValues.Followings.some(f => f.id === user.id),
+            isCurrentUser: getUser(req).dataValues.id === user.id
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
           .slice(0, 10)

@@ -3,6 +3,7 @@ const router = express.Router()
 const userController = require('../../controllers/user-controller')
 const upload = require('../../middleware/multer')
 
+router.get('/:id/followings', userController.getUserFollowings)
 router.get('/:id/likes', userController.getUserLikes)
 router.get('/:id', userController.getUser)
 router.put('/:id/setting', userController.putUserSetting)
