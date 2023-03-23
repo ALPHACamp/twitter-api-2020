@@ -32,18 +32,18 @@ router.post('/users', userController.signUp);
 
 // login
 router.post(
-  '/admin/signin',
-  passport.authenticate('local', { session: false }),
-  authenticatedAdmin,
-  userController.signIn
-);
-router.post(
   '/users/signin',
   passport.authenticate('local', { session: false }),
   authenticatedUser,
   userController.signIn
 );
 
+router.post(
+  '/admin/signin',
+  passport.authenticate('local', { session: false }),
+  authenticatedAdmin,
+  userController.signIn
+);
 router.get('/tweets', authenticated, tweetController.getAllTweets);
 
 router.use('/admin', authenticated, authenticatedAdmin, admin);
