@@ -3,10 +3,10 @@
 
 ## Initialize
 ### Clone the project to local
-1. clone project
 ```
 git clone https://github.com/kai3kai2/twitter-api-2020.git
 ```
+
 ### Initialize
 ```
 npm install
@@ -16,10 +16,10 @@ npm install
 ```
 JWT_SECRET=SKIP
 IMGUR_CLIENT_ID=SKIP
+IMGUR_CLIENT_SECRET=SKIP
 ```
 
 ### add your password and username of your MySQL workbench to config/config.json
-
 ```
 "development": {
     "username": "<your username>",
@@ -28,7 +28,6 @@ IMGUR_CLIENT_ID=SKIP
     "host": "127.0.0.1",
     "dialect": "mysql"
 }
-
 ```
 
 ### Create the database
@@ -40,7 +39,6 @@ create database ac_twitter_workspace_test;
 ### Create the data table
 ```
 npx sequelize db:migrate
-
 ```
 
 ### Create the seed data
@@ -54,12 +52,14 @@ npm run dev
 ```
 
 ### Test accounts
-
-* 第一組帳號有 admin 權限：
+* This account have admin permission：
   * email: root@example.com
   * password: 12345678
-* 第二組帳號沒有 admin 權限：
+* This account does not have admin permission：
   * email: user1@example.com
   * password: 12345678
 
 ### API docs
+```
+https://psychedelic-mine-4a0.notion.site/Twitter-API-3e2fc44b290f4108a2063e45d16fce75
+```
