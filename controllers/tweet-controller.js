@@ -93,7 +93,7 @@ const tweetController = {
     try {
       const tweetId = req.params.tweet_id;
       const currentUserId = getUser(req).id;
-      const tweet = await Tweet.findbyPk(tweetId, {
+      const tweet = await Tweet.findByPk(tweetId, {
         nest: true,
         raw: true,
         include: {
