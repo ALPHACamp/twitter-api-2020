@@ -10,6 +10,9 @@ router.put(
   upload.fields([{ name: 'avatar' }, { name: 'cover_image' }]),
   userController.editUserProfile
 );
+
+router.get('/:id/replied_tweets', userController.getUserRepliedTweet);
+
 router.get('/:id/tweets', userController.getUserTweets);
 
 router.put('/:id/setting', userController.editUserSetting);

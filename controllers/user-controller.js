@@ -221,7 +221,7 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const UserId = req.params.id;
-      const Tweets = await Tweet.findAll({
+      const tweets = await Tweet.findAll({
         where: { UserId },
         attributes: [
           'id',
@@ -261,16 +261,43 @@ const userController = {
         order: [['createdAt', 'DESC']],
       });
 
+      if (!tweets) throw new Error(`This user doesn't have any tweets`);
+
       const likedTweetId = req.user?.LikedTweets
         ? req.user.LikedTweets.map((likeTweet) => likeTweet.id)
         : [];
 
-      const modifiedTweets = Tweets.map((tweet) => ({
+      const modifiedTweets = tweets.map((tweet) => ({
         ...tweet.toJSON(),
         isLiked: likedTweetId.includes(tweet.id),
       }));
 
       res.status(200).json(modifiedTweets);
+    } catch (err) {
+      err.status = 400;
+      next(err);
+    }
+  },
+  getUserRepliedTweet: async (req, res, next) => {
+    try {
+      const UserId = req.params.id;
+      const replies = await Reply.findAll({
+        where: { UserId },
+        attributes: ['id', 'comment', 'createdAt'],
+        include: [
+          {
+            model: Tweet,
+            as: 'Tweet',
+            attributes: ['id', 'description', 'createdAt'],
+            include: [{ model: User, attributes: ['id', 'account', 'avatar'] }],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+
+      if (!replies) throw new Error(`This user doesn't have any replies`);
+
+      res.status(200).json(replies);
     } catch (err) {
       err.status = 400;
       next(err);
