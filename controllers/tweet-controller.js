@@ -16,13 +16,23 @@ const tweetController = {
   },
   getTweets: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll({
+      const data = await Tweet.findAll({
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
           { model: Reply, attributes: ['id'] },
           { model: Like, attributes: ['id'] }
         ],
         order: [['updatedAt', 'DESC']]
+      })
+      const tweets = data.map(d => {
+        const tweet = {
+          ...d.toJSON(),
+          replies: d.Replies?.length || 0,
+          likes: d.Likes?.length || 0
+        }
+        delete tweet.Replies
+        delete tweet.Likes
+        return tweet
       })
       res.status(200).json(tweets)
     } catch (err) {
@@ -32,13 +42,20 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     try {
       const TweetId = req.params.tweet_id
-      const tweet = await Tweet.findByPk(TweetId, {
+      const data = await Tweet.findByPk(TweetId, {
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
           { model: Reply, attributes: ['id'] },
           { model: Like, attributes: ['id'] }
         ]
       })
+      const tweet = {
+        ...data.toJSON(),
+        replies: data.Replies?.length || 0,
+        likes: data.Likes?.length || 0
+      }
+      delete tweet.Replies
+      delete tweet.Likes
       res.status(200).json(tweet)
     } catch (err) {
       next(err)
