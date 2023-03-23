@@ -1,12 +1,11 @@
 {
   "development": {
     "username": "root",
-    "password": "root",
+    "password": "password",
     "database": "ac_twitter_workspace",
     "host": "127.0.0.1",
     "dialect": "mysql",
-    "logging": false,
-		"url": "mysql://root:root@127.0.0.1/ac_twitter_workspace"
+    "logging": false
   },
   "test": {
     "username": "root",

@@ -11,6 +11,6 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 router.post('/admin/signin', passport.authenticate('local', { session: false }), authenticatedAdmin, adminController.signIn)
 router.use('/admin', authenticated, admin)
 router.post('/users/signin', passport.authenticate('local', { session: false }), authenticatedUser, userController.postSignIn)
-router.use('/users', authenticated, user)
+router.use('/users', user)
 router.use(apiErrorHandler)
 module.exports = router

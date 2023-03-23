@@ -60,6 +60,36 @@ const adminServices = {
     } catch (err) {
       next(err)
     }
+  },
+  postSignUp: (req, cb) => {
+    const { account, name, email, password, checkPassword } = req.body
+    if (!account || !email || !password || !checkPassword) throw new Error('請填寫必填欄位')
+    if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
+    User.findOne({ where: { email } })
+      .then(user => {
+        if (user) throw new Error('此信箱已被註冊')
+        return User.create({
+          account,
+          name,
+          email,
+          password,
+          role: 'user'
+        })
+          .then(user => {
+            const userData = user.toJSON()
+            delete userData.password
+            const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+            return cb(null, {
+              status: 'success',
+              message: '成功註冊',
+              data: {
+                token,
+                userData
+              }
+            })
+          })
+      })
+      .catch(err => cb(err))
   }
 }
 module.exports = adminServices

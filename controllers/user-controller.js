@@ -5,6 +5,9 @@ const adminController = {
   },
   getTopUsers: (req, res, next) => {
     userServices.getTopUsers(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  postSignUp: (req, res, next) => {
+    userServices.postSignUp(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 module.exports = adminController

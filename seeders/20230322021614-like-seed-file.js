@@ -8,8 +8,8 @@ module.exports = {
     await queryInterface.bulkInsert('Likes', Array.from({ length: 250 }, (_, index) => ({
       created_at: new Date(),
       updated_at: new Date(),
-      Tweet_id: shuffledArray(tweets)[index % 50].id,
-      User_id: shuffledArray(users)[index % 5].id
+      Tweet_id: shuffledArray(tweets)[index % 100].id,
+      User_id: shuffledArray(users)[index % 20].id
     })))
   },
   // !這邊還沒有解決不能Like自己貼文的問題
