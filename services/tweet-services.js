@@ -14,11 +14,8 @@ const tweetServices = {
   },
   getTweet: (req, cb) => {
     Tweet.findByPk(req.params.id, {
-      include: [{
-        model: Reply,
-        order: [[Reply, 'createdAt', 'DESC']]
-      }],
-      order: [['createdAt', 'DESC']]
+      include: [Reply],
+      order: [[Reply, 'createdAt', 'DESC']]
     })
       .then(tweet => {
         if (!tweet) throw new Error('此推文不存在')
@@ -41,11 +38,8 @@ const tweetServices = {
   // 回覆
   getReplies: (req, cb) => {
     Tweet.findByPk(req.params.id, {
-      include: [{
-        model: Reply,
-        order: [[Reply, 'createdAt', 'DESC']]
-      }],
-      order: [['createdAt', 'DESC']]
+      include: [Reply],
+      order: [[Reply, 'createdAt', 'DESC']]
     })
       .then(tweet => {
         if (!tweet) throw new Error('此推文不存在')
