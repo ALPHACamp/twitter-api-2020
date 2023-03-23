@@ -61,7 +61,7 @@ const userController = {
       const UserId = req.params.id;
       const user = await User.findOne({
         where: { id: UserId },
-        raw: true,
+        // raw: true,
         next: true,
         include: [
           {
@@ -85,7 +85,7 @@ const userController = {
         throw new Error('User not found');
       }
 
-      res.status(200).json({ user, tweets, replies, likes });
+      res.status(200).json(user);
     } catch (err) {
       err.status = 400;
       next(err);
