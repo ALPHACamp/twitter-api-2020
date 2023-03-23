@@ -36,7 +36,7 @@ const userController = {
     res.json({ status: 'success', user: createdUser })
   }),
   signIn: tryCatch((req, res) => {
-    const userData = getUser(req).toJSON
+    const userData = getUser(req)
     delete userData.password
     if (userData.role === 'admin') {
       throw new ReqError('帳號不存在！')
@@ -54,6 +54,7 @@ const userController = {
     })
   }),
   signInFail: (err, req, res, next) => {
+    if (err instanceof ReqError) return next(err)
     err = new AuthError(req.session.messages)
     next(err)
     // return res

@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const adminController = {
   signIn: (req, res, next) => {
     try {
-      const userData = getUser(req).toJSON()
+      const userData = getUser(req)
       delete userData.password
       if (userData.role === 'user') return res.json({ status: 'error', message: '帳號不存在！' })
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
