@@ -3,9 +3,10 @@ const passport = require('../config/passport')
 const errorHandler = require('../middleware/error-handler')
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
-const { authenticated, authenticatedUser, checkFieldNotEmpty } = require('../middleware/auth')
+const { authenticated, authenticatedAdmin, authenticatedUser, checkFieldNotEmpty } = require('../middleware/auth')
 const users = require('./modules/users')
 const tweets = require('./modules/tweets')
+const admin = require('./modules/admin')
 
 // 使用者登入
 router.post('/users/login', checkFieldNotEmpty, passport.authenticate('local', { session: false }), userController.login)
@@ -22,6 +23,7 @@ router.post('/tweets', authenticated, authenticatedUser, tweetController.postTwe
 
 router.use('/users', authenticated, authenticatedUser, users)
 router.use('/tweets', authenticated, authenticatedUser, tweets)
+router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 router.use('/', errorHandler)
 
