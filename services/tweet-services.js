@@ -68,9 +68,9 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   getTweetReplies: (req, cb) => {
-    const tweetId = req.params.tweetId
+    const TweetId = req.params.tweetId
     return Reply.findAll({
-      where: { TweetId: tweetId },
+      where: { TweetId },
       include: [
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ],
@@ -79,6 +79,27 @@ const tweetServices = {
       raw: true
     })
       .then(replies => cb(null, replies))
+      .catch(err => cb(err))
+  },
+  replyTweet: (req, cb) => {
+    const userId = helpers.getUser(req).id
+    const TweetId = req.params.tweetId
+    const { comment } = req.body
+    assert(comment, 'comment為必填')
+    return Promise.all([
+      User.findByPk(userId),
+      Tweet.findByPk(TweetId)
+    ])
+      .then(([user, tweet]) => {
+        assert(user, '使用者不存在')
+        assert(tweet, '推文不存在')
+        return Reply.create({
+          UserId: userId,
+          TweetId,
+          comment
+        })
+      })
+      .then(replied => cb(null, { replied }))
       .catch(err => cb(err))
   }
 }
