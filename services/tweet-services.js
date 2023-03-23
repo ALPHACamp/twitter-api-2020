@@ -1,7 +1,7 @@
 // const assert = require('assert')
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { assert } = require('chai')
 
 const tweetServices = {
@@ -100,6 +100,24 @@ const tweetServices = {
         })
       })
       .then(replied => cb(null, { replied }))
+      .catch(err => cb(err))
+  },
+  likeTweet: (req, cb) => {
+    const userId = helpers.getUser(req).id
+    const TweetId = req.params.tweetId
+    return Promise.all([
+      User.findByPk(userId),
+      Tweet.findByPk(TweetId)
+    ])
+      .then(([user, tweet]) => {
+        assert(user, '使用者不存在')
+        assert(tweet, '推文不存在')
+        return Like.create({
+          UserId: userId,
+          TweetId
+        })
+      })
+      .then(liked => cb(null, { liked }))
       .catch(err => cb(err))
   }
 }
