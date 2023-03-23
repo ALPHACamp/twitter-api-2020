@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { Tweet, User } = require('../models')
+const { Tweet, User, Sequelize, Reply } = require('../models')
 const adminController = {
   // 登入
   signIn: async (req, res, next) => {
@@ -30,53 +30,84 @@ const adminController = {
       next(err)
     }
   }, // 推文清單(每筆資料顯示推文內容的前50字)
-  getTweet: async (req, res, next) => {
-    return Tweet.findAll({
-      raw: true
-    }).then(tweets => {
-      const data = tweets.map(t => ({
-        ...t,
-        description: t.description.substring(0, 50)
-      }))
-      return res.status(200).json(data)
-    })
-      .catch(err => next(err))
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          'updatedAt',
+          [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id )'), 'reply_count'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id )'), 'like_count']
+        ],
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          },
+          {
+            model: Reply,
+            attributes: { exclude: 'TweetId' },
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'name', 'account', 'avatar']
+              }
+            ]
+          }
+        ],
+        order: [['updatedAt', 'DESC']],
+        nest: true
+      })
+      const modifiedTweets = tweets.map(tweet => {
+        tweet.description = tweet.description.substring(0, 50)
+        return tweet
+      })
+      return res.status(200).json(modifiedTweets)
+    } catch (error) {
+      return next(error)
+    }
   },
-  deleteTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.id)
-      .then(tweet => {
-        if (!tweet) { return res.status(400).json({ status: 'error', message: "Tweet didn't exist!" }) }
-        return tweet.destroy()
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (!tweet) { return res.status(400).json({ status: 'error', message: "Tweet didn't exist!" }) }
+      await tweet.destroy()
+      return res.json({
+        status: 'success',
+        message: 'Successfully deleted the tweet',
+        data: { tweet }
       })
-      .then(() => {
-        return res.json({
-          status: 'success',
-          message: 'Successfully deleted the tweet'
-        })
-      })
-      .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
   },
-  getUsers: (req, res, next) => {
-    return User.findAll({
-      raw: true
-      // include: [
-      //   { model: Tweet, as: 'TweetLikes' },
-      //   { model: User, as: 'Usertweets' },
-      //   { model: User, as: 'Followers' },
-      //   { model: User, as: 'Followings' }
-      // ]
-    })
-      .then(users => {
-        // const data = users.map(u => ({
-        //   ...u,
-        //   followersCount: User.Followers.length, // 跟隨者人數
-        //   followingsCount: User.Followings.length, // 關注人數
-        //   tweetsCount: User.Usertweets.length, // 使用者的 Tweet 累積總量
-        //   tweetLikesCount: Tweet.TweetLikes.length // 推文被 like 的數量
-        // }))
-        return res.status(200).json(users)
+  getUsers: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          'cover',
+          'introduction',
+          'role',
+          [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id )'), 'tweet_count'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowerId = User.id )'), 'following_count'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Followships  WHERE Followships.FollowingId = User.id )'), 'follower_count'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id )'), 'total_like']
+        ],
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
       })
-      .catch(err => next(err))
+      return res.status(200).json(users)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = adminController
