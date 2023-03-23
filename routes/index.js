@@ -25,6 +25,7 @@ router.get(
 router.get("/api/tweets", authenticatedUser, tweetController.getTweets);
 router.post("/api/tweets", authenticatedUser, tweetController.postTweet);
 
+router.delete('/api/followships/:followingId', authenticatedUser, userController.removeFollowing)
 router.post('/api/followships', authenticatedUser, userController.addFollowing)
 
 router.use("/", errorHandler);
