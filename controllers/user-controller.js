@@ -259,6 +259,34 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const followerId = req.params.id
+      const user = await User.findByPk(followerId)
+      if (!user) throw new Error('使用者不存在')
+      const data = await sequelize.query(
+        `
+        SELECT followingId, name, avatar, introduction
+        FROM followships JOIN users ON users.id = followships.followingId
+        WHERE followerId = ?
+        ORDER BY followships.createdAt DESC
+        `,
+        {
+          replacements: [followerId],
+          raw: true,
+          type: QueryTypes.SELECT
+        }
+      )
+      const signinUser = helpers.getUser(req)
+      const followings = data.map(el => ({
+        ...el,
+        isFollowing: signinUser.Followings?.some(following => following.id === el.followingId)
+      }))
+      res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 

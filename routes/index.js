@@ -10,6 +10,7 @@ const replyController = require('../controllers/reply-controller')
 
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 
+router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
 router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
