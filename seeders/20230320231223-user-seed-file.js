@@ -4,6 +4,7 @@ const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+    const DEFAULT_NUMBER = 5
     await queryInterface.bulkInsert('Users', [{
       email: 'root@example.com',
       name: 'root',
@@ -15,7 +16,7 @@ module.exports = {
       created_at: new Date(),
       updated_at: new Date()
     },
-    ...Array.from({ length: 5 }).map((_, i) => ({
+    ...Array.from({ length: DEFAULT_NUMBER }).map((_, i) => ({
       email: `user${i + 1}@example.com`,
       name: `user${i + 1}`,
       avatar: `https://loremflickr.com/320/240/man,woman/?lock=${Math.floor(Math.random() * 50)}`,
