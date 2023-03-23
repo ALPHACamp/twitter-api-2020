@@ -8,8 +8,8 @@ module.exports = {
     await queryInterface.bulkInsert('Likes', Array.from({ length: 250 }, (_, index) => ({
       created_at: new Date(),
       updated_at: new Date(),
-      TweetId: tweets[index % 50].id,
-      UserId: users[index % 5].id
+      Tweet_id: tweets[index % 50].id,
+      User_id: users[index % 5].id
     })))
     // await queryInterface.sequelize.query(
     // 	`DELETE likes FROM likes
