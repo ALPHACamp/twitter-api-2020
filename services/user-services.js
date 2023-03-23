@@ -97,7 +97,8 @@ const userService = {
       .then(user => {
         assert(user, '使用者不存在！')
         const { ...userData } = {
-          ...user.toJSON()
+          ...user.toJSON(),
+          isFollowed: Boolean(user.isFollowed)
         }
         return cb(null, userData)
       })
