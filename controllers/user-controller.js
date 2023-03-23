@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，不管，我先用舊的 add-on
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { getUser } = require('../_helpers')
 
@@ -71,8 +71,8 @@ const userController = {
   },
   putUser: (req, res, next) => {
     const newPW = req.body.password
-    const oldPW = getUser(req).dataValues.password
-    // const samePW = bcrypt.compare(newPW, oldPW) // async 跟 promise 混用，我得小心
+    // const oldPW = getUser(req).dataValues.password
+    // const samePW = await bcrypt.compare(newPW, oldPW) // async 跟 promise 混用，我得小心
     // (下1) 先擋擋看，測試出錯立刻封掉 --> 真的會因為它而測試出錯...
     // const { account, name, email, password } = req.body
     // if (!account || !name || !email || !password) {
@@ -90,72 +90,70 @@ const userController = {
     }
     const { file } = req
 
-    return bcrypt.compare(newPW, oldPW)
-      .then(samePW => {
-        return Promise.all([
-          User.findByPk(id),
-          imgurFileHandler(file), // 若有餘裕，就研究下圖片上傳的細節唄
-          !samePW ? bcrypt.hash(newPW, 10) : oldPW
-          // ! 下2 之後要改
-          // User.findOne({ where: { account } }),
-          // User.findOne({ where: { email } })
-        ])
-          // .then(([user, filePath, samePW]) => {
-          //   if (samePW) return [user, filePath]
-          //   return [user, filePath, bcrypt.hash(req.body.password, 10)]
-          // })
-          .then(([user, filePath, pw]) => {
-            // console.log('pw')
-            // console.log('pw')
-            // console.log(pw)
-            if (!user) throw new Error("User doesn't exist!")
-            // console.log(checkAcc)
-            // console.log(checkMail)
-            // if (checkAcc) throw new Error('account 已重複註冊！')
-            // if (checkMail) throw new Error('email 已重複註冊！')
-            req.body.image = filePath || user.image
-            req.body.password = pw
-            return user.update(req.body) // 試試看唄，看能不能回傳 array
-          })
-          .then(updatedUser => {
-            const result = updatedUser.toJSON()
-            // delete result.password //! 之後復原
-            return res.status(200).json(result)
-          })
-          .catch(err => next(err))
-      })
-    // return Promise.all([ // 舊寫法，留一下
-    // Promise.all([
+    // 結果 async/await 可執行，但也沒法過測試，是怎樣
+    // const bbb = await Promise.all([
     //   User.findByPk(id),
     //   imgurFileHandler(file), // 若有餘裕，就研究下圖片上傳的細節唄
     //   !samePW ? bcrypt.hash(newPW, 10) : oldPW
-    //   // ! 下2 之後要改
-    //   // User.findOne({ where: { account } }),
-    //   // User.findOne({ where: { email } })
     // ])
-    //   // .then(([user, filePath, samePW]) => {
-    //   //   if (samePW) return [user, filePath]
-    //   //   return [user, filePath, bcrypt.hash(req.body.password, 10)]
-    //   // })
-    //   .then(([user, filePath, pw, checkAcc, checkMail]) => {
-    //     // console.log('pw')
-    //     // console.log('pw')
-    //     // console.log(pw)
-    //     if (!user) throw new Error("User doesn't exist!")
-    //     // console.log(checkAcc)
-    //     // console.log(checkMail)
-    //     if (checkAcc) throw new Error('account 已重複註冊！')
-    //     if (checkMail) throw new Error('email 已重複註冊！')
-    //     req.body.image = filePath || user.image
-    //     req.body.password = pw
-    //     return user.update(req.body) // 試試看唄，看能不能回傳 array
-    //   })
-    //   .then(updatedUser => {
-    //     const result = updatedUser.toJSON()
-    //     // delete result.password //! 之後復原
-    //     return res.status(200).json(result)
+
+    // req.body.image = bbb[1] || bbb[0].image
+    // req.body.password = bbb[2]
+    // const ccc = await bbb[0].update(req.body)
+    // const ddd = ccc.toJSON()
+    // // delete ddd.password
+    // return await res.status(200).json(ddd)
+
+    // 第二版，把密碼驗證機制加進去，可用，但過不了 測試檔
+    // return bcrypt.compare(newPW, oldPW)
+    //   .then(samePW => {
+    //     return Promise.all([
+    //       User.findByPk(id),
+    //       imgurFileHandler(file), // 若有餘裕，就研究下圖片上傳的細節唄
+    //       !samePW ? bcrypt.hash(newPW, 10) : oldPW
+    //     ])
+    //       .then(([user, filePath, pw]) => {
+    //         if (!user) throw new Error("User doesn't exist!")
+    //         req.body.image = filePath || user.image
+    //         req.body.password = pw
+    //         return user.update(req.body)
+    //       })
+    //       .then(updatedUser => {
+    //         const result = updatedUser.toJSON()
+    //         // delete result.password //! 之後復原
+    //         return res.status(200).json(result)
+    //       })
     //   })
     //   .catch(err => next(err))
+
+    // 原始版，可過 test，但嚴格來說，密碼驗證有問題
+    return Promise.all([
+      User.findByPk(id),
+      imgurFileHandler(file), // 若有餘裕，就研究下圖片上傳的細節唄
+      bcrypt.hash(newPW, 10)
+      //* !samePW ? bcrypt.hash(newPW, 10) : oldPW
+      // ! 下2 之後要改
+      // User.findOne({ where: { account } }),
+      // User.findOne({ where: { email } })
+    ])
+      // .then(([user, filePath, samePW]) => {
+      //   if (samePW) return [user, filePath]
+      //   return [user, filePath, bcrypt.hash(req.body.password, 10)]
+      // })
+      .then(([user, filePath, pw]) => {
+        if (!user) throw new Error("User doesn't exist!")
+        // if (checkAcc) throw new Error('account 已重複註冊！')
+        // if (checkMail) throw new Error('email 已重複註冊！')
+        req.body.image = filePath || user.image
+        req.body.password = pw
+        return user.update(req.body) // 試試看唄，看能不能回傳 array
+      })
+      .then(updatedUser => {
+        const result = updatedUser.toJSON()
+        // delete result.password //! 之後復原
+        return res.status(200).json(result)
+      })
+      .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
@@ -173,6 +171,15 @@ const userController = {
       order: [['createdAt', 'DESC']]
     })
       .then(replies => res.status(200).json(replies))
+      .catch(err => next(err))
+  },
+  getLikes: (req, res, next) => {
+    return Like.findAll({
+      where: { UserId: req.params.id }, // 因測試檔，改大駝峰
+      raw: true,
+      order: [['createdAt', 'DESC']]
+    })
+      .then(likes => res.status(200).json(likes))
       .catch(err => next(err))
   }
 }

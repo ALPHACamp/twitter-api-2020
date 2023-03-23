@@ -16,6 +16,7 @@ router.use('/api/admin', auth, isAdmin, admin)
 router.get('/api/users/:id/tweets', auth, isUser, userController.getTweets)
 // (下1) 單一 user 的所有回覆
 router.get('/api/users/:id/replied_tweets', auth, isUser, userController.getReplies)
+router.get('/api/users/:id/likes', auth, isUser, userController.getLikes) // 取得 like 資料
 router.get('/api/users/:id', auth, isUser, userController.getUserInfo)
 
 router.post('/api/users', userController.signUp) // 註冊帳號路由
