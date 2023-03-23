@@ -2,6 +2,7 @@ const createError = require('http-errors')
 // const { getUser } = require('../_helpers')
 const helpers = require('../_helpers')
 const { User, Tweet, Like, sequelize, Reply } = require('../models')
+const timeFormat = require('../helpers/date-helpers')
 
 // if (!user) throw createError(404, '該使用者不存在')
 
@@ -33,6 +34,8 @@ const tweetController = {
       .then(([tweets, likes]) => {
         const result = tweets.map(tweet => ({
           ...tweet,
+          // tweet 時間格式修改
+          createdAt: timeFormat(tweet.createdAt),
           // loginUser 是否 like 過
           isLiked: likes.some(like => like.UserId === loginUser.id)
         }))
@@ -91,6 +94,7 @@ const tweetController = {
         if (!tweet) throw createError(404, '該推文不存在')
         // loginUser 是否 like 過
         tweet.isLiked = likes.some(like => like.UserId === loginUser.id)
+        tweet.createdAt = timeFormat(tweet.createdAt)
 
         return res.json(tweet)
       })
@@ -114,8 +118,12 @@ const tweetController = {
     ])
       .then(([tweet, replies]) => {
         if (!tweet) throw createError(404, '該推文不存在')
+        const result = replies.map(reply => ({
+          ...reply.toJSON(),
+          createdAt: timeFormat(reply.createdAt)
+        }))
 
-        return res.json(replies)
+        return res.json(result)
       })
       .catch(err => next(err))
   }
