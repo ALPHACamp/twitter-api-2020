@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
 
@@ -199,27 +199,25 @@ const userServices = {
     try {
       const userId = req.params.id
       const nowUser = helpers.getUser(req)
-      const following = await User.findAll({
-        where: {
-          id: userId
+      const following = await Followship.findAll({
+        where: { followerId: userId },
+        include: {
+          model: User,
+          as: 'Following',
+          attributes: {
+            exclude: ['password', 'role'],
+            include: [
+              [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.follower_id = ${nowUser.id} AND Followships.following_id = Following.id)`), 'isFollowed']
+            ]
+          }
         },
         attributes: {
-          include: [
-            'id', 'name', 'avatar', 'account', 'introduction',
-            [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.follower_id = ${nowUser.id} AND Followships.following_id = Followings.id)`), 'isFollowed']
-          ],
-          exclude: ['password', 'role', 'createdAt', 'updatedAt']
+          exclude: ['updatedAt']
         },
-        include: [{
-          model: User,
-          as: 'Followings',
-          attributes: ['id', 'name', 'avatar', 'account', 'introduction']
-        }],
         order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
-      if (!following) throw new Error('沒有追蹤!')
       cb(null, following)
     } catch (err) {
       cb(err)
@@ -229,28 +227,26 @@ const userServices = {
     try {
       const userId = req.params.id
       const nowUser = helpers.getUser(req)
-      const follower = await User.findAll({
-        where: {
-          id: userId
+      const followers = await Followship.findAll({
+        where: { followingId: userId },
+        include: {
+          model: User,
+          as: 'Follower',
+          attributes: {
+            exclude: ['password', 'role'],
+            include: [
+              [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.follower_id = ${nowUser.id} AND Followships.following_id = Follower.id)`), 'isFollowed']
+            ]
+          }
         },
         attributes: {
-          include: [
-            'id', 'name', 'avatar', 'account', 'introduction',
-            [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.follower_id = ${nowUser.id} AND Followships.following_id = Users.id)`), 'isFollowed']
-          ],
-          exclude: ['password', 'role', 'createdAt', 'updatedAt']
+          exclude: ['updatedAt']
         },
-        include: [{
-          model: User,
-          as: 'Followers',
-          attributes: ['id', 'name', 'avatar', 'account', 'introduction']
-        }],
         order: [['createdAt', 'DESC']],
         raw: true,
-        nest: false
+        nest: true
       })
-      if (!follower) throw new Error('沒有追隨!')
-      cb(null, follower)
+      cb(null, followers)
     } catch (err) {
       cb(err)
     }
