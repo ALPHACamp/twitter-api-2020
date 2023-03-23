@@ -1,11 +1,14 @@
 const express = require('express')
 const router = express.Router()
-const { authenticated } = require('../middleware/auth')
+const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 const { uploadMultiple } = require('../middleware/multer')
 const { errorHandler } = require('../middleware/error-handler')
+const adminController = require('../controllers/admin-controller')
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
+
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.put('/users/:id/account', authenticated, userController.editUserAccount)
