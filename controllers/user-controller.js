@@ -2,14 +2,14 @@ const jwt = require('jsonwebtoken')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const createError = require('http-errors')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const { User, Tweet, Like, Reply, sequelize } = require('../models')
 const imgurFileHandler = require('../helpers/file-helpers')
 
 const userController = {
   login: (req, res, next) => {
     try {
-      const loginUser = getUser(req)
+      const loginUser = helpers.getUser(req)
       if ((req.originalUrl === '/api/users/login' && loginUser.role !== 'user') || (req.originalUrl === '/api/admin/login' && loginUser.role !== 'admin')) throw createError(404, '帳號不存在')
 
       const token = jwt.sign({ id: loginUser.id }, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -131,7 +131,7 @@ const userController = {
   // 查看特定使用者發過的推文
   getUserTweets: (req, res, next) => {
     // login user 一包資料
-    const loginUser = getUser(req)
+    const loginUser = helpers.getUser(req)
     // 動態 id user
     const UserId = Number(req.params.id)
 
@@ -200,6 +200,37 @@ const userController = {
         return res.json(replies)
       })
       .catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+    const { id } = req.params
+    const loginUser = helpers.getUser(req)
+
+    return Promise.all([
+      User.findByPk(id),
+      Like.findAll({
+        where: { UserId: id },
+        attributes: ['id', 'UserId', 'TweetId', 'createdAt'],
+        include: {
+          model: Tweet,
+          attributes: ['id', 'description', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCount']
+          ],
+          include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        },
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, likes]) => {
+        if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
+
+        const result = likes.map(like => ({
+          ...like.toJSON(),
+          isLiked: like.UserId === loginUser.id
+        }))
+        return res.json(result)
+      })
+      .catch(error => next(error))
   }
 }
 
