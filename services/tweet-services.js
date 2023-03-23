@@ -20,7 +20,10 @@ const tweetServices = {
       }],
       order: [['createdAt', 'DESC']]
     })
-      .then(tweet => cb(null, tweet))
+      .then(tweet => {
+        if (!tweet) throw new Error('此推文不存在')
+        return cb(null, tweet)
+      })
       .catch(err => cb(err))
   },
   postTweet: (req, cb) => {
@@ -37,41 +40,54 @@ const tweetServices = {
   },
   // 回覆
   getReplies: (req, cb) => {
-    Reply.findAll({
-      where: { TweetId: req.params.id },
-      order: [['createdAt', 'DESC']],
-      nest: true,
-      raw: true
+    Tweet.findByPk(req.params.id, {
+      include: [{
+        model: Reply,
+        order: [[Reply, 'createdAt', 'DESC']]
+      }],
+      order: [['createdAt', 'DESC']]
     })
-      .then(replies => cb(null, replies))
+      .then(tweet => {
+        if (!tweet) throw new Error('此推文不存在')
+        return cb(null, tweet.Replies)
+      })
       .catch(err => cb(err))
   },
   postReply: (req, cb) => {
     const { comment } = req.body
     if (comment.trim().length === 0) throw new Error('內容不可空白')
-    Reply.create({
-      comment,
-      UserId: helpers.getUser(req) ? helpers.getUser(req).id : req.user.id,
-      TweetId: req.params.id
-    })
+    Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) throw new Error('此推文不存在')
+        return Reply.create({
+          comment,
+          UserId: helpers.getUser(req) ? helpers.getUser(req).id : req.user.id,
+          TweetId: req.params.id
+        })
+      })
       .then(reply => cb(null, reply))
       .catch(err => cb(err))
   },
   // 喜歡與取消喜歡推文
   postLike: (req, cb) => {
-    Like.findOne({
-      where: {
-        UserId: helpers.getUser(req) ? helpers.getUser(req).id : req.user.id,
-        TweetId: req.params.id
-      }
-    }).then(like => {
-      if (!like) {
-        return Like.create({
+    Promise.all([
+      Tweet.findByPk(req.params.id),
+      Like.findOne({
+        where: {
           UserId: helpers.getUser(req) ? helpers.getUser(req).id : req.user.id,
           TweetId: req.params.id
-        })
-      } else return like
-    })
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error('此推文不存在')
+        if (!like) {
+          return Like.create({
+            UserId: helpers.getUser(req) ? helpers.getUser(req).id : req.user.id,
+            TweetId: req.params.id
+          })
+        } else return like
+      })
       .then(like => cb(null, like))
       .catch(err => cb(err))
   },
