@@ -77,31 +77,32 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
-      const UserId = req.params.userId
+      const { userId } = req.params
       const likedTweets = await Like.findAll({
-        where: { UserId },
+        where: { UserId: userId },
         include: [
           { model: User, attributes: [] },
           {
-            model: Tweet, attributes: ['id', 'description'],
+            model: Tweet,
+            attributes: ['id', 'description'],
             include: [
               {
                 model: User,
-                attributes: ['id', "name", "account", "avatar", "createdAt"],
+                attributes: ['id', 'name', 'account', 'avatar', 'createdAt']
               },
-              { model: User, as: "LikedUsers" },
-              { model: User, as: "RepliedUsers" },
-            ],
-          },
+              { model: User, as: 'LikedUsers' },
+              { model: User, as: 'RepliedUsers' }
+            ]
+          }
         ],
-        order: [["createdAt", "DESC"]],
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
       if (!likedTweets) {
-        return  res.status(404).json({
+        return res.status(404).json({
           status: 'error',
-          message: 'Tweet not found!',
+          message: 'Tweet not found!'
         })
       }
       const isLiked = likedTweets.LikedUsers.some(
@@ -110,11 +111,11 @@ const userController = {
       return res
         .status(200)
         .json({
-          status: "success",
-          message: "All liked tweets are retrieved!",
+          status: 'success',
+          message: 'All liked tweets are retrieved!',
           likedTweets,
-          isLiked,
-        });
+          isLiked
+        })
     } catch (error) { next(error) }
   },
   getRepliedTweets: async (req, res, next) => {
