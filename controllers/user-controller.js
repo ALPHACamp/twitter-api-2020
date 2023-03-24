@@ -37,8 +37,8 @@ const adminController = {
   getUserFollowers: (req, res, next) => {
     userServices.getUserFollowers(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
-  putUserProfile: (req, res, next) => {
-    userServices.putUserProfile(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  putUserSetting: (req, res, next) => {
+    userServices.putUserSetting(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 module.exports = adminController
