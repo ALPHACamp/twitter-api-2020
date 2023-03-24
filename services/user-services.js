@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
 const db = require('../models')
-const { User, sequelize, Tweet, Reply, Like } = db
+const { User, sequelize, Tweet, Reply, Like, Followship } = db
 
 const adminServices = {
   postSignIn: (req, cb) => {
@@ -130,7 +130,7 @@ const adminServices = {
   getUserTweets: (req, cb) => {
     return Tweet.findAll({
       where: { UserId: req.params.id },
-      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+      include: [{ model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
@@ -172,6 +172,26 @@ const adminServices = {
       return cb(null, [...replies])
     })
       .catch(err => cb(err))
+  },
+  getUserFollowings: (req, cb) => {
+    return Followship.findAll({
+      where: { followerId: req.params.id },
+      include: [
+        { model: User, as: 'Follower', attributes: ['id', 'account', 'name', 'avatar'] }
+      ]
+    }).then(followings => {
+      return cb(null, [...followings])
+    }).catch(err => cb(err))
+  },
+  getUserFollowers: (req, cb) => {
+    return Followship.findAll({
+      where: { followingId: req.params.id },
+      include: [
+        { model: User, as: 'Following', attributes: ['id', 'account', 'name', 'avatar'] }
+      ]
+    }).then(followers => {
+      return cb(null, [...followers])
+    }).catch(err => cb(err))
   }
 }
 module.exports = adminServices
