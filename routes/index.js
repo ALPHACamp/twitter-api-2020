@@ -5,6 +5,12 @@ const { errorHandler } = require("../middleware/error-handler");
 const { authenticatedUser } = require("../middleware/auth");
 const upload = require("../middleware/multer");
 
+router.get(
+  "/api/users/current_user",
+  authenticatedUser,
+  userController.getCurrentUser
+);
+router.get("/api/users/:id", authenticatedUser, userController.getUser);
 router.post("/api/users", userController.signUp);
 router.get(
   "/api/users/:id/tweets",

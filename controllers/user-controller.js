@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
-const { User, Tweet, Reply, Followship } = require("../models");
+const { User, Tweet, Reply, Followship, sequelize } = require("../models");
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -64,6 +64,11 @@ const userController = {
         error.status = 404;
         throw error;
       }
+      if (foundUser.isAdmin) {
+        const error = new Error("帳號不存在!");
+        error.status = 404;
+        throw error;
+      }
       const isMatch = await bcrypt.compare(password, foundUser.password);
       if (!isMatch) {
         const error = new Error("密碼不正確!");
@@ -86,6 +91,65 @@ const userController = {
       return next(error);
     }
   },
+  getUser: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const foundUser = await User.findByPk(id, {
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                `(SELECT COUNT(*) FROM Followships WHERE followingId = ${id})`
+              ),
+              "followerCounts",
+            ],
+            [
+              sequelize.literal(
+                `(SELECT COUNT(*) FROM Followships WHERE followerId = ${id})`
+              ),
+              "followingCounts",
+            ],
+          ],
+        },
+      });
+      if (!foundUser) {
+        const error = new Error("使用者不存在!");
+        error.status = 404;
+        throw error;
+      }
+      if (foundUser.isAdmin) {
+        const error = new Error("無法存取管理員資料!");
+        error.status = 403;
+        throw error;
+      }
+      const user = foundUser.toJSON();
+      delete user.password;
+      return res.json({
+        status: "success",
+        ...user,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const foundUser = await User.findByPk(getUser(req).id);
+      if (!foundUser) {
+        const error = new Error("使用者不存在!");
+        error.status = 404;
+        throw error;
+      }
+      const currentUser = foundUser.toJSON();
+      delete currentUser.password;
+      return res.json({
+        ...currentUser,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+
   putUser: async (req, res, next) => {
     const { id } = req.params;
     const { name, introduction } = req.body;
@@ -228,9 +292,6 @@ const userController = {
   },
   removeFollowing: async (req, res, next) => {
     const { followingId } = req.params;
-    console.log("================");
-    console.log("followingId is " + followingId);
-    console.log("================");
     try {
       if (getUser(req).id === Number(followingId)) {
         const error = new Error("無法追蹤自己!");
@@ -266,7 +327,6 @@ const userController = {
       return next(error);
     }
   },
-
   getUserTweets: async (req, res, next) => {
     const { id } = req.params;
     try {
