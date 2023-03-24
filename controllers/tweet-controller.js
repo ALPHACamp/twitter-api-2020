@@ -178,11 +178,27 @@ const tweetController = {
       const UserId = getUser(req).id;
       const TweetId = req.params.tweet_id;
       const comment = req.body.comment.trim();
+      const tweet = await Tweet.findByPk(TweetId);
+      if (!tweet) {
+        const err = new Error("該貼文不存在");
+        err.status = 404;
+        throw err;
+      }
       const replyInput = await Reply.create({
         UserId,
         TweetId,
         comment,
       });
+      if (!comment) {
+        const err = new Error("內容不可空白");
+        err.status = 404;
+        throw err;
+      }
+      if (comment.length > 140) {
+        const err = new Error("字數不可超過140字");
+        err.status = 400;
+        throw err;
+      }
       return res.json({
         status: "success",
         replyInput,
