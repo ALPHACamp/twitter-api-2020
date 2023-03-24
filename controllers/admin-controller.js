@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -61,6 +61,31 @@ const adminController = {
         }))
         res.json(tweetsData)
       })
+      .catch(err => next(err))
+  },
+  deleteTweet: (req, res, next) => {
+    const TweetId = Number(req.params.id)
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Reply.findAll({
+        where: { TweetId },
+        attributes: ['id']
+      }),
+      Like.findAll({
+        where: { TweetId },
+        attributes: ['id']
+      })
+    ])
+      .then(([tweet, replies, likes]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        // 刪除與此推文相關的reply及like
+        Promise.all([
+          replies.map(reply => reply.destroy()),
+          likes.map(like => like.destroy())
+        ])
+        return tweet.destroy()
+      })
+      .then(deletedTweet => res.json(deletedTweet))
       .catch(err => next(err))
   }
 }
