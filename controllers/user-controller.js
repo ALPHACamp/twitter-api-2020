@@ -4,7 +4,7 @@ const validator = require('validator')
 
 const helpers = require('../_helpers')
 const sequelize = require('sequelize')
-const { User } = require('../models')
+const { User, Like, Reply, Tweet } = require('../models')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -75,13 +75,35 @@ const userController = {
       next(err)
     }
   },
-  getUserLikes: (req, res, next) => {
-    try{
+  getUserLikes: async (req, res, next) => {
+    try {
       const UserId = req.params.userId
-      
-
-    }catch(error){next(error)}
-    
+      const likedTweets = await Like.findAll({
+        where: { UserId },
+        include: [
+          { model: User, attributes: [] },
+          {
+            model: Tweet, attributes: ['id', 'description'],
+            include: [
+              {
+                model: User,
+                attributes: ['id', "name", "account", "avatar", "createdAt"],
+              },
+              { model: User, as: "LikedUsers" },
+              { model: User, as: "RepliedUsers" },
+            ],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+        raw: true,
+        nest: true
+      })
+      if (!likedTweets) throw new Error("Tweet does not exist!");
+      const isLiked = likedTweets.LikedUsers.some(
+        (user) => user.id === helpers.getUser(req).id
+      )
+      return res.status(200).json({likedTweets, isLiked})
+    } catch (error) { next(error) }
   },
   getRepliedTweets: async (req, res, next) => {
     try {
@@ -89,20 +111,20 @@ const userController = {
       const reply = await Reply.findAll({
         where: { UserId: userId },
         include: [
-          { model: User, attributes: ["name", "avatar", "account"] },
+          { model: User, attributes: ['name', 'avatar', 'account'] },
           {
             model: Tweet,
             attributes: [],
-            include: [{ model: User, attributes: ["account"] }],
-          },
+            include: [{ model: User, attributes: ['account'] }]
+          }
         ],
-        order: [["createdAt", "DESC"]],
+        order: [['createdAt', 'DESC']],
         raw: true,
-        nest: true,
-      });
+        nest: true
+      })
       if (!reply) throw new Error('Reply does not exist!')
       return res.status(200).json(reply)
-    } catch (error) { next(error)}
+    } catch (error) { next(error) }
   }
 }
 
