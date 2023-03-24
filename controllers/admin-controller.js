@@ -49,6 +49,19 @@ const adminController = {
         res.json(usersData.sort((a, b) => b.tweetCounts - a.tweetCounts))
       })
       .catch(err => next(err))
+  },
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+    })
+      .then(tweets => {
+        const tweetsData = tweets.map(tweet => ({
+          ...tweet.toJSON(),
+          description: tweet.description.substring(0, 50)
+        }))
+        res.json(tweetsData)
+      })
+      .catch(err => next(err))
   }
 }
 
