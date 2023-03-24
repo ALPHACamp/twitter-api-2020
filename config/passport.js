@@ -11,17 +11,19 @@ const { User } = require('../models')
 passport.use(
   new LocalStrategy(
     {
-      usernameField: 'email',
+      usernameField: 'account',
       passwordField: 'password',
       passReqToCallback: true
     },
-    async (req, email, password, cb) => {
+    async (req, account, password, cb) => {
       try {
-        const user = await User.findOne({ where: { email } })
-        if (!user) throw new Error('帳號不存在！')
+        const user = await User.findOne({ where: { account } })
+
+        if (!user) throw new Error('Account does not exist!')
 
         const isMatched = await bcrypt.compare(password, user.password)
-        if (!isMatched) throw new Error('帳號或密碼輸入錯誤！')
+
+        if (!isMatched) throw new Error('Incorrect username or password!')
 
         return cb(null, user)
       } catch (err) {
