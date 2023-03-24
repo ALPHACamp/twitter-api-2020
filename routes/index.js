@@ -12,6 +12,16 @@ router.get(
 );
 router.get("/api/users/:id", authenticatedUser, userController.getUser);
 router.post("/api/users", userController.signUp);
+router.get(
+  "/api/users/:id/tweets",
+  authenticatedUser,
+  userController.getUserTweets
+);
+router.get(
+  "/api/users/:id/replied_tweets",
+  authenticatedUser,
+  userController.getUserReplies
+);
 router.put(
   "/api/users/:id/setting",
   authenticatedUser,
