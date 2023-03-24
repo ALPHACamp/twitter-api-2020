@@ -1,8 +1,8 @@
 'use strict'
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Replies', {
+  up: (queryInterface, Sequelize) => {
+    return queryInterface.createTable('Likes', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -11,20 +11,21 @@ module.exports = {
       },
       User_id: {
         type: Sequelize.INTEGER,
-        reference: {
+        references: {
           model: 'Users',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       Tweet_id: {
         type: Sequelize.INTEGER,
-        reference: {
+        references: {
           model: 'Tweets',
           key: 'id'
-        }
-      },
-      comment: {
-        type: Sequelize.TEXT
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       created_at: {
         allowNull: false,
@@ -36,7 +37,7 @@ module.exports = {
       }
     })
   },
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Replies')
+  down: (queryInterface, Sequelize) => {
+    return queryInterface.dropTable('Likes')
   }
 }
