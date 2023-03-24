@@ -76,37 +76,33 @@ const userController = {
     }
   },
   getUserLikes: (req, res, next) => {
-    const { userId } = req.params
-    return Promise.all([
-      User.findByPk(userId, {
-        include: [
-          {
-            model: Like,
-            include: [{ model: Tweet, include: [Like, Reply, User] }]
-          }
-        ],
-        order: [[sequelize.literal('`Likes`.`createdAt`'), 'DESC']]
-      }),
-      Like.findAll({
+    try{
+      const UserId = req.params.userId
+      
+
+    }catch(error){next(error)}
+    
+  },
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      const reply = await Reply.findAll({
         where: { UserId: userId },
         include: [
-          { model: Tweet, include: [{ model: User, as: 'LikedUsers' }] }
-        ]
-      })
-    ])
-      .then(([user, likes]) => {
-        if (!user) {
-          return res.status(404).json({
-            status: 'error', message: 'User not found!'
-          })
-        }
-        likes = likes.map(like => ({
-          ...like.toJSON(),
-          likeCount: user.LikedUsers.length,
-          isLiked: 
-        }))
-      })
-      .catch(err => next(err))
+          { model: User, attributes: ["name", "avatar", "account"] },
+          {
+            model: Tweet,
+            attributes: [],
+            include: [{ model: User, attributes: ["account"] }],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+        raw: true,
+        nest: true,
+      });
+      if (!reply) throw new Error('Reply does not exist!')
+      return res.status(200).json(reply)
+    } catch (error) { next(error)}
   }
 }
 
