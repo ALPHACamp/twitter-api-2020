@@ -48,6 +48,7 @@ const adminController = {
         })
         res.json(usersData.sort((a, b) => b.tweetCounts - a.tweetCounts))
       })
+      .catch(err => next(err))
   }
 }
 
