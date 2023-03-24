@@ -122,6 +122,7 @@ const userController = {
           topUsers: topUsers.sort((a, b) => b.followerCounts - a.followerCounts).slice(0, 10)
         })
       })
+      .catch(err => next(err))
   },
   getUserProfile: (req, res, next) => {
     const { id } = req.params
