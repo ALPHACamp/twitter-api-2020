@@ -167,8 +167,9 @@ const userController = {
   editUserProfile: async (req, res, next) => {
     try {
       const UserId = req.params.id;
-      const currentUser = getUser(req);
+      const currentUser = getUser(req).dataValues;
       const { name, introduction } = req.body;
+
       let avatar = req.files?.avatar || null;
       let coverImage = req.files?.cover_image || null;
 
