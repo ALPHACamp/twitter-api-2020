@@ -1,7 +1,7 @@
 const { Op } = require('sequelize')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
-const { User, Followship } = db
+const { User, Followship, Tweet, Reply, Like } = db
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 
@@ -148,6 +148,76 @@ const userController = {
         delete userProfile.Followings
 
         return res.json(userProfile)
+      })
+      .catch(err => next(err))
+  },
+  getUserTweets: (req, res, next) => {
+    const { id } = req.params
+    const user = helpers.getUser(req)
+    const userId = Number(user.id)
+
+    return Promise.all([
+      Tweet.findAll({
+        where: { UserId: id },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          { model: Reply, attributes: ['id'] },
+          { model: Like, attributes: ['UserId'] }
+        ]
+      }),
+      User.findByPk(id)
+    ])
+      .then(([tweets, user]) => {
+        if (!tweets) throw new Error('There is no any tweet exists')
+        if (!user) throw new Error("This User didn't exists!")
+
+        const userTweets = tweets.map(tweet => {
+          const data = {
+            ...tweet.toJSON(),
+            replyCounts: tweet.Replies.length,
+            likeCounts: tweet.Likes.length,
+            isLiked: tweet.Likes.some(like => like.UserId === userId)
+          }
+          delete data.Replies
+          delete data.Likes
+
+          return data
+        })
+
+        res.json(userTweets)
+      })
+      .catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    const { id } = req.params
+
+    return Promise.all([
+      Reply.findAll({
+        where: { UserId: id },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: ['UserId'],
+            include: { model: User, attributes: ['id', 'account'] }
+          }
+        ]
+      }),
+      User.findByPk(id)
+    ])
+      .then(([replies, user]) => {
+        if (!replies) throw new Error('There is no any reply exists')
+        if (!user) throw new Error("This User didn't exists!")
+
+        const userReplies = replies.map(reply => {
+          const data = {
+            ...reply.toJSON()
+          }
+
+          return data
+        })
+
+        res.json(userReplies)
       })
       .catch(err => next(err))
   }
