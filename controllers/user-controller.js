@@ -1,10 +1,13 @@
-const { User, Reply, sequelize } = require('../models')
+const { User, sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
+const createError = require('http-errors')
 const jwt = require('jsonwebtoken')
-const { imgurFileHandler } = require('../_helpers')
+const { getUser, imgurFileHandler } = require('../_helpers')
 
 const userController = {
   getUser: (req, res, next) => {
+    // 無法拿到其他用戶的資源
+    if (getUser(req).id.toString() !== req.params.userId) next(createError(401, 'You don’t have permission to request that URL'))
     return User.findByPk(req.params.userId)
       .then(user => {
         if (!user) {
@@ -12,13 +15,14 @@ const userController = {
           error.status = 404
           throw error
         }
-
         return res.json({ status: 'success', ...user.toJSON() })
       })
       .catch(error => next(error))
   },
 
   getUserTweets: (req, res, next) => {
+    // 無法拿到其他用戶的資源
+    if (getUser(req).id.toString() !== req.params.userId) next(createError(401, 'You don’t have permission to request that URL'))
     return sequelize.query('SELECT description FROM tweets WHERE user_id = :userId ORDER BY created_at LIMIT 5',
       {
         replacements: { userId: req.params.userId },
@@ -37,6 +41,8 @@ const userController = {
   },
 
   getUserReplies: (req, res, next) => {
+    // 無法拿到其他用戶的資源
+    if (getUser(req).id.toString() !== req.params.userId) next(createError(401, 'You don’t have permission to request that URL'))
     return sequelize.query('SELECT comment FROM replies WHERE user_id = :userId ORDER BY created_at LIMIT 5',
       {
         replacements: { userId: req.params.userId },
@@ -55,6 +61,8 @@ const userController = {
   },
 
   getUserLikes: (req, res, next) => {
+    // 無法拿到其他用戶的資源
+    if (getUser(req).id.toString() !== req.params.userId) next(createError(401, 'You don’t have permission to request that URL'))
     return sequelize.query('SELECT Tweet_id TweetId FROM likes WHERE User_id = :userId',
       {
         replacements: { userId: req.params.userId },
@@ -73,6 +81,8 @@ const userController = {
   },
 
   getUserFollowers: (req, res, next) => {
+    // 無法拿到其他用戶的資源
+    if (getUser(req).id.toString() !== req.params.userId) next(createError(401, 'You don’t have permission to request that URL'))
     return sequelize.query('SELECT Follower_id followerId FROM users u JOIN followships f ON u.id = f.Following_Id WHERE u.id = :userId',
       {
         replacements: { userId: req.params.userId },
@@ -84,6 +94,8 @@ const userController = {
 
   // 不能直接從followship去找，要從user
   getUserFollowings: (req, res, next) => {
+    // 無法拿到其他用戶的資源
+    if (getUser(req).id.toString() !== req.params.userId) next(createError(401, 'You don’t have permission to request that URL'))
     return sequelize.query('SELECT Following_id followingId FROM users u JOIN followships f ON u.id = f.Follower_Id WHERE u.id = :userId',
       {
         replacements: { userId: req.params.userId },
@@ -156,6 +168,8 @@ const userController = {
   },
 
   putUser: (req, res, next) => {
+    // 無法拿到其他用戶的資源
+    if (getUser(req).id.toString() !== req.params.userId) next(createError(401, 'You don’t have permission to request that URL'))
     const { file } = req
     const { name, introduction } = req.body
     return Promise.all([
@@ -180,7 +194,9 @@ const userController = {
       .catch(error => next(error))
   },
 
-  patchUser: (req, res, next) => {
+  patchUser: (req, _, next) => {
+    // 無法拿到其他用戶的資源
+    if (getUser(req).id.toString() !== req.params.userId) next(createError(401, 'You don’t have permission to request that URL'))
     const { account, password, email, checkPassword } = req.body
 
     return User.findByPk(req.params.userId)

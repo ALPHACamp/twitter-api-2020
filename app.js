@@ -19,6 +19,7 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 app.use('/api', apis)
+app.use('/', (_, res) => res.status(404).json({ message: '404 Not Found' }))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
