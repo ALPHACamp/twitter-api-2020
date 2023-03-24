@@ -220,6 +220,52 @@ const userController = {
         res.json(userReplies)
       })
       .catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+    const { id } = req.params
+    const user = helpers.getUser(req)
+    const userId = Number(user.id)
+
+    return Promise.all([
+      Tweet.findAll({
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          { model: Reply, attributes: ['id'] },
+          { model: Like, attributes: ['UserId'] }
+        ]
+      }),
+      Like.findAll({
+        where: { UserId: id },
+        attributes: ['TweetId']
+      }),
+      User.findByPk(id)
+    ])
+      .then(([tweets, likes, user]) => {
+        if (!tweets) throw new Error('There is no any tweet exists')
+        if (!likes) throw new Error('This user not yet like any tweet')
+        if (!user) throw new Error("This User didn't exists!")
+
+        const Tweets = tweets.map(tweet => tweet.toJSON())
+        const Likes = likes.map(like => like.toJSON())
+
+        const likeTweets = Tweets.filter(tweet => Likes.some(like => like.TweetId === tweet.id))
+          .map(tweet => {
+            const data = {
+              ...tweet,
+              replyCounts: tweet.Replies.length,
+              likeCounts: tweet.Likes.length,
+              isLiked: tweet.Likes.some(like => like.UserId === userId),
+              TweetId: tweet.id
+            }
+            delete data.Replies
+            delete data.Likes
+
+            return data
+          })
+
+        res.json(likeTweets)
+      })
+      .catch(err => next(err))
   }
 }
 
