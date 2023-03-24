@@ -4,7 +4,7 @@ const passport = require('../config/passport')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (error, user) => {
-    if (error || !user) throw createError(401, '請先登入')
+    if (error || !user) next(createError(401, '請先登入'))
 
     req.user = user
     next()
