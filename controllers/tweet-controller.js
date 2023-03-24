@@ -164,10 +164,7 @@ const tweetController = {
         err.status = 404;
         throw err;
       }
-      return res.json({
-        status: "success",
-        replies,
-      });
+      return res.json(replies);
     } catch (err) {
       return next(err);
     }
