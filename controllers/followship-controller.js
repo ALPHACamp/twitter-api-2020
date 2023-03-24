@@ -1,4 +1,5 @@
-const { User, Followship } = require('../models')
+const { User, Followship, Sequelize } = require('../models')
+const { Op } = require('sequelize')
 const helpers = require('../_helpers')
 
 const followshipController = {
@@ -35,7 +36,7 @@ const followshipController = {
     }
   },
   removeFollowing: async (req, res, next) => {
-    const ownerId = helpers.getUser(req).id
+    const ownerId = helpers.getUser(req)?.id
     const userId = Number(req.params?.followingId)
     if (ownerId === userId) return res.status(400).json({ status: 'error', message: 'You can not follow yourself and certainly can not undo' })
     try {
@@ -59,6 +60,43 @@ const followshipController = {
         message: 'Successfully unfollowed the user',
         data: { userData }
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getMostFollowed: async (req, res, next) => {
+    const ownerId = helpers.getUser(req)?.id
+    const number = Number(req.params.count)
+    try {
+      // 先找出已追蹤的使用者
+      const followedShips = await Followship.findAll({
+        where: { followerId: ownerId },
+        attributes: ['followingId'],
+        raw: true
+      })
+      const followedUserIds = followedShips.map(followship => followship.followingId)
+      console.log(followedUserIds)
+      const users = await User.findAll({
+        where: {
+          // 排除自己和已追蹤
+          id: { [Op.ne]: ownerId, [Op.notIn]: followedUserIds },
+          // 排除管理員
+          role: { [Op.ne]: 'admin' }
+        },
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          'cover',
+          [Sequelize.literal('(SELECT COUNT(*) FROM Followships  WHERE Followships.FollowingId = User.id )'), 'follower_count']
+        ],
+        order: [[Sequelize.literal('follower_count'), 'DESC']],
+        limit: number,
+        nest: true,
+        raw: true
+      })
+      res.status(200).json(users)
     } catch (err) {
       next(err)
     }
