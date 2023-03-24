@@ -131,8 +131,7 @@ const tweetController = {
         throw err;
       }
       return res.json({
-        status: "success",
-        tweet,
+        ...tweet,
       });
     } catch (err) {
       return next(err);
