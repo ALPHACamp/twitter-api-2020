@@ -148,23 +148,32 @@ const userController = {
       .catch(error => next(error))
   },
 
-  signIn: (req, res, next) => {
-    try {
-      const userData = req.user.toJSON()
-      delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, {
-        expiresIn: '30d'
+  signIn: async (req, res, next) => {
+    const userData = req.body
+    // 從db撈密碼 (限定user身分)
+    const dbPassword = await sequelize.query("SELECT password FROM users u WHERE u.account = :account AND role = 'user'",
+      {
+        replacements: { account: req.body.account },
+        type: sequelize.QueryTypes.SELECT
       })
-      res.json({
-        status: 'success',
-        data: {
-          token,
-          user: userData
-        }
+    if (dbPassword) return next(createError(401, 'The username and password your provided are invalid'))
+    // 再與req.body做比對
+    await bcrypt.compare(userData.password, dbPassword[0].password)
+      .then(result => {
+        if (result) {
+          delete userData.password
+          const token = jwt.sign(userData, process.env.JWT_SECRET, {
+            expiresIn: '30d'
+          })
+          return res.json({
+            status: 'success',
+            data: {
+              token,
+              user: userData
+            }
+          })
+        } else return next(createError(401, 'The username and password your provided are invalid'))
       })
-    } catch (error) {
-      next(error)
-    }
   },
 
   putUser: (req, res, next) => {
