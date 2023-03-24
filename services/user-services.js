@@ -8,7 +8,6 @@ const userServices = {
   signIn: async (req, cb) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-
       delete userData.password
       delete userData.role
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -23,30 +22,24 @@ const userServices = {
       if (account?.trim().length === 0 || name?.trim().length === 0 || email.trim()?.length === 0 || password?.trim().length === 0) throw new Error('還有欄位沒填')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不同!')
       if (name && name.length > 50) throw new Error('暱稱上限50字!')
-      Promise.all([
+      const [userAccount, userEmail] = await Promise.all([
         User.findOne({ where: { account } }),
         User.findOne({ where: { email } })
       ])
-        .then(([userAccount, userEmail]) => {
-          console.log(userAccount)
-          console.log(userEmail)
-          if (userAccount) throw new Error('account 已重複註冊!')
-          if (userEmail) throw new Error('email 已重複註冊!')
-          return bcrypt.hash(password, 10)
-        })
-        .then(hash => User.create({
-          account,
-          name,
-          email,
-          role: 'user',
-          password: hash
-        }))
-        .then(newUser => {
-          newUser = newUser.toJSON()
-          delete newUser.password
-          delete newUser.role
-          cb(null, newUser)
-        })
+      if (userAccount) throw new Error('account 已重複註冊!')
+      if (userEmail) throw new Error('email 已重複註冊!')
+      const hash = await bcrypt.hash(password, 10)
+      const newUser = await User.create({
+        account,
+        name,
+        email,
+        role: 'user',
+        password: hash
+      })
+      const user = newUser.toJSON()
+      delete newUser.password
+      delete newUser.role
+      cb(null, user)
     } catch (err) {
       cb(err)
     }
@@ -75,6 +68,7 @@ const userServices = {
       raw: true
     })
       .then(getUser => {
+        if (!getUser) throw new Error('此使用者不存在!')
         cb(null, getUser)
       })
       .catch(err => cb(err))
