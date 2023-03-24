@@ -4,6 +4,7 @@ const { Op } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
 const { User, Followship, sequelize } = require("../models");
+const { get } = require("../app");
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -125,6 +126,24 @@ const userController = {
       });
     } catch (error) {
       return next(error);
+    }
+  },
+  getCurrentUser: async (req, res, next) => {
+    console.log(getUser(req))
+    try {
+      const foundUser = await User.findByPk(getUser(req).id)
+      if (!foundUser) {
+        const error = new Error("使用者不存在!");
+        error.status = 404;
+        throw error;
+      }
+      const currentUser = foundUser.toJSON()
+      delete currentUser.password
+      return res.json({
+        ...currentUser
+      })
+    } catch (error) {
+      return next(error)
     }
   },
 
