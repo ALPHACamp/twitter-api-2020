@@ -98,8 +98,10 @@ const userController = {
         raw: true,
         nest: true,
       });
-      if (!reply) throw new Error('Reply does not exist!')
-      return res.status(200).json({ status: "success", reply });
+      if (!reply) {
+        return res.status(404).json({status:"error", message:'Reply does not exist!'})
+      }
+      return res.status(200).json({ status: "success", data: reply });
     } catch (error) { next(error)}
   }
 }
