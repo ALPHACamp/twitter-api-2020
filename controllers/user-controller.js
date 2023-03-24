@@ -4,8 +4,7 @@ const validator = require('validator')
 
 const helpers = require('../_helpers')
 
-const { User, Tweet, Reply, followship } = require('../models')
-const followship = require('../models/followship')
+const { User, Tweet, Reply, Followship } = require('../models')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -106,19 +105,19 @@ const userController = {
   getFollowers: (req, res, next) => {
     return User.findAll({
       where: { id: req.params.userId },
-      include:[{model: User, as: 'Followers', attributes:['id','avatar', 'name','description']}]
+      include: [{ model: User, as: 'Followers', attributes: ['id', 'avatar', 'name', 'description'] }]
     })
-    .then(followerData => {
-       if (!followerData) throw new Error("用戶不存在");
-      followerData = followerData.map((f) => ({
-        ...f.toJSON().Followers,
-        followerId: f.Followers.id,
-        followerCount: f.Followers.length,
-        isFollowed: helpers.getUser(req).Followings.some(fu => fu.Followship.followingId === f.Followers.id)
-      }))
-       return res.status(200).json({status:"success", data:followerData});
-    })
-    .catch(error => next(error))
+      .then(followerData => {
+        if (!followerData) throw new Error('用戶不存在')
+        followerData = followerData.map((f) => ({
+          ...f.toJSON().Followers,
+          followerId: f.Followers.id,
+          followerCount: f.Followers.length,
+          isFollowed: helpers.getUser(req).Followings.some(fu => fu.Followship.followingId === f.Followers.id)
+        }))
+        return res.status(200).json({ status: 'success', data: followerData })
+      })
+      .catch(error => next(error))
   }
 }
 
