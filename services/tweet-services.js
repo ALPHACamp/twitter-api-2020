@@ -14,7 +14,6 @@ const tweetServices = {
   },
   getTweets: (req, cb) => {
     const currentUserId = getUser(req).dataValues.id
-    console.log(currentUserId)
     return Tweet.findAll({
       include: [
         { model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] },
