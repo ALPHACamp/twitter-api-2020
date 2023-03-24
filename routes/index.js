@@ -6,6 +6,7 @@ const { authenticated, authenticatedAdmin, authenticatedUser, checkFieldNotEmpty
 const users = require('./modules/users')
 const tweets = require('./modules/tweets')
 const admin = require('./modules/admin')
+const followships = require('./modules/followships')
 
 // 使用者登入
 router.post('/users/login', checkFieldNotEmpty, passport.authenticate('local', { session: false }), userController.login)
@@ -19,6 +20,7 @@ router.post('/users', userController.register)
 router.use('/users', authenticated, authenticatedUser, users)
 router.use('/tweets', authenticated, authenticatedUser, tweets)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
+router.use('/followships', authenticated, authenticatedUser, followships)
 
 router.use('/', errorHandler)
 
