@@ -1,10 +1,11 @@
 const { User, Tweet, sequelize } = require('../models')
 const createError = require('http-errors')
+const timeFormat = require('../helpers/date-helpers')
 
 const adminController = {
   getUsers: (req, res, next) => {
     return User.findAll({
-      attributes: ['id', 'avatar', 'cover',
+      attributes: ['id', 'account', 'name', 'avatar', 'cover',
         [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount'],
@@ -14,6 +15,23 @@ const adminController = {
       raw: true
     })
       .then(users => res.json(users))
+      .catch(error => next(error))
+  },
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      attributes: { exclude: ['updatedAt'] },
+      include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => {
+        const result = tweets.map(tweet => ({
+          ...tweet.toJSON(),
+          description: tweet.description.substring(0, 50),
+          createdAt: timeFormat(tweet.createdAt)
+        }))
+
+        return res.json(result)
+      })
       .catch(error => next(error))
   },
   deleteTweet: (req, res, next) => {
