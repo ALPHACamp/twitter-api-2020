@@ -13,10 +13,12 @@ const tweetServices = {
       .catch(err => cb(err, null))
   },
   getTweets: (req, cb) => {
+    const currentUserId = getUser(req).dataValues.id
+    console.log(currentUserId)
     return Tweet.findAll({
       include: [
         { model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Like }
+        { model: Like, attributes: ['UserId'] }
       ],
       attributes: {
         include: [
@@ -33,7 +35,11 @@ const tweetServices = {
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
-        cb(null, tweets)
+        const result = tweets.map(t => ({
+          ...t.toJSON(),
+          isLiked: t.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
+        }))
+        cb(null, result)
       })
       .catch(err => cb(err))
   }
