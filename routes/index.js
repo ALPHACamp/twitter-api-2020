@@ -6,6 +6,16 @@ const { authenticatedUser } = require("../middleware/auth");
 const upload = require("../middleware/multer");
 
 router.post("/api/users", userController.signUp);
+router.get(
+  "/api/users/:id/tweets",
+  authenticatedUser,
+  userController.getUserTweets
+);
+router.get(
+  "/api/users/:id/replied_tweets",
+  authenticatedUser,
+  userController.getUserReplies
+);
 router.put(
   "/api/users/:id/setting",
   authenticatedUser,
@@ -22,7 +32,6 @@ router.put(
 );
 router.post("/api/users/signin", userController.signIn);
 
-
 router.get(
   "/api/tweets/:tweet_id",
   authenticatedUser,
@@ -31,9 +40,12 @@ router.get(
 router.get("/api/tweets", authenticatedUser, tweetController.getTweets);
 router.post("/api/tweets", authenticatedUser, tweetController.postTweet);
 
-router.delete('/api/followships/:followingId', authenticatedUser, userController.removeFollowing)
-router.post('/api/followships', authenticatedUser, userController.addFollowing)
-
+router.delete(
+  "/api/followships/:followingId",
+  authenticatedUser,
+  userController.removeFollowing
+);
+router.post("/api/followships", authenticatedUser, userController.addFollowing);
 
 router.use("/", errorHandler);
 

@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
-const { User, Followship } = require("../models");
+const { User, Tweet, Reply, Followship } = require("../models");
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -261,11 +261,52 @@ const userController = {
       return res.json({
         status: "success",
         data: { deletedFollowship },
-         });
+      });
     } catch (error) {
       return next(error);
     }
-  }
+  },
+
+  getUserTweets: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const foundUser = await User.findByPk(id);
+      if (!foundUser || foundUser.isAdmin) {
+        const error = new Error("帳號不存在!");
+        error.status = 404;
+        throw error;
+      }
+      const tweets = await Tweet.findAll({
+        where: {
+          UserId: getUser(req).id,
+        },
+        raw: true,
+      });
+      return res.json(tweets);
+    } catch (error) {
+      return next(error);
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const foundUser = await User.findByPk(id);
+      if (!foundUser || foundUser.isAdmin) {
+        const error = new Error("帳號不存在!");
+        error.status = 404;
+        throw error;
+      }
+      const replies = await Reply.findAll({
+        where: {
+          UserId: getUser(req).id,
+        },
+        raw: true,
+      });
+      return res.json(replies);
+    } catch (error) {
+      return next(error);
+    }
+  },
 };
 
 module.exports = userController;
