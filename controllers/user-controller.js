@@ -102,7 +102,14 @@ const userController = {
       const isLiked = likedTweets.LikedUsers.some(
         (user) => user.id === helpers.getUser(req).id
       )
-      return res.status(200).json({likedTweets, isLiked})
+      return res
+        .status(200)
+        .json({
+          status: "success",
+          message: "All liked tweets are retrieved!",
+          likedTweets,
+          isLiked,
+        });
     } catch (error) { next(error) }
   },
   getRepliedTweets: async (req, res, next) => {
