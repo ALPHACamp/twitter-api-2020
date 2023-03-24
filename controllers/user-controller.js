@@ -27,9 +27,6 @@ const userController = {
     const { account, name, email, password, checkPassword } = req.body
 
     if (!account || !name || !email || !password || !checkPassword) throw createError(400, '欄位不得為空')
-    if (name.length > 50) throw createError(422, '名稱不能超過 50 個字')
-    if (!validator.isEmail(email)) throw createError(422, 'Email 格式有誤')
-    if (password !== checkPassword) throw createError(422, '兩次輸入的密碼不相同')
 
     return Promise.all([
       User.findOne({ where: { account }, raw: true }),
@@ -38,6 +35,9 @@ const userController = {
       .then(([foundAccount, foundEmail]) => {
         if (foundAccount) throw createError(422, 'Account 重複註冊')
         if (foundEmail) throw createError(422, 'Email 重複註冊')
+        if (name.length > 50) throw createError(422, '名稱不能超過 50 個字')
+        if (!validator.isEmail(email)) throw createError(422, 'Email 格式有誤')
+        if (password !== checkPassword) throw createError(422, '兩次輸入的密碼不相同')
 
         return User.create({ account, name, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)) })
       })
@@ -108,9 +108,6 @@ const userController = {
     const { account, name, email, password, checkPassword } = req.body
 
     if (!account || !name || !email || !password || !checkPassword) throw createError(400, '欄位不得為空')
-    if (name.length > 50) throw createError(422, '名稱不能超過 50 個字')
-    if (!validator.isEmail(email)) throw createError(422, 'Email 格式有誤')
-    if (password !== checkPassword) throw createError(422, '兩次輸入的密碼不相同')
 
     return Promise.all([
       User.findByPk(id),
@@ -120,6 +117,9 @@ const userController = {
       .then(([user, foundAccount, foundEmail]) => {
         if (foundAccount && foundAccount.account !== user.account) throw createError(422, 'Account 重複註冊')
         if (foundEmail && foundEmail.email !== user.email) throw createError(422, 'Email 重複註冊')
+        if (name.length > 50) throw createError(422, '名稱不能超過 50 個字')
+        if (!validator.isEmail(email)) throw createError(422, 'Email 格式有誤')
+        if (password !== checkPassword) throw createError(422, '兩次輸入的密碼不相同')
 
         return user.update({ account, name, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)) })
       })
@@ -144,17 +144,16 @@ const userController = {
         nest: true,
         where: { UserId },
         include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
-        attributes: {
-          include: [
-            // 直接計算回覆數、like 數
-            [sequelize.literal(
-              '(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id )'
-            ), 'replyCounts'],
-            [sequelize.literal(
-              '(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweet.id )'
-            ), 'likeCounts']
-          ]
-        },
+        attributes: [
+          'id', 'description', 'createdAt',
+          // 直接計算回覆數、like 數
+          [sequelize.literal(
+            '(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id )'
+          ), 'replyCount'],
+          [sequelize.literal(
+            '(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweet.id )'
+          ), 'likeCount']
+        ],
         // 推文規格要 DESC
         order: [['createdAt', 'DESC']]
       }),
@@ -162,7 +161,8 @@ const userController = {
     ])
       .then(([user, tweets, likes]) => {
         // 401: 請先登入 & 403:沒有使用該頁面的權限，在 middleware/auth
-        if (!user) throw createError(404, '該使用者不存在')
+        if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
+
         const result = tweets.map(tweet => ({
           ...tweet,
           createdAt: timeFormat(tweet.createdAt),
@@ -185,6 +185,7 @@ const userController = {
       User.findByPk(UserId),
       Reply.findAll({
         where: { UserId },
+        attributes: { exclude: ['updatedAt'] },
         // reply table 找出 user.id，並對應 id 找出 user table 裡面的資料
         // 對應 id 找出 tweet table 裡的 user 資料
         include: [
@@ -197,7 +198,7 @@ const userController = {
     ])
       .then(([user, replies]) => {
         // 401: 請先登入 & 403:沒有使用該頁面的權限，在 middleware/auth
-        if (!user) throw createError(404, '該使用者不存在')
+        if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
 
         const result = replies.map(reply => ({
           ...reply.toJSON(),
