@@ -88,19 +88,20 @@ const userController = {
       const reply = await Reply.findAll({
         where: { UserId: userId },
         include: [
-          { model: User, attributes: ['name'] },
+          { model: User, attributes: ['name', 'avatar', 'account'] },
           {
             model: Tweet,
-            include: [{ model: User, attributes: ['name', 'account', 'createdAt'] }]
+            attributes: [],
+            include: [{ model: User, attributes: ['account'] }]
           }
         ],
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
+        order: [['createdAt', 'DESC']]
       })
-      if (!reply) throw new Error('回覆不存在')
-      return res.status(200).json(reply)
-    } catch (error) { return res.status(500).json({ status: 'error', message: error }) }
+      if (!reply) {
+        return res.status(404).json({ status: 'error', message: '回覆不存在' })
+      }
+      return res.status(200).json({ status: 'success', data: reply })
+    } catch (error) { next(error) }
   }
 }
 
