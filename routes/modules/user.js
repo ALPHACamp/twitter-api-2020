@@ -5,6 +5,7 @@ const userController = require('../../controllers/user-controller')
 
 router.post('/', userController.postSignUp)
 router.get('/top', userController.getTopUsers)
+router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id', userController.getUser)
 
 module.exports = router
