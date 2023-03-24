@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { Tweet, User, Like, sequelize } = require('../models')
+const { Tweet, User, Like, Reply, sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
 const passport = require('../config/passport')
 const { getUser } = require('../_helpers')
@@ -216,6 +216,79 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  getUserTweets: (req, res, next) => {
+    User.findByPk(req.params.id).then(user => {
+      if (!user) {
+        const error = new Error('此使用者不存在!')
+        error.status = 404
+        throw error
+      }
+    })
+      .then(() => {
+        return Tweet.findAll({
+          where: {
+            UserId: req.params.id
+          },
+          raw: true,
+          nest: true,
+          order: [['createdAt', 'DESC']],
+          attributes: {
+            exclude: ['UserId'],
+            include: [
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCounts'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts']
+            ]
+          },
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'avatar', 'name', 'account']
+            }
+          ]
+        })
+      })
+      .then(tweets => {
+        return res.status(200).json(tweets)
+      }).catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) {
+          const error = new Error('此使用者不存在!')
+          error.status = 404
+          throw error
+        }
+      })
+      .then(() => {
+        return Reply.findAll({
+          where: {
+            UserId: req.params.id
+          },
+          raw: true,
+          nest: true,
+          order: [['createdAt', 'DESC']],
+          attributes: {
+            exclude: ['UserId', 'TweetId']
+          },
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'avatar', 'name', 'account']
+            },
+            {
+              model: Tweet,
+              attributes: ['id'],
+              include: [{ model: User, attributes: ['account'] }]
+            }
+          ]
+        })
+      })
+      .then(replies => {
+        return res.status(200).json(replies)
+      })
+      .catch(err => next(err))
+  },
   getUserFollowings: (req, res, next) => {
     return Promise.all([
       User.findByPk(req.params.id, {
@@ -238,6 +311,11 @@ const userController = {
       })
     ])
       .then(([targetUser, currentUser]) => {
+        if (!targetUser) {
+          const error = new Error('此使用者不存在!')
+          error.status = 404
+          throw error
+        }
         const followings = targetUser.toJSON().Followings.map(following => ({
           createdAt: following.createdAt,
           followingId: following.id,
