@@ -11,6 +11,10 @@ const tweetController = {
         include: [User, Reply, Like, { model: User, as: 'LikedUsers' }]
       })
 
+      if (!tweets) {
+        return res.status(404).json({ status: 'error', message: 'No tweets were found' })
+      }
+
       const tweetsData = tweets.reduce((result, tweet) => {
         const {
           id,
