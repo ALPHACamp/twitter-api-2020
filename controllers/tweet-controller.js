@@ -3,9 +3,8 @@ const helpers = require('../_helpers')
 
 const tweetController = {
   postTweet: async (req, res, next) => {
-    const description = req.body?.description
+    const { description } = req.body
     const UserId = helpers.getUser(req)?.id
-    if (description.length > 140 || description.length < 1) return res.status(400).json({ status: 'error', message: 'Content should be less than 140 characters and not empty' })
     try {
       const tweet = await Tweet.create({
         description,
@@ -150,8 +149,7 @@ const tweetController = {
   },
   postReply: async (req, res, next) => {
     const ownerId = helpers.getUser(req)?.id
-    const { comment } = req.body ?? {}
-    if (comment.length < 1 || comment.length > 140) return res.status(400).json({ status: 'error', message: 'Comment should be less than 140 characters and not empty' })
+    const { comment } = req.body
     const UserId = ownerId
     const TweetId = req.params.tweet_id
     try {

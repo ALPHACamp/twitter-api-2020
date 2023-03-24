@@ -10,13 +10,14 @@ const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
 
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
+const { signupValidation, signinValidation, validateForm } = require('../middleware/validator')
 const { errorHandler } = require('../middleware/error-handler')
 
 // 註冊
-router.post('/users', userController.signUp)
+router.post('/users', signupValidation, validateForm, userController.signUp)
 
 // 登入
-router.post('/users/signin', userController.signIn)
+router.post('/users/signin', signinValidation, validateForm, userController.signIn)
 
 router.use('/users', authenticated, authenticatedUser, users)
 
@@ -24,9 +25,14 @@ router.use('/tweets', authenticated, authenticatedUser, tweets)
 
 router.use('/followships', authenticated, authenticatedUser, followships)
 
-router.post('/admin/signin', adminController.signIn)
+router.post('/admin/signin', signinValidation, validateForm, adminController.signIn)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
+
+router.use('/', (req, res, next) => {
+  res.status(404).json({ status: 'error', message: 'Page not found' })
+  next()
+})
 
 router.use('/', errorHandler)
 
