@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 
 const helpers = require('../_helpers')
-const {Op, sequelize} = require('sequelize')
+const sequelize = require('sequelize')
 const { User, Like, Reply, Tweet } = require('../models')
 
 const userController = {
