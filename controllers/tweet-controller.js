@@ -49,7 +49,7 @@ const tweetController = {
       if (!tweet) {
         return res.status(404).json({
           status: 'error',
-          message: 'Tweet not found!',
+          message: 'Tweet not found!'
         })
       }
 
@@ -68,7 +68,7 @@ const tweetController = {
       return res.status(200).json({
         status: 'success',
         message: 'Successfully retrieved this Tweet.',
-        ...tweetData,
+        ...tweetData
       })
     } catch (err) {
       next(err)
