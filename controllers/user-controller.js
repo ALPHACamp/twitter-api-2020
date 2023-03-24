@@ -84,7 +84,7 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const { userId } = req.params
-      const likedTweets = await Like.findAll({
+      let likedTweets = await Like.findAll({
         where: { UserId: userId },
         include: [
           { model: User },
@@ -110,7 +110,7 @@ const userController = {
           status: 'error',
           message: 'Tweet not found!'
         })
-      }
+      } 
       const isLiked = likedTweets.LikedUsers.some(
         (user) => user.id === helpers.getUser(req).id
       )
