@@ -17,6 +17,8 @@ router.get('/:id/tweets', userController.getUserTweets);
 
 router.get('/:id/likes', userController.getUserLikes);
 
+router.get('/:id/followings', userController.getUserFollowings);
+
 router.put('/:id/setting', userController.editUserSetting);
 
 router.get('/:id', userController.getUser);

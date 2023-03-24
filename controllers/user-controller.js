@@ -6,7 +6,7 @@ const {
   Tweet,
   Reply,
   Like,
-  FollowShip,
+  Followship,
   sequelize,
 } = require('../models');
 const { imgurFileHandler } = require('../helpers/file-helpers');
@@ -342,12 +342,53 @@ const userController = {
         order: [['createdAt', 'DESC']],
       });
 
+      if (!likes) throw new Error(`This user doesn't have any likes`);
+
       const modifiedLikes = likes.map((like) => ({
         ...like.toJSON(),
         isLiked: true,
       }));
 
       res.status(200).json(modifiedLikes);
+    } catch (err) {
+      next(err);
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const UserId = req.params.id;
+      const followings = await Followship.findAll({
+        where: { followerId: UserId },
+        attributes: [
+          'followingId',
+          'createdAt',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(User_id) FROM Tweets WHERE User_id = follower_id)'
+            ),
+            'TweetsCount',
+          ],
+        ],
+        include: [
+          {
+            model: User,
+            as: 'followingUser',
+            attributes: ['account', 'name', 'avatar', 'introduction'],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+
+      if (!followings) throw new Error(`This user doesn't have any followings`);
+
+      const modifiedFollowings = followings.map((following) => ({
+        ...following.toJSON(),
+        isFollowed: getUser(req).Followings.some(
+          (f) => f.id === following.followingId
+        ),
+      }));
+
+      res.status(200).json(modifiedFollowings);
     } catch (err) {
       next(err);
     }
