@@ -347,6 +347,11 @@ const userController = {
       })
     ])
       .then(([targetUser, currentUser]) => {
+        if (!targetUser) {
+          const error = new Error('此使用者不存在!')
+          error.status = 404
+          throw error
+        }
         const followers = targetUser.toJSON().Followers.map(follower => ({
           createdAt: follower.Followship.createdAt,
           followerId: follower.id,
