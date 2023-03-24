@@ -122,6 +122,33 @@ const userController = {
           topUsers: topUsers.sort((a, b) => b.followerCounts - a.followerCounts).slice(0, 10)
         })
       })
+  },
+  getUserProfile: (req, res, next) => {
+    const { id } = req.params
+    const user = helpers.getUser(req)
+    const userId = Number(user.id)
+
+    return User.findByPk(id, {
+      include: [
+        { model: User, as: 'Followings', attributes: ['id'] },
+        { model: User, as: 'Followers', attributes: ['id'] }
+      ]
+    })
+      .then(user => {
+        if (!user) throw new Error("This User didn't exists!")
+
+        const userProfile = {
+          ...user.toJSON(),
+          followerCounts: user.Followers.length,
+          followingCounts: user.Followings.length,
+          isFollowed: user.Followers.some(follower => follower.id === userId)
+        }
+        delete userProfile.Followers
+        delete userProfile.Followings
+
+        return res.json(userProfile)
+      })
+      .catch(err => next(err))
   }
 }
 
