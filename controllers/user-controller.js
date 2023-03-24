@@ -186,6 +186,39 @@ const userController = {
         res.json(userTweets)
       })
       .catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    const { id } = req.params
+
+    return Promise.all([
+      Reply.findAll({
+        where: { UserId: id },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: ['UserId'],
+            include: { model: User, attributes: ['id', 'account'] }
+          }
+        ]
+      }),
+      User.findByPk(id)
+    ])
+      .then(([replies, user]) => {
+        if (!replies) throw new Error('There is no any reply exists')
+        if (!user) throw new Error("This User didn't exists!")
+
+        const userReplies = replies.map(reply => {
+          const data = {
+            ...reply.toJSON()
+          }
+
+          return data
+        })
+
+        res.json(userReplies)
+      })
+      .catch(err => next(err))
   }
 }
 
