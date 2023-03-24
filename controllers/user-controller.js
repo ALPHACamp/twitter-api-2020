@@ -65,6 +65,11 @@ const userController = {
         error.status = 404;
         throw error;
       }
+      if (foundUser.isAdmin) {
+        const error = new Error("帳號不存在!");
+        error.status = 404;
+        throw error;
+      }
       const isMatch = await bcrypt.compare(password, foundUser.password);
       if (!isMatch) {
         const error = new Error("密碼不正確!");
@@ -118,7 +123,7 @@ const userController = {
         error.status = 403;
         throw error;
       }
-      const user = foundUser.toJSON()
+      const user = foundUser.toJSON();
       delete user.password;
       return res.json({
         status: "success",
@@ -129,21 +134,21 @@ const userController = {
     }
   },
   getCurrentUser: async (req, res, next) => {
-    console.log(getUser(req))
+    console.log(getUser(req));
     try {
-      const foundUser = await User.findByPk(getUser(req).id)
+      const foundUser = await User.findByPk(getUser(req).id);
       if (!foundUser) {
         const error = new Error("使用者不存在!");
         error.status = 404;
         throw error;
       }
-      const currentUser = foundUser.toJSON()
-      delete currentUser.password
+      const currentUser = foundUser.toJSON();
+      delete currentUser.password;
       return res.json({
-        ...currentUser
-      })
+        ...currentUser,
+      });
     } catch (error) {
-      return next(error)
+      return next(error);
     }
   },
 
