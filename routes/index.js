@@ -22,6 +22,11 @@ router.get(
   authenticatedUser,
   tweetController.getReplies
 );
+router.post(
+  "/api/tweets/:tweet_id/replies",
+  authenticatedUser,
+  tweetController.postReply
+);
 router.get(
   "/api/tweets/:tweet_id",
   authenticatedUser,

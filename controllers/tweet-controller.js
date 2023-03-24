@@ -159,7 +159,7 @@ const tweetController = {
         attributes: ["comment", "createdAt"],
         order: [["createdAt", "DESC"]],
       });
-      if (!replies) {
+      if (!replies.length) {
         const err = new Error("該貼文沒有任何留言回覆");
         err.status = 404;
         throw err;
@@ -167,6 +167,25 @@ const tweetController = {
       return res.json({
         status: "success",
         replies,
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
+  // 在特定推文新增回覆
+  postReply: async (req, res, next) => {
+    try {
+      const UserId = getUser(req).id;
+      const TweetId = req.params.tweet_id;
+      const comment = req.body.comment.trim();
+      const replyInput = await Reply.create({
+        UserId,
+        TweetId,
+        comment,
+      });
+      return res.json({
+        status: "success",
+        replyInput,
       });
     } catch (err) {
       return next(err);
