@@ -59,12 +59,7 @@ const userController = {
         throw error;
       }
       const foundUser = await User.findOne({ where: { account } });
-      if (!foundUser) {
-        const error = new Error("帳號不存在!");
-        error.status = 404;
-        throw error;
-      }
-      if (foundUser.isAdmin) {
+      if (!foundUser || foundUser.isAdmin) {
         const error = new Error("帳號不存在!");
         error.status = 404;
         throw error;
@@ -149,7 +144,6 @@ const userController = {
       return next(error);
     }
   },
-
   putUser: async (req, res, next) => {
     const { id } = req.params;
     const { name, introduction } = req.body;
@@ -268,8 +262,8 @@ const userController = {
         }),
       ]);
       if (foundUser.isAdmin) {
-        const error = new Error("無法追蹤管理員!");
-        error.status = 400;
+        const error = new Error("使用者不存在!");
+        error.status = 404;
         throw error;
       }
       if (followship) {
@@ -308,8 +302,8 @@ const userController = {
         }),
       ]);
       if (foundUser.isAdmin) {
-        const error = new Error("無法取消追蹤管理員!");
-        error.status = 400;
+        const error = new Error("使用者不存在!");
+        error.status = 404;
         throw error;
       }
       if (!followship) {
@@ -332,7 +326,7 @@ const userController = {
     try {
       const foundUser = await User.findByPk(id);
       if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("帳號不存在!");
+        const error = new Error("使用者不存在!");
         error.status = 404;
         throw error;
       }
@@ -352,7 +346,7 @@ const userController = {
     try {
       const foundUser = await User.findByPk(id);
       if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("帳號不存在!");
+        const error = new Error("使用者不存在!");
         error.status = 404;
         throw error;
       }
