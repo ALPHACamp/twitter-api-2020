@@ -5,6 +5,11 @@ const { authenticatedUser } = require('../../middleware/auth')
 const userController = require('../../controllers/user-controller')
 
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
+router.get(
+  "/:userId/replied_tweets",
+  authenticatedUser,
+  userController.getRepliedTweets
+);
 router.get('/:userId/likes', authenticatedUser, userController.getUserLikes)
 router.post('/', userController.signUp)
 
