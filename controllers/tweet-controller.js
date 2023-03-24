@@ -1,14 +1,14 @@
 const createError = require('http-errors')
-// const { getUser } = require('../_helpers')
 const helpers = require('../_helpers')
 const { User, Tweet, Like, sequelize, Reply } = require('../models')
 const timeFormat = require('../helpers/date-helpers')
+const { Op } = require('sequelize')
 
 // if (!user) throw createError(404, '該使用者不存在')
 
 const tweetController = {
   getTweets: (req, res, next) => {
-    const loginUser = helpers.getUser(req)
+    const loginUserId = helpers.getUser(req).id
 
     // 找 tweet table, 對應的 user table，取 user 資料
     // 從 like table 找出該 tweet.id，算出該推文多少 like
@@ -37,7 +37,7 @@ const tweetController = {
           // tweet 時間格式修改
           createdAt: timeFormat(tweet.createdAt),
           // loginUser 是否 like 過
-          isLiked: likes.some(like => like.UserId === loginUser.id)
+          isLiked: likes.some(like => like.UserId === loginUserId)
         }))
         return res.json(result)
       })
@@ -68,7 +68,7 @@ const tweetController = {
   },
   getTweet: (req, res, next) => {
     const loginUser = helpers.getUser(req)
-    const TweetId = req.params.tweet_id
+    const TweetId = Number(req.params.tweet_id)
 
     Promise.all([
       // 在 tweet table 找到該 TweetId 資料，包含關聯 user 的資料
@@ -123,6 +123,120 @@ const tweetController = {
           createdAt: timeFormat(reply.createdAt)
         }))
 
+        return res.json(result)
+      })
+      .catch(err => next(err))
+  },
+  postReplies: (req, res, next) => {
+    const UserId = helpers.getUser(req).id
+    const TweetId = Number(req.params.tweet_id)
+    const { comment } = req.body
+    if (comment.length > 140) throw createError(422, '字數不可超過 140 字')
+    if (!comment) throw createError(400, '內容不可空白')
+
+    // 找 tweet.id 對應貼文
+    Tweet.findByPk(TweetId)
+      .then(tweet => {
+        if (!tweet) throw createError(404, '該推文不存在')
+
+        // 針對這 TweetId, UserId 來新增 reply
+        return Reply.create({
+          comment,
+          UserId,
+          TweetId
+        })
+      })
+      .then(() => res.json({
+        status: 'success',
+        message: '新增回覆成功'
+      }))
+      .catch(err => next(err))
+  },
+  postLikes: (req, res, next) => {
+    const UserId = helpers.getUser(req).id
+    const TweetId = Number(req.params.tweet_id)
+
+    // 找 tweet.id 對應貼文 & 找 like table 登入使用者(UserId) 該貼文(TweetId)
+    return Promise.all([
+      Tweet.findByPk(TweetId, { raw: true }),
+      Like.findOne({
+        where: { UserId, TweetId }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw createError(404, '該推文不存在')
+        if (like) throw createError(404, '此 like 已存在')
+
+        // 在 like table 建立
+        return Like.create({
+          UserId,
+          TweetId
+        })
+      })
+      .then(() => res.json({
+        status: 'success',
+        message: '使用者點擊喜歡貼文成功'
+      }))
+      .catch(err => next(err))
+  },
+  postUnLikes: (req, res, next) => {
+    const UserId = helpers.getUser(req).id
+    const TweetId = Number(req.params.tweet_id)
+
+    return Promise.all([
+      Tweet.findByPk(TweetId, { raw: true }),
+      Like.findOne({
+        where: { UserId, TweetId },
+        attributes: ['id', 'UserId', 'TweetId', 'createdAt', 'updatedAt']
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw createError(404, '該推文不存在')
+        if (!like) throw createError(404, '已經 unlike 不要再逼它惹')
+
+        // 移除 like table 裡的 UserId & TweetId 資料
+        return like.destroy()
+      })
+      .then(() => res.json({
+        status: 'success',
+        message: '使用者移除喜歡貼文成功'
+      }))
+      .catch(err => next(err))
+  },
+  getTopUsers: (req, res, next) => {
+    const loginUserId = helpers.getUser(req).id
+    const topUserLimit = 10
+
+    // user table 找出 role 為 user，且不是自己
+    // 用 followerCounts 做排序，資料庫回傳 10 筆資料
+    // 計算 Followships 裡面的 followerCounts
+    // exclude 不需要的資料
+    User.findAll({
+      where: { role: 'user', id: { [Op.ne]: loginUserId } },
+      limit: topUserLimit,
+      attributes: {
+        include: [[
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'followerCounts'
+        ]],
+        exclude: ['password', 'email', 'cover', 'role', 'introduction', 'createdAt', 'updatedAt']
+      },
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: ['id', 'name']
+      }],
+      order: [[sequelize.literal('followerCounts'), 'Desc']]
+    })
+      .then(users => {
+        const result = users.map(users => {
+          // data 和 Followers 拆開
+          // 創建 data.isFollowed，當 Followers 的 id 是登入者的，代表有追蹤 (isFollowed)
+          const { Followers, ...data } = users.toJSON()
+          data.isFollowed = Followers.some(follower => follower.id === loginUserId)
+
+          return data
+        })
         return res.json(result)
       })
       .catch(err => next(err))
