@@ -80,9 +80,9 @@ const tweetController = {
     const TweetId = req.params.tweet_id
     const [tweet, like] = await Promise.all([ // 查詢欲刪除的tweet和like是否存在於資料庫中
       Tweet.findByPk(TweetId),
-      Like.findAll({ where: { UserId, TweetId } })
+      Like.findOne({ where: { UserId, TweetId } })
     ])
-    if (like.length || !tweet) throw new ReqError('資料庫無此筆資料或發送重複請求!')
+    if (like || !tweet) throw new ReqError('資料庫無此筆資料或發送重複請求!')
     const result = await Like.create({ UserId, TweetId })
     // const result = Promise.resolve(createdLike)
     res.status(200).json(result)
@@ -92,11 +92,11 @@ const tweetController = {
     const TweetId = req.params.tweet_id
     const [tweet, like] = await Promise.all([ // 查詢欲刪除的tweet和like是否存在於資料庫中
       Tweet.findByPk(TweetId),
-      Like.findAll({ where: { UserId, TweetId } })
+      Like.findOne({ where: { UserId, TweetId } })
     ])
-    if (!like.length || !tweet) throw new ReqError('資料庫無此筆資料!')
-    await Like.destroy({ where: { UserId, TweetId } })
-    res.status(200).json({ message: 'user unlike success' }) // 不曉得為甚麼like.destroy會報錯not a function 所以先用where查詢的方式刪除
+    if (!like || !tweet) throw new ReqError('資料庫無此筆資料!')
+    const deletedLikeData = await like.destroy()
+    res.status(200).json(deletedLikeData)
   }),
   getReplies: tryCatch(async (req, res) => {
     const TweetId = req.params.tweet_id

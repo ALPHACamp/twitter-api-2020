@@ -47,7 +47,7 @@ const adminController = {
         }
       })
       result.sort((a, b) => b.tweetCount - a.tweetCount)
-      res.json({ status: 'success', data: result })
+      res.json(result)
     } catch (error) {
       next(error)
     }
@@ -66,12 +66,12 @@ const adminController = {
   },
   deleteTweet: async (req, res, next) => { // 待優化: 一個動作可以一次刪除完有關該貼文的資料
     try {
-      const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId)
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) throw new Error("tweet didn't exist!")
       const [Replies, Likes] = await Promise.all([ // 找到與此條貼文有關留言與案讚資料
-        Reply.findAll({ where: { tweetId } }),
-        Like.findAll({ where: { tweetId } })
+        Reply.findAll({ where: { TweetId } }),
+        Like.findAll({ where: { TweetId } })
       ])
       Replies.forEach(reply => reply.destroy()) // 並刪除與這條貼文有關的資料
       Likes.forEach(like => like.destroy())

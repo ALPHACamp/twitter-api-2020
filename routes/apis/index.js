@@ -5,6 +5,8 @@ const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const adminController = require('../../controllers/admin-controller')
 const userController = require('../../controllers/user-controller')
+const followships = require('./followship.js')
+
 const tweets = require('./tweet')
 const users = require('./user')
 const admin = require('./admin')
@@ -22,6 +24,7 @@ router.use(authenticated)
 router.use('/admin', authenticatedAdmin, admin)
 router.use('/users', users)
 router.use('/tweets', tweets)
+router.use('/followships', followships)
 
 router.use('/', apiErrorHandler)
 module.exports = router
