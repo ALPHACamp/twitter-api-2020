@@ -1,7 +1,14 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { getUser } = require('../_helpers');
-const { User, Tweet, Reply, Like, FollowShip } = require('../models');
+const {
+  User,
+  Tweet,
+  Reply,
+  Like,
+  FollowShip,
+  sequelize,
+} = require('../models');
 const { imgurFileHandler } = require('../helpers/file-helpers');
 
 const userController = {
@@ -206,6 +213,91 @@ const userController = {
           cover_image: userUpdated.coverImage,
         },
       });
+    } catch (err) {
+      err.status = 400;
+      next(err);
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const UserId = req.params.id;
+      const tweets = await Tweet.findAll({
+        where: { UserId },
+        attributes: [
+          'id',
+          'description',
+          'createdAt',
+          'updatedAt',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(Tweet_id) FROM Replies WHERE Tweet_id = Tweet.id)'
+            ),
+            'RepliesCount',
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(Tweet_id) FROM Likes WHERE Tweet_id = Tweet.id)'
+            ),
+            'LikesCount',
+          ],
+        ],
+        include: [
+          {
+            model: User,
+            as: 'User',
+            attributes: ['id', 'account', 'avatar', 'name'],
+          },
+          {
+            model: Reply,
+            as: 'Replies',
+            attributes: ['id', 'comment', 'createdAt'],
+          },
+          {
+            model: Like,
+            as: 'Likes',
+          },
+        ],
+
+        order: [['createdAt', 'DESC']],
+      });
+
+      if (!tweets) throw new Error(`This user doesn't have any tweets`);
+
+      const likedTweetId = req.user?.LikedTweets
+        ? req.user.LikedTweets.map((likeTweet) => likeTweet.id)
+        : [];
+
+      const modifiedTweets = tweets.map((tweet) => ({
+        ...tweet.toJSON(),
+        isLiked: likedTweetId.includes(tweet.id),
+      }));
+
+      res.status(200).json(modifiedTweets);
+    } catch (err) {
+      err.status = 400;
+      next(err);
+    }
+  },
+  getUserRepliedTweet: async (req, res, next) => {
+    try {
+      const UserId = req.params.id;
+      const replies = await Reply.findAll({
+        where: { UserId },
+        attributes: ['id', 'comment', 'createdAt'],
+        include: [
+          {
+            model: Tweet,
+            as: 'Tweet',
+            attributes: ['id', 'description', 'createdAt'],
+            include: [{ model: User, attributes: ['id', 'account', 'avatar'] }],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+
+      if (!replies) throw new Error(`This user doesn't have any replies`);
+
+      res.status(200).json(replies);
     } catch (err) {
       err.status = 400;
       next(err);
