@@ -107,14 +107,9 @@ const userController = {
           ],
         },
       });
-      if (!foundUser) {
+      if (!foundUser || foundUser.isAdmin) {
         const error = new Error("使用者不存在!");
         error.status = 404;
-        throw error;
-      }
-      if (foundUser.isAdmin) {
-        const error = new Error("無法存取管理員資料!");
-        error.status = 403;
         throw error;
       }
       const user = foundUser.toJSON();
