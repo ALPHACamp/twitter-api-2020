@@ -16,6 +16,7 @@ const userController = {
       })
       return res.json({
         status: 'success',
+        message: '登入成功!',
         data: {
           token,
           user: userData
@@ -32,21 +33,21 @@ const userController = {
 
       // check if all the required fields are filled out correctly
       if (!account || !name || !email || !password || !checkPassword) {
-        errors.push('All fields are required!')
+        errors.push('所有欄位皆必填')
       }
       if (name && !validator.isByteLength(name, { max: 50 })) {
-        errors.push('The name cannot exceed 50 characters.')
+        errors.push('字數超出上限，請將字數限制在 50 字以內')
       }
       if (password && !validator.isByteLength(password, { min: 8, max: 20 })) {
         errors.push(
-          'The password length should be between 8 to 20 characters.'
+          '密碼長度介於 8 ~ 20 字元'
         )
       }
       if (password !== checkPassword) {
-        errors.push('Passwords do not match!')
+        errors.push('密碼與確認密碼不相符')
       }
       if (email && !validator.isEmail(email)) {
-        errors.push('Please enter the valid email address!')
+        errors.push('請輸入有效的 email 格式')
       }
 
       // Check if account and email are unique
@@ -54,8 +55,8 @@ const userController = {
         User.findOne({ where: { account } }),
         User.findOne({ where: { email } })
       ])
-      if (userAccount) errors.push('Account already exists')
-      if (userEmail) errors.push('Email already exists')
+      if (userAccount) errors.push('帳號已重複註冊！')
+      if (userEmail) errors.push('Email已重複註冊！')
 
       // Return error message if there are errors
       if (errors.length) {
@@ -76,7 +77,7 @@ const userController = {
 
       return res
         .status(200)
-        .json({ status: 'success', message: 'Successfully signed up!' })
+        .json({ status: 'success', message: '註冊成功！' })
     } catch (err) {
       next(err)
     }
@@ -97,7 +98,7 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!reply) throw new Error('Reply does not exist!')
+      if (!reply) throw new Error('回覆不存在')
       return res.status(200).json(reply)
     } catch (error) { return res.status(500).json({ status: 'error', message: error }) }
   }
