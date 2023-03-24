@@ -4,7 +4,8 @@ const validator = require('validator')
 
 const helpers = require('../_helpers')
 
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, followship } = require('../models')
+const followship = require('../models/followship')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -101,6 +102,21 @@ const userController = {
       if (!reply) throw new Error('回覆不存在')
       return res.status(200).json(reply)
     } catch (error) { return res.status(500).json({ status: 'error', message: error }) }
+  },
+  getFollowers: async(req, res, next) => {
+    try{
+      const {userId} = req.params
+      User.findByPk(userId),
+      followship.findAll({
+        where: {followingId: req.params.userId}
+      }) 
+
+
+
+
+
+    }catch(error){}
+
   }
 }
 
