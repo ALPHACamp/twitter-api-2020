@@ -7,6 +7,7 @@ router.post('/', userController.postSignUp)
 router.get('/top', userController.getTopUsers)
 router.get('/:id/replied_tweets', userController.getUserRepliedTweets)
 router.get('/:id/tweets', userController.getUserTweets)
+router.get('/:id/likes', userController.getUserLikedTweets)
 router.get('/:id', userController.getUser)
 
 module.exports = router

@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
 const db = require('../models')
-const { User, sequelize, Tweet, Reply } = db
+const { User, sequelize, Tweet, Reply, Like } = db
 
 const adminServices = {
   postSignIn: (req, cb) => {
@@ -149,6 +149,24 @@ const adminServices = {
           'description',
           'createdAt']
       },
+      order: [['createdAt', 'desc']]
+    }).then(replies => {
+      return cb(null, [...replies])
+    })
+      .catch(err => cb(err))
+  },
+  getUserLikedTweets: (req, cb) => {
+    return Like.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        {
+          model: Tweet,
+          as: 'likedTweet',
+          include: [
+            { model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] }
+          ]
+        }
+      ],
       order: [['createdAt', 'desc']]
     }).then(replies => {
       return cb(null, [...replies])
