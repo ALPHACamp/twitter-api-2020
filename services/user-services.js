@@ -7,10 +7,7 @@ const helpers = require('../_helpers')
 const userServices = {
   signIn: async (req, cb) => {
     try {
-      const { account, password } = req.body
       const userData = helpers.getUser(req).toJSON()
-      if (password !== userData.password) throw new Error('帳號或密碼不正確')
-      if (account !== userData.account) throw new Error('此帳戶不存在!')
 
       delete userData.password
       delete userData.role

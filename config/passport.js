@@ -15,9 +15,11 @@ passport.use(new LocalStrategy(
   (account, password, cb) => {
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) throw new Error('帳號不存在！')
+        if (!user) return cb(null, false, { status: 423, message: '帳號不存在!' })
+        if (user.dataValues.role !== 'user') return cb(null, false, { status: 423, message: '帳號不存在!' })
+
         bcrypt.compare(password, user.password).then(res => {
-          if (!res) throw new Error('帳號不存在！')
+          if (!res) return cb(null, false, { status: 402, message: '帳號或密碼錯誤!' })
 
           return cb(null, user)
         })
