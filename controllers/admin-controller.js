@@ -31,6 +31,7 @@ const adminController = {
 
   getTweets: (req, res, next) => {
     return Tweet.findAll({
+      order: [['created_at', 'desc']],
       raw: true,
       nest: true,
       include: [User]

@@ -43,7 +43,13 @@ const tweetController = {
   },
 
   getReplies: (req, res, next) => {
-    return Reply.findByPk(req.params.tweetId)
+    return Reply.findAll({
+      where: {
+        tweetId: req.params.tweetId
+      },
+      raw: true,
+      nest: true
+    })
       .then(replies => {
         if (!replies) {
           const error = new Error("Replies does'nt exist!")
@@ -57,7 +63,7 @@ const tweetController = {
   },
 
   postReply: (req, res, next) => {
-    const { comment, tweetId } = req.body
+    const { comment } = req.body
 
     if (!comment.trim()) {
       const error = new Error('Comment is requires!')
@@ -66,9 +72,11 @@ const tweetController = {
     }
 
     return Reply.create({
+      userId: req.user.id,
       comment,
-      tweetId
+      tweetId: req.params.tweetId
     })
+      .then(newReply => res.json({ status: 'success', newReply }))
       .catch(error => next(error))
   },
 
@@ -79,8 +87,8 @@ const tweetController = {
       Tweet.findByPk(tweetId),
       Like.findOne({
         where: {
-          userId: req.user.id,
-          tweetId
+          user_id: req.user.id,
+          tweet_id: tweetId
         }
       })
     ])
@@ -99,17 +107,18 @@ const tweetController = {
 
         return Like.create({
           userId: req.user.id,
-          tweetId
+          tweetId: tweetId
         })
       })
+      .then(newLike => res.json({ status: 'success', newLike }))
       .catch(error => next(error))
   },
 
   removeLike: (req, res, next) => {
     return Like.findOne({
       where: {
-        userId: req.user.id,
-        tweetId: req.params.tweetId
+        user_id: req.user.id,
+        tweet_id: req.params.tweetId
       }
     })
       .then(like => {
@@ -121,6 +130,7 @@ const tweetController = {
 
         return like.destroy()
       })
+      .then(deletedLike => res.json({ status: 'success', deletedLike }))
       .catch(error => next(error))
   }
 }
