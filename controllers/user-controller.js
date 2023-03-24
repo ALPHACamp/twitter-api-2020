@@ -81,7 +81,7 @@ const userController = {
       const likedTweets = await Like.findAll({
         where: { UserId: userId },
         include: [
-          { model: User, attributes: [] },
+          { model: User },
           {
             model: Tweet,
             attributes: ['id', 'description'],
