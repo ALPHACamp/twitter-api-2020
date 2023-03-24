@@ -1,5 +1,6 @@
 module.exports = {
-  apiErrorHandler(err, req, res, next) {
+
+  apiErrorHandler (err, req, res, next) {
     if (err instanceof Error) {
       if (err.status === 401) {
         res.status(401).json({ status: 'error', message: '尚未登入' })

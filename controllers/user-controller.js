@@ -30,6 +30,15 @@ const adminController = {
   },
   getUserLikedTweets: (req, res, next) => {
     userServices.getUserLikedTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getUserFollowings: (req, res, next) => {
+    userServices.getUserFollowings(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getUserFollowers: (req, res, next) => {
+    userServices.getUserFollowers(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  putUserSetting: (req, res, next) => {
+    userServices.putUserSetting(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 module.exports = adminController

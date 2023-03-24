@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const db = require('../models')
-const { User, sequelize, Tweet, Reply, Like } = db
+const { User, sequelize, Tweet, Reply, Like, Followship } = db
 
 const adminServices = {
   postSignIn: (req, cb) => {
@@ -130,7 +130,7 @@ const adminServices = {
   getUserTweets: (req, cb) => {
     return Tweet.findAll({
       where: { UserId: req.params.id },
-      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+      include: [{ model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
@@ -172,6 +172,57 @@ const adminServices = {
       return cb(null, [...replies])
     })
       .catch(err => cb(err))
+  },
+  getUserFollowings: (req, cb) => {
+    return Followship.findAll({
+      where: { followerId: req.params.id },
+      include: [
+        { model: User, as: 'Follower', attributes: ['id', 'account', 'name', 'avatar'] }
+      ]
+    }).then(followings => {
+      return cb(null, [...followings])
+    }).catch(err => cb(err))
+  },
+  getUserFollowers: (req, cb) => {
+    return Followship.findAll({
+      where: { followingId: req.params.id },
+      include: [
+        { model: User, as: 'Following', attributes: ['id', 'account', 'name', 'avatar'] }
+      ]
+    }).then(followers => {
+      return cb(null, [...followers])
+    }).catch(err => cb(err))
+  },
+  putUserSetting: (req, cb) => {
+    const id = Number(req.params.id)
+    // console.log(helpers.getUser(req))
+    const currentUserId = helpers.getUser(req).id
+    const { name, email, introduction, avatar, cover, password, checkPassword } = req.body
+
+    // if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
+    if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
+    // if (!name || !email || !password || !checkPassword) throw new Error('請填寫必填欄位')
+
+    return User.findByPk(currentUserId)
+      .then(user => {
+        user.update({
+          name,
+          email,
+          introduction,
+          password,
+          avatar,
+          cover
+        })
+          .then(user => {
+            const userData = user.toJSON()
+            delete userData.password
+            const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+            return cb(null, { token, userData })
+          })
+      })
+      .catch(err => cb(err))
+  },
+  putUserProfile: (req, cb) => {
   }
 }
 module.exports = adminServices
