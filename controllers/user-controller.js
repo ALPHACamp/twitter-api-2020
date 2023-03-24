@@ -266,6 +266,48 @@ const userController = {
         res.json(likeTweets)
       })
       .catch(err => next(err))
+  },
+  putUserSetting: (req, res, next) => {
+    const user = helpers.getUser(req)
+    const userId = Number(user.id)
+    const { account, name, email, password, checkPassword } = req.body
+
+    if (!account || !name || !email || !password || !checkPassword) throw new Error('You should input all required parameters')
+    if (name.length > 50) throw new Error("Name can't larger than 50 characters!")
+    if (password !== checkPassword) throw new Error('Password do not match!')
+
+    return Promise.all([
+      User.findAll({
+        attributes: ['id'],
+        where: {
+          id: { [Op.ne]: req.params.id },
+          [Op.or]: [{ account }, { email }]
+        }
+      }),
+      User.findByPk(req.params.id)
+    ])
+      .then(([users, user]) => {
+        if (!user) throw new Error("User did't exist!")
+        // 避免有人惡意修改其他人的設定
+        if (user.id !== userId) throw new Error("You can't modify other user's setting!")
+        // 反查不是該使用者，但是卻已經有相同的account或者email存在的情況 => 表示已經被其他人使用
+        if (users.length !== 0) throw new Error('Account or email already exists!')
+
+        return user.update({
+          account,
+          email,
+          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+          name
+        })
+      })
+      .then(user => {
+        const userData = {
+          ...user.toJSON()
+        }
+        delete userData.password
+        res.json(userData)
+      })
+      .catch(err => next(err))
   }
 }
 
