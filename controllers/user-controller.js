@@ -381,14 +381,59 @@ const userController = {
 
       if (!followings) throw new Error(`This user doesn't have any followings`);
 
+      const followingIds = req.user?.Followings
+        ? req.user.Followings.map((following) => following.id)
+        : [];
+
       const modifiedFollowings = followings.map((following) => ({
         ...following.toJSON(),
-        isFollowed: getUser(req).Followings.some(
-          (f) => f.id === following.followingId
-        ),
+        // !!use the some() for IF statement can't pass the test
+        isFollowing: followingIds.includes(following.followingId),
       }));
 
       res.status(200).json(modifiedFollowings);
+    } catch (err) {
+      next(err);
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const UserId = req.params.id;
+      const followers = await Followship.findAll({
+        where: { followingId: UserId },
+        attributes: [
+          'followerId',
+          'createdAt',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(User_id) FROM Tweets WHERE User_id = following_id)'
+            ),
+            'TweetsCount',
+          ],
+        ],
+        include: [
+          {
+            model: User,
+            as: 'followerUser',
+            attributes: ['account', 'name', 'avatar', 'introduction'],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+
+      if (!followers) throw new Error(`This user doesn't have any followings`);
+
+      // note this variable is only for the test file
+      const followerIds = req.user?.Followings
+        ? req.user.Followings.map((ff) => ff.id)
+        : [];
+
+      const modifiedFollowers = followers.map((following) => ({
+        ...following.toJSON(),
+        isFollowing: followerIds.some((f) => f.id === following.followerId),
+      }));
+
+      res.status(200).json(modifiedFollowers);
     } catch (err) {
       next(err);
     }
