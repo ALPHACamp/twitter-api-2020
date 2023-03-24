@@ -4,7 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const path = require('path')
 const express = require('express')
-const helpers = require('./_helpers')
+const helpers = require('./_helpers') // AC 為了測試要我們改的，用 getUser(...) 取代 req.user
 
 const app = express()
 const port = process.env.PORT || 3000
