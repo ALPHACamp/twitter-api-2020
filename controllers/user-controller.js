@@ -24,6 +24,9 @@ const adminController = {
   },
   getUserTweets: (req, res, next) => {
     userServices.getUserTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getUserRepliedTweets: (req, res, next) => {
+    userServices.getUserRepliedTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 module.exports = adminController
