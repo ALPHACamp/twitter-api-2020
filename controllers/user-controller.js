@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，不管，我先用舊的 add-on
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
-const { getUser } = require('../_helpers')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -190,41 +189,38 @@ const userController = {
 
   // },
   addLike: (req, res, next) => {
-    const tweetId = req.params.id
-    return User.findOne(getUser(req).id)
-      .then(user => {
-        return Like.create({
-          UserId: user.id,
-          TweetId: tweetId
-        })
-      })
-      .then(like => {
-        return res.status(200).json({ message: 'success', like })
-      })
+    const TweetId = req.params.id
+    // return User.findOne(helpers.getUser(req).id)
+    // return User.findOne(getUser(req).id)
+    return User.findByPk(helpers.getUser(req).id)
+      .then(user => Like.create({ UserId: user.id, TweetId }))
+      .then(like => res.status(200).json({ message: 'success', like }))
       .catch(err => next(err))
   },
   removeLike: (req, res, next) => {
-    const tweetId = req.params.id
-    console.log('getUser(req)')
-    console.log('getUser(req)')
-    console.log(getUser(req).id)
-    console.log('helpers.getUser(req)')
-    console.log('helpers.getUser(req)')
-    console.log(helpers.getUser(req).id)
-    return User.findOne(getUser(req).id)
-      .then(user => {
-        return Like.findOne({
-          where: {
-            UserId: user.id,
-            TweetId: tweetId
-          }
-        })
-      })
+    const { id } = req.params
+    return Like.findByPk(id)
       .then(like => {
-        like.destroy()
-        return res.status(200).json({ message: 'success', like })
+        if (!like) return res.status(404).json({ message: 'We can not find this like record.' })
+        return like.destroy()
       })
+      .then(like => res.status(200).json({ message: 'success', like }))
       .catch(err => next(err))
+      // to 子安：因為要過測試檔，我把你的 (下面)，改成上面了
+    // return User.findByPk(helpers.getUser(req).id)
+    //   .then(user => {
+    //     return Like.findOne({
+    //       where: {
+    //         UserId: user.id,
+    //         TweetId
+    //       }
+    //     })
+    //   })
+    //   .then(like => {
+    //     like.destroy()
+    //     return res.status(200).json({ message: 'success', like })
+    //   })
+      // .catch(err => next(err))
   }
 }
 
