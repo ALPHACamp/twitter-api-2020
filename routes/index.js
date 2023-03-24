@@ -22,7 +22,9 @@ router.get('/api/users/:id/likes', auth, isUser, userController.getLikes) // 取
 router.get('/api/users/:id', auth, isUser, userController.getUserInfo)
 
 router.post('/api/users', userController.signUp) // 註冊帳號路由
-router.put('/api/users/:id', auth, isUser, upload.single('image'), userController.putUser)
+// router.put('/api/users/:id', auth, isUser, upload.single('avatar'), userController.putUser)
+// router.put('/api/users/:id', auth, isUser, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUser)
+router.put('/api/users/:id', auth, isUser, upload.fields([{ name: 'image' }, { name: 'avatar' }]), userController.putUser)
 // (下1) session: false 的功能，把 cookie/session 功能關掉，不管理它
 router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn) // 注意是 post
 
