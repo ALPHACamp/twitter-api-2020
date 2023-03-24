@@ -26,7 +26,7 @@ const authenticatedAdmin = (req, res, next) => {
         status: 'error',
         message: 'unauthorized'
       })
-    } else if (user && user.account !== 'root') {
+    } else if (user && user.dataValues.name !== 'root') {
       return res.status(403).json({
         status: 'error',
         message: 'forbidden'
