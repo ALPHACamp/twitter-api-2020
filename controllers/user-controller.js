@@ -156,7 +156,7 @@ const userController = {
         replacements: { account: req.body.account },
         type: sequelize.QueryTypes.SELECT
       })
-    if (dbPassword) return next(createError(401, 'The username and password your provided are invalid'))
+    if (!dbPassword) return next(createError(401, 'The username and password your provided are invalid'))
     // 再與req.body做比對
     await bcrypt.compare(userData.password, dbPassword[0].password)
       .then(result => {
