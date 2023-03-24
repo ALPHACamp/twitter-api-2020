@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
 const db = require('../models')
-const { User, sequelize } = db
+const { User, sequelize, Tweet, Reply, Like } = db
 
 const adminServices = {
   postSignIn: (req, cb) => {
@@ -89,6 +89,88 @@ const adminServices = {
             })
           })
       })
+      .catch(err => cb(err))
+  },
+  getUserFailed: (req, cb) => {
+    const { id } = req.params
+    User.findAll({
+      where: {
+        id: id,
+        role: 'user'
+      }
+    }, {
+      attributes: {
+        include: [
+          [
+            sequelize.literal('(SELECT COUNT(*)FROM Tweets WHERE User_id = User.id)'), 'TweetsCounts'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*)FROM Followships AS Followers WHERE following_id = User.id)'), 'followerCounts'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*)FROM Followships AS Followings WHERE follower_id = User.id)'), 'followingCounts'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*)FROM Likes INNER JOIN Tweets ON Tweets.id = Likes.tweet_id WHERE Tweets.User_id = User.id)'), 'LikedCounts'
+          ]
+        ],
+        exclude: [
+          'password',
+          'updatedAt',
+          'createdAt'
+        ]
+      },
+      raw: true
+    })
+      .then(user => {
+        cb(null, user[0])
+      })
+      .catch(err => cb(err))
+  },
+  getUserTweets: (req, cb) => {
+    return Tweet.findAll({
+      where: { UserId: req.params.id },
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => {
+        // tweets = tweets.map(tweet => { return tweet })
+        return cb(null, [...tweets])
+      })
+      .catch(err => cb(err))
+  },
+  getUserRepliedTweets: (req, cb) => {
+    return Reply.findAll({
+      where: { UserId: req.params.id },
+      include: {
+        model: Tweet,
+        attributes: [
+          'id',
+          'description',
+          'createdAt']
+      },
+      order: [['createdAt', 'desc']]
+    }).then(replies => {
+      return cb(null, [...replies])
+    })
+      .catch(err => cb(err))
+  },
+  getUserLikedTweets: (req, cb) => {
+    return Like.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        {
+          model: Tweet,
+          as: 'likedTweet',
+          include: [
+            { model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] }
+          ]
+        }
+      ],
+      order: [['createdAt', 'desc']]
+    }).then(replies => {
+      return cb(null, [...replies])
+    })
       .catch(err => cb(err))
   }
 }
