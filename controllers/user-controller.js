@@ -98,7 +98,12 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!likedTweets) throw new Error("Tweet does not exist!");
+      if (!likedTweets) {
+        return  res.status(404).json({
+          status: 'error',
+          message: 'Tweet not found!',
+        })
+      }
       const isLiked = likedTweets.LikedUsers.some(
         (user) => user.id === helpers.getUser(req).id
       )
