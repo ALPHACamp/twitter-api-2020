@@ -34,7 +34,8 @@ module.exports = {
         defaultValue: false
       },
       image: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'https://i.imgur.com/GPlwyDu.png'
       },
       created_at: {
         allowNull: false,

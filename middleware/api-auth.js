@@ -1,6 +1,7 @@
 const passport = require('../config/passport')
-// (下1) 真麻煩，不知這到底有何用
-// const { getUser } = require('../_helpers') // 用 getUser(...) 取代 req.user
+// const { getUser } = require('../_helpers')
+// 幹！連名字都得一樣才行 (上1 不行 下1 行)
+const helpers = require('../_helpers') // AC 為了測試要我們改的，用 getUser(...) 取代 req.user
 // const authenticated = passport.authenticate('jwt', { session: false }) // 過去寫法
 // (下) 為了增加 json 而改的寫法
 const auth = (req, res, next) => {
@@ -14,12 +15,15 @@ const auth = (req, res, next) => {
 }
 
 const isAdmin = (req, res, next) => {
-  if (req.user?.isAdmin) return next()
+  // if (req.user?.isAdmin) return next() //! 為測試檔改成 下1，都沒問題再刪
+  if (helpers.getUser(req).role === 'admin') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied. You are user' })
 }
 
 const isUser = (req, res, next) => {
-  if (!req.user?.isAdmin) return next()
+  // if (!req.user?.isAdmin) return next() //! 為測試檔改成 下1，都沒問題再刪
+  if (helpers.getUser(req).role === 'user') return next()
+  // if (req.user?.role === 'user') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied. Your are admin.' })
 }
 module.exports = {

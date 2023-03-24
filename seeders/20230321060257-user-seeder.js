@@ -8,7 +8,8 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       account: 'root@example.com',
       name: 'root',
-      is_admin: true,
+      role: 'admin',
+      // is_admin: true, //! 先留著，測試都沒問題再刪
       created_at: new Date(),
       updated_at: new Date()
     }], {})
@@ -19,7 +20,8 @@ module.exports = {
             password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
             account: `user${i}@example.com`,
             name: `user${i}`,
-            is_admin: false,
+            role: 'user',
+            // is_admin: false, //! 為測試檔改，都沒問題再刪
             created_at: new Date(),
             updated_at: new Date()
           })

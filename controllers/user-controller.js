@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，�
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -59,10 +60,10 @@ const userController = {
   },
   putUser: (req, res, next) => {
     const id = Number(req.params.id)
-    const oldPW = getUser(req).dataValues.password
+    const oldPW = helpers.getUser(req).password
     // if (req.user.id !== id) {
     // (上1 不能用) 居然得為了測試擋改成這樣 (下1)
-    if (getUser(req).dataValues.id !== id) {
+    if (helpers.getUser(req).id !== id) {
       return res.status(401).json({
         status: 'error',
         message: 'Sorry. You do not own this account.'
@@ -75,10 +76,10 @@ const userController = {
     const { file } = req
     // 必須先知道有哪些要更動 (變數量可能有變!!)
     let { account, email, password } = req.body // 管他有沒有都先設，之後確保正確使用就好
-    if (account === getUser(req).dataValues.account) {
+    if (account === helpers.getUser(req).account) {
       account = undefined
     }
-    if (email === getUser(req).dataValues.email) {
+    if (email === helpers.getUser(req).email) {
       email = undefined
     }
     return Promise.all([
@@ -158,7 +159,7 @@ const userController = {
   },
   addFollowing: (req, res, next) => {
     const followingId = Number(req.body.id) // 要 follow 的對象
-    return User.findByPk(getUser(req).dataValues.id) // 登入的使用者
+    return User.findByPk(helpers.getUser(req).id) // 登入的使用者
       .then(user => {
         // if (!user || !userId) {
         //   return res.status(404).json({ status: 'error', message: 'Cannot find this user' })
@@ -177,7 +178,7 @@ const userController = {
   },
   removeFollowing: (req, res, next) => {
     const { followingId } = req.params
-    return User.findByPk(getUser(req).dataValues.id)
+    return User.findByPk(helpers.getUser(req).id)
       .then(user => Followship.findOne({ where: { followerId: user.id, followingId } }))
       .then(following => {
         following.destroy()
@@ -204,6 +205,12 @@ const userController = {
   },
   removeLike: (req, res, next) => {
     const tweetId = req.params.id
+    console.log('getUser(req)')
+    console.log('getUser(req)')
+    console.log(getUser(req).id)
+    console.log('helpers.getUser(req)')
+    console.log('helpers.getUser(req)')
+    console.log(helpers.getUser(req).id)
     return User.findOne(getUser(req).id)
       .then(user => {
         return Like.findOne({
