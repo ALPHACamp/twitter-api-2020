@@ -103,20 +103,22 @@ const userController = {
       return res.status(200).json(reply)
     } catch (error) { return res.status(500).json({ status: 'error', message: error }) }
   },
-  getFollowers: async(req, res, next) => {
-    try{
-      const {userId} = req.params
-      User.findByPk(userId),
-      followship.findAll({
-        where: {followingId: req.params.userId}
-      }) 
-
-
-
-
-
-    }catch(error){}
-
+  getFollowers: (req, res, next) => {
+    return User.findAll({
+      where: { id: req.params.userId },
+      include:[{model: User, as: 'Followers', attributes:['id','avatar', 'name','description']}]
+    })
+    .then(followerData => {
+       if (!followerData) throw new Error("用戶不存在");
+      followerData = followerData.map((f) => ({
+        ...f.toJSON().Followers,
+        followerId: f.Followers.id,
+        followerCount: f.Followers.length,
+        isFollowed: helpers.getUser(req).Followings.some(fu => fu.Followship.followingId === f.Followers.id)
+      }))
+       return res.status(200).json({status:"success", data:followerData});
+    })
+    .catch(error => next(error))
   }
 }
 
