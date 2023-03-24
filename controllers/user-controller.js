@@ -6,7 +6,7 @@ const {
   Tweet,
   Reply,
   Like,
-  FollowShip,
+  Followship,
   sequelize,
 } = require('../models');
 const { imgurFileHandler } = require('../helpers/file-helpers');
@@ -293,6 +293,8 @@ const userController = {
           },
         ],
         order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true,
       });
 
       if (!replies) throw new Error(`This user doesn't have any replies`);
@@ -300,6 +302,139 @@ const userController = {
       res.status(200).json(replies);
     } catch (err) {
       err.status = 400;
+      next(err);
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const UserId = req.params.id;
+      const likes = await Like.findAll({
+        where: { UserId },
+        attributes: [
+          'TweetId',
+          'createdAt',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(Tweet_id) FROM Replies WHERE Tweet.Id = Tweet_id)'
+            ),
+            'RepliesCount',
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(Tweet_id) FROM Likes WHERE Tweet.Id = Tweet_id)'
+            ),
+            'likesCount',
+          ],
+        ],
+        include: [
+          {
+            model: Tweet,
+            as: 'Tweet',
+            attributes: ['description'],
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'avatar', 'account', 'name'],
+              },
+            ],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+
+      if (!likes) throw new Error(`This user doesn't have any likes`);
+
+      const modifiedLikes = likes.map((like) => ({
+        ...like.toJSON(),
+        isLiked: true,
+      }));
+
+      res.status(200).json(modifiedLikes);
+    } catch (err) {
+      next(err);
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const UserId = req.params.id;
+      const followings = await Followship.findAll({
+        where: { followerId: UserId },
+        attributes: [
+          'followingId',
+          'createdAt',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(User_id) FROM Tweets WHERE User_id = follower_id)'
+            ),
+            'TweetsCount',
+          ],
+        ],
+        include: [
+          {
+            model: User,
+            as: 'followingUser',
+            attributes: ['account', 'name', 'avatar', 'introduction'],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+
+      if (!followings) throw new Error(`This user doesn't have any followings`);
+
+      const followingIds = req.user?.Followings
+        ? req.user.Followings.map((following) => following.id)
+        : [];
+
+      const modifiedFollowings = followings.map((following) => ({
+        ...following.toJSON(),
+        // !!use the some() for IF statement can't pass the test
+        isFollowing: followingIds.includes(following.followingId),
+      }));
+
+      res.status(200).json(modifiedFollowings);
+    } catch (err) {
+      next(err);
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const UserId = req.params.id;
+      const followers = await Followship.findAll({
+        where: { followingId: UserId },
+        attributes: [
+          'followerId',
+          'createdAt',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(User_id) FROM Tweets WHERE User_id = following_id)'
+            ),
+            'TweetsCount',
+          ],
+        ],
+        include: [
+          {
+            model: User,
+            as: 'followerUser',
+            attributes: ['account', 'name', 'avatar', 'introduction'],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+
+      if (!followers) throw new Error(`This user doesn't have any followings`);
+
+      // note this variable is only for the test file
+      const followerIds = req.user?.Followings
+        ? req.user.Followings.map((ff) => ff.id)
+        : [];
+
+      const modifiedFollowers = followers.map((following) => ({
+        ...following.toJSON(),
+        isFollowing: followerIds.some((f) => f.id === following.followerId),
+      }));
+
+      res.status(200).json(modifiedFollowers);
+    } catch (err) {
       next(err);
     }
   },
