@@ -4,7 +4,6 @@ const { Op } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
 const { User, Followship, sequelize } = require("../models");
-const { get } = require("../app");
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -134,7 +133,6 @@ const userController = {
     }
   },
   getCurrentUser: async (req, res, next) => {
-    console.log(getUser(req));
     try {
       const foundUser = await User.findByPk(getUser(req).id);
       if (!foundUser) {
