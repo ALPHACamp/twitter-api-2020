@@ -1,9 +1,10 @@
 const express = require('express')
 const router = express.Router()
 const tweetController = require('../../controllers/tweet-controller')
+const { tweetValidation, replyValidation, validateForm } = require('../../middleware/validator')
 
 // 在特定推文下留言
-router.post('/:tweet_id/replies', tweetController.postReply)
+router.post('/:tweet_id/replies', replyValidation, validateForm, tweetController.postReply)
 
 // 瀏覽特定推文下留言
 router.get('/:tweet_id/replies', tweetController.getReplies)
@@ -21,7 +22,7 @@ router.get('/:tweet_id', tweetController.getTweet)
 router.delete('/:tweet_id', tweetController.deleteTweet)
 
 // 發送推文
-router.post('/', tweetController.postTweet)
+router.post('/', tweetValidation, validateForm, tweetController.postTweet)
 
 // 瀏覽所有推文
 router.get('/', tweetController.getTweets)

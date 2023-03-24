@@ -9,14 +9,10 @@ const helpers = require('../_helpers')
 const userController = {
   // 登入
   signIn: async (req, res, next) => {
-    const { account, password } = req.body ?? {}
-    if (!account || !password) {
-      return res.status(400).json({ status: 'error', message: 'Account and password are required' })
-    }
+    const { account, password } = req.body
     try {
       const user = await User.findOne({ where: { account } })
-      if (!user) return res.status(404).json({ status: 'error', message: 'User does not exist' })
-      if (user.role === 'admin') return res.status(404).json({ status: 'error', message: 'User does not exist' })
+      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'User does not exist' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'Incorrect password' })
       }
@@ -38,23 +34,7 @@ const userController = {
   },
   // 註冊
   signUp: async (req, res, next) => {
-    const { account, name, email, password, checkPassword } = req.body ?? {}
-    if (!account || !name || !email || !password) {
-      return res.status(400).json({ status: 'error', message: 'All fields are required' })
-    }
-    if (password.length < 5 || password.length > 12) {
-      return res.status(400).json({ status: 'error', message: 'Password should be between 5-12' })
-    }
-    if (password !== checkPassword) {
-      return res.status(400).json({ status: 'error', message: 'Check password do not match' })
-    }
-    if (name.length < 1 || name.length > 50) {
-      return res.status(400).json({ status: 'error', message: 'Name should be less than 50' })
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ status: 'error', message: 'Invalid email address' })
-    }
+    const { account, name, email, password } = req.body
     try {
       const [userAccount, userEmail] = await Promise.all([
         User.findOne({ where: { account } }),
@@ -83,7 +63,7 @@ const userController = {
     }
   },
   getUser: async (req, res, next) => {
-    const id = req.params?.id
+    const id = Number(req.params?.id)
     try {
       const user = await User.findByPk(id, {
         attributes: [
@@ -108,10 +88,10 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     const ownerId = helpers.getUser(req)?.id
-    const id = req.params?.id
+    const id = Number(req.params?.id)
     try {
       const user = await User.findByPk(id)
-      if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
+      if (!user || user.role === 'admin') { return res.status(404).json({ status: 'error', message: 'User not found' }) }
       const tweets = await Tweet.findAll({
         where: { UserId: id },
         attributes: [
@@ -149,10 +129,10 @@ const userController = {
     } catch (err) { next(err) }
   },
   getUserReplies: async (req, res, next) => {
-    const id = req.params?.id
+    const id = Number(req.params?.id)
     try {
       const user = await User.findByPk(id)
-      if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
+      if (!user || user.role === 'admin') { return res.status(404).json({ status: 'error', message: 'User not found' }) }
       const replies = await Reply.findAll({
         where: { UserId: id },
         attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
@@ -177,10 +157,10 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     const ownerId = helpers.getUser(req)?.id
-    const id = req.params?.id
+    const id = Number(req.params?.id)
     try {
       const user = await User.findByPk(id)
-      if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
+      if (!user || user.role === 'admin') { return res.status(404).json({ status: 'error', message: 'User not found' }) }
       const likes = await Like.findAll({
         where: { UserId: id },
         include: [{
@@ -208,10 +188,10 @@ const userController = {
   },
   getUserFollowing: async (req, res, next) => {
     const ownerId = helpers.getUser(req)?.id
-    const id = req.params?.id
+    const id = Number(req.params?.id)
     try {
       const user = await User.findByPk(id)
-      if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
+      if (!user || user.role === 'admin') { return res.status(404).json({ status: 'error', message: 'User not found' }) }
       const userFollowings = await Followship.findAll({
         where: { followerId: id },
         include: [{
@@ -235,10 +215,10 @@ const userController = {
   },
   getUserFollower: async (req, res, next) => {
     const ownerId = helpers.getUser(req)?.id
-    const id = req.params?.id
+    const id = Number(req.params?.id)
     try {
       const user = await User.findByPk(id)
-      if (!user) { return res.status(404).json({ status: 'error', message: 'User not found' }) }
+      if (!user || user.role === 'admin') { return res.status(404).json({ status: 'error', message: 'User not found' }) }
       const userFollowers = await Followship.findAll({
         where: { followingId: id },
         include: [{
@@ -261,13 +241,9 @@ const userController = {
     } catch (err) { next(err) }
   },
   putUser: async (req, res, next) => {
-    const id = req.params?.id
-    const { name, introduction } = req.body ?? {}
+    const id = Number(req.params?.id)
+    const { name, introduction } = req.body
     const { avatar = null, cover = null } = req.files || {}
-    if (name.length < 1 || name.length > 50) {
-      return res.status(400).json({ status: 'error', message: 'Name should be less than 50' })
-    }
-    if (introduction.length > 160) return res.status(400).json({ status: 'error', message: 'introduction should be less than 160 characters' })
     try {
       const user = await User.findByPk(id)
       if (!user) return res.status(404).json({ status: 'error', message: 'User not found' })
@@ -306,7 +282,7 @@ const userController = {
     }
   },
   putUserSetting: async (req, res, next) => {
-    const { account, name, email, password } = req.body ?? {}
+    const { account, name, email, password } = req.body
     const originalUserData = helpers.getUser(req)?.toJSON()
     try {
       // 重複帳號
