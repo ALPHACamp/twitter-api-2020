@@ -39,6 +39,16 @@ router.put(
 router.post("/api/users/signin", userController.signIn);
 
 router.get(
+  "/api/tweets/:tweet_id/replies",
+  authenticatedUser,
+  tweetController.getReplies
+);
+router.post(
+  "/api/tweets/:tweet_id/replies",
+  authenticatedUser,
+  tweetController.postReply
+);
+router.get(
   "/api/tweets/:tweet_id",
   authenticatedUser,
   tweetController.getTweet

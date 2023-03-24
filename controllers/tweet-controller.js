@@ -51,7 +51,7 @@ const tweetController = {
         ],
         order: [["createdAt", "DESC"]],
       });
-      return res.json({ status: "success", tweets });
+      return res.json(tweets);
     } catch (err) {
       return next(err);
     }
@@ -131,8 +131,73 @@ const tweetController = {
         throw err;
       }
       return res.json({
+        ...tweet,
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
+  // 取得特定推文的所有回覆
+  getReplies: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweet_id;
+      const tweet = await Tweet.findByPk(tweetId);
+      if (!tweet) {
+        const err = new Error("該貼文不存在");
+        err.status = 404;
+        throw err;
+      }
+      const replies = await Reply.findAll({
+        raw: true,
+        nest: true,
+        include: {
+          model: User,
+          attributes: ["id", "name", "account", "avatar"],
+        },
+        where: { TweetId: tweetId },
+        attributes: ["comment", "createdAt"],
+        order: [["createdAt", "DESC"]],
+      });
+      if (!replies.length) {
+        const err = new Error("該貼文沒有任何留言回覆");
+        err.status = 404;
+        throw err;
+      }
+      return res.json(replies);
+    } catch (err) {
+      return next(err);
+    }
+  },
+  // 在特定推文新增回覆
+  postReply: async (req, res, next) => {
+    try {
+      const UserId = getUser(req).id;
+      const TweetId = req.params.tweet_id;
+      const comment = req.body.comment.trim();
+      const tweet = await Tweet.findByPk(TweetId);
+      if (!tweet) {
+        const err = new Error("該貼文不存在");
+        err.status = 404;
+        throw err;
+      }
+      if (!comment) {
+        const err = new Error("內容不可空白");
+        err.status = 404;
+        throw err;
+      }
+      if (comment.length > 140) {
+        const err = new Error("字數不可超過140字");
+        err.status = 400;
+        throw err;
+      }
+      const replyInput = await Reply.create({
+        UserId,
+        TweetId,
+        comment,
+      });
+      return res.json({
         status: "success",
-        tweet,
+        replyInput,
       });
     } catch (err) {
       return next(err);
