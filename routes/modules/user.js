@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../../controllers/user-controller')
+const { authenticatedCurrentUser } = require('../../middleware/auth')
 // const upload = require('../../../middleware/multer')
 
 router.get('/top', userController.getTopUsers)
@@ -9,7 +10,7 @@ router.get('/:id/followings', userController.getUserFollowings)
 router.get('/:id/likes', userController.getUserLikedTweets)
 router.get('/:id/replied_tweets', userController.getUserRepliedTweets)
 router.get('/:id/tweets', userController.getUserTweets)
-router.put('/:id', userController.putUserSetting)
+router.put('/:id', authenticatedCurrentUser, userController.putUserSetting)
 router.get('/:id', userController.getUser)
 
 module.exports = router

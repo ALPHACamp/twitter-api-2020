@@ -18,8 +18,14 @@ const authenticatedUser = (req, res, next) => {
   return res.status(403).json({ status: 'error', message: '帳號不存在' })
 }
 
+const authenticatedCurrentUser = (req, res, next) => {
+  if (helpers.getUser(req).id === Number(req.params.id)) return next()
+  return res.status(403).json({ status: 'error', message: '權限不足' })
+}
+
 module.exports = {
   authenticated,
   authenticatedAdmin,
-  authenticatedUser
+  authenticatedUser,
+  authenticatedCurrentUser
 }

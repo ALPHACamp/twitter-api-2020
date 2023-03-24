@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const db = require('../models')
 const { User, sequelize, Tweet, Reply, Like, Followship } = db
 
@@ -194,14 +194,16 @@ const adminServices = {
     }).catch(err => cb(err))
   },
   putUserSetting: (req, cb) => {
-    const { name, email, introduction, avatar, cover, password, checkPassword } = req.body
     const id = Number(req.params.id)
-    const currentUserId = Number(req.body.id)
-    if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
-    if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
-    if (!name || !email || !password || !checkPassword) throw new Error('請填寫必填欄位')
+    // console.log(helpers.getUser(req))
+    const currentUserId = helpers.getUser(req).id
+    const { name, email, introduction, avatar, cover, password, checkPassword } = req.body
 
-    return User.findByPk(req.body.id)
+    // if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
+    if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
+    // if (!name || !email || !password || !checkPassword) throw new Error('請填寫必填欄位')
+
+    return User.findByPk(currentUserId)
       .then(user => {
         user.update({
           name,
