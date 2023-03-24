@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 
 const helpers = require('../_helpers')
-const sequelize = require('sequelize')
+const {Op, sequelize} = require('sequelize')
 const { User, Like, Reply, Tweet } = require('../models')
 
 const userController = {
@@ -90,37 +90,58 @@ const userController = {
           { model: User },
           {
             model: Tweet,
-            attributes: ['id', 'description'],
-            include: [
-              {
-                model: User,
-                attributes: ['id', 'name', 'account', 'avatar', 'createdAt']
-              },
-              { model: User, as: 'LikedUsers' },
-              { model: User, as: 'RepliedUsers' }
-            ]
-          }
+            attributes: {
+              include: [
+                [
+                  sequelize.literal(
+                    `(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`
+                  ),
+                  'totalReplies',
+                ],
+                [
+                  sequelize.literal(
+                    `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweets.id)`
+                  ),
+                  "totalLikes",
+                ],
+                [
+                  sequelize.literal(
+                    `EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${
+                      helpers.getUser(req).id
+                    } AND Likes.TweetId = Tweet.id)`,
+                    "isLiked"
+                  ),
+                ],
+                [
+                  sequelize.literal(
+                    `(SELECT ("id", "name", "account", "avatar", "createdAt") FROM Users WHERE Users.id = Tweets.UserId)`
+                  ),
+                  "tweetAuthorInfo",
+                ],
+              ],
+            },
+          },
         ],
-        order: [['createdAt', 'DESC']],
+        order: [["createdAt", "DESC"]],
         raw: true,
-        nest: true
-      })
+        nest: true,
+      });
       if (!likedTweets) {
         return res.status(404).json({
           status: 'error',
           message: 'Tweet not found!'
         })
       } 
-      const isLiked = likedTweets.LikedUsers.some(
-        (user) => user.id === helpers.getUser(req).id
-      )
+      if (!tweetAuthorInfo){
+        throw new Error('Tweet author not found!')
+      }
       return res
         .status(200)
         .json({
           status: 'success',
           message: 'All liked tweets are retrieved!',
           likedTweets,
-          isLiked
+         
         })
     } catch (error) { next(error) }
   },

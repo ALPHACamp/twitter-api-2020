@@ -9,10 +9,10 @@ router.get(
 )
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.get(
-  "/:userId/replied_tweets",
+  '/:userId/replied_tweets',
   authenticatedUser,
   userController.getRepliedTweets
-);
+)
 router.get('/:userId/likes', authenticatedUser, userController.getUserLikes)
 router.post('/', userController.signUp)
 
