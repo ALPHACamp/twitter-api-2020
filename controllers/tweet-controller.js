@@ -180,16 +180,16 @@ const tweetController = {
         err.status = 404;
         throw err;
       }
-      const replyInput = await Reply.create({
-        UserId,
-        TweetId,
-        comment,
-      });
       if (!comment) {
         const err = new Error("內容不可空白");
         err.status = 404;
         throw err;
       }
+      const replyInput = await Reply.create({
+        UserId,
+        TweetId,
+        comment,
+      });
       if (comment.length > 140) {
         const err = new Error("字數不可超過140字");
         err.status = 400;
