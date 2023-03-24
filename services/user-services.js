@@ -192,6 +192,37 @@ const adminServices = {
     }).then(followers => {
       return cb(null, [...followers])
     }).catch(err => cb(err))
+  },
+  putUserProfile: (req, cb) => {
+    const { name, email, introduction, avatar, cover } = req.body
+    const { id } = req.params
+    const currentUserId = req.body.id
+    if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
+    if (!name || !email) throw new Error('請填寫必填欄位')
+    return User.findByPk(req.body.id)
+      .then(user => {
+        user.update({
+          name,
+          email,
+          avatar,
+          cover,
+          introduction
+        })
+          .then(user => {
+            const userData = user.toJSON()
+            delete userData.password
+            const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+            return cb(null, {
+              status: 'success',
+              message: '成功更新個人資料',
+              data: {
+                token,
+                userData
+              }
+            })
+          })
+      })
+      .catch(err => cb(err))
   }
 }
 module.exports = adminServices
