@@ -51,7 +51,7 @@ const tweetController = {
         ],
         order: [["createdAt", "DESC"]],
       });
-      return res.json({ status: "success", tweets });
+      return res.json(tweets);
     } catch (err) {
       return next(err);
     }
