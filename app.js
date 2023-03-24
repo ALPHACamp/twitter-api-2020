@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express')
 const session = require('express-session')
+const cors = require('cors')
 const passport = require('./config/passport')
 const { apis } = require('./routes')
 
@@ -12,6 +13,11 @@ const port = process.env.PORT || 3000
 
 const SESSION_SECRET = 'secret'
 
+// const corsOptions = {
+//   origin: 'http://example.com',
+//   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+// }
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
