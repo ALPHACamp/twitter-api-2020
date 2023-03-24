@@ -5,7 +5,7 @@ const followshipController = {
   addFollowship: async (req, res, next) => {
     try {
       // current user's id
-      const followerId = getUser(req).id;
+      const followerId = getUser(req).dataValues.id;
       // add following user
       const followingId = req.body.id;
 
@@ -35,7 +35,7 @@ const followshipController = {
   },
   removeFollowship: async (req, res, next) => {
     try {
-      const followerId = getUser(req).id;
+      const followerId = getUser(req).dataValues.id;
       const { followingId } = req.params;
 
       if (followerId === Number(followingId)) {
