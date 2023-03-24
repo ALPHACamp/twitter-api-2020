@@ -12,7 +12,7 @@ const tweetController = {
       })
 
       if (!tweets) {
-        return res.status(404).json({ status: 'error', message: 'No tweets were found' })
+        return res.status(404).json({ status: 'error', message: '找不到任何推文' })
       }
 
       const tweetsData = tweets.reduce((result, tweet) => {
@@ -57,7 +57,7 @@ const tweetController = {
       if (!tweet) {
         return res.status(404).json({
           status: 'error',
-          message: 'Tweet not found!'
+          message: '找不到此篇推文'
         })
       }
 
@@ -75,7 +75,7 @@ const tweetController = {
       }
       return res.status(200).json({
         status: 'success',
-        message: 'Successfully retrieved this Tweet.',
+        message: '成功取得此篇推文',
         ...tweetData
       })
     } catch (err) {
@@ -88,10 +88,10 @@ const tweetController = {
       const UserId = helpers.getUser(req).id
 
       if (!description || !description.trim()) {
-        return res.status(400).json({ status: 'error', message: 'Please enter a message before posting.' })
+        return res.status(400).json({ status: 'error', message: '請輸入內容，內容不能為空白' })
       }
       if (description.length > 140) {
-        return res.status(400).json({ status: 'error', message: 'Tweet cannot be longer than 140 characters.' })
+        return res.status(400).json({ status: 'error', message: '請將推文字數限制在 140 以內' })
       }
 
       const tweet = await Tweet.create({
@@ -99,7 +99,7 @@ const tweetController = {
         description
       })
 
-      return res.status(200).json({ status: 'success', message: 'The tweet was successfully posted.', tweet })
+      return res.status(200).json({ status: 'success', message: '推文已成功發布', tweet })
     } catch (err) {
       next(err)
     }
