@@ -1,14 +1,15 @@
 const { Reply, Tweet, User } = require('../models')
-const { getUser } = require('../helpers/auth-helpers')
+// const { getUser } = require('../helpers/auth-helpers')
+const { getUser } = require('../_helpers')
 
 const tweetController = {
   postTweet: (req, res, next) => {
     const { description } = req.body
     // if (!description.trim()) return res.status(400).json({ message: '推文不能為空白' })
     // if (description.length > 140) return res.status(400).json({ message: '推文字數限制在 140 以內' })
-    User.findByPk(getUser(req).id)
+    User.findByPk(getUser(req).dataValues.id)
       .then(user => {
-        // if (!user) return res.status(404).json({ message: 'Can not find this user.' })
+        if (!user) return res.status(404).json({ message: 'Can not find this user.' })
         return Tweet.create({
           UserId: user.id,
           description
@@ -50,14 +51,14 @@ const tweetController = {
   },
   postReply: (req, res, next) => {
     const { comment } = req.body
-    // if (!comment.trim()) return res.status(400).json({ message: '回覆內容不能空白' })
+    if (!comment.trim()) return res.status(400).json({ message: '回覆內容不能空白' })
     Tweet.findByPk(req.params.tweet_id, {
       include: { model: User }
     })
       .then(tweet => {
-        // if (!tweet) return res.status(404).json({ message: '推文不存在' })
+        if (!tweet) return res.status(404).json({ message: '推文不存在' })
         return Reply.create({
-          UserId: getUser(req).id,
+          UserId: getUser(req).dataValues.id,
           TweetId: tweet.id,
           comment
         })

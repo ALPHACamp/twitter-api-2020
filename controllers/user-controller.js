@@ -4,7 +4,6 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { getUser } = require('../_helpers')
 
-
 const userController = {
   signIn: (req, res, next) => {
     try {
@@ -31,18 +30,6 @@ const userController = {
         if (emailResult) throw new Error('email 已重複註冊！')
         if (accountResult) throw new Error('account 已重複註冊！')
       })
-    // User.findOne({
-    //   where: {
-    //     [Op.or]: [
-    //       { email: req.body.email },
-    //       { account: req.body.account }]
-    //   }
-    // })
-    //   .then(user => {
-    //     if (user) throw new Error('email 已重複註冊！')
-
-    //     return bcrypt.hash(req.body.password, 10)
-    //   })
       .then(() => bcrypt.hash(req.body.password, 10))
       .then(hash =>
         User.create({
@@ -71,16 +58,8 @@ const userController = {
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
-    const newPW = req.body.password
-    // const oldPW = getUser(req).dataValues.password
-    // const samePW = await bcrypt.compare(newPW, oldPW) // async 跟 promise 混用，我得小心
-    // (下1) 先擋擋看，測試出錯立刻封掉 --> 真的會因為它而測試出錯...
-    // const { account, name, email, password } = req.body
-    // if (!account || !name || !email || !password) {
-    //   throw new Error('account, name, email, password 皆為必填')
-    // }
-
     const id = Number(req.params.id)
+    const oldPW = getUser(req).dataValues.password
     // if (req.user.id !== id) {
     // (上1 不能用) 居然得為了測試擋改成這樣 (下1)
     if (getUser(req).dataValues.id !== id) {
@@ -89,69 +68,45 @@ const userController = {
         message: 'Sorry. You do not own this account.'
       })
     }
+    // 檢驗每個 key/value
+    for (const key in req.body) {
+      if (!req.body[key].trim()) throw new Error(`${key} 不能輸入空白`)
+    }
     const { file } = req
-
-    // 結果 async/await 可執行，但也沒法過測試，是怎樣
-    // const bbb = await Promise.all([
-    //   User.findByPk(id),
-    //   imgurFileHandler(file), // 若有餘裕，就研究下圖片上傳的細節唄
-    //   !samePW ? bcrypt.hash(newPW, 10) : oldPW
-    // ])
-
-    // req.body.image = bbb[1] || bbb[0].image
-    // req.body.password = bbb[2]
-    // const ccc = await bbb[0].update(req.body)
-    // const ddd = ccc.toJSON()
-    // // delete ddd.password
-    // return await res.status(200).json(ddd)
-
-    // 第二版，把密碼驗證機制加進去，可用，但過不了 測試檔
-    // return bcrypt.compare(newPW, oldPW)
-    //   .then(samePW => {
-    //     return Promise.all([
-    //       User.findByPk(id),
-    //       imgurFileHandler(file), // 若有餘裕，就研究下圖片上傳的細節唄
-    //       !samePW ? bcrypt.hash(newPW, 10) : oldPW
-    //     ])
-    //       .then(([user, filePath, pw]) => {
-    //         if (!user) throw new Error("User doesn't exist!")
-    //         req.body.image = filePath || user.image
-    //         req.body.password = pw
-    //         return user.update(req.body)
-    //       })
-    //       .then(updatedUser => {
-    //         const result = updatedUser.toJSON()
-    //         // delete result.password //! 之後復原
-    //         return res.status(200).json(result)
-    //       })
-    //   })
-    //   .catch(err => next(err))
-
-    // 原始版，可過 test，但嚴格來說，密碼驗證有問題
+    // 必須先知道有哪些要更動 (變數量可能有變!!)
+    let { account, email, password } = req.body // 管他有沒有都先設，之後確保正確使用就好
+    if (account === getUser(req).dataValues.account) {
+      account = undefined
+    }
+    if (email === getUser(req).dataValues.email) {
+      email = undefined
+    }
     return Promise.all([
-      User.findByPk(id),
       imgurFileHandler(file), // 若有餘裕，就研究下圖片上傳的細節唄
-      bcrypt.hash(newPW, 10)
-      //* !samePW ? bcrypt.hash(newPW, 10) : oldPW
-      // ! 下2 之後要改
-      // User.findOne({ where: { account } }),
-      // User.findOne({ where: { email } })
+      User.findByPk(id),
+      // (下1) false 要擺 account 根本不存在 (不更動 account) 的狀況
+      account ? User.findOne({ where: { account } }) : undefined,
+      email ? User.findOne({ where: { email } }) : undefined,
+      password ? bcrypt.compare(password, oldPW) : oldPW
+      // (上1) 測試檔裡根本沒有舊密碼雜湊值啊！這要怎麼比較！難怪一直跳 illegal argument！
     ])
-      // .then(([user, filePath, samePW]) => {
-      //   if (samePW) return [user, filePath]
-      //   return [user, filePath, bcrypt.hash(req.body.password, 10)]
-      // })
-      .then(([user, filePath, pw]) => {
+      .then(([filePath, user, sameAcc, sameMail, samePW]) => {
         if (!user) throw new Error("User doesn't exist!")
-        // if (checkAcc) throw new Error('account 已重複註冊！')
-        // if (checkMail) throw new Error('email 已重複註冊！')
+        if (sameAcc) throw new Error('account 已重複註冊！')
+        if (sameMail) throw new Error('email 已重複註冊！')
+        if (samePW) {
+          req.body.password = oldPW
+        } else {
+          bcrypt.hash(password, 10).then(password => user.update({ password }))
+        }
+        req.body.account = account
+        req.body.email = email
         req.body.image = filePath || user.image
-        req.body.password = pw
         return user.update(req.body) // 試試看唄，看能不能回傳 array
       })
       .then(updatedUser => {
         const result = updatedUser.toJSON()
-        // delete result.password //! 之後復原
+        delete result.password
         return res.status(200).json(result)
       })
       .catch(err => next(err))
@@ -202,8 +157,8 @@ const userController = {
       .catch(err => next(err))
   },
   addFollowing: (req, res, next) => {
-    const userId = Number(req.query.id) // 目標使用者
-    return User.findByPk(getUser(req).id) // 登入的使用者
+    const followingId = Number(req.body.id) // 要 follow 的對象
+    return User.findByPk(getUser(req).dataValues.id) // 登入的使用者
       .then(user => {
         // if (!user || !userId) {
         //   return res.status(404).json({ status: 'error', message: 'Cannot find this user' })
@@ -211,29 +166,22 @@ const userController = {
         // if (user.id === userId) throw new Error('不能追蹤自己')
         return Followship.create({
           followerId: user.id,
-          followingId: userId
+          followingId
         })
       })
-      .then(followship => {
-        // if (followship) return res.status(409).json({ status: 'error', message: 'you already followed this user.' })
-        return res.status(200).json(followship)
+      .then(following => {
+        // if (following) return res.status(409).json({ status: 'error', message: 'you already followed this user.' })
+        return res.status(200).json(following)
       })
       .catch(err => next(err))
   },
   removeFollowing: (req, res, next) => {
     const { followingId } = req.params
-    return User.findByPk(getUser(req).id)
-      .then(user => {
-        return Followship.findOne({
-          where: {
-            followerId: user.id,
-            followingId
-          }
-        })
-      })
-      .then(followship => {
-        followship.destroy()
-        return res.status(200).json({ message: 'success', followship })
+    return User.findByPk(getUser(req).dataValues.id)
+      .then(user => Followship.findOne({ where: { followerId: user.id, followingId } }))
+      .then(following => {
+        following.destroy()
+        return res.status(200).json({ message: 'success', following })
       })
       .catch(err => next(err))
   },
