@@ -10,17 +10,16 @@ module.exports = {
     )
     await queryInterface.bulkInsert(
       'Tweets',
-      Array.from({ length: 50 }, (num, i) => ({
+      Array.from({ length: 50 }).map((_, index) => ({
+        UserId: users[index % 5].id,
         description: faker.lorem.text(),
         createdAt: new Date(),
-        updatedAt: new Date(),
-        UserId:
-          users[i % 5].id
-      }))
-    )
+        updatedAt: new Date()
+      })
+      ), {})
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Tweets', {})
+    await queryInterface.bulkDelete('Tweets', null, { truncate: true })
   }
 }
