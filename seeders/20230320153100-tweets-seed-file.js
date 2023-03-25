@@ -14,8 +14,8 @@ module.exports = {
         UserId: users[index % 5].id,
         description: faker.lorem.text(),
         createdAt: new Date(),
-        updatedAt: new Date(),
-       })
+        updatedAt: new Date()
+      })
       ), {})
   },
 
