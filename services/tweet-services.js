@@ -70,6 +70,21 @@ const tweetServices = {
         cb(null, tweet)
       })
       .catch(err => cb(err))
+  },
+  postReply: (req, cb) => {
+    const UserId = getUser(req)?.dataValues.id
+    const TweetId = req.params.id
+    Tweet.findByPk(TweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error('找不到這篇推文')
+        return Reply.create({
+          comment: req.body.comment,
+          UserId,
+          TweetId
+        })
+      })
+      .then(reply => cb(null, { reply: reply.toJSON() }))
+      .catch(err => cb(err, null))
   }
 
 }
