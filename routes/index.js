@@ -5,13 +5,22 @@ const { errorHandler } = require("../middleware/error-handler");
 const { authenticatedUser } = require("../middleware/auth");
 const upload = require("../middleware/multer");
 
+// - User
 router.get(
   "/api/users/current_user",
   authenticatedUser,
   userController.getCurrentUser
 );
-router.get("/api/users/:id", authenticatedUser, userController.getUser);
-router.post("/api/users", userController.signUp);
+router.get(
+  "/api/users/:id/followers",
+  authenticatedUser,
+  userController.getUserFollowers
+);
+router.get(
+  "/api/users/:id/followings",
+  authenticatedUser,
+  userController.getUserFollowings
+);
 router.get(
   "/api/users/:id/tweets",
   authenticatedUser,
@@ -22,6 +31,8 @@ router.get(
   authenticatedUser,
   userController.getUserReplies
 );
+router.post("/api/users", userController.signUp);
+router.get("/api/users/:id", authenticatedUser, userController.getUser);
 router.put(
   "/api/users/:id/setting",
   authenticatedUser,
@@ -38,6 +49,7 @@ router.put(
 );
 router.post("/api/users/signin", userController.signIn);
 
+// - Tweet
 router.get(
   "/api/tweets/:tweet_id/replies",
   authenticatedUser,
@@ -56,6 +68,7 @@ router.get(
 router.get("/api/tweets", authenticatedUser, tweetController.getTweets);
 router.post("/api/tweets", authenticatedUser, tweetController.postTweet);
 
+// - Followship
 router.delete(
   "/api/followships/:followingId",
   authenticatedUser,
@@ -63,6 +76,7 @@ router.delete(
 );
 router.post("/api/followships", authenticatedUser, userController.addFollowing);
 
+// - Error
 router.use("/", errorHandler);
 
 module.exports = router;

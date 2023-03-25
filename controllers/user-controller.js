@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { Op } = require("sequelize");
+const { Op, QueryTypes } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
 const { User, Tweet, Reply, Followship, sequelize } = require("../models");
@@ -59,12 +59,7 @@ const userController = {
         throw error;
       }
       const foundUser = await User.findOne({ where: { account } });
-      if (!foundUser) {
-        const error = new Error("帳號不存在!");
-        error.status = 404;
-        throw error;
-      }
-      if (foundUser.isAdmin) {
+      if (!foundUser || foundUser.isAdmin) {
         const error = new Error("帳號不存在!");
         error.status = 404;
         throw error;
@@ -112,14 +107,9 @@ const userController = {
           ],
         },
       });
-      if (!foundUser) {
+      if (!foundUser || foundUser.isAdmin) {
         const error = new Error("使用者不存在!");
         error.status = 404;
-        throw error;
-      }
-      if (foundUser.isAdmin) {
-        const error = new Error("無法存取管理員資料!");
-        error.status = 403;
         throw error;
       }
       const user = foundUser.toJSON();
@@ -149,7 +139,6 @@ const userController = {
       return next(error);
     }
   },
-
   putUser: async (req, res, next) => {
     const { id } = req.params;
     const { name, introduction } = req.body;
@@ -268,8 +257,8 @@ const userController = {
         }),
       ]);
       if (foundUser.isAdmin) {
-        const error = new Error("無法追蹤管理員!");
-        error.status = 400;
+        const error = new Error("使用者不存在!");
+        error.status = 404;
         throw error;
       }
       if (followship) {
@@ -308,8 +297,8 @@ const userController = {
         }),
       ]);
       if (foundUser.isAdmin) {
-        const error = new Error("無法取消追蹤管理員!");
-        error.status = 400;
+        const error = new Error("使用者不存在!");
+        error.status = 404;
         throw error;
       }
       if (!followship) {
@@ -332,7 +321,7 @@ const userController = {
     try {
       const foundUser = await User.findByPk(id);
       if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("帳號不存在!");
+        const error = new Error("使用者不存在!");
         error.status = 404;
         throw error;
       }
@@ -352,7 +341,7 @@ const userController = {
     try {
       const foundUser = await User.findByPk(id);
       if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("帳號不存在!");
+        const error = new Error("使用者不存在!");
         error.status = 404;
         throw error;
       }
@@ -363,6 +352,42 @@ const userController = {
         raw: true,
       });
       return res.json(replies);
+    } catch (error) {
+      return next(error);
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const followers = await sequelize.query(
+        `
+      SELECT f.followerId, u.account, u.name, u.avatar, f.createdAt as followedDate
+      FROM Followships as f INNER JOIN Users as u
+      ON f.followerId = u.id
+      WHERE followingId = ${id}
+      ORDER BY followedDate DESC;
+      `,
+        { type: QueryTypes.SELECT }
+      );
+      return res.json(followers);
+    } catch (error) {
+      return next(error);
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const followings = await sequelize.query(
+        `
+      SELECT f.followingId, u.account, u.name, u.avatar, f.createdAt as followedDate
+      FROM Followships as f INNER JOIN Users as u
+      ON f.followingId = u.id
+      WHERE followerId = ${id}
+      ORDER BY followedDate DESC;
+      `,
+        { type: QueryTypes.SELECT }
+      );
+      return res.json(followings);
     } catch (error) {
       return next(error);
     }
