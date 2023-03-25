@@ -152,7 +152,7 @@ const userService = {
           exclude: ['password']
         }
       }, {
-        model: Tweet, include: [{ model: User, attributes: [['account', 'ownerAccount'], ['name', 'ownerName']] }]
+        model: Tweet, include: [{ model: User, attributes: [['account', 'ownerAccount'], ['name', 'ownerName'], ['avatar', 'ownerAvatar']] }]
       }],
       order: [['createdAt', 'DESC']],
       raw: true,
