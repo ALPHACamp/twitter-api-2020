@@ -235,8 +235,15 @@ const userController = {
           attributes: {
             exclude: ['UserId'],
             include: [
-              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCounts'],
-              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts']
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts'],
+              [sequelize.literal(`
+                (SELECT 
+                CASE 
+                  WHEN COUNT(*) = 0 THEN 'false' 
+                  ELSE 'true' 
+                END FROM Likes WHERE Likes.User_id = ${getUser(req).dataValues.id} AND Likes.Tweet_id = Tweet.id)`
+              ), 'isLiked']
             ]
           },
           include: [
@@ -376,29 +383,42 @@ const userController = {
       }
     })
       .then(() => {
-        Like.findAll({
-          where: {
-            UserId: req.params.id
-          },
-          raw: true,
-          nest: true,
-          order: [['createdAt', 'DESC']],
-          attributes: {
-            exclude: ['UserId'],
+        Promise.all([
+          Like.findAll({
+            where: {
+              UserId: req.params.id
+            },
+            raw: true,
+            nest: true,
+            order: [['createdAt', 'DESC']],
+            attributes: {
+              exclude: ['UserId'],
+              include: [
+                [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
+                [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts']
+              ]
+            },
             include: [
-              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCounts'],
-              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts']
+              {
+                model: Tweet,
+                attributes: ['id', 'description'],
+                include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+              }
             ]
-          },
-          include: [
-            {
-              model: Tweet,
-              attributes: ['id', 'description'],
-              include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
-            }
-          ]
-        })
-          .then(likes => {
+          }),
+          Like.findAll({
+            where: {
+              UserId: getUser(req).dataValues.id
+            },
+            raw: true,
+            attributes: ['Tweet_id']
+          })
+        ])
+          .then(([targetUserLikes, currentUserLikes]) => {
+            const likes = targetUserLikes.map(like => ({
+              ...like,
+              isLiked: currentUserLikes.some(currentUserLike => currentUserLike.Tweet_id === like.TweetId)
+            }))
             return res.status(200).json(likes)
           })
       }).catch(err => next(err))
