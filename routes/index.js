@@ -10,6 +10,8 @@ const admin = require('./modules/admin');
 
 const users = require('./modules/users');
 
+const followships = require('./modules/followships');
+
 const {
   authenticated,
   authenticatedAdmin,
@@ -18,7 +20,6 @@ const {
 
 const { apiErrorHandler } = require('../middleware/error-handler');
 const userController = require('../controllers/user-controller');
-const adminController = require('../controllers/admin-controller');
 const tweetController = require('../controllers/tweet-controller');
 
 // cors header setting middleware
@@ -51,6 +52,8 @@ router.use('/admin', authenticated, authenticatedAdmin, admin);
 router.use('/users', authenticated, authenticatedUser, users);
 
 router.use('/tweets', authenticated, authenticatedUser, tweet);
+
+router.use('/followships', authenticated, authenticatedUser, followships);
 
 router.get('/', (req, res) =>
   res.send(`You did not pass the authentication. Here is routes/index.js
