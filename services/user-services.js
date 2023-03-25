@@ -3,7 +3,8 @@ const jwt = require('jsonwebtoken')
 const assert = require('assert')
 
 const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const { Op } = require('sequelize')
 
 const userService = {
   signUp: (req, cb) => {
@@ -129,6 +130,132 @@ const userService = {
           isLiked: Boolean(t.Likes.isLiked)
         }))
         cb(null, data)
+      })
+      .catch(err => cb(err))
+  },
+  getRepliesOfUser: (req, cb) => {
+    const UserId = req.params.userId
+    return Reply.findAll({
+      where: {
+        UserId
+      },
+      include: [{
+        model: User,
+        attributes: {
+          exclude: ['password']
+        }
+      }, {
+        model: Tweet, include: [{ model: User, attributes: [['account', 'ownerAccount'], ['name', 'ownerName']] }]
+      }],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(repliesOfTweet => {
+        assert(repliesOfTweet, '此使用者沒有回覆的推文！')
+        cb(null, repliesOfTweet)
+      })
+      .catch(err => cb(err))
+  },
+  getLikesOfUser: (req, cb) => {
+    const UserId = req.params.userId
+    return Like.findAll({
+      where: {
+        UserId
+      },
+      order: [[{ model: Tweet }, 'createdAt', 'DESC']],
+      raw: true,
+      nest: true,
+      include: [
+        {
+          model: Tweet,
+          where: { id: { [Op.ne]: null } },
+          attributes: {
+            include: [
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'totalReplies'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'totalLikes'],
+              [sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.User_Id = ${helpers.getUser(req).id} AND Likes.Tweet_Id = Tweet.id)`), 'isLiked']
+            ]
+          },
+          include: [{ model: User, attributes: { exclude: ['password'] } }]
+        }
+      ]
+    })
+      .then(likes => {
+        assert(likes, '此使用者沒有喜歡的推文！')
+        console.log(likes)
+        const result = likes.map(f => ({
+          ...f,
+          isLiked: Boolean(f.Tweet.isLiked)
+        }))
+        cb(null, result)
+      })
+      .catch(err => cb(err))
+  },
+  getFollowingsOfUser: (req, cb) => {
+    const currentUser = helpers.getUser(req)
+    return User.findAll({
+      where: { id: req.params.userId },
+      attributes: [],
+      include: [{
+        model: User,
+        as: 'Followings',
+        attributes: {
+          exclude: ['password'],
+          include: [
+            [
+              sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUser.id} AND following_id = Followings.id)`),
+              'isFollowed'
+            ]
+          ]
+        }
+      }],
+      order: [[{ model: User, as: 'Followings' }, Followship, 'createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(followings => {
+        assert(followings, '此使用者沒有追蹤的使用者！')
+
+        const result = followings.map(f => ({
+          followingId: f.Followings.id,
+          ...f.Followings,
+          isFollowed: Boolean(f.Followings.isFollowed)
+        }))
+        cb(null, result)
+      })
+      .catch(err => cb(err))
+  },
+  getFollowersOfUser: (req, cb) => {
+    const currentUser = helpers.getUser(req)
+    return User.findAll({
+      where: { id: req.params.userId },
+      attributes: [],
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: {
+          exclude: ['password'],
+          include: [
+            [
+              sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUser.id} AND following_id = Followers.id)`),
+              'isFollowed'
+            ]
+          ]
+        }
+      }],
+      order: [[{ model: User, as: 'Followers' }, Followship, 'createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(followers => {
+        assert(followers, '此使用者沒有被使用者追蹤！')
+        const result = followers.map(f => ({
+          followerId: f.Followers.id,
+          ...f.Followers,
+          isFollowed: Boolean(f.Followers.isFollowed)
+        }))
+        cb(null, result)
       })
       .catch(err => cb(err))
   }

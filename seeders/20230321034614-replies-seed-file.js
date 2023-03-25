@@ -19,8 +19,8 @@ module.exports = {
         User_id: users[Math.floor(Math.random() * users.length)].id,
         Tweet_id: tweets[Math.floor(index / commentsPerTweet)].id, // 使每篇Tweet有三個留言
         comment: faker.lorem.sentence().substring(0, 140),
-        created_at: new Date(),
-        updated_at: new Date()
+        created_at: faker.date.between('2023-02-21T00:00:00.000Z', '2023-02-22T00:00:00.000Z'),
+        updated_at: faker.date.between('2023-02-23T00:00:00.000Z', '2023-02-24T00:00:00.000Z')
       }))
     )
   },
