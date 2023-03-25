@@ -1,6 +1,7 @@
 const fs = require('fs') // 引入 fs (file system) 模組 (node.JS 中專門拿來處理檔案的模組)
 const imgur = require('imgur')
-const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+// const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const IMGUR_CLIENT_ID = '252ea9997a22215'
 
 imgur.setClientId(IMGUR_CLIENT_ID)
 
