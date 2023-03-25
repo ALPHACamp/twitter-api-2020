@@ -2,12 +2,19 @@ const { Tweet, User, Reply, Like, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 const tweetController = {
   getTweets: (req, res, next) => {
+    const loginUserId = getUser(req).dataValues.id
     return Tweet.findAll({
       raw: true,
       nest: true,
       attributes: {
+        exclude: ['UserId'],
         include: [
-          [sequelize.literal('( SELECT CASE WHEN EXISTS(SELECT * FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = UserId) THEN "true" ELSE "false" END )'), 'isLiked'],
+          [sequelize.literal(`
+          ( SELECT CASE WHEN EXISTS(
+            SELECT * FROM Likes 
+            WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${loginUserId}) 
+            THEN true ELSE false END )
+          `), 'isLiked'],
           [sequelize.literal('( SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts']]
       },
@@ -17,21 +24,28 @@ const tweetController = {
       ]
     })
       .then(tweets => {
-        const data = tweets.map(tweet => {
-          delete tweet.UserId
-          return tweet
-        })
+        const data = tweets.map(tweet => ({
+          ...tweet,
+          isLiked: Boolean(tweet.isLiked)
+        }))
         res.status(200).json(data)
       })
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
+    const loginUserId = getUser(req).dataValues.id
     return Tweet.findByPk(req.params.id, {
       raw: true,
       nest: true,
       attributes: {
+        exclude: ['UserId'],
         include: [
-          [sequelize.literal('( SELECT CASE WHEN EXISTS(SELECT * FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = UserId) THEN "true" ELSE "false" END )'), 'isLiked'],
+          [sequelize.literal(`
+          ( SELECT CASE WHEN EXISTS(
+            SELECT * FROM Likes 
+            WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${loginUserId}) 
+            THEN true ELSE false END )
+          `), 'isLiked'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts']]
       },
@@ -43,8 +57,11 @@ const tweetController = {
           error.status = 404
           throw error
         }
-        delete tweet.UserId
-        return res.status(200).json(tweet)
+        const data = {
+          ...tweet,
+          isLiked: Boolean(tweet.isLiked)
+        }
+        return res.status(200).json(data)
       })
       .catch(err => next(err))
   },
@@ -89,7 +106,8 @@ const tweetController = {
       Reply.findAll({
         attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
         where: { TweetId },
-        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([tweet, replies]) => {
@@ -126,10 +144,10 @@ const tweetController = {
 
       const data = {
         ...reply.dataValues,
-        user: user.dataValues
+        User: user.dataValues
       }
-      Object.keys(data.user).forEach(e => {
-        if (!['id', 'name', 'account', 'avatar'].includes(e)) return delete data.user[e]
+      Object.keys(data.User).forEach(e => {
+        if (!['id', 'name', 'account', 'avatar'].includes(e)) return delete data.User[e]
       })
       delete data.UserId
       delete data.TweetId
