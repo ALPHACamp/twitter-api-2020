@@ -155,7 +155,7 @@ const tweetController = {
           attributes: ["id", "name", "account", "avatar"],
         },
         where: { TweetId: tweetId },
-        attributes: ["comment", "createdAt"],
+        attributes: ["id", "comment", "createdAt"],
         order: [["createdAt", "DESC"]],
       });
       if (!replies.length) {
