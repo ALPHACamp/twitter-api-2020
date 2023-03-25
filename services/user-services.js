@@ -5,7 +5,7 @@ const { User, sequelize, Tweet, Reply, Like, Followship } = db
 
 const adminServices = {
   postSignIn: (req, cb) => {
-    const userData = getUser(req).toJSON()
+    const userData = helpers.getUser(req).toJSON()
     delete userData.password
     try {
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
