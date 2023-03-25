@@ -266,6 +266,135 @@ const userController = {
         res.json(likeTweets)
       })
       .catch(err => next(err))
+  },
+  putUserSetting: (req, res, next) => {
+    const user = helpers.getUser(req)
+    const userId = Number(user.id)
+    const { account, name, email, password, checkPassword } = req.body
+
+    if (!account || !name || !email || !password || !checkPassword) throw new Error('You should input all required parameters')
+    if (name.length > 50) throw new Error("Name can't larger than 50 characters!")
+    if (password !== checkPassword) throw new Error('Password do not match!')
+
+    return Promise.all([
+      User.findAll({
+        attributes: ['id'],
+        where: {
+          id: { [Op.ne]: req.params.id },
+          [Op.or]: [{ account }, { email }]
+        }
+      }),
+      User.findByPk(req.params.id)
+    ])
+      .then(([users, user]) => {
+        if (!user) throw new Error("User did't exist!")
+        // 避免有人惡意修改其他人的設定
+        if (user.id !== userId) throw new Error("You can't modify other user's setting!")
+        // 反查不是該使用者，但是卻已經有相同的account或者email存在的情況 => 表示已經被其他人使用
+        if (users.length !== 0) throw new Error('Account or email already exists!')
+
+        return user.update({
+          account,
+          email,
+          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+          name
+        })
+      })
+      .then(user => {
+        const userData = {
+          ...user.toJSON()
+        }
+        delete userData.password
+        res.json(userData)
+      })
+      .catch(err => next(err))
+  },
+  getUserFollowings: (req, res, next) => {
+    const { id } = req.params
+    const user = helpers.getUser(req)
+    const userId = Number(user.id)
+
+    return Promise.all([
+      User.findAll({
+        attributes: ['id', 'account', 'name', 'avatar', 'introduction'],
+        // 為了確認是否isFollowed，故include [Followers]
+        include: [
+          { model: User, as: 'Followers', attributes: ['id'] }
+        ]
+      }),
+      Followship.findAll({
+        where: { followerId: id },
+        attributes: ['followingId', 'createdAt']
+      })
+    ])
+      .then(([users, followings]) => {
+        if (!users) throw new Error('There is no user!')
+        if (!followings) throw new Error('This user not yet follow other user!')
+
+        const Users = users.map(user => user.toJSON())
+        const Followings = followings.map(following => following.toJSON())
+
+        const userFollowings = Users.filter(
+          user => Followings.some(following => following.followingId === user.id)
+        ).map(user => {
+          const data = {
+            ...user,
+            followingId: user.id,
+            // user/:id/followings，下方的Follower已指定為是此:id，故只會有一位，陣列選[0]即可。
+            followingDate: user.Followers[0].Followship.createdAt,
+            isFollowed: user.Followers.some(follower => follower.id === userId)
+          }
+          delete data.Followers
+
+          return data
+        })
+
+        res.json(userFollowings)
+      })
+      .catch(err => next(err))
+  },
+  getUserFollowers: (req, res, next) => {
+    const { id } = req.params
+    const user = helpers.getUser(req)
+    const userId = Number(user.id)
+
+    return Promise.all([
+      User.findAll({
+        attributes: ['id', 'account', 'name', 'avatar', 'introduction'],
+        // 為了確認是否isFollowed，故include [Followers]
+        include: [
+          { model: User, as: 'Followers', attributes: ['id'] }
+        ]
+      }),
+      Followship.findAll({
+        where: { followingId: id },
+        attributes: ['followerId', 'createdAt']
+      })
+    ])
+      .then(([users, followers]) => {
+        if (!users) throw new Error('There is no user!')
+        if (!followers) throw new Error('There are no user followed!')
+
+        const Users = users.map(user => user.toJSON())
+        const Followers = followers.map(follower => follower.toJSON())
+
+        const userFollowers = Users.filter(
+          user => Followers.some(follower => follower.followerId === user.id)
+        ).map(user => {
+          const data = {
+            ...user,
+            followerId: user.id,
+            isFollowed: user.Followers.some(follower => follower.id === userId)
+            // 這裡不顯示followingDate，因此用戶是被追蹤的，只要知道有誰追蹤他就好。
+          }
+          delete data.Followers
+
+          return data
+        })
+
+        res.json(userFollowers)
+      })
+      .catch(err => next(err))
   }
 }
 
