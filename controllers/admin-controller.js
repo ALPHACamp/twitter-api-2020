@@ -4,12 +4,9 @@ const { Tweet, User, Sequelize, Reply } = require('../models')
 const adminController = {
   // 登入
   signIn: async (req, res, next) => {
-    const { email, password } = req.body ?? {}
-    if (!email || !password) {
-      return res.status(400).json({ status: 'error', message: 'Email and password are required' })
-    }
+    const { account, password } = req.body
     try {
-      const user = await User.findOne({ where: { email } })
+      const user = await User.findOne({ where: { account } })
       if (!user) return res.status(404).json({ status: 'error', message: 'User does not exist' })
       if (user.role === 'user') return res.status(404).json({ status: 'error', message: 'User does not exist' })
       if (!bcrypt.compareSync(password, user.password)) {
@@ -100,7 +97,7 @@ const adminController = {
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships  WHERE Followships.FollowingId = User.id )'), 'follower_count'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Likes JOIN Tweets ON Likes.TweetId = Tweets.id WHERE Tweets.UserId = User.id )'), 'total_like']
         ],
-        order: [['createdAt', 'DESC']],
+        order: [[Sequelize.literal('tweet_count'), 'DESC']],
         nest: true,
         raw: true
       })
