@@ -1,5 +1,7 @@
 const { User, Tweet, sequelize } = require('../models')
+const helpers = require('../_helpers')
 const assert = require('assert')
+const jwt = require('jsonwebtoken')
 const adminServices = {
   getUsers: (req, cb) => {
     return User.findAll({
@@ -32,6 +34,17 @@ const adminServices = {
       })
       .then(deletedTweet => cb(null, { deletedTweet }))
       .catch(err => cb(err))
+  },
+  singIn: (req, cb) => {
+    try {
+      const userData = helpers.getUser(req).toJSON()
+      assert(userData.role !== 'user', '帳號不存在！')
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      cb(null, { token, user: userData })
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 

@@ -15,7 +15,7 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 router.use('/followships', authenticated, followships)
 router.use('/tweets', authenticated, tweets)
 router.use('/users', authenticated, user)
-router.use('/admin', authenticated, authenticatedAdmin, admin)
+router.use('/admin', admin)
 router.use('/', apiErrorHandler)
 
 module.exports = router
