@@ -11,8 +11,8 @@ jobs:
 
     env:
       NODE_ENV: ghactions
-      IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
-      JWT_SECRET: ${{ secrets.JWTsecret }}
+      IMGUR_CLIENT_ID: 252ea9997a22215
+      JWT_SECRET: alphacamp
 
     services:
       mysql:
