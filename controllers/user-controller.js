@@ -82,26 +82,55 @@ const userController = {
       next(err)
     }
   },
-  getRepliedTweets: async (req, res, next) => {
+  getUserReplies: async (req, res, next) => {
     try {
-      const { userId } = req.params
-      const reply = await Reply.findAll({
+      const userId = helpers.getUser(req).id
+
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(404).json({ status: 'error', message: '找不到使用者' })
+      }
+
+      const replies = await Reply.findAll({
         where: { UserId: userId },
         include: [
           { model: User, attributes: ['name', 'avatar', 'account'] },
           {
             model: Tweet,
-            attributes: [],
-            include: [{ model: User, attributes: ['account'] }]
+            include: User
           }
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (!reply) {
-        return res.status(404).json({ status: 'error', message: '回覆不存在' })
+
+      if (replies.length === 0) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到任何回覆'
+        })
       }
-      return res.status(200).json({ status: 'success', data: reply })
-    } catch (error) { next(error) }
+
+      const repliesData = replies.map((reply) => {
+        return {
+          Id: reply.id,
+          UserId: reply.UserId,
+          comment: reply.comment,
+          CreatedAt: reply.createdAt,
+          Name: reply.User.name,
+          Avatar: reply.User.avatar,
+          Account: reply.User.account,
+          tweetId: reply.TweetId,
+          tweetDescription: reply.Tweet.description,
+          tweetCreatedAt: reply.Tweet.createdAt,
+          tweetAuthorId: reply.Tweet.User.id,
+          tweetAuthorAccount: reply.Tweet.User.account
+        }
+      })
+
+      return res.status(200).json(repliesData)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
