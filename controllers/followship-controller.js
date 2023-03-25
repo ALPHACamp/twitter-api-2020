@@ -22,7 +22,8 @@ const adminController = {
   }),
   getFollowship: tryCatch(async (req, res) => {
     const { limit, sort } = req.query
-    const result = await User.findAll({ // chatGDP大哥教的
+    const currentUser = getUser(req)
+    const users = await User.findAll({ // chatGDP大哥教的
       subQuery: false,
       attributes: [
         'id', 'account', 'name', 'avatar',
@@ -39,6 +40,12 @@ const adminController = {
       group: ['User.id'],
       limit: Number(limit) || null,
       order: sort ? [[sequelize.literal('followersCount'), 'DESC']] : null
+    })
+    const result = users.map(user => {
+      return {
+        user,
+        isFollowed: currentUser.Followings.some(fu => fu.id === user.id) // fu = following user
+      }
     })
     res.status(200).json(result)
   }),

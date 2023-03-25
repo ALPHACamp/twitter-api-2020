@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { Op, Model } = require('sequelize')
+const sequelize = require('sequelize')
 const { ReqError, AuthError, AutherError } = require('../helpers/errorInstance')
 const { User, Tweet, Followship, Reply, Like } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -33,11 +34,15 @@ const userController = {
     })
     createdUser = createdUser.toJSON()
     delete createdUser.password
-    res.json({ status: 'success', user: createdUser })
+    delete createdUser.updatedAt
+    delete createdUser.createdAt
+    res.status(200).json(createdUser)
   }),
   signIn: tryCatch((req, res) => {
     const userData = getUser(req).toJSON()
     delete userData.password
+    delete userData.updatedAt
+    delete userData.createdAt
     if (userData.role === 'admin') {
       throw new ReqError('帳號不存在！')
       // return res.json({ status: 'error', message: '帳號不存在！' })
@@ -45,8 +50,7 @@ const userController = {
     const token = jwt.sign(userData, process.env.JWT_SECRET, {
       expiresIn: '30d'
     })
-    res.json({
-      status: 'success',
+    res.status(200).json({
       data: {
         token,
         user: userData
@@ -61,7 +65,9 @@ const userController = {
   userVerify: (req, res) => {
     const token = req.header('Authorization').replace('Bearer ', '')
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    res.json({ status: 'success', user: decoded })
+    delete decoded.updatedAt
+    delete decoded.createdAt
+    res.status(200).json(decoded)
   },
   getUser: tryCatch(async (req, res) => {
     const userData = getUser(req) instanceof Model
@@ -69,6 +75,7 @@ const userController = {
       : getUser(req).dataValues
     const { id } = req.params
     const user = await User.findByPk(id, {
+      attributes: { exclude: ['password', 'updatedAt', 'createdAt'] },
       raw: true
     })
     if (!user) throw new ReqError('無此使用者資料....')
@@ -81,7 +88,6 @@ const userController = {
     })
     // 字串比數字 用==
     user.currentUser = id == userData.id
-    delete user.password
     return Promise.resolve(user).then(
       user => res.status(200).json(user)
       // res.status(200).json({ status: 'success', user })
@@ -89,7 +95,8 @@ const userController = {
   }),
   getTweets: tryCatch(async (req, res) => {
     const { id } = req.params
-    const user = await User.findByPk(id)
+    const currentUser = getUser(req)
+    const user = await User.findByPk(id, { raw: true })
     if (!user) throw new ReqError('無此使用者資料')
     const tweets = await Tweet.findAll({
       where: { UserId: id },
@@ -101,6 +108,8 @@ const userController = {
       const temp = e.toJSON()
       temp.Replies = temp.Replies.length
       temp.Likes = temp.Likes.length
+      temp.isLiked = currentUser.Likes.some(like => like.TweetId === e.id)
+      temp.avatar = user.avatar
       return temp
     })
     return Promise.resolve(result)
@@ -115,7 +124,7 @@ const userController = {
       : getUser(req).dataValues
     // 之後或許需要使用者名稱跟帳號
     const { id } = req.params
-    const user = await User.findByPk(id)
+    const user = await User.findByPk(id, { raw: true })
     if (!user) throw new ReqError('無此使用者資料')
     const replies = await Reply.findAll({
       where: { UserId: id },
@@ -125,37 +134,50 @@ const userController = {
         include: { model: User, as: 'poster', attributes: ['account'] }
       },
       order: [['createdAt', 'DESC']],
-      raw: true
+      nest: true
     })
     const result = replies.map(e => ({
       ...e,
       name: userData.name,
-      account: userData.account
+      account: userData.account,
+      avatar: user.avatar
     }))
     return Promise.resolve(result).then(result =>
       res.status(200).json(result)
       // res.status(200).json({ status: 'success', replies: result })
     )
   }),
-  getLikes: tryCatch(async (req, res) => {
+  getLikes: tryCatch(async (req, res) => { // 可優化 將SQL語法轉為Squelize
     const { id } = req.params
     const user = await User.findByPk(id)
+    const currentUser = getUser(req)
     if (!user) throw new ReqError('無此使用者資料')
     let likes = await Like.findAll({
       where: { UserId: id },
-      attributes: ['id'],
+      attributes: ['TweetId'],
       order: [['updatedAt', 'DESC']],
       raw: true
     })
-    likes = likes.map(e => e.id)
+    likes = likes.map(e => e.TweetId)
     let result = await Tweet.findAll({
       where: { id: likes },
-      include: { model: User, as: 'poster', attributes: ['name', 'account'] },
-      raw: true
+      attributes: [
+        'id', 'description', 'image', 'createdAt', 'updatedAt',
+        [sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`Tweet_id` = `Tweet`.`id`)'), 'Likes'],
+        [sequelize.literal('(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`Tweet_id` = `Tweet`.`id`)'), 'Replies']
+      ],
+      include: [
+        { model: User, as: 'poster', attributes: ['name', 'account', 'avatar', 'updatedAt'] }
+      ],
+      nest: true,
+      order: [['updatedAt', 'DESC']]
     })
-    result = result.map(e => {
-      delete Object.assign(e, { TweetId: e.id }).id
-      return e
+    result = result.map(LikedPost => {
+      delete Object.assign(LikedPost, { TweetId: LikedPost.id }).id
+      return {
+        LikedPost,
+        currentIsLiked: currentUser.Likes.some(lu => lu.id === LikedPost.id)
+      }
     })
     return Promise.resolve(result).then(result =>
       res.status(200).json(result)
@@ -234,10 +256,11 @@ const userController = {
 
     const form = req.body
     const finalform = await userController.formValidation(form, req)
-    const user = await User.findByPk(id)
+    const user = await User.findByPk(id, {
+      attributes: { exclude: ['password', 'updatedAt', 'createdAt'] }
+    })
     let result = await user.update(finalform)
     result = result.toJSON()
-    delete result.password
     return Promise.resolve(result).then(result =>
       res.status(200).json(result)
       // res.status(200).json({ status: 'success', updatedUser: result })
