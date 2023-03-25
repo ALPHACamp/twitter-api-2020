@@ -107,7 +107,8 @@ const userController = {
     const { userId } = req.params
     return User.findAll({
       where: { id: userId },
-      include: [{ model: User, as: 'Followings' }]
+      include: [{ model: User, as: 'Followings' }],
+      raw: true
     })
       .then((user) => {
         console.log('result', user)
@@ -130,7 +131,7 @@ const userController = {
               (fu) => fu.Followship.followingId === f.Followers.id
             )
         }))
-        return res.status(200).json({ status: 'success', data: followingData })
+        return res.status(200).json(followingData)
       })
       .catch((error) => next(error))
   }
