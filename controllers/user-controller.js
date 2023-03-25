@@ -105,7 +105,8 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      if (Number(req.params.userId) !== Number(helpers.getUser(req).id)) {
+      const { userId } = req.params
+      if (Number(userId) !== Number(helpers.getUser(req).id)) {
         return res
           .status(403)
           .json({ status: 'error', message: 'Access denied!' })
@@ -113,7 +114,7 @@ const userController = {
       const { account, name, email, password, checkPassword, introduction } = req.body
       const errors = []
       // check if all the required fields are filled out correctly
-      if (!account || !name || !email || !password || !checkPassword || !introduction) {
+      if (!account || !name || !email || !password || !checkPassword ) {
         errors.push('所有欄位皆必填')
       }
       if (name && !validator.isByteLength(name, { max: 50 })) {
@@ -136,7 +137,6 @@ const userController = {
             errors.push("此Email已被註冊!");
           }
         }
-        
       }
       if (account !== helpers.getUser(req).account) {
         const ifAccountDuplicate = await User.findOne({ where: { account } })
@@ -153,16 +153,18 @@ const userController = {
       if (!user) {
         return res.status(404).json({ status: 'error', message: '帳戶不存在' })
       }
-      const salt = await bcrypt.genSalt(10)
-      const hashedPassword = await bcrypt.hash(password, salt)
+      const updatedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+      // const salt = await bcrypt.genSalt(10)
+      // const hashedPassword = await bcrypt.hash(password, salt)
       await user.update({
         name,
         account,
         email,
-        password: hashedPassword
+        password: updatedPassword, 
+        introduction
       })
       return res.status(200).json({ status: 'success', message: '設定成功' })
-    } catch (error) { return res.status(404).json({ status: 'error', message: error }) }
+    } catch (error) { next(error) }
   }
 }
 module.exports = userController
