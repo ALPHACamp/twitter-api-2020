@@ -102,6 +102,9 @@ const userController = {
       }
       return res.status(200).json({ status: 'success', data: reply })
     } catch (error) { next(error) }
+  },
+  getFollowings: (req, res, next) => {
+    
   }
 }
 
