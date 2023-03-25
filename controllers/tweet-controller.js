@@ -4,8 +4,6 @@ const { User, Tweet, Like, sequelize, Reply } = require('../models')
 const timeFormat = require('../helpers/date-helpers')
 const { Op } = require('sequelize')
 
-// if (!user) throw createError(404, '該使用者不存在')
-
 const tweetController = {
   getTweets: (req, res, next) => {
     const loginUserId = helpers.getUser(req).id
@@ -23,8 +21,8 @@ const tweetController = {
         attributes: {
           include:
             [
-              [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCounts'],
-              [sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCounts']
+              [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCount'],
+              [sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCount']
             ]
         },
         order: [['createdAt', 'DESC']]
@@ -51,15 +49,10 @@ const tweetController = {
     if (!description) throw createError(400, '內容不可空白')
     if (description.length > 140) throw createError(422, '字數不可超過 140 字')
 
-    User.findByPk(UserId)
-      .then(user => {
-        if (!user) throw createError(404, '該使用者不存在')
-
-        return Tweet.create({
-          description,
-          UserId
-        })
-      })
+    Tweet.create({
+      description,
+      UserId
+    })
       .then(() => res.json({
         status: 'success',
         message: '推文新增成功'
@@ -82,8 +75,8 @@ const tweetController = {
           // 計算 reply, like 數量
           include:
             [
-              [sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCounts'],
-              [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCounts']
+              [sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCount'],
+              [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCount']
             ]
         }
       }),
@@ -217,7 +210,7 @@ const tweetController = {
       attributes: {
         include: [[
           sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'followerCounts'
+            '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'followerCount'
         ]],
         exclude: ['password', 'email', 'cover', 'role', 'introduction', 'createdAt', 'updatedAt']
       },
@@ -226,7 +219,7 @@ const tweetController = {
         as: 'Followers',
         attributes: ['id', 'name']
       }],
-      order: [[sequelize.literal('followerCounts'), 'Desc']]
+      order: [[sequelize.literal('followerCount'), 'Desc']]
     })
       .then(users => {
         const result = users.map(users => {
