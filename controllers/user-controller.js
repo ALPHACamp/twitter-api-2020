@@ -110,10 +110,14 @@ const userController = {
       include: [{ model: User, as: 'Followings' }]
     })
       .then((user) => {
+        console.log('result', user)
         if (!user || user.role === 'admin') {
           return res.status(404).json({ status: 'error', message: '帳戶不存在' })
         };
         const followingData = user.map((f) => ({
+          userId: f.id,
+          name: f.name,
+          account: f.account,
           ...f.toJSON().Followings,
           followingId: f.Followings?.id || null,
           followingAvatar: f.Followings?.avatar || 'https://reurl.cc/XLQeQj',
