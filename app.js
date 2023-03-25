@@ -1,6 +1,12 @@
 console.log('process.env.NODE_ENV')
 console.log('process.env.NODE_ENV')
 console.log(process.env.NODE_ENV)
+console.log('process.env.IMGUR_CLIENT_ID')
+console.log('process.env.IMGUR_CLIENT_ID')
+console.log(process.env.IMGUR_CLIENT_ID)
+console.log('process.env.JWT_SECRET')
+console.log('process.env.JWT_SECRET')
+console.log(process.env.JWT_SECRET)
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
