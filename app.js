@@ -5,7 +5,7 @@ if (process.env.NODE_ENV !== 'production') {
 const path = require('path')
 const express = require('express')
 const helpers = require('./_helpers') // AC 為了測試要我們改的，用 getUser(...) 取代 req.user
-
+const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
 const passport = require('./config/passport')
@@ -21,7 +21,7 @@ app.use('/upload', express.static(path.join(__dirname, 'upload')))
 function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
-
+app.use(cors())
 app.use(routes)
 // app.get('/', (req, res) => res.send('Hello World!'))
 // app.listen(port, () => console.log(`Example app listening on port ${port}!`))
