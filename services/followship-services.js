@@ -5,19 +5,27 @@ const { Followship } = db
 const followshipServices = {
   followSomeone: (req, cb) => {
     const currentUserId = Number(helpers.getUser(req).id)
-    console.log(currentUserId)
     const id = Number(req.body.id)
-    console.log(id)
-    Followship.create({
-      followerId: currentUserId,
-      followingId: id
+    Followship.findOne({
+      where: {
+        followerId: currentUserId,
+        followingId: id
+      }
     })
-      .then(followship => cb(null, followship))
+      .then(followship => {
+        if (followship) throw new Error('已經追蹤過了')
+        return Followship.create({
+          followerId: currentUserId,
+          followingId: id
+        }).then(followship => cb(null, followship))
+          .catch(err => cb(err, null))
+      }
+      )
       .catch(err => cb(err, null))
   },
   unfollowSomeone: (req, cb) => {
-    const currentUserId = helpers.getUser(req).dataValues.id
-    const { id } = req.params
+    const currentUserId = Number(helpers.getUser(req).id)
+    const id = req.params.followingId
     Followship.findOne({
       where: {
         followerId: currentUserId,
