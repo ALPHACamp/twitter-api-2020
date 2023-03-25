@@ -4,6 +4,7 @@ const db = require('../models')
 const { User, Followship, Tweet, Reply, Like } = db
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signUp: (req, res, next) => {
@@ -395,6 +396,66 @@ const userController = {
         res.json(userFollowers)
       })
       .catch(err => next(err))
+  },
+  putUserProfile: (req, res, next) => {
+    const user = helpers.getUser(req)
+    const userId = Number(user.id)
+    const { name, introduction } = req.body
+    const { files } = req
+
+    if (!name) throw new Error('Name is required!')
+    if (name.length > 50) throw new Error("Name can't larger than 50 characters!")
+    if (introduction.length > 160) throw new Error("Introduction can't larger than 160 characters!")
+
+    if (!files) { // test沒有file
+      return User.findByPk(req.params.id)
+        .then(user => {
+          if (!user) throw new Error("User did't exist!")
+          // 避免有人惡意修改其他人的設定
+          if (user.id !== userId) throw new Error("You can't modify other user's setting!")
+
+          return user.update({
+            name,
+            introduction
+          })
+        })
+        .then(user => {
+          const userData = {
+            ...user.toJSON()
+          }
+          delete userData.password
+          delete userData.role
+          res.json(userData)
+        })
+        .catch(err => next(err))
+    } else {
+      return Promise.all([
+        User.findByPk(req.params.id),
+        imgurFileHandler(files.avatar === undefined ? null : files.avatar[0]),
+        imgurFileHandler(files.cover === undefined ? null : files.cover[0])
+      ])
+        .then(([user, avatar, cover]) => {
+          if (!user) throw new Error("User did't exist!")
+          // 避免有人惡意修改其他人的設定
+          if (user.id !== userId) throw new Error("You can't modify other user's setting!")
+
+          return user.update({
+            name,
+            introduction,
+            avatar: avatar || user.avatar,
+            cover: cover || user.cover
+          })
+        })
+        .then(user => {
+          const userData = {
+            ...user.toJSON()
+          }
+          delete userData.password
+          delete userData.role
+          res.json(userData)
+        })
+        .catch(err => next(err))
+    }
   }
 }
 

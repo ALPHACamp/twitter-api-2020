@@ -5,6 +5,7 @@ const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated } = require('../middleware/auth')
+const upload = require('../middleware/multer')
 
 const admin = require('./modules/admin')
 
@@ -19,6 +20,7 @@ router.get('/users/:id/replied_tweets', authenticated, userController.getUserRep
 router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
+router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUserProfile)
 router.get('/users/:id', authenticated, userController.getUserProfile)
 
 router.post('/tweets/:id/like', authenticated, tweetController.likeTweet)
