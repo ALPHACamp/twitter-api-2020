@@ -1,11 +1,17 @@
-const admimServices = require('../../services/admin-services')
+const adminServices = require('../../services/admin-services')
 
 const adminController = {
   getUsers: (req, res, next) => {
-    admimServices.getUsers(req, (err, data) => err ? next(err) : res.json(data))
+    adminServices.getUsers(req, (err, data) => err ? next(err) : res.json(data))
   },
   deleteTweet: (req, res, next) => {
-    admimServices.deleteTweet(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+    adminServices.deleteTweet(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  signIn: (req, res, next) => {
+    adminServices.singIn(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', data }))
+  },
+  getTweets: (req, res, next) => {
+    adminServices.getTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 

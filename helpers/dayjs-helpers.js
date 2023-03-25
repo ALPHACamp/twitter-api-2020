@@ -6,6 +6,6 @@ dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
 
 module.exports = {
-  relativeTimeFromNow: a => dayjs(a).fromNow(),
+  relativeTimeFromNow: a => dayjs(a).fromNow(true),
   transferDateTime: a => dayjs(a).format('A hh:mm．YYYY[年]MM[月]DD[日]')
 }
