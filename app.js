@@ -22,6 +22,10 @@ function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
+console.log('process.env')
+console.log('process.env')
+console.log(process.env)
+
 app.use(routes)
 // app.get('/', (req, res) => res.send('Hello World!'))
 // app.listen(port, () => console.log(`Example app listening on port ${port}!`))
