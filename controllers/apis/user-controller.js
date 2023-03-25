@@ -12,6 +12,21 @@ const userController = {
   },
   getTweetsOfUser: (req, res, next) => {
     userService.getTweetsOfUser(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getRepliesOfUser: (req, res, next) => {
+    userService.getRepliesOfUser(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getLikesOfUser: (req, res, next) => {
+    userService.getLikesOfUser(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getFollowingsOfUser: (req, res, next) => {
+    userService.getFollowingsOfUser(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getFollowersOfUser: (req, res, next) => {
+    userService.getFollowersOfUser(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getTopUsers: (req, res, next) => {
+    userService.getTopUsers(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 
