@@ -104,6 +104,8 @@ const userController = {
     } catch (error) { next(error) }
   },
   getFollowings: (req, res, next) => {
+    const { userId } =req.params
+    
     
   }
 }
