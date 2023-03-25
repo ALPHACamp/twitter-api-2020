@@ -42,10 +42,7 @@ const userController = {
       const foundUser = await User.findByPk(user.id);
       const newUser = foundUser.toJSON();
       delete newUser.password;
-      return res.json({
-        status: "success",
-        data: { newUser },
-      });
+      return res.json(newUser);
     } catch (error) {
       return next(error);
     }
@@ -81,11 +78,8 @@ const userController = {
         expiresIn: "30d",
       });
       return res.json({
-        status: "success",
-        data: {
-          token,
-          loginUser,
-        },
+        token,
+        ...loginUser,
       });
     } catch (error) {
       return next(error);
@@ -124,10 +118,7 @@ const userController = {
       }
       const user = foundUser.toJSON();
       delete user.password;
-      return res.json({
-        status: "success",
-        ...user,
-      });
+      return res.json({ ...user });
     } catch (error) {
       return next(error);
     }
@@ -142,9 +133,7 @@ const userController = {
       }
       const currentUser = foundUser.toJSON();
       delete currentUser.password;
-      return res.json({
-        ...currentUser,
-      });
+      return res.json({ ...currentUser });
     } catch (error) {
       return next(error);
     }
@@ -187,10 +176,7 @@ const userController = {
       });
       const updatedUser = data.toJSON();
       delete updatedUser.password;
-      return res.json({
-        status: "success",
-        data: { updatedUser },
-      });
+      return res.json({ ...updatedUser });
     } catch (error) {
       return next(error);
     }
@@ -242,10 +228,7 @@ const userController = {
       });
       const updatedUser = data.toJSON();
       delete updatedUser.password;
-      return res.json({
-        status: "success",
-        data: { updatedUser },
-      });
+      return res.json({ ...updatedUser });
     } catch (error) {
       return next(error);
     }
@@ -282,10 +265,8 @@ const userController = {
         followerId: getUser(req).id,
         followingId: Number(id),
       });
-      return res.json({
-        status: "success",
-        data: { createdFollowship },
-      });
+      const data = createdFollowship.toJSON();
+      return res.json({ ...data });
     } catch (error) {
       return next(error);
     }
@@ -319,10 +300,8 @@ const userController = {
       }
       // - 取消追蹤
       const deletedFollowship = await followship.destroy();
-      return res.json({
-        status: "success",
-        data: { deletedFollowship },
-      });
+      const data = deletedFollowship.toJSON();
+      return res.json({ ...data });
     } catch (error) {
       return next(error);
     }
@@ -338,7 +317,7 @@ const userController = {
       }
       const tweets = await Tweet.findAll({
         where: {
-          UserId: getUser(req).id,
+          UserId: id,
         },
         raw: true,
       });
@@ -358,7 +337,7 @@ const userController = {
       }
       const replies = await Reply.findAll({
         where: {
-          UserId: getUser(req).id,
+          UserId: id,
         },
         raw: true,
       });
