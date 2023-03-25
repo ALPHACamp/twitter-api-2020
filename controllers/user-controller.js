@@ -89,24 +89,32 @@ const userController = {
   getUser: async (req, res, next) => {
     const { id } = req.params;
     try {
-      const foundUser = await User.findByPk(id, {
-        attributes: {
-          include: [
-            [
-              sequelize.literal(
-                `(SELECT COUNT(*) FROM Followships WHERE followingId = ${id})`
-              ),
-              "followerCounts",
+      const [foundUser, loginUser] = await Promise.all([
+        User.findByPk(id, {
+          attributes: {
+            include: [
+              [
+                sequelize.literal(
+                  `(SELECT COUNT(*) FROM Followships WHERE followingId = ${id})`
+                ),
+                "followerCounts",
+              ],
+              [
+                sequelize.literal(
+                  `(SELECT COUNT(*) FROM Followships WHERE followerId = ${id})`
+                ),
+                "followingCounts",
+              ],
             ],
-            [
-              sequelize.literal(
-                `(SELECT COUNT(*) FROM Followships WHERE followerId = ${id})`
-              ),
-              "followingCounts",
-            ],
-          ],
-        },
-      });
+          },
+        }),
+        User.findByPk(getUser(req).id, {
+          include: [{ model: User, as: "Followings", attributes: ["id"] }],
+        }),
+      ]);
+      const loginUserFollowingIds = loginUser?.Followings
+        ? loginUser.Followings.map((f) => f.id)
+        : [];
       if (!foundUser || foundUser.isAdmin) {
         const error = new Error("使用者不存在!");
         error.status = 404;
@@ -115,8 +123,8 @@ const userController = {
       const user = foundUser.toJSON();
       delete user.password;
       return res.json({
-        status: "success",
         ...user,
+        isFollowed: loginUserFollowingIds.some(fid => fid === Number(id))
       });
     } catch (error) {
       return next(error);
