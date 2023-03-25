@@ -10,7 +10,7 @@ module.exports = {
       created_at: new Date(),
       updated_at: new Date(),
       following_id: shuffledArray(users)[index % 20].id,
-      follower_Id: shuffledArray(users)[index % 20].id
+      follower_id: shuffledArray(users)[index % 20].id
     })))
     await queryInterface.sequelize.query('DELETE FROM followships WHERE following_id = follower_id;', { type: queryInterface.sequelize.QueryTypes.DELETE })
   },
