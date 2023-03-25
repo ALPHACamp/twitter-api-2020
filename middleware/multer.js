@@ -1,7 +1,7 @@
 const multer = require('multer')
 const upload = multer({
   dest: 'temp/',
-  fileFilter: function (req, file, cb) {
+  fileFilter: function (_req, file, cb) {
     // 檢查檔案類型
     if (!file.mimetype.startsWith('image/')) {
       return cb(new Error('只能上傳圖片'))
