@@ -64,8 +64,8 @@ const tweetServices = {
       }
     })
       .then(tweet => {
-        tweet = tweet.toJSON()
         if (!tweet) throw new Error('此貼文不存在!')
+        tweet = tweet.toJSON()
         tweet.isLiked = tweet.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
         cb(null, tweet)
       })
