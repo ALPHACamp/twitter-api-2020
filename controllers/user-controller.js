@@ -106,13 +106,13 @@ const userController = {
     return User.findAll({
       where: { id: req.params.userId },
       include: [
-        { model: User, as: 'Followers', attributes: ['id', 'avatar', 'name', 'introduction'] }],
+        { model: User, as: 'Followers', attributes: ['id', 'avatar', 'name', 'introduction'] }]
     })
       .then(followerData => {
         if (!followerData) throw new Error('用戶不存在')
         followerData = followerData.map((f) => ({
           ...f.toJSON().Followers,
-          followerId: f.Followers.id,
+          followerId: f.Followers?.id || null,
           followerAvatar: f.Followers?.avatar || 'https://reurl.cc/XLQeQj',
           followerName: f.Followers?.name,
           followerIntro: f.Followers?.introduction || '',
@@ -123,7 +123,7 @@ const userController = {
               (fu) => fu.Followship.followingId === f.Followers.id
             )
         }))
-        return res.status(200).json(followerData)
+        return res.status(200).json({ status: 'success', data: followerData })
       })
       .catch(error => next(error))
   }
