@@ -323,6 +323,12 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserTokenStatus: async (req, res, next) => {
+    return res.status(200).json({
+      status: 'success',
+      message: 'User authenticated'
+    })
   }
 }
 module.exports = userController

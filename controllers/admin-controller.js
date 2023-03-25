@@ -30,7 +30,7 @@ const adminController = {
       next(err)
     }
   }, // 推文清單(每筆資料顯示推文內容的前50字)
-  getTweets: async (req, res, next) => {
+  getTweets: async (_req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
         attributes: [
@@ -84,7 +84,7 @@ const adminController = {
       next(err)
     }
   },
-  getUsers: async (req, res, next) => {
+  getUsers: async (_req, res, next) => {
     try {
       const users = await User.findAll({
         attributes: [
