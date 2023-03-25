@@ -5,6 +5,7 @@ const assert = require('assert')
 const helpers = require('../_helpers')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { Op } = require('sequelize')
+const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 
 const userService = {
   signUp: (req, cb) => {
@@ -132,6 +133,7 @@ const userService = {
         assert(tweets, '此使用者沒有推文！')
         const data = tweets.map(t => ({
           ...t,
+          transferDateTime: relativeTimeFromNow(t.createdAt),
           isLiked: Boolean(t.Likes.isLiked)
         }))
         cb(null, data)
@@ -150,7 +152,7 @@ const userService = {
           exclude: ['password']
         }
       }, {
-        model: Tweet, include: [{ model: User, attributes: [['account', 'ownerAccount'], ['name', 'ownerName']] }]
+        model: Tweet, include: [{ model: User, attributes: [['account', 'ownerAccount'], ['name', 'ownerName'], ['avatar', 'ownerAvatar']] }]
       }],
       order: [['createdAt', 'DESC']],
       raw: true,
@@ -158,7 +160,11 @@ const userService = {
     })
       .then(repliesOfTweet => {
         assert(repliesOfTweet, '此使用者沒有回覆的推文！')
-        cb(null, repliesOfTweet)
+        const data = repliesOfTweet.map(t => ({
+          ...t,
+          transferDateTime: relativeTimeFromNow(t.createdAt)
+        }))
+        cb(null, data)
       })
       .catch(err => cb(err))
   },
@@ -190,6 +196,7 @@ const userService = {
         assert(likes, '此使用者沒有喜歡的推文！')
         const result = likes.map(f => ({
           ...f,
+          transferDateTime: relativeTimeFromNow(f.Tweet.createdAt),
           isLiked: Boolean(f.Tweet.isLiked)
         }))
         cb(null, result)
