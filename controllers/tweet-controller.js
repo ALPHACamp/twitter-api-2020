@@ -16,16 +16,7 @@ const tweetController = {
       }
 
       const tweetsData = tweets.reduce((result, tweet) => {
-        const {
-          id,
-          UserId,
-          description,
-          createdAt,
-          User,
-          Replies,
-          Likes,
-          LikedUsers
-        } = tweet
+        const { id, UserId, description, createdAt, User, Replies, Likes, LikedUsers } = tweet
         result.push({
           id,
           UserId,
@@ -100,6 +91,48 @@ const tweetController = {
       })
 
       return res.status(200).json({ status: 'success', message: '推文已成功發布', tweet })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getReplies: async (req, res, next) => {
+    try {
+      const { tweetId } = req.params
+
+      const tweet = await Tweet.findByPk(tweetId)
+
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到此篇推文'
+        })
+      }
+
+      const replies = await Reply.findAll({
+        where: { tweetId },
+        include: [User, { model: Tweet, include: [User] }],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+
+      const repliesData = replies.map((reply) => {
+        const { id, UserId, TweetId, comment, createdAt } = reply
+        return {
+          id,
+          UserId,
+          TweetId,
+          comment,
+          createdAt,
+          tweetAuthorAccount: reply.Tweet.User.account,
+          replyAccount: reply.User.account,
+          replyName: reply.User.name,
+          replyAvatar: reply.User.avatar
+        }
+      })
+
+      return res.status(200).json(repliesData)
     } catch (err) {
       next(err)
     }
