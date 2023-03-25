@@ -79,11 +79,7 @@ const tweetController = {
         nest: true,
         attributes: ["id", "avatar"],
       });
-      return res.json({
-        status: "success",
-        tweetInput,
-        user,
-      });
+      return res.json({ tweetInput, user });
     } catch (err) {
       return next(err);
     }
@@ -195,10 +191,7 @@ const tweetController = {
         TweetId,
         comment,
       });
-      return res.json({
-        status: "success",
-        replyInput,
-      });
+      return res.json(replyInput);
     } catch (err) {
       return next(err);
     }
