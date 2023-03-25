@@ -37,7 +37,7 @@ const userService = {
         password: hash,
         role: 'user',
         avatar: 'https://i.imgur.com/ZyXrPxB.png',
-        cover: 'https://imgur.com/a/lGG5iGQ'
+        cover: 'https://i.imgur.com/jXE6Mmp.png'
       }))
       .then(signedUser => {
         const userData = signedUser.toJSON()
@@ -51,6 +51,7 @@ const userService = {
       // 按照原始檔給的有提到要引入 helpers 並用 helpers.getUser(req) 來做 req.user的替代
       const userData = helpers.getUser(req).toJSON()
       // if (userData?.role === 'admin') return res.status(403).json({ status: 'error', message: '帳號不存在！' })
+      assert(userData.role !== 'admin', '帳號不存在！')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, { token, user: userData })
@@ -118,6 +119,9 @@ const userService = {
       }, {
         model: Reply,
         attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReplies']]
+      }, {
+        model: User,
+        attributes: ['account', 'name', 'avatar']
       }],
       group: 'Tweet.id',
       order: [['createdAt', 'DESC']],
@@ -184,7 +188,6 @@ const userService = {
     })
       .then(likes => {
         assert(likes, '此使用者沒有喜歡的推文！')
-        console.log(likes)
         const result = likes.map(f => ({
           ...f,
           isLiked: Boolean(f.Tweet.isLiked)
