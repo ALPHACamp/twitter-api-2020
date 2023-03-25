@@ -52,7 +52,7 @@ router.post("/api/users/signin", userController.signIn);
 // - Tweet
 router.post("/api/tweets/:id/like", authenticatedUser, tweetController.addLike);
 router.post(
-  "/api/tweets/:id/removeLike",
+  "/api/tweets/:id/unLike",
   authenticatedUser,
   tweetController.removeLike
 );

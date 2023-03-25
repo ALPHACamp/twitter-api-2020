@@ -233,6 +233,16 @@ const tweetController = {
   // 將指定推文移除喜歡
   removeLike: async (req, res, next) => {
     try {
+      const tweetId = req.params.id;
+      const currentUser = getUser(req).id;
+      // 直接執行刪除動作，不需要先到資料庫中尋找有沒有喜歡過的紀錄，以減少對資料庫的請求次數
+      const removeLike = await Like.destroy({
+        where: {
+          TweetId: tweetId,
+          UserId: currentUser,
+        },
+      });
+      return res.json(removeLike);
     } catch (err) {
       return next(err);
     }
