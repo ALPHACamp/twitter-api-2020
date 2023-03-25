@@ -22,8 +22,8 @@ passport.use(new LocalStrategy(
           if (!res) return cb(null, false, { status: 402, message: '帳號或密碼錯誤!' })
 
           return cb(null, user)
-        })
-      })
+        }).catch(err => cb(err))
+      }).catch(err => cb(err))
   }
 ))
 
