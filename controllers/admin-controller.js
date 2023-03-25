@@ -3,14 +3,34 @@ const { Like, Tweet, User } = require('../models')
 const adminController = {
   getUsers: (req, res, next) => {
     return User.findAll({
+      attributes: [
+        'id',
+        'email',
+        'name',
+        'account'
+      ],
       include: [
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' },
-        { model: Like },
-        { model: Tweet }
+        { model: User, as: 'Followings', attributes: ['id'] },
+        { model: User, as: 'Followers', attributes: ['id'] },
+        { model: Tweet, include: { model: Like, attributes: ['id'] } }
       ]
     })
-      .then(users => res.json({ status: 'success', users }))
+      .then(users => {
+        const result = users
+          .map(user => ({
+            ...user.toJSON()
+          }))
+        result.forEach(r => {
+          r.TweetsCount = r.Tweets.length
+          r.FollowingsCount = r.Followings.length
+          r.FollowersCount = r.Followers.length
+          r.TweetsLikedCount = r.Tweets.reduce((acc, tweet) => acc + tweet.Likes.length, 0)
+          delete r.Tweets
+          delete r.Followings
+          delete r.Followers
+        })
+        return res.status(200).json(result)
+      })
       .catch(err => next(err))
   },
   // 顯示所有推文
