@@ -12,6 +12,16 @@ router.get(
   userController.getCurrentUser
 );
 router.get(
+  "/api/users/:id/followers",
+  authenticatedUser,
+  userController.getUserFollowers
+);
+router.get(
+  "/api/users/:id/followings",
+  authenticatedUser,
+  userController.getUserFollowings
+);
+router.get(
   "/api/users/:id/tweets",
   authenticatedUser,
   userController.getUserTweets

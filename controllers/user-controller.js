@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { Op } = require("sequelize");
+const { Op, QueryTypes } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
 const { User, Tweet, Reply, Followship, sequelize } = require("../models");
@@ -352,6 +352,42 @@ const userController = {
         raw: true,
       });
       return res.json(replies);
+    } catch (error) {
+      return next(error);
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const followers = await sequelize.query(
+        `
+      SELECT f.followerId, u.account, u.name, u.avatar, f.createdAt as followedDate
+      FROM Followships as f INNER JOIN Users as u
+      ON f.followerId = u.id
+      WHERE followingId = ${id}
+      ORDER BY followedDate DESC;
+      `,
+        { type: QueryTypes.SELECT }
+      );
+      return res.json(followers);
+    } catch (error) {
+      return next(error);
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const followings = await sequelize.query(
+        `
+      SELECT f.followingId, u.account, u.name, u.avatar, f.createdAt as followedDate
+      FROM Followships as f INNER JOIN Users as u
+      ON f.followingId = u.id
+      WHERE followerId = ${id}
+      ORDER BY followedDate DESC;
+      `,
+        { type: QueryTypes.SELECT }
+      );
+      return res.json(followings);
     } catch (error) {
       return next(error);
     }
