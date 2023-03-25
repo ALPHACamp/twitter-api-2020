@@ -45,7 +45,7 @@ const tweetController = {
   getReplies: (req, res, next) => {
     return Reply.findAll({
       where: {
-        tweetId: req.params.tweetId
+        TweetId: req.params.tweetId
       },
       raw: true,
       nest: true
@@ -72,9 +72,9 @@ const tweetController = {
     }
 
     return Reply.create({
-      userId: req.user.id,
+      UserId: req.user.id,
       comment,
-      tweetId: req.params.tweetId
+      TweetId: req.params.tweetId
     })
       .then(newReply => res.json({ status: 'success', newReply }))
       .catch(error => next(error))
@@ -87,8 +87,8 @@ const tweetController = {
       Tweet.findByPk(tweetId),
       Like.findOne({
         where: {
-          user_id: req.user.id,
-          tweet_id: tweetId
+          UserId: req.user.id,
+          TweetId: tweetId
         }
       })
     ])
@@ -106,8 +106,8 @@ const tweetController = {
         }
 
         return Like.create({
-          userId: req.user.id,
-          tweetId: tweetId
+          UserId: req.user.id,
+          TweetId: tweetId
         })
       })
       .then(newLike => res.json({ status: 'success', newLike }))
@@ -117,8 +117,8 @@ const tweetController = {
   removeLike: (req, res, next) => {
     return Like.findOne({
       where: {
-        user_id: req.user.id,
-        tweet_id: req.params.tweetId
+        UserId: req.user.id,
+        TweetId: req.params.tweetId
       }
     })
       .then(like => {
