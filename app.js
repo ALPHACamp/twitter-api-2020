@@ -1,9 +1,13 @@
-// if (process.env.NODE_ENV !== 'production') {
-//   require('dotenv').config()
-// }
-if (process.env.NODE_ENV === 'development' || 'test') {
+console.log('process.env.NODE_ENV')
+console.log('process.env.NODE_ENV')
+console.log(process.env.NODE_ENV)
+if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+// const env = 'development' || 'test'
+// if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+//   require('dotenv').config()
+// }
 
 const path = require('path')
 const express = require('express')
