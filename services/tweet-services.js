@@ -73,7 +73,7 @@ const tweetServices = {
   },
   postReply: (req, cb) => {
     const UserId = getUser(req)?.dataValues.id
-    const TweetId = req.params.id
+    const TweetId = req.params.tweet_id
     Tweet.findByPk(TweetId)
       .then(tweet => {
         if (!tweet) throw new Error('找不到這篇推文')
@@ -83,7 +83,7 @@ const tweetServices = {
           TweetId
         })
       })
-      .then(reply => cb(null, { reply: reply.toJSON() }))
+      .then(reply => cb(null, reply))
       .catch(err => cb(err, null))
   }
 
