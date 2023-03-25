@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const db = require('../models')
 const { User, sequelize, Tweet, Reply, Like, Followship } = db
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const adminServices = {
   postSignIn: (req, cb) => {
@@ -197,15 +198,14 @@ const adminServices = {
     const id = Number(req.params.id)
     // console.log(helpers.getUser(req))
     const currentUserId = helpers.getUser(req).id
-    const { name, email, introduction, avatar, cover, password, checkPassword } = req.body
+    const { name, account, email, introduction, avatar, cover, password } = req.body
 
-    // if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
     if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
-    // if (!name || !email || !password || !checkPassword) throw new Error('請填寫必填欄位')
-
+    // if (!account || !password) throw new Error('請填寫必填欄位')
     return User.findByPk(currentUserId)
       .then(user => {
         user.update({
+          account,
           name,
           email,
           introduction,
@@ -221,8 +221,19 @@ const adminServices = {
           })
       })
       .catch(err => cb(err))
-  },
-  putUserProfile: (req, cb) => {
   }
+  // putUserProfile: (req, cb) => {
+  //   const id = Number(req.params.id)
+  //   // console.log(helpers.getUser(req))
+  //   const currentUserId = helpers.getUser(req).id
+  //   const { name, account, email, introduction, avatar, cover, password } = req.body
+
+  //   if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
+  //   // if (!account || !password) throw new Error('請填寫必填欄位')
+  //  return Promise.all([
+  // 		User.findByPk(currentUserId),
+  // 		imgurFileHandler(req, 'avatar'),
+
+  // }
 }
 module.exports = adminServices
