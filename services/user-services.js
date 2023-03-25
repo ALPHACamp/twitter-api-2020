@@ -133,7 +133,7 @@ const userService = {
         assert(tweets, '此使用者沒有推文！')
         const data = tweets.map(t => ({
           ...t,
-          transferDateTime: relativeTimeFromNow(tweets.createdAt),
+          transferDateTime: relativeTimeFromNow(t.createdAt),
           isLiked: Boolean(t.Likes.isLiked)
         }))
         cb(null, data)
@@ -162,7 +162,7 @@ const userService = {
         assert(repliesOfTweet, '此使用者沒有回覆的推文！')
         const data = repliesOfTweet.map(t => ({
           ...t,
-          transferDateTime: relativeTimeFromNow(repliesOfTweet.createdAt)
+          transferDateTime: relativeTimeFromNow(t.createdAt)
         }))
         cb(null, data)
       })
@@ -196,7 +196,7 @@ const userService = {
         assert(likes, '此使用者沒有喜歡的推文！')
         const result = likes.map(f => ({
           ...f,
-          transferDateTime: relativeTimeFromNow(likes.createdAt),
+          transferDateTime: relativeTimeFromNow(f.Tweet.createdAt),
           isLiked: Boolean(f.Tweet.isLiked)
         }))
         cb(null, result)
