@@ -50,6 +50,12 @@ router.put(
 router.post("/api/users/signin", userController.signIn);
 
 // - Tweet
+router.post("/api/tweets/:id/like", authenticatedUser, tweetController.addLike);
+router.post(
+  "/api/tweets/:id/removeLike",
+  authenticatedUser,
+  tweetController.removeLike
+);
 router.get(
   "/api/tweets/:tweet_id/replies",
   authenticatedUser,
