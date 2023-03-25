@@ -21,9 +21,9 @@ passport.use(
     // req.flash，因為沒有view，所以flash接到也看不到，我調整成直接回傳一包資料 from Ray
     (req, account, password, cb) => {
       User.findOne({ where: { account } }).then(user => {
-        assert(user, new Error('帳號不存在！'))
+        assert(user, '帳號不存在！')
         bcrypt.compare(password, user.password).then(res => {
-          assert(res, new Error('帳號或密碼輸入錯誤！'))
+          assert(res, '帳號或密碼輸入錯誤！')
           return cb(null, user)
         })
           .catch(err => cb(err))
