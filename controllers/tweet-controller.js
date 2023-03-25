@@ -136,6 +136,43 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  postReply: async (req, res, next) => {
+    try {
+      const { tweetId } = req.params
+      const { comment } = req.body
+      const UserId = helpers.getUser(req).id
+
+      const tweet = await Tweet.findByPk(tweetId)
+
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到此則推文，無法進行回覆'
+        })
+      }
+
+      if (!comment || !comment.trim()) {
+        return res.status(400).json({
+          status: 'error',
+          message: '請輸入內容，內容不能為空白'
+        })
+      }
+
+      const reply = await Reply.create({
+        UserId,
+        TweetId: tweet.id,
+        comment
+      })
+
+      return res.status(200).json({
+        status: 'success',
+        message: '您已成功在此則推文下發布了回覆',
+        reply
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
