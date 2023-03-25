@@ -3,7 +3,14 @@ const jwt = require("jsonwebtoken");
 const { Op, QueryTypes } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
-const { User, Tweet, Reply, Followship, sequelize } = require("../models");
+const {
+  User,
+  Tweet,
+  Reply,
+  Like,
+  Followship,
+  sequelize,
+} = require("../models");
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -42,10 +49,7 @@ const userController = {
       const foundUser = await User.findByPk(user.id);
       const newUser = foundUser.toJSON();
       delete newUser.password;
-      return res.json({
-        status: "success",
-        data: { newUser },
-      });
+      return res.json(newUser);
     } catch (error) {
       return next(error);
     }
@@ -76,11 +80,8 @@ const userController = {
         expiresIn: "30d",
       });
       return res.json({
-        status: "success",
-        data: {
-          token,
-          loginUser,
-        },
+        token,
+        ...loginUser,
       });
     } catch (error) {
       return next(error);
@@ -140,9 +141,7 @@ const userController = {
       }
       const currentUser = foundUser.toJSON();
       delete currentUser.password;
-      return res.json({
-        ...currentUser,
-      });
+      return res.json({ ...currentUser });
     } catch (error) {
       return next(error);
     }
@@ -184,10 +183,7 @@ const userController = {
       });
       const updatedUser = data.toJSON();
       delete updatedUser.password;
-      return res.json({
-        status: "success",
-        data: { updatedUser },
-      });
+      return res.json({ ...updatedUser });
     } catch (error) {
       return next(error);
     }
@@ -239,10 +235,7 @@ const userController = {
       });
       const updatedUser = data.toJSON();
       delete updatedUser.password;
-      return res.json({
-        status: "success",
-        data: { updatedUser },
-      });
+      return res.json({ ...updatedUser });
     } catch (error) {
       return next(error);
     }
@@ -279,10 +272,8 @@ const userController = {
         followerId: getUser(req).id,
         followingId: Number(id),
       });
-      return res.json({
-        status: "success",
-        data: { createdFollowship },
-      });
+      const data = createdFollowship.toJSON();
+      return res.json({ ...data });
     } catch (error) {
       return next(error);
     }
@@ -316,10 +307,8 @@ const userController = {
       }
       // - 取消追蹤
       const deletedFollowship = await followship.destroy();
-      return res.json({
-        status: "success",
-        data: { deletedFollowship },
-      });
+      const data = deletedFollowship.toJSON();
+      return res.json({ ...data });
     } catch (error) {
       return next(error);
     }
@@ -334,12 +323,29 @@ const userController = {
         throw error;
       }
       const tweets = await Tweet.findAll({
+        include: [
+          { model: Reply, attributes: ["id"] },
+          { model: Like, attributes: ["id"] },
+        ],
+        attributes: ["id", "description", "UserId", "createdAt"],
         where: {
-          UserId: getUser(req).id,
+          UserId: id,
         },
-        raw: true,
+        order: [["createdAt", "DESC"]],
       });
-      return res.json(tweets);
+      const data = tweets.map((t) => {
+        const tweet = t.toJSON();
+        const replyCounts = t.Replies.length;
+        const likeCounts = t.Likes.length;
+        delete tweet.Replies;
+        delete tweet.Likes;
+        return {
+          ...tweet,
+          replyCounts,
+          likeCounts,
+        };
+      });
+      return res.json(data);
     } catch (error) {
       return next(error);
     }
@@ -354,12 +360,28 @@ const userController = {
         throw error;
       }
       const replies = await Reply.findAll({
+        include: [
+          {
+            model: Tweet,
+            attributes: ["id"],
+            include: [{ model: User, attributes: ["id", "account"] }],
+          },
+        ],
         where: {
-          UserId: getUser(req).id,
+          UserId: id,
         },
-        raw: true,
+        order: [["createdAt", "DESC"]],
       });
-      return res.json(replies);
+      const data = replies.map((r) => {
+        const reply = r.toJSON();
+        const replyTo = r.Tweet.User.account;
+        delete reply.Tweet;
+        return {
+          ...reply,
+          replyTo,
+        };
+      });
+      return res.json(data);
     } catch (error) {
       return next(error);
     }
