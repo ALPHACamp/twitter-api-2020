@@ -1,5 +1,5 @@
 const passport = require('../config/passport')
-const helpers = require('../_helpers')
+const { getUser } = require('../_helpers')
 const authenticate = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) { return next(err) }
@@ -16,7 +16,7 @@ const authenticate = (req, res, next) => {
 }
 
 const authenticateAdmin = (req, res, next) => {
-  if (helpers.getUser(req) && helpers.getUser(req).role === 'admin') return next()
+  if (getUser(req) && getUser(req).role === 'admin') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 module.exports = {
