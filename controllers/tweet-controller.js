@@ -196,6 +196,57 @@ const tweetController = {
       return next(err);
     }
   },
+  // 將指定推文加入喜歡
+  addLike: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id;
+      const currentUser = getUser(req).id;
+      // 先到資料庫找該筆推文是否存在及是否有被該使用者喜歡
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(tweetId),
+        Like.findOne({
+          where: {
+            TweetId: tweetId,
+            UserId: currentUser,
+          },
+        }),
+      ]);
+      if (!tweet) {
+        const err = new Error("該貼文不存在");
+        err.status = 404;
+        throw err;
+      }
+      if (like) {
+        const err = new Error("使用者已經按過讚");
+        err.status = 404;
+        throw err;
+      }
+      const createdLike = await Like.create({
+        TweetId: tweetId,
+        UserId: currentUser,
+      });
+      return res.json(createdLike);
+    } catch (err) {
+      return next(err);
+    }
+  },
+  // 將指定推文移除喜歡
+  removeLike: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id;
+      const currentUser = getUser(req).id;
+      // 直接執行刪除動作，不需要先到資料庫中尋找有沒有喜歡過的紀錄，以減少對資料庫的請求次數
+      const removeLike = await Like.destroy({
+        where: {
+          TweetId: tweetId,
+          UserId: currentUser,
+        },
+      });
+      return res.json(removeLike);
+    } catch (err) {
+      return next(err);
+    }
+  },
 };
 
 module.exports = tweetController;
