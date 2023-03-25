@@ -7,7 +7,7 @@
     "start": "SET NODE_ENV=development&&node app.js",
     "dev": "SET NODE_ENV=development&&nodemon app.js",
     "lint": "eslint \"**/*.js\" --fix",
-    "test": "mocha tests/requests/like.spec.js --exit --recursive --timeout 5000"
+    "test": "mocha tests/requests/followship.spec.js --exit --recursive --timeout 5000"
   },
   "author": "",
   "license": "ISC",
