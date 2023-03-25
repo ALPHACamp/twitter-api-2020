@@ -3,7 +3,14 @@ const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
-const { User, Tweet, Reply, Like ,Followship, sequelize } = require("../models");
+const {
+  User,
+  Tweet,
+  Reply,
+  Like,
+  Followship,
+  sequelize,
+} = require("../models");
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -317,32 +324,27 @@ const userController = {
       }
       const tweets = await Tweet.findAll({
         include: [
-          { model: Reply, attributes: ['id'] },
-          { model: Like, attributes: ['id'] }
+          { model: Reply, attributes: ["id"] },
+          { model: Like, attributes: ["id"] },
         ],
-        attributes: [
-          "id",
-          "description",
-          "UserId",
-          "createdAt",
-        ],
+        attributes: ["id", "description", "UserId", "createdAt"],
         where: {
           UserId: id,
         },
         order: [["createdAt", "DESC"]],
       });
-      const data = tweets.map(t => {
-        const tweet = t.toJSON()
-        const replyCounts = t.Replies.length
-        const likeCounts = t.Likes.length
-        delete tweet.Replies
-        delete tweet.Likes
+      const data = tweets.map((t) => {
+        const tweet = t.toJSON();
+        const replyCounts = t.Replies.length;
+        const likeCounts = t.Likes.length;
+        delete tweet.Replies;
+        delete tweet.Likes;
         return {
           ...tweet,
           replyCounts,
-          likeCounts
-        }
-      })
+          likeCounts,
+        };
+      });
       return res.json(data);
     } catch (error) {
       return next(error);
@@ -358,12 +360,28 @@ const userController = {
         throw error;
       }
       const replies = await Reply.findAll({
+        include: [
+          {
+            model: Tweet,
+            attributes: ["id"],
+            include: [{ model: User, attributes: ["id", "account"] }],
+          },
+        ],
         where: {
           UserId: id,
         },
-        raw: true,
+        order: [["createdAt", "DESC"]],
       });
-      return res.json(replies);
+      const data = replies.map((r) => {
+        const reply = r.toJSON();
+        const replyTo = r.Tweet.User.account;
+        delete reply.Tweet;
+        return {
+          ...reply,
+          replyTo,
+        };
+      });
+      return res.json(data);
     } catch (error) {
       return next(error);
     }
