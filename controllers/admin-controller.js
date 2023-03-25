@@ -28,7 +28,7 @@ const adminController = {
       ) AS followshipsPerUser
       ON likesAndTweetsPerUser.tweeterId = followshipsPerUser.tweeterId
       
-      INNER JOIN users AS users
+      RIGHT JOIN users AS users
       ON users.id = followshipsPerUser.tweeterId
       WHERE users.role = 'user'
         
