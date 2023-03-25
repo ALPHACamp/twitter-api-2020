@@ -2,6 +2,7 @@ const assert = require('assert')
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
 const { User, Tweet, Reply, Like } = require('../models')
+const { relativeTimeFromNow, transferDateTime } = require('../helpers/dayjs-helpers')
 
 const tweetServices = {
   getTweets: (req, cb) => {
@@ -9,20 +10,21 @@ const tweetServices = {
     return Tweet.findAll({
       attributes: [
         'id', 'description', 'createdAt', 'updatedAt',
-        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id)'), 'repliedCount'],
-        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Tweet_id = Tweet.id)'), 'likedCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id)'), 'totalReplies'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Tweet_id = Tweet.id)'), 'totalLikes'],
         [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Tweet_id = Tweet.id AND User_id = ${userId})`), 'isLiked']
       ],
       include: [
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ],
-      order: [['updatedAt', 'DESC']],
+      order: [['createdAt', 'DESC']],
       nest: true,
       raw: true
     })
       .then(tweetsData => {
         const tweets = tweetsData.map(t => ({
           ...t,
+          transferDateTime: relativeTimeFromNow(t.createdAt),
           isLiked: t.isLiked === 1
         }))
         cb(null, tweets)
@@ -35,8 +37,8 @@ const tweetServices = {
     return Tweet.findByPk(tweetId, {
       attributes: [
         'id', 'description', 'createdAt', 'updatedAt',
-        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id)'), 'repliedCount'],
-        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Tweet_id = Tweet.id)'), 'likedCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id)'), 'totalReplies'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Tweet_id = Tweet.id)'), 'totalLikes'],
         [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Tweet_id = Tweet.id AND User_id = ${userId})`), 'isLiked']
       ],
       include: [
@@ -46,6 +48,7 @@ const tweetServices = {
       .then(tweetData => {
         const { ...data } = {
           ...tweetData.toJSON(),
+          transferDateTime: transferDateTime(tweetData.createdAt),
           isLiked: tweetData.isLiked === 1
         }
         return cb(null, data)
@@ -77,7 +80,13 @@ const tweetServices = {
       nest: true,
       raw: true
     })
-      .then(replies => cb(null, replies))
+      .then(replies => {
+        const result = replies.map(r => ({
+          ...r,
+          transferDateTime: relativeTimeFromNow(r.createdAt)
+        }))
+        cb(null, result)
+      })
       .catch(err => cb(err))
   },
   replyTweet: (req, cb) => {
