@@ -6,9 +6,9 @@ const tweetController = {
       raw: true,
       nest: true,
       attributes: {
-        exclude: ['UserId'],
         include: [
-          [sequelize.literal('( SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCounts'],
+          [sequelize.literal('( SELECT CASE WHEN EXISTS(SELECT * FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = UserId) THEN "true" ELSE "false" END )'), 'isLiked'],
+          [sequelize.literal('( SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts']]
       },
       order: [['createdAt', 'DESC']],
@@ -16,7 +16,13 @@ const tweetController = {
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ]
     })
-      .then(tweets => res.status(200).json(tweets))
+      .then(tweets => {
+        const data = tweets.map(tweet => {
+          delete tweet.UserId
+          return tweet
+        })
+        res.status(200).json(data)
+      })
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
@@ -24,9 +30,9 @@ const tweetController = {
       raw: true,
       nest: true,
       attributes: {
-        exclude: ['UserId'],
         include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCounts'],
+          [sequelize.literal('( SELECT CASE WHEN EXISTS(SELECT * FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = UserId) THEN "true" ELSE "false" END )'), 'isLiked'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts']]
       },
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
@@ -37,6 +43,7 @@ const tweetController = {
           error.status = 404
           throw error
         }
+        delete tweet.UserId
         return res.status(200).json(tweet)
       })
       .catch(err => next(err))
