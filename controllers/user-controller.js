@@ -107,30 +107,28 @@ const userController = {
     const { userId } = req.params
     return User.findAll({
       where: { id: userId },
-      include: [ { model: User, as: 'Followings'} ]
+      include: [{ model: User, as: 'Followings' }]
     })
       .then((user) => {
         if (!user || user.role === 'admin') {
-          return res.status(404).json({status: 'error', message: '帳戶不存在'})
+          return res.status(404).json({ status: 'error', message: '帳戶不存在' })
         };
         const followingData = user.map((f) => ({
           ...f.toJSON().Followings,
           followingId: f.Followings?.id || null,
-          followingAvatar: f.Followings?.avatar || "https://reurl.cc/XLQeQj",
-          followingName: f.Followings?.name || "anonymous user",
-          followingIntro: f.Followings?.introduction || "",
+          followingAvatar: f.Followings?.avatar || 'https://reurl.cc/XLQeQj',
+          followingName: f.Followings?.name || 'anonymous user',
+          followingIntro: f.Followings?.introduction || '',
           followingCount: f.Followings.length,
           isFollowed: helpers
             .getUser(req)
             .Followings.some(
               (fu) => fu.Followship.followingId === f.Followers.id
-            ),
-        }));
-        return res.status(200).json({ status: "success",  data: followingData });
+            )
+        }))
+        return res.status(200).json({ status: 'success', data: followingData })
       })
-      .catch((error) => next(error));
-    
-    
+      .catch((error) => next(error))
   }
 }
 

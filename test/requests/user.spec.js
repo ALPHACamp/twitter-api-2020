@@ -269,7 +269,6 @@ describe('# user requests', () => {
           .expect(200)
           .end(function (err, res) {
             if (err) return done(err)
-            console.log(res.body)
 
             expect(res.body).to.be.an('array')
             // 回傳資料中是否有跟隨中的人的 id = 2
