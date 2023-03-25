@@ -17,6 +17,7 @@ const userController = {
       return res.json({
         status: 'success',
         message: '登入成功',
+        id: loginUser.id,
         token
       })
     } catch (error) {
@@ -152,12 +153,12 @@ const userController = {
           ), 'replyCount'],
           [sequelize.literal(
             '(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweet.id )'
-          ), 'likeCount']
+          ), 'likeCount'],
+          [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.User_id = ${loginUser.id} AND Likes.Tweet_id = Tweet.id)`), 'isLiked']
         ],
         // 推文規格要 DESC
         order: [['createdAt', 'DESC']]
-      }),
-      Like.findAll({ where: { UserId } })
+      })
     ])
       .then(([user, tweets, likes]) => {
         // 401: 請先登入 & 403:沒有使用該頁面的權限，在 middleware/auth
@@ -166,9 +167,7 @@ const userController = {
         const result = tweets.map(tweet => ({
           ...tweet,
           createdAt: timeFormat(tweet.createdAt),
-          // like 為 true 條件：查找 like table 裡的 userId 是否有 login 本人
-          // 這裡有點抖抖，有需要再加 like.TweetId === tweet.id 判斷？
-          isLiked: likes.some(like => like.UserId === loginUser.id)
+          isLiked: !!tweet.isLiked
         }))
 
         return res.json(result)
@@ -221,7 +220,8 @@ const userController = {
           model: Tweet,
           attributes: ['id', 'description', 'createdAt',
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCount']
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCount'],
+            [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.User_id = ${loginUser.id} AND Likes.Tweet_id = Tweet.id)`), 'isLiked']
           ],
           include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         },
@@ -237,9 +237,9 @@ const userController = {
             ...data,
             Tweet: {
               ...Tweet,
+              isLiked: !!Tweet.isLiked,
               createdAt: timeFormat(Tweet.createdAt)
-            },
-            isLiked: like.UserId === loginUser.id
+            }
           }
         })
         return res.json(result)
@@ -254,19 +254,31 @@ const userController = {
       User.findByPk(id),
       Followship.findAll({
         where: { followerId: id },
-        attributes: { exclude: ['updatedAt'] },
-        include: { model: User, as: 'Followings', attributes: ['account', 'name', 'introduction', 'avatar'] },
+        attributes: {
+          exclude: ['updatedAt']
+        },
+        include: {
+          model: User,
+          as: 'Followings',
+          attributes: ['account', 'name', 'introduction', 'avatar',
+            [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.follower_id = ${loginUser.id} AND Followships.following_id = Followings.id)`), 'isFollowed']]
+        },
         order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, followings]) => {
         if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
 
-        const result = followings.map(following => ({
-          ...following.toJSON(),
-          isFollowed: following.followerId === loginUser.id
-        }))
-
+        const result = followings.map(following => {
+          const { Followings, ...data } = following.toJSON()
+          return {
+            ...data,
+            Followings: {
+              ...Followings,
+              isFollowed: !!Followings.isFollowed
+            }
+          }
+        })
         return res.json(result)
       })
       .catch(error => next(error))
@@ -280,18 +292,29 @@ const userController = {
       Followship.findAll({
         where: { followingId: id },
         attributes: { exclude: ['updatedAt'] },
-        include: { model: User, as: 'Followers', attributes: ['account', 'name', 'introduction', 'avatar'] },
+        include: {
+          model: User,
+          as: 'Followers',
+          attributes: [
+            'account', 'name', 'introduction', 'avatar',
+            [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.follower_id = ${loginUser.id} AND Followships.following_id = Followers.id)`), 'isFollowed']]
+        },
         order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, followers]) => {
         if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
 
-        const result = followers.map(follower => ({
-          ...follower.toJSON(),
-          isFollowed: follower.followerId === loginUser.id
-        }))
-
+        const result = followers.map(follower => {
+          const { Followers, ...data } = follower.toJSON()
+          return {
+            ...data,
+            Followers: {
+              ...Followers,
+              isFollowed: !!Followers.isFollowed
+            }
+          }
+        })
         return res.json(result)
       })
       .catch(error => next(error))
