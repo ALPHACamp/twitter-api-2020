@@ -9,7 +9,7 @@ module.exports = {
       account: 'root@example.com',
       name: 'root',
       role: 'admin',
-      // is_admin: true, //! 先留著，測試都沒問題再刪
+      image: 'https://i.imgur.com/gerdVUX.png',
       created_at: new Date(),
       updated_at: new Date()
     }], {})
@@ -21,7 +21,7 @@ module.exports = {
             account: `user${i}@example.com`,
             name: `user${i}`,
             role: 'user',
-            // is_admin: false, //! 為測試檔改，都沒問題再刪
+            image: 'https://i.imgur.com/gerdVUX.png',
             created_at: new Date(),
             updated_at: new Date()
           })
