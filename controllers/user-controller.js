@@ -125,6 +125,7 @@ const userController = {
       delete user.password;
       return res.json({
         ...user,
+        // - 目前登入的使用者有無追蹤查詢的使用者
         isFollowed: loginUserFollowingIds.some((fid) => fid === Number(id)),
       });
     } catch (error) {
@@ -300,17 +301,25 @@ const userController = {
         error.status = 404;
         throw error;
       }
-      const tweets = await Tweet.findAll({
-        include: [
-          { model: Reply, attributes: ["id"] },
-          { model: Like, attributes: ["id"] },
-        ],
-        attributes: ["id", "description", "UserId", "createdAt"],
-        where: {
-          UserId: id,
-        },
-        order: [["createdAt", "DESC"]],
-      });
+      const [tweets, loginUser] = await Promise.all([
+        Tweet.findAll({
+          include: [
+            { model: Reply, attributes: ["id"] },
+            { model: Like, attributes: ["id"] },
+          ],
+          attributes: ["id", "description", "UserId", "createdAt"],
+          where: {
+            UserId: id,
+          },
+          order: [["createdAt", "DESC"]],
+        }),
+        User.findByPk(getUser(req).id, {
+          include: [{ model: Like, attributes: ["TweetId"] }],
+        }),
+      ]);
+      const loginUserLikeTweetIds = loginUser?.Likes
+      ? loginUser.Likes.map((l) => l.TweetId)
+      : [];
       const data = tweets.map((t) => {
         const tweet = t.toJSON();
         const replyCounts = t.Replies.length;
@@ -321,6 +330,8 @@ const userController = {
           ...tweet,
           replyCounts,
           likeCounts,
+          // - 目前登入的使用者有無按過喜歡
+          isLiked: loginUserLikeTweetIds.some(tid => tid === tweet.id)
         };
       });
       return res.json(data);
