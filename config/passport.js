@@ -2,7 +2,7 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
 const bcrypt = require('bcryptjs')
-
+const assert = require('assert')
 const { User } = require('../models')
 
 const JWTStrategy = passportJWT.Strategy
@@ -21,24 +21,14 @@ passport.use(
     // req.flash，因為沒有view，所以flash接到也看不到，我調整成直接回傳一包資料 from Ray
     (req, account, password, cb) => {
       User.findOne({ where: { account } }).then(user => {
-        if (!user) {
-          return cb(
-            null,
-            false,
-            { status: 401, message: '帳號不存在！' }
-          )
-        }
+        assert(user, new Error('帳號不存在！'))
         bcrypt.compare(password, user.password).then(res => {
-          if (!res) {
-            return cb(
-              null,
-              false,
-              { status: 401, message: '帳號或密碼輸入錯誤！' }
-            )
-          }
+          assert(res, new Error('帳號或密碼輸入錯誤！'))
           return cb(null, user)
         })
+          .catch(err => cb(err))
       })
+        .catch(err => cb(err))
     }
   )
 )
