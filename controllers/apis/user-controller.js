@@ -24,6 +24,9 @@ const userController = {
   },
   getFollowersOfUser: (req, res, next) => {
     userService.getFollowersOfUser(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getTopUsers: (req, res, next) => {
+    userService.getTopUsers(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 

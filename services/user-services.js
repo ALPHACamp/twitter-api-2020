@@ -258,6 +258,29 @@ const userService = {
         cb(null, result)
       })
       .catch(err => cb(err))
+  },
+  getTopUsers: (req, cb) => {
+    const userId = helpers.getUser(req).id
+    return User.findAll({
+      where: { role: 'user' },
+      attributes: ['id', 'name', 'account', 'avatar',
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCounts'],
+        [sequelize.literal(`(EXISTS(SELECT * FROM Followships WHERE Followships.following_id = User.id AND Followships.follower_id = ${userId}))`), 'isFollowed']
+      ],
+      order: [[sequelize.literal('followerCounts'), 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(topUsers => {
+        assert(topUsers => '資料庫發生錯誤')
+        let result = topUsers.map(f => ({
+          ...f,
+          isFollowed: Boolean(f.isFollowed)
+        }))
+        result = result.slice(0, 10)
+        cb(null, { result })
+      })
+      .catch(err => cb(err))
   }
 }
 

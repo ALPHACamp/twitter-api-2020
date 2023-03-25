@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const userController = require('../../../controllers/apis/user-controller')
 
+router.get('/top', userController.getTopUsers)
 router.get('/:userId/followings', userController.getFollowingsOfUser)
 router.get('/:userId/replied_tweets', userController.getRepliesOfUser)
 router.get('/:userId/followers', userController.getFollowersOfUser)
