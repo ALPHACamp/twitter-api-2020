@@ -69,6 +69,7 @@ const userService = {
         'avatar',
         'introduction',
         'cover',
+        'email',
         [
           sequelize.literal(
             `(EXISTS(SELECT * FROM Followships WHERE Followships.following_id = User.id AND Followships.follower_id = ${userId}))`
