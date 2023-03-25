@@ -20,7 +20,7 @@ const followshipController = {
       })
     ])
       .then(([user, followship]) => {
-        if (!user) throw createError(404, '該使用者不存在')
+        if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
         if (user.id === loginUserId) throw createError(422, '無法追蹤自己')
         if (followship) throw createError(422, '已追蹤該使用者')
 
