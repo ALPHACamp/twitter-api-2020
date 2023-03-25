@@ -1,93 +1,107 @@
 const jwt = require('jsonwebtoken')
-const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Like } = require('../models')
+const passport = require('../config/passport')
 
 const adminController = {
-  signIn: (req, res, next) => {
-    try {
-      const userData = helpers.getUser(req).toJSON()
+  login: (req, res, next) => {
+    passport.authenticate('local', { session: false, failWithError: true }, (err, user, info) => {
+      // err: null & user: false => 400
+      if (!err && !user) {
+        const error = new Error('輸入資料不可為空值!')
+        error.status = 400
+        return next(error)
+      }
 
-      if (userData.role !== 'admin') throw new Error('Account or password is wrong!')
-
-      const authToken = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-
-      res.json({
-        status: 'success',
-        authToken,
-        data: {
-          user: userData
+      if (err || !user) {
+        if (err.status === 401) {
+          return next(err)
         }
-      })
-    } catch (err) {
-      next(err)
-    }
+      }
+      if (user.role !== 'admin') {
+        const error = new Error('驗證失敗!')
+        error.status = 401
+        return next(error)
+      }
+      try {
+        const userData = user.toJSON()
+        delete userData.password
+        const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+        res.json({
+          token,
+          user: { id: userData.id }
+        })
+      } catch (err) {
+        return next(err)
+      }
+    })(req, res, next)
   },
   getUsers: (req, res, next) => {
-    return User.findAll({
-      attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+    User.findAll({
       include: [
-        { model: Tweet, include: Like },
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
+        { model: User, as: 'Followings' },
+        { model: Tweet },
+        { model: Like }
       ]
     })
       .then(users => {
         const usersData = users.map(user => {
-          const data = {
+          const transformedData = {
             ...user.toJSON(),
-            tweetCounts: user.Tweets.length,
-            // 先取出每篇推文被like的數量, 再透過array.reduce依序加起來(達到加總的效果)
-            beLikedCounts: user.Tweets.map(tweet => tweet.Likes.length).reduce((accumulator, currentValue) => accumulator + currentValue, 0),
             followerCounts: user.Followers.length,
-            followingCounts: user.Followings.length
+            followingCounts: user.Followings.length,
+            tweetCounts: user.Tweets.length,
+            likeCounts: user.Likes.length
           }
-          delete data.Tweets
-          delete data.Followers
-          delete data.Followings
-          return data
+          delete transformedData.password
+          delete transformedData.role
+          delete transformedData.Followers
+          delete transformedData.Followings
+          delete transformedData.Tweets
+          delete transformedData.Likes
+          return transformedData
         })
-        res.json(usersData.sort((a, b) => b.tweetCounts - a.tweetCounts))
+          .sort((a, b) => b.tweetCounts - a.tweetCounts)
+
+        res.json(usersData)
       })
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
-    return Tweet.findAll({
-      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+    Tweet.findAll({
+      attributes: {
+        exclude: ['UserId']
+      },
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      raw: true,
+      nest: true
     })
       .then(tweets => {
-        const tweetsData = tweets.map(tweet => ({
-          ...tweet.toJSON(),
-          description: tweet.description.substring(0, 50)
-        }))
-        res.json(tweetsData)
+        const tweetData = tweets.map(tweet =>
+          ({
+            ...tweet,
+            description: tweet.description.substring(0, 50)
+          }))
+        res.json(tweetData)
       })
-      .catch(err => next(err))
   },
   deleteTweet: (req, res, next) => {
-    const TweetId = Number(req.params.id)
-    return Promise.all([
-      Tweet.findByPk(TweetId),
-      Reply.findAll({
-        where: { TweetId },
-        attributes: ['id']
-      }),
-      Like.findAll({
-        where: { TweetId },
-        attributes: ['id']
-      })
-    ])
-      .then(([tweet, replies, likes]) => {
-        if (!tweet) throw new Error("Tweet didn't exist!")
-        // 刪除與此推文相關的reply及like
-        Promise.all([
-          replies.map(reply => reply.destroy()),
-          likes.map(like => like.destroy())
-        ])
+    Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) {
+          const err = new Error('此推文不存在！')
+          err.status = 404
+          throw err
+        }
         return tweet.destroy()
       })
-      .then(deletedTweet => res.json(deletedTweet))
+      .then(deletedTweet => res.status(200).send())
       .catch(err => next(err))
   }
+
 }
 
 module.exports = adminController
