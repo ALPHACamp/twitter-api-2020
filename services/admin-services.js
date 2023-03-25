@@ -2,6 +2,8 @@ const { User, Tweet, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const assert = require('assert')
 const jwt = require('jsonwebtoken')
+const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
+
 const adminServices = {
   getUsers: (req, cb) => {
     return User.findAll({
@@ -45,6 +47,32 @@ const adminServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  getTweets: (req, cb) => {
+    const userId = helpers.getUser(req).id
+    return Tweet.findAll({
+      attributes: [
+        'id', 'description', 'createdAt', 'updatedAt',
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id)'), 'totalReplies'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Tweet_id = Tweet.id)'), 'totalLikes'],
+        [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Tweet_id = Tweet.id AND User_id = ${userId})`), 'isLiked']
+      ],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']],
+      nest: true,
+      raw: true
+    })
+      .then(tweetsData => {
+        const tweets = tweetsData.map(t => ({
+          ...t,
+          transferDateTime: relativeTimeFromNow(t.createdAt),
+          isLiked: t.isLiked === 1
+        }))
+        cb(null, tweets)
+      })
+      .catch(err => cb(err))
   }
 }
 

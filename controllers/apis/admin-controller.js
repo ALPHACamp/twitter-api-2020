@@ -9,6 +9,9 @@ const adminController = {
   },
   signIn: (req, res, next) => {
     adminServices.singIn(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', data }))
+  },
+  getTweets: (req, res, next) => {
+    adminServices.getTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 
