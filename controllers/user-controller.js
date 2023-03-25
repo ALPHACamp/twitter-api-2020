@@ -237,13 +237,7 @@ const userController = {
             include: [
               [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likeCounts'],
               [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCounts'],
-              [sequelize.literal(`
-                (SELECT 
-                CASE 
-                  WHEN COUNT(*) = 0 THEN 'false' 
-                  ELSE 'true' 
-                END FROM Likes WHERE Likes.User_id = ${getUser(req).dataValues.id} AND Likes.Tweet_id = Tweet.id)`
-              ), 'isLiked']
+              [sequelize.literal(`(SELECT COUNT(*) = 1 FROM Likes WHERE Likes.User_id = ${getUser(req).dataValues.id} AND Likes.Tweet_id = Tweet.id)`), 'isLiked']
             ]
           },
           include: [
@@ -255,7 +249,11 @@ const userController = {
         })
       })
       .then(tweets => {
-        return res.status(200).json(tweets)
+        const resultTweets = tweets.map(tweet => ({
+          ...tweet,
+          isLiked: Boolean(tweet.isLiked)
+        }))
+        return res.status(200).json(resultTweets)
       }).catch(err => next(err))
   },
   getUserReplies: (req, res, next) => {
