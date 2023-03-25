@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
-const { User, Tweet, Reply, Followship, sequelize } = require("../models");
+const { User, Tweet, Reply, Like ,Followship, sequelize } = require("../models");
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -316,12 +316,34 @@ const userController = {
         throw error;
       }
       const tweets = await Tweet.findAll({
+        include: [
+          { model: Reply, attributes: ['id'] },
+          { model: Like, attributes: ['id'] }
+        ],
+        attributes: [
+          "id",
+          "description",
+          "UserId",
+          "createdAt",
+        ],
         where: {
           UserId: id,
         },
-        raw: true,
+        order: [["createdAt", "DESC"]],
       });
-      return res.json(tweets);
+      const data = tweets.map(t => {
+        const tweet = t.toJSON()
+        const replyCounts = t.Replies.length
+        const likeCounts = t.Likes.length
+        delete tweet.Replies
+        delete tweet.Likes
+        return {
+          ...tweet,
+          replyCounts,
+          likeCounts
+        }
+      })
+      return res.json(data);
     } catch (error) {
       return next(error);
     }
