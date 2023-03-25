@@ -1,6 +1,6 @@
 const helper = require('../_helpers')
 const { valueTrim } = require('../helpers/obj-helpers')
-const { Tweet, Reply } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 
 const replyController = {
   postReply: async (req, res, next) => {
@@ -10,8 +10,14 @@ const replyController = {
       const { comment } = valueTrim(req.body)
       if (!comment) throw new Error('回覆不可空白')
       if (comment.length > 140) throw new Error('字數限制 140 字')
-      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+
+      const [user, tweet] = await Promise.all([
+        User.findByPk(UserId, { raw: true }),
+        Tweet.findByPk(TweetId, { raw: true })
+      ])
+      if (!user) throw new Error('使用者不存在')
       if (!tweet) throw new Error('推文不存在')
+      
       await Reply.create({ TweetId, UserId, comment })
       res.status(200).end()
     } catch (err) {

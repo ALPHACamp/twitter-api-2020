@@ -24,11 +24,13 @@ const tweetController = {
         ],
         order: [['updatedAt', 'DESC']]
       })
+      const signinUser = helper.getUser(req)
       const tweets = data.map(d => {
         const tweet = {
           ...d.toJSON(),
           replies: d.Replies?.length || 0,
-          likes: d.Likes?.length || 0
+          likes: d.Likes?.length || 0,
+          isLike: signinUser.Likes ? signinUser.Likes.some(like => like.TweetId === d.id) : false
         }
         delete tweet.Replies
         delete tweet.Likes
@@ -49,10 +51,13 @@ const tweetController = {
           { model: Like, attributes: ['id'] }
         ]
       })
+      if (!data) throw new Error('推文不存在')
+      const signinUser = helper.getUser(req)
       const tweet = {
         ...data.toJSON(),
         replies: data.Replies?.length || 0,
-        likes: data.Likes?.length || 0
+        likes: data.Likes?.length || 0,
+        isLike: signinUser.Likes ? signinUser.Likes.some(like => like.TweetId === data.id) : false
       }
       delete tweet.Replies
       delete tweet.Likes
