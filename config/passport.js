@@ -45,8 +45,7 @@ const jwtOptions = {
   // jwtFromRequest -> 從哪找到這 token
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   // (上1) 設定去哪裡找 token，這裡指定了 authorization header 裡的 bearer 項目。
-  // secretOrKey: process.env.JWT_SECRET // 定義 secret
-  secretOrKey: 'alphacamp' // 定義 secret
+  secretOrKey: process.env.JWT_SECRET // 定義 secret
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {

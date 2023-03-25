@@ -12,8 +12,8 @@ jobs:
     env:
       NODE_ENV: ghactions
       IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID}}
-      JWT_SECRET: ${{ secrets.JWT_SECRET}}
-      
+      JWT_SECRET: ${{ secrets.JWTsecret}}
+
     services:
       mysql:
         image: mysql:5.7
