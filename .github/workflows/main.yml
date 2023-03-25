@@ -11,6 +11,8 @@ jobs:
 
     env:
       NODE_ENV: ghactions
+      IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID}}
+      JWT_SECRET: ${{ secrets.JWT_SECRET}}
 
     services:
       mysql:
@@ -20,8 +22,7 @@ jobs:
           MYSQL_DATABASE: ac_twitter
         ports:
           - 3306:3306
-        options:
-          --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     strategy:
       matrix:
@@ -29,14 +30,13 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm install sequelize-cli -g
-    - run: sequelize db:migrate
-    - run: npm test
-
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm install sequelize-cli -g
+      - run: sequelize db:migrate
+      - run: npm test
