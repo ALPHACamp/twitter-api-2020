@@ -125,7 +125,7 @@ const userController = {
       delete user.password;
       return res.json({
         ...user,
-        isFollowed: loginUserFollowingIds.some(fid => fid === Number(id))
+        isFollowed: loginUserFollowingIds.some((fid) => fid === Number(id)),
       });
     } catch (error) {
       return next(error);
@@ -248,23 +248,10 @@ const userController = {
         error.status = 400;
         throw error;
       }
-      const [foundUser, followship] = await Promise.all([
-        User.findByPk(id, { raw: true }),
-        Followship.findOne({
-          where: {
-            followerId: getUser(req).id,
-            followingId: Number(id),
-          },
-        }),
-      ]);
-      if (foundUser.isAdmin) {
+      const foundUser = await User.findByPk(id, { raw: true });
+      if (!foundUser || foundUser.isAdmin) {
         const error = new Error("使用者不存在!");
         error.status = 404;
-        throw error;
-      }
-      if (followship) {
-        const error = new Error("已經追蹤過此使用者!");
-        error.status = 400;
         throw error;
       }
       // - 新增追蹤
@@ -286,29 +273,20 @@ const userController = {
         error.status = 400;
         throw error;
       }
-      const [foundUser, followship] = await Promise.all([
-        User.findByPk(followingId, { raw: true }),
-        Followship.findOne({
-          where: {
-            followerId: getUser(req).id,
-            followingId: Number(followingId),
-          },
-        }),
-      ]);
+      const foundUser = await User.findByPk(followingId, { raw: true });
       if (foundUser.isAdmin) {
         const error = new Error("使用者不存在!");
         error.status = 404;
         throw error;
       }
-      if (!followship) {
-        const error = new Error("尚未追蹤過此使用者!");
-        error.status = 400;
-        throw error;
-      }
-      // - 取消追蹤
-      const deletedFollowship = await followship.destroy();
-      const data = deletedFollowship.toJSON();
-      return res.json({ ...data });
+      // - 取消追蹤 (回傳刪除的資料筆數)
+      const deletedCount = await Followship.destroy({
+        where: {
+          followerId: getUser(req).id,
+          followingId: Number(followingId),
+        },
+      });
+      return res.json({ message: `刪除了 ${deletedCount} 筆資料` });
     } catch (error) {
       return next(error);
     }
