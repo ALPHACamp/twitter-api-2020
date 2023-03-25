@@ -6,6 +6,7 @@ const path = require('path');
 const express = require('express');
 const methodOverride = require('method-override');
 
+const cors = require('cors');
 const passport = require('./config/passport');
 const routes = require('./routes');
 const helpers = require('./_helpers');
@@ -13,6 +14,12 @@ const helpers = require('./_helpers');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// 限定網域設定
+// const corsOptions = {
+//   origin: 'https://pure-scrubland-51482.herokuapp.com/',
+// };
+
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
