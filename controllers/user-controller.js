@@ -72,7 +72,8 @@ const userController = {
     for (const key in req.body) {
       if (!req.body[key].trim()) throw new Error(`${key} 不能輸入空白`)
     }
-    const { file } = req
+    // const { file } = req
+    const { files } = req // 上傳多個檔時，會改擺在 req.files
     // 必須先知道有哪些要更動 (變數量可能有變!!)
     let { account, email, password } = req.body // 管他有沒有都先設，之後確保正確使用就好
     if (account === helpers.getUser(req).account) {
@@ -81,16 +82,22 @@ const userController = {
     if (email === helpers.getUser(req).email) {
       email = undefined
     }
+    const upload = {}
+    for (const key in files) {
+      upload[key] = { path: files[key][0].path }
+    }
     return Promise.all([
-      imgurFileHandler(file), // 若有餘裕，就研究下圖片上傳的細節唄
+      imgurFileHandler(upload.image), // 若有餘裕，就研究下圖片上傳的細節唄
+      imgurFileHandler(upload.avatar),
       User.findByPk(id),
       // (下1) false 要擺 account 根本不存在 (不更動 account) 的狀況
       account ? User.findOne({ where: { account } }) : undefined,
       email ? User.findOne({ where: { email } }) : undefined,
-      password ? bcrypt.compare(password, oldPW) : oldPW
-      // (上1) 測試檔裡根本沒有舊密碼雜湊值啊！這要怎麼比較！難怪一直跳 illegal argument！
+      // password ? bcrypt.compare(password, oldPW) : oldPW
+      password ? bcrypt.compare(password, oldPW) : true
+      // (上1) 因為測試檔 pw 是 null，若用 oldPW，下面的判定會跑到 else，拿空值去雜湊，跳 illegal argument，所以這樣改
     ])
-      .then(([filePath, user, sameAcc, sameMail, samePW]) => {
+      .then(([imagePath, avatarPath, user, sameAcc, sameMail, samePW]) => {
         if (!user) throw new Error("User doesn't exist!")
         if (sameAcc) throw new Error('account 已重複註冊！')
         if (sameMail) throw new Error('email 已重複註冊！')
@@ -101,7 +108,8 @@ const userController = {
         }
         req.body.account = account
         req.body.email = email
-        req.body.image = filePath || user.image
+        req.body.image = imagePath || user.image
+        req.body.avatar = avatarPath || user.avatar
         return user.update(req.body) // 試試看唄，看能不能回傳 array
       })
       .then(updatedUser => {
