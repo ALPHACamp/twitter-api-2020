@@ -12,7 +12,7 @@ const { authenticate, authenticateAdmin } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const passport = require('passport')
 
-router.post('/users/signIn', userController.signIn)
+router.post('/users/signIn', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/users', userController.signUp)
 
 router.post('/admin/signIn', passport.authenticate('local', { session: false }), adminController.signIn)

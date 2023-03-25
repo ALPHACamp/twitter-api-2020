@@ -16,12 +16,12 @@ passport.use(
       User.findOne({ where: { account } })
         .then(user => {
           // 如果使用者不存在
-          if (!user) return cb(null, false, { message: '帳號或密碼輸入錯誤!' })
+          if (!user) return cb(null, false, { message: 'The username and password your provided are invalid' })
           // 如果使用者密碼錯誤
           return bcrypt.compare(password, user.password).then(res => {
-            if (!res) { return cb(null, false, { message: '帳號或密碼輸入錯誤!' }) }
+            if (!res) { return cb(null, false, { message: 'The username and password your provided are invalid' }) }
             // 認證成功，回傳user資訊
-            return cb(null, user, { message: '登入成功!' })
+            return cb(null, user, { message: 'Login Successfully!' })
           })
         })
         .catch(error => cb(error))
