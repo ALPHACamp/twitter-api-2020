@@ -119,7 +119,7 @@ const userController = {
           name: f.name,
           account: f.account,
           ...f.toJSON().Followings,
-          followingId: f.Followings?.id || null,
+          followingId: f.Followings?.id|| null,
           followingAvatar: f.Followings?.avatar || 'https://reurl.cc/XLQeQj',
           followingName: f.Followings?.name || 'anonymous user',
           followingIntro: f.Followings?.introduction || '',
