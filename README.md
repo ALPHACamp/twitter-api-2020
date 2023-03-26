@@ -1,13 +1,40 @@
 # Simple Twitter API
 
-1. 提供網站**前台**註冊/登入/登出、新增推文與回覆、按讚推文、追蹤使用者、編輯個人資料等功能。
-2. 提供網站**後台**管理使用者、刪除推文等功能。
+1. 提供網站 **前台** 註冊/登入/登出、新增推文與回覆、按讚推文、追蹤使用者、編輯個人資料等功能。
+2. 提供網站 **後台** 管理使用者、刪除推文等功能。
 
-<img src="./snapshot.jpg" width="50%">
+<img src="./snapshot.jpg">
+
+
+## 基礎環境
+
+- Node.js 14.16.0
+- mysql2 1.6.4,
+- sequelize 6.18.0
+- sequelize-cli 5.5.0
+- express 4.16.4
+- express-session 1.15.6
+- passport 0.4.0
+- passport-local 1.0.0
+- passport-jwt 4.0.0
+- jsonwebtoken 9.0.0
+- bcryptjs 2.4.3
+- method-override 3.0.0
+- connect-flash 0.1.1
+- @faker-js/faker 7.6.0
+- imgur 1.0.2
+- multer 1.4.4
+- mocha 6.0.2
+- sinon 10.0.0
+- sinon-chai 3.3.0
+- chai 4.2.0
+- cors 2.8.5
+- dotenv 16.0.3
+
 
 ## 使用方式
 
-雲端服務：https://ac-twitter-12345.herokuapp.com
+#### 雲端服務：https://ac-twitter-12345.herokuapp.com
 
 以下列 4 種路由為例：
 | 類型    | Method     | 路由                               | 描述                             |
@@ -44,7 +71,7 @@ axios.post(`${baseUrl}/tweets`, {
 axios.delete(`${baseUrl}/admin/tweets/:id`)
 ```
 
-本地服務
+#### 本地服務
 
 1. 開啟終端機(Terminal)，clone 此專案至本機電腦
 ```
