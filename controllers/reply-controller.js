@@ -17,9 +17,26 @@ const replyController = {
       ])
       if (!user) throw new Error('使用者不存在')
       if (!tweet) throw new Error('推文不存在')
-      
+
       await Reply.create({ TweetId, UserId, comment })
       res.status(200).end()
+    } catch (err) {
+      next(err)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const TweetId = req.params.tweet_id
+      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+      if (!tweet) throw new Error('推文不存在')
+      const replies = await Reply.findAll({
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
+        where: { TweetId },
+        order: [['updatedAt', 'DESC']]
+      })
+      res.status(200).json(replies)
     } catch (err) {
       next(err)
     }

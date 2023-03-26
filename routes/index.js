@@ -23,6 +23,7 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.post('/users', userController.signup)
 router.post('/:role/signin', userController.signin)
 
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
 
 router.post('/tweets/:id/like', authenticated, tweetController.addTweetLike)
