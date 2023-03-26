@@ -7,7 +7,7 @@ const { authenticatedUser } = require("../middleware/auth");
 const upload = require("../middleware/multer");
 
 // - Admin
-router.use("/admin", admin);
+router.use("/api/admin", admin);
 
 // - User
 router.get(
