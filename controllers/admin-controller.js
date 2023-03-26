@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const { User, sequelize } = require("../models");
+const { User, Tweet, sequelize } = require("../models");
 const { QueryTypes } = require("sequelize");
 
 const adminController = {
@@ -80,6 +80,15 @@ const adminController = {
         };
       });
       return res.json(data);
+    } catch (error) {
+      return next(error);
+    }
+  },
+  deleteTweet: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const deletedCount = await Tweet.destroy({ where: { id } });
+      return res.json({ message: `刪除了 ${deletedCount} 筆資料` });
     } catch (error) {
       return next(error);
     }
