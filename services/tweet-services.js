@@ -12,7 +12,7 @@ const tweetServices = {
       .then(tweet => cb(null, tweet))
       .catch(err => cb(err, null))
   },
-  getTweets: (req, cb) => {
+  getTweets2: (req, cb) => {
     const currentUserId = helpers.getUser(req)?.id
     Promise.all([
       Tweet.findAll({
@@ -31,7 +31,6 @@ const tweetServices = {
       Like.findAll({})
     ])
       .then(([tweets, likes]) => {
-        console.log(tweets)
         const result = tweets.map(tweet => ({
           ...tweet,
           isLiked: likes.some(like => like.TweetId === tweet.id && currentUserId === like.UserId)
@@ -40,9 +39,9 @@ const tweetServices = {
       })
       .catch(err => cb(err))
   },
-  getTweets1: (req, cb) => {
+  getTweets: (req, cb) => {
     const currentUserId = Number(helpers.getUser(req).id)
-    return Tweet.findAll({
+    Tweet.findAll({
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
         { model: Like, attributes: ['UserId'] }
