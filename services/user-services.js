@@ -162,7 +162,7 @@ const adminServices = {
       include: [
         {
           model: Tweet,
-          as: 'likedTweet',
+
           include: [
             { model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] }
           ]
