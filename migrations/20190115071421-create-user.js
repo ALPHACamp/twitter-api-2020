@@ -24,11 +24,11 @@ module.exports = {
       },
       avatar: {
         type: Sequelize.STRING,
-        defaultValue: 'https://i.imgur.com/MlICwQb.jpg'
+        defaultValue: 'https://raw.githubusercontent.com/mirageapache/simple_twitter_frontend/d387af0317fc172f36eacd3a084e4c8eddedabf8/src/assets/images/default_user_avatar.jpg'
       },
       cover: {
         type: Sequelize.STRING,
-        defaultValue: 'https://i.imgur.com/eUeMQvx.png'
+        defaultValue: 'https://i.imgur.com/eUhttps://raw.githubusercontent.com/mirageapache/simple_twitter_frontend/main/src/assets/images/default_user_cover.jpgeMQvx.png'
       },
       introduction: {
         type: Sequelize.STRING(160)
