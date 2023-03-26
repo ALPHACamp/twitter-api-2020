@@ -37,11 +37,14 @@ const userController = {
 
       const authToken = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
 
+      delete userData.password
+      delete userData.role
+
       res.json({
         status: 'success',
         authToken,
-        data: {
-          user: userData
+        user: {
+          ...userData
         }
       })
     } catch (err) {
