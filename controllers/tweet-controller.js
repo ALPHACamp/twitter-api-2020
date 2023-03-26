@@ -4,15 +4,16 @@ const { User, Tweet, Followship, Reply, Like } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { tryCatch } = require('../helpers/tryCatch')
 const { getUser } = require('../_helpers')
+const sequelize = require('sequelize')
 
 const tweetController = {
   getTweets: tryCatch(async (req, res) => {
     const userData = getUser(req) instanceof Model
       ? getUser(req).toJSON()
       : getUser(req).dataValues
-    const user = await User.findByPk(userData.id)
-    if (!user) throw new ReqError('無此使用者資料')
-    const followings = await Followship.findAll({
+      const user = await User.findByPk(userData.id)
+      if (!user) throw new ReqError('無此使用者資料')
+      const followings = await Followship.findAll({
       where: { followerId: userData.id },
       attributes: ['followingId'],
       raw: true
@@ -34,6 +35,7 @@ const tweetController = {
       const temp = e.toJSON()
       temp.Replies = temp.Replies.length
       temp.Likes = temp.Likes.length
+      temp.isLiked = userData.Likes.some(like => like.TweetId === e.id)
       return temp
     })
     return Promise.resolve(result).then(
@@ -43,20 +45,23 @@ const tweetController = {
   getTweet: tryCatch(async (req, res) => {
     const TweetId = req.params.tweet_id
     const tweet = await Tweet.findByPk(TweetId, {
+      attributes: [
+        'description', 'createdAt',
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'Likes'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'Replies']
+      ],
       include: [
         {
           model: User,
           required: false,
-          attributes: ['name', 'account', 'avatar'],
+          attributes: ['id', 'name', 'account', 'avatar'],
           as: 'poster'
         }
       ],
       nest: true
     })
     if (!tweet) throw new ReqError('此推文不存在')
-    tweet.Replies = await Reply.count({ where: { TweetId } })
-    tweet.Likes = await Like.count({ where: { TweetId } })
-    res.send(tweet)
+    res.status(200).json(tweet)
   }),
   postTweet: tryCatch(async (req, res) => {
     const userData = !(getUser(req) instanceof Model)
