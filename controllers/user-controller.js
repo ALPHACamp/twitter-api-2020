@@ -324,7 +324,7 @@ const userController = {
       next(err)
     }
   },
-  getUserTokenStatus: async (req, res, next) => {
+  getUserTokenStatus: async (_req, res) => {
     return res.status(200).json({
       status: 'success',
       message: 'User authenticated'
