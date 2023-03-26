@@ -151,6 +151,8 @@ const userController = {
         }
         delete userProfile.Followers
         delete userProfile.Followings
+        delete userProfile.password
+        delete userProfile.role
 
         return res.json(userProfile)
       })
