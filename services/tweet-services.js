@@ -1,10 +1,10 @@
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const db = require('../models')
 const { User, sequelize, Tweet, Reply, Like } = db
 
 const tweetServices = {
   postTweet: (req, cb) => {
-    const UserId = getUser(req)?.dataValues.id
+    const UserId = Number(helpers.getUser(req).id)
     Tweet.create({
       description: req.body.description,
       UserId
@@ -12,11 +12,38 @@ const tweetServices = {
       .then(tweet => cb(null, tweet))
       .catch(err => cb(err, null))
   },
+  getTweets2: (req, cb) => {
+    const currentUserId = helpers.getUser(req)?.id
+    Promise.all([
+      Tweet.findAll({
+        raw: true,
+        nest: true,
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        ],
+        attributes: {
+          include:
+          [[sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCounts'], [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCounts']
+          ]
+        },
+        order: [['createdAt', 'DESC']]
+      }),
+      Like.findAll({})
+    ])
+      .then(([tweets, likes]) => {
+        const result = tweets.map(tweet => ({
+          ...tweet,
+          isLiked: likes.some(like => like.TweetId === tweet.id && currentUserId === like.UserId)
+        }))
+        cb(null, result)
+      })
+      .catch(err => cb(err))
+  },
   getTweets: (req, cb) => {
-    const currentUserId = getUser(req).dataValues.id
-    return Tweet.findAll({
+    const currentUserId = Number(helpers.getUser(req).id)
+    Tweet.findAll({
       include: [
-        { model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
         { model: Like, attributes: ['UserId'] }
       ],
       attributes: {
@@ -43,11 +70,11 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   getTweet: (req, cb) => {
-    const currentUserId = getUser(req).dataValues.id
+    const currentUserId = Number(helpers.getUser(req).id)
     const { id } = req.params
     return Tweet.findByPk(id, {
       include: [
-        { model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
         { model: Like, attributes: ['UserId'] }
       ],
       attributes: {
@@ -72,7 +99,7 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   postReply: (req, cb) => {
-    const UserId = getUser(req)?.dataValues.id
+    const UserId = Number(helpers.getUser(req).id)
     const TweetId = req.params.tweet_id
     Tweet.findByPk(TweetId)
       .then(tweet => {
@@ -94,7 +121,7 @@ const tweetServices = {
         where: { TweetId },
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-          { model: Tweet, attributes: ['UserId'], include: { model: User, as: 'Author', attributes: ['id', 'account'] } }
+          { model: Tweet, attributes: ['UserId'], include: { model: User, attributes: ['id', 'account'] } }
         ]
       })
     ])

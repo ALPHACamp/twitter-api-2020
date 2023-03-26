@@ -131,7 +131,7 @@ const adminServices = {
   getUserTweets: (req, cb) => {
     return Tweet.findAll({
       where: { UserId: req.params.id },
-      include: [{ model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] }],
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
@@ -162,9 +162,9 @@ const adminServices = {
       include: [
         {
           model: Tweet,
-          as: 'likedTweet',
+
           include: [
-            { model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] }
+            { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
           ]
         }
       ],
