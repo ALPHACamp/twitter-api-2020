@@ -1,19 +1,59 @@
-const { Tweet, Like, Reply, User } = require('../models')
+const { Tweet, Like, Reply, User, sequelize } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       order: [['created_at', 'desc']],
-      include: [User],
-      raw: true,
+      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`tweet_id` = `Tweet`.`id`)'
+            ),
+            'likesNum'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`tweet_id` = `Tweet`.`id`)'
+            ),
+            'repliesNum'
+          ]
+        ]
+      },
       nest: true
     })
-      .then(tweets => res.json({ status: 'success', tweets }))
+      .then(tweets => {
+        tweets = tweets.map(tweet => {
+          const tweetData = tweet.toJSON()
+          return tweetData
+        })
+
+        return res.json({ status: 'success', tweets })
+      })
       .catch(error => next(error))
   },
 
   getTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.tweetId)
+    return Tweet.findByPk(req.params.tweetId, {
+      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`tweet_id` = `Tweet`.`id`)'
+            ),
+            'likesNum'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`tweet_id` = `Tweet`.`id`)'
+            ),
+            'repliesNum'
+          ]
+        ]
+      }
+    })
       .then(tweet => {
         if (!tweet) {
           const error = new Error("Tweet doesn't exist!")
@@ -48,7 +88,7 @@ const tweetController = {
       where: {
         TweetId: req.params.tweetId
       },
-      include: [User],
+      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
       raw: true,
       nest: true
     })
