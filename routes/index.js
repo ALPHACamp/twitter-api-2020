@@ -7,6 +7,7 @@ const adminController = require('../controllers/admin-controller')
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
+const followshipController = require('../controllers/followship-controller')
 
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.removeTweet)
@@ -23,6 +24,8 @@ router.get('/users/:id', authenticated, userController.getUser)
 
 router.post('/users', userController.signup)
 router.post('/:role/signin', userController.signin)
+
+router.post('/followships', authenticated, followshipController.addFollowships)
 
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
