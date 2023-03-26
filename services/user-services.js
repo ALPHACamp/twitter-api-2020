@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const db = require('../models')
 const { User, sequelize, Tweet, Reply, Like, Followship } = db
-const { imgurFileHandler } = require('../helpers/file-helpers')
+// const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const adminServices = {
   postSignIn: (req, cb) => {
@@ -231,8 +231,8 @@ const adminServices = {
   //   if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
   //   // if (!account || !password) throw new Error('請填寫必填欄位')
   //  return Promise.all([
-  // 		User.findByPk(currentUserId),
-  // 		imgurFileHandler(req, 'avatar'),
+  // User.findByPk(currentUserId),
+  // imgurFileHandler(req, 'avatar'),
 
   // }
 }
