@@ -23,6 +23,9 @@ const adminController = {
 
   getUsers: (req, res, next) => {
     return User.findAll({
+      where: {
+        role: 'user'
+      },
       raw: true
     })
       .then(users => res.json({ status: 'success', users }))
@@ -34,7 +37,7 @@ const adminController = {
       order: [['created_at', 'desc']],
       raw: true,
       nest: true,
-      include: [User]
+      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }]
     })
       .then(tweets => res.json({ status: 'success', tweets }))
       .catch(error => next(error))
