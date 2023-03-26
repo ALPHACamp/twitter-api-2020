@@ -110,34 +110,33 @@ const userService = {
       .catch(err => cb(err))
   },
   getTweetsOfUser: (req, cb) => {
-    const UserId = req.params.userId
+    const userId = req.params.userId
+    const currentUserId = helpers.getUser(req).id
+
     return Tweet.findAll({
+      attributes: [
+        'id', 'description', 'createdAt', 'updatedAt',
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id)'), 'totalReplies'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Tweet_id = Tweet.id)'), 'totalLikes'],
+        [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Tweet_id = Tweet.id AND User_id = ${currentUserId})`), 'isLiked']
+      ],
       where: {
-        UserId
+        UserId: userId
       },
-      include: [{
-        model: Like,
-        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLikes'], [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE User_id = ${helpers.getUser(req).id} AND Tweet_id = Tweet.id)`), 'isLiked']]
-      }, {
-        model: Reply,
-        attributes: [[sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReplies']]
-      }, {
-        model: User,
-        attributes: ['account', 'name', 'avatar']
-      }],
-      group: 'Tweet.id',
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
       order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
+      nest: true,
+      raw: true
     })
-      .then(tweets => {
-        assert(tweets, '此使用者沒有推文！')
-        const data = tweets.map(t => ({
+      .then(tweetsData => {
+        const tweets = tweetsData.map(t => ({
           ...t,
           transferDateTime: relativeTimeFromNow(t.createdAt),
-          isLiked: Boolean(t.Likes.isLiked)
+          isLiked: t.isLiked === 1
         }))
-        cb(null, data)
+        cb(null, tweets)
       })
       .catch(err => cb(err))
   },
