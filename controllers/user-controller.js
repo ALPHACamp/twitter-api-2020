@@ -129,13 +129,13 @@ const userController = {
       if (introduction && !validator.isByteLength(introduction, { max: 160 })) {
         errors.push("字數超出上限，請將字數限制在 160 字以內");
       }
-      if (email) {
-        if (!validator.isEmail(email)){errors.push('請輸入有效的 email 格式')}
-        if (email !== helpers.getUser(req).email) {
-          const ifEmailDuplicate = await User.findOne({ where: { email } });
-          if (ifEmailDuplicate) {
-            errors.push("此Email已被註冊!");
-          }
+      if (email && !validator.isEmail(email)) {
+        errors.push('請輸入有效的 email 格式')
+      }
+      if (email && email !== helpers.getUser(req).email) {
+        const ifEmailDuplicate = await User.findOne({ where: { email } });
+        if (ifEmailDuplicate) {
+          errors.push("此Email已被註冊!");
         }
       }
       if (account !== helpers.getUser(req).account) {
@@ -153,7 +153,7 @@ const userController = {
       if (!user) {
         return res.status(404).json({ status: 'error', message: '帳戶不存在' })
       }
-      const updatedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+      const updatedPassword = await bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
       // const salt = await bcrypt.genSalt(10)
       // const hashedPassword = await bcrypt.hash(password, salt)
       await user.update({
