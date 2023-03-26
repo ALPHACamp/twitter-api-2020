@@ -13,6 +13,34 @@ const tweetServices = {
       .catch(err => cb(err, null))
   },
   getTweets: (req, cb) => {
+    const currentUserId = helpers.getUser(req)?.id
+    Promise.all([
+      Tweet.findAll({
+        raw: true,
+        nest: true,
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        ],
+        attributes: {
+          include:
+          [[sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCounts'], [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCounts']
+          ]
+        },
+        order: [['createdAt', 'DESC']]
+      }),
+      Like.findAll({})
+    ])
+      .then(([tweets, likes]) => {
+        console.log(tweets)
+        const result = tweets.map(tweet => ({
+          ...tweet,
+          isLiked: likes.some(like => like.TweetId === tweet.id && currentUserId === like.UserId)
+        }))
+        cb(null, result)
+      })
+      .catch(err => cb(err))
+  },
+  getTweets1: (req, cb) => {
     const currentUserId = Number(helpers.getUser(req).id)
     return Tweet.findAll({
       include: [
