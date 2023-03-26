@@ -27,6 +27,12 @@ const userController = {
   },
   getTopUsers: (req, res, next) => {
     userService.getTopUsers(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  editUser: (req, res, next) => {
+    userService.editUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  editSettingofUser: (req, res, next) => {
+    userService.editSettingofUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 

@@ -6,6 +6,7 @@ const helpers = require('../_helpers')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { Op } = require('sequelize')
 const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userService = {
   signUp: (req, cb) => {
@@ -290,6 +291,76 @@ const userService = {
         }))
         result = result.slice(0, 10)
         cb(null, { result })
+      })
+      .catch(err => cb(err))
+  },
+  editUser: (req, cb) => {
+    assert(Number(req.params.userId) === helpers.getUser(req).id, '不可修改其他使用者的資料！')
+    const { name, introduction } = req.body
+    console.log(req.body)
+    assert(name, '使用者名稱為必填！')
+    const checkNameLength = req.body.name.length
+    assert(checkNameLength <= 50, '字數超過上限')
+    const checkIntroductionLength = req.body.introduction.length
+    assert(checkIntroductionLength <= 160, '字數超過上限')
+    const avatarFile = req.files?.avatar ? req.files.avatar[0] : null
+    const coverFile = req.files?.cover ? req.files.cover[0] : null
+    return Promise.all([
+      imgurFileHandler(avatarFile),
+      imgurFileHandler(coverFile),
+      User.findByPk(req.params.userId)
+    ])
+      .then(([avatarFilePath, coverFilePath, user]) => {
+        return user.update({
+          name,
+          introduction,
+          avatar: avatarFilePath || user.avatar,
+          cover: coverFilePath || user.cover
+        })
+      })
+      .then(updatedUser => {
+        updatedUser = updatedUser.toJSON()
+        delete updatedUser.password
+        cb(null, { updatedUser })
+      })
+      .catch(err => cb(err))
+  },
+  editSettingofUser: (req, cb) => {
+    assert(Number(req.params.userId) === helpers.getUser(req).id, '不可修改其他使用者的資料！')
+    const { account, name, email, password, checkPassword } = req.body
+    const checkEmail = data => {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      return emailPattern.test(data)
+    }
+    const checkNameLength = name.length
+    assert(checkNameLength <= 50, '字數超過上限！')
+    assert(password === checkPassword, '密碼與確認密碼不一致')
+    assert(checkEmail(email), 'Email格式錯誤')
+    assert(account && name && email && password && checkPassword, '所有欄位皆須填寫')
+    Promise.all([
+      User.findOne({ where: { account: req.body.account } }),
+      User.findOne({ where: { email: req.body.email } })
+    ])
+      .then(([checkAccount, checkEmail]) => {
+        assert(!checkAccount, 'account 已重複註冊！')
+        assert(!checkEmail, 'email 已重複註冊！')
+        return Promise.all([bcrypt.hash(req.body.password, 10), User.findByPk(req.params.userId)])
+      })
+      .then(([hash, user]) => {
+        assert(user, '使用者不存在！')
+        return user.update({
+          name,
+          account,
+          email,
+          password: hash
+        })
+      })
+      .then(result => {
+        const { ...userResult } = {
+          ...result.toJSON()
+        }
+        delete userResult.password
+        cb(null, { userResult })
       })
       .catch(err => cb(err))
   }
