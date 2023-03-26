@@ -173,6 +173,80 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  likeTweet: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = req.params.tweetId
+      // 查找推文
+      const tweet = await Tweet.findByPk(TweetId)
+      // 找不到推文，則返回出錯誤提示
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到此則推文，無法按喜歡'
+        })
+      }
+      // 檢查是否已經按過喜歡
+      const liked = await Like.findOne({
+        where: { UserId, TweetId }
+      })
+      // 如果按過喜歡，則返回錯誤提示
+      if (liked) {
+        return res.status(400).json({
+          status: 'error',
+          message: '你已經點讚過此則推文'
+        })
+      }
+      // 沒按過喜歡，則創建一條新的like紀錄
+      await Like.create({
+        UserId,
+        TweetId
+      })
+
+      return res.status(200).json({
+        status: 'success',
+        message: '你已經成功點讚此則推文'
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = req.params.tweetId
+      // 查找推文
+      const tweet = await Tweet.findByPk(TweetId)
+      // 找不到推文，則返回出錯誤提示
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到此則推文，無法按喜歡'
+        })
+      }
+      // 檢查是否已經按過喜歡
+      const liked = await Like.findOne({
+        where: { UserId, TweetId }
+      })
+      if (liked === null) {
+        return res.status(400).json({
+          status: 'error',
+          message: '你沒有點讚過此則推文'
+        })
+      }
+
+      // 如果按過喜歡，則取消點讚紀錄
+      if (liked) {
+        liked.destroy()
+        return res.status(200).json({
+          status: 'success',
+          message: '你已經成功取消點讚此則推文'
+        })
+      }
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
