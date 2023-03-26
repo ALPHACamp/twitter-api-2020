@@ -40,8 +40,8 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   getTweets: (req, cb) => {
-    const currentUserId = Number(helpers.getUser(req).id)
-    Tweet.findAll({
+    // const currentUserId = Number(helpers.getUser(req).id)
+    return Tweet.findAll({
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
         // { model: Like, attributes: ['UserId'] }
@@ -49,20 +49,22 @@ const tweetServices = {
       attributes: {
         include: [
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM likes WHERE Tweet_id = Tweet.id 
+            sequelize.literal(`(SELECT COUNT(*)FROM Likes WHERE Tweet_id = Tweet.id 
             )`), 'LikedCounts'
           ],
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM replies WHERE Tweet_id = Tweet.id
+            sequelize.literal(`(SELECT COUNT(*)FROM Replies WHERE Tweet_id = Tweet.id
                 )`), 'RepliesCounts'
           ]
         ]
       },
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
     })
       .then(tweets => {
         const result = tweets.map(t => ({
-          ...t.toJSON()
+          ...t
           // isLiked: t.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
         }))
         cb(null, result)
@@ -70,7 +72,7 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   getTweet: (req, cb) => {
-    const currentUserId = Number(helpers.getUser(req).id)
+    // const currentUserId = Number(helpers.getUser(req).id)
     const { id } = req.params
     return Tweet.findByPk(id, {
       include: [
@@ -92,9 +94,9 @@ const tweetServices = {
     })
       .then(tweet => {
         if (!tweet) throw new Error('此貼文不存在!')
-        tweet = tweet.toJSON()
+        // tweet = tweet.toJSON()
         // tweet.isLiked = tweet.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
-        cb(null, tweet)
+        cb(null, tweet.toJSON())
       })
       .catch(err => cb(err))
   },
