@@ -197,7 +197,31 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
+      const { userId } = req.params
+      let userInfo = await User.findByPk(userId, {
+        attributes: { exclude: ['password', 'createdAt', 'updatedAt'] },
+        include: [Tweet, { model: User, as: 'Followers' }, { model: User, as: 'Followings' }]
+      })
 
+      if (!userInfo || userInfo.role === 'admin') {
+        return res
+          .status(404)
+          .json({ status: 'error', message: '此帳戶不存在' })
+      }
+      userInfo = {
+        id: userInfo.id,
+        account: userInfo.account,
+        name: userInfo.name,
+        avatar: userInfo.avatar ? userInfo.avatar : 'https://reurl.cc/7RVA5N',
+        cover: userInfo.cover ? userInfo.cover : 'https://reurl.cc/4QNDE3',
+        introduction: userInfo.introduction ? userInfo.introduction : 'Newbie here!',
+        tweetCount: userInfo.Tweets.length,
+        followingCount: userInfo.Followings.length,
+        followerCount: userInfo.Followers.length,
+        isFollowing: userInfo.Followings.some(u => u.id === helpers.getUser(req).id)
+      }
+
+      return res.status(200).json(userInfo)
     } catch (error) { next(error) }
   }
 }
