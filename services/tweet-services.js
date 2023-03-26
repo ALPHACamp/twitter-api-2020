@@ -58,13 +58,11 @@ const tweetServices = {
           ]
         ]
       },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         const result = tweets.map(t => ({
-          ...t
+          ...t.toJSON()
           // isLiked: t.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
         }))
         cb(null, result)
