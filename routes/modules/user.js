@@ -8,6 +8,7 @@ router.get(
   '/:userId/replied_tweets', authenticatedUser, userController.getUserReplies)
 
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
+
 router.post('/', userController.signUp)
 
 module.exports = router
