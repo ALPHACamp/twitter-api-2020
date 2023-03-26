@@ -35,7 +35,7 @@ const tweetController = {
           // tweet 時間格式修改
           createdAt: timeFormat(tweet.createdAt),
           // loginUser 是否 like 過
-          isLiked: likes.some(like => like.UserId === loginUserId)
+          isLiked: likes.some(like => like.TweetId === tweet.id && like.UserId === loginUserId)
         }))
         return res.json(result)
       })
@@ -86,7 +86,7 @@ const tweetController = {
       .then(([tweet, likes]) => {
         if (!tweet) throw createError(404, '該推文不存在')
         // loginUser 是否 like 過
-        tweet.isLiked = likes.some(like => like.UserId === loginUser.id)
+        tweet.isLiked = likes.some(like => like.TweetId === tweet.id && like.UserId === loginUser.id)
         tweet.createdAt = timeFormat(tweet.createdAt)
 
         return res.json(tweet)
