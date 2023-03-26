@@ -38,6 +38,7 @@ router.get('/api/tweets/:id', auth, isUser, tweetController.getTweet)
 router.get('/api/tweets', auth, isUser, tweetController.getTweets)
 router.post('/api/tweets', auth, isUser, tweetController.postTweet)
 
+router.get('/api/followships10', auth, isUser, userController.getTopFollowing) // 回傳 top10
 router.post('/api/followships', auth, isUser, userController.addFollowing)
 router.delete('/api/followships/:followingId', auth, isUser, userController.removeFollowing)
 

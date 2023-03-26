@@ -196,9 +196,29 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  // getFollowship: (req, res, next) => {
-
-  // },
+  getTopFollowing: (req, res, next) => {
+    // return Followship.findAll({
+    //   // limit: 10,
+    //   // order: [[]]
+    //   group: 'followingId'
+    // })
+    return User.findAll({
+      attributes: ['id'],
+      include: [{ model: User, as: 'Followers', attributes: ['id'] }]
+    })
+      .then(users => {
+        users = users.map(user => {
+          user = user.toJSON()
+          user.FollowerCounts = user.Followers.length // 先故意用 FollowerCounts 等想好再看要不要改 Followers
+          delete user.Followers
+          return user
+        })
+          .sort((a, b) => b.FollowerCounts - a.FollowerCounts)
+          .slice(0, 10)
+        return res.status(200).json(users)
+      })
+      .catch(err => next(err))
+  },
   addLike: (req, res, next) => {
     const TweetId = req.params.id
     // return User.findOne(helpers.getUser(req).id)
