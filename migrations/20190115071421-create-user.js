@@ -29,10 +29,6 @@ module.exports = {
       role: {
         type: Sequelize.STRING
       },
-      is_admin: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
-      },
       image: {
         type: Sequelize.STRING,
         defaultValue: 'https://i.imgur.com/GPlwyDu.png'
