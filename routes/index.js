@@ -37,6 +37,7 @@ router.get(
   userController.getUserLikes
 );
 router.post("/api/users", userController.signUp);
+router.get("/api/users/top", authenticatedUser, userController.getTopUser);
 router.get("/api/users/:id", authenticatedUser, userController.getUser);
 router.put(
   "/api/users/:id/setting",

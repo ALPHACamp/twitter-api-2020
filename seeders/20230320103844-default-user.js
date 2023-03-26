@@ -3,10 +3,10 @@ const bcrypt = require('bcryptjs')
 const { faker } = require('@faker-js/faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    // - 一個 admin 和 5 個一般用戶
+    // - 一個 admin 和 9 個一般用戶
     await queryInterface.bulkInsert(
       'Users',
-      Array.from({ length: 6 }, (_, index) =>
+      Array.from({ length: 10 }, (_, index) =>
         index === 0
           ? {
               name: 'root',
