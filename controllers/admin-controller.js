@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const Sequelize = require('sequelize')
 
 const helpers = require('../_helpers')
@@ -50,6 +50,21 @@ const adminController = {
       }))
 
       return res.status(200).json(userData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const { tweetId } = req.params
+
+      const tweet = await Tweet.findByPk(tweetId)
+
+      if (!tweet) return res.status(404).json({ status: 'error', message: '此則推文不存在' })
+
+      await tweet.destroy()
+
+      return res.status(200).json({ status: 'success', message: '成功刪除此推文' })
     } catch (err) {
       next(err)
     }
