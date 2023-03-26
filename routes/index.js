@@ -31,6 +31,11 @@ router.get(
   authenticatedUser,
   userController.getUserReplies
 );
+router.get(
+  "/api/users/:id/likes",
+  authenticatedUser,
+  userController.getUserLikes
+);
 router.post("/api/users", userController.signUp);
 router.get("/api/users/:id", authenticatedUser, userController.getUser);
 router.put(

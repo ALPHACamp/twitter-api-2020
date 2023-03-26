@@ -375,6 +375,49 @@ const userController = {
       return next(error);
     }
   },
+  getUserLikes: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const foundUser = await User.findByPk(id);
+      if (!foundUser || foundUser.isAdmin) {
+        const error = new Error("使用者不存在!");
+        error.status = 404;
+        throw error;
+      }
+      const [likes, loginUser] = await Promise.all([
+        Like.findAll({
+          include: [
+            {
+              model: Tweet,
+              attributes: ["description"],
+            },
+          ],
+          where: {
+            UserId: id,
+          },
+          order: [["createdAt", "DESC"]],
+        }),
+        User.findByPk(getUser(req).id, {
+          include: [{ model: Like, attributes: ["TweetId"] }],
+        })
+      ]);
+      const loginUserLikeTweetIds = loginUser?.Likes
+      ? loginUser.Likes.map((ul) => ul.TweetId)
+      : [];
+      const data = likes.map((l) => {
+        const {TweetId, Tweet} = l.toJSON();
+        return {
+          TweetId,
+          ...Tweet,
+          // - 目前登入的使用者有無按過喜歡
+          isLiked: loginUserLikeTweetIds.some(tid => tid === TweetId)
+        };
+      });
+      return res.json(data);
+    } catch (error) {
+      return next(error);
+    }
+  },
   getUserFollowers: async (req, res, next) => {
     const { id } = req.params;
     try {
