@@ -1,11 +1,11 @@
 const express = require('express')
 const router = express.Router()
 
-
-const { user, tweet, followship } = require('./modules')
+const user = require('./modules/user')
+const tweet = require('./modules/tweet')
+const followship = require('./modules/followship')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticatedUser } = require('../middleware/auth')
-const followship = require('../models/followship')
 
 router.use('/users', user)
 router.use('/tweets', authenticatedUser, tweet)

@@ -4,8 +4,7 @@ const validator = require('validator')
 
 const helpers = require('../_helpers')
 
-const { User, Tweet, Reply } = require('../models')
-const followship = require('../models/followship')
+const { User, Tweet, Reply, Followship } = require('../models')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -135,15 +134,15 @@ const userController = {
   },
   addFollowing: async (req, res, next) => {
     try {
-      const followingId = req.body.id
-      if (Number(followingId) === helpers.getUser(req).id) {
+      const userId = req.body.id
+      if (Number(userId) === helpers.getUser(req).id) {
         return res.status(404).json({ status: 'error', message: '無法追蹤自己' })
       }
       const [user, followship] = await Promise.all([
-        User.findByPk(Number(followingId)),
+        User.findByPk(Number(userId)),
         Followship.findOne({
           where: {
-            followingId,
+            followingId: userId,
             followerId: helpers.getUser(req).id
           }
         })
@@ -159,7 +158,7 @@ const userController = {
           .json({ status: 'error', message: '你已追蹤此使用者!' })
       }
       await Followship.create({
-        followingId,
+        followingId: userId,
         followerId: helpers.getUser(req).id
       })
       return res.status(200).json({ status: 'success', message: '追蹤成功！' })
