@@ -33,6 +33,17 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+  removeTweet: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const tweet = await Tweet.findByPk(id)
+      if (!tweet) throw new Error('推文不存在')
+      await tweet.destroy()
+      res.status(200).end()
+    } catch (err) {
+      next(err)
+    }
   }
 }
 

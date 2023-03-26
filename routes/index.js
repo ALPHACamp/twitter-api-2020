@@ -9,6 +9,7 @@ const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.removeTweet)
 
 router.get('/followers', authenticated, userController.getFollowersRank)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
