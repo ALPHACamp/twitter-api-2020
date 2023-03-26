@@ -26,6 +26,7 @@ router.post('/users', userController.signup)
 router.post('/:role/signin', userController.signin)
 
 router.post('/followships', authenticated, followshipController.addFollowships)
+router.delete('/followships/:followingId', authenticated, followshipController.removeFollowships)
 
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
