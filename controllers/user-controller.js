@@ -126,7 +126,8 @@ const userController = {
           name,
           account,
           email,
-          password: hash
+          password: hash,
+          role: 'user'
         })
       })
       .then(newUser => {
