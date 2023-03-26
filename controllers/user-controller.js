@@ -4,7 +4,7 @@ const validator = require('validator')
 
 const helpers = require('../_helpers')
 
-const { User, Tweet, Reply, Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -39,9 +39,7 @@ const userController = {
         errors.push('字數超出上限，請將字數限制在 50 字以內')
       }
       if (password && !validator.isByteLength(password, { min: 8, max: 20 })) {
-        errors.push(
-          '密碼長度介於 8 ~ 20 字元'
-        )
+        errors.push('密碼長度介於 8 ~ 20 字元')
       }
       if (password !== checkPassword) {
         errors.push('密碼與確認密碼不相符')
@@ -75,9 +73,62 @@ const userController = {
         password: hashedPassword
       })
 
-      return res
-        .status(200)
-        .json({ status: 'success', message: '註冊成功！' })
+      return res.status(200).json({ status: 'success', message: '註冊成功！' })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      const currentUserId = helpers.getUser(req).id
+
+      if (currentUserId !== Number(userId)) {
+        return res.status(403).json({
+          status: 'error',
+          message: '你沒有權限進入此頁面'
+        })
+      }
+
+      const user = await User.findByPk(userId)
+      
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到使用者'
+        })
+      }
+
+      const tweets = await Tweet.findAll({
+        where: { UserId: userId },
+        include: [User, Reply, Like, { model: User, as: 'LikedUsers' }],
+        order: [['createdAt', 'DESC']]
+      })
+
+      if (tweets.length === 0) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到任何推文'
+        })
+      }
+
+      const tweetsData = tweets.map((tweet) => {
+        const { id, UserId, description, createdAt } = tweet
+        return {
+          id,
+          UserId,
+          description,
+          createdAt,
+          avatar: tweet.User.avatar,
+          name: tweet.User.name,
+          account: tweet.User.account,
+          repliedCount: tweet.Replies.length,
+          likedCount: tweet.Likes.length,
+          isLike: tweet.LikedUsers.some((u) => u.id === currentUserId)
+        }
+      })
+
+      return res.status(200).json(tweetsData)
     } catch (err) {
       next(err)
     }
@@ -112,7 +163,7 @@ const userController = {
 
       const repliesData = replies.map((reply) => {
         return {
-          Id: reply.id,
+          id: reply.id,
           UserId: reply.UserId,
           comment: reply.comment,
           CreatedAt: reply.createdAt,
