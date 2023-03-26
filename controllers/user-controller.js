@@ -11,6 +11,7 @@ const userController = {
     const { account, name, email, password, checkPassword } = req.body
 
     if (password !== checkPassword) throw new Error('Password do not match!')
+    if (name.length > 50) throw new Error("name can't over 50 letters")
 
     User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
       .then(user => {
