@@ -4,6 +4,7 @@ const router = express.Router()
 const admin = require('./modules/admin')
 const users = require('./modules/users')
 const tweets = require('./modules/tweets')
+const followships = require('./modules/followships')
 
 const userController = require('../../controllers/user-controller')
 const adminController = require('../../controllers/admin-controller')
@@ -19,6 +20,7 @@ router.post('/admin/signIn', passport.authenticate('local', { session: false }),
 router.use('/admin', authenticate, authenticateAdmin, admin)
 router.use('/users', authenticate, users)
 router.use('/tweets', authenticate, tweets)
+router.use('/followships', authenticate, followships)
 
 router.use('/', apiErrorHandler)
 
