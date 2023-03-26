@@ -4,6 +4,7 @@ const passport = require('../../config/passport')
 const { authenticatedUser } = require('../../middleware/auth')
 const userController = require('../../controllers/user-controller')
 
+router.get('/:userId', authenticatedUser, userController.getUser)
 router.get(
   '/:userId/replied_tweets', authenticatedUser, userController.getUserReplies)
 

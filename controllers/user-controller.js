@@ -194,6 +194,11 @@ const userController = {
       await followship.destroy()
       return res.status(200).json({ status: 'success', message: '取消追蹤成功！' })
     } catch (error) { next(error) }
+  },
+  getUser: async (req, res, next) => {
+    try {
+
+    } catch (error) { next(error) }
   }
 }
 
