@@ -25,7 +25,7 @@
     "dialect": "mysql",
     "logging": false
   },
-	"ghactions": {
+  "ghactions": {
     "username": "root",
     "database": "ac_twitter",
     "host": "127.0.0.1",
