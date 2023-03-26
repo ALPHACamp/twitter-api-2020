@@ -195,7 +195,7 @@ const tweetController = {
       if (liked) {
         return res.status(400).json({
           status: 'error',
-          message: '你已經點讚過此則推文'
+          message: '你已經按喜歡過此則推文'
         })
       }
       // 沒按過喜歡，則創建一條新的like紀錄
@@ -206,7 +206,7 @@ const tweetController = {
 
       return res.status(200).json({
         status: 'success',
-        message: '你已經成功點讚此則推文'
+        message: '你已經成功按喜歡此則推文'
       })
     } catch (err) {
       next(err)
@@ -232,16 +232,16 @@ const tweetController = {
       if (liked === null) {
         return res.status(400).json({
           status: 'error',
-          message: '你沒有點讚過此則推文'
+          message: '你沒有按喜歡過此則推文'
         })
       }
 
-      // 如果按過喜歡，則取消點讚紀錄
+      // 如果按過喜歡，則取消按喜歡紀錄
       if (liked) {
         liked.destroy()
         return res.status(200).json({
           status: 'success',
-          message: '你已經成功取消點讚此則推文'
+          message: '你已經成功取消喜歡此則推文'
         })
       }
     } catch (err) {
