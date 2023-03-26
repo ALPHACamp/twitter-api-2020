@@ -91,7 +91,7 @@ const userController = {
       }
 
       const user = await User.findByPk(userId)
-      
+
       if (!user) {
         return res.status(404).json({
           status: 'error',
@@ -135,11 +135,22 @@ const userController = {
   },
   getUserReplies: async (req, res, next) => {
     try {
-      const userId = helpers.getUser(req).id
+      const { userId } = req.params
+      const currentUserId = helpers.getUser(req).id
+
+      if (currentUserId !== Number(userId)) {
+        return res.status(403).json({
+          status: 'error',
+          message: '你沒有權限進入此頁面'
+        })
+      }
 
       const user = await User.findByPk(userId)
       if (!user) {
-        return res.status(404).json({ status: 'error', message: '找不到使用者' })
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到使用者'
+        })
       }
 
       const replies = await Reply.findAll({
@@ -166,10 +177,10 @@ const userController = {
           id: reply.id,
           UserId: reply.UserId,
           comment: reply.comment,
-          CreatedAt: reply.createdAt,
-          Name: reply.User.name,
-          Avatar: reply.User.avatar,
-          Account: reply.User.account,
+          createdAt: reply.createdAt,
+          name: reply.User.name,
+          avatar: reply.User.avatar,
+          account: reply.User.account,
           tweetId: reply.TweetId,
           tweetDescription: reply.Tweet.description,
           tweetCreatedAt: reply.Tweet.createdAt,
