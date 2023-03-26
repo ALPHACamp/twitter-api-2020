@@ -238,7 +238,7 @@ const tweetController = {
 
       // 如果按過喜歡，則取消按喜歡紀錄
       if (liked) {
-        liked.destroy()
+        await liked.destroy()
         return res.status(200).json({
           status: 'success',
           message: '你已經成功取消喜歡此則推文'
