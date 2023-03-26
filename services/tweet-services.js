@@ -23,8 +23,8 @@ const tweetServices = {
         ],
         attributes: {
           include:
-          [[sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCounts'], [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCounts']
-          ]
+            [[sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCounts'], [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCounts']
+            ]
         },
         order: [['createdAt', 'DESC']]
       }),
@@ -43,8 +43,8 @@ const tweetServices = {
     const currentUserId = Number(helpers.getUser(req).id)
     Tweet.findAll({
       include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Like, attributes: ['UserId'] }
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        // { model: Like, attributes: ['UserId'] }
       ],
       attributes: {
         include: [
@@ -62,8 +62,8 @@ const tweetServices = {
     })
       .then(tweets => {
         const result = tweets.map(t => ({
-          ...t.toJSON(),
-          isLiked: t.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
+          ...t.toJSON()
+          // isLiked: t.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
         }))
         cb(null, result)
       })
@@ -74,8 +74,8 @@ const tweetServices = {
     const { id } = req.params
     return Tweet.findByPk(id, {
       include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Like, attributes: ['UserId'] }
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        // { model: Like, attributes: ['UserId'] }
       ],
       attributes: {
         include: [
@@ -93,7 +93,7 @@ const tweetServices = {
       .then(tweet => {
         if (!tweet) throw new Error('此貼文不存在!')
         tweet = tweet.toJSON()
-        tweet.isLiked = tweet.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
+        // tweet.isLiked = tweet.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
         cb(null, tweet)
       })
       .catch(err => cb(err))
