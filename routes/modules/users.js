@@ -24,12 +24,12 @@ router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id/setting', authenticatedOwner, userController.getUserSetting)
 
 // 編輯個人設定
-router.put('/:id/setting', userAccountValidation, validateForm, authenticatedOwner, userController.putUserSetting)
+router.put('/:id/setting', authenticatedOwner, userAccountValidation, validateForm, userController.putUserSetting)
 
 // 個人資料
 router.get('/:id', userController.getUser)
 
 // 編輯個人資料
-router.put('/:id', userProfileValidation, validateForm, authenticatedOwner, upload, userController.putUser)
+router.put('/:id', authenticatedOwner, upload, userProfileValidation, validateForm, userController.putUser)
 
 module.exports = router

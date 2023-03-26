@@ -28,7 +28,7 @@ module.exports = {
       },
       cover: {
         type: Sequelize.STRING,
-        defaultValue: 'https://i.imgur.com/eUhttps://raw.githubusercontent.com/mirageapache/simple_twitter_frontend/main/src/assets/images/default_user_cover.jpgeMQvx.png'
+        defaultValue: 'https://raw.githubusercontent.com/mirageapache/simple_twitter_frontend/main/src/assets/images/default_user_cover.jpg'
       },
       introduction: {
         type: Sequelize.STRING(160)

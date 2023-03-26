@@ -248,8 +248,8 @@ const userController = {
       const user = await User.findByPk(id)
       if (!user) return res.status(404).json({ status: 'error', message: 'User not found' })
       const filePaths = {
-        updatedAvatar: avatar ? await imgurFileHandler(avatar[0]) : null,
-        updatedCover: cover ? await imgurFileHandler(cover[0]) : null
+        updatedAvatar: avatar ? await imgurFileHandler(avatar[0], 'avatar') : null,
+        updatedCover: cover ? await imgurFileHandler(cover[0], 'cover') : null
       }
       const updatedUser = await user.update({
         name,
@@ -257,6 +257,8 @@ const userController = {
         cover: filePaths.updatedCover || user.cover,
         introduction
       })
+      delete updatedUser.password
+      delete updatedUser.role
       return res.status(200).json({
         status: 'success',
         message: 'Successfully updated the user',
