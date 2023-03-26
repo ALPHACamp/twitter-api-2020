@@ -16,7 +16,7 @@ const tweetServices = {
     const currentUserId = getUser(req).dataValues.id
     return Tweet.findAll({
       include: [
-        { model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
         { model: Like, attributes: ['UserId'] }
       ],
       attributes: {
@@ -47,7 +47,7 @@ const tweetServices = {
     const { id } = req.params
     return Tweet.findByPk(id, {
       include: [
-        { model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
         { model: Like, attributes: ['UserId'] }
       ],
       attributes: {
@@ -94,7 +94,7 @@ const tweetServices = {
         where: { TweetId },
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-          { model: Tweet, attributes: ['UserId'], include: { model: User, as: 'Author', attributes: ['id', 'account'] } }
+          { model: Tweet, attributes: ['UserId'], include: { model: User, attributes: ['id', 'account'] } }
         ]
       })
     ])
