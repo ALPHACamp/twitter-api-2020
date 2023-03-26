@@ -113,7 +113,6 @@ const userController = {
       }
       const { account, name, email, password, checkPassword, introduction } = req.body
       const errors = []
-      // check if all the required fields are filled out correctly
       if (!account || !name || !email || !password || !checkPassword ) {
         errors.push('所有欄位皆必填')
       }
@@ -149,18 +148,16 @@ const userController = {
         return res.status(400).json({ status: 'error', errors })
       }
 
-      const user = await User.findByPk(req.params.userId)
+      const user = await User.findByPk(userId)
       if (!user) {
         return res.status(404).json({ status: 'error', message: '帳戶不存在' })
       }
-      const updatedPassword = await bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-      
       await user.update({
         name,
         account,
         email,
-        password: updatedPassword, 
-        introduction
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+        introduction,
       })
       return res.status(200).json({ status: 'success', message: '設定成功' })
     } catch (error) { next(error) }
