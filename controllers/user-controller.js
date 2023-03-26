@@ -454,6 +454,29 @@ const userController = {
       return next(error);
     }
   },
+  getTopUser: async (req, res, next) => {
+    const loginUserId = getUser(req).id
+    const DEFAULT_LIMIT = 10
+    const limit = req.query.limit || DEFAULT_LIMIT
+    try {
+      const users = await sequelize.query(
+        `
+        SELECT f.followingId, u.account, u.name, u.avatar, COUNT(f.followingId) as followerCounts
+        FROM Followships as f INNER JOIN Users as u
+        ON f.followingId = u.id
+        GROUP BY f.followingId
+        HAVING f.followingId <> ${loginUserId}
+        ORDER BY followerCounts DESC, f.followingId ASC
+        LIMIT ${limit};
+        `,
+        { type: QueryTypes.SELECT }
+      )
+      console.log(users)
+      return res.json(users)
+    } catch (error) {
+      return next(error)
+    }
+  }
 };
 
 module.exports = userController;
