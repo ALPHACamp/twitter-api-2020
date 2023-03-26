@@ -9,17 +9,20 @@ module.exports = {
       }
     );
     const followships = [];
-    // - 每人隨機追蹤一名其他使用者
+    // - 每人隨機追蹤其他三位使用者
     users.forEach((user, index) => {
-      const others = users.filter((u) => u.id !== user.id);
-      const randomIndex = Math.floor(Math.random() * others.length);
-      const followship = {
-        followerId: users[index].id,
-        followingId: others[randomIndex].id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      followships.push(followship);
+      let others = users.filter((u) => u.id !== user.id);
+      for (let i = 0; i < 3; i += 1) {
+        const randomIndex = Math.floor(Math.random() * others.length);
+        const followship = {
+          followerId: users[index].id,
+          followingId: others[randomIndex].id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        followships.push(followship);
+        others.splice(randomIndex, 1) // - 剔除選中的 user
+      }
     });
     await queryInterface.bulkInsert("Followships", followships, {});
   },

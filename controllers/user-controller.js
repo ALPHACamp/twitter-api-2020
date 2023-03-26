@@ -471,7 +471,6 @@ const userController = {
         `,
         { type: QueryTypes.SELECT }
       )
-      console.log(users)
       return res.json(users)
     } catch (error) {
       return next(error)
