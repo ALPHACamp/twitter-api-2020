@@ -1,7 +1,42 @@
-const { sequelize } = require("../models");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const { User, sequelize } = require("../models");
 const { QueryTypes } = require("sequelize");
 
 const adminController = {
+  signIn: async (req, res, next) => {
+    const { account, password } = req.body;
+    try {
+      if (!account || !password) {
+        const error = new Error("欄位不可空白!");
+        error.status = 400;
+        throw error;
+      }
+      const foundUser = await User.findOne({ where: { account } });
+      if (!foundUser || !foundUser.isAdmin) {
+        const error = new Error("帳號不存在!");
+        error.status = 404;
+        throw error;
+      }
+      const isMatch = await bcrypt.compare(password, foundUser.password);
+      if (!isMatch) {
+        const error = new Error("密碼不正確!");
+        error.status = 400;
+        throw error;
+      }
+      const loginUser = foundUser.toJSON();
+      delete loginUser.password;
+      const token = jwt.sign(loginUser, process.env.JWT_SECRET, {
+        expiresIn: "30d",
+      });
+      return res.json({
+        token,
+        ...loginUser,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
   getUsers: async (req, res, next) => {
     try {
       const users = await sequelize.query(
@@ -37,13 +72,13 @@ const adminController = {
       `,
         { type: QueryTypes.SELECT }
       );
-      const data = users.map(u => {
-        delete u.password
+      const data = users.map((u) => {
+        delete u.password;
         return {
           ...u,
-          isAdmin: u.role === 'admin'
-        }
-      })
+          isAdmin: u.role === "admin",
+        };
+      });
       return res.json(data);
     } catch (error) {
       return next(error);
