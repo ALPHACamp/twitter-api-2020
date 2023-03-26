@@ -4,7 +4,7 @@ const {
 } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class Followship extends Model {
-    static associate(models) {
+    static associate (models) {
       Followship.belongsTo(models.User, { as: 'Follower', foreignKey: 'followerId' })
       Followship.belongsTo(models.User, { as: 'Following', foreignKey: 'followingId' })
     }
@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Followship',
-    tableName: 'followships',
+    tableName: 'Followships',
     underscored: true
   })
   return Followship

@@ -4,7 +4,7 @@ const {
 } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class Tweet extends Model {
-    static associate(models) {
+    static associate (models) {
       Tweet.hasMany(models.Reply)
       Tweet.hasMany(models.Like)
       Tweet.belongsTo(models.User, { as: 'Author', foreignKey: 'UserId' })
@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Tweet',
-    tableName: 'tweets',
+    tableName: 'Tweets',
     underscored: true
   })
   return Tweet
