@@ -80,11 +80,11 @@ const tweetServices = {
       attributes: {
         include: [
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM likes WHERE Tweet_id = Tweet.id 
+            sequelize.literal(`(SELECT COUNT(*)FROM Likes WHERE Tweet_id = Tweet.id 
             )`), 'LikedCounts'
           ],
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM replies WHERE Tweet_id = Tweet.id
+            sequelize.literal(`(SELECT COUNT(*)FROM Replies WHERE Tweet_id = Tweet.id
                 )`), 'RepliesCounts'
           ]
         ]
