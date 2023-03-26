@@ -399,7 +399,7 @@ const userController = {
             include: [
               {
                 model: Tweet,
-                attributes: ['id', 'description'],
+                attributes: ['id', 'description', 'createdAt', 'updatedAt'],
                 include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
               }
             ]
