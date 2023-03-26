@@ -1,16 +1,16 @@
 const { User, Tweet } = require('../models')
 const jwt = require('jsonwebtoken')
+const helpers = require('../_helpers')
 
 const adminController = {
   signIn: (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
+      const userData = helpers.getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
       res.json({
-        status: 'success',
         data: {
           token,
           user: userData
@@ -23,12 +23,9 @@ const adminController = {
 
   getUsers: (req, res, next) => {
     return User.findAll({
-      where: {
-        role: 'user'
-      },
       raw: true
     })
-      .then(users => res.json({ status: 'success', users }))
+      .then(users => res.json(users))
       .catch(error => next(error))
   },
 
@@ -39,7 +36,7 @@ const adminController = {
       nest: true,
       include: [{ model: User, attributes: ['account', 'name', 'avatar'] }]
     })
-      .then(tweets => res.json({ status: 'success', tweets }))
+      .then(tweets => res.json({ tweets }))
       .catch(error => next(error))
   },
 
@@ -54,7 +51,7 @@ const adminController = {
 
         return tweet.destroy()
       })
-      .then(deleteTweet => res.json({ status: 'success', deleteTweet }))
+      .then(deleteTweet => res.json({ deleteTweet }))
       .catch(error => next(error))
   }
 }

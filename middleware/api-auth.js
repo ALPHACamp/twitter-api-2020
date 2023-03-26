@@ -15,11 +15,11 @@ const authenticate = (req, res, next) => {
   })(req, res, next)
 }
 
-const authenticateAdmin = (req, res, next) => {
-  if (helpers.getUser(req) && helpers.getUser(req).role === 'admin') return next()
+const authenticateRole = (role) => (req, res, next) => {
+  if (helpers.getUser(req) && helpers.getUser(req).role === role) return next()
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 module.exports = {
   authenticate,
-  authenticateAdmin
+  authenticateRole
 }

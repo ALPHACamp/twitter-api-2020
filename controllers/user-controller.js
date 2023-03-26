@@ -13,7 +13,7 @@ const userController = {
           throw error
         }
 
-        return res.json({ status: 'success', ...user.toJSON() })
+        return res.json({ ...user.toJSON() })
       })
       .catch(error => next(error))
   },
@@ -132,7 +132,7 @@ const userController = {
       })
       .then(newUser => {
         delete newUser.password
-        return res.json({ status: 'success', newUser })
+        return res.json(newUser)
       })
       .catch(error => next(error))
   },
@@ -145,11 +145,8 @@ const userController = {
         expiresIn: '30d'
       })
       res.json({
-        status: 'success',
-        data: {
-          token,
-          user: userData
-        }
+        token,
+        user: userData
       })
     } catch (error) {
       next(error)
@@ -177,7 +174,7 @@ const userController = {
           coverUrl: filePath[1] || user.coverUrl
         })
       })
-      .then(updatedUser => res.json({ status: 'success', updatedUser }))
+      .then(updatedUser => res.json(updatedUser))
       .catch(error => next(error))
   },
 

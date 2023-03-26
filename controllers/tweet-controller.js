@@ -1,4 +1,5 @@
 const { Tweet, Like, Reply, User, sequelize } = require('../models')
+const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: (req, res, next) => {
@@ -29,7 +30,7 @@ const tweetController = {
           return tweetData
         })
 
-        return res.json({ status: 'success', tweets })
+        return res.json(tweets)
       })
       .catch(error => next(error))
   },
@@ -61,13 +62,13 @@ const tweetController = {
           throw error
         }
 
-        return res.json({ status: 'success', tweet })
+        return res.json(tweet)
       })
       .catch(error => next(error))
   },
 
   postTweet: (req, res, next) => {
-    const { description, userId } = req.body
+    const { description } = req.body
 
     if (!description.trim()) {
       const error = new Error('Description is required!')
@@ -77,9 +78,11 @@ const tweetController = {
 
     return Tweet.create({
       description,
-      userId
+      UserId: helpers.getUser(req).id
     })
-      .then(newTweet => res.json({ status: 'success', newTweet }))
+      .then(newTweet => {
+        return res.json(newTweet)
+      })
       .catch(error => next(error))
   },
 
@@ -99,7 +102,7 @@ const tweetController = {
           throw error
         }
 
-        return res.json({ status: 'success', replies })
+        return res.json(replies)
       })
       .catch(error => next(error))
   },
@@ -114,11 +117,11 @@ const tweetController = {
     }
 
     return Reply.create({
-      UserId: req.user.id,
+      UserId: helpers.getUser(req).id,
       comment,
       TweetId: req.params.tweetId
     })
-      .then(newReply => res.json({ status: 'success', newReply }))
+      .then(newReply => res.json(newReply))
       .catch(error => next(error))
   },
 
@@ -129,7 +132,7 @@ const tweetController = {
       Tweet.findByPk(tweetId),
       Like.findOne({
         where: {
-          UserId: req.user.id,
+          UserId: helpers.getUser(req).id,
           TweetId: tweetId
         }
       })
@@ -148,18 +151,18 @@ const tweetController = {
         }
 
         return Like.create({
-          UserId: req.user.id,
+          UserId: helpers.getUser(req).id,
           TweetId: tweetId
         })
       })
-      .then(newLike => res.json({ status: 'success', newLike }))
+      .then(newLike => res.json(newLike))
       .catch(error => next(error))
   },
 
   removeLike: (req, res, next) => {
     return Like.findOne({
       where: {
-        UserId: req.user.id,
+        UserId: helpers.getUser(req).id,
         TweetId: req.params.tweetId
       }
     })
@@ -172,7 +175,7 @@ const tweetController = {
 
         return like.destroy()
       })
-      .then(deletedLike => res.json({ status: 'success', deletedLike }))
+      .then(deletedLike => res.json(deletedLike))
       .catch(error => next(error))
   }
 }
