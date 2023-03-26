@@ -17,7 +17,12 @@ const passport = require('./config/passport')
 // function authenticated (req, res, next) {
 // passport.authenticate('jwt', { ses...
 // }
-app.use(cors())
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  credentials: true,
+  optionSuccessStatus: 200
+}
+app.use(cors(corsOptions))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
