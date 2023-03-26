@@ -64,7 +64,8 @@ const tweetController = {
         })
       })
       .then(reply => {
-        return res.status(200).json({ status: 'success', reply })
+        // return res.status(200).json({ status: 'success', reply }) // 前端說改成下面
+        return res.status(200).json({ success: 'true', reply })
       })
       .catch(err => next(err))
   },

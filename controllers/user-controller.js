@@ -11,7 +11,8 @@ const userController = {
       delete userData.password // 刪除 .password 這個 property
       // (下1) 發出 jwt token，要擺兩個引數，第一個，要包進去的資料，第二個，要放 secret key
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 30 天過期，可調
-      res.json({ status: 'success', data: { token, user: userData } })
+      // res.json({ status: 'success', data: { token, user: userData } }) // 前端說改成下面
+      res.json({ success: 'true', data: { token, user: userData } })
     } catch (err) {
       next(err)
     }
@@ -42,7 +43,8 @@ const userController = {
       .then(createdUser => {
         const result = createdUser.toJSON()
         delete result.password // 避免不必要資料外洩
-        res.status(200).json({ status: 'success', user: result })
+        // res.status(200).json({ status: 'success', user: result }) // 前端說改成下面
+        res.status(200).json({ success: 'true', user: result })
       })
       .catch(err => next(err))
   },
@@ -64,7 +66,8 @@ const userController = {
     // (上1 不能用) 居然得為了測試擋改成這樣 (下1)
     if (helpers.getUser(req).id !== id) {
       return res.status(401).json({
-        status: 'error',
+        // status: 'error', // 前端說改成下面
+        success: 'false',
         message: 'Sorry. You do not own this account.'
       })
     }

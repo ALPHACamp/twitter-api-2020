@@ -26,7 +26,7 @@ router.post('/api/users', userController.signUp) // 註冊帳號路由
 // router.put('/api/users/:id', auth, isUser, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUser)
 router.put('/api/users/:id', auth, isUser, upload.fields([{ name: 'image' }, { name: 'avatar' }]), userController.putUser)
 // (下1) session: false 的功能，把 cookie/session 功能關掉，不管理它
-router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn) // 注意是 post
+router.post('/api/login', passport.authenticate('local', { session: false }), userController.signIn) // 注意是 post
 
 router.post('/api/tweets/:tweet_id/replies', auth, isUser, tweetController.postReply)
 router.get('/api/tweets/:tweet_id/replies', auth, isUser, tweetController.getReply)
