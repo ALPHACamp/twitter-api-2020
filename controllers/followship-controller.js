@@ -35,6 +35,7 @@ const followshipController = {
           .then(newFollowing => res.json(newFollowing))
           .catch(error => next(error))
       })
+      .catch(error => next(error))
   },
 
   deleteFollowship: (req, res, next) => {
