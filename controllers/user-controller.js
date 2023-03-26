@@ -154,8 +154,7 @@ const userController = {
         return res.status(404).json({ status: 'error', message: '帳戶不存在' })
       }
       const updatedPassword = await bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-      // const salt = await bcrypt.genSalt(10)
-      // const hashedPassword = await bcrypt.hash(password, salt)
+      
       await user.update({
         name,
         account,
