@@ -19,7 +19,7 @@ const userController = {
   },
 
   getUserTweets: (req, res, next) => {
-    return sequelize.query('SELECT description FROM tweets WHERE user_id = :userId ORDER BY created_at LIMIT 5',
+    return sequelize.query('SELECT description FROM Tweets WHERE user_id = :userId ORDER BY created_at LIMIT 5',
       {
         replacements: { userId: req.params.userId },
         type: sequelize.QueryTypes.SELECT
@@ -37,7 +37,7 @@ const userController = {
   },
 
   getUserReplies: (req, res, next) => {
-    return sequelize.query('SELECT comment FROM replies WHERE user_id = :userId ORDER BY created_at LIMIT 5',
+    return sequelize.query('SELECT comment FROM Replies WHERE user_id = :userId ORDER BY created_at LIMIT 5',
       {
         replacements: { userId: req.params.userId },
         type: sequelize.QueryTypes.SELECT
@@ -55,7 +55,7 @@ const userController = {
   },
 
   getUserLikes: (req, res, next) => {
-    return sequelize.query('SELECT Tweet_id TweetId FROM likes WHERE User_id = :userId',
+    return sequelize.query('SELECT Tweet_id TweetId FROM Likes WHERE User_id = :userId',
       {
         replacements: { userId: req.params.userId },
         type: sequelize.QueryTypes.SELECT
@@ -73,7 +73,7 @@ const userController = {
   },
 
   getUserFollowers: (req, res, next) => {
-    return sequelize.query('SELECT Follower_id followerId FROM users u JOIN followships f ON u.id = f.Following_Id WHERE u.id = :userId',
+    return sequelize.query('SELECT Follower_id followerId FROM Users u JOIN Followships f ON u.id = f.Following_Id WHERE u.id = :userId',
       {
         replacements: { userId: req.params.userId },
         type: sequelize.QueryTypes.SELECT
@@ -84,7 +84,7 @@ const userController = {
 
   // 不能直接從followship去找，要從user
   getUserFollowings: (req, res, next) => {
-    return sequelize.query('SELECT Following_id followingId FROM users u JOIN followships f ON u.id = f.Follower_Id WHERE u.id = :userId',
+    return sequelize.query('SELECT Following_id followingId FROM Users u JOIN Followships f ON u.id = f.Follower_Id WHERE u.id = :userId',
       {
         replacements: { userId: req.params.userId },
         type: sequelize.QueryTypes.SELECT
