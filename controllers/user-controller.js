@@ -82,26 +82,55 @@ const userController = {
       next(err)
     }
   },
-  getRepliedTweets: async (req, res, next) => {
+  getUserReplies: async (req, res, next) => {
     try {
-      const { userId } = req.params
-      const reply = await Reply.findAll({
+      const userId = helpers.getUser(req).id
+
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(404).json({ status: 'error', message: '找不到使用者' })
+      }
+
+      const replies = await Reply.findAll({
         where: { UserId: userId },
         include: [
           { model: User, attributes: ['name', 'avatar', 'account'] },
           {
             model: Tweet,
-            attributes: [],
-            include: [{ model: User, attributes: ['account'] }]
+            include: User
           }
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (!reply) {
-        return res.status(404).json({ status: 'error', message: '回覆不存在' })
+
+      if (replies.length === 0) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到任何回覆'
+        })
       }
-      return res.status(200).json({ status: 'success', data: reply })
-    } catch (error) { next(error) }
+
+      const repliesData = replies.map((reply) => {
+        return {
+          Id: reply.id,
+          UserId: reply.UserId,
+          comment: reply.comment,
+          CreatedAt: reply.createdAt,
+          Name: reply.User.name,
+          Avatar: reply.User.avatar,
+          Account: reply.User.account,
+          tweetId: reply.TweetId,
+          tweetDescription: reply.Tweet.description,
+          tweetCreatedAt: reply.Tweet.createdAt,
+          tweetAuthorId: reply.Tweet.User.id,
+          tweetAuthorAccount: reply.Tweet.User.account
+        }
+      })
+
+      return res.status(200).json(repliesData)
+    } catch (err) {
+      next(err)
+    }
   },
   getFollowings: (req, res, next) => {
     const { userId } = req.params
@@ -111,26 +140,30 @@ const userController = {
       raw: true
     })
       .then((user) => {
-        console.log('result', user)
+        console.log(...user)
         if (!user || user.role === 'admin') {
           return res.status(404).json({ status: 'error', message: '帳戶不存在' })
         };
-        const followingData = user.map((f) => ({
-          userId: f.id,
-          name: f.name,
-          account: f.account,
-          ...f.toJSON().Followings,
-          followingId: f.Followings?.id|| null,
-          followingAvatar: f.Followings?.avatar || 'https://reurl.cc/XLQeQj',
-          followingName: f.Followings?.name || 'anonymous user',
-          followingIntro: f.Followings?.introduction || '',
-          followingCount: f.Followings.length,
+        const followingData = user.map((user) => ({
+          ...user,
+          userId: user.id,
+          name: user.name,
+          account: user.account,
+
+          followingId: user.Followings?.id || null,
+          followingAvatar: user.Followings?.avatar || 'https://reurl.cc/XLQeQj',
+          followingName: user.Followings?.name || 'anonymous user',
+          followingIntro: user.Followings?.introduction || '',
+          followingCount: user.Followings.length,
           isFollowed: helpers
             .getUser(req)
             .Followings.some(
-              (fu) => fu.Followship.followingId === f.Followers.id
+              (fu) => fu.Followship.followingId === user.Followers.id
             )
+
         }))
+        console.log(user.Followings)
+        console.log(followingData)
         return res.status(200).json(followingData)
       })
       .catch((error) => next(error))
