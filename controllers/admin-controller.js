@@ -49,28 +49,28 @@ const adminController = {
       const users = await sequelize.query(
         `
       SELECT u.*, userTweet.tweetCount, userFollower.followerCount, userFollowing.followingCount, userTweetLike.userTweetLikeCount
-      FROM users as u LEFT OUTER JOIN (
+      FROM Users as u LEFT OUTER JOIN (
         SELECT u.id as UserId, count(u.id) as tweetCount 
-        FROM users as u INNER JOIN tweets as t
+        FROM Users as u INNER JOIN Tweets as t
         on u.id = t.UserId
         GROUP BY u.id
       ) as userTweet
       on u.id = userTweet.UserId
       LEFT OUTER JOIN (
         SELECT f.followingId, count(followingId) as followerCount
-        FROM followships as f
+        FROM Followships as f
         GROUP BY f.followingId
       ) as userFollower
       on u.id = userFollower.followingId
       LEFT OUTER JOIN (
         SELECT f.followerId, count(followerId) as followingCount
-        FROM followships as f
+        FROM Followships as f
         GROUP BY f.followerId
       ) as userFollowing
       on u.id = userFollowing.followerId
       LEFT OUTER JOIN (
         SELECT t.UserId as TweetOwner , count(t.UserId) as userTweetLikeCount
-        FROM likes as l INNER JOIN tweets as t
+        FROM Likes as l INNER JOIN Tweets as t
         on l.TweetId = t.id
         GROUP BY t.UserId
       ) as userTweetLike
