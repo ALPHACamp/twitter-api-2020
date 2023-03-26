@@ -74,7 +74,6 @@ ctrl + c
   |---|---|
   | Account | admin |
   | Password | 12345678 |
--
 
   | User | |
   |---|---|
