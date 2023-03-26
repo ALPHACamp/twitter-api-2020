@@ -8,6 +8,7 @@ const routes = require('./routes')
 const session = require('express-session')
 const flash = require('connect-flash')
 const methodOverride = require('method-override')
+const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -16,6 +17,7 @@ const passport = require('./config/passport')
 // function authenticated (req, res, next) {
 // passport.authenticate('jwt', { ses...
 // }
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
