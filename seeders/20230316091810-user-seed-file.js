@@ -34,13 +34,14 @@ module.exports = {
     })))
 
     await queryInterface.bulkInsert('Users', Array.from({ length: 11 }, (_, i) => {
-      const firstName = faker.name.firstName()
-      const lastName = faker.name.lastName()
+      const name = faker.name.firstName()
+      const account = name.toLowerCase()
+      const randomNums = Math.floor(Math.random() * 99) + 1
       return {
-        email: `${firstName.toLocaleLowerCase()}@email.com`,
+        email: `${account}@email.com`,
         password: bcrypt.hashSync('12345678', 10),
-        account: `${firstName} ${lastName}`,
-        name: firstName,
+        account: `${account}${randomNums}`,
+        name,
         role: 'user',
         avatar: faker.image.cats(360, 360, true),
         cover: faker.image.animals(639, 378, true),
