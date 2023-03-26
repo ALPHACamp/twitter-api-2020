@@ -1,5 +1,8 @@
 const { Tweet, User, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
+const dayjs = require('dayjs')
+const relativeTime = require('dayjs/plugin/relativeTime')
+dayjs.extend(relativeTime)
 
 const tweetController = {
   postTweet: (req, res, next) => {

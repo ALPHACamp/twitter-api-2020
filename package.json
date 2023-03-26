@@ -17,6 +17,7 @@
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
     "cors": "^2.8.5",
+    "dayjs": "^1.10.6",
     "dotenv": "^8.2.0",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
