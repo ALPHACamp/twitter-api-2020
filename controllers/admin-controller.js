@@ -11,7 +11,6 @@ const adminController = {
         expiresIn: '30d'
       })
       res.json({
-        status: 'success',
         data: {
           token,
           user: userData
@@ -37,7 +36,7 @@ const adminController = {
       nest: true,
       include: [{ model: User, attributes: ['account', 'name', 'avatar'] }]
     })
-      .then(tweets => res.json({ status: 'success', tweets }))
+      .then(tweets => res.json({ tweets }))
       .catch(error => next(error))
   },
 
@@ -52,7 +51,7 @@ const adminController = {
 
         return tweet.destroy()
       })
-      .then(deleteTweet => res.json({ status: 'success', deleteTweet }))
+      .then(deleteTweet => res.json({ deleteTweet }))
       .catch(error => next(error))
   }
 }

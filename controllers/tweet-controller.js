@@ -121,7 +121,7 @@ const tweetController = {
       comment,
       TweetId: req.params.tweetId
     })
-      .then(newReply => res.json({ status: 'success', newReply }))
+      .then(newReply => res.json(newReply))
       .catch(error => next(error))
   },
 
@@ -155,7 +155,7 @@ const tweetController = {
           TweetId: tweetId
         })
       })
-      .then(newLike => res.json({ status: 'success', newLike }))
+      .then(newLike => res.json(newLike))
       .catch(error => next(error))
   },
 
@@ -175,7 +175,7 @@ const tweetController = {
 
         return like.destroy()
       })
-      .then(deletedLike => res.json({ status: 'success', deletedLike }))
+      .then(deletedLike => res.json(deletedLike))
       .catch(error => next(error))
   }
 }
