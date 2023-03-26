@@ -11,7 +11,7 @@ const followship = require('./modules/followship')
 
 const userController = require('../controllers/user-controller')
 
-router.use('/users', authenticatedUser, user)
+router.use('/users', user)
 router.use('/tweets', authenticatedUser, tweet)
 router.use('/followships', authenticatedUser, followship)
 
