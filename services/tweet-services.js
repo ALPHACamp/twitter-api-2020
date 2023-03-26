@@ -116,11 +116,13 @@ const tweetServices = {
     const TweetId = req.params.tweetId
     return Promise.all([
       User.findByPk(userId),
-      Tweet.findByPk(TweetId)
+      Tweet.findByPk(TweetId),
+      Like.findOne({ where: { UserId: userId, TweetId } })
     ])
-      .then(([user, tweet]) => {
+      .then(([user, tweet, likeStatus]) => {
         assert(user, '使用者不存在')
         assert(tweet, '推文不存在')
+        assert(!likeStatus, '已喜歡過此推文')
         return Like.create({
           UserId: userId,
           TweetId
@@ -142,11 +144,11 @@ const tweetServices = {
         }
       })
     ])
-      .then(([user, tweet, like]) => {
+      .then(([user, tweet, likeStatus]) => {
         assert(user, '使用者不存在')
         assert(tweet, '推文不存在')
-        assert(like, '尚未 like 推文')
-        return like.destroy()
+        assert(likeStatus, '尚未 like 推文')
+        return likeStatus.destroy()
       })
       .then(unlike => cb(null, { unlike }))
       .catch(err => cb(err))
