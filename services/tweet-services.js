@@ -71,20 +71,21 @@ const tweetServices = {
       })
       .catch(err => cb(err))
   },
-  postReply: (req, cb) => {
-    const UserId = getUser(req)?.dataValues.id
-    const TweetId = req.params.tweet_id
-    Tweet.findByPk(TweetId)
-      .then(tweet => {
-        if (!tweet) throw new Error('找不到這篇推文')
-        return Reply.create({
-          comment: req.body.comment,
-          UserId,
-          TweetId
-        })
+  postReply: async (req, cb) => {
+    try {
+      const UserId = getUser(req)?.dataValues.id
+      const TweetId = req.params.tweet_id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) throw new Error('找不到這篇推文')
+      const reply = await Reply.create({
+        comment: req.body.comment,
+        UserId,
+        TweetId
       })
-      .then(reply => cb(null, reply))
-      .catch(err => cb(err, null))
+      cb(null, reply)
+    } catch (err) {
+      cb(err, null)
+    }
   },
   getReplies: (req, cb) => {
     const TweetId = req.params.tweet_id
