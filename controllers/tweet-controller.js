@@ -222,7 +222,7 @@ const tweetController = {
       if (!tweet) {
         return res.status(404).json({
           status: 'error',
-          message: '找不到此則推文，無法按喜歡'
+          message: '找不到此則推文，無法取消喜歡'
         })
       }
       // 檢查是否已經按過喜歡
