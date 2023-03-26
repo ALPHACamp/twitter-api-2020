@@ -5,47 +5,44 @@ const { imgurFileHandler } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
 
 const userServices = {
-  signIn: (req, cb) => {
+  signIn: async (req, cb) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-
       delete userData.password
+      delete userData.role
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       cb(null, { token, user: userData })
     } catch (err) {
       cb(err)
     }
   },
-  postUsers: (req, cb) => {
-    const { account, name, email, password, checkPassword } = req.body
-    if (!account?.trim().length === 0 || !name?.trim().length === 0 || !email.trim()?.length === 0 || !password?.trim().length === 0) throw new Error('還有欄位沒填')
-    if (password !== checkPassword) throw new Error('密碼與確認密碼不同!')
-    if (name && name.length > 50) throw new Error('暱稱上限50字!')
-    Promise.all([
-      User.findOne({ where: { account } }),
-      User.findOne({ where: { email } })
-    ])
-      .then(([userAccount, userEmail]) => {
-        console.log(userAccount)
-        console.log(userEmail)
-        if (userAccount) throw new Error('account 已重複註冊!')
-        if (userEmail) throw new Error('email 已重複註冊!')
-        return bcrypt.hash(password, 10)
-      })
-      .then(hash => User.create({
+  postUsers: async (req, cb) => {
+    try {
+      const { account, name, email, password, checkPassword } = req.body
+      if (account?.trim().length === 0 || name?.trim().length === 0 || email.trim()?.length === 0 || password?.trim().length === 0) throw new Error('還有欄位沒填')
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不同!')
+      if (name && name.length > 50) throw new Error('暱稱上限50字!')
+      const [userAccount, userEmail] = await Promise.all([
+        User.findOne({ where: { account } }),
+        User.findOne({ where: { email } })
+      ])
+      if (userAccount) throw new Error('account 已重複註冊!')
+      if (userEmail) throw new Error('email 已重複註冊!')
+      const hash = await bcrypt.hash(password, 10)
+      const newUser = await User.create({
         account,
         name,
         email,
         role: 'user',
         password: hash
-      }))
-      .then(newUser => {
-        newUser = newUser.toJSON()
-        delete newUser.password
-        delete newUser.role
-        cb(null, newUser)
       })
-      .catch(err => cb(err))
+      const user = newUser.toJSON()
+      delete newUser.password
+      delete newUser.role
+      cb(null, user)
+    } catch (err) {
+      cb(err)
+    }
   },
   getUser: (req, cb) => {
     const userId = req.params.id
@@ -54,15 +51,24 @@ const userServices = {
       where: { id: userId },
       attributes: [
         'id', 'name', 'account', 'avatar', 'cover', 'introduction',
-        [sequelize.literal(`EXISTS (SELECT * FROM Followships WHERE Followships.following_id = User.id AND Followships.follower_id = ${nowUser.id})`), 'isFollowed'],
-        [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.user_id = User.id)'), 'tweetsCounts'],
-        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followingCount'],
-        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followerCounts']
+        [
+          sequelize.literal(`EXISTS (SELECT * FROM Followships WHERE Followships.following_id = User.id AND Followships.follower_id = ${nowUser.id})`), 'isFollowed'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.user_id = User.id)'), 'tweetCounts'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followingCount'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followerCounts'
+        ]
       ],
       nest: true,
       raw: true
     })
       .then(getUser => {
+        if (!getUser) throw new Error('此使用者不存在!')
         cb(null, getUser)
       })
       .catch(err => cb(err))
