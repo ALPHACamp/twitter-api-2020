@@ -1,10 +1,10 @@
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const db = require('../models')
 const { User, sequelize, Tweet, Reply, Like } = db
 
 const tweetServices = {
   postTweet: (req, cb) => {
-    const UserId = getUser(req)?.dataValues.id
+    const UserId = Number(helpers.getUser(req).id)
     Tweet.create({
       description: req.body.description,
       UserId
@@ -13,7 +13,7 @@ const tweetServices = {
       .catch(err => cb(err, null))
   },
   getTweets: (req, cb) => {
-    const currentUserId = getUser(req).dataValues.id
+    const currentUserId = Number(helpers.getUser(req).id)
     return Tweet.findAll({
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
@@ -43,7 +43,7 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   getTweet: (req, cb) => {
-    const currentUserId = getUser(req).dataValues.id
+    const currentUserId = Number(helpers.getUser(req).id)
     const { id } = req.params
     return Tweet.findByPk(id, {
       include: [
@@ -72,7 +72,7 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   postReply: (req, cb) => {
-    const UserId = getUser(req)?.dataValues.id
+    const UserId = Number(helpers.getUser(req).id)
     const TweetId = req.params.tweet_id
     Tweet.findByPk(TweetId)
       .then(tweet => {
