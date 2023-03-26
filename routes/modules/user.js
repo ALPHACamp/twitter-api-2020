@@ -3,6 +3,7 @@ const router = express.Router()
 
 const userController = require('../../controllers/user-controller')
 
+router.get('/:userId/tweets', authenticatedUser, userController.getUserTweets)
 router.get(
   '/:userId/replied_tweets', userController.getUserReplies)
 
