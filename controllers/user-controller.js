@@ -170,12 +170,12 @@ const userController = {
           { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
           { model: Reply, attributes: ['id'] },
           { model: Like, attributes: ['UserId'] }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       }),
       User.findByPk(id)
     ])
       .then(([tweets, user]) => {
-        if (!tweets) throw new Error('There is no any tweet exists')
         if (!user) throw new Error("This User didn't exists!")
 
         const userTweets = tweets.map(tweet => {
