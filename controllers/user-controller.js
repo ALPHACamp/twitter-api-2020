@@ -136,7 +136,7 @@ const userController = {
     try {
       const userId = req.body.id
       if (Number(userId) === helpers.getUser(req).id) {
-        return res.status(404).json({ status: 'error', message: '無法追蹤自己' })
+        return res.status(400).json({ status: 'error', message: '無法追蹤自己' })
       }
       const [user, followship] = await Promise.all([
         User.findByPk(Number(userId)),
