@@ -208,12 +208,12 @@ const userController = {
             attributes: ['UserId'],
             include: { model: User, attributes: ['id', 'account'] }
           }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       }),
       User.findByPk(id)
     ])
       .then(([replies, user]) => {
-        if (!replies) throw new Error('There is no any reply exists')
         if (!user) throw new Error("This User didn't exists!")
 
         const userReplies = replies.map(reply => {
