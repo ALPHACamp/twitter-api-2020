@@ -1,9 +1,10 @@
-const { Tweet, Like, Reply } = require('../models')
+const { Tweet, Like, Reply, User } = require('../models')
 
 const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       order: [['created_at', 'desc']],
+      include: [User],
       raw: true,
       nest: true
     })
@@ -47,6 +48,7 @@ const tweetController = {
       where: {
         TweetId: req.params.tweetId
       },
+      include: [User],
       raw: true,
       nest: true
     })
