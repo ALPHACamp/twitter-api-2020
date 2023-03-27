@@ -133,7 +133,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserProfile: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
     const user = helpers.getUser(req)
     const userId = Number(user.id)
 
@@ -162,7 +162,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserTweets: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
     const user = helpers.getUser(req)
     const userId = Number(user.id)
 
@@ -186,7 +186,8 @@ const userController = {
             ...tweet.toJSON(),
             replyCounts: tweet.Replies.length,
             likeCounts: tweet.Likes.length,
-            isLiked: tweet.Likes.some(like => like.UserId === userId)
+            isLiked: tweet.Likes.some(like => like.UserId === userId),
+            period: dayjs(tweet.createdAt).fromNow()
           }
           delete data.Replies
           delete data.Likes
@@ -199,7 +200,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserReplies: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
 
     return Promise.all([
       Reply.findAll({
@@ -221,7 +222,8 @@ const userController = {
 
         const userReplies = replies.map(reply => {
           const data = {
-            ...reply.toJSON()
+            ...reply.toJSON(),
+            period: dayjs(reply.createdAt).fromNow()
           }
 
           return data
@@ -232,7 +234,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserLikes: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
     const user = helpers.getUser(req)
     const userId = Number(user.id)
 
@@ -241,7 +243,7 @@ const userController = {
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
           { model: Reply, attributes: ['id'] },
-          { model: Like, attributes: ['UserId'] }
+          { model: Like, attributes: ['UserId', 'createdAt'] }
         ]
       }),
       Like.findAll({
@@ -251,8 +253,6 @@ const userController = {
       User.findByPk(id)
     ])
       .then(([tweets, likes, user]) => {
-        if (!tweets) throw new Error('There is no any tweet exists')
-        if (!likes) throw new Error('This user not yet like any tweet')
         if (!user) throw new Error("This User didn't exists!")
 
         const Tweets = tweets.map(tweet => tweet.toJSON())
@@ -260,18 +260,22 @@ const userController = {
 
         const likeTweets = Tweets.filter(tweet => Likes.some(like => like.TweetId === tweet.id))
           .map(tweet => {
+            const likedDate = tweet.Likes.filter(like => like.UserId === id)[0].createdAt
             const data = {
               ...tweet,
               replyCounts: tweet.Replies.length,
               likeCounts: tweet.Likes.length,
               isLiked: tweet.Likes.some(like => like.UserId === userId),
-              TweetId: tweet.id
+              TweetId: tweet.id,
+              likedDate,
+              period: dayjs(likedDate).fromNow()
             }
             delete data.Replies
             delete data.Likes
 
             return data
           })
+          .sort((a, b) => (b.likedDate - a.likedDate))
 
         res.json(likeTweets)
       })
