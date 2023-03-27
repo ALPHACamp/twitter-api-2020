@@ -24,7 +24,8 @@ const tweetController = {
     return Tweet.findAll({
       include: { model: User },
       raw: true,
-      nest: true
+      nest: true,
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         return res.status(200).json(tweets)
