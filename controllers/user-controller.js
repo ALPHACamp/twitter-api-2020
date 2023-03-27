@@ -194,6 +194,34 @@ const userController = {
       next(err)
     }
   },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      const users = await User.findByPk(userId, {
+        include: { model: User, as: 'Followings' },
+        raw: true,
+        nest: true
+      })
+      if (!users) {
+        return res.status(404).json({ status: 'error', message: '帳戶不存在' })
+      }
+      const userData = users
+      const followingData = []
+      followingData.push({
+        followingId: userData.Followings.id,
+        followingAccount: userData.Followings.account,
+        followingAvatar: userData.Followings.avatar,
+        followingIntro: userData.Followings.introduction,
+        followingCount: userData.Followings.length,
+        isFollowing: helpers
+          .getUser(req)
+          .Followings.some(
+            (fu) => fu.Followship.followingId === users.Followers.id
+          )
+      })
+      return res.status(200).json(followingData)
+    } catch (error) { next(error) }
+  },
   getUser: async (req, res, next) => {
     try {
       const { userId } = req.params

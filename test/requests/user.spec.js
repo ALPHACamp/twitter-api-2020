@@ -170,6 +170,7 @@ describe('# user requests', () => {
             if (err) return done(err)
 
             expect(res.body).to.be.an('array')
+
             // 有回傳 Tweet1 的 comment 這筆資料
             res.body[0].comment.should.equal('Tweet1 的 comment')
 
