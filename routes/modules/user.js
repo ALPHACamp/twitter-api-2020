@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { authenticatedUser } = require('../../middleware/auth')
 const userController = require('../../controllers/user-controller')
+router.get('/top', authenticatedUser, userController.getTopUsers)
 router.get('/:userId/followers', authenticatedUser, userController.getUserFollowers)
 
 router.get('/:userId/tweets', authenticatedUser, userController.getUserTweets)

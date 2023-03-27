@@ -286,6 +286,9 @@ const userController = {
         .status(200)
         .json(followerData)
     } catch (error) { next(error) }
+  },
+  getTopUsers: (req, res, next) => {
+    
   }
 }
 
