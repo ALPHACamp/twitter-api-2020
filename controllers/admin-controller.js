@@ -3,12 +3,7 @@ const { Like, Tweet, User } = require('../models')
 const adminController = {
   getUsers: (req, res, next) => {
     return User.findAll({
-      attributes: [
-        'id',
-        'email',
-        'name',
-        'account'
-      ],
+      attributes: ['id', 'email', 'name', 'account', 'image', 'avatar'],
       include: [
         { model: User, as: 'Followings', attributes: ['id'] },
         { model: User, as: 'Followers', attributes: ['id'] },
@@ -37,7 +32,9 @@ const adminController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       order: [['createdAt', 'DESC'], ['UserId', 'ASC']],
-      raw: true
+      include: [{ model: User, attributes: ['account', 'name'] }],
+      raw: true,
+      nest: true
       //! 等下再想能不能直接從資料庫 slice(0, 50)
     })
       .then(tweets => {

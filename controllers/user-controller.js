@@ -145,12 +145,13 @@ const userController = {
     // ? 成品~~~~~~~
     return Tweet.findAll({
       where: { UserId: req.params.id }, // 為了測試檔而改成這樣
-      order: [['createdAt', 'DESC']],
-      include: [{ model: Like, attributes: ['id'] }, { model: Reply, attributes: ['id'] }]
+      order: [['createdAt', 'DESC'], ['id', 'ASC']],
+      include: [{ model: Like, attributes: ['UserId'] }, { model: Reply, attributes: ['id'] }]
     })
       .then(tweets => {
         const result = tweets.map(tweet => {
           tweet = tweet.toJSON()
+          tweet.isLiked = tweet.Likes.some(like => like.UserId)
           tweet.likeCounts = tweet.Likes.length
           tweet.replyCounts = tweet.Replies.length
           delete tweet.Likes
