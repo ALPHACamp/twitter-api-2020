@@ -57,12 +57,14 @@ const adminController = {
   },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
+      order: [['createdAt', 'DESC']],
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
     })
       .then(tweets => {
         const tweetsData = tweets.map(tweet => ({
           ...tweet.toJSON(),
-          description: tweet.description.substring(0, 50)
+          description: tweet.description.substring(0, 50),
+          period: dayjs(tweet.createdAt).fromNow()
         }))
         res.json(tweetsData)
       })
