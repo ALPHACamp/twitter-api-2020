@@ -223,8 +223,8 @@ const userController = {
       return res.status(200).json(userInfo)
     } catch (error) { next(error) }
   },
-  getFollowers: async(req, res, next) => {
-    try{
+  getUserFollowers: async(req, res, next) => {
+    try {
       const [user, followers] = await Promise.all([
         User.findAll({
           where: { id: req.params.userId },
