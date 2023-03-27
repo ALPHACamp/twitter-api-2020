@@ -88,14 +88,15 @@ const userServices = {
 
       const [user, userAccount, userEmail, filePathAvatar, filePathCover] = await Promise.all([
         User.findByPk(userId),
-        account ? User.findOne({ where: { account }, raw: true }) : Promise.resolve(null),
-        email ? User.findOne({ where: { email }, raw: true }) : Promise.resolve(null),
+        account ? User.findOne({ where: { account } }) : Promise.resolve(null),
+        email ? User.findOne({ where: { email } }) : Promise.resolve(null),
         Avatar ? imgurFileHandler(Avatar[0]) : Promise.resolve(null),
         Cover ? imgurFileHandler(Cover[0]) : Promise.resolve(null)
       ])
-
-      if (userAccount && userAccount.id !== nowUser.id) throw new Error('帳戶名稱已經註冊過!')
-      if (userEmail && userEmail.id !== nowUser.id) throw new Error('信箱已經註冊過!')
+      // console.log(userAccount)
+      console.log(user)
+      if (userAccount && userAccount?.toJSON().account === user.account) throw new Error('帳戶名稱已經註冊過!')
+      if (userEmail && userEmail?.toJSON().email === user.email) throw new Error('信箱已經註冊過!')
 
       const updateUser = await user.update({
         account,
