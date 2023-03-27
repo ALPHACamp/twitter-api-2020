@@ -108,7 +108,9 @@ const userController = {
       const temp = e.toJSON()
       temp.Replies = temp.Replies.length
       temp.Likes = temp.Likes.length
-      temp.isLiked = currentUser.Likes.some(like => like.TweetId === e.id)
+      temp.currentIsLiked = currentUser.Likes.some(
+        like => like.TweetId === e.id
+      )
       temp.avatar = user.avatar
       return temp
     })
@@ -131,7 +133,7 @@ const userController = {
       include: {
         model: Tweet,
         attributes: ['id'],
-        include: { model: User, as: 'poster', attributes: ['account'] }
+        include: { model: User, as: 'poster', attributes: ['id', 'account'] }
       },
       order: [['createdAt', 'DESC']],
       nest: true
@@ -167,7 +169,7 @@ const userController = {
         [sequelize.literal('(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`Tweet_id` = `Tweet`.`id`)'), 'Replies']
       ],
       include: [
-        { model: User, as: 'poster', attributes: ['name', 'account', 'avatar', 'updatedAt'] }
+        { model: User, as: 'poster', attributes: ['id', 'name', 'account', 'avatar', 'updatedAt'] }
       ],
       nest: true,
       order: [['updatedAt', 'DESC']]

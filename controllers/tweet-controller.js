@@ -24,7 +24,7 @@ const tweetController = {
     const tweets = await Tweet.findAll({
       where: { UserId: showIds },
       include: [
-        { model: User, as: 'poster', attributes: ['name', 'account', 'avatar'] },
+        { model: User, as: 'poster', attributes: ['id','name', 'account', 'avatar'] },
         { model: Reply },
         { model: Like }
       ],
@@ -35,7 +35,7 @@ const tweetController = {
       const temp = e.toJSON()
       temp.Replies = temp.Replies.length
       temp.Likes = temp.Likes.length
-      temp.isLiked = userData.Likes.some(like => like.TweetId === e.id)
+      temp.currentIsLiked = userData.Likes.some(like => like.TweetId === e.id)
       return temp
     })
     return Promise.resolve(result).then(
