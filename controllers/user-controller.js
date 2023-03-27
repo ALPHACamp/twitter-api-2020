@@ -5,6 +5,9 @@ const { User, Followship, Tweet, Reply, Like } = db
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const dayjs = require('dayjs')
+const relativeTime = require('dayjs/plugin/relativeTime')
+dayjs.extend(relativeTime)
 
 const userController = {
   signUp: (req, res, next) => {
