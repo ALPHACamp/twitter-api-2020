@@ -1,5 +1,5 @@
 const express = require('express')
-// const { check } = require('express-validator')
+const { check } = require('express-validator')
 const upload = require('../../../middleware/multer')
 
 const router = express.Router()
@@ -13,6 +13,5 @@ router.get('/:userId/followers', userController.getUserFollowers)
 router.get('/:userId/followings', userController.getUserFollowings)
 router.get('/:userId', userController.getUser)
 router.put('/:userId', upload.single('file'), userController.putUser)
-router.patch('/:userId', userController.patchUser)
 
 module.exports = router

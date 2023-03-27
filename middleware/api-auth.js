@@ -1,23 +1,18 @@
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
+const createError = require('http-errors')
 const authenticate = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user, info) => {
-    if (err) { return next(err) }
-    if (!user) {
-      if (info.name === 'TokenExpiredError') {
-        return res.status(401).json({ message: 'Your token has expired.' })
-      } else {
-        return res.status(401).json({ message: info.message })
-      }
-    }
+  passport.authenticate('jwt', { session: false }, (err, user) => {
+    if (err) next(err)
+    if (!user) next(createError(401, 'Your token is invalid.'))
     req.user = user
     return next()
   })(req, res, next)
 }
 
-const authenticateRole = (role) => (req, res, next) => {
+const authenticateRole = role => (req, res, next) => {
   if (helpers.getUser(req) && helpers.getUser(req).role === role) return next()
-  return res.status(403).json({ status: 'error', message: 'permission denied' })
+  return next(createError(403, 'permission denied.'))
 }
 module.exports = {
   authenticate,
