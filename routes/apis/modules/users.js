@@ -13,5 +13,6 @@ router.get('/:userId/followers', userController.getUserFollowers)
 router.get('/:userId/followings', userController.getUserFollowings)
 router.get('/:userId', userController.getUser)
 router.put('/:userId', upload.single('file'), userController.putUser)
+router.patch('/:userId', userController.patchUser)
 
 module.exports = router
