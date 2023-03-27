@@ -127,6 +127,7 @@ const userController = {
   },
 
   putUser: (req, res, next) => {
+    if (helpers.getUser(req).id.toString() !== req.params.userId) next(createError(403, 'Forbidden Error'))
     const { file } = req
     const { name, introduction } = req.body
     return Promise.all([
@@ -153,7 +154,7 @@ const userController = {
 
   patchUser: (req, res, next) => {
     const { account, password, email, checkPassword } = req.body
-
+    if (helpers.getUser(req).id.toString() !== req.params.userId) next(createError(403, 'Forbidden Error'))
     return User.findByPk(req.params.userId)
       .then(user => {
         if (!user) {
