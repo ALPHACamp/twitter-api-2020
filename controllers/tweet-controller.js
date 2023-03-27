@@ -112,22 +112,34 @@ const tweetController = {
   },
   getReplies: (req, res, next) => {
     const id = req.params.tweet_id
+    const TweetId = Number(req.params.tweet_id)
 
-    return Reply.findAll({
-      where: { TweetId: id },
-      include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        {
-          model: Tweet,
-          attributes: ['UserId'],
-          include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
-        }
-      ],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(replies => res.json(replies))
+    return Promise.all([
+      Reply.findAll({
+        where: { TweetId: id },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: ['UserId'],
+            include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      }),
+      Tweet.findByPk(TweetId)
+    ])
+      .then(([replies, tweet]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+
+        const repliesData = replies.map(reply => ({
+          ...reply,
+          period: dayjs(reply.createdAt).fromNow()
+        }))
+        res.json(repliesData)
+      })
       .catch(err => next(err))
   },
   likeTweet: (req, res, next) => {
