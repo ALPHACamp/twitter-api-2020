@@ -2,6 +2,7 @@ const { tryCatch } = require('../helpers/tryCatch')
 const { ReqError } = require('../helpers/errorInstance')
 const { User, Followship } = require('../models')
 const { getUser } = require('../_helpers')
+const { Op } = require('sequelize')
 const sequelize = require('sequelize')
 const adminController = {
   postFollowship: tryCatch(async (req, res) => {
@@ -25,6 +26,11 @@ const adminController = {
     const currentUser = getUser(req)
     const users = await User.findAll({ // chatGDP大哥教的
       subQuery: false,
+      where: {
+        role: {
+          [Op.not]: 'admin'
+        }
+      },
       attributes: [
         'id', 'account', 'name', 'avatar',
         [sequelize.fn('COUNT', sequelize.col('Followers.id')), 'followersCount']

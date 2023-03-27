@@ -137,7 +137,7 @@ const userController = {
       nest: true
     })
     const result = replies.map(e => ({
-      ...e,
+      ...e.toJSON(),
       name: userData.name,
       account: userData.account,
       avatar: user.avatar
