@@ -16,12 +16,12 @@ const auth = (req, res, next) => {
 
 const isAdmin = (req, res, next) => {
   if (helpers.getUser(req).role === 'admin') return next()
-  return res.status(403).json({ status: 'error', message: 'permission denied. You are user' })
+  return res.status(403).json({ success: false, message: 'permission denied. You are user' })
 }
 
 const isUser = (req, res, next) => {
   if (helpers.getUser(req).role === 'user') return next()
-  return res.status(403).json({ status: 'error', message: 'permission denied. Your are admin.' })
+  return res.status(403).json({ success: false, message: 'permission denied. Your are admin.' })
 }
 module.exports = {
   auth,

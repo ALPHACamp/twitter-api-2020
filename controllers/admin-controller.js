@@ -26,6 +26,7 @@ const adminController = {
         })
         result.sort((a, b) => b.TweetsCount - a.TweetsCount)
         return res.status(200).json(result)
+        // return res.status(200).json({ success: true, result })
       })
       .catch(err => next(err))
   },
@@ -43,7 +44,7 @@ const adminController = {
           ...tweet,
           description: tweet.description.slice(0, 50)
         }))
-        return res.status(200).json(result)
+        return res.status(200).json({ success: true, result })
       })
       .catch(err => next(err))
   },
@@ -51,12 +52,12 @@ const adminController = {
   deleteTweet: (req, res, next) => {
     return Tweet.findByPk(req.params.id)
       .then(tweet => {
-        // if (!tweet) return res.status(404).json({ message: 'Can not find this tweet.' })
+        if (!tweet) throw new Error('找不到這則推文')
         //! 功能能用 但 console 跳錯，檢查
         return tweet.destroy()
       })
-      .then(removedTweet => res.status(200).json(removedTweet))
-      // .catch(err => next(err))
+      .then(removedTweet => res.status(200).json({ success: true, removedTweet }))
+      .catch(err => next(err))
   }
 }
 

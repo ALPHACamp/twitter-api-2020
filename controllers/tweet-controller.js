@@ -57,7 +57,7 @@ const tweetController = {
       include: { model: User }
     })
       .then(tweet => {
-        if (!tweet) return res.status(404).json({ message: '推文不存在' })
+        if (!tweet) throw new Error('推文不存在')
         return Reply.create({
           UserId: getUser(req).dataValues.id,
           TweetId: tweet.id,
@@ -81,7 +81,7 @@ const tweetController = {
       .then(replies => {
         const data = []
         replies.forEach(reply => data.push(reply))
-        res.status(200).json(data)
+        return res.status(200).json(data)
       })
       .catch(err => next(err))
   }
