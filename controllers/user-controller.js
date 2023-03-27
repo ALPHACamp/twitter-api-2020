@@ -248,9 +248,17 @@ const userController = {
   },
   removeFollowing: (req, res, next) => {
     const { followingId } = req.params
-    return User.findByPk(helpers.getUser(req).id)
-      .then(user => Followship.findOne({ where: { followerId: user.id, followingId } }))
+    // ? 第一版寫法~~~~~~~~~~~~~~~
+    // return User.findByPk(helpers.getUser(req).id)
+    //   .then(user => Followship.findOne({ where: { followerId: user.id, followingId } }))
+    //   .then(following => {
+    //     following.destroy()
+    //     return res.status(200).json({ message: 'success', following })
+    //   })
+    // ? 第一版寫法 end~~~~~~~~~~~~
+    return Followship.findOne({ where: { followingId, followerId: helpers.getUser(req).id } })
       .then(following => {
+        // 若沒資料 (沒 following) 下1 會自動跳錯 (驗證)，因此沒建 if，若需要再建
         following.destroy()
         return res.status(200).json({ message: 'success', following })
       })
