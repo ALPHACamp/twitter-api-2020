@@ -318,8 +318,8 @@ const userController = {
         }),
       ]);
       const loginUserLikeTweetIds = loginUser?.Likes
-      ? loginUser.Likes.map((l) => l.TweetId)
-      : [];
+        ? loginUser.Likes.map((l) => l.TweetId)
+        : [];
       const data = tweets.map((t) => {
         const tweet = t.toJSON();
         const replyCounts = t.Replies.length;
@@ -331,7 +331,7 @@ const userController = {
           replyCounts,
           likeCounts,
           // - 目前登入的使用者有無按過喜歡
-          isLiked: loginUserLikeTweetIds.some(tid => tid === tweet.id)
+          isLiked: loginUserLikeTweetIds.some((tid) => tid === tweet.id),
         };
       });
       return res.json(data);
@@ -390,6 +390,15 @@ const userController = {
             {
               model: Tweet,
               attributes: ["description"],
+              include: [
+                {
+                  model: User,
+                  attributes: ["id", "name", "account", "avatar"],
+                  required: true,
+                },
+                { model: Reply, attributes: ["id"] },
+                { model: Like, attributes: ["id"] },
+              ],
             },
           ],
           where: {
@@ -399,18 +408,25 @@ const userController = {
         }),
         User.findByPk(getUser(req).id, {
           include: [{ model: Like, attributes: ["TweetId"] }],
-        })
+        }),
       ]);
       const loginUserLikeTweetIds = loginUser?.Likes
-      ? loginUser.Likes.map((ul) => ul.TweetId)
-      : [];
+        ? loginUser.Likes.map((ul) => ul.TweetId)
+        : [];
       const data = likes.map((l) => {
-        const {TweetId, Tweet} = l.toJSON();
+        const { TweetId, createdAt, Tweet } = l.toJSON();
+        const replyCounts = Tweet.Replies.length;
+        const likeCounts = Tweet.Likes.length;
+        delete Tweet.Replies;
+        delete Tweet.Likes;
         return {
           TweetId,
+          createdAt, // - 什麼時候按喜歡推文
           ...Tweet,
+          replyCounts,
+          likeCounts,
           // - 目前登入的使用者有無按過喜歡
-          isLiked: loginUserLikeTweetIds.some(tid => tid === TweetId)
+          isLiked: loginUserLikeTweetIds.some((tid) => tid === TweetId),
         };
       });
       return res.json(data);
@@ -455,9 +471,9 @@ const userController = {
     }
   },
   getTopUser: async (req, res, next) => {
-    const loginUserId = getUser(req).id
-    const DEFAULT_LIMIT = 10
-    const limit = req.query.limit || DEFAULT_LIMIT
+    const loginUserId = getUser(req).id;
+    const DEFAULT_LIMIT = 10;
+    const limit = req.query.limit || DEFAULT_LIMIT;
     try {
       const users = await sequelize.query(
         `
@@ -470,12 +486,12 @@ const userController = {
         LIMIT ${limit};
         `,
         { type: QueryTypes.SELECT }
-      )
-      return res.json(users)
+      );
+      return res.json(users);
     } catch (error) {
-      return next(error)
+      return next(error);
     }
-  }
+  },
 };
 
 module.exports = userController;
