@@ -106,6 +106,49 @@ const adminController = {
       return next(error);
     }
   },
+  getTweets: async (req, res, next) => {
+    const loginUser = getUser(req);
+    try {
+      if (loginUser.role === "user") {
+        return res
+          .status(403)
+          .json({ status: "error", message: "permisson denied" });
+      }
+      const tweets = await Tweet.findAll({
+        nest: true,
+        raw: true,
+        include: [
+          {
+            model: User,
+            attributes: ["id", "account", "name", "avatar"],
+          },
+        ],
+        attributes: [
+          "id",
+          "description",
+          "createdAt",
+          // 計算每筆Tweet有幾個replies
+          [
+            sequelize.literal(
+              "(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)"
+            ),
+            "replyCounts",
+          ],
+          // 計算每筆Tweet有幾個likes
+          [
+            sequelize.literal(
+              "(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)"
+            ),
+            "likeCounts",
+          ],
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+      return res.json(tweets);
+    } catch (err) {
+      return next(err);
+    }
+  },
 };
 
 module.exports = adminController;
