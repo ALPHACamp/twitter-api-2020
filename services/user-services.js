@@ -198,20 +198,19 @@ const userServices = {
   },
   putUserSetting: (req, cb) => {
     const id = Number(req.params.id)
-    // console.log(helpers.getUser(req))
     const currentUserId = helpers.getUser(req).id
     const { name, account, email, introduction, avatar, cover, password } = req.body
-
+    let hashedPassword = ''
+    if (password) { hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) }
     if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
-    // if (!account || !password) throw new Error('請填寫必填欄位')
     return User.findByPk(currentUserId)
       .then(user => {
         user.update({
           account,
           name,
           email,
+          password: hashedPassword || user.password,
           introduction,
-          password,
           avatar,
           cover
         })
