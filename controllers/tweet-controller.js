@@ -16,18 +16,18 @@ const tweetController = {
       }
 
       const tweetsData = tweets.reduce((result, tweet) => {
-        const { id, UserId, description, createdAt, User, Replies, Likes, LikedUsers } = tweet
+        const { id, UserId, description, createdAt } = tweet
         result.push({
           id,
           UserId,
           description,
           createdAt,
-          name: User.name,
-          account: User.account,
-          avatar: User.avatar,
-          repliedCount: Replies.length,
-          likedCount: Likes.length,
-          isLike: LikedUsers.some((u) => u.id === userId)
+          name: tweet.User.name,
+          account: tweet.User.account,
+          avatar: tweet.User.avatar,
+          repliedCount: tweet.Replies.length,
+          likedCount: tweet.Likes.length,
+          isLike: tweet.LikedUsers.some((u) => u.id === userId)
         })
         return result
       }, [])
