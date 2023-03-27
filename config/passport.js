@@ -29,6 +29,7 @@ passport.use(
 
         return cb(null, user);
       } catch (err) {
+        err.status = 402;
         return cb(err);
       }
     }

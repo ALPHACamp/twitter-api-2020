@@ -37,6 +37,7 @@ const userController = {
         name,
         email,
         password: bcrypt.hashSync(password, 10),
+        role: 'user',
       });
 
       res.status(200).json({ message: 'User is registered successfully' });
@@ -47,17 +48,15 @@ const userController = {
   },
   signIn: async (req, res, next) => {
     try {
-      const userData = getUser(req).toJSON();
+      const user = getUser(req).toJSON();
 
-      delete userData.password;
+      delete user.password;
 
-      const token = jwt.sign(userData, process.env.JWT_SECRET, {
+      const token = jwt.sign(user, process.env.JWT_SECRET, {
         expiresIn: '30d',
       });
 
-      res
-        .status(200)
-        .json({ status: 'success', data: { token, user: userData } });
+      res.status(200).json({ status: 'success', user, token });
     } catch (err) {
       err.status = 400;
       next(err);
@@ -94,7 +93,7 @@ const userController = {
 
       res.status(200).json(user);
     } catch (err) {
-      err.status = 400;
+      err.status = 404;
       next(err);
     }
   },
@@ -222,6 +221,7 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const UserId = req.params.id;
+
       const tweets = await Tweet.findAll({
         where: { UserId },
         attributes: [
@@ -262,7 +262,8 @@ const userController = {
         order: [['createdAt', 'DESC']],
       });
 
-      if (!tweets) throw new Error(`This user doesn't have any tweets`);
+      if (!tweets || !tweets.length)
+        throw new Error(`This user doesn't have any tweets`);
 
       const likedTweetId = req.user?.LikedTweets
         ? req.user.LikedTweets.map((likeTweet) => likeTweet.id)
@@ -275,7 +276,7 @@ const userController = {
 
       res.status(200).json(modifiedTweets);
     } catch (err) {
-      err.status = 400;
+      err.status = 404;
       next(err);
     }
   },
@@ -298,11 +299,12 @@ const userController = {
         nest: true,
       });
 
-      if (!replies) throw new Error(`This user doesn't have any replies`);
+      if (!replies || !replies.length)
+        throw new Error(`This user doesn't have any replies`);
 
       res.status(200).json(replies);
     } catch (err) {
-      err.status = 400;
+      err.status = 404;
       next(err);
     }
   },
@@ -343,7 +345,8 @@ const userController = {
         order: [['createdAt', 'DESC']],
       });
 
-      if (!likes) throw new Error(`This user doesn't have any likes`);
+      if (!likes || likes === 0)
+        throw new Error(`This user doesn't have any likes`);
 
       const modifiedLikes = likes.map((like) => ({
         ...like.toJSON(),
@@ -380,7 +383,8 @@ const userController = {
         order: [['createdAt', 'DESC']],
       });
 
-      if (!followings) throw new Error(`This user doesn't have any followings`);
+      if (!followings || !followings.length)
+        throw new Error(`This user doesn't have any followings`);
 
       const followingIds = req.user?.Followings
         ? req.user.Followings.map((following) => following.id)
@@ -422,7 +426,8 @@ const userController = {
         order: [['createdAt', 'DESC']],
       });
 
-      if (!followers) throw new Error(`This user doesn't have any followings`);
+      if (!followers || !followers)
+        throw new Error(`This user doesn't have any followings`);
 
       // note this variable is only for the test file
       const followerIds = req.user?.Followings
