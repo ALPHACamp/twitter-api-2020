@@ -194,38 +194,34 @@ const userController = {
       next(err)
     }
   },
-  getFollowings: (req, res, next) => {
-    const { userId } = req.params
-    return User.findAll({
-      where: { id: userId },
-      include: [{ model: User, as: 'Followings' }]
-    })
-      .then((user) => {
-        if (!user || user.role === 'admin') {
-          return res.status(404).json({ status: 'error', message: '帳戶不存在' })
-        }
-        const followingData = user.map((u) => ({
-          userId: u.id,
-          name: u.name,
-          account: u.account,
-          ...u.toJSON().Followings,
-          followingId: u.Followings.id,
-          followingAvatar: u.Followings?.avatar || "https://reurl.cc/XLQeQj",
-          followingName: u.Followings.name,
-          followingIntro: u.Followings?.introduction || "",
-          followingCount: u.Followings.length,
-          isFollowed: helpers
-            .getUser(req)
-            .Followings.some(
-              (fu) => fu.Followship.followingId === u.Followers.id
-            )
-        }))
-
-        // console.log(followingData)
-        return res.status(200).json(followingData)
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      const users = await User.findByPk(userId, {
+        include: { model: User, as: 'Followings' },
+        raw: true,
+        nest: true
       })
-      .catch((error) => next(error))
-    },
+      if (!users) {
+        return res.status(404).json({ status: 'error', message: '帳戶不存在' })
+      }
+      const userData = users
+      const followingData = []
+      followingData.push({
+        followingId: userData.Followings.id,
+        followingAccount: userData.Followings.account,
+        followingAvatar: userData.Followings.avatar,
+        followingIntro: userData.Followings.introduction,
+        followingCount: userData.Followings.length,
+        isFollowing: helpers
+          .getUser(req)
+          .Followings.some(
+            (fu) => fu.Followship.followingId === users.Followers.id
+          )
+      })
+      return res.status(200).json(followingData)
+    } catch (error) { next(error) }
+  },
   getUser: async (req, res, next) => {
     try {
       const { userId } = req.params

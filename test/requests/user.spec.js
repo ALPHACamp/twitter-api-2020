@@ -272,6 +272,7 @@ describe('# user requests', () => {
             if (err) return done(err)
 
             expect(res.body).to.be.an('array')
+            // console.log(res.body)
             // 回傳資料中是否有跟隨中的人的 id = 2
             res.body[0].followingId.should.equal(2)
 
