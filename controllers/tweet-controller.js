@@ -118,14 +118,15 @@ const tweetController = {
       })
 
       const repliesData = replies.map((reply) => {
-        const { id, UserId, TweetId, comment, createdAt } = reply
+        const { id, TweetId, comment, createdAt } = reply
         return {
           id,
-          UserId,
           TweetId,
           comment,
           createdAt,
+          tweetAuthorId: reply.Tweet.UserId,
           tweetAuthorAccount: reply.Tweet.User.account,
+          replyUserId: reply.UserId,
           replyAccount: reply.User.account,
           replyName: reply.User.name,
           replyAvatar: reply.User.avatar
