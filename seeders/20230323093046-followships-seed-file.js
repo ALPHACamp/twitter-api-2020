@@ -8,18 +8,33 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
 
+    let targetArr = []
+    // 讓每個 user 的 follow 數不同 (遞減)
+    for (let j = 0; j < users.length; j++) {
+      targetArr = targetArr.concat(
+        Array.from({ length: users.length - j - 1 }, (_, i) => ({
+          follower_id: users[j].id,
+          following_id: users
+            .filter((_, idx) => idx !== j)[i].id,
+          created_at: new Date(),
+          updated_at: new Date()
+        }))
+      )
+    }
+    await queryInterface.bulkInsert('Followships', targetArr
+    // ? 舊版本~~~~~~~~~~~
     // 所有 users 互相 follow
-    await queryInterface.bulkInsert('Followships',
-      Array.from({ length: users.length * (users.length - 1) }, (_, i) => ({
-        follower_id: users[i % users.length].id,
-        following_id: users
-          .filter((_, idx) =>
-            idx !== (i % users.length))[
-            Math.floor(i / users.length)
-          ].id,
-        created_at: new Date(),
-        updated_at: new Date()
-      }))
+      // Array.from({ length: users.length * (users.length - 1) }, (_, i) => ({
+      //   follower_id: users[i % users.length].id,
+      //   following_id: users
+      //     .filter((_, idx) =>
+      //       idx !== (i % users.length))[
+      //       Math.floor(i / users.length)
+      //     ].id,
+      //   created_at: new Date(),
+      //   updated_at: new Date()
+      // }))
+      // ? 舊版本 end~~~~~~~~~~~~~~~
     )
   },
   down: async (queryInterface, Sequelize) => {
