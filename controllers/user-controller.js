@@ -370,7 +370,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserFollowers: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
     const user = helpers.getUser(req)
     const userId = Number(user.id)
 
@@ -379,17 +379,18 @@ const userController = {
         attributes: ['id', 'account', 'name', 'avatar', 'introduction'],
         // 為了確認是否isFollowed，故include [Followers]
         include: [
-          { model: User, as: 'Followers', attributes: ['id'] }
+          { model: User, as: 'Followers', attributes: ['id'] },
+          { model: User, as: 'Followings', attributes: ['id'] }
         ]
       }),
       Followship.findAll({
         where: { followingId: id },
         attributes: ['followerId', 'createdAt']
-      })
+      }),
+      User.findByPk(id)
     ])
-      .then(([users, followers]) => {
-        if (!users) throw new Error('There is no user!')
-        if (!followers) throw new Error('There are no user followed!')
+      .then(([users, followers, user]) => {
+        if (!user) throw new Error("This user didn't exist!")
 
         const Users = users.map(user => user.toJSON())
         const Followers = followers.map(follower => follower.toJSON())
@@ -397,16 +398,19 @@ const userController = {
         const userFollowers = Users.filter(
           user => Followers.some(follower => follower.followerId === user.id)
         ).map(user => {
+          const followerDate = user.Followings.filter(f => f.id === id)[0].Followship.createdAt
           const data = {
             ...user,
             followerId: user.id,
-            isFollowed: user.Followers.some(follower => follower.id === userId)
-            // 這裡不顯示followingDate，因此用戶是被追蹤的，只要知道有誰追蹤他就好。
+            isFollowed: user.Followers.some(follower => follower.id === userId),
+            followerDate
           }
           delete data.Followers
+          delete data.Followings
 
           return data
         })
+          .sort((a, b) => (b.followerDate - a.followerDate))
 
         res.json(userFollowers)
       })
