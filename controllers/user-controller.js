@@ -476,6 +476,11 @@ const userController = {
     const DEFAULT_LIMIT = 10;
     const limit = req.query.limit || DEFAULT_LIMIT;
     try {
+      if (Number(limit) < 0) {
+        const error = new Error("limit 不可小於 0 !");
+        error.status = 404;
+        throw error;
+      }
       const users = await sequelize.query(
         `
         SELECT f.followingId AS id, u.account, u.name, u.avatar, u.introduction , COUNT(f.followingId) AS followerCounts
