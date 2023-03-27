@@ -7,7 +7,7 @@ services:
 
 # 設定參數(Travis CI 會按照參數分別執行)
 env:
-  - NODE_ENV=travis IMGUR_CLIENT_ID:${{secret.IMGUR_CLIENT_ID}} JWT_SECRET:${{secret.JWT_SECRET}} PORT:${{secret.PORT}}
+  - NODE_ENV=travis IMGUR_CLIENT_ID:${{secrets.IMGUR_CLIENT_ID}} JWT_SECRET:${{secrets.JWT_SECRET}} PORT:${{secrets.PORT}}
 
 # 在 install 前執行的指令git p
 before_install:
