@@ -8,7 +8,7 @@ const ExtractJWT = passportJWT.ExtractJwt
 
 const { User } = require('../models')
 
-passport.use(
+passport.use('user-local',
   new LocalStrategy(
     {
       usernameField: 'account',
@@ -17,7 +17,32 @@ passport.use(
     },
     async (req, account, password, cb) => {
       try {
-        const user = await User.findOne({ where: { account } })
+        const user = await User.findOne({ where: { account, role: 'user' } })
+
+        if (!user) throw new Error('帳號不存在！')
+
+        const isMatched = await bcrypt.compare(password, user.password)
+
+        if (!isMatched) throw new Error('帳號或密碼輸入錯誤！')
+
+        return cb(null, user)
+      } catch (err) {
+        return cb(err, null)
+      }
+    }
+  )
+)
+
+passport.use('admin-local',
+  new LocalStrategy(
+    {
+      usernameField: 'account',
+      passwordField: 'password',
+      passReqToCallback: true
+    },
+    async (req, account, password, cb) => {
+      try {
+        const user = await User.findOne({ where: { account, role: 'admin' } })
 
         if (!user) throw new Error('帳號不存在！')
 
