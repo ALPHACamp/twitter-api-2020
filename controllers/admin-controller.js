@@ -41,34 +41,34 @@ const adminController = {
     try {
       const users = await sequelize.query(
         `
-      SELECT u.*, userTweet.tweetCount, userFollower.followerCount, userFollowing.followingCount, userTweetLike.userTweetLikeCount
+      SELECT u.*, userTweet.tweetCounts, userFollower.followerCounts, userFollowing.followingCounts, userTweetLike.userTweetLikeCounts
       FROM Users as u LEFT OUTER JOIN (
-        SELECT u.id as UserId, count(u.id) as tweetCount 
+        SELECT u.id as UserId, count(u.id) as tweetCounts
         FROM Users as u INNER JOIN Tweets as t
         on u.id = t.UserId
         GROUP BY u.id
       ) as userTweet
       on u.id = userTweet.UserId
       LEFT OUTER JOIN (
-        SELECT f.followingId, count(followingId) as followerCount
+        SELECT f.followingId, count(followingId) as followerCounts
         FROM Followships as f
         GROUP BY f.followingId
       ) as userFollower
       on u.id = userFollower.followingId
       LEFT OUTER JOIN (
-        SELECT f.followerId, count(followerId) as followingCount
+        SELECT f.followerId, count(followerId) as followingCounts
         FROM Followships as f
         GROUP BY f.followerId
       ) as userFollowing
       on u.id = userFollowing.followerId
       LEFT OUTER JOIN (
-        SELECT t.UserId as TweetOwner , count(t.UserId) as userTweetLikeCount
+        SELECT t.UserId as TweetOwner , count(t.UserId) as userTweetLikeCounts
         FROM Likes as l INNER JOIN Tweets as t
         on l.TweetId = t.id
         GROUP BY t.UserId
       ) as userTweetLike
       on u.id = userTweetLike.TweetOwner
-      ORDER BY tweetCount DESC
+      ORDER BY tweetCounts DESC
       `,
         { type: QueryTypes.SELECT }
       );
