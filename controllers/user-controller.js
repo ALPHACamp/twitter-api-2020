@@ -243,7 +243,7 @@ const userController = {
         return Followship.create({ followerId, followingId })
       })
       .then(following => {
-        return res.status(200).json(following)
+        return res.status(200).json({ success: true, following })
       })
       .catch(err => next(err))
   },
@@ -261,7 +261,7 @@ const userController = {
       .then(following => {
         // 若沒資料 (沒 following) 下1 會自動跳錯 (驗證)，因此沒建 if，若需要再建
         following.destroy()
-        return res.status(200).json({ message: 'success', following })
+        return res.status(200).json({ success: true, following })
       })
       .catch(err => next(err))
   },
@@ -287,7 +287,7 @@ const userController = {
         })
           .sort((a, b) => b.FollowerCounts - a.FollowerCounts)
           .slice(0, 10)
-        return res.status(200).json(users)
+        return res.status(200).json({ success: true, users })
       })
       .catch(err => next(err))
   },
@@ -297,17 +297,17 @@ const userController = {
     // return User.findOne(getUser(req).id)
     return User.findByPk(helpers.getUser(req).id)
       .then(user => Like.create({ UserId: user.id, TweetId }))
-      .then(like => res.status(200).json({ message: 'success', like }))
+      .then(like => res.status(200).json({ success: true, like }))
       .catch(err => next(err))
   },
   removeLike: (req, res, next) => {
     const TweetId = req.params.id
     return Like.findOne({ where: { TweetId } })
       .then(like => {
-        if (!like) return res.status(404).json({ message: 'We can not find this like record.' })
+        if (!like) return res.status(404).json({ success: false, message: 'We can not find this like record.' })
         return like.destroy()
       })
-      .then(like => res.status(200).json({ message: 'success', like }))
+      .then(like => res.status(200).json({ success: true, like }))
       .catch(err => next(err))
       // to 子安：因為要過測試檔，我把你的 (下面)，改成上面了
     // return User.findByPk(helpers.getUser(req).id)
