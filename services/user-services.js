@@ -93,8 +93,7 @@ const userServices = {
         Avatar ? imgurFileHandler(Avatar[0]) : Promise.resolve(null),
         Cover ? imgurFileHandler(Cover[0]) : Promise.resolve(null)
       ])
-      // console.log(userAccount)
-      console.log(user)
+
       if (userAccount && userAccount?.toJSON().account === user.account) throw new Error('帳戶名稱已經註冊過!')
       if (userEmail && userEmail?.toJSON().email === user.email) throw new Error('信箱已經註冊過!')
 
