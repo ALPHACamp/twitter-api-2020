@@ -4,7 +4,7 @@ const validator = require('validator')
 
 const helpers = require('../_helpers')
 
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -39,9 +39,7 @@ const userController = {
         errors.push('字數超出上限，請將字數限制在 50 字以內')
       }
       if (password && !validator.isByteLength(password, { min: 8, max: 20 })) {
-        errors.push(
-          '密碼長度介於 8 ~ 20 字元'
-        )
+        errors.push('密碼長度介於 8 ~ 20 字元')
       }
       if (password !== checkPassword) {
         errors.push('密碼與確認密碼不相符')
@@ -75,20 +73,84 @@ const userController = {
         password: hashedPassword
       })
 
-      return res
-        .status(200)
-        .json({ status: 'success', message: '註冊成功！' })
+      return res.status(200).json({ status: 'success', message: '註冊成功！' })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      const currentUserId = helpers.getUser(req).id
+
+      if (currentUserId !== Number(userId)) {
+        return res.status(403).json({
+          status: 'error',
+          message: '你沒有權限進入此頁面'
+        })
+      }
+
+      const user = await User.findByPk(userId)
+
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到使用者'
+        })
+      }
+
+      const tweets = await Tweet.findAll({
+        where: { UserId: userId },
+        include: [User, Reply, Like, { model: User, as: 'LikedUsers' }],
+        order: [['createdAt', 'DESC']]
+      })
+
+      if (tweets.length === 0) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到任何推文'
+        })
+      }
+
+      const tweetsData = tweets.map((tweet) => {
+        const { id, UserId, description, createdAt } = tweet
+        return {
+          id,
+          UserId,
+          description,
+          createdAt,
+          avatar: tweet.User.avatar,
+          name: tweet.User.name,
+          account: tweet.User.account,
+          repliedCount: tweet.Replies.length,
+          likedCount: tweet.Likes.length,
+          isLike: tweet.LikedUsers.some((u) => u.id === currentUserId)
+        }
+      })
+
+      return res.status(200).json(tweetsData)
     } catch (err) {
       next(err)
     }
   },
   getUserReplies: async (req, res, next) => {
     try {
-      const userId = helpers.getUser(req).id
+      const { userId } = req.params
+      const currentUserId = helpers.getUser(req).id
+
+      if (currentUserId !== Number(userId)) {
+        return res.status(403).json({
+          status: 'error',
+          message: '你沒有權限進入此頁面'
+        })
+      }
 
       const user = await User.findByPk(userId)
       if (!user) {
-        return res.status(404).json({ status: 'error', message: '找不到使用者' })
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到使用者'
+        })
       }
 
       const replies = await Reply.findAll({
@@ -112,13 +174,13 @@ const userController = {
 
       const repliesData = replies.map((reply) => {
         return {
-          Id: reply.id,
+          id: reply.id,
           UserId: reply.UserId,
           comment: reply.comment,
-          CreatedAt: reply.createdAt,
-          Name: reply.User.name,
-          Avatar: reply.User.avatar,
-          Account: reply.User.account,
+          createdAt: reply.createdAt,
+          name: reply.User.name,
+          avatar: reply.User.avatar,
+          account: reply.User.account,
           tweetId: reply.TweetId,
           tweetDescription: reply.Tweet.description,
           tweetCreatedAt: reply.Tweet.createdAt,
@@ -167,6 +229,35 @@ const userController = {
         return res.status(200).json(followingData)
       })
       .catch((error) => next(error))
+    },
+  getUser: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      let userInfo = await User.findByPk(userId, {
+        attributes: { exclude: ['password', 'createdAt', 'updatedAt'] },
+        include: [Tweet, { model: User, as: 'Followers' }, { model: User, as: 'Followings' }]
+      })
+
+      if (!userInfo || userInfo.role === 'admin') {
+        return res
+          .status(404)
+          .json({ status: 'error', message: '此帳戶不存在' })
+      }
+      userInfo = {
+        id: userInfo.id,
+        account: userInfo.account,
+        name: userInfo.name,
+        avatar: userInfo.avatar || 'https://reurl.cc/7RVA5N',
+        cover: userInfo.cover || 'https://reurl.cc/4QNDE3',
+        introduction: userInfo.introduction || 'Newbie here!',
+        tweetCount: userInfo.Tweets.length,
+        followingCount: userInfo.Followings.length,
+        followerCount: userInfo.Followers.length,
+        isFollowing: userInfo.Followings.some(u => u.id === helpers.getUser(req).id)
+      }
+
+      return res.status(200).json(userInfo)
+    } catch (error) { next(error) }
   }
 }
 
