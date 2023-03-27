@@ -4,7 +4,7 @@ const validator = require('validator')
 
 const helpers = require('../_helpers')
 
-const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -282,20 +282,6 @@ const userController = {
           )
       })
 
-      console.log(followerData)
-      // const followerData = user.Followers.map(f => ({
-
-      //   followerId: f.id,
-      //   followerName: f.name,
-      //   followerAccount: f.account,
-      //   followerAvatar: f?.avatar || "https://reurl.cc/XLQeQj",
-      //   followerIntro: f?.introduction || "",
-      //   followerCount: f.length,
-      //   followshipCreatedAt: f.Followship.createdAt,
-      //   isFollowed: helpers
-      //     .getUser(req)
-      //     .Followings.map(fg => fg.id).includes(f.id)
-      // }));
       return res
         .status(200)
         .json(followerData)
