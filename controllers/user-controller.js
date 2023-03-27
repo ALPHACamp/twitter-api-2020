@@ -83,13 +83,6 @@ const userController = {
       const { userId } = req.params
       const currentUserId = helpers.getUser(req).id
 
-      if (currentUserId !== Number(userId)) {
-        return res.status(403).json({
-          status: 'error',
-          message: '你沒有權限進入此頁面'
-        })
-      }
-
       const user = await User.findByPk(userId)
 
       if (!user) {
@@ -119,9 +112,9 @@ const userController = {
           UserId,
           description,
           createdAt,
-          avatar: tweet.User.avatar,
           name: tweet.User.name,
           account: tweet.User.account,
+          avatar: tweet.User.avatar,
           repliedCount: tweet.Replies.length,
           likedCount: tweet.Likes.length,
           isLike: tweet.LikedUsers.some((u) => u.id === currentUserId)
@@ -137,13 +130,6 @@ const userController = {
     try {
       const { userId } = req.params
       const currentUserId = helpers.getUser(req).id
-
-      if (currentUserId !== Number(userId)) {
-        return res.status(403).json({
-          status: 'error',
-          message: '你沒有權限進入此頁面'
-        })
-      }
 
       const user = await User.findByPk(userId)
       if (!user) {
@@ -173,19 +159,18 @@ const userController = {
       }
 
       const repliesData = replies.map((reply) => {
+        const { id, TweetId, comment, createdAt } = reply
         return {
-          id: reply.id,
-          UserId: reply.UserId,
-          comment: reply.comment,
-          createdAt: reply.createdAt,
-          name: reply.User.name,
-          avatar: reply.User.avatar,
-          account: reply.User.account,
-          tweetId: reply.TweetId,
-          tweetDescription: reply.Tweet.description,
-          tweetCreatedAt: reply.Tweet.createdAt,
-          tweetAuthorId: reply.Tweet.User.id,
-          tweetAuthorAccount: reply.Tweet.User.account
+          id,
+          TweetId,
+          comment,
+          createdAt,
+          tweetAuthorId: reply.Tweet.UserId,
+          tweetAuthorAccount: reply.Tweet.User.account,
+          replyUserId: reply.UserId,
+          replyAccount: reply.User.account,
+          replyName: reply.User.name,
+          replyAvatar: reply.User.avatar
         }
       })
 
@@ -194,12 +179,96 @@ const userController = {
       next(err)
     }
   },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      const currentUserId = helpers.getUser(req).id
+      const likedTweets = await Like.findAll({
+        where: { UserId: userId },
+        include: [
+          User,
+          {
+            model: Tweet,
+            include: [User, { model: Reply, include: User }, Like]
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      if (likedTweets.length === 0) {
+        return res.status(404).json({
+          status: 'error',
+          message: '沒有按任何貼文喜歡'
+        })
+      }
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到使用者'
+        })
+      }
+      const likedTweetsData = likedTweets.map((like) => {
+        return {
+          likeId: like.id,
+          userId: like.UserId,
+          TweetId: like.TweetId,
+          likeCreatedAt: like.createdAt,
+          tweetAuthorId: like.Tweet.UserId,
+          tweetAuthorAccount: like.Tweet.User.account,
+          tweetAuthorName: like.Tweet.User.name,
+          tweetAuthorAvatar: like.Tweet.User.avatar,
+          tweetContent: like.Tweet.description,
+          tweetCreatedAt: like.Tweet.createdAt,
+          isLike: like.Tweet.Likes.some((u) => u.UserId === currentUserId),
+          likedCount: like.Tweet.Likes.length,
+          replyCount: like.Tweet.Replies.length
+        }
+      })
+      return res.status(200).json(likedTweetsData)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      const users = await User.findByPk(userId, {
+        include: { model: User, as: 'Followings' },
+        raw: true,
+        nest: true
+      })
+      if (!users) {
+        return res.status(404).json({ status: 'error', message: '帳戶不存在' })
+      }
+      const userData = users
+      const followingData = []
+      followingData.push({
+        followingId: userData.Followings.id,
+        followingAccount: userData.Followings.account,
+        followingAvatar: userData.Followings.avatar,
+        followingIntro: userData.Followings.introduction,
+        followingCount: userData.Followings.length,
+        isFollowing: helpers
+          .getUser(req)
+          .Followings.some(
+            (fu) => fu.Followship.followingId === users.Followers.id
+          )
+      })
+      return res.status(200).json(followingData)
+    } catch (error) {
+      next(error)
+    }
+  },
   getUser: async (req, res, next) => {
     try {
       const { userId } = req.params
       let userInfo = await User.findByPk(userId, {
         attributes: { exclude: ['password', 'createdAt', 'updatedAt'] },
-        include: [Tweet, { model: User, as: 'Followers' }, { model: User, as: 'Followings' }]
+        include: [
+          Tweet,
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
       })
 
       if (!userInfo || userInfo.role === 'admin') {
@@ -217,11 +286,53 @@ const userController = {
         tweetCount: userInfo.Tweets.length,
         followingCount: userInfo.Followings.length,
         followerCount: userInfo.Followers.length,
-        isFollowing: userInfo.Followings.some(u => u.id === helpers.getUser(req).id)
+        isFollowing: userInfo.Followings.some(
+          (u) => u.id === helpers.getUser(req).id
+        )
       }
 
       return res.status(200).json(userInfo)
-    } catch (error) { next(error) }
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      const users = await User.findByPk(userId, {
+        include: { model: User, as: 'Followers' },
+        order: [
+          [{ model: User, as: 'Followers' }, Followship, 'createdAt', 'DESC']
+        ],
+        raw: true,
+        nest: true
+      })
+      if (!users) {
+        return res
+          .status(404)
+          .json({ status: 'error', message: '此帳戶不存在!' })
+      }
+
+      const followerData = []
+      followerData.push({
+        followerId: users.Followers.id,
+        followerAccount: users.Followers.account,
+        followerName: users.Followers.name,
+        followerAvatar: users.Followers.avatar,
+        followerIntro: users.Followers.introduction,
+        followerCount: users.Followers.length,
+        followshipCreatedAt: users.Followers.Followship.createdAt,
+        isFollowing: helpers
+          .getUser(req)
+          .Followings.some(
+            (fg) => fg.Followship.followingId === users.Followers.id
+          )
+      })
+
+      return res.status(200).json(followerData)
+    } catch (error) {
+      next(error)
+    }
   },
   editUser: async (req, res, next) => {
     try {
@@ -251,18 +362,18 @@ const userController = {
       if (email && !validator.isEmail(email)) {
         errors.push('請輸入有效的 email 格式')
       }
-      if (email && email !== helpers.getUser(req).email) {
-        const ifEmailDuplicate = await User.findOne({ where: { email } });
-        if (ifEmailDuplicate) {
-          errors.push("此Email已被註冊!");
-        }
-      }
-      if (account !== helpers.getUser(req).account) {
-        const ifAccountDuplicate = await User.findOne({ where: { account } })
-        if (ifAccountDuplicate) {
-          errors.push('此帳號已被註冊!')
-        }
-      }
+      // if (email && email !== helpers.getUser(req).email) {
+      //   const ifEmailDuplicate = await User.findOne({ where: { email } });
+      //   if (ifEmailDuplicate) {
+      //     errors.push("此Email已被註冊!");
+      //   }
+      // }
+      // if (account !== helpers.getUser(req).account) {
+      //   const ifAccountDuplicate = await User.findOne({ where: { account } })
+      //   if (ifAccountDuplicate) {
+      //     errors.push('此帳號已被註冊!')
+      //   }
+      // }
 
       if (errors.length) {
         return res.status(400).json({ status: 'error', errors })
@@ -281,6 +392,6 @@ const userController = {
       })
       return res.status(200).json({ status: 'success', message: '設定成功' })
     } catch (error) { next(error) }
-  }
+}
 }
 module.exports = userController
