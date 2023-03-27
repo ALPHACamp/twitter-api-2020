@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const validator = require('validator')
-
+const { imgurFileHandler } = require('../file-helpers')
 const helpers = require('../_helpers')
 
 const { User, Tweet, Reply, Like, Followship } = require('../models')
@@ -342,33 +342,30 @@ const userController = {
           .status(403)
           .json({ status: 'error', message: '沒有權限' })
       }
-       const user = await User.findByPk(userId);
-       const { account, name, email, password, checkPassword, introduction } =
-         req.body;
-       
-       if (!user) {
-         return res
-           .status(404)
-           .json({ status: "error", message: "帳戶不存在" });
-       }
-      const { file } = req;
-      const filePath = await localFileHandler(file);
+      const user = await User.findByPk(userId)
+      const {  name, password,  introduction } = req.body
+
+      if (!user) {
+        return res
+          .status(404)
+          .json({ status: 'error', message: '帳戶不存在' })
+      }
       const errors = []
-      if (!name){
+      if (!name) {
         errors.push('姓名為必填')
       }
       if (name && !validator.isByteLength(name, { max: 50 })) {
         errors.push('字數超出上限，請將字數限制在 50 字以內')
       }
       if (introduction && !validator.isByteLength(introduction, { max: 160 })) {
-          errors.push("字數超出上限，請將字數限制在 50 字以內");
-        }
-      if (password && !validator.isByteLength(password, { max: 20 })) {
-        errors.push('密碼長度限制在 20 字元以內')
+        errors.push('字數超出上限，請將字數限制在 50 字以內')
       }
-      if (password !== checkPassword) {
-        errors.push('密碼與確認密碼不相符')
-      }
+      // if (password && !validator.isByteLength(password, { max: 20 })) {
+      //   errors.push('密碼長度限制在 20 字元以內')
+      // }
+      // if (password !== checkPassword) {
+      //   errors.push('密碼與確認密碼不相符')
+      // }
       // if (updatedEmail !== helpers.getUser(req).email) {
       //   const ifEmailDuplicate = await User.findOne({ where: { email: updatedEmail } });
       //   if (ifEmailDuplicate) {
@@ -385,20 +382,29 @@ const userController = {
       if (errors.length) {
         return res.status(400).json({ status: 'error', errors })
       }
-      
-      const newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+      const { files } = req;
+      const originalAvatar = files.avatar[0] || null;
+      const originalCover = files.cover[0] || null;
+      const [avatarPath, coverPath] = await Promise.all([
+        imgurFileHandler(originalAvatar),
+        imgurFileHandler(originalCover),
+        User.findByPk(userId),
+          ]);
+
+      // const newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
 
       await user.update({
         name,
-        account,
-        email,
-        password: newPassword,
+        // account,
+        // email,
+        // password: newPassword,
         introduction,
-        avatar: filePath || user.avatar
+        avatar: avatarPath || user.avatar,
+        cover: coverPath || user.cover
       })
       // await user.save()
       return res.status(200).json({ status: 'success', message: '設定成功' })
     } catch (error) { next(error) }
-}
+  }
 }
 module.exports = userController

@@ -3,7 +3,7 @@ const router = express.Router()
 const passport = require('../../config/passport')
 const { authenticatedUser } = require('../../middleware/auth')
 const userController = require('../../controllers/user-controller')
-const upload = require('../../middleware/multer') 
+const upload = require('../../middleware/multer')
 router.post('/signin', passport.authenticate('user-local', { session: false }), userController.signIn)
 router.post('/', userController.signUp)
 
