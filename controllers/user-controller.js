@@ -81,55 +81,21 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const { userId } = req.params
-      let likedTweets = await Like.findAll({
+      const likedTweets = await Like.findAll({
         where: { UserId: userId },
-        include: [
-          { model: User },
-          {
-            model: Tweet,
-            attributes: {
-              include: [
-                [
-                  sequelize.literal(
-                    `(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`
-                  ),
-                  'totalReplies',
-                ],
-                [
-                  sequelize.literal(
-                    `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweets.id)`
-                  ),
-                  "totalLikes",
-                ],
-                [
-                  sequelize.literal(
-                    `EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${
-                      helpers.getUser(req).id
-                    } AND Likes.TweetId = Tweet.id)`,
-                    "isLiked"
-                  ),
-                ],
-                [
-                  sequelize.literal(
-                    `(SELECT ("id", "name", "account", "avatar", "createdAt") FROM Users WHERE Users.id = Tweets.UserId)`
-                  ),
-                  "tweetAuthorInfo",
-                ],
-              ],
-            },
-          },
+        include: [ User, { model: Tweet, include: [Reply, { model: User, as: 'LikedUsers' }] }
         ],
-        order: [["createdAt", "DESC"]],
+        order: [['createdAt', 'DESC']],
         raw: true,
-        nest: true,
-      });
+        nest: true
+      })
       if (!likedTweets) {
         return res.status(404).json({
           status: 'error',
-          message: 'Tweet not found!'
+          message: '找不到此則推文'
         })
-      } 
-      if (!tweetAuthorInfo){
+      }
+      if (!tweetAuthorInfo) {
         throw new Error('Tweet author not found!')
       }
       return res
@@ -137,23 +103,16 @@ const userController = {
         .json({
           status: 'success',
           message: 'All liked tweets are retrieved!',
-          likedTweets,
-         
+          likedTweets
+
         })
     } catch (error) { next(error) }
   },
- 
+
   getUserTweets: async (req, res, next) => {
     try {
       const { userId } = req.params
       const currentUserId = helpers.getUser(req).id
-
-      if (currentUserId !== Number(userId)) {
-        return res.status(403).json({
-          status: 'error',
-          message: '你沒有權限進入此頁面'
-        })
-      }
 
       const user = await User.findByPk(userId)
 
@@ -202,13 +161,6 @@ const userController = {
     try {
       const { userId } = req.params
       const currentUserId = helpers.getUser(req).id
-
-      if (currentUserId !== Number(userId)) {
-        return res.status(403).json({
-          status: 'error',
-          message: '你沒有權限進入此頁面'
-        })
-      }
 
       const user = await User.findByPk(userId)
       if (!user) {
