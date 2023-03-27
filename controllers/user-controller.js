@@ -14,6 +14,7 @@ const userController = {
     const { account, name, email, password, checkPassword } = req.body
 
     if (password !== checkPassword) throw new Error('Password do not match!')
+    if (name.length > 50) throw new Error("name can't over 50 letters")
 
     User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
       .then(user => {
@@ -40,11 +41,14 @@ const userController = {
 
       const authToken = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
 
+      delete userData.password
+      delete userData.role
+
       res.json({
         status: 'success',
         authToken,
-        data: {
-          user: userData
+        user: {
+          ...userData
         }
       })
     } catch (err) {
@@ -129,7 +133,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserProfile: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
     const user = helpers.getUser(req)
     const userId = Number(user.id)
 
@@ -150,13 +154,15 @@ const userController = {
         }
         delete userProfile.Followers
         delete userProfile.Followings
+        delete userProfile.password
+        delete userProfile.role
 
         return res.json(userProfile)
       })
       .catch(err => next(err))
   },
   getUserTweets: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
     const user = helpers.getUser(req)
     const userId = Number(user.id)
 
@@ -167,12 +173,12 @@ const userController = {
           { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
           { model: Reply, attributes: ['id'] },
           { model: Like, attributes: ['UserId'] }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       }),
       User.findByPk(id)
     ])
       .then(([tweets, user]) => {
-        if (!tweets) throw new Error('There is no any tweet exists')
         if (!user) throw new Error("This User didn't exists!")
 
         const userTweets = tweets.map(tweet => {
@@ -180,7 +186,8 @@ const userController = {
             ...tweet.toJSON(),
             replyCounts: tweet.Replies.length,
             likeCounts: tweet.Likes.length,
-            isLiked: tweet.Likes.some(like => like.UserId === userId)
+            isLiked: tweet.Likes.some(like => like.UserId === userId),
+            period: dayjs(tweet.createdAt).fromNow()
           }
           delete data.Replies
           delete data.Likes
@@ -193,7 +200,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserReplies: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
 
     return Promise.all([
       Reply.findAll({
@@ -205,17 +212,18 @@ const userController = {
             attributes: ['UserId'],
             include: { model: User, attributes: ['id', 'account'] }
           }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       }),
       User.findByPk(id)
     ])
       .then(([replies, user]) => {
-        if (!replies) throw new Error('There is no any reply exists')
         if (!user) throw new Error("This User didn't exists!")
 
         const userReplies = replies.map(reply => {
           const data = {
-            ...reply.toJSON()
+            ...reply.toJSON(),
+            period: dayjs(reply.createdAt).fromNow()
           }
 
           return data
@@ -226,7 +234,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserLikes: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
     const user = helpers.getUser(req)
     const userId = Number(user.id)
 
@@ -235,7 +243,7 @@ const userController = {
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
           { model: Reply, attributes: ['id'] },
-          { model: Like, attributes: ['UserId'] }
+          { model: Like, attributes: ['UserId', 'createdAt'] }
         ]
       }),
       Like.findAll({
@@ -245,8 +253,6 @@ const userController = {
       User.findByPk(id)
     ])
       .then(([tweets, likes, user]) => {
-        if (!tweets) throw new Error('There is no any tweet exists')
-        if (!likes) throw new Error('This user not yet like any tweet')
         if (!user) throw new Error("This User didn't exists!")
 
         const Tweets = tweets.map(tweet => tweet.toJSON())
@@ -254,18 +260,22 @@ const userController = {
 
         const likeTweets = Tweets.filter(tweet => Likes.some(like => like.TweetId === tweet.id))
           .map(tweet => {
+            const likedDate = tweet.Likes.filter(like => like.UserId === id)[0].createdAt
             const data = {
               ...tweet,
               replyCounts: tweet.Replies.length,
               likeCounts: tweet.Likes.length,
               isLiked: tweet.Likes.some(like => like.UserId === userId),
-              TweetId: tweet.id
+              TweetId: tweet.id,
+              likedDate,
+              period: dayjs(likedDate).fromNow()
             }
             delete data.Replies
             delete data.Likes
 
             return data
           })
+          .sort((a, b) => (b.likedDate - a.likedDate))
 
         res.json(likeTweets)
       })
@@ -314,7 +324,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserFollowings: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
     const user = helpers.getUser(req)
     const userId = Number(user.id)
 
@@ -329,11 +339,11 @@ const userController = {
       Followship.findAll({
         where: { followerId: id },
         attributes: ['followingId', 'createdAt']
-      })
+      }),
+      User.findByPk(id)
     ])
-      .then(([users, followings]) => {
-        if (!users) throw new Error('There is no user!')
-        if (!followings) throw new Error('This user not yet follow other user!')
+      .then(([users, followings, user]) => {
+        if (!user) throw new Error("This user didn't exist!")
 
         const Users = users.map(user => user.toJSON())
         const Followings = followings.map(following => following.toJSON())
@@ -341,24 +351,26 @@ const userController = {
         const userFollowings = Users.filter(
           user => Followings.some(following => following.followingId === user.id)
         ).map(user => {
+          const followingDate = user.Followers.filter(f => f.id === id)[0].Followship.createdAt
+          console.log(followingDate)
           const data = {
             ...user,
             followingId: user.id,
-            // user/:id/followings，下方的Follower已指定為是此:id，故只會有一位，陣列選[0]即可。
-            followingDate: user.Followers[0].Followship.createdAt,
+            followingDate,
             isFollowed: user.Followers.some(follower => follower.id === userId)
           }
           delete data.Followers
 
           return data
         })
+          .sort((a, b) => (b.followingDate - a.followingDate))
 
         res.json(userFollowings)
       })
       .catch(err => next(err))
   },
   getUserFollowers: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
     const user = helpers.getUser(req)
     const userId = Number(user.id)
 
@@ -367,17 +379,18 @@ const userController = {
         attributes: ['id', 'account', 'name', 'avatar', 'introduction'],
         // 為了確認是否isFollowed，故include [Followers]
         include: [
-          { model: User, as: 'Followers', attributes: ['id'] }
+          { model: User, as: 'Followers', attributes: ['id'] },
+          { model: User, as: 'Followings', attributes: ['id'] }
         ]
       }),
       Followship.findAll({
         where: { followingId: id },
         attributes: ['followerId', 'createdAt']
-      })
+      }),
+      User.findByPk(id)
     ])
-      .then(([users, followers]) => {
-        if (!users) throw new Error('There is no user!')
-        if (!followers) throw new Error('There are no user followed!')
+      .then(([users, followers, user]) => {
+        if (!user) throw new Error("This user didn't exist!")
 
         const Users = users.map(user => user.toJSON())
         const Followers = followers.map(follower => follower.toJSON())
@@ -385,16 +398,19 @@ const userController = {
         const userFollowers = Users.filter(
           user => Followers.some(follower => follower.followerId === user.id)
         ).map(user => {
+          const followerDate = user.Followings.filter(f => f.id === id)[0].Followship.createdAt
           const data = {
             ...user,
             followerId: user.id,
-            isFollowed: user.Followers.some(follower => follower.id === userId)
-            // 這裡不顯示followingDate，因此用戶是被追蹤的，只要知道有誰追蹤他就好。
+            isFollowed: user.Followers.some(follower => follower.id === userId),
+            followerDate
           }
           delete data.Followers
+          delete data.Followings
 
           return data
         })
+          .sort((a, b) => (b.followerDate - a.followerDate))
 
         res.json(userFollowers)
       })
