@@ -434,6 +434,7 @@ const userController = {
         delete Tweet.Replies;
         delete Tweet.Likes;
         return {
+          id: TweetId,
           TweetId,
           createdAt, // - 什麼時候按喜歡推文
           ...Tweet,
