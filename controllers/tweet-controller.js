@@ -89,11 +89,15 @@ const tweetController = {
 
     const user = helpers.getUser(req)
     const UserId = user.id
-    const TweetId = req.params.tweet_id
+    const TweetId = Number(req.params.tweet_id)
 
-    return User.findByPk(UserId)
-      .then(user => {
+    return Promise.all([
+      User.findByPk(UserId),
+      Tweet.findByPk(TweetId)
+    ])
+      .then(([user, tweet]) => {
         if (!user) throw new Error("User didn't exist!")
+        if (!tweet) throw new Error("Tweet didn't exist!")
 
         return Reply.create({
           UserId,
