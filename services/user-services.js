@@ -332,13 +332,18 @@ const userService = {
     }
     const checkNameLength = name.length
     assert(checkNameLength <= 50, '字數超過上限！')
+    assert(name && password && checkPassword, '必填欄位不得為空')
     assert(password === checkPassword, '密碼與確認密碼不一致')
-    assert(checkEmail(email), 'Email格式錯誤')
-    assert(account && name && email && password && checkPassword, '所有欄位皆須填寫')
-    Promise.all([
-      User.findOne({ where: { account: req.body.account } }),
-      User.findOne({ where: { email: req.body.email } })
-    ])
+
+    const promises = []
+    if (account) {
+      promises.push(User.findOne({ where: { account: req.body.account } }))
+    }
+    if (email) {
+      assert(checkEmail(email), 'Email格式錯誤')
+      promises.push(User.findOne({ where: { email: req.body.email } }))
+    }
+    Promise.all(promises)
       .then(([checkAccount, checkEmail]) => {
         assert(!checkAccount, 'account 已重複註冊！')
         assert(!checkEmail, 'email 已重複註冊！')
