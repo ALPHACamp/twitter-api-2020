@@ -1,15 +1,4 @@
 module.exports = {
-  // 應該沒用，確定沒用就殺
-  // generalErrorHandler (err, req, res, next) {
-  //   if (err instanceof Error) {
-  //     req.flash('error_messages', `${err.message}`)
-  //   } else {
-  //     req.flash('error_messages', `${err}`)
-  //   }
-  //   res.redirect('back') // 丟回前一頁
-
-  //   next(err)
-  // },
   apiErrorHandler (err, req, res, next) {
     if (err instanceof Error) {
       res.status(err.status || 500).json({ // err.status 若有值，就是狀態碼

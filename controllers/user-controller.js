@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，不管，我先用舊的 add-on
-const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
 
@@ -124,8 +124,9 @@ const userController = {
   },
   getTweets: (req, res, next) => {
     // return Tweet.findAll({
+    //   subQuery: false,
     //   where: { UserId: req.params.id }, // 為了測試檔而改成這樣
-    // order: [['createdAt', 'DESC'], ['likeCounts', 'DESC']],
+    //   order: [['createdAt', 'DESC'], ['likeCounts', 'DESC']],
     //   // include: [{ model: Like, attributes: [] }, { model: Reply, attributes: [] }],
     //   include: [{ model: Like, attributes: ['id', 'UserId', 'TweetId'] }, { model: Reply, attributes: ['id', 'UserId', 'TweetId'] }],
     //   attributes: {
@@ -133,10 +134,15 @@ const userController = {
     //       [sequelize.fn('COUNT', sequelize.col('likes.tweet_id')), 'likeCounts'],
     //       [sequelize.fn('COUNT', sequelize.col('replies.id')), 'replyCounts']
     //     ]
-    //   },
-    //   group: 'id'
+    //   }
+    // group: ['id']
     // })
     // .then(tweets => res.status(200).json(tweets))
+    // .then(tweets => {
+    //   console.log(tweets.map(tweet => tweet.toJSON()))
+    //   return res.status(200).json(tweets)
+    // })
+    // ? 成品~~~~~~~
     return Tweet.findAll({
       where: { UserId: req.params.id }, // 為了測試檔而改成這樣
       order: [['createdAt', 'DESC']],
@@ -153,6 +159,7 @@ const userController = {
         })
         return res.status(200).json(result)
       })
+      // ? 成品 end~~~~~~~
       .catch(err => next(err))
   },
   getReplies: (req, res, next) => {
@@ -193,28 +200,65 @@ const userController = {
   },
   addFollowing: (req, res, next) => {
     const followingId = Number(req.body.id) // 要 follow 的對象
-    return User.findByPk(helpers.getUser(req).id) // 登入的使用者
+    const followerId = helpers.getUser(req).id
+    // ? 第一版寫法~~~~~~~~~~
+    // return User.findByPk(helpers.getUser(req).id) // 登入的使用者
+    //   .then(user => {
+    //     if (!user || !followingId) {
+    //       // return res.status(404).json({ status: 'error', message: 'Cannot find this user' })
+    //       // 前端要我們換成下面
+    //       return res.status(404).json({ success: false, message: 'Cannot find this user' })
+    //     }
+    //     if (user.id === followingId) throw new Error('不能追蹤自己')
+    //     return Followship.create({
+    //       followerId: user.id,
+    //       followingId
+    //     })
+    //   })
+    //   .then(following => {
+    //     // if (following) return res.status(409).json({ status: 'error', message: 'you already followed this user.' })
+    //     return res.status(200).json(following)
+    //   })
+    // ? 第一版寫法 end~~~~~~~~~~~
+    return Followship.findOne({ where: { followingId, followerId } })
+      .then(followRecord => {
+        // if (followRecord) return res.status(409).json({ message: 'you already followed this user.' })
+        // 雖然下面冗，但比起上1 跳錯誤，我也想不出更好的方法來傳遞 status code 了
+        if (followRecord) {
+          const err = new Error('you already followed this user.')
+          err.status = 409
+          throw err
+        }
+      })
+      .then(() => User.findByPk(followingId))
       .then(user => {
-        // if (!user || !userId) {
-        //   return res.status(404).json({ status: 'error', message: 'Cannot find this user' })
-        // }
-        // if (user.id === userId) throw new Error('不能追蹤自己')
-        return Followship.create({
-          followerId: user.id,
-          followingId
-        })
+        if (!user) {
+          const err = new Error('Cannot find this user')
+          err.status = 404
+          throw err
+        }
+        if (user.id === followerId) throw new Error('不能追蹤自己')
+        // (上1) 檢查要 follow 的人是否是自己
+        return Followship.create({ followerId, followingId })
       })
       .then(following => {
-        // if (following) return res.status(409).json({ status: 'error', message: 'you already followed this user.' })
         return res.status(200).json(following)
       })
       .catch(err => next(err))
   },
   removeFollowing: (req, res, next) => {
     const { followingId } = req.params
-    return User.findByPk(helpers.getUser(req).id)
-      .then(user => Followship.findOne({ where: { followerId: user.id, followingId } }))
+    // ? 第一版寫法~~~~~~~~~~~~~~~
+    // return User.findByPk(helpers.getUser(req).id)
+    //   .then(user => Followship.findOne({ where: { followerId: user.id, followingId } }))
+    //   .then(following => {
+    //     following.destroy()
+    //     return res.status(200).json({ message: 'success', following })
+    //   })
+    // ? 第一版寫法 end~~~~~~~~~~~~
+    return Followship.findOne({ where: { followingId, followerId: helpers.getUser(req).id } })
       .then(following => {
+        // 若沒資料 (沒 following) 下1 會自動跳錯 (驗證)，因此沒建 if，若需要再建
         following.destroy()
         return res.status(200).json({ message: 'success', following })
       })
@@ -229,7 +273,6 @@ const userController = {
     // 雖然可以 count，但只會出 count 數字，沒啥用
     // return Followship.count({ where: { followingId: 16 } })
     //   .then(test => console.log(test))
-    // ? 成品
     return User.findAll({
       attributes: ['id'],
       include: [{ model: User, as: 'Followers', attributes: ['id'] }]
@@ -246,7 +289,6 @@ const userController = {
         return res.status(200).json(users)
       })
       .catch(err => next(err))
-      // ? 成品 end
   },
   addLike: (req, res, next) => {
     const TweetId = req.params.id
