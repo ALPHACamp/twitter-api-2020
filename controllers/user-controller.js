@@ -81,6 +81,7 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const { userId } = req.params
+      const currentUserId = helpers.getUser(req).id
       const likedTweets = await Like.findAll({
         where: { UserId: userId },
         include: [ User, { model: Tweet, include: [Reply, { model: User, as: 'LikedUsers' }] }
@@ -89,15 +90,22 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!likedTweets) {
+      if (likedTweets.length === 0) {
         return res.status(404).json({
           status: 'error',
           message: '找不到此則推文'
         })
       }
-      if (!tweetAuthorInfo) {
-        throw new Error('Tweet author not found!')
+      const user = await User.findByPk(userId)
+      if(!user){
+        return res.status(404).json({
+          status: "error",
+          message: "找不到使用者",
+        })
       }
+
+
+      
       return res
         .status(200)
         .json({
