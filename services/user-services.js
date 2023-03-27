@@ -3,7 +3,7 @@ const helpers = require('../_helpers')
 const db = require('../models')
 const { User, sequelize, Tweet, Reply, Like, Followship } = db
 const bcrypt = require('bcryptjs')
-// const { imgurFileHandler } = require('../helpers/file-helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
   postSignIn: (req, cb) => {
@@ -198,20 +198,32 @@ const userServices = {
   },
   putUserSetting: (req, cb) => {
     const id = Number(req.params.id)
-    // console.log(helpers.getUser(req))
     const currentUserId = helpers.getUser(req).id
     const { name, account, email, introduction, avatar, cover, password } = req.body
-
+		const { file } = req
+    let hashedPassword = ''
+    if (password) { hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) }
     if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
-    // if (!account || !password) throw new Error('請填寫必填欄位')
+		return Promise.all([User.findByPk(currentUserId), imgurFileHandler(file)])
+			.then(([user, imgurData]) => {
+				user.update({
+          account,
+          name,
+          email,
+          password: hashedPassword || user.password,
+          introduction,
+          avatar,
+          cover
+        })
+
     return User.findByPk(currentUserId)
       .then(user => {
         user.update({
           account,
           name,
           email,
+          password: hashedPassword || user.password,
           introduction,
-          password,
           avatar,
           cover
         })
@@ -222,6 +234,7 @@ const userServices = {
             return cb(null, { token, userData })
           })
       })
+
       .catch(err => cb(err))
   }
   // putUserProfile: (req, cb) => {
