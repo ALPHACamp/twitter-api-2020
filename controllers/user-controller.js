@@ -250,6 +250,42 @@ const userController = {
 
       return res.status(200).json(userInfo)
     } catch (error) { next(error) }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      const users = await User.findByPk(userId, {
+        include: { model: User, as: 'Followers' },
+        order: [
+          [{ model: User, as: 'Followers' }, Followship, 'createdAt', 'DESC']
+        ],
+        raw: true,
+        nest: true
+      })
+      if (!users) {
+        return res.status(404).json({ status: 'error', message: '此帳戶不存在!' })
+      }
+
+      const followerData = []
+      followerData.push({
+        followerId: users.Followers.id,
+        followerAccount: users.Followers.account,
+        followerName: users.Followers.name,
+        followerAvatar: users.Followers.avatar,
+        followerIntro: users.Followers.introduction,
+        followerCount: users.Followers.length,
+        followshipCreatedAt: users.Followers.Followship.createdAt,
+        isFollowing: helpers
+          .getUser(req)
+          .Followings.some(
+            (fg) => fg.Followship.followingId === users.Followers.id
+          )
+      })
+
+      return res
+        .status(200)
+        .json(followerData)
+    } catch (error) { next(error) }
   }
 }
 
