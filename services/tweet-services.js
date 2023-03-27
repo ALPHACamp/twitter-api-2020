@@ -75,7 +75,8 @@ const tweetServices = {
     return Reply.findAll({
       where: { TweetId },
       include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Tweet, include: [{ model: User, attributes: [['account', 'ownerAccount']] }] }
       ],
       order: [['createdAt', 'DESC']],
       nest: true,

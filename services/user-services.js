@@ -296,7 +296,6 @@ const userService = {
   editUser: (req, cb) => {
     assert(Number(req.params.userId) === helpers.getUser(req).id, '不可修改其他使用者的資料！')
     const { name, introduction } = req.body
-    console.log(req.body)
     assert(name, '使用者名稱為必填！')
     const checkNameLength = req.body.name.length
     assert(checkNameLength <= 50, '字數超過上限')
