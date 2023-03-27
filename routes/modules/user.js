@@ -7,7 +7,7 @@ router.get(
   '/:userId/replied_tweets', authenticatedUser,
   userController.getRepliedTweets
 )
-router.put('/:userId', authenticatedUser, userController.putUser)
+router.put('/:userId', authenticatedUser, userController.editUser)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/', userController.signUp)
 

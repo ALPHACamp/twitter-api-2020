@@ -103,7 +103,7 @@ const userController = {
       return res.status(200).json({ status: 'success', data: reply })
     } catch (error) { next(error) }
   },
-  putUser: async (req, res, next) => {
+  editUser: async (req, res, next) => {
     try {
       const { userId } = req.params
       if (Number(userId) !== Number(helpers.getUser(req).id)) {
