@@ -1,6 +1,7 @@
 const { User, Tweet, Like } = require('../models');
 
 const adminController = {
+  // get all users data
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
