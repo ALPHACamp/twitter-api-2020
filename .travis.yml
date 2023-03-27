@@ -10,6 +10,7 @@ env:
   - NODE_ENV=travis
   - IMGUR_CLIENT_ID = f2ebcef56820282
   - JWT_SECRET = twitterTeam
+  - PORT = 3000
 
 # 在 install 前執行的指令
 before_install:
