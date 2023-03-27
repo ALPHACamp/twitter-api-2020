@@ -439,7 +439,7 @@ const userController = {
     try {
       const followers = await sequelize.query(
         `
-      SELECT f.followerId AS id, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
+      SELECT f.followerId, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
       FROM Followships AS f INNER JOIN Users AS u
       ON f.followerId = u.id
       WHERE followingId = ${id}
@@ -457,7 +457,7 @@ const userController = {
     try {
       const followings = await sequelize.query(
         `
-      SELECT f.followingId AS id, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
+      SELECT f.followingId, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
       FROM Followships AS f INNER JOIN Users AS u
       ON f.followingId = u.id
       WHERE followerId = ${id}
