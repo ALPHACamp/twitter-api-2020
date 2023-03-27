@@ -173,13 +173,17 @@ const tweetController = {
     const user = helpers.getUser(req)
     const UserId = user.id
 
-    return Like.findOne({
-      where: {
-        TweetId: id,
-        UserId
-      }
-    })
-      .then(like => {
+    return Promise.all([
+      Tweet.findByPk(id),
+      Like.findOne({
+        where: {
+          TweetId: id,
+          UserId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
         if (!like) throw new Error("You haven't liked this tweet")
 
         return like.destroy()
