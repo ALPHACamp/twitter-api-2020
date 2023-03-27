@@ -41,7 +41,8 @@ const adminController = {
           ...data.toJSON()
         }
       })
-      result.sort((a, b) => b.tweetCount - a.tweetCount)
+
+      result.sort((a, b) => b.tweetsCount - a.tweetsCount)
       res.status(200).json(result)
     } catch (error) {
       next(error)
