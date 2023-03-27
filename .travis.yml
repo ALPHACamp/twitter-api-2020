@@ -7,9 +7,9 @@ services:
 
 # 設定參數(Travis CI 會按照參數分別執行)
 env:
-  - NODE_ENV=travis IMGUR_CLIENT_ID=${{secret.IMGUR_CLIENT_ID}} JWT_SECRET=${{secret.JWT_SECRET}} PORT=${{secret.PORT}}
+  - NODE_ENV=travis IMGUR_CLIENT_ID:${{secret.IMGUR_CLIENT_ID}} JWT_SECRET:${{secret.JWT_SECRET}} PORT:${{secret.PORT}}
 
-# 在 install 前執行的指令
+# 在 install 前執行的指令git p
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS ac_twitter_workspace_test default character set utf8mb4 collate utf8mb4_unicode_ci;'
   - npm install sequelize-cli -g
