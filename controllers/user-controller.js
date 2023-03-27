@@ -198,34 +198,30 @@ const userController = {
     const { userId } = req.params
     return User.findAll({
       where: { id: userId },
-      include: [{ model: User, as: 'Followings' }],
-      raw: true
+      include: [{ model: User, as: 'Followings' }]
     })
       .then((user) => {
-        console.log(...user)
         if (!user || user.role === 'admin') {
           return res.status(404).json({ status: 'error', message: '帳戶不存在' })
-        };
-        const followingData = user.map((user) => ({
-          ...user,
-          userId: user.id,
-          name: user.name,
-          account: user.account,
-
-          followingId: user.Followings?.id || null,
-          followingAvatar: user.Followings?.avatar || 'https://reurl.cc/XLQeQj',
-          followingName: user.Followings?.name || 'anonymous user',
-          followingIntro: user.Followings?.introduction || '',
-          followingCount: user.Followings.length,
+        }
+        const followingData = user.map((u) => ({
+          userId: u.id,
+          name: u.name,
+          account: u.account,
+          ...u.toJSON().Followings,
+          followingId: u.Followings.id,
+          followingAvatar: u.Followings?.avatar || "https://reurl.cc/XLQeQj",
+          followingName: u.Followings.name,
+          followingIntro: u.Followings?.introduction || "",
+          followingCount: u.Followings.length,
           isFollowed: helpers
             .getUser(req)
             .Followings.some(
-              (fu) => fu.Followship.followingId === user.Followers.id
+              (fu) => fu.Followship.followingId === u.Followers.id
             )
-
         }))
-        console.log(user.Followings)
-        console.log(followingData)
+
+        // console.log(followingData)
         return res.status(200).json(followingData)
       })
       .catch((error) => next(error))
