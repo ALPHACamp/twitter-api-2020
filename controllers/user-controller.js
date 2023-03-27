@@ -250,7 +250,20 @@ const userController = {
         error.status = 400;
         throw error;
       }
-      const foundUser = await User.findByPk(id, { raw: true });
+      const [foundUser, followship] = await Promise.all([
+        User.findByPk(id, { raw: true }),
+        Followship.findOne({
+          where: {
+            followerId: getUser(req).id,
+            followingId: Number(id),
+          },
+        }),
+      ]);
+      if (followship) {
+        const error = new Error("已追蹤過此使用者!");
+        error.status = 400;
+        throw error;
+      }
       if (!foundUser || foundUser.isAdmin) {
         const error = new Error("使用者不存在!");
         error.status = 404;
