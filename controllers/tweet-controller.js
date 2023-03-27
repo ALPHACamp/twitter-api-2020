@@ -60,19 +60,26 @@ const tweetController = {
   },
   getTweet: (req, res, next) => {
     const id = req.params.tweet_id
+    const user = helpers.getUser(req)
+    const UserId = Number(user.id)
 
     return Tweet.findByPk(id, {
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Like, attributes: ['deleted'] }
-      ],
-      raw: true,
-      nest: true
+        { model: Like }
+      ]
     })
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
 
-        res.json(tweet)
+        const tweetData = {
+          ...tweet.toJSON(),
+          period: dayjs(tweet.createdAt).fromNow(),
+          isLiked: tweet.Likes.some(like => like.UserId === UserId)
+        }
+        delete tweetData.Likes
+
+        res.json(tweetData)
       })
       .catch(err => next(err))
   },
