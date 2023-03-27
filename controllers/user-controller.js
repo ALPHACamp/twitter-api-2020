@@ -251,56 +251,40 @@ const userController = {
       return res.status(200).json(userInfo)
     } catch (error) { next(error) }
   },
-  getUserFollowers: async(req, res, next) => {
+  getUserFollowers: async (req, res, next) => {
     try {
-      const [user, followers] = await Promise.all([
-        User.findAll({
-          where: { id: req.params.userId },
-          attributes: ["id", "account", "name"],
-          include: [
-            {
-              model: User,
-              as: "Followers",
-              attributes: ["id", "avatar", "name", "introduction"],
-            }
-          ],
-          order: [
-            [{ model: User, as: "Followers" }, Followship, "createdAt", "DESC"],
-          ],
-        }),
-        Followship.findAll({
-        where: { followingId: req.params.userId },
+      const { userId } = req.params
+      const users = await User.findByPk(userId, {
+        include: { model: User, as: 'Followers' },
+        order: [
+          [{ model: User, as: 'Followers' }, Followship, 'createdAt', 'DESC']
+        ],
+        raw: true,
+        nest: true
       })
-      ])
-      
-      if (!user || user.role === 'admin') {
-        return res.status(404).json({status: 'error', message:'此帳戶不存在!'})}
-        
-        if(!followers){
-          return res
-            .status(404)
-            .json({ status: "error", message: "無任何追蹤者" });
-        }
-        
-        const followerData = user.map(u => {
-          return {
-            id: u.id,
-            name: u.name,
-            account: u.account,
-            ...u.toJSON().Followers,
-            followerId: u.Followers.id,
-            followeName: u.Followers.name,
-            followerAvatar: u.Followers.avatar,
-            isFollowing: helpers
-              .getUser(req)
-              .Followings.some(
-                (fg) => fg.Followship.followingId === u.Followers.id
-              )
-          }
-        })
-       console.log(followerData)
+      if (!users) {
+        return res.status(404).json({ status: 'error', message: '此帳戶不存在!' })
+      }
+
+      const followerData = []
+      followerData.push({
+        followerId: users.Followers.id,
+        followerAccount: users.Followers.account,
+        followerName: users.Followers.name,
+        followerAvatar: users.Followers.avatar,
+        followerIntro: users.Followers.introduction,
+        followerCount: users.Followers.length,
+        followshipCreatedAt: users.Followers.Followship.createdAt,
+        isFollowing: helpers
+          .getUser(req)
+          .Followings.some(
+            (fg) => fg.Followship.followingId === users.Followers.id
+          )
+      })
+
+      console.log(followerData)
       // const followerData = user.Followers.map(f => ({
-        
+
       //   followerId: f.id,
       //   followerName: f.name,
       //   followerAccount: f.account,
@@ -312,13 +296,11 @@ const userController = {
       //     .getUser(req)
       //     .Followings.map(fg => fg.id).includes(f.id)
       // }));
-          return res
-            .status(200)
-            .json(followerData);
-        
-        
-    }catch(error){next(error)}
-    }
+      return res
+        .status(200)
+        .json(followerData)
+    } catch (error) { next(error) }
+  }
 }
 
 module.exports = userController
