@@ -423,8 +423,8 @@ const userController = {
     try {
       const followers = await sequelize.query(
         `
-      SELECT f.followerId AS id, u.account, u.name, u.avatar, u.introduction, f.createdAt as followedDate
-      FROM Followships as f INNER JOIN Users as u
+      SELECT f.followerId AS id, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
+      FROM Followships AS f INNER JOIN Users AS u
       ON f.followerId = u.id
       WHERE followingId = ${id}
       ORDER BY followedDate DESC;
@@ -441,8 +441,8 @@ const userController = {
     try {
       const followings = await sequelize.query(
         `
-      SELECT f.followingId as id, u.account, u.name, u.avatar, u.introduction, f.createdAt as followedDate
-      FROM Followships as f INNER JOIN Users as u
+      SELECT f.followingId AS id, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
+      FROM Followships AS f INNER JOIN Users AS u
       ON f.followingId = u.id
       WHERE followerId = ${id}
       ORDER BY followedDate DESC;
@@ -461,8 +461,8 @@ const userController = {
     try {
       const users = await sequelize.query(
         `
-        SELECT f.followingId as id, u.account, u.name, u.avatar, u.introduction , COUNT(f.followingId) as followerCounts
-        FROM Followships as f INNER JOIN Users as u
+        SELECT f.followingId AS id, u.account, u.name, u.avatar, u.introduction , COUNT(f.followingId) AS followerCounts
+        FROM Followships AS f INNER JOIN Users AS u
         ON f.followingId = u.id
         GROUP BY f.followingId
         HAVING f.followingId <> ${loginUserId}
