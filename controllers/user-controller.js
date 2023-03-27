@@ -90,7 +90,8 @@ const userController = {
     User.findByPk(req.params.id, {
       include: [
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
+        { model: User, as: 'Followings' },
+        { model: Tweet }
       ]
     })
       .then(user => {
@@ -106,6 +107,7 @@ const userController = {
         // count followers and following
         userData.followerCounts = userData.Followers.length
         userData.followingCounts = userData.Followings.length
+        userData.tweetCounts = userData.Tweets.length
         userData.isFollowed = userData.Followers?.some(follower => follower.id === getUser(req).dataValues.id)
         userData.isCurrentUser = getUser(req).dataValues.id === user.id
         // delete unused properties
