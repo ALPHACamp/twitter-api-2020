@@ -239,8 +239,6 @@ const userController = {
           order: [
             [{ model: User, as: "Followers" }, Followship, "createdAt", "DESC"],
           ],
-          
-
         }),
         Followship.findAll({
         where: { followingId: req.params.userId },
@@ -255,9 +253,8 @@ const userController = {
             .status(404)
             .json({ status: "error", message: "無任何追蹤者" });
         }
-        console.log(user)
+        
         const followerData = user.map(u => {
-         
           return {
             id: u.id,
             name: u.name,
@@ -273,7 +270,7 @@ const userController = {
               )
           }
         })
-        console.log(followerData)
+       console.log(followerData)
       // const followerData = user.Followers.map(f => ({
         
       //   followerId: f.id,
