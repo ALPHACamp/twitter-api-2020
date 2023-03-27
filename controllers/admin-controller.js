@@ -14,6 +14,8 @@ const adminController = {
 
       const authToken = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
 
+      delete userData.password
+      delete userData.role
       res.json({
         status: 'success',
         authToken,
