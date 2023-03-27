@@ -340,36 +340,43 @@ const userController = {
       if (Number(userId) !== Number(helpers.getUser(req).id)) {
         return res
           .status(403)
-          .json({ status: 'error', message: 'Access denied!' })
+          .json({ status: 'error', message: '沒有權限' })
       }
-      const { account, name, email, password, checkPassword, introduction } = req.body
+       const user = await User.findByPk(userId);
+       const { account, name, email, password, checkPassword, introduction } =
+         req.body;
+       
+       if (!user) {
+         return res
+           .status(404)
+           .json({ status: "error", message: "帳戶不存在" });
+       }
+      const { file } = req;
+      const filePath = await localFileHandler(file);
       const errors = []
-      if (!account || !name || !email || !password || !checkPassword ) {
-        errors.push('所有欄位皆必填')
+      if (!name){
+        errors.push('姓名為必填')
       }
       if (name && !validator.isByteLength(name, { max: 50 })) {
         errors.push('字數超出上限，請將字數限制在 50 字以內')
       }
-      if (password && !validator.isByteLength(password, { min: 8, max: 20 })) {
-        errors.push('密碼長度介於 8 ~ 20 字元')
+      if (introduction && !validator.isByteLength(introduction, { max: 160 })) {
+          errors.push("字數超出上限，請將字數限制在 50 字以內");
+        }
+      if (password && !validator.isByteLength(password, { max: 20 })) {
+        errors.push('密碼長度限制在 20 字元以內')
       }
       if (password !== checkPassword) {
         errors.push('密碼與確認密碼不相符')
       }
-      if (introduction && !validator.isByteLength(introduction, { max: 160 })) {
-        errors.push("字數超出上限，請將字數限制在 160 字以內");
-      }
-      if (email && !validator.isEmail(email)) {
-        errors.push('請輸入有效的 email 格式')
-      }
-      // if (email && email !== helpers.getUser(req).email) {
-      //   const ifEmailDuplicate = await User.findOne({ where: { email } });
+      // if (updatedEmail !== helpers.getUser(req).email) {
+      //   const ifEmailDuplicate = await User.findOne({ where: { email: updatedEmail } });
       //   if (ifEmailDuplicate) {
       //     errors.push("此Email已被註冊!");
       //   }
       // }
-      // if (account !== helpers.getUser(req).account) {
-      //   const ifAccountDuplicate = await User.findOne({ where: { account } })
+      // if (updatedAccount !== helpers.getUser(req).account) {
+      //   const ifAccountDuplicate = await User.findOne({ where: { account: updatedAccount } })
       //   if (ifAccountDuplicate) {
       //     errors.push('此帳號已被註冊!')
       //   }
@@ -378,18 +385,18 @@ const userController = {
       if (errors.length) {
         return res.status(400).json({ status: 'error', errors })
       }
+      
+      const newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
 
-      const user = await User.findByPk(userId)
-      if (!user) {
-        return res.status(404).json({ status: 'error', message: '帳戶不存在' })
-      }
       await user.update({
         name,
         account,
         email,
-        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+        password: newPassword,
         introduction,
+        avatar: filePath || user.avatar
       })
+      // await user.save()
       return res.status(200).json({ status: 'success', message: '設定成功' })
     } catch (error) { next(error) }
 }

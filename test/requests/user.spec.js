@@ -369,6 +369,7 @@ describe('# user requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function (err, res) {
+            console.log(res)
             if (err) return done(err)
             db.User.findByPk(1).then(user => {
               // 檢查資料是否有變更
