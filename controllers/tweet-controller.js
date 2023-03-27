@@ -29,32 +29,57 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
+    const user = helpers.getUser(req)
+    const UserId = Number(user.id)
+
     return Tweet.findAll({
-      include: { model: User },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Reply },
+        { model: Like }
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
-        res.json(tweets)
+        const tweetsData = tweets.map(tweet => {
+          const data = {
+            ...tweet.toJSON(),
+            period: dayjs(tweet.createdAt).fromNow(),
+            replyCounts: tweet.Replies.length,
+            likeCounts: tweet.Likes.length,
+            isLiked: tweet.Likes.some(like => like.UserId === UserId)
+          }
+          delete data.Replies
+          delete data.Likes
+          return data
+        })
+
+        res.json(tweetsData)
       })
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
     const id = req.params.tweet_id
+    const user = helpers.getUser(req)
+    const UserId = Number(user.id)
 
     return Tweet.findByPk(id, {
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Like, attributes: ['deleted'] }
-      ],
-      raw: true,
-      nest: true
+        { model: Like }
+      ]
     })
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
 
-        res.json(tweet)
+        const tweetData = {
+          ...tweet.toJSON(),
+          period: dayjs(tweet.createdAt).fromNow(),
+          isLiked: tweet.Likes.some(like => like.UserId === UserId)
+        }
+        delete tweetData.Likes
+
+        res.json(tweetData)
       })
       .catch(err => next(err))
   },
@@ -64,11 +89,15 @@ const tweetController = {
 
     const user = helpers.getUser(req)
     const UserId = user.id
-    const TweetId = req.params.tweet_id
+    const TweetId = Number(req.params.tweet_id)
 
-    return User.findByPk(UserId)
-      .then(user => {
+    return Promise.all([
+      User.findByPk(UserId),
+      Tweet.findByPk(TweetId)
+    ])
+      .then(([user, tweet]) => {
         if (!user) throw new Error("User didn't exist!")
+        if (!tweet) throw new Error("Tweet didn't exist!")
 
         return Reply.create({
           UserId,
@@ -83,22 +112,34 @@ const tweetController = {
   },
   getReplies: (req, res, next) => {
     const id = req.params.tweet_id
+    const TweetId = Number(req.params.tweet_id)
 
-    return Reply.findAll({
-      where: { TweetId: id },
-      include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        {
-          model: Tweet,
-          attributes: ['UserId'],
-          include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
-        }
-      ],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(replies => res.json(replies))
+    return Promise.all([
+      Reply.findAll({
+        where: { TweetId: id },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: ['UserId'],
+            include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      }),
+      Tweet.findByPk(TweetId)
+    ])
+      .then(([replies, tweet]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+
+        const repliesData = replies.map(reply => ({
+          ...reply,
+          period: dayjs(reply.createdAt).fromNow()
+        }))
+        res.json(repliesData)
+      })
       .catch(err => next(err))
   },
   likeTweet: (req, res, next) => {
@@ -132,13 +173,17 @@ const tweetController = {
     const user = helpers.getUser(req)
     const UserId = user.id
 
-    return Like.findOne({
-      where: {
-        TweetId: id,
-        UserId
-      }
-    })
-      .then(like => {
+    return Promise.all([
+      Tweet.findByPk(id),
+      Like.findOne({
+        where: {
+          TweetId: id,
+          UserId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
         if (!like) throw new Error("You haven't liked this tweet")
 
         return like.destroy()

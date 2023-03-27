@@ -14,6 +14,8 @@ const adminController = {
 
       const authToken = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
 
+      delete userData.password
+      delete userData.role
       res.json({
         status: 'success',
         authToken,
@@ -55,13 +57,27 @@ const adminController = {
   },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Reply },
+        { model: Like }
+      ]
     })
       .then(tweets => {
-        const tweetsData = tweets.map(tweet => ({
-          ...tweet.toJSON(),
-          description: tweet.description.substring(0, 50)
-        }))
+        const tweetsData = tweets.map(tweet => {
+          const data = {
+            ...tweet.toJSON(),
+            description: tweet.description.substring(0, 50),
+            period: dayjs(tweet.createdAt).fromNow(),
+            replyCounts: tweet.Replies.length,
+            likeCounts: tweet.Likes.length
+          }
+          delete data.Replies
+          delete data.Likes
+          return data
+        })
+
         res.json(tweetsData)
       })
       .catch(err => next(err))
