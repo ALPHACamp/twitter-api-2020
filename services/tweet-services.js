@@ -23,8 +23,8 @@ const tweetServices = {
         ],
         attributes: {
           include:
-          [[sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCounts'], [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCounts']
-          ]
+            [[sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCounts'], [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCounts']
+            ]
         },
         order: [['createdAt', 'DESC']]
       }),
@@ -40,20 +40,20 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   getTweets: (req, cb) => {
-    const currentUserId = Number(helpers.getUser(req).id)
-    Tweet.findAll({
+    // const currentUserId = Number(helpers.getUser(req).id)
+    return Tweet.findAll({
       include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Like, attributes: ['UserId'] }
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        // { model: Like, attributes: ['UserId'] }
       ],
       attributes: {
         include: [
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM likes WHERE Tweet_id = Tweet.id 
+            sequelize.literal(`(SELECT COUNT(*)FROM Likes WHERE Tweet_id = Tweet.id 
             )`), 'LikedCounts'
           ],
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM replies WHERE Tweet_id = Tweet.id
+            sequelize.literal(`(SELECT COUNT(*)FROM Replies WHERE Tweet_id = Tweet.id
                 )`), 'RepliesCounts'
           ]
         ]
@@ -62,29 +62,29 @@ const tweetServices = {
     })
       .then(tweets => {
         const result = tweets.map(t => ({
-          ...t.toJSON(),
-          isLiked: t.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
+          ...t.toJSON()
+          // isLiked: t.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
         }))
         cb(null, result)
       })
       .catch(err => cb(err))
   },
   getTweet: (req, cb) => {
-    const currentUserId = Number(helpers.getUser(req).id)
+    // const currentUserId = Number(helpers.getUser(req).id)
     const { id } = req.params
     return Tweet.findByPk(id, {
       include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Like, attributes: ['UserId'] }
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        // { model: Like, attributes: ['UserId'] }
       ],
       attributes: {
         include: [
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM likes WHERE Tweet_id = Tweet.id 
+            sequelize.literal(`(SELECT COUNT(*)FROM Likes WHERE Tweet_id = Tweet.id 
             )`), 'LikedCounts'
           ],
           [
-            sequelize.literal(`(SELECT COUNT(*)FROM replies WHERE Tweet_id = Tweet.id
+            sequelize.literal(`(SELECT COUNT(*)FROM Replies WHERE Tweet_id = Tweet.id
                 )`), 'RepliesCounts'
           ]
         ]
@@ -92,9 +92,9 @@ const tweetServices = {
     })
       .then(tweet => {
         if (!tweet) throw new Error('此貼文不存在!')
-        tweet = tweet.toJSON()
-        tweet.isLiked = tweet.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
-        cb(null, tweet)
+        // tweet = tweet.toJSON()
+        // tweet.isLiked = tweet.Likes.some(l => l.UserId === Number(currentUserId)) // 加入if isLikedBycurrentUser
+        cb(null, tweet.toJSON())
       })
       .catch(err => cb(err))
   },
