@@ -324,7 +324,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUserFollowings: (req, res, next) => {
-    const { id } = req.params
+    const id = Number(req.params.id)
     const user = helpers.getUser(req)
     const userId = Number(user.id)
 
@@ -339,11 +339,11 @@ const userController = {
       Followship.findAll({
         where: { followerId: id },
         attributes: ['followingId', 'createdAt']
-      })
+      }),
+      User.findByPk(id)
     ])
-      .then(([users, followings]) => {
-        if (!users) throw new Error('There is no user!')
-        if (!followings) throw new Error('This user not yet follow other user!')
+      .then(([users, followings, user]) => {
+        if (!user) throw new Error("This user didn't exist!")
 
         const Users = users.map(user => user.toJSON())
         const Followings = followings.map(following => following.toJSON())
@@ -351,17 +351,19 @@ const userController = {
         const userFollowings = Users.filter(
           user => Followings.some(following => following.followingId === user.id)
         ).map(user => {
+          const followingDate = user.Followers.filter(f => f.id === id)[0].Followship.createdAt
+          console.log(followingDate)
           const data = {
             ...user,
             followingId: user.id,
-            // user/:id/followings，下方的Follower已指定為是此:id，故只會有一位，陣列選[0]即可。
-            followingDate: user.Followers[0].Followship.createdAt,
+            followingDate,
             isFollowed: user.Followers.some(follower => follower.id === userId)
           }
           delete data.Followers
 
           return data
         })
+          .sort((a, b) => (b.followingDate - a.followingDate))
 
         res.json(userFollowings)
       })
