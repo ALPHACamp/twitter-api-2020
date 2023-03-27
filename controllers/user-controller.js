@@ -84,11 +84,14 @@ const userController = {
       const currentUserId = helpers.getUser(req).id
       const likedTweets = await Like.findAll({
         where: { UserId: userId },
-        include: [ User, { model: Tweet, include: [Reply, User, { model: User, as: 'LikedUsers' }] }
+        include: [
+          User,
+          {
+            model: Tweet,
+            include: [User, { model: Reply, include: User }, Like]
+          }
         ],
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
+        order: [['createdAt', 'DESC']]
       })
       if (likedTweets.length === 0) {
         return res.status(404).json({
@@ -97,36 +100,30 @@ const userController = {
         })
       }
       const user = await User.findByPk(userId)
-      if(!user){
+      if (!user) {
         return res.status(404).json({
-          status: "error",
-          message: "找不到使用者",
+          status: 'error',
+          message: '找不到使用者'
         })
       }
-      
       const likedTweetsData = likedTweets.map(like => {
         return {
+          likeId: like.id,
           userId: like.UserId,
+          TweetId: like.TweetId,
+          likeCreatedAt: like.createdAt,
           tweetAuthorId: like.Tweet.UserId,
           tweetAuthorAccount: like.Tweet.User.account,
           tweetAuthorName: like.Tweet.User.name,
           tweetAuthorAvatar: like.Tweet.User.avatar,
           tweetContent: like.Tweet.description,
-
-
+          tweetCreatedAt: like.Tweet.createdAt,
+          isLike: like.Tweet.Likes.some(u => u.UserId === currentUserId),
+          likedCount: like.Tweet.Likes.length,
+          replyCount: like.Tweet.Replies.length
         }
       })
-
-
-      
-      return res
-        .status(200)
-        .json({
-          status: 'success',
-          message: 'All liked tweets are retrieved!',
-          likedTweets
-
-        })
+      return res.status(200).json(likedTweetsData)
     } catch (error) { next(error) }
   },
 
