@@ -15,15 +15,12 @@ const auth = (req, res, next) => {
 }
 
 const isAdmin = (req, res, next) => {
-  // if (req.user?.isAdmin) return next() //! 為測試檔改成 下1，都沒問題再刪
   if (helpers.getUser(req).role === 'admin') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied. You are user' })
 }
 
 const isUser = (req, res, next) => {
-  // if (!req.user?.isAdmin) return next() //! 為測試檔改成 下1，都沒問題再刪
   if (helpers.getUser(req).role === 'user') return next()
-  // if (req.user?.role === 'user') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied. Your are admin.' })
 }
 module.exports = {

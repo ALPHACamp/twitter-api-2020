@@ -2,14 +2,16 @@ module.exports = {
   apiErrorHandler (err, req, res, next) {
     if (err instanceof Error) {
       res.status(err.status || 500).json({ // err.status 若有值，就是狀態碼
-        status: 'error',
+        // status: 'error', // 前端要求，寫成下 1
+        success: false,
         // message: `${err.name}: ${err.message}}`
         // 為只顯示訊息，先改成下1，等全部完成後看起來沒問題，再殺掉吧...
         message: `${err.message}`
       })
     } else {
       res.status(500).json({
-        status: 'error',
+        // status: 'error', // 前端要求，寫成下 1
+        success: false,
         message: `${err}`
       })
     }
