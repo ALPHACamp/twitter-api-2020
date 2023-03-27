@@ -199,23 +199,10 @@ const userServices = {
   putUserSetting: (req, cb) => {
     const id = Number(req.params.id)
     const currentUserId = helpers.getUser(req).id
-    const { name, account, email, introduction, avatar, cover, password } = req.body
-		const { file } = req
+    const { name, account, email, introduction, password } = req.body
     let hashedPassword = ''
     if (password) { hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) }
     if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
-		return Promise.all([User.findByPk(currentUserId), imgurFileHandler(file)])
-			.then(([user, imgurData]) => {
-				user.update({
-          account,
-          name,
-          email,
-          password: hashedPassword || user.password,
-          introduction,
-          avatar,
-          cover
-        })
-
     return User.findByPk(currentUserId)
       .then(user => {
         user.update({
@@ -223,9 +210,7 @@ const userServices = {
           name,
           email,
           password: hashedPassword || user.password,
-          introduction,
-          avatar,
-          cover
+          introduction
         })
           .then(user => {
             const userData = user.toJSON()
@@ -233,22 +218,29 @@ const userServices = {
             const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
             return cb(null, { token, userData })
           })
+          .catch(err => cb(err))
       })
-
-      .catch(err => cb(err))
+  },
+  putUserProfile: (req, cb) => {
+    const id = Number(req.params.id)
+    const currentUserId = helpers.getUser(req).id
+    const { name, introduction } = req.body
+    const files = req.files
+    if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
+    return Promise.all([User.findByPk(currentUserId), imgurFileHandler(files)])
+      .then(([user, imgurData]) => {
+        user.update({
+          name,
+          introduction,
+          avatar: imgurData[0] || user.avatar,
+          cover: imgurData[1] || user.cover
+        })
+          .then(user => {
+            return cb(null, { user })
+          })
+          .catch(err => cb(err))
+      })
   }
-  // putUserProfile: (req, cb) => {
-  //   const id = Number(req.params.id)
-  //   // console.log(helpers.getUser(req))
-  //   const currentUserId = helpers.getUser(req).id
-  //   const { name, account, email, introduction, avatar, cover, password } = req.body
 
-  //   if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
-  //   // if (!account || !password) throw new Error('請填寫必填欄位')
-  //  return Promise.all([
-  // User.findByPk(currentUserId),
-  // imgurFileHandler(req, 'avatar'),
-
-  // }
 }
 module.exports = userServices
