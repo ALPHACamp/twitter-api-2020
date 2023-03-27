@@ -171,7 +171,7 @@ const userController = {
         imgurFileHandler(avatarFile),
         imgurFileHandler(coverFile),
       ]);
-      if (!foundUser) {
+      if (!foundUser || foundUser.isAdmin) {
         const error = new Error("使用者不存在!");
         error.status = 404;
         throw error;
@@ -224,7 +224,7 @@ const userController = {
         throw error;
       }
       const foundUser = await User.findByPk(id);
-      if (!foundUser) {
+      if (!foundUser || foundUser.isAdmin) {
         const error = new Error("使用者不存在!");
         error.status = 404;
         throw error;
