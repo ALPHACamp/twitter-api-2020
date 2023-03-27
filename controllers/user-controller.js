@@ -151,9 +151,9 @@ const userController = {
           UserId,
           description,
           createdAt,
-          avatar: tweet.User.avatar,
           name: tweet.User.name,
           account: tweet.User.account,
+          avatar: tweet.User.avatar,
           repliedCount: tweet.Replies.length,
           likedCount: tweet.Likes.length,
           isLike: tweet.LikedUsers.some((u) => u.id === currentUserId)
