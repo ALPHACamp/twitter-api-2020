@@ -29,14 +29,32 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
+    const user = helpers.getUser(req)
+    const UserId = Number(user.id)
+
     return Tweet.findAll({
-      include: { model: User },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Reply },
+        { model: Like }
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
-        res.json(tweets)
+        const tweetsData = tweets.map(tweet => {
+          const data = {
+            ...tweet.toJSON(),
+            period: dayjs(tweet.createdAt).fromNow(),
+            replyCounts: tweet.Replies.length,
+            likeCounts: tweet.Likes.length,
+            isLiked: tweet.Likes.some(like => like.UserId === UserId)
+          }
+          delete data.Replies
+          delete data.Likes
+          return data
+        })
+
+        res.json(tweetsData)
       })
       .catch(err => next(err))
   },
