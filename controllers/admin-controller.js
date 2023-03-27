@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const { getUser } = require("../helpers/auth-helper");
 const { User, Tweet, sequelize } = require("../models");
 const { QueryTypes } = require("sequelize");
 
@@ -39,13 +38,7 @@ const adminController = {
     }
   },
   getUsers: async (req, res, next) => {
-    const loginUser = getUser(req);
     try {
-      if (loginUser.role === "user") {
-        return res
-          .status(403)
-          .json({ status: "error", message: "permisson denied" });
-      }
       const users = await sequelize.query(
         `
       SELECT u.*, userTweet.tweetCount, userFollower.followerCount, userFollowing.followingCount, userTweetLike.userTweetLikeCount
@@ -93,13 +86,7 @@ const adminController = {
   },
   deleteTweet: async (req, res, next) => {
     const { id } = req.params;
-    const loginUser = getUser(req);
     try {
-      if (loginUser.role === "user") {
-        return res
-          .status(403)
-          .json({ status: "error", message: "permisson denied" });
-      }
       const deletedCount = await Tweet.destroy({ where: { id } });
       return res.json({ message: `刪除了 ${deletedCount} 筆資料` });
     } catch (error) {
@@ -107,13 +94,7 @@ const adminController = {
     }
   },
   getTweets: async (req, res, next) => {
-    const loginUser = getUser(req);
     try {
-      if (loginUser.role === "user") {
-        return res
-          .status(403)
-          .json({ status: "error", message: "permisson denied" });
-      }
       const tweets = await Tweet.findAll({
         nest: true,
         raw: true,
