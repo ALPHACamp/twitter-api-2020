@@ -84,7 +84,7 @@ const userController = {
       const currentUserId = helpers.getUser(req).id
       const likedTweets = await Like.findAll({
         where: { UserId: userId },
-        include: [ User, { model: Tweet, include: [Reply, { model: User, as: 'LikedUsers' }] }
+        include: [ User, { model: Tweet, include: [Reply, User, { model: User, as: 'LikedUsers' }] }
         ],
         order: [['createdAt', 'DESC']],
         raw: true,
@@ -93,7 +93,7 @@ const userController = {
       if (likedTweets.length === 0) {
         return res.status(404).json({
           status: 'error',
-          message: '找不到此則推文'
+          message: '沒有按任何貼文喜歡'
         })
       }
       const user = await User.findByPk(userId)
@@ -103,6 +103,19 @@ const userController = {
           message: "找不到使用者",
         })
       }
+      
+      const likedTweetsData = likedTweets.map(like => {
+        return {
+          userId: like.UserId,
+          tweetAuthorId: like.Tweet.UserId,
+          tweetAuthorAccount: like.Tweet.User.account,
+          tweetAuthorName: like.Tweet.User.name,
+          tweetAuthorAvatar: like.Tweet.User.avatar,
+          tweetContent: like.Tweet.description,
+
+
+        }
+      })
 
 
       
