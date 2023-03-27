@@ -194,6 +194,34 @@ const userController = {
       next(err)
     }
   },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      const users = await User.findByPk(userId, {
+        include: { model: User, as: 'Followings' },
+        raw: true,
+        nest: true
+      })
+      if (!users) {
+        return res.status(404).json({ status: 'error', message: '帳戶不存在' })
+      }
+      const userData = users
+      const followingData = []
+      followingData.push({
+        followingId: userData.Followings.id,
+        followingAccount: userData.Followings.account,
+        followingAvatar: userData.Followings.avatar,
+        followingIntro: userData.Followings.introduction,
+        followingCount: userData.Followings.length,
+        isFollowing: helpers
+          .getUser(req)
+          .Followings.some(
+            (fu) => fu.Followship.followingId === users.Followers.id
+          )
+      })
+      return res.status(200).json(followingData)
+    } catch (error) { next(error) }
+  },
   getUser: async (req, res, next) => {
     try {
       const { userId } = req.params
@@ -212,8 +240,8 @@ const userController = {
         account: userInfo.account,
         name: userInfo.name,
         avatar: userInfo.avatar || 'https://reurl.cc/7RVA5N',
-        cover: userInfo.cover ||'https://reurl.cc/4QNDE3',
-        introduction: userInfo.introduction ||'Newbie here!',
+        cover: userInfo.cover || 'https://reurl.cc/4QNDE3',
+        introduction: userInfo.introduction || 'Newbie here!',
         tweetCount: userInfo.Tweets.length,
         followingCount: userInfo.Followings.length,
         followerCount: userInfo.Followers.length,
