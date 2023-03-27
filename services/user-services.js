@@ -2,9 +2,10 @@ const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const db = require('../models')
 const { User, sequelize, Tweet, Reply, Like, Followship } = db
+const bcrypt = require('bcryptjs')
 // const { imgurFileHandler } = require('../helpers/file-helpers')
 
-const adminServices = {
+const userServices = {
   postSignIn: (req, cb) => {
     const userData = helpers.getUser(req).toJSON()
     delete userData.password
@@ -69,17 +70,18 @@ const adminServices = {
     User.findOne({ where: { email } })
       .then(user => {
         if (user) throw new Error('此信箱已被註冊')
+        const hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
         return User.create({
           account,
           name,
           email,
-          password,
+          password: hashedPassword,
           role: 'user'
         })
           .then(user => {
             const userData = user.toJSON()
-            delete userData.password
             const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+            delete userData.password
             return cb(null, {
               status: 'success',
               message: '成功註冊',
@@ -236,4 +238,4 @@ const adminServices = {
 
   // }
 }
-module.exports = adminServices
+module.exports = userServices
