@@ -12,14 +12,15 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate (models) {
       // define association here
-      Like.belongsTo(models.User, { foreignKey: 'userId' })
-      Like.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
-      Like.belongsTo(models.Reply, { foreignKey: 'replyId' })
+      Like.belongsTo(models.User, { foreignKey: 'UserId' })
+      Like.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
+      Like.belongsTo(models.Reply, { foreignKey: 'ReplyId' })
     }
   }
   Like.init({
     UserId: DataTypes.INTEGER, // 暫時配合測試檔，改大駝峰
-    TweetId: DataTypes.INTEGER // 暫時配合測試檔，改大駝峰
+    TweetId: DataTypes.INTEGER, // 暫時配合測試檔，改大駝峰
+    ReplyId: DataTypes.INTEGER // 暫時配合測試檔，改大駝峰
   }, {
     sequelize,
     modelName: 'Like',

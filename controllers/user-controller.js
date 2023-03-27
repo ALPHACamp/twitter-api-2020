@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs') // 教案 package.json 用 bcrypt-node.js，不管，我先用舊的 add-on
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const helpers = require('../_helpers')
 
@@ -12,7 +12,7 @@ const userController = {
       // (下1) 發出 jwt token，要擺兩個引數，第一個，要包進去的資料，第二個，要放 secret key
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 30 天過期，可調
       // res.json({ status: 'success', data: { token, user: userData } }) // 前端說改成下面
-      res.json({ success: 'true', data: { token, user: userData } })
+      res.json({ success: true, data: { token, user: userData } })
     } catch (err) {
       next(err)
     }
@@ -44,7 +44,7 @@ const userController = {
         const result = createdUser.toJSON()
         delete result.password // 避免不必要資料外洩
         // res.status(200).json({ status: 'success', user: result }) // 前端說改成下面
-        res.status(200).json({ success: 'true', user: result })
+        res.status(200).json({ success: true, user: result })
       })
       .catch(err => next(err))
   },
@@ -67,7 +67,7 @@ const userController = {
     if (helpers.getUser(req).id !== id) {
       return res.status(401).json({
         // status: 'error', // 前端說改成下面
-        success: 'false',
+        success: false,
         message: 'Sorry. You do not own this account.'
       })
     }
@@ -123,12 +123,36 @@ const userController = {
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
+    // return Tweet.findAll({
+    //   where: { UserId: req.params.id }, // 為了測試檔而改成這樣
+    // order: [['createdAt', 'DESC'], ['likeCounts', 'DESC']],
+    //   // include: [{ model: Like, attributes: [] }, { model: Reply, attributes: [] }],
+    //   include: [{ model: Like, attributes: ['id', 'UserId', 'TweetId'] }, { model: Reply, attributes: ['id', 'UserId', 'TweetId'] }],
+    //   attributes: {
+    //     include: [
+    //       [sequelize.fn('COUNT', sequelize.col('likes.tweet_id')), 'likeCounts'],
+    //       [sequelize.fn('COUNT', sequelize.col('replies.id')), 'replyCounts']
+    //     ]
+    //   },
+    //   group: 'id'
+    // })
+    // .then(tweets => res.status(200).json(tweets))
     return Tweet.findAll({
       where: { UserId: req.params.id }, // 為了測試檔而改成這樣
-      raw: true,
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      include: [{ model: Like, attributes: ['id'] }, { model: Reply, attributes: ['id'] }]
     })
-      .then(tweets => res.status(200).json(tweets))
+      .then(tweets => {
+        const result = tweets.map(tweet => {
+          tweet = tweet.toJSON()
+          tweet.likeCounts = tweet.Likes.length
+          tweet.replyCounts = tweet.Replies.length
+          delete tweet.Likes
+          delete tweet.Replies
+          return tweet
+        })
+        return res.status(200).json(result)
+      })
       .catch(err => next(err))
   },
   getReplies: (req, res, next) => {
@@ -202,6 +226,10 @@ const userController = {
     //   // order: [[]]
     //   group: 'followingId'
     // })
+    // 雖然可以 count，但只會出 count 數字，沒啥用
+    // return Followship.count({ where: { followingId: 16 } })
+    //   .then(test => console.log(test))
+    // ? 成品
     return User.findAll({
       attributes: ['id'],
       include: [{ model: User, as: 'Followers', attributes: ['id'] }]
@@ -218,6 +246,7 @@ const userController = {
         return res.status(200).json(users)
       })
       .catch(err => next(err))
+      // ? 成品 end
   },
   addLike: (req, res, next) => {
     const TweetId = req.params.id
