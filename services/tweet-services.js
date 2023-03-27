@@ -21,6 +21,12 @@ const tweetServices = {
   },
   getTweet: (req, cb) => {
     Tweet.findByPk(req.params.id, {
+      attributes: {
+        include: [
+          [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'tweetsRepliesCount'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id) '), 'tweetsLikedCount']
+        ]
+      },
       include: [Reply],
       order: [[Reply, 'createdAt', 'DESC']]
     })
