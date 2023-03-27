@@ -115,6 +115,7 @@ const userController = {
 
         res.json(userData)
       })
+      .catch(err => next(err))
   },
   putUserSetting: (req, res, next) => {
     const { id } = req.params
