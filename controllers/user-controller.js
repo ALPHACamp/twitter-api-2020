@@ -16,9 +16,13 @@ const userController = {
     if (password !== checkPassword) throw new Error('Password do not match!')
     if (name.length > 50) throw new Error("name can't over 50 letters")
 
-    User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
-      .then(user => {
-        if (user) throw new Error('account or email already exists!')
+    return Promise.all([
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
+    ])
+      .then(([repeatAccount, repeatEmail]) => {
+        if (repeatAccount) throw new Error('account already exists!')
+        if (repeatEmail) throw new Error('email already exists!')
 
         return bcrypt.hash(password, 10)
       })
@@ -295,17 +299,25 @@ const userController = {
         attributes: ['id'],
         where: {
           id: { [Op.ne]: req.params.id },
-          [Op.or]: [{ account }, { email }]
+          account
+        }
+      }),
+      User.findAll({
+        attributes: ['id'],
+        where: {
+          id: { [Op.ne]: req.params.id },
+          email
         }
       }),
       User.findByPk(req.params.id)
     ])
-      .then(([users, user]) => {
+      .then(([repeatAccount, repeatEmail, user]) => {
         if (!user) throw new Error("User did't exist!")
         // 避免有人惡意修改其他人的設定
         if (user.id !== userId) throw new Error("You can't modify other user's setting!")
         // 反查不是該使用者，但是卻已經有相同的account或者email存在的情況 => 表示已經被其他人使用
-        if (users.length !== 0) throw new Error('Account or email already exists!')
+        if (repeatAccount.length !== 0) throw new Error('account already exists!')
+        if (repeatEmail.length !== 0) throw new Error('email already exists!')
 
         return user.update({
           account,
