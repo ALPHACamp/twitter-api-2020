@@ -87,6 +87,7 @@ const adminController = {
           }))
         res.json(tweetData)
       })
+      .catch(err => next(err))
   },
   deleteTweet: (req, res, next) => {
     Tweet.findByPk(req.params.id)
