@@ -58,14 +58,26 @@ const adminController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       order: [['createdAt', 'DESC']],
-      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Reply },
+        { model: Like }
+      ]
     })
       .then(tweets => {
-        const tweetsData = tweets.map(tweet => ({
-          ...tweet.toJSON(),
-          description: tweet.description.substring(0, 50),
-          period: dayjs(tweet.createdAt).fromNow()
-        }))
+        const tweetsData = tweets.map(tweet => {
+          const data = {
+            ...tweet.toJSON(),
+            description: tweet.description.substring(0, 50),
+            period: dayjs(tweet.createdAt).fromNow(),
+            replyCounts: tweet.Replies.length,
+            likeCounts: tweet.Likes.length
+          }
+          delete data.Replies
+          delete data.Likes
+          return data
+        })
+
         res.json(tweetsData)
       })
       .catch(err => next(err))
