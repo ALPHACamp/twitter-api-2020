@@ -208,6 +208,7 @@ const userController = {
         error.status = 400;
         throw error;
       }
+      // - 確認更改的新值 (email, account) 是否有自己以外的人已經擁有了
       const [isEmailExist, isAccountExist] = await Promise.all([
         User.findOne({ where: { email, id: { [Op.ne]: id } } }),
         User.findOne({ where: { account, id: { [Op.ne]: id } } }),
@@ -275,7 +276,7 @@ const userController = {
         throw error;
       }
       const foundUser = await User.findByPk(followingId, { raw: true });
-      if (foundUser.isAdmin) {
+      if (!foundUser || foundUser.isAdmin) {
         const error = new Error("使用者不存在!");
         error.status = 404;
         throw error;
@@ -439,7 +440,7 @@ const userController = {
     try {
       const followers = await sequelize.query(
         `
-      SELECT f.followerId, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
+      SELECT f.followerId AS id, f.followerId, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
       FROM Followships AS f INNER JOIN Users AS u
       ON f.followerId = u.id
       WHERE followingId = ${id}
@@ -457,7 +458,7 @@ const userController = {
     try {
       const followings = await sequelize.query(
         `
-      SELECT f.followingId, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
+      SELECT f.followingId AS id, f.followingId, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
       FROM Followships AS f INNER JOIN Users AS u
       ON f.followingId = u.id
       WHERE followerId = ${id}
