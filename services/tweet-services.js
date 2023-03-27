@@ -46,11 +46,11 @@ const tweetServices = {
       ]
     })
       .then(tweetData => {
-        const { ...data } = {
+        const data = {
           ...tweetData.toJSON(),
           transferDateTimeforpage: transferDateTime(tweetData.createdAt),
           transferDateTimeformodel: relativeTimeFromNow(tweetData.createdAt),
-          isLiked: tweetData.isLiked === 1
+          isLiked: Boolean(tweetData.dataValues.isLiked)
         }
         return cb(null, data)
       })
