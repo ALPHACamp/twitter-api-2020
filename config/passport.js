@@ -19,11 +19,11 @@ passport.use(
       try {
         const user = await User.findOne({ where: { account } })
 
-        if (!user) throw new Error('Account does not exist!')
+        if (!user) throw new Error('帳號不存在！')
 
         const isMatched = await bcrypt.compare(password, user.password)
 
-        if (!isMatched) throw new Error('Incorrect username or password!')
+        if (!isMatched) throw new Error('帳號或密碼輸入錯誤！')
 
         return cb(null, user)
       } catch (err) {

@@ -1,19 +1,14 @@
 const express = require('express')
 const router = express.Router()
-const passport = require('../../config/passport')
 const { authenticatedUser } = require('../../middleware/auth')
 const userController = require('../../controllers/user-controller')
-router.get(
-  '/:userId/replied_tweets', authenticatedUser,
-  userController.getRepliedTweets
-)
-router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
-router.get(
-  '/:userId/replied_tweets',
-  authenticatedUser,
-  userController.getRepliedTweets
-)
+router.get('/:userId/followers', authenticatedUser, userController.getUserFollowers)
+
+router.get('/:userId/tweets', authenticatedUser, userController.getUserTweets)
+router.get('/:userId/replied_tweets', authenticatedUser, userController.getUserReplies)
 router.get('/:userId/likes', authenticatedUser, userController.getUserLikes)
+router.get('/:userId/followings', authenticatedUser, userController.getUserFollowings)
+router.get('/:userId', authenticatedUser, userController.getUser)
 router.post('/', userController.signUp)
 
 module.exports = router
