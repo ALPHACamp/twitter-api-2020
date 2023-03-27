@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply, sequelize } = require('../models')
 const passport = require('../config/passport')
 
 const adminController = {
@@ -89,20 +89,30 @@ const adminController = {
       })
       .catch(err => next(err))
   },
-  deleteTweet: (req, res, next) => {
-    Tweet.findByPk(req.params.id)
-      .then(tweet => {
-        if (!tweet) {
-          const err = new Error('此推文不存在！')
-          err.status = 404
-          throw err
-        }
-        return tweet.destroy()
-      })
-      .then(deletedTweet => res.status(200).send())
-      .catch(err => next(err))
-  }
+  deleteTweet: async (req, res, next) => {
+    const t = await sequelize.transaction()
 
+    try {
+      const tweetId = req.params.id
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) {
+        const err = new Error('此推文不存在！')
+        err.status = 404
+        throw err
+      }
+      tweet.destroy({ transaction: t })
+
+      await Like.destroy({ where: { Tweet_id: tweetId }, transaction: t })
+      await Reply.destroy({ where: { Tweet_id: tweetId }, transaction: t })
+
+      await t.commit()
+
+      return res.status(200).send()
+    } catch (error) {
+      await t.rollback()
+      return next(error)
+    }
+  }
 }
 
 module.exports = adminController
