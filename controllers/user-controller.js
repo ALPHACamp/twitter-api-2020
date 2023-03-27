@@ -258,8 +258,8 @@ const userController = {
       .catch(err => next(err))
   },
   removeLike: (req, res, next) => {
-    const { id } = req.params
-    return Like.findByPk(id)
+    const TweetId = req.params.id
+    return Like.findOne({ where: { TweetId } })
       .then(like => {
         if (!like) return res.status(404).json({ message: 'We can not find this like record.' })
         return like.destroy()
