@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-    - "14"
+  - '14'
 
 services:
   - mysql
@@ -8,6 +8,8 @@ services:
 # 設定參數(Travis CI 會按照參數分別執行)
 env:
   - NODE_ENV=travis
+  - JWT_SECRET: ${{ secrets.JWT_secret }}
+  - IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
 
 # 在 install 前執行的指令
 before_install:
