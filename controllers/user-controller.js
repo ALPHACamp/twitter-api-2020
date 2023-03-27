@@ -201,7 +201,7 @@ const userController = {
             'account',
             'name',
             'avatar',
-            'cover',
+            'introduction',
             [Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${ownerId} AND Followships.followingId = Followings.id )`),
               'is_followed']
           ]
@@ -228,7 +228,7 @@ const userController = {
             'account',
             'name',
             'avatar',
-            'cover',
+            'introduction',
             [Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${ownerId} AND Followships.followingId = Followers.id )`),
               'is_followed']
           ]
