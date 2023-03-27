@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const Sequelize = require('sequelize')
 
 const helpers = require('../_helpers')
@@ -50,6 +50,47 @@ const adminController = {
       }))
 
       return res.status(200).json(userData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        attributes: ['id', 'description', 'createdAt'],
+        include: { model: User, attributes: { exclude: ['password'] } },
+        order: [['createdAt', 'DESC']]
+      })
+
+      if (tweets.length === 0) {
+        return res.status(404).json({ status: 'error', message: '找不到任何推文' })
+      }
+
+      const tweetData = tweets.map((tweet) => ({
+        id: tweet.id,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        avatar: tweet.User.avatar,
+        name: tweet.User.name,
+        account: tweet.User.account
+      }))
+
+      return res.status(200).json(tweetData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const { tweetId } = req.params
+
+      const tweet = await Tweet.findByPk(tweetId)
+
+      if (!tweet) return res.status(404).json({ status: 'error', message: '此則推文不存在' })
+
+      await tweet.destroy()
+
+      return res.status(200).json({ status: 'success', message: '成功刪除此推文' })
     } catch (err) {
       next(err)
     }
