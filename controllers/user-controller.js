@@ -38,53 +38,48 @@ const userController = {
       }
     })(req, res, next)
   },
-  signUp: (req, res, next) => {
-    if (!req.body.email.trim() || !req.body.account.trim() || !req.body.name.trim() || !req.body.password.trim() || !req.body.checkPassword.trim()) {
-      const error = new Error('輸入資料不可為空值!')
-      error.status = 400
-      throw error
-    }
+  signUp: async (req, res, next) => {
+    try {
+      if (!req.body.email.trim() || !req.body.account.trim() || !req.body.name.trim() || !req.body.password.trim() || !req.body.checkPassword.trim()) {
+        const error = new Error('輸入資料不可為空值!')
+        error.status = 400
+        throw error
+      }
 
-    if (req.body.password !== req.body.checkPassword) {
-      const error = new Error('密碼輸入不相符！')
-      error.status = 403
-      throw error
-    }
+      if (req.body.password !== req.body.checkPassword) {
+        const error = new Error('密碼輸入不相符！')
+        error.status = 403
+        throw error
+      }
 
-    User.findOne({ where: { account: req.body.account } })
-      .then(user => {
-        if (user) {
-          const error = new Error('account 已重複註冊！')
-          error.status = 403
-          throw error
-        }
+      const userWithTargetAccount = await User.findOne({ where: { account: req.body.account } })
+      if (userWithTargetAccount) {
+        const error = new Error('account 已重複註冊！')
+        error.status = 403
+        throw error
+      }
 
-        return bcrypt.hash(req.body.password, 10)
-      })
-      .catch(err => next(err))
+      const userWithTargetEmail = await User.findOne({ where: { email: req.body.email } })
+      if (userWithTargetEmail) {
+        const error = new Error('email 已重複註冊！')
+        error.status = 403
+        throw error
+      }
 
-    User.findOne({ where: { email: req.body.email } })
-      .then(user => {
-        if (user) {
-          const error = new Error('email 已重複註冊！')
-          error.status = 403
-          throw error
-        }
-
-        return bcrypt.hash(req.body.password, 10)
-      })
-      .then(hash => User.create({
+      const hash = await bcrypt.hash(req.body.password, 10)
+      await User.create({
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
         password: hash
-      }))
-      .then(user => {
-        res.json({
-          status: 'success'
-        })
       })
-      .catch(err => next(err))
+
+      res.json({
+        status: 'success'
+      })
+    } catch (error) {
+      return next(error)
+    }
   },
   getUser: (req, res, next) => {
     User.findByPk(req.params.id, {
