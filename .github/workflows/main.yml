@@ -11,7 +11,7 @@ jobs:
 
     env:
       NODE_ENV: ghactions
-      JWT_TOKEN: ${{ secrets.JWT_TOKEN }}
+      JWT_TOKEN: ${{ ghactions.JWT_TOKEN }}
       
     services:
       mysql:
