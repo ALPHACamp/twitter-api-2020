@@ -97,7 +97,10 @@ const tweetController = {
       UserId: helpers.getUser(req).id
     })
       .then(newTweet => {
-        return res.json(newTweet)
+        const tweetData = newTweet.toJSON()
+        tweetData.repliesNum = 0
+        tweetData.likesNum = 0
+        return res.json(tweetData)
       })
       .catch(error => next(error))
   },
