@@ -14,7 +14,7 @@ module.exports = {
         tweet_id: tweetId,
         comment: faker.lorem.paragraph(),
         created_at: faker.date.past(),
-        updated_at: new Date()
+        updated_at: faker.date.recent()
       }
     })
 

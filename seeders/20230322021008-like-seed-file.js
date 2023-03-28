@@ -14,7 +14,7 @@ module.exports = {
         user_id: userData.rows[Math.floor(Math.random() * userData.count)].id,
         tweet_id: tweetData.rows[Math.floor(Math.random() * tweetData.count)].id,
         created_at: faker.date.past(),
-        updated_at: new Date()
+        updated_at: faker.date.recent()
       })
     }
 

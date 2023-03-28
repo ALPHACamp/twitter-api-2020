@@ -1,5 +1,6 @@
 'use strict'
 const { User } = require('../models')
+const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -17,8 +18,8 @@ module.exports = {
         followshipSeedData.push({
           follower_id: userIdData[i].id,
           following_id: followingId,
-          created_at: new Date(),
-          updated_at: new Date()
+          created_at: faker.date.past(),
+          updated_at: faker.date.recent()
         })
       }
     }
