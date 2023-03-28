@@ -199,7 +199,7 @@ const userServices = {
     return Followship.findAll({
       where: { followingId: req.params.id },
       include: [
-        { model: User, as: 'Following', attributes: ['id', 'account', 'name', 'avatar'] }
+        { model: User, as: 'Follower', attributes: ['id', 'account', 'name', 'avatar'] }
       ],
       order: [['createdAt', 'DESC']]
     }).then(followers => {
