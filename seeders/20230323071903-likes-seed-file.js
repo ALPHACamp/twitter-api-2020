@@ -12,14 +12,33 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
 
-    await queryInterface.bulkInsert('Likes',
-      Array.from({ length: users.length * 3 }, (_, i) => ({
-        created_at: new Date(),
-        updated_at: new Date(),
-        user_id: users[i % users.length].id,
-        tweet_id: tweets[Math.floor(Math.random() * tweets.length)].id
-      }))
-    )
+    function getRandom (usedNums) {
+      const random = Math.floor(Math.random() * (tweets.length))
+      return checkRandom(random, usedNums)
+    }
+
+    function checkRandom (random, usedNums) {
+      if (usedNums.includes(random)) {
+        getRandom(usedNums)
+      }
+      usedNums.push(random)
+      return random
+    }
+    let targetArr = []
+    for (let j = 0; j < users.length; j++) {
+      const usedNums = []
+      targetArr = targetArr.concat(
+        // ~~~~~~~~~~~~~~~第一個 user 有十個 like 的推文，依序遞減~~~~~~~~~~
+        Array.from({ length: 10 - j }, (_, i) => ({
+          created_at: new Date(),
+          updated_at: new Date(),
+          user_id: users[j].id,
+          tweet_id: tweets[getRandom(usedNums)].id
+        }))
+      )
+    }
+
+    await queryInterface.bulkInsert('Likes', targetArr)
   },
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Likes', {})
