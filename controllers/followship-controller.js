@@ -10,7 +10,7 @@ const followshipController = {
     // 用 req.body 代入要追蹤的 id
     // 在 Uer table 找出對應的 id
     // 在 Followship 找出 follower 為登入者，following 為要追蹤的 id
-    Promise.all([
+    return Promise.all([
       User.findByPk(id),
       Followship.findOne({
         where: {
@@ -21,8 +21,8 @@ const followshipController = {
     ])
       .then(([user, followship]) => {
         if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
-        if (user.id === loginUserId) throw createError(422, '無法追蹤自己')
-        if (followship) throw createError(422, '已追蹤該使用者')
+        if (user.id === loginUserId) throw createError(400, '無法追蹤自己')
+        if (followship) throw createError(400, '已追蹤該使用者')
 
         // 建立 Followship，follower 是登入者，following 是要追蹤的 id
         return Followship.create({
@@ -41,14 +41,14 @@ const followshipController = {
     const userId = Number(req.params.followingId)
 
     // 找出 Followship table, follower 為登入者, following 為要取消追蹤者
-    Followship.findOne({
+    return Followship.findOne({
       where: {
         followerId: loginUserId,
         followingId: userId
       }
     })
       .then(followship => {
-        if (!followship) throw createError(422, '沒有追蹤該使用者')
+        if (!followship) throw createError(400, '沒有追蹤該使用者')
 
         return followship.destroy()
       })
