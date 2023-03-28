@@ -14,7 +14,7 @@ const userController = {
   },
 
   getUserTweets: (req, res, next) => {
-    return sequelize.query('WITH like_tweet AS(SELECT tweet_id FROM Likes WHERE user_id = :ownId) SELECT description, !ISNULL(like_tweet.tweet_id) isLiked FROM Tweets t LEFT JOIN like_tweet ON t.id = like_tweet.tweet_id WHERE t.user_id = :userId ORDER BY t.created_at DESC LIMIT 5',
+    return sequelize.query('SELECT description, !ISNULL(like_tweet.tweet_id) isLiked FROM Tweets t LEFT JOIN (SELECT tweet_id FROM Likes WHERE user_id = :ownId) like_tweet ON t.id = like_tweet.tweet_id WHERE t.user_id = :userId ORDER BY t.created_at DESC LIMIT 5',
       {
         replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
         type: sequelize.QueryTypes.SELECT
@@ -118,11 +118,11 @@ const userController = {
 
   putUser: (req, res, next) => {
     if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
-    const { file } = req
+    const { files } = req
     const { name, introduction } = req.body
     return Promise.all([
       User.findByPk(req.params.userId),
-      imgurFileHandler(file)
+      imgurFileHandler(files)
     ])
       .then(([user, ...filePath]) => {
         return user.update({
