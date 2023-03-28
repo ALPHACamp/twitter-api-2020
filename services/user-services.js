@@ -67,7 +67,7 @@ const userServices = {
     const { account, name, email, password, checkPassword } = req.body
     if (!account || !email || !password || !checkPassword) throw new Error('請填寫必填欄位')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
-    User.findOne({ where: { email } })
+    User.findOne({ where: { email, account } })
       .then(user => {
         if (user) throw new Error('此信箱已被註冊')
         const hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
