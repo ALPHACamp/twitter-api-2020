@@ -369,6 +369,73 @@ const userController = {
       return res.status(200).json({ status: 'success', message: '設定成功' })
     } catch (error) { next(error) }
   },
+  editUserAccount: async (req, res, next) => {
+    try {
+      // user setting
+      const { userId } = req.params
+      const currentUserId = helpers.getUser(req).id
+      const { account, name, email, password, checkPassword } = req.body
+
+      // confirm if it is the currently logged-in user
+      if (currentUserId !== Number(userId)) {
+        return res.status(401).json({ status: 'error', message: '你沒有權限進入此頁面' })
+      }
+      // confirm if this user exists
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(404).json({ status: 'error', message: '此帳戶不存在!' })
+      }
+
+      const errors = []
+      // check if all the required fields are filled out correctly
+      if (!account || !name || !email || !password || !checkPassword) {
+        errors.push('所有欄位皆必填')
+      }
+      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
+        message.push('字數超出上限，請將字數限制在 50 字以內')
+      }
+      if (password && !validator.isByteLength(password, { max: 20 })) {
+        errors.push('密碼長度不能超過20字元')
+      }
+      if (password !== checkPassword) {
+        errors.push('密碼與確認密碼不相符')
+      }
+      if (email && !validator.isEmail(email)) {
+        errors.push('請輸入有效的 email 格式')
+      }
+
+      // check if account and email are unique
+      const [existingUserAccount, existingUserEmail] = await Promise.all([
+        User.findOne({ role: 'user', where: { account } }),
+        User.findOne({ role: 'user', where: { email } }),
+      ])
+      // verify if the user editing currently is the same user as the one logged in. If they are the same user, no error message needs to be displayed
+      if (existingUserAccount && existingUserAccount.id !== currentUserId) {
+        errors.push('帳號已重複註冊！')
+      }
+      if (existingUserEmail && existingUserEmail.id !== currentUserId) {
+        errors.push('Email已重複註冊！')
+      }
+
+      if (errors.length) {
+        return res.status(400).json({ status: 'error', errors })
+      }
+      // hashedPassword
+      const salt = await bcrypt.genSalt(10)
+      const hashedPassword = await bcrypt.hash(password, salt)
+      // create user in DB
+      await user.update({
+        account,
+        name,
+        email,
+        password: hashedPassword,
+      })
+
+      return res.status(200).json({ status: 'success', message: '帳號設定修改成功！' })
+    } catch (err) {
+      next(err)
+    }
+  },
   getTopUsers: async (req, res, next) => {
     try {
       const DEFAULT_LIMIT = 10
