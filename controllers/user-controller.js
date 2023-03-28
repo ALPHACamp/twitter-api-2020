@@ -374,12 +374,16 @@ const userController = {
       const DEFAULT_LIMIT = 10
       const limit = Number(req.query.limit) || DEFAULT_LIMIT
       const users = await User.findAll({
-        attributes: ['id', 'account', 'name', 'avatar'],
-        include: { model: User, as: 'Followers', attributes: ['id'] },
-        limit
-      })
+        attributes: ["id", "account", "name", "avatar"],
+        include: {
+          model: User,
+          as: "Followers",
+          attributes:['id'],
+        },
+        limit,
+      });
       if (!users) {
-        return res.status(404).json({ status: 'error', message: '此帳戶不存在!' })
+        return res.status(404).json({ status: 'error', message: '無使用者資料!' })
       }
       let usersData = users.map((user) => ({
         ...user.toJSON(),
@@ -387,9 +391,7 @@ const userController = {
         isFollowing: helpers.getUser(req).Followings.some(fg => fg.id === user.id)
       }))
       usersData = usersData.sort((a, b) => b.followerCount - a.followerCount)
-      console.log(usersData)
-
-      return res.status(200).json(usersData)
+      return res.status(200).json({status: 'success', data: usersData})
     } catch (error) { next(error) }
   }
 }
