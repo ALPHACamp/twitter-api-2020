@@ -56,11 +56,15 @@ const followServices = {
   },
   topFollow: async (req, cb) => {
     try {
+      const nowUser = helpers.getUser(req).id
       const user = await User.findAll({
         attributes: [
           'id', 'name', 'account', 'avatar',
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followingNum']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.following_id = User.id)'), 'followingNum'],
+          [sequelize.literal(`EXISTS (SELECT id FROM Followships WHERE Followships.follower_id = ${nowUser} AND Followships.following_id = User.id)`), 'isFollowed']
         ],
+        group: ['User.id'],
+        having: sequelize.literal('followingNum > 0 AND NOT User.name = "root"'),
         order: [[sequelize.literal('followingNum'), 'DESC']],
         raw: true,
         nest: true
