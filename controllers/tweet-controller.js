@@ -1,6 +1,8 @@
 const { Tweet, Like, Reply, User, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
+const createError = require('http-errors')
+
 const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
@@ -56,11 +58,7 @@ const tweetController = {
       }
     })
       .then(tweet => {
-        if (!tweet) {
-          const error = new Error("Tweet doesn't exist!")
-          error.status = 404
-          throw error
-        }
+        if (!tweet) throw (createError(404, "Tweet doesn't exist!"))
 
         return res.json(tweet)
       })
@@ -70,11 +68,7 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const { description } = req.body
 
-    if (!description.trim()) {
-      const error = new Error('Description is required!')
-      error.status = 404
-      throw error
-    }
+    if (!description.trim()) throw (createError(400, 'Description is required!'))
 
     return Tweet.create({
       description,
@@ -96,11 +90,7 @@ const tweetController = {
       nest: true
     })
       .then(replies => {
-        if (!replies) {
-          const error = new Error("Replies does'nt exist!")
-          error.status = 404
-          throw error
-        }
+        if (!replies) throw (createError(404, "Replies does'nt exist!"))
 
         return res.json(replies)
       })
@@ -110,11 +100,7 @@ const tweetController = {
   postReply: (req, res, next) => {
     const { comment } = req.body
 
-    if (!comment.trim()) {
-      const error = new Error('Comment is requires!')
-      error.status = 404
-      throw error
-    }
+    if (!comment.trim()) throw (createError(400, 'Comment is requires!'))
 
     return Reply.create({
       UserId: helpers.getUser(req).id,
@@ -138,17 +124,9 @@ const tweetController = {
       })
     ])
       .then(([tweet, like]) => {
-        if (!tweet) {
-          const error = new Error("Tweet doesn't exist!")
-          error.status = 404
-          throw error
-        }
+        if (!tweet) throw (createError(404, "Tweet doesn't exist!"))
 
-        if (like) {
-          const error = new Error('You already liked this tweet!')
-          error.status = 404
-          throw error
-        }
+        if (like) throw (createError(409, 'You already liked this tweet!'))
 
         return Like.create({
           UserId: helpers.getUser(req).id,
@@ -167,11 +145,7 @@ const tweetController = {
       }
     })
       .then(like => {
-        if (!like) {
-          const error = new Error("You haven't liked this tweet!")
-          error.status = 404
-          throw error
-        }
+        if (!like) throw (createError(404, "You haven't liked this tweet!"))
 
         return like.destroy()
       })
