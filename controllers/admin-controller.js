@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { User, Tweet, sequelize } = require('../models');
 
 const adminController = {
+  // get all users data
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
