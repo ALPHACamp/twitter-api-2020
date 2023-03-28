@@ -11,12 +11,12 @@ module.exports = {
         account: faker.internet.userName(),
         password: hashedPassword,
         name: faker.internet.userName(),
-        avatar: 'https://raw.githubusercontent.com/LJBL22/react_twitter/3d808b59166970aa7c34cbb78dba58d70b11fc63/src/logo.svg',
-        cover_url: 'https://github.com/LJBL22/react_twitter/blob/main/src/assets/images/defaultCover.jpg?raw=true',
+        // avatar: ,
+        // cover_url: ,
         introduction: faker.lorem.paragraph(),
         role: 'user',
-        created_at: new Date(),
-        updated_at: new Date()
+        created_at: faker.date.past(),
+        updated_at: faker.date.recent()
       }
     })
 

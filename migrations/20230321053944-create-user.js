@@ -27,10 +27,12 @@ module.exports = {
         }
       },
       avatar: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'https://raw.githubusercontent.com/LJBL22/react_twitter/3d808b59166970aa7c34cbb78dba58d70b11fc63/src/logo.svg'
       },
       cover_url: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'https://github.com/LJBL22/react_twitter/blob/main/src/assets/images/defaultCover.jpg?raw=true'
       },
       introduction: {
         type: Sequelize.TEXT,
@@ -39,7 +41,8 @@ module.exports = {
         }
       },
       role: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'user'
       },
       created_at: {
         allowNull: false,
