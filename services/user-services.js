@@ -317,6 +317,9 @@ const userService = {
         })
       })
       .then(updatedUser => {
+        if (coverFile === null) {
+          updatedUser.cover = 'https://i.imgur.com/jXE6Mmp.png'
+        }
         updatedUser = updatedUser.toJSON()
         delete updatedUser.password
         cb(null, { updatedUser })
