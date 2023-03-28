@@ -378,7 +378,7 @@ const userController = {
 
       // confirm if it is the currently logged-in user
       if (currentUserId !== Number(userId)) {
-        return res.status(401).json({ status: 'error', message: '你沒有權限進入此頁面' })
+        return res.status(403).json({ status: 'error', message: '你沒有權限進入此頁面' })
       }
       // confirm if this user exists
       const user = await User.findByPk(userId)
@@ -406,8 +406,8 @@ const userController = {
 
       // check if account and email are unique
       const [existingUserAccount, existingUserEmail] = await Promise.all([
-        User.findOne({ role: 'user', where: { account } }),
-        User.findOne({ role: 'user', where: { email } }),
+        User.findOne({ where: { account } }),
+        User.findOne({ where: { email } }),
       ])
       // verify if the user editing currently is the same user as the one logged in. If they are the same user, no error message needs to be displayed
       if (existingUserAccount && existingUserAccount.id !== currentUserId) {
