@@ -78,8 +78,8 @@ const followshipController = {
       console.log(followedUserIds)
       const users = await User.findAll({
         where: {
-          // 排除自己和已追蹤
-          id: { [Op.ne]: ownerId, [Op.notIn]: followedUserIds },
+          // 排除自己
+          id: { [Op.ne]: ownerId },
           // 排除管理員
           role: { [Op.ne]: 'admin' }
         },

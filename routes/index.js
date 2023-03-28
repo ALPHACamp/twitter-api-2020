@@ -7,7 +7,6 @@ const tweets = require('./modules/tweets')
 const followships = require('./modules/followships')
 
 const userController = require('../controllers/user-controller')
-const adminController = require('../controllers/admin-controller')
 
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 const { signupValidation, signinValidation, validateForm } = require('../middleware/validator')
@@ -26,7 +25,7 @@ router.use('/tweets', authenticated, authenticatedUser, tweets)
 
 router.use('/followships', authenticated, authenticatedUser, followships)
 
-router.post('/admin/signin', signinValidation, validateForm, adminController.signIn)
+router.post('/admin/signin', signinValidation, validateForm, userController.signIn)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 

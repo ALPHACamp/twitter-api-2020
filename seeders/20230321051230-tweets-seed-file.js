@@ -12,7 +12,7 @@ module.exports = {
     for (const user of users) {
       const UserId = user.id
       // 生成10筆推文
-      const tweets = Array.from({ length: 10 }, () => ({
+      const tweets = Array.from({ length: 15 }, () => ({
         UserId,
         description: faker.lorem.text().substring(0, 140),
         createdAt: new Date(),
