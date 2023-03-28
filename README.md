@@ -2,7 +2,7 @@
 
 This project, Simple Twitter, has been developed using a front-end and back-end separation model. This repository is for the back-end and contains information about the API provided by the back-end.
 
-# API Documents[API Documents](https://www.notion.so/API-469a52bfc4f94f9ab300132e4b324166#f002277fef914b7180927fbe8b5e44f7)
+# [API Documents](https://www.notion.so/API-469a52bfc4f94f9ab300132e4b324166#f002277fef914b7180927fbe8b5e44f7)
 
 # Product Features
 
@@ -44,29 +44,34 @@ This project, Simple Twitter, has been developed using a front-end and back-end 
 
 7. Run migration files and load seed data
 
-```
-npx sequelize db:migrate
-npx sequelize db:seed:all
-```
+   ```
+   npx sequelize db:migrate
+   npx sequelize db:seed:all
+   ```
 
 8. Run project `npm run dev`
 9. You will see this message when the project has been successfully executed
 
-```
-Example app listening on port 3000!
-```
+   ```
+   Example app listening on port 3000!
+   ```
 
 # Test Account
 
-**Administrator**
+### **Administrator**
+
 account : root
+
 password: 12345678
 
-**User**
+### **User**
+
 account : user1
+
 password: 12345678
 
-# Developer
+# Developers
 
-Frank [Frank](https://github.com/yhhuangfrank)
-Wei [Wei](https://github.com/wego11ya)
+### [Frank](https://github.com/yhhuangfrank)
+
+### [Wei](https://github.com/wego11ya)
