@@ -3,8 +3,6 @@ const jwt = require('jsonwebtoken')
 const createError = require('http-errors')
 const helpers = require('../_helpers')
 
-const createError = require('http-errors')
-
 const adminController = {
   signIn: (req, res, next) => {
     try {
@@ -15,8 +13,6 @@ const adminController = {
         expiresIn: '30d'
       })
       res.json({
-        token,
-        user: userData
         token,
         user: userData
       })
