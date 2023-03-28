@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const validator = require('validator')
-const { imgurFileHandler } = require('../file-helpers')
 const helpers = require('../_helpers')
+const imgurFileHandler = require('../helpers/file-helpers')
 
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 
@@ -337,22 +337,18 @@ const userController = {
   editUserProfile: async (req, res, next) => {
     try {
       const { userId } = req.params
-      if (Number(userId) !== Number(helpers.getUser(req).id)) {
-        return res
-          .status(403)
-          .json({ status: 'error', message: '沒有權限' })
-      }
-      const user = await User.findByPk(userId)
-      if (!user) {
-        return res
-          .status(404)
-          .json({ status: 'error', message: '帳戶不存在' })
-      }
       const { name, introduction } = req.body
       const errors = []
-      if (!name) {
-        errors.push('姓名為必填')
+
+      if (Number(userId) !== Number(helpers.getUser(req).id)) {
+        return res.status(403).json({ status: 'error', message: '沒有權限' })
       }
+
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(404).json({ status: 'error', message: '帳戶不存在' })
+      }
+
       if (name && !validator.isByteLength(name, { max: 50 })) {
         errors.push('字數超出上限，請將字數限制在 50 字以內')
       }
@@ -362,12 +358,26 @@ const userController = {
       if (errors.length) {
         return res.status(400).json({ status: 'error', errors })
       }
-      const updatedData = { name, introduction }
-      await user.update(
-        updatedData
-      )
-      return res.status(200).json({ status: 'success', message: '設定成功' })
-    } catch (error) { next(error) }
+
+      const { files } = req
+
+      // handle the user's uploaded avatar and cover image, if no image is uploaded, the path is set to null.
+      const uploadAvatar = files?.avatar ? imgurFileHandler(files.avatar[0]) : null
+      const uploadCover = files?.cover ? imgurFileHandler(files.cover[0]) : null
+
+      const [avatarPath, coverPath] = await Promise.all([uploadAvatar, uploadCover])
+
+      await user.update({
+        name,
+        introduction,
+        avatar: avatarPath || user.avatar,
+        cover: coverPath || user.cover,
+      })
+
+      res.json({ status: 'success', message: '成功編輯個人資料',})
+    } catch (err) { 
+      next(err) 
+    }
   },
   editUserAccount: async (req, res, next) => {
     try {
