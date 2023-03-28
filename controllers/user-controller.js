@@ -14,20 +14,19 @@ const userController = {
   },
 
   getUserTweets: (req, res, next) => {
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
-    return sequelize.query('SELECT description FROM Tweets WHERE user_id = :userId ORDER BY created_at LIMIT 5',
+    return sequelize.query('WITH like_tweet AS(SELECT tweet_id FROM Likes WHERE user_id = :ownId) SELECT description, !ISNULL(like_tweet.tweet_id) isLiked FROM Tweets t LEFT JOIN like_tweet ON t.id = like_tweet.tweet_id WHERE t.user_id = :userId ORDER BY t.created_at DESC LIMIT 5',
       {
-        replacements: { userId: req.params.userId },
+        replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
         type: sequelize.QueryTypes.SELECT
       })
       .then(tweets => {
+        console.log(tweets)
         return res.json(tweets)
       })
       .catch(error => next(error))
   },
 
   getUserReplies: (req, res, next) => {
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     return sequelize.query('SELECT comment FROM Replies WHERE user_id = :userId ORDER BY created_at LIMIT 5',
       {
         replacements: { userId: req.params.userId },
@@ -40,7 +39,6 @@ const userController = {
   },
 
   getUserLikes: (req, res, next) => {
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     return sequelize.query('SELECT Tweet_id TweetId FROM Likes WHERE User_id = :userId',
       {
         replacements: { userId: req.params.userId },
@@ -64,7 +62,6 @@ const userController = {
 
   // 不能直接從followship去找，要從user
   getUserFollowings: (req, res, next) => {
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     return sequelize.query('SELECT Following_id followingId FROM Users u JOIN Followships f ON u.id = f.Follower_Id WHERE u.id = :userId',
       {
         replacements: { userId: req.params.userId },
@@ -130,6 +127,7 @@ const userController = {
       imgurFileHandler(file)
     ])
       .then(([user, ...filePath]) => {
+        console.log(filePath)
         return user.update({
           name,
           introduction,
