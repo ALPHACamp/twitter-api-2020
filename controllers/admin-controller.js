@@ -46,12 +46,7 @@ const adminController = {
   deleteTweet: (req, res, next) => {
     return Tweet.findByPk(req.params.tweetId)
       .then(tweet => {
-        if (!tweet) {
-          const error = new Error("Tweet doesn't exist!")
-          error.status = 404
-          throw error
-        }
-
+        if (!tweet) throw next(createError(204, "No need to delete the tweet that doesn't exist!"))
         return tweet.destroy()
       })
       .then(deleteTweet => res.json(deleteTweet))
