@@ -5,7 +5,7 @@ module.exports = {
     // - 條件一 : 每個一般使用者有 1 則 reply
     // - 條件二 : 每篇 tweet 有 3 則 replies
     const users = await queryInterface.sequelize.query(
-      "SELECT id FROM Users WHERE account <> 'root'",
+      "SELECT id FROM Users WHERE role <> 'admin'",
       {
         type: queryInterface.sequelize.QueryTypes.SELECT
       }
