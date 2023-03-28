@@ -90,6 +90,7 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const { description } = req.body
 
+    if (description.length > 140) { throw createError(422, "Description can't more than 140 words!") }
     if (!description.trim()) throw (createError(400, 'Description is required!'))
 
     return Tweet.create({
@@ -125,6 +126,7 @@ const tweetController = {
   postReply: (req, res, next) => {
     const { comment } = req.body
 
+    if (comment.length > 140) throw (createError(422, "Comment can't more than 140 words!"))
     if (!comment.trim()) throw (createError(400, 'Comment is requires!'))
 
     return Reply.create({
