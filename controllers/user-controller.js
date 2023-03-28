@@ -426,6 +426,9 @@ const userController = {
   },
   getTopUsers: (req, res, next) => {
     User.findAll({
+      where: {
+        role: 'user'
+      },
       attributes: ['id', 'name', 'account', 'avatar'],
       include: [
         { model: User, as: 'Followers', attributes: ['id'] },
