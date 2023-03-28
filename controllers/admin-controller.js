@@ -77,6 +77,10 @@ const adminController = {
         return {
           ...u,
           isAdmin: u.role === "admin",
+          tweetCounts: u.tweetCounts || 0,
+          followerCounts: u.followerCounts || 0,
+          followingCounts: u.followingCounts || 0,
+          userTweetLikeCounts: u.userTweetLikeCounts || 0
         };
       });
       return res.json(data);
