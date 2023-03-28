@@ -1,6 +1,6 @@
 'use strict'
 const bcrypt = require('bcryptjs')
-
+const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const hashedPassword = await bcrypt.hash('12345678', 10)
@@ -10,6 +10,7 @@ module.exports = {
       role: 'user',
       name: `user${index}`,
       account: `user${index}`,
+      introduction: faker.lorem.text(100),
       created_at: new Date(),
       updated_at: new Date(),
       avatar: `https://loremflickr.com/320/240/people,casual/?random=${Math.random() * 100}`,
@@ -21,6 +22,7 @@ module.exports = {
       role: 'admin',
       name: 'root',
       account: 'root',
+      introduction: faker.lorem.text(100),
       created_at: new Date(),
       updated_at: new Date(),
       avatar: `https://loremflickr.com/320/240/people,casual/?random=${Math.random() * 100}`,

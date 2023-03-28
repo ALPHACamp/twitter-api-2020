@@ -50,7 +50,8 @@ const adminServices = {
         ]
       },
       order: [
-        [sequelize.literal('tweetsCounts'), 'DESC']
+        [sequelize.literal('tweetsCounts'), 'DESC'],
+        [sequelize.literal('LikedCounts'), 'DESC'] // 新增tweetsCounts相同時第二排序方式
       ],
       raw: true,
       nest: true
@@ -61,7 +62,7 @@ const adminServices = {
   },
   getTweets: (req, cb) => {
     return Tweet.findAll({
-      include: [{ model: User, as: 'Author', attributes: ['id', 'account', 'name', 'avatar'] }],
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
