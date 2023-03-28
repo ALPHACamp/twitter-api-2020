@@ -20,10 +20,12 @@ const tweetController = {
       const UserId = helpers.getUser(req).id;
       const { description } = req.body;
       if (!UserId) throw new Error('UserId is required!');
+      if (!description) throw new Error('Description is required!');
       const newTweet = await Tweet.create({
         UserId,
         description,
       });
+
       return res.status(200).json(newTweet);
     } catch (err) {
       return next(err);
@@ -38,6 +40,8 @@ const tweetController = {
         nest: true,
         include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
       });
+      if (!tweet) throw new Error('The tweet is not available');
+
       return res.status(200).json(tweet);
     } catch (err) {
       return next(err);
@@ -53,8 +57,12 @@ const tweetController = {
         include: [{ model: User, attributes: ['account', 'name'] }],
         order: [['updatedAt', 'DESC']],
       });
+      if (!replies || !replies.length)
+        throw new Error('No replies in this tweet');
+
       return res.status(200).json(replies);
     } catch (err) {
+      err.status = 404;
       return next(err);
     }
   },
@@ -63,8 +71,12 @@ const tweetController = {
       const UserId = helpers.getUser(req).id;
       const TweetId = req.params.tweetId;
       const { comment } = req.body;
+      console.error(TweetId);
+
       if (!UserId || !TweetId)
         throw new Error('User id or Tweet id is required!');
+      if (!comment) throw new Error('The reply cannot be blank');
+
       const newReply = await Reply.create({
         UserId,
         TweetId,
