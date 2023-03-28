@@ -7,20 +7,18 @@ const { User } = require('../models')
 
 passport.use(new LocalStrategy({
   usernameField: 'account'
-}, (account, password, done) => {
-  return User.findOne({ where: { account } })
-    .then(user => {
-      if (!user) throw createError(404, '帳號不存在')
+}, async (account, password, done) => {
+  try {
+    const user = await User.findOne({ where: { account } })
+    if (!user) throw createError(404, '帳號不存在')
 
-      return bcrypt.compare(password, user.password)
-        .then(isMatch => {
-          if (!isMatch) throw createError(401, '帳號或密碼錯誤')
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) throw createError(401, '帳號或密碼錯誤')
 
-          return done(null, user.toJSON())
-        })
-        .catch(error => done(error))
-    })
-    .catch(error => done(error))
+    done(null, user.toJSON())
+  } catch (error) {
+    done(error)
+  }
 }))
 
 const jwtOptions = {
@@ -28,12 +26,16 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET
 }
 
-passport.use(new JWTStrategy(jwtOptions, (jwtPayload, done) => {
-  return User.findByPk(jwtPayload.id, {
-    attributes: ['id', 'name', 'account', 'email', 'role']
-  })
-    .then(user => done(null, user.toJSON()))
-    .catch(error => done(error))
+passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
+  try {
+    const user = await User.findByPk(jwtPayload.id, {
+      attributes: ['id', 'name', 'account', 'email', 'role']
+    })
+
+    done(null, user.toJSON())
+  } catch (error) {
+    done(error)
+  }
 }))
 
 module.exports = passport
