@@ -357,7 +357,7 @@ const userController = {
         errors.push('字數超出上限，請將字數限制在 50 字以內')
       }
       if (introduction && !validator.isByteLength(introduction, { max: 160 })) {
-        errors.push('字數超出上限，請將字數限制在 50 字以內')
+        errors.push('字數超出上限，請將字數限制在 160 字以內')
       }
       if (errors.length) {
         return res.status(400).json({ status: 'error', errors })
