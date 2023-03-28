@@ -50,7 +50,8 @@ const adminServices = {
         ]
       },
       order: [
-        [sequelize.literal('tweetsCounts'), 'DESC']
+        [sequelize.literal('tweetsCounts'), 'DESC'],
+        [sequelize.literal('LikedCounts'), 'DESC'] // 新增tweetsCounts相同時第二排序方式
       ],
       raw: true,
       nest: true
