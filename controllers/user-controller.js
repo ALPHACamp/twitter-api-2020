@@ -56,9 +56,27 @@ const userController = {
         if (!user) throw new Error('Can not find this user.')
         delete user.password
         user.isFollowed = currentUser.Followings.some(f => f.id === user.id)
+        user.isNotified = currentUser.Followings.some(f => f.id === user.id)
         // return res.status(200).json({ status: 'success', user })
         // 因為測試檔，所以物件格式不能像 (上1) 一樣加工，必須做成 (下1)
         return res.status(200).json(user)
+      })
+      .catch(err => next(err))
+  },
+  patchNotification: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
+    return Followship.findOne({
+      where: {
+        followerId: currentUser.id,
+        followingId: req.params.id
+      }
+    })
+      .then(n => {
+        if (!n) throw new Error("You haven't follow this user.")
+        return n.update({ isNotified: !n.isNotified })
+      })
+      .then(n => {
+        return res.status(200).json({ success: true, n })
       })
       .catch(err => next(err))
   },
