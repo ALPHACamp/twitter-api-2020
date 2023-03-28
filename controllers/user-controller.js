@@ -138,7 +138,7 @@ const userController = {
     const UserId = Number(req.params.id)
 
     // 找出動態 id 的 User, Tweet, Like table 資料
-    Promise.all([
+    return Promise.all([
       User.findByPk(UserId),
       Tweet.findAll({
         raw: true,
@@ -160,7 +160,7 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
     ])
-      .then(([user, tweets, likes]) => {
+      .then(([user, tweets]) => {
         // 401: 請先登入 & 403:沒有使用該頁面的權限，在 middleware/auth
         if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
 
@@ -180,7 +180,7 @@ const userController = {
     const UserId = Number(req.params.id)
 
     // 找出動態 id 的 User, reply table 資料
-    Promise.all([
+    return Promise.all([
       User.findByPk(UserId),
       Reply.findAll({
         where: { UserId },
