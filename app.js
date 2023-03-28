@@ -14,7 +14,7 @@ app.use(cors())
 app.use(passport.initialize())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use("/upload", express.static(path.join(__dirname, "upload")));
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use('/api', router)
 
 app.get('/', (req, res) => res.send('Hello World!'))

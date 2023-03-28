@@ -14,7 +14,7 @@ router.get(
   '/:userId/replied_tweets', userController.getUserReplies)
 router.get('/:userId/followings', userController.getUserFollowings)
 router.get('/:userId/followers', userController.getUserFollowers)
-router.put('/:userId', authenticatedUser, upload.single('image'), userController.editUser)
+router.put('/:userId', authenticatedUser, upload.single('image'), userController.editUserProfile)
 router.get('/:userId', userController.getUser)
 
 module.exports = router
