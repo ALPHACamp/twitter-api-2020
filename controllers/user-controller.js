@@ -369,35 +369,28 @@ const userController = {
       return res.status(200).json({ status: 'success', message: '設定成功' })
     } catch (error) { next(error) }
   },
-  getTopUsers: async(req, res, next) => {
-    try{
-       const users = await User.findAll({
-        include: {model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'avatar']},
-        raw: true,
-        nest: true
-        
-       })
-       if(!users) {
-        return res.status(404).json({status: 'error', message: '此帳戶不存在!'})
-       }
-       console.log(users)
-       let topUserData = []
-       topUserData.push({
-        
-        
-         isFollowing: helpers
-           .getUser(req)
-           .Followings.some(
-             (fg) => fg.Followship.followingId === users.Followers.id
-           ),
-       })
-       return res.status(200).json(topUserData);
+  getTopUsers: async (req, res, next) => {
+    try {
+      const DEFAULT_LIMIT = 10
+      const limit = Number(req.query.limit) || DEFAULT_LIMIT
+      const users = await User.findAll({
+        attributes: ['id', 'account', 'name', 'avatar'],
+        include: { model: User, as: 'Followers', attributes: ['id'] },
+        limit
+      })
+      if (!users) {
+        return res.status(404).json({ status: 'error', message: '此帳戶不存在!' })
+      }
+      let usersData = users.map((user) => ({
+        ...user.toJSON(),
+        followerCount: user.Followers.length,
+        isFollowing: helpers.getUser(req).Followings.some(fg => fg.id === user.id)
+      }))
+      usersData = usersData.sort((a, b) => b.followerCount - a.followerCount)
+      console.log(usersData)
 
-
-    }catch(error){next(error)}
-   
-
-    
+      return res.status(200).json(usersData)
+    } catch (error) { next(error) }
   }
 }
 module.exports = userController
