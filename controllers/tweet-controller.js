@@ -5,62 +5,84 @@ const createError = require('http-errors')
 
 const tweetController = {
   getTweets: (req, res, next) => {
-    return Tweet.findAll({
-      order: [['created_at', 'desc']],
-      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
-      attributes: {
-        include: [
-          [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`tweet_id` = `Tweet`.`id`)'
-            ),
-            'likesNum'
-          ],
-          [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`tweet_id` = `Tweet`.`id`)'
-            ),
-            'repliesNum'
-          ]
-        ]
-      },
-      nest: true
-    })
-      .then(tweets => {
-        tweets = tweets.map(tweet => {
-          const tweetData = tweet.toJSON()
-          return tweetData
-        })
+    const userId = helpers.getUser(req).id
 
-        return res.json(tweets)
+    return Promise.all([
+      Tweet.findAll({
+        order: [['created_at', 'desc']],
+        include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`tweet_id` = `Tweet`.`id`)'
+              ),
+              'likesNum'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`tweet_id` = `Tweet`.`id`)'
+              ),
+              'repliesNum'
+            ]
+          ]
+        },
+        nest: true,
+        raw: true
+      }),
+      Like.findAll({
+        where: {
+          user_id: userId
+        }
+      })
+    ])
+      .then(([tweets, likes]) => {
+        const result = tweets.map(tweet => ({
+          ...tweet,
+          isLiked: likes.some(like => like.TweetId === tweet.id)
+        }))
+
+        return res.json(result)
       })
       .catch(error => next(error))
   },
 
   getTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.tweetId, {
-      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
-      attributes: {
-        include: [
-          [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`tweet_id` = `Tweet`.`id`)'
-            ),
-            'likesNum'
-          ],
-          [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`tweet_id` = `Tweet`.`id`)'
-            ),
-            'repliesNum'
-          ]
-        ]
-      }
-    })
-      .then(tweet => {
-        if (!tweet) throw (createError(404, "Tweet doesn't exist!"))
+    const userId = helpers.getUser(req).id
 
-        return res.json(tweet)
+    return Promise.all([
+      Tweet.findByPk(req.params.tweetId, {
+        include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`tweet_id` = `Tweet`.`id`)'
+              ),
+              'likesNum'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`tweet_id` = `Tweet`.`id`)'
+              ),
+              'repliesNum'
+            ]
+          ]
+        }
+      }),
+      Like.findAll({
+        where: {
+          user_id: userId
+        }
+      })
+    ])
+      .then(([tweet, likes]) => {
+        if (!tweet) throw createError(404, "Tweet doesn't exist!")
+
+        const tweetData = tweet.toJSON()
+        tweetData.isLiked = likes.some(like => like.TweetId === tweet.id)
+
+        return res.json(tweetData)
       })
       .catch(error => next(error))
   },
