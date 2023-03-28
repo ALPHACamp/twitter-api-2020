@@ -46,8 +46,7 @@ const userController = {
         email,
         password: bcrypt.hashSync(password, 10),
       });
-      const foundUser = await User.findByPk(user.id);
-      const newUser = foundUser.toJSON();
+      const newUser = user.toJSON();
       delete newUser.password;
       return res.json(newUser);
     } catch (error) {
