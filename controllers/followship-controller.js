@@ -1,6 +1,8 @@
 const { User, Followship } = require('../models')
 const helpers = require('../_helpers')
 
+const createError = require('http-errors')
+
 const followshipController = {
   postFollowship: (req, res, next) => {
     const userId = helpers.getUser(req).id
@@ -16,17 +18,9 @@ const followshipController = {
       })
     ])
       .then(([user, followship]) => {
-        if (!user) {
-          const error = new Error("User doesn't exist!")
-          error.status = 400
-          throw error
-        }
+        if (!user) next(createError(404, "User doesn't exist!"))
 
-        if (followship) {
-          const error = new Error('You already followed this user!')
-          error.status = 400
-          throw error
-        }
+        if (followship) next(createError(409, 'You already followed this user!'))
 
         return Followship.create({
           followerId: userId,
@@ -49,11 +43,7 @@ const followshipController = {
       }
     })
       .then(followship => {
-        if (!followship) {
-          const error = new Error("You haven't followed this user!")
-          error.status = 404
-          throw error
-        }
+        if (!followship) next(createError(404, "You haven't followed this user!"))
 
         return followship.destroy()
       })
