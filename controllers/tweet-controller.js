@@ -71,7 +71,6 @@ const tweetController = {
       const UserId = helpers.getUser(req).id;
       const TweetId = req.params.tweetId;
       const { comment } = req.body;
-      console.error(TweetId);
 
       if (!UserId || !TweetId)
         throw new Error('User id or Tweet id is required!');

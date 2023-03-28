@@ -1,4 +1,3 @@
-const { Op } = require('sequelize');
 const { User, Tweet, sequelize } = require('../models');
 
 const adminController = {
