@@ -8,7 +8,7 @@ const helpers = require('../_helpers')
 const userController = {
   getUser: (req, res, next) => {
     if (helpers.getUser(req).id.toString() !== req.params.userId) throw next(createError(403, 'Forbidden Error'))
-    return User.findByPk(req.params.userId)
+    return User.findByPk(req.params.userId, { attributes: { exclude: ['password'] } })
       .then(user => res.json({ ...user.toJSON() }))
       .catch(error => next(error))
   },
@@ -107,9 +107,8 @@ const userController = {
 
   signIn: (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
+      const { password, ...userData } = helpers.getUser(req).toJSON()
       if (userData.role !== 'user') throw next(createError(403, 'Access to the requested resource is forbidden'))
-      delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
@@ -144,12 +143,13 @@ const userController = {
 
   patchUser: async (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
-    const checkDuplicateAccount = await sequelize.query('SELECT COUNT(1) FROM Users WHERE id <> :userId AND account = :account',
+    const checkDuplicate = await sequelize.query('SELECT (SELECT COUNT(1) FROM users WHERE id <> :userId AND account = :account) AS accountCheck, (SELECT COUNT(1) FROM users WHERE id <> :userId AND email = :email) AS emailCheck',
       {
-        replacements: { userId: req.params.userId, account },
+        replacements: { userId: req.params.userId, account, email },
         type: sequelize.QueryTypes.SELECT
       })
-    if (checkDuplicateAccount) throw next(createError(409, 'Account already exists!'))
+    if (checkDuplicate[0].accountCheck) throw next(createError(409, 'Account already exists!'))
+    if (checkDuplicate[0].emailCheck) throw next(createError(409, 'Email already exists!'))
     if (helpers.getUser(req).id.toString() !== req.params.userId) throw next(createError(403, 'Forbidden Error'))
     return User.findByPk(req.params.userId)
       .then(user => {
