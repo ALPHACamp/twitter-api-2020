@@ -9,7 +9,7 @@ const { authenticatedUser } = require('../../middleware/auth')
 const upload = require('../../middleware/multer')
 const imageUpload = upload.fields([
   { name: 'avatar', maxCount: 1 },
-  { name: 'cover', maxCount: 1 },
+  { name: 'cover', maxCount: 1 }
 ])
 
 router.post('/signin', passport.authenticate('user-local', { session: false }), userController.signIn)
