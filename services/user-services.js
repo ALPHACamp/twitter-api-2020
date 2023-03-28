@@ -326,7 +326,7 @@ const userService = {
   editSettingofUser: (req, cb) => {
     assert(Number(req.params.userId) === helpers.getUser(req).id, '不可修改其他使用者的資料！')
     const { account, name, email, password, checkPassword } = req.body
-    const checkEmail = data => {
+    const checkEmailFormat = data => {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       return emailPattern.test(data)
     }
@@ -338,18 +338,14 @@ const userService = {
       assert(password === checkPassword, '密碼與確認密碼不一致')
     }
 
-    const promises = []
-    if (account) {
-      promises.push(User.findOne({ where: { account: req.body.account } }))
-    }
-    if (email) {
-      assert(checkEmail(email), 'Email格式錯誤')
-      promises.push(User.findOne({ where: { email: req.body.email } }))
-    }
-    Promise.all(promises)
+    Promise.all([
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
+    ])
       .then(([checkAccount, checkEmail]) => {
-        assert(!checkAccount, 'account 已重複註冊！')
-        assert(!checkEmail, 'email 已重複註冊！')
+        assert(checkEmailFormat(email), 'Email格式錯誤')
+        if (checkAccount && checkAccount.account === req.body.account && checkAccount.id !== helpers.getUser(req).id) throw new Error('Account 已存在!')
+        if (checkEmail && checkEmail.email === req.body.email && checkEmail.id !== helpers.getUser(req).id) throw new Error('Email 已存在！')
         return Promise.all([password && bcrypt.hash(req.body.password, 10), User.findByPk(req.params.userId)])
       })
       .then(([hash, user]) => {
