@@ -105,7 +105,8 @@ const tweetServices = {
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
           { model: Tweet, attributes: ['UserId'], include: { model: User, attributes: ['id', 'account'] } }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([tweet, replies]) => {
