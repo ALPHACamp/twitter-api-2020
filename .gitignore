@@ -87,3 +87,6 @@ typings/
 .dynamodb/
 
 temp/
+
+# DynamoDB Local files
+async/
