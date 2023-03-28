@@ -89,11 +89,7 @@ const tweetController = {
       raw: true,
       nest: true
     })
-      .then(replies => {
-        if (!replies) throw (createError(404, "Replies does'nt exist!"))
-
-        return res.json(replies)
-      })
+      .then(replies => res.json(replies))
       .catch(error => next(error))
   },
 

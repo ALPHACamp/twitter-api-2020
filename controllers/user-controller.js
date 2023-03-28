@@ -142,12 +142,13 @@ const userController = {
   },
 
   patchUser: async (req, res, next) => {
-    const { account, name, email, password } = req.body
+    const { account, name, email, password, checkPassword } = req.body
     const checkDuplicate = await sequelize.query('SELECT (SELECT COUNT(1) FROM Users WHERE id <> :userId AND account = :account) AS accountCheck, (SELECT COUNT(1) FROM Users WHERE id <> :userId AND email = :email) AS emailCheck',
       {
         replacements: { userId: req.params.userId, account, email },
         type: sequelize.QueryTypes.SELECT
       })
+    if (password !== checkPassword) throw next(createError(403, 'Password not match!'))
     if (checkDuplicate[0].accountCheck) throw next(createError(409, 'Account already exists!'))
     if (checkDuplicate[0].emailCheck) throw next(createError(409, 'Email already exists!'))
     if (helpers.getUser(req).id.toString() !== req.params.userId) throw next(createError(403, 'Forbidden Error'))
@@ -165,7 +166,7 @@ const userController = {
       })
       // Results will be an empty array and metadata will contain the number of affected rows.
       .then(([results, metadata]) => {
-        const { password, ...others } = req.body
+        const { password, checkPassword, ...others } = req.body
         res.json(others)
       })
       .catch(error => next(error))
