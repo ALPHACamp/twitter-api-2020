@@ -20,7 +20,6 @@ const userController = {
         type: sequelize.QueryTypes.SELECT
       })
       .then(tweets => {
-        console.log(tweets)
         return res.json(tweets)
       })
       .catch(error => next(error))
@@ -45,7 +44,6 @@ const userController = {
         type: sequelize.QueryTypes.SELECT
       })
       .then(likes => {
-        console.log(likes)
         return res.json(likes)
       })
       .catch(error => next(error))
@@ -127,7 +125,6 @@ const userController = {
       imgurFileHandler(file)
     ])
       .then(([user, ...filePath]) => {
-        console.log(filePath)
         return user.update({
           name,
           introduction,
