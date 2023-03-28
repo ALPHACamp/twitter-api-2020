@@ -38,8 +38,8 @@ const userController = {
       if (name && !validator.isByteLength(name, { max: 50 })) {
         errors.push('字數超出上限，請將字數限制在 50 字以內')
       }
-      if (password && !validator.isByteLength(password, { min: 8, max: 20 })) {
-        errors.push('密碼長度介於 8 ~ 20 字元')
+      if (password && !validator.isByteLength(password, { max: 20 })) {
+        errors.push('密碼長度不能超過20個字元')
       }
       if (password !== checkPassword) {
         errors.push('密碼與確認密碼不相符')
