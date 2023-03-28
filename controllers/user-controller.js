@@ -38,7 +38,7 @@ const userController = {
   },
 
   getUserLikes: (req, res, next) => {
-    return sequelize.query('WITH ownLike AS (SELECT tweet_id FROM Likes WHERE user_id = :ownId) SELECT l.tweet_id TweetId, ISNULL(ownLike.tweet_id) isliked FROM Likes l LEFT JOIN ownLike USING(tweet_id) WHERE l.user_id = :userId',
+    return sequelize.query('WITH ownLike AS (SELECT tweet_id FROM Likes WHERE user_id = :ownId) SELECT l.tweet_id TweetId, !ISNULL(ownLike.tweet_id) isliked FROM Likes l LEFT JOIN ownLike USING(tweet_id) WHERE l.user_id = :userId',
       {
         replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
         type: sequelize.QueryTypes.SELECT
