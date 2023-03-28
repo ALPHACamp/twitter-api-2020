@@ -16,6 +16,7 @@ module.exports = {
           follower_id: users[j].id,
           following_id: users
             .filter((_, idx) => idx !== j)[i].id,
+          is_notified: true,
           created_at: new Date(),
           updated_at: new Date()
         }))

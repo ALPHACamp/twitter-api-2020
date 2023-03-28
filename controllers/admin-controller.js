@@ -34,7 +34,7 @@ const adminController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       order: [['createdAt', 'DESC'], ['UserId', 'ASC']],
-      include: [{ model: User, attributes: ['account', 'name'] }],
+      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
       raw: true,
       nest: true
       //! 等下再想能不能直接從資料庫 slice(0, 50)

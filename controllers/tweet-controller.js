@@ -9,14 +9,14 @@ const tweetController = {
     // if (description.length > 140) return res.status(400).json({ message: '推文字數限制在 140 以內' })
     User.findByPk(getUser(req).dataValues.id)
       .then(user => {
-        if (!user) return res.status(404).json({ message: 'Can not find this user.' })
+        if (!user) throw new Error('Can not find this user.')
         return Tweet.create({
           UserId: user.id,
           description
         })
       })
       .then(tweet => {
-        return res.status(200).json({ tweet })
+        return res.status(200).json({ success: true, tweet })
       })
       .catch(err => next(err))
   },
@@ -45,7 +45,8 @@ const tweetController = {
       nest: true
     })
       .then(tweet => {
-        if (!tweet) return res.status(404).json({ message: '推文不存在' })
+        console.log(tweet)
+        if (!tweet) throw new Error('推文不存在')
         return res.status(200).json(tweet)
       })
       .catch(err => next(err))

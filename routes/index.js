@@ -20,6 +20,7 @@ router.get('/api/users/:id/followers', auth, isUser, userController.getFollowers
 router.get('/api/users/:id/followings', auth, isUser, userController.getFollowings) // 取得某 user 跟隨的使用者資料
 router.get('/api/users/:id/likes', auth, isUser, userController.getLikes) // 取得 like 資料
 router.get('/api/users/:id', auth, isUser, userController.getUserInfo)
+router.patch('/api/users/:id/notification', auth, isUser, userController.patchNotification)
 
 router.post('/api/users', userController.signUp) // 註冊帳號路由
 // router.put('/api/users/:id', auth, isUser, upload.single('avatar'), userController.putUser)

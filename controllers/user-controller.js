@@ -37,7 +37,8 @@ const userController = {
           account: req.body.account,
           name: req.body.name,
           email: req.body.email,
-          password: hash
+          password: hash,
+          role: 'user'
         })
       )
       .then(createdUser => {
@@ -49,13 +50,33 @@ const userController = {
       .catch(err => next(err))
   },
   getUserInfo: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
     return User.findByPk(req.params.id, { raw: true })
       .then(user => {
-        if (!user) return res.status(404).json({ message: 'Can not find this user.' })
+        if (!user) throw new Error('Can not find this user.')
         delete user.password
+        user.isFollowed = currentUser.Followings.some(f => f.id === user.id)
+        user.isNotified = currentUser.Followings.some(f => f.id === user.id)
         // return res.status(200).json({ status: 'success', user })
         // 因為測試檔，所以物件格式不能像 (上1) 一樣加工，必須做成 (下1)
         return res.status(200).json(user)
+      })
+      .catch(err => next(err))
+  },
+  patchNotification: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
+    return Followship.findOne({
+      where: {
+        followerId: currentUser.id,
+        followingId: req.params.id
+      }
+    })
+      .then(n => {
+        if (!n) throw new Error("You haven't follow this user.")
+        return n.update({ isNotified: !n.isNotified })
+      })
+      .then(n => {
+        return res.status(200).json({ success: true, n })
       })
       .catch(err => next(err))
   },
@@ -275,7 +296,8 @@ const userController = {
     // return Followship.count({ where: { followingId: 16 } })
     //   .then(test => console.log(test))
     return User.findAll({
-      attributes: ['id'],
+      attributes: ['id', 'email', 'account', 'name'],
+      where: { role: 'user' },
       include: [{ model: User, as: 'Followers', attributes: ['id'] }]
     })
       .then(users => {
