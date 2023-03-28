@@ -7,7 +7,7 @@ const adminController = {
   signIn: (req, res, next) => {
     try {
       const { password, ...userData } = helpers.getUser(req).toJSON()
-      if (userData.role !== 'admin') throw next(createError(403, 'Access to the requested resource is forbidden'))
+      if (userData.role !== 'admin') throw createError(403, 'Access to the requested resource is forbidden')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
@@ -46,7 +46,7 @@ const adminController = {
   deleteTweet: (req, res, next) => {
     return Tweet.findByPk(req.params.tweetId)
       .then(tweet => {
-        if (!tweet) throw next(createError(204, "No need to delete the tweet that doesn't exist!"))
+        if (tweet === null) throw createError(404, "No need to delete the tweet that doesn't exist!")
         return tweet.destroy()
       })
       .then(deleteTweet => res.json(deleteTweet))

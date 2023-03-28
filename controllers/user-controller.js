@@ -7,14 +7,14 @@ const helpers = require('../_helpers')
 
 const userController = {
   getUser: (req, res, next) => {
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw next(createError(403, 'Forbidden Error'))
+    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     return User.findByPk(req.params.userId, { attributes: { exclude: ['password'] } })
       .then(user => res.json({ ...user.toJSON() }))
       .catch(error => next(error))
   },
 
   getUserTweets: (req, res, next) => {
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw next(createError(403, 'Forbidden Error'))
+    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     return sequelize.query('SELECT description FROM Tweets WHERE user_id = :userId ORDER BY created_at LIMIT 5',
       {
         replacements: { userId: req.params.userId },
@@ -27,7 +27,7 @@ const userController = {
   },
 
   getUserReplies: (req, res, next) => {
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw next(createError(403, 'Forbidden Error'))
+    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     return sequelize.query('SELECT comment FROM Replies WHERE user_id = :userId ORDER BY created_at LIMIT 5',
       {
         replacements: { userId: req.params.userId },
@@ -40,7 +40,7 @@ const userController = {
   },
 
   getUserLikes: (req, res, next) => {
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw next(createError(403, 'Forbidden Error'))
+    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     return sequelize.query('SELECT Tweet_id TweetId FROM Likes WHERE User_id = :userId',
       {
         replacements: { userId: req.params.userId },
@@ -64,7 +64,7 @@ const userController = {
 
   // 不能直接從followship去找，要從user
   getUserFollowings: (req, res, next) => {
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw next(createError(403, 'Forbidden Error'))
+    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     return sequelize.query('SELECT Following_id followingId FROM Users u JOIN Followships f ON u.id = f.Follower_Id WHERE u.id = :userId',
       {
         replacements: { userId: req.params.userId },
@@ -77,16 +77,16 @@ const userController = {
   signUp: (req, res, next) => {
     const { name, email, password, account } = req.body
 
-    if (password !== req.body.checkPassword) throw next(createError(400, 'Passwords do not match!'))
-    if (name.length > 50) next(createError(400, 'The length of name exceeds 50 characters.'))
+    if (password !== req.body.checkPassword) throw createError(400, 'Passwords do not match!')
+    if (name.length > 50) createError(400, 'The length of name exceeds 50 characters.')
 
     return Promise.all([
       User.findOne({ where: { account } }),
       User.findOne({ where: { email } })
     ])
       .then(([account, email]) => {
-        if (account) throw next(createError(409, 'This account is already registered'))
-        if (email) throw next(createError(409, 'This email is already registered'))
+        if (account) throw createError(409, 'This account is already registered')
+        if (email) throw createError(409, 'This email is already registered')
         return bcrypt.hash(password, 10)
       })
       .then(hash => {
@@ -108,7 +108,7 @@ const userController = {
   signIn: (req, res, next) => {
     try {
       const { password, ...userData } = helpers.getUser(req).toJSON()
-      if (userData.role !== 'user') throw next(createError(403, 'Access to the requested resource is forbidden'))
+      if (userData.role !== 'user') throw createError(403, 'Access to the requested resource is forbidden')
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
@@ -122,7 +122,7 @@ const userController = {
   },
 
   putUser: (req, res, next) => {
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw next(createError(403, 'Forbidden Error'))
+    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     const { file } = req
     const { name, introduction } = req.body
     return Promise.all([
@@ -148,12 +148,12 @@ const userController = {
         replacements: { userId: req.params.userId, account, email },
         type: sequelize.QueryTypes.SELECT
       })
-    if (checkDuplicate[0].accountCheck) throw next(createError(409, 'Account already exists!'))
-    if (checkDuplicate[0].emailCheck) throw next(createError(409, 'Email already exists!'))
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw next(createError(403, 'Forbidden Error'))
+    if (checkDuplicate[0].accountCheck) throw createError(409, 'Account already exists!')
+    if (checkDuplicate[0].emailCheck) throw createError(409, 'Email already exists!')
+    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     return User.findByPk(req.params.userId)
       .then(user => {
-        if (password !== checkPassword) throw next(createError(403, 'Passwords do not match!'))
+        if (password !== checkPassword) throw createError(403, 'Passwords do not match!')
         return user.update({
           name,
           account,
