@@ -1,5 +1,4 @@
 const express = require('express')
-const { check } = require('express-validator')
 const upload = require('../../../middleware/multer')
 
 const router = express.Router()
