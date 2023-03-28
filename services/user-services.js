@@ -183,14 +183,19 @@ const userServices = {
       const userId = req.params.id
       const RepliedTweets = await Reply.findAll({
         where: { UserId: userId },
-        include: {
+        include: [{
+          model: User,
+          attributes: ['id', 'account', 'name', 'avatar']
+        },
+        {
           model: Tweet,
           attributes: ['id'],
           include: [{
             model: User,
             attributes: ['id', 'name', 'avatar', 'account']
           }]
-        },
+        }
+        ],
         order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
