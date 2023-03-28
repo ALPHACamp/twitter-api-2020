@@ -56,18 +56,21 @@ const userController = {
         attributes: { exclude: ['password', 'role'] },
         include: [
           { model: User, as: 'Followers', attributes: ['id'] },
-          { model: User, as: 'Followings', attributes: ['id'] }
+          { model: User, as: 'Followings', attributes: ['id'] },
+          { model: Tweet, attributes: ['id'] }
         ]
       })
       if (!data) throw new Error('查無此使用者')
       const signinUser = helpers.getUser(req)
       const user = {
         ...data.toJSON(),
+        tweets: data.Tweets.length,
         followers: data.Followers?.length,
         followings: data.Followings?.length,
         isMyself: helpers.getUser(req).id === Number(id),
         isFollowing: (signinUser.Followings) ? signinUser.Followings.some(following => following.id === Number(id)) : false
       }
+      delete user.Tweets
       delete user.Followers
       delete user.Followings
       res.status(200).json(user)
