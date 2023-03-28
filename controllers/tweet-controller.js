@@ -5,62 +5,84 @@ const createError = require('http-errors')
 
 const tweetController = {
   getTweets: (req, res, next) => {
-    return Tweet.findAll({
-      order: [['created_at', 'desc']],
-      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
-      attributes: {
-        include: [
-          [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`tweet_id` = `Tweet`.`id`)'
-            ),
-            'likesNum'
-          ],
-          [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`tweet_id` = `Tweet`.`id`)'
-            ),
-            'repliesNum'
-          ]
-        ]
-      },
-      nest: true
-    })
-      .then(tweets => {
-        tweets = tweets.map(tweet => {
-          const tweetData = tweet.toJSON()
-          return tweetData
-        })
+    const userId = helpers.getUser(req).id
 
-        return res.json(tweets)
+    return Promise.all([
+      Tweet.findAll({
+        order: [['created_at', 'desc']],
+        include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`tweet_id` = `Tweet`.`id`)'
+              ),
+              'likesNum'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`tweet_id` = `Tweet`.`id`)'
+              ),
+              'repliesNum'
+            ]
+          ]
+        },
+        nest: true,
+        raw: true
+      }),
+      Like.findAll({
+        where: {
+          user_id: userId
+        }
+      })
+    ])
+      .then(([tweets, likes]) => {
+        const result = tweets.map(tweet => ({
+          ...tweet,
+          isLiked: likes.some(like => like.TweetId === tweet.id)
+        }))
+
+        return res.json(result)
       })
       .catch(error => next(error))
   },
 
   getTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.tweetId, {
-      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
-      attributes: {
-        include: [
-          [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`tweet_id` = `Tweet`.`id`)'
-            ),
-            'likesNum'
-          ],
-          [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`tweet_id` = `Tweet`.`id`)'
-            ),
-            'repliesNum'
-          ]
-        ]
-      }
-    })
-      .then(tweet => {
-        if (!tweet) throw (createError(404, "Tweet doesn't exist!"))
+    const userId = helpers.getUser(req).id
 
-        return res.json(tweet)
+    return Promise.all([
+      Tweet.findByPk(req.params.tweetId, {
+        include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`tweet_id` = `Tweet`.`id`)'
+              ),
+              'likesNum'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`tweet_id` = `Tweet`.`id`)'
+              ),
+              'repliesNum'
+            ]
+          ]
+        }
+      }),
+      Like.findAll({
+        where: {
+          user_id: userId
+        }
+      })
+    ])
+      .then(([tweet, likes]) => {
+        if (!tweet) throw createError(404, "Tweet doesn't exist!")
+
+        const tweetData = tweet.toJSON()
+        tweetData.isLiked = likes.some(like => like.TweetId === tweet.id)
+
+        return res.json(tweetData)
       })
       .catch(error => next(error))
   },
@@ -68,6 +90,7 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const { description } = req.body
 
+    if (description.length > 140) { throw createError(422, "Description can't more than 140 words!") }
     if (!description.trim()) throw (createError(400, 'Description is required!'))
 
     return Tweet.create({
@@ -75,7 +98,14 @@ const tweetController = {
       UserId: helpers.getUser(req).id
     })
       .then(newTweet => {
-        return res.json(newTweet)
+        const tweetData = newTweet.toJSON()
+        const { account, name, avatar } = req.user
+
+        tweetData.repliesNum = 0
+        tweetData.likesNum = 0
+        tweetData.User = { account, name, avatar }
+        tweetData.isLiked = false
+        return res.json(tweetData)
       })
       .catch(error => next(error))
   },
@@ -96,6 +126,7 @@ const tweetController = {
   postReply: (req, res, next) => {
     const { comment } = req.body
 
+    if (comment.length > 140) throw (createError(422, "Comment can't more than 140 words!"))
     if (!comment.trim()) throw (createError(400, 'Comment is requires!'))
 
     return Reply.create({
