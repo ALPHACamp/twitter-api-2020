@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const validator = require('validator')
-
+const { imgurFileHandler } = require('../file-helpers')
 const helpers = require('../_helpers')
 
 const { User, Tweet, Reply, Like, Followship } = require('../models')
@@ -333,7 +333,41 @@ const userController = {
     } catch (error) {
       next(error)
     }
+  },
+  editUserProfile: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      if (Number(userId) !== Number(helpers.getUser(req).id)) {
+        return res
+          .status(403)
+          .json({ status: 'error', message: '沒有權限' })
+      }
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res
+          .status(404)
+          .json({ status: 'error', message: '帳戶不存在' })
+      }
+      const { name, introduction } = req.body
+      const errors = []
+      if (!name) {
+        errors.push('姓名為必填')
+      }
+      if (name && !validator.isByteLength(name, { max: 50 })) {
+        errors.push('字數超出上限，請將字數限制在 50 字以內')
+      }
+      if (introduction && !validator.isByteLength(introduction, { max: 160 })) {
+        errors.push('字數超出上限，請將字數限制在 160 字以內')
+      }
+      if (errors.length) {
+        return res.status(400).json({ status: 'error', errors })
+      }
+      const updatedData = { name, introduction }
+      await user.update(
+        updatedData
+      )
+      return res.status(200).json({ status: 'success', message: '設定成功' })
+    } catch (error) { next(error) }
   }
 }
-
 module.exports = userController
