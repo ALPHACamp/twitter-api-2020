@@ -4,6 +4,7 @@ const { User, Tweet, Reply, Like } = require('../models')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
+const sequelize = require('sequelize')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -29,30 +30,31 @@ const adminController = {
   },
   getUsers: (req, res, next) => {
     return User.findAll({
-      attributes: ['id', 'name', 'account', 'avatar', 'cover'],
-      include: [
-        { model: Tweet, include: Like },
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ]
+      attributes: ['id', 'name', 'account', 'avatar', 'cover',
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id)'), 'tweetCounts'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM tweets RIGHT OUTER JOIN likes ON tweets.id=likes.TweetId WHERE tweets.UserId = user.id )'), 'beLikedCounts'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id)'), 'followerCounts'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id)'), 'followingCounts'
+        ]
+      ],
+      order: [
+        [sequelize.literal('tweetCounts'), 'DESC']
+      ],
+      raw: true,
+      where: {
+        role: {
+          [sequelize.Op.ne]: 'admin'
+        }
+      }
     })
-      .then(users => {
-        const usersData = users.map(user => {
-          const data = {
-            ...user.toJSON(),
-            tweetCounts: user.Tweets.length,
-            // 先取出每篇推文被like的數量, 再透過array.reduce依序加起來(達到加總的效果)
-            beLikedCounts: user.Tweets.map(tweet => tweet.Likes.length).reduce((accumulator, currentValue) => accumulator + currentValue, 0),
-            followerCounts: user.Followers.length,
-            followingCounts: user.Followings.length
-          }
-          delete data.Tweets
-          delete data.Followers
-          delete data.Followings
-          return data
-        })
-        res.json(usersData.sort((a, b) => b.tweetCounts - a.tweetCounts))
-      })
+      .then(users => { res.json(users) })
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
