@@ -48,6 +48,11 @@ router.put(
   authenticatedUser,
   userController.putUserSetting
 );
+router.patch(
+  "/api/users/:id/cover",
+  authenticatedUser,
+  userController.patchUserCover
+);
 router.put(
   "/api/users/:id",
   upload.fields([
