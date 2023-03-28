@@ -4,7 +4,7 @@ const createError = require('http-errors')
 const authenticate = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err) next(err)
-    if (!user) createError(401, 'Your token is invalid.')
+    if (!user) throw createError(401, 'Your token is invalid.')
     req.user = user
     return next()
   })(req, res, next)

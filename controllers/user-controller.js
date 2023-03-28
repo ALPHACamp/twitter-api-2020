@@ -78,7 +78,7 @@ const userController = {
     const { name, email, password, account } = req.body
 
     if (password !== req.body.checkPassword) throw createError(400, 'Passwords do not match!')
-    if (name.length > 50) createError(400, 'The length of name exceeds 50 characters.')
+    if (name.length > 50) throw createError(400, 'The length of name exceeds 50 characters.')
 
     return Promise.all([
       User.findOne({ where: { account } }),
