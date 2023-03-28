@@ -38,7 +38,7 @@ const userController = {
   },
 
   getUserLikes: (req, res, next) => {
-    return sequelize.query('WITH ownLike AS (SELECT tweet_id FROM Likes WHERE user_id = :ownId) SELECT l.tweet_id TweetId, !ISNULL(ownLike.tweet_id) isliked FROM Likes l LEFT JOIN ownLike USING(tweet_id) WHERE l.user_id = :userId',
+    return sequelize.query('SELECT l.tweet_id TweetId, !ISNULL(ownLike.tweet_id) isliked FROM Likes l LEFT JOIN (SELECT tweet_id FROM Likes WHERE user_id = :ownId) ownLike USING(tweet_id) WHERE l.user_id = :userId',
       {
         replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
         type: sequelize.QueryTypes.SELECT
@@ -50,7 +50,7 @@ const userController = {
   },
 
   getUserFollowers: (req, res, next) => {
-    return sequelize.query('WITH follow AS (SELECT following_id own_follow FROM Followships WHERE follower_id = :ownId) SELECT follower_id followerId, !ISNULL(own_follow) isFollowed FROM Followships f1 LEFT JOIN follow f2 ON follower_id = own_follow WHERE f1.following_id = :userId',
+    return sequelize.query('SELECT follower_id followerId, !ISNULL(own_follow) isFollowed FROM Followships f1 LEFT JOIN (SELECT following_id own_follow FROM Followships WHERE follower_id = :ownId) follow ON follower_id = own_follow WHERE f1.following_id = :userId',
       {
         replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
         type: sequelize.QueryTypes.SELECT
@@ -60,7 +60,7 @@ const userController = {
   },
 
   getUserFollowings: (req, res, next) => {
-    return sequelize.query('WITH follow AS (SELECT following_id own_follow FROM Followships WHERE follower_id = :ownId) SELECT following_id followingId, !ISNULL(own_follow) isFollowed FROM Followships f1 LEFT JOIN follow f2 ON following_id = own_follow WHERE f1.follower_id = :userId',
+    return sequelize.query('SELECT following_id followingId, !ISNULL(own_follow) isFollowed FROM Followships f1 LEFT JOIN (SELECT following_id own_follow FROM Followships WHERE follower_id = :ownId) follow ON following_id = own_follow WHERE f1.follower_id = :userId',
       {
         replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
         type: sequelize.QueryTypes.SELECT
