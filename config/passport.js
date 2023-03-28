@@ -50,12 +50,12 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     // 先註記，之後依這個改
-  //   include: [
-  //     { model: Restaurant, as: 'FavoritedRestaurants' },
-  //     { model: Restaurant, as: 'LikeRestaurants' },
-  //     { model: User, as: 'Followers' },
-  //     { model: User, as: 'Followings' }
-  //   ]
+    include: [
+    //   { model: Restaurant, as: 'FavoritedRestaurants' },
+    //   { model: Restaurant, as: 'LikeRestaurants' },
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ]
   })
     .then(user => cb(null, user))
     .catch(err => cb(err))
