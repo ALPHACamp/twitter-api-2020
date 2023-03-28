@@ -213,10 +213,18 @@ const userServices = {
     let hashedPassword = ''
     if (password) { hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) }
     if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
-    return User.findByPk(currentUserId)
+    return User.findOne({
+      where: {
+        [Op.or]: [{ account: { [Op.or]: { [Op.is]: null, [Op.eq]: account } } }, { email: { [Op.or]: { [Op.is]: null, [Op.eq]: email } } }]
+      }
+    })
       .then(user => {
-        if (user.email && user.email === email) throw new Error('此信箱已被註冊')
-        if (user.account && user.account === account) throw new Error('此帳號已被註冊')
+        if (user.account !== null && user.account === account) throw new Error('此帳號已被註冊')
+        if (user.email !== null && user.email === email) throw new Error('此信箱已被註冊')
+
+        return User.findByPk(currentUserId)
+      })
+      .then(user => {
         return user.update({
           account,
           name,
@@ -248,7 +256,10 @@ const userServices = {
           cover: imgurData[1] || user.cover
         })
           .then(user => {
-            return cb(null, { user })
+            const userData = user.toJSON()
+            delete userData.password
+            const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+            return cb(null, { token, userData })
           })
           .catch(err => cb(err))
       })
