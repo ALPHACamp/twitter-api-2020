@@ -65,6 +65,7 @@ const followshipController = {
         'id',
         'name',
         'account',
+        'avatar',
         [
           sequelize.literal(
             '(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`following_id` = `User`.`id`)'
@@ -87,7 +88,7 @@ const followshipController = {
     }).then(topFollowing => {
       const result = topFollowing.map(user => {
         const { Followers, ...data } = user.toJSON()
-        data.isFollowed = Followers.some(follower => follower.id === userId)
+        data.isFollowed = Followers.includes(follower => follower.id === userId)
 
         return data
       })
