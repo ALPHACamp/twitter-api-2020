@@ -511,6 +511,26 @@ const userController = {
       return next(error);
     }
   },
+  patchUserCover: async (req, res, next) => {
+    const currentUserId = getUser(req).id;
+    const id = Number(req.params.id);
+    try {
+      // 先確認當前使用者只能修改自己的封面
+      if (currentUserId !== id) {
+        const err = new Error("無法修改其他使用者的封面照片");
+        err.status = 401;
+        throw err;
+      }
+      const user = await User.findByPk(id, { attributes: ["id", "cover"] });
+      const userCover = await user.update({
+        cover:
+          "https://st3.depositphotos.com/23594922/31822/v/600/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg",
+      });
+      return res.json(userCover);
+    } catch (err) {
+      return next(err);
+    }
+  },
 };
 
 module.exports = userController;
