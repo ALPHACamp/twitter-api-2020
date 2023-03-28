@@ -189,7 +189,8 @@ const userServices = {
       where: { followerId: req.params.id },
       include: [
         { model: User, as: 'Follower', attributes: ['id', 'account', 'name', 'avatar'] }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     }).then(followings => {
       return cb(null, [...followings])
     }).catch(err => cb(err))
@@ -199,7 +200,8 @@ const userServices = {
       where: { followingId: req.params.id },
       include: [
         { model: User, as: 'Following', attributes: ['id', 'account', 'name', 'avatar'] }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     }).then(followers => {
       return cb(null, [...followers])
     }).catch(err => cb(err))
@@ -213,21 +215,23 @@ const userServices = {
     if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
     return User.findByPk(currentUserId)
       .then(user => {
-        user.update({
+        if (user.email && user.email === email) throw new Error('此信箱已被註冊')
+        if (user.account && user.account === account) throw new Error('此帳號已被註冊')
+        return user.update({
           account,
           name,
           email,
           password: hashedPassword || user.password,
           introduction
         })
-          .then(user => {
-            const userData = user.toJSON()
-            delete userData.password
-            const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-            return cb(null, { token, userData })
-          })
-          .catch(err => cb(err))
       })
+      .then(user => {
+        const userData = user.toJSON()
+        delete userData.password
+        const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+        return cb(null, { token, userData })
+      })
+      .catch(err => cb(err))
   },
   putUserProfile: (req, cb) => {
     const id = Number(req.params.id)
