@@ -4,6 +4,7 @@ const db = require('../models')
 const { User, sequelize, Tweet, Reply, Like, Followship } = db
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const { Op } = require('sequelize')
 
 const userServices = {
   postSignIn: (req, cb) => {
@@ -67,9 +68,16 @@ const userServices = {
     const { account, name, email, password, checkPassword } = req.body
     if (!account || !email || !password || !checkPassword) throw new Error('請填寫必填欄位')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不相符')
-    User.findOne({ where: { email, account } })
+    User.findOne({
+      where: {
+        [Op.or]: [{ account: account }, { email: email }]
+      }
+    })
       .then(user => {
-        if (user) throw new Error('此信箱已被註冊')
+        if (user !== null) {
+          if (user.email === email) throw new Error('此信箱已被註冊')
+          if (user.account === account) throw new Error('此帳號已被註冊')
+        }
         const hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
         return User.create({
           account,
