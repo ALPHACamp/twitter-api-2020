@@ -2,28 +2,22 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { User, Tweet, sequelize } = require("../models");
 const { QueryTypes } = require("sequelize");
+const { newError } = require("../helpers/error-helper")
 
 const adminController = {
   signIn: async (req, res, next) => {
     const { account, password } = req.body;
     try {
-      if (!account || !password) {
-        const error = new Error("欄位不可空白!");
-        error.status = 400;
-        throw error;
-      }
+      if (!account || !password) throw newError(400, "欄位不可空白!")
+
       const foundUser = await User.findOne({ where: { account } });
-      if (!foundUser || !foundUser.isAdmin) {
-        const error = new Error("帳號不存在!");
-        error.status = 404;
-        throw error;
-      }
+
+      if (!foundUser || !foundUser.isAdmin) throw newError(404, "帳號不存在!")
+
       const isMatch = await bcrypt.compare(password, foundUser.password);
-      if (!isMatch) {
-        const error = new Error("密碼不正確!");
-        error.status = 400;
-        throw error;
-      }
+
+      if (!isMatch) throw newError(400, "密碼不正確!")
+
       const loginUser = foundUser.toJSON();
       delete loginUser.password;
       const token = jwt.sign(loginUser, process.env.JWT_SECRET, {
