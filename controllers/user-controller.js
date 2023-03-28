@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const validator = require('validator')
-
+const { imgurFileHandler } = require('../file-helpers')
 const helpers = require('../_helpers')
 
 const { User, Tweet, Reply, Like, Followship } = require('../models')
@@ -83,13 +83,6 @@ const userController = {
       const { userId } = req.params
       const currentUserId = helpers.getUser(req).id
 
-      if (currentUserId !== Number(userId)) {
-        return res.status(403).json({
-          status: 'error',
-          message: '你沒有權限進入此頁面'
-        })
-      }
-
       const user = await User.findByPk(userId)
 
       if (!user) {
@@ -119,9 +112,9 @@ const userController = {
           UserId,
           description,
           createdAt,
-          avatar: tweet.User.avatar,
           name: tweet.User.name,
           account: tweet.User.account,
+          avatar: tweet.User.avatar,
           repliedCount: tweet.Replies.length,
           likedCount: tweet.Likes.length,
           isLike: tweet.LikedUsers.some((u) => u.id === currentUserId)
@@ -137,13 +130,6 @@ const userController = {
     try {
       const { userId } = req.params
       const currentUserId = helpers.getUser(req).id
-
-      if (currentUserId !== Number(userId)) {
-        return res.status(403).json({
-          status: 'error',
-          message: '你沒有權限進入此頁面'
-        })
-      }
 
       const user = await User.findByPk(userId)
       if (!user) {
@@ -193,6 +179,56 @@ const userController = {
       next(err)
     }
   },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      const currentUserId = helpers.getUser(req).id
+      const likedTweets = await Like.findAll({
+        where: { UserId: userId },
+        include: [
+          User,
+          {
+            model: Tweet,
+            include: [User, { model: Reply, include: User }, Like]
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      if (likedTweets.length === 0) {
+        return res.status(404).json({
+          status: 'error',
+          message: '沒有按任何貼文喜歡'
+        })
+      }
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到使用者'
+        })
+      }
+      const likedTweetsData = likedTweets.map((like) => {
+        return {
+          likeId: like.id,
+          userId: like.UserId,
+          TweetId: like.TweetId,
+          likeCreatedAt: like.createdAt,
+          tweetAuthorId: like.Tweet.UserId,
+          tweetAuthorAccount: like.Tweet.User.account,
+          tweetAuthorName: like.Tweet.User.name,
+          tweetAuthorAvatar: like.Tweet.User.avatar,
+          tweetContent: like.Tweet.description,
+          tweetCreatedAt: like.Tweet.createdAt,
+          isLike: like.Tweet.Likes.some((u) => u.UserId === currentUserId),
+          likedCount: like.Tweet.Likes.length,
+          replyCount: like.Tweet.Replies.length
+        }
+      })
+      return res.status(200).json(likedTweetsData)
+    } catch (error) {
+      next(error)
+    }
+  },
   getUserFollowings: async (req, res, next) => {
     try {
       const { userId } = req.params
@@ -219,14 +255,20 @@ const userController = {
           )
       })
       return res.status(200).json(followingData)
-    } catch (error) { next(error) }
+    } catch (error) {
+      next(error)
+    }
   },
   getUser: async (req, res, next) => {
     try {
       const { userId } = req.params
       let userInfo = await User.findByPk(userId, {
         attributes: { exclude: ['password', 'createdAt', 'updatedAt'] },
-        include: [Tweet, { model: User, as: 'Followers' }, { model: User, as: 'Followings' }]
+        include: [
+          Tweet,
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
       })
 
       if (!userInfo || userInfo.role === 'admin') {
@@ -244,11 +286,15 @@ const userController = {
         tweetCount: userInfo.Tweets.length,
         followingCount: userInfo.Followings.length,
         followerCount: userInfo.Followers.length,
-        isFollowing: userInfo.Followings.some(u => u.id === helpers.getUser(req).id)
+        isFollowing: userInfo.Followings.some(
+          (u) => u.id === helpers.getUser(req).id
+        )
       }
 
       return res.status(200).json(userInfo)
-    } catch (error) { next(error) }
+    } catch (error) {
+      next(error)
+    }
   },
   getUserFollowers: async (req, res, next) => {
     try {
@@ -262,7 +308,9 @@ const userController = {
         nest: true
       })
       if (!users) {
-        return res.status(404).json({ status: 'error', message: '此帳戶不存在!' })
+        return res
+          .status(404)
+          .json({ status: 'error', message: '此帳戶不存在!' })
       }
 
       const followerData = []
@@ -281,9 +329,44 @@ const userController = {
           )
       })
 
-      return res
-        .status(200)
-        .json(followerData)
+      return res.status(200).json(followerData)
+    } catch (error) {
+      next(error)
+    }
+  },
+  editUserProfile: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      if (Number(userId) !== Number(helpers.getUser(req).id)) {
+        return res
+          .status(403)
+          .json({ status: 'error', message: '沒有權限' })
+      }
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res
+          .status(404)
+          .json({ status: 'error', message: '帳戶不存在' })
+      }
+      const { name, introduction } = req.body
+      const errors = []
+      if (!name) {
+        errors.push('姓名為必填')
+      }
+      if (name && !validator.isByteLength(name, { max: 50 })) {
+        errors.push('字數超出上限，請將字數限制在 50 字以內')
+      }
+      if (introduction && !validator.isByteLength(introduction, { max: 160 })) {
+        errors.push('字數超出上限，請將字數限制在 160 字以內')
+      }
+      if (errors.length) {
+        return res.status(400).json({ status: 'error', errors })
+      }
+      const updatedData = { name, introduction }
+      await user.update(
+        updatedData
+      )
+      return res.status(200).json({ status: 'success', message: '設定成功' })
     } catch (error) { next(error) }
   },
   getTopUsers: async(req, res, next) => {
@@ -317,5 +400,4 @@ const userController = {
     
   }
 }
-
 module.exports = userController
