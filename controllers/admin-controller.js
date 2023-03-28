@@ -13,10 +13,8 @@ const adminController = {
         expiresIn: '30d'
       })
       res.json({
-        data: {
-          token,
-          user: userData
-        }
+        token,
+        user: userData
       })
     } catch (error) {
       next(error)

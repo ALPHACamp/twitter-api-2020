@@ -58,7 +58,7 @@ const tweetController = {
       }
     })
       .then(tweet => {
-        if (!tweet) next(createError(404, "Tweet doesn't exist!"))
+        if (!tweet) throw (createError(404, "Tweet doesn't exist!"))
 
         return res.json(tweet)
       })
@@ -68,7 +68,7 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const { description } = req.body
 
-    if (!description.trim()) next(createError(400, 'Description is required!'))
+    if (!description.trim()) throw (createError(400, 'Description is required!'))
 
     return Tweet.create({
       description,
@@ -90,7 +90,7 @@ const tweetController = {
       nest: true
     })
       .then(replies => {
-        if (!replies) next(createError(404, "Replies does'nt exist!"))
+        if (!replies) throw (createError(404, "Replies does'nt exist!"))
 
         return res.json(replies)
       })
@@ -100,7 +100,7 @@ const tweetController = {
   postReply: (req, res, next) => {
     const { comment } = req.body
 
-    if (!comment.trim()) next(createError(400, 'Comment is requires!'))
+    if (!comment.trim()) throw (createError(400, 'Comment is requires!'))
 
     return Reply.create({
       UserId: helpers.getUser(req).id,
@@ -124,9 +124,9 @@ const tweetController = {
       })
     ])
       .then(([tweet, like]) => {
-        if (!tweet) next(createError(404, "Tweet doesn't exist!"))
+        if (!tweet) throw (createError(404, "Tweet doesn't exist!"))
 
-        if (like) next(createError(409, 'You already liked this tweet!'))
+        if (like) throw (createError(409, 'You already liked this tweet!'))
 
         return Like.create({
           UserId: helpers.getUser(req).id,
@@ -145,7 +145,7 @@ const tweetController = {
       }
     })
       .then(like => {
-        if (!like) next(createError(404, "You haven't liked this tweet!"))
+        if (!like) throw (createError(404, "You haven't liked this tweet!"))
 
         return like.destroy()
       })
