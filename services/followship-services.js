@@ -8,6 +8,7 @@ const followshipServices = {
     const followUserId = Number(req.body.id)
     return Promise.all([
       User.findByPk(curruntUserId),
+      User.findByPk(followUserId),
       Followship.findOne({
         where: {
           followerId: curruntUserId,
@@ -15,8 +16,9 @@ const followshipServices = {
         }
       })
     ])
-      .then(([user, followship]) => {
-        assert(user, '使用者不存在')
+      .then(([currentUser, userToFollow, followship]) => {
+        assert(currentUser, '使用者不存在')
+        assert(userToFollow, '欲追隨用戶不存在')
         assert(!followship, '已追蹤用戶')
         return Followship.create({
           followerId: curruntUserId,
@@ -31,6 +33,7 @@ const followshipServices = {
     const followingUserId = req.params.followingId
     return Promise.all([
       User.findByPk(curruntUserId),
+      User.findByPk(followingUserId),
       Followship.findOne({
         where: {
           followerId: curruntUserId,
@@ -38,8 +41,9 @@ const followshipServices = {
         }
       })
     ])
-      .then(([user, followship]) => {
-        assert(user, '使用者不存在')
+      .then(([currentUser, userToUnfollow, followship]) => {
+        assert(currentUser, '使用者不存在')
+        assert(userToUnfollow, '欲取消追隨用戶不存在')
         assert(followship, '未追隨用戶')
         return followship.destroy()
       })
