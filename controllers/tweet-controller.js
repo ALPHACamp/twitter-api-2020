@@ -99,8 +99,12 @@ const tweetController = {
     })
       .then(newTweet => {
         const tweetData = newTweet.toJSON()
+        const { account, name, avatar } = req.user
+
         tweetData.repliesNum = 0
         tweetData.likesNum = 0
+        tweetData.User = { account, name, avatar }
+        tweetData.isLiked = false
         return res.json(tweetData)
       })
       .catch(error => next(error))
