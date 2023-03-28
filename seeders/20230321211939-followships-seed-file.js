@@ -2,7 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const userFollowingCounts = 3
+    const userFollowingCounts = 1
     // 從資料庫取得所有user
     const users = await queryInterface.sequelize.query(
       "SELECT id FROM Users WHERE role = 'user';",
