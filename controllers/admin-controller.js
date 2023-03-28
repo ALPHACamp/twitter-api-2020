@@ -2,6 +2,8 @@ const { User, Tweet } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 
+const createError = require('http-errors')
+
 const adminController = {
   signIn: (req, res, next) => {
     try {
@@ -11,10 +13,8 @@ const adminController = {
         expiresIn: '30d'
       })
       res.json({
-        data: {
-          token,
-          user: userData
-        }
+        token,
+        user: userData
       })
     } catch (error) {
       next(error)
@@ -43,11 +43,7 @@ const adminController = {
   deleteTweet: (req, res, next) => {
     return Tweet.findByPk(req.params.tweetId)
       .then(tweet => {
-        if (!tweet) {
-          const error = new Error("Tweet doesn't exist!")
-          error.status = 404
-          throw error
-        }
+        if (!tweet) next(createError(404, "Tweet doesn't exist!"))
 
         return tweet.destroy()
       })

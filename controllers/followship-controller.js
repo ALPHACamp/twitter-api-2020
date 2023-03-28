@@ -1,5 +1,8 @@
-const { User, Followship } = require('../models')
+const { User, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
+const { Op } = require('sequelize')
+
+const createError = require('http-errors')
 
 const followshipController = {
   postFollowship: (req, res, next) => {
@@ -16,17 +19,9 @@ const followshipController = {
       })
     ])
       .then(([user, followship]) => {
-        if (!user) {
-          const error = new Error("User doesn't exist!")
-          error.status = 400
-          throw error
-        }
+        if (!user) throw (createError(404, "User doesn't exist!"))
 
-        if (followship) {
-          const error = new Error('You already followed this user!')
-          error.status = 400
-          throw error
-        }
+        if (followship) throw (createError(409, 'You already followed this user!'))
 
         return Followship.create({
           followerId: userId,
@@ -49,16 +44,55 @@ const followshipController = {
       }
     })
       .then(followship => {
-        if (!followship) {
-          const error = new Error("You haven't followed this user!")
-          error.status = 404
-          throw error
-        }
+        if (!followship) throw (createError(404, "You haven't followed this user!"))
 
         return followship.destroy()
       })
       .then(deletedFollowship => res.json(deletedFollowship))
       .catch(error => next(error))
+  },
+
+  getTop: (req, res, next) => {
+    const topLimit = 10
+    const userId = helpers.getUser(req).id
+
+    return User.findAll({
+      where: {
+        role: 'user',
+        id: { [Op.ne]: userId }
+      },
+      attributes: [
+        'id',
+        'name',
+        'account',
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`following_id` = `User`.`id`)'
+          ),
+          'followerCount'
+        ]
+      ],
+      include: [
+        {
+          model: User,
+          as: 'Followers',
+          attributes: ['id']
+        }
+      ],
+      limit: topLimit,
+      order: [
+        [sequelize.literal('followerCount'), 'desc'],
+        ['id', 'asc']
+      ]
+    }).then(topFollowing => {
+      const result = topFollowing.map(user => {
+        const { Followers, ...data } = user.toJSON()
+        data.isFollowed = Followers.some(follower => follower.id === userId)
+
+        return data
+      })
+      return (res.json(result))
+    })
   }
 }
 
