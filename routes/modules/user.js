@@ -8,6 +8,7 @@ router.post('/signin', passport.authenticate('user-local', { session: false }), 
 router.post('/', userController.signUp)
 
 router.use(authenticatedUser)
+router.get('/top', authenticatedUser, userController.getTopUsers)
 router.get('/:userId/likes', authenticatedUser, userController.getUserLikes)
 router.get('/:userId/tweets', userController.getUserTweets)
 router.get(
