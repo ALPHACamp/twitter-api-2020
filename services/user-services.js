@@ -330,10 +330,13 @@ const userService = {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       return emailPattern.test(data)
     }
-    const checkNameLength = name.length
-    assert(checkNameLength <= 50, '字數超過上限！')
-    assert(name && password && checkPassword, '必填欄位不得為空')
-    assert(password === checkPassword, '密碼與確認密碼不一致')
+    if (name) {
+      const checkNameLength = name.length
+      assert(checkNameLength <= 50, '字數超過上限！')
+    }
+    if (password || checkPassword) {
+      assert(password === checkPassword, '密碼與確認密碼不一致')
+    }
 
     const promises = []
     if (account) {
@@ -347,16 +350,19 @@ const userService = {
       .then(([checkAccount, checkEmail]) => {
         assert(!checkAccount, 'account 已重複註冊！')
         assert(!checkEmail, 'email 已重複註冊！')
-        return Promise.all([bcrypt.hash(req.body.password, 10), User.findByPk(req.params.userId)])
+        return Promise.all([password && bcrypt.hash(req.body.password, 10), User.findByPk(req.params.userId)])
       })
       .then(([hash, user]) => {
         assert(user, '使用者不存在！')
-        return user.update({
+        const updatedData = {
           name,
           account,
-          email,
-          password: hash
-        })
+          email
+        }
+        if (hash) {
+          updatedData.password = hash
+        }
+        return user.update(updatedData)
       })
       .then(result => {
         const { ...userResult } = {
