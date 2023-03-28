@@ -16,6 +16,7 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
+    "cloudinary": "^1.35.0",
     "connect-flash": "^0.1.1",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
