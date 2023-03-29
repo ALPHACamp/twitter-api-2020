@@ -13,7 +13,7 @@ const userController = {
   },
 
   getUserTweets: (req, res, next) => {
-    return sequelize.query('SELECT description, !ISNULL(like_tweet.tweet_id) isLiked FROM Tweets t LEFT JOIN (SELECT tweet_id FROM Likes WHERE user_id = :ownId) like_tweet ON t.id = like_tweet.tweet_id WHERE t.user_id = :userId ORDER BY t.created_at DESC LIMIT 5',
+    return sequelize.query('SELECT id TweetId, description, !ISNULL(like_tweet.tweet_id) isLiked FROM Tweets t LEFT JOIN (SELECT tweet_id FROM Likes WHERE user_id = :ownId) like_tweet ON t.id = like_tweet.tweet_id WHERE t.user_id = :userId ORDER BY t.created_at DESC LIMIT 5',
       {
         replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
         type: sequelize.QueryTypes.SELECT
@@ -25,7 +25,7 @@ const userController = {
   },
 
   getUserReplies: (req, res, next) => {
-    return sequelize.query('SELECT comment FROM Replies WHERE user_id = :userId ORDER BY created_at LIMIT 5',
+    return sequelize.query('SELECT tweet_id TweetId, comment FROM Replies WHERE user_id = :userId ORDER BY created_at LIMIT 5',
       {
         replacements: { userId: req.params.userId },
         type: sequelize.QueryTypes.SELECT
