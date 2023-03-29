@@ -1,7 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const defaultImageLink = require('../helpers/default-image-helper')
-const { faker } = require("@faker-js/faker");
 const { newError } = require("../helpers/error-helper");
 const { Op, QueryTypes } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
