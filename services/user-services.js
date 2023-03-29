@@ -24,10 +24,16 @@ const userServices = {
       cb(err)
     }
   },
-  getTopUsers: (next, cb) => {
+  getTopUsers: (req, next, cb) => {
+    const { id } = helpers.getUser(req)
     try {
       User.findAll({
-        where: { role: 'user' },
+        where: {
+          role: 'user',
+          id: {
+            [Op.not]: id
+          }
+        },
         attributes: {
           include: [
             [
