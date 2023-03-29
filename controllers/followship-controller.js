@@ -18,7 +18,7 @@ const followshipController = {
         })
       ])
       if (!user) {
-        return res.status(404).json({ status: 'error', message: '此帳戶不存在' })
+        return res.status(404).json({ status: 'error', message: '找不到使用者' })
       }
       if (followship) {
         return res.status(404).json({ status: 'error', message: '你已追蹤此使用者!' })

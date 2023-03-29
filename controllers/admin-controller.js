@@ -1,16 +1,9 @@
 const { User, Tweet } = require('../models')
 const Sequelize = require('sequelize')
 
-const helpers = require('../_helpers')
-
 const adminController = {
   getUsers: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req)
-      if (!currentUser || currentUser.role === 'user') {
-        return res.status(404).json({ status: 'error', message: '此帳戶不存在' })
-      }
-
       const users = await User.findAll({
         attributes: [
           'id',
@@ -68,11 +61,11 @@ const adminController = {
 
       const tweetData = tweets.map((tweet) => ({
         id: tweet.id,
-        description: tweet.description,
+        description: tweet.description.substring(0, 50),
         createdAt: tweet.createdAt,
         avatar: tweet.User.avatar,
         name: tweet.User.name,
-        account: tweet.User.account
+        account: tweet.User.account,
       }))
 
       return res.status(200).json(tweetData)

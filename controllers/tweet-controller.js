@@ -48,7 +48,7 @@ const tweetController = {
       if (!tweet) {
         return res.status(404).json({
           status: 'error',
-          message: '找不到此篇推文'
+          message: '找不到此則推文'
         })
       }
 
@@ -66,7 +66,7 @@ const tweetController = {
       }
       return res.status(200).json({
         status: 'success',
-        message: '成功取得此篇推文',
+        message: '成功取得此則推文',
         ...tweetData
       })
     } catch (err) {
@@ -105,7 +105,7 @@ const tweetController = {
       if (!tweet) {
         return res.status(404).json({
           status: 'error',
-          message: '找不到此篇推文'
+          message: '找不到此則推文'
         })
       }
 
