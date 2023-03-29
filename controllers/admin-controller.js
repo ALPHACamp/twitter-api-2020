@@ -1,16 +1,9 @@
 const { User, Tweet } = require('../models')
 const Sequelize = require('sequelize')
 
-const helpers = require('../_helpers')
-
 const adminController = {
   getUsers: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req)
-      if (!currentUser || currentUser.role === 'user') {
-        return res.status(404).json({ status: 'error', message: '此帳戶不存在' })
-      }
-
       const users = await User.findAll({
         attributes: [
           'id',

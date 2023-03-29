@@ -183,6 +183,15 @@ const userController = {
     try {
       const { userId } = req.params
       const currentUserId = helpers.getUser(req).id
+
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: '找不到使用者'
+        })
+      }
+
       const likedTweets = await Like.findAll({
         where: { UserId: userId },
         include: [
@@ -194,19 +203,14 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
+
       if (likedTweets.length === 0) {
         return res.status(404).json({
           status: 'error',
           message: '沒有按任何貼文喜歡'
         })
       }
-      const user = await User.findByPk(userId)
-      if (!user) {
-        return res.status(404).json({
-          status: 'error',
-          message: '找不到使用者'
-        })
-      }
+
       const likedTweetsData = likedTweets.map((like) => {
         return {
           likeId: like.id,
@@ -247,13 +251,16 @@ const userController = {
         raw: true,
         nest: true
       })
+
       if (!users) {
-        return res.status(404).json({ status: 'error', message: '帳戶不存在' })
+        return res.status(404).json({ status: 'error', message: '找不到使用者' })
       }
+
       const tweetCount = await Tweet.count({
         where: { UserId: userId },
         col: 'id'
       })
+
       const followingCount = await Followship.count({
         where: { followerId: userId }
       })
@@ -297,7 +304,7 @@ const userController = {
       if (!userInfo || userInfo.role === 'admin') {
         return res
           .status(404)
-          .json({ status: 'error', message: '此帳戶不存在' })
+          .json({ status: 'error', message: '找不到使用者' })
       }
 
       userInfo = {
@@ -341,7 +348,7 @@ const userController = {
       if (!users) {
         return res
           .status(404)
-          .json({ status: 'error', message: '此帳戶不存在!' })
+          .json({ status: 'error', message: '找不到使用者' })
       }
       const tweetCount = await Tweet.count({
         where: { UserId: userId },
@@ -382,12 +389,12 @@ const userController = {
       const errors = []
 
       if (Number(userId) !== Number(helpers.getUser(req).id)) {
-        return res.status(403).json({ status: 'error', message: '沒有權限' })
+        return res.status(403).json({ status: 'error', message: '你沒有權限進入此頁面' })
       }
 
       const user = await User.findByPk(userId)
       if (!user) {
-        return res.status(404).json({ status: 'error', message: '帳戶不存在' })
+        return res.status(404).json({ status: 'error', message: '找不到使用者' })
       }
 
       if (name && !validator.isByteLength(name, { max: 50 })) {
@@ -434,7 +441,7 @@ const userController = {
       // confirm if this user exists
       const user = await User.findByPk(userId)
       if (!user) {
-        return res.status(404).json({ status: 'error', message: '此帳戶不存在!' })
+        return res.status(404).json({ status: 'error', message: '找不到使用者!' })
       }
 
       const errors = []
