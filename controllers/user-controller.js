@@ -1,4 +1,4 @@
-const { Op } = require('sequelize')
+const sequelize = require('sequelize')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const { User, Followship, Tweet, Reply, Like } = db
@@ -69,7 +69,7 @@ const userController = {
         raw: true,
         attributes: ['id']
       }),
-      Followship.findOne({ where: { [Op.and]: [{ followerId }, { followingId }] } })
+      Followship.findOne({ where: { [sequelize.Op.and]: [{ followerId }, { followingId }] } })
     ])
       .then(([users, followship]) => {
         if (!users.some(user => user.id === followingId)) throw new Error("User didn't exist!")
@@ -94,7 +94,7 @@ const userController = {
         raw: true,
         attributes: ['id']
       }),
-      Followship.findOne({ where: { [Op.and]: [{ followerId }, { followingId }] } })
+      Followship.findOne({ where: { [sequelize.Op.and]: [{ followerId }, { followingId }] } })
     ])
       .then(([users, followship]) => {
         if (!users.some(user => user.id === followingId)) throw new Error("User didn't exist!")
@@ -113,7 +113,18 @@ const userController = {
 
     return User.findAll({
       where: { role: 'user' },
-      attributes: ['id', 'account', 'name', 'avatar'],
+      attributes: ['id', 'account', 'name', 'avatar',
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*) FROM followships 
+            WHERE followships.followingId = user.id
+          )`),
+          'followerCounts'
+        ]
+      ],
+      order: [
+        [sequelize.literal('followerCounts'), 'DESC']
+      ],
       include: [{
         model: User,
         as: 'Followers',
@@ -124,15 +135,12 @@ const userController = {
         const topUsers = users.map(user => {
           const userData = {
             ...user.toJSON(),
-            followerCounts: user.Followers.length,
             isFollowed: user.Followers.some(follower => follower.id === userId)
           }
           delete userData.Followers
           return userData
         })
-        res.json({
-          topUsers: topUsers.sort((a, b) => b.followerCounts - a.followerCounts).slice(0, 10)
-        })
+        res.json({ topUsers })
       })
       .catch(err => next(err))
   },
@@ -298,14 +306,14 @@ const userController = {
       User.findAll({
         attributes: ['id'],
         where: {
-          id: { [Op.ne]: req.params.id },
+          id: { [sequelize.Op.ne]: req.params.id },
           account
         }
       }),
       User.findAll({
         attributes: ['id'],
         where: {
-          id: { [Op.ne]: req.params.id },
+          id: { [sequelize.Op.ne]: req.params.id },
           email
         }
       }),
