@@ -65,7 +65,7 @@ const adminController = {
         createdAt: tweet.createdAt,
         avatar: tweet.User.avatar,
         name: tweet.User.name,
-        account: tweet.User.account,
+        account: tweet.User.account
       }))
 
       return res.status(200).json(tweetData)

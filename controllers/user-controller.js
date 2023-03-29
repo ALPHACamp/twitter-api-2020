@@ -516,7 +516,7 @@ const userController = {
       let usersData = users.map(user => {
         return {
           UserId: user.id,
-          account: user.account, 
+          account: user.account,
           name: user.name,
           avatar: user.avatar || 'https://live.staticflickr.com/65535/52777903968_c0460ba4d6_z.jpg',
           followerCount: user.Followers.length,
@@ -524,7 +524,7 @@ const userController = {
         }
       })
       usersData = usersData.sort((a, b) => b.followerCount - a.followerCount)
-      return res.status(200).json( usersData )
+      return res.status(200).json(usersData)
     } catch (error) { next(error) }
   }
 }
