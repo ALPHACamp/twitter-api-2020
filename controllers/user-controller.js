@@ -113,7 +113,18 @@ const userController = {
 
     return User.findAll({
       where: { role: 'user' },
-      attributes: ['id', 'account', 'name', 'avatar'],
+      attributes: ['id', 'account', 'name', 'avatar',
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*) FROM followships 
+            WHERE followships.followingId = user.id
+          )`),
+          'followerCounts'
+        ]
+      ],
+      order: [
+        [sequelize.literal('followerCounts'), 'DESC']
+      ],
       include: [{
         model: User,
         as: 'Followers',
@@ -124,15 +135,12 @@ const userController = {
         const topUsers = users.map(user => {
           const userData = {
             ...user.toJSON(),
-            followerCounts: user.Followers.length,
             isFollowed: user.Followers.some(follower => follower.id === userId)
           }
           delete userData.Followers
           return userData
         })
-        res.json({
-          topUsers: topUsers.sort((a, b) => b.followerCounts - a.followerCounts).slice(0, 10)
-        })
+        res.json({ topUsers })
       })
       .catch(err => next(err))
   },
