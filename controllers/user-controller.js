@@ -50,6 +50,7 @@ const userController = {
     const token = jwt.sign(userData, process.env.JWT_SECRET, {
       expiresIn: '30d'
     })
+
     res.status(200).json({
       data: {
         token,
@@ -62,17 +63,19 @@ const userController = {
     err = new AuthError(req.session.messages)
     next(err)
   },
-  userVerify: (req, res) => {
+  userVerify: tryCatch(async (req, res) => {
     const token = req.header('Authorization').replace('Bearer ', '')
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    delete decoded.updatedAt
-    delete decoded.createdAt
-    res.status(200).json(decoded)
-  },
+    const user = await User.findByPk(decoded.id)
+    delete user.updatedAt
+    delete user.createdAt
+    res.status(200).json(user)
+  }),
   getUser: tryCatch(async (req, res) => {
-    const userData = getUser(req) instanceof Model
-      ? getUser(req).toJSON()
-      : getUser(req).dataValues
+    const userData =
+			getUser(req) instanceof Model
+			  ? getUser(req).toJSON()
+			  : getUser(req).dataValues
     const { id } = req.params
     const user = await User.findByPk(id, {
       attributes: { exclude: ['password', 'updatedAt', 'createdAt'] },
@@ -114,16 +117,16 @@ const userController = {
       temp.avatar = user.avatar
       return temp
     })
-    return Promise.resolve(result)
-      .then(result =>
-        res.status(200).json(result)
-        // res.status(200).json({ status: 'success', tweets: result })
-      )
+    return Promise.resolve(result).then(
+      result => res.status(200).json(result)
+      // res.status(200).json({ status: 'success', tweets: result })
+    )
   }),
   getReplies: tryCatch(async (req, res) => {
-    const userData = getUser(req) instanceof Model
-      ? getUser(req).toJSON()
-      : getUser(req).dataValues
+    const userData =
+			getUser(req) instanceof Model
+			  ? getUser(req).toJSON()
+			  : getUser(req).dataValues
     // 之後或許需要使用者名稱跟帳號
     const { id } = req.params
     const user = await User.findByPk(id, { raw: true })
@@ -144,12 +147,13 @@ const userController = {
       account: userData.account,
       avatar: user.avatar
     }))
-    return Promise.resolve(result).then(result =>
-      res.status(200).json(result)
+    return Promise.resolve(result).then(
+      result => res.status(200).json(result)
       // res.status(200).json({ status: 'success', replies: result })
     )
   }),
-  getLikes: tryCatch(async (req, res) => { // 可優化 將SQL語法轉為Squelize
+  getLikes: tryCatch(async (req, res) => {
+    // 可優化 將SQL語法轉為Squelize
     const { id } = req.params
     const user = await User.findByPk(id)
     const currentUser = getUser(req)
@@ -164,12 +168,30 @@ const userController = {
     let result = await Tweet.findAll({
       where: { id: likes },
       attributes: [
-        'id', 'description', 'image', 'createdAt', 'updatedAt',
-        [sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`Tweet_id` = `Tweet`.`id`)'), 'Likes'],
-        [sequelize.literal('(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`Tweet_id` = `Tweet`.`id`)'), 'Replies']
+        'id',
+        'description',
+        'image',
+        'createdAt',
+        'updatedAt',
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`Tweet_id` = `Tweet`.`id`)'
+          ),
+          'Likes'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`Tweet_id` = `Tweet`.`id`)'
+          ),
+          'Replies'
+        ]
       ],
       include: [
-        { model: User, as: 'poster', attributes: ['id', 'name', 'account', 'avatar', 'updatedAt'] }
+        {
+          model: User,
+          as: 'poster',
+          attributes: ['id', 'name', 'account', 'avatar', 'updatedAt']
+        }
       ],
       nest: true,
       order: [['updatedAt', 'DESC']]
@@ -181,8 +203,8 @@ const userController = {
         currentIsLiked: currentUser.Likes.some(lu => lu.id === LikedPost.id)
       }
     })
-    return Promise.resolve(result).then(result =>
-      res.status(200).json(result)
+    return Promise.resolve(result).then(
+      result => res.status(200).json(result)
       // res.status(200).json({ status: 'success', likes: result })
     )
   }),
@@ -236,15 +258,13 @@ const userController = {
       e = { ...e }
       delete Object.assign(e, { followerId: e.id }).id
       e.currentfollowed = userData.Followings
-        ? userData.Followings.some(
-          element => element.id === e.followerId
-        )
+        ? userData.Followings.some(element => element.id === e.followerId)
         : false
       delete e.Followship
       return e
     })
-    return Promise.resolve(result).then(result =>
-      res.status(200).json(result)
+    return Promise.resolve(result).then(
+      result => res.status(200).json(result)
       // res.status(200).json({ status: 'success', followers: result })
     )
   }),
@@ -263,8 +283,8 @@ const userController = {
     })
     let result = await user.update(finalform)
     result = result.toJSON()
-    return Promise.resolve(result).then(result =>
-      res.status(200).json(result)
+    return Promise.resolve(result).then(
+      result => res.status(200).json(result)
       // res.status(200).json({ status: 'success', updatedUser: result })
     )
   }),

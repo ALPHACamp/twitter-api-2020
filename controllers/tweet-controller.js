@@ -99,7 +99,6 @@ const tweetController = {
       Tweet.findByPk(TweetId),
       Like.findOne({ where: { UserId, TweetId } })
     ])
-    console.log(like, tweet)
     if (!like || !tweet) throw new ReqError('資料庫無此筆資料!')
     const deletedLikeData = await like.destroy()
     res.status(200).json(deletedLikeData)
