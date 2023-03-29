@@ -4,7 +4,7 @@ const { User, Tweet, Reply, Like } = require('../models')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
-const Sequelize = require('sequelize')
+const sequelize = require('sequelize')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -32,36 +32,20 @@ const adminController = {
     return User.findAll({
       attributes: ['id', 'name', 'account', 'avatar', 'cover',
         [
-          Sequelize.literal(`(
-            SELECT COUNT(*) FROM tweets 
-            WHERE tweets.UserId = user.id
-          )`),
-          'tweetCounts'
+          sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id)'), 'tweetCounts'
         ],
         [
-          Sequelize.literal(`(
-            SELECT COUNT(*) FROM tweets RIGHT OUTER JOIN likes ON tweets.id=likes.TweetId 
-            WHERE tweets.UserId = user.id 
-          )`),
-          'beLikedCounts'
+          sequelize.literal('(SELECT COUNT(*) FROM tweets RIGHT OUTER JOIN likes ON tweets.id=likes.TweetId WHERE tweets.UserId = user.id)'), 'beLikedCounts'
         ],
         [
-          Sequelize.literal(`(
-            SELECT COUNT(*) FROM followships 
-            WHERE followships.followingId = user.id
-          )`),
-          'followerCounts'
+          sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id)'), 'followerCounts'
         ],
         [
-          Sequelize.literal(`(
-            SELECT COUNT(*) FROM followships 
-            WHERE followships.followerId = user.id
-          )`),
-          'followingCounts'
+          sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id)'), 'followingCounts'
         ]
       ],
       order: [
-        [Sequelize.literal('tweetCounts'), 'DESC']
+        [sequelize.literal('tweetCounts'), 'DESC']
       ],
       raw: true
     })
@@ -73,25 +57,13 @@ const adminController = {
       attributes: {
         include: [
           [
-            Sequelize.literal(`(
-              SELECT SUBSTR(description,1,50) FROM tweets
-              WHERE tweets.id = tweet.id
-            )`),
-            'description'
+            sequelize.literal('(SELECT SUBSTR(description,1,50) FROM tweets WHERE tweets.id = tweet.id)'), 'description'
           ],
           [
-            Sequelize.literal(`(
-              SELECT COUNT(*) FROM replies 
-              WHERE replies.TweetId = tweet.id
-            )`),
-            'replyCounts'
+            sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id)'), 'replyCounts'
           ],
           [
-            Sequelize.literal(`(
-              SELECT COUNT(*) FROM likes 
-              WHERE likes.TweetId = tweet.id
-            )`),
-            'likeCounts'
+            sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id)'), 'likeCounts'
           ]
         ]
       },
