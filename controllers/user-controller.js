@@ -115,7 +115,7 @@ const userController = {
     }
   },
 
-  putUser: async (req, res, next) => {
+  putUser: (req, res, next) => {
     if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     const { name, introduction } = req.body
     const { files } = req
@@ -125,7 +125,7 @@ const userController = {
         let coverUrl = user.coverUrl
         if (files) {
           avatar = files.avatar ? files.avatar[0].path : user.avatar
-          coverUrl = files.coverUrl ? files.coverUrl[1].path : user.coverUrl
+          coverUrl = files.coverUrl ? files.coverUrl[0].path : user.coverUrl
         }
         return user.update({
           name,
@@ -134,7 +134,10 @@ const userController = {
           coverUrl
         })
       })
-      .then(updatedUser => res.json(updatedUser))
+      .then(updatedUser => {
+        const { password, ...userData } = updatedUser.dataValues
+        return res.json(userData)
+      })
       .catch(error => next(error))
   },
 

@@ -19,8 +19,12 @@ const fileFilter = async (req, file, cb) => {
   if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
     return cb(new Error('Please upload a valid image file'))
   }
-  cb(undefined, true)
+  cb(null, true)
 }
 
-const upload = multer({ storage: storage, fileFilter })
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 1024 * 1024 },
+  fileFilter
+})
 module.exports = upload
