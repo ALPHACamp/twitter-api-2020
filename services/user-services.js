@@ -81,8 +81,8 @@ const userServices = {
     })
       .then(user => {
         if (user !== null) {
-          if (user.email === email) throw new Error('此信箱已被註冊')
-          if (user.account === account) throw new Error('此帳號已被註冊')
+          if (user.email === email) throw new Error('email 已重複註冊！')
+          if (user.account === account) throw new Error('account 已重複註冊！')
         }
         const hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
         return User.create({
@@ -98,7 +98,7 @@ const userServices = {
             delete userData.password
             return cb(null, {
               status: 'success',
-              message: '成功註冊',
+              message: '建立帳號成功！',
               data: {
                 token,
                 userData
