@@ -11,9 +11,10 @@ module.exports = {
       'SELECT id FROM Tweets;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
+    const replyAmount = tweets.length * 2 // ! 最後要改回 ... * 3 ~~~~~~~~~~~~~~~
 
     await queryInterface.bulkInsert('Replies',
-      Array.from({ length: tweets.length * 3 }, (_, i) => ({
+      Array.from({ length: replyAmount }, (_, i) => ({
         comment: faker.lorem.text(),
         user_id: users[Math.floor(Math.random() * users.length)].id, // 若要 "不重複的 3 人"，之後再修
         tweet_id: tweets[i % tweets.length].id,
