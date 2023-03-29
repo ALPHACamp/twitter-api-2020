@@ -4,8 +4,7 @@
     "password": "password",
     "database": "ac_twitter_workspace",
     "host": "127.0.0.1",
-    "dialect": "mysql",
-    "logging": false
+    "dialect": "mysql"
   },
   "test": {
     "username": "root",
