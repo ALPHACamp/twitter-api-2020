@@ -376,12 +376,12 @@ const userController = {
         name,
         introduction,
         avatar: avatarPath || user.avatar,
-        cover: coverPath || user.cover,
+        cover: coverPath || user.cover
       })
 
-      res.json({ status: 'success', message: '成功編輯個人資料',})
-    } catch (err) { 
-      next(err) 
+      res.json({ status: 'success', message: '成功編輯個人資料' })
+    } catch (err) {
+      next(err)
     }
   },
   editUserAccount: async (req, res, next) => {
@@ -422,7 +422,7 @@ const userController = {
       // check if account and email are unique
       const [existingUserAccount, existingUserEmail] = await Promise.all([
         User.findOne({ where: { account } }),
-        User.findOne({ where: { email } }),
+        User.findOne({ where: { email } })
       ])
       // verify if the user editing currently is the same user as the one logged in. If they are the same user, no error message needs to be displayed
       if (existingUserAccount && existingUserAccount.id !== currentUserId) {
@@ -443,7 +443,7 @@ const userController = {
         account,
         name,
         email,
-        password: hashedPassword,
+        password: hashedPassword
       })
 
       return res.status(200).json({ status: 'success', message: '帳號設定修改成功！' })
