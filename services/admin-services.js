@@ -5,6 +5,12 @@ const adminServices = {
   // 推文
   getTweets: (req, cb) => {
     Tweet.findAll({
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'account', 'avatar', 'name']
+        }
+      ],
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
