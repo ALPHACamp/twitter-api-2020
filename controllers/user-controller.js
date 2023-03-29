@@ -233,7 +233,7 @@ const userController = {
     try {
       const { userId } = req.params
       const users = await User.findByPk(userId, {
-        include: { model: User, as: 'Followings' },
+        include: [{model: Tweet}, { model: User, as: 'Followings' }],
         raw: true,
         nest: true
       })
@@ -243,6 +243,9 @@ const userController = {
       const userData = users
       const followingData = []
       followingData.push({
+        UserId: userData.id,
+        UserName: userData.name,
+        tweetCount: userData.Tweets.length,
         followingId: userData.Followings.id,
         followingAccount: userData.Followings.account,
         followingAvatar: userData.Followings.avatar,
@@ -300,7 +303,7 @@ const userController = {
     try {
       const { userId } = req.params
       const users = await User.findByPk(userId, {
-        include: { model: User, as: 'Followers' },
+        include: [Tweet, { model: User, as: 'Followers' }],
         order: [
           [{ model: User, as: 'Followers' }, Followship, 'createdAt', 'DESC']
         ],
@@ -315,6 +318,7 @@ const userController = {
 
       const followerData = []
       followerData.push({
+        tweetCount: users.Tweets.length,
         followerId: users.Followers.id,
         followerAccount: users.Followers.account,
         followerName: users.Followers.name,
@@ -328,6 +332,7 @@ const userController = {
             (fg) => fg.Followship.followingId === users.Followers.id
           )
       })
+      console.log(followerData)
 
       return res.status(200).json(followerData)
     } catch (error) {
