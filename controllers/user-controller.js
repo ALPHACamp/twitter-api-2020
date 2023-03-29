@@ -1,4 +1,4 @@
-const { Op } = require('sequelize')
+const sequelize = require('sequelize')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const { User, Followship, Tweet, Reply, Like } = db
@@ -69,7 +69,7 @@ const userController = {
         raw: true,
         attributes: ['id']
       }),
-      Followship.findOne({ where: { [Op.and]: [{ followerId }, { followingId }] } })
+      Followship.findOne({ where: { [sequelize.Op.and]: [{ followerId }, { followingId }] } })
     ])
       .then(([users, followship]) => {
         if (!users.some(user => user.id === followingId)) throw new Error("User didn't exist!")
@@ -94,7 +94,7 @@ const userController = {
         raw: true,
         attributes: ['id']
       }),
-      Followship.findOne({ where: { [Op.and]: [{ followerId }, { followingId }] } })
+      Followship.findOne({ where: { [sequelize.Op.and]: [{ followerId }, { followingId }] } })
     ])
       .then(([users, followship]) => {
         if (!users.some(user => user.id === followingId)) throw new Error("User didn't exist!")
@@ -298,18 +298,23 @@ const userController = {
       User.findAll({
         attributes: ['id'],
         where: {
-          id: { [Op.ne]: req.params.id },
+          id: { [sequelize.Op.ne]: req.params.id },
           account
         }
       }),
       User.findAll({
         attributes: ['id'],
         where: {
-          id: { [Op.ne]: req.params.id },
+          id: { [sequelize.Op.ne]: req.params.id },
           email
         }
       }),
-      User.findByPk(req.params.id)
+      User.findOne({
+        where: { id: req.params.id },
+        attributes: {
+          exclude: ['role']
+        }
+      })
     ])
       .then(([repeatAccount, repeatEmail, user]) => {
         if (!user) throw new Error("User did't exist!")
@@ -364,7 +369,6 @@ const userController = {
           user => Followings.some(following => following.followingId === user.id)
         ).map(user => {
           const followingDate = user.Followers.filter(f => f.id === id)[0].Followship.createdAt
-          console.log(followingDate)
           const data = {
             ...user,
             followingId: user.id,
