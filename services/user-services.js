@@ -303,9 +303,17 @@ const userService = {
     assert(checkIntroductionLength <= 160, '字數超過上限')
     const avatarFile = req.files?.avatar ? req.files.avatar[0] : null
     const coverFile = req.files?.cover ? req.files.cover[0] : null
+
+    let coverFilePath = null
+    if (coverFile) {
+      coverFilePath = imgurFileHandler(coverFile)
+    } else if (coverFile === null) {
+      coverFilePath = ''
+    }
+
     return Promise.all([
       imgurFileHandler(avatarFile),
-      imgurFileHandler(coverFile),
+      coverFilePath,
       User.findByPk(req.params.userId)
     ])
       .then(([avatarFilePath, coverFilePath, user]) => {
@@ -313,13 +321,10 @@ const userService = {
           name,
           introduction,
           avatar: avatarFilePath || user.avatar,
-          cover: coverFilePath || user.cover
+          cover: coverFilePath === '' ? null : coverFilePath || user.cover
         })
       })
       .then(updatedUser => {
-        if (coverFile === null) {
-          updatedUser.cover = 'https://i.imgur.com/jXE6Mmp.png'
-        }
         updatedUser = updatedUser.toJSON()
         delete updatedUser.password
         cb(null, { updatedUser })
