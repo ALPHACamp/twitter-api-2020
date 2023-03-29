@@ -38,15 +38,15 @@ const tweetController = {
         include: [
           [
             sequelize.literal(`(
-              SELECT COUNT(*) FROM replies 
-              WHERE replies.TweetId = tweet.id
+              SELECT COUNT(*) FROM Replies 
+              WHERE Replies.TweetId = Tweet.id
             )`),
             'replyCounts'
           ],
           [
             sequelize.literal(`(
-              SELECT COUNT(*) FROM likes 
-              WHERE likes.TweetId = tweet.id
+              SELECT COUNT(*) FROM Likes 
+              WHERE Likes.TweetId = Tweet.id
             )`),
             'likeCounts'
           ]
