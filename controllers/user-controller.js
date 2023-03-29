@@ -121,8 +121,12 @@ const userController = {
     const { files } = req
     return User.findByPk(req.params.userId)
       .then(user => {
-        const avatar = files.avatar ? files.avatar[0].path : user.avatar
-        const coverUrl = files.coverUrl ? files.coverUrl[1].path : user.coverUrl
+        let avatar = user.avatar
+        let coverUrl = user.coverUrl
+        if (files) {
+          avatar = files.avatar ? files.avatar[0].path : user.avatar
+          coverUrl = files.coverUrl ? files.coverUrl[1].path : user.coverUrl
+        }
         return user.update({
           name,
           introduction,
