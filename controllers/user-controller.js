@@ -204,7 +204,7 @@ const userController = {
     const result = followings.toJSON().Followings.map(e => {
       e = { ...e }
       delete Object.assign(e, { followingId: e.id }).id
-      e.currentIsFollowed = userData.Followings
+      e.currentfollowed = userData.Followings
         ? userData.Followings.some(element => element.id === e.followingId)
         : false
       delete e.Followship
@@ -234,7 +234,7 @@ const userController = {
     const result = followers.toJSON().Followers.map(e => {
       e = { ...e }
       delete Object.assign(e, { followerId: e.id }).id
-      e.currentIsFollowed = userData.Followings
+      e.currentfollowed = userData.Followings
         ? userData.Followings.some(
           element => element.id === e.followerId
         )
