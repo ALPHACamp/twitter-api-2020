@@ -258,7 +258,7 @@ const userController = {
       const signinUser = helpers.getUser(req)
       const followers = data.map(el => ({
         ...el,
-        isFollowing: signinUser && signinUser.Followings.some(following => following.id === el.followerId)
+        isFollowing: signinUser.Followings ? signinUser.Followings.some(following => following.id === el.followerId) : false
       }))
       res.status(200).json(followers)
     } catch (err) {
@@ -286,7 +286,7 @@ const userController = {
       const signinUser = helpers.getUser(req)
       const followings = data.map(el => ({
         ...el,
-        isFollowing: signinUser && signinUser.Followings.some(following => following.id === el.followingId)
+        isFollowing: signinUser.Followings ? signinUser.Followings.some(following => following.id === el.followingId) : false
       }))
       res.status(200).json(followings)
     } catch (err) {
