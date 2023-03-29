@@ -1,5 +1,6 @@
 const { Tweet, User, Like, Reply, sequelize } = require("../models");
 const { getUser } = require("../helpers/auth-helper");
+const { newError } = require("../helpers/error-helper");
 
 const tweetController = {
   // 要取得所有貼文，每則貼文要拿到user的name跟account，還有每則貼文的按讚數/回覆數量，去關聯Like/Reply
@@ -8,11 +9,7 @@ const tweetController = {
     try {
       const currentUserId = getUser(req).id;
 
-      if (!currentUserId) {
-        const err = new Error("找不到使用者");
-        err.status = 404;
-        throw err;
-      }
+      if (!currentUserId) throw newError(404, "找不到使用者");
 
       const tweets = await Tweet.findAll({
         nest: true,
@@ -60,16 +57,10 @@ const tweetController = {
     const currentUserId = getUser(req).id;
     const description = req.body.description.trim();
     try {
-      if (!description) {
-        const error = new Error("內容不可空白");
-        error.status = 400;
-        throw error;
-      }
-      if (description.length > 140) {
-        const err = new Error("字數不可超過140字");
-        err.status = 400;
-        throw err;
-      }
+      if (!description) throw newError(400, "內容不可空白");
+
+      if (description.length > 140) throw newError(400, "字數不可超過140字");
+
       const tweetInput = await Tweet.create({
         UserId: currentUserId,
         description,
@@ -121,11 +112,8 @@ const tweetController = {
         ],
         order: [["createdAt", "DESC"]],
       });
-      if (!tweet) {
-        const err = new Error("該貼文不存在");
-        err.status = 404;
-        throw err;
-      }
+      if (!tweet) throw newError(404, "該貼文不存在");
+
       return res.json({
         ...tweet,
       });
@@ -138,11 +126,8 @@ const tweetController = {
     try {
       const tweetId = req.params.tweet_id;
       const tweet = await Tweet.findByPk(tweetId);
-      if (!tweet) {
-        const err = new Error("該貼文不存在");
-        err.status = 404;
-        throw err;
-      }
+      if (!tweet) throw newError(404, "該貼文不存在");
+
       const replies = await Reply.findAll({
         raw: true,
         nest: true,
@@ -154,11 +139,8 @@ const tweetController = {
         attributes: ["id", "comment", "createdAt"],
         order: [["createdAt", "DESC"]],
       });
-      if (!replies.length) {
-        const err = new Error("該貼文沒有任何留言回覆");
-        err.status = 404;
-        throw err;
-      }
+      if (!replies.length) throw newError(404, "該貼文沒有任何留言回覆");
+
       return res.json(replies);
     } catch (err) {
       return next(err);
@@ -171,21 +153,12 @@ const tweetController = {
       const TweetId = req.params.tweet_id;
       const comment = req.body.comment.trim();
       const tweet = await Tweet.findByPk(TweetId);
-      if (!tweet) {
-        const err = new Error("該貼文不存在");
-        err.status = 404;
-        throw err;
-      }
-      if (!comment) {
-        const err = new Error("內容不可空白");
-        err.status = 404;
-        throw err;
-      }
-      if (comment.length > 140) {
-        const err = new Error("字數不可超過140字");
-        err.status = 400;
-        throw err;
-      }
+      if (!tweet) throw newError(404, "該貼文不存在");
+
+      if (!comment) throw newError(400, "內容不可空白");
+
+      if (comment.length > 140) throw newError(400, "字數不可超過140字");
+
       const replyInput = await Reply.create({
         UserId,
         TweetId,
@@ -211,16 +184,10 @@ const tweetController = {
           },
         }),
       ]);
-      if (!tweet) {
-        const err = new Error("該貼文不存在");
-        err.status = 404;
-        throw err;
-      }
-      if (like) {
-        const err = new Error("使用者已經按過讚");
-        err.status = 404;
-        throw err;
-      }
+      if (!tweet) throw newError(404, "該貼文不存在");
+
+      if (like) throw newError(400, "使用者已經按過讚");
+
       const createdLike = await Like.create({
         TweetId: tweetId,
         UserId: currentUser,

@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { newError } = require("../helpers/error-helper");
 const { Op, QueryTypes } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
 const { getUser } = require("../helpers/auth-helper");
@@ -16,30 +17,19 @@ const userController = {
   signUp: async (req, res, next) => {
     const { name, account, email, password, checkPassword } = req.body;
     try {
-      if (!name || !account || !email || !password || !checkPassword) {
-        const error = new Error("欄位不可空白!");
-        error.status = 400;
-        throw error;
-      }
-      if (password !== checkPassword) {
-        const error = new Error("密碼與確認密碼不符!");
-        error.status = 400;
-        throw error;
-      }
+      if (!name || !account || !email || !password || !checkPassword)
+        throw newError(400, "欄位不可空白!");
+      if (password !== checkPassword)
+        throw newError(400, "密碼與確認密碼不符!");
+
       const [isEmailExist, isAccountExist] = await Promise.all([
         User.findOne({ where: { email } }),
         User.findOne({ where: { account } }),
       ]);
-      if (isEmailExist) {
-        const error = new Error("email 已重複註冊！");
-        error.status = 400;
-        throw error;
-      }
-      if (isAccountExist) {
-        const error = new Error("account 已重複註冊！");
-        error.status = 400;
-        throw error;
-      }
+
+      if (isEmailExist) throw newError(400, "email 已重複註冊！");
+      if (isAccountExist) throw newError(400, "account 已重複註冊！");
+
       const user = await User.create({
         name,
         account,
@@ -56,23 +46,16 @@ const userController = {
   signIn: async (req, res, next) => {
     const { account, password } = req.body;
     try {
-      if (!account || !password) {
-        const error = new Error("欄位不可空白!");
-        error.status = 400;
-        throw error;
-      }
+      if (!account || !password) throw newError(400, "欄位不可空白!");
+
       const foundUser = await User.findOne({ where: { account } });
-      if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("帳號不存在!");
-        error.status = 404;
-        throw error;
-      }
+
+      if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在!");
+
       const isMatch = await bcrypt.compare(password, foundUser.password);
-      if (!isMatch) {
-        const error = new Error("密碼不正確!");
-        error.status = 400;
-        throw error;
-      }
+
+      if (!isMatch) throw newError(400, "密碼不正確!");
+
       const loginUser = foundUser.toJSON();
       delete loginUser.password;
       const token = jwt.sign(loginUser, process.env.JWT_SECRET, {
@@ -115,11 +98,8 @@ const userController = {
       const loginUserFollowingIds = loginUser?.Followings
         ? loginUser.Followings.map((f) => f.id)
         : [];
-      if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("使用者不存在!");
-        error.status = 404;
-        throw error;
-      }
+      if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在!");
+
       const user = foundUser.toJSON();
       delete user.password;
       return res.json({
@@ -134,11 +114,9 @@ const userController = {
   getCurrentUser: async (req, res, next) => {
     try {
       const foundUser = await User.findByPk(getUser(req).id);
-      if (!foundUser) {
-        const error = new Error("使用者不存在!");
-        error.status = 404;
-        throw error;
-      }
+
+      if (!foundUser) throw newError(404, "帳號不存在!");
+
       const currentUser = foundUser.toJSON();
       delete currentUser.password;
       return res.json({ ...currentUser });
@@ -155,26 +133,20 @@ const userController = {
     const avatarFile = avatar ? avatar[0] : null;
     const coverFile = cover ? cover[0] : null;
     try {
-      if (introduction.length > 160 || name.length > 50) {
-        const error = new Error("字數超出上限！");
-        error.status = 400;
-        throw error;
-      }
-      if (getUser(req).id !== Number(id)) {
-        const error = new Error("無法更改他人資料!");
-        error.status = 401;
-        throw error;
-      }
+      if (introduction.length > 160 || name.length > 50)
+        throw newError(400, "字數超出上限！");
+
+      if (getUser(req).id !== Number(id))
+        throw newError(401, "無法更改他人資料!");
+
       const [foundUser, avatarLink, coverLink] = await Promise.all([
         User.findByPk(id),
         imgurFileHandler(avatarFile),
         imgurFileHandler(coverFile),
       ]);
-      if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("使用者不存在!");
-        error.status = 404;
-        throw error;
-      }
+
+      if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在!");
+
       const data = await foundUser.update({
         name,
         introduction,
@@ -192,42 +164,29 @@ const userController = {
     const { id } = req.params;
     const { name, account, email, password, checkPassword } = req.body;
     try {
-      if (getUser(req).id !== Number(id)) {
-        const error = new Error("無法更改他人資料!");
-        error.status = 401;
-        throw error;
-      }
-      if (!name || !account || !email || !password || !checkPassword) {
-        const error = new Error("欄位不可空白!");
-        error.status = 400;
-        throw error;
-      }
-      if (password !== checkPassword) {
-        const error = new Error("密碼與確認密碼不符!");
-        error.status = 400;
-        throw error;
-      }
+      if (getUser(req).id !== Number(id))
+        throw newError(401, "無法更改他人資料!");
+
+      if (!name || !account || !email || !password || !checkPassword)
+        throw newError(400, "欄位不可空白!");
+
+      if (password !== checkPassword)
+        throw newError(400, "密碼與確認密碼不符!");
+
       // - 確認更改的新值 (email, account) 是否有自己以外的人已經擁有了
       const [isEmailExist, isAccountExist] = await Promise.all([
         User.findOne({ where: { email, id: { [Op.ne]: id } } }),
         User.findOne({ where: { account, id: { [Op.ne]: id } } }),
       ]);
-      if (isEmailExist) {
-        const error = new Error("email 已重複註冊！");
-        error.status = 400;
-        throw error;
-      }
-      if (isAccountExist) {
-        const error = new Error("account 已重複註冊！");
-        error.status = 400;
-        throw error;
-      }
+
+      if (isEmailExist) throw newError(400, "email 已重複註冊！");
+
+      if (isAccountExist) throw newError(400, "account 已重複註冊！");
+
       const foundUser = await User.findByPk(id);
-      if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("使用者不存在!");
-        error.status = 404;
-        throw error;
-      }
+
+      if (!foundUser || foundUser.isAdmin) throw newError(400, "帳號不存在！");
+
       const data = await foundUser.update({
         name,
         account,
@@ -244,11 +203,8 @@ const userController = {
   addFollowing: async (req, res, next) => {
     const { id } = req.body;
     try {
-      if (getUser(req).id === Number(id)) {
-        const error = new Error("無法追蹤自己!");
-        error.status = 400;
-        throw error;
-      }
+      if (getUser(req).id === Number(id)) throw newError(400, "無法追蹤自己!");
+
       const [foundUser, followship] = await Promise.all([
         User.findByPk(id, { raw: true }),
         Followship.findOne({
@@ -258,16 +214,11 @@ const userController = {
           },
         }),
       ]);
-      if (followship) {
-        const error = new Error("已追蹤過此使用者!");
-        error.status = 400;
-        throw error;
-      }
-      if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("使用者不存在!");
-        error.status = 404;
-        throw error;
-      }
+
+      if (followship) throw newError(400, "已追蹤過此使用者!");
+
+      if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在！");
+
       // - 新增追蹤
       const createdFollowship = await Followship.create({
         followerId: getUser(req).id,
@@ -282,17 +233,13 @@ const userController = {
   removeFollowing: async (req, res, next) => {
     const { followingId } = req.params;
     try {
-      if (getUser(req).id === Number(followingId)) {
-        const error = new Error("無法追蹤自己!");
-        error.status = 400;
-        throw error;
-      }
+      if (getUser(req).id === Number(followingId))
+        throw newError(400, "無法追蹤自己!");
+
       const foundUser = await User.findByPk(followingId, { raw: true });
-      if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("使用者不存在!");
-        error.status = 404;
-        throw error;
-      }
+
+      if (!foundUser || foundUser.isAdmin) throw newError(404, "使帳號不存在！");
+
       // - 取消追蹤 (回傳刪除的資料筆數)
       const deletedCount = await Followship.destroy({
         where: {
@@ -309,11 +256,9 @@ const userController = {
     const { id } = req.params;
     try {
       const foundUser = await User.findByPk(id);
-      if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("使用者不存在!");
-        error.status = 404;
-        throw error;
-      }
+
+      if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在！");
+
       const [tweets, loginUser] = await Promise.all([
         Tweet.findAll({
           include: [
@@ -356,11 +301,9 @@ const userController = {
     const { id } = req.params;
     try {
       const foundUser = await User.findByPk(id);
-      if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("使用者不存在!");
-        error.status = 404;
-        throw error;
-      }
+
+      if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在！");
+
       const replies = await Reply.findAll({
         include: [
           {
@@ -392,11 +335,9 @@ const userController = {
     const { id } = req.params;
     try {
       const foundUser = await User.findByPk(id);
-      if (!foundUser || foundUser.isAdmin) {
-        const error = new Error("使用者不存在!");
-        error.status = 404;
-        throw error;
-      }
+
+      if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在！");
+
       const [likes, loginUser] = await Promise.all([
         Like.findAll({
           include: [
@@ -489,11 +430,8 @@ const userController = {
     const DEFAULT_LIMIT = 10;
     const limit = req.query.limit || DEFAULT_LIMIT;
     try {
-      if (Number(limit) < 0) {
-        const error = new Error("limit 不可小於 0 !");
-        error.status = 404;
-        throw error;
-      }
+      if (Number(limit) < 0) throw newError(400, "limit 不可小於 0 !");
+
       const users = await sequelize.query(
         `
         SELECT f.followingId AS id, u.account, u.name, u.avatar, u.introduction , COUNT(f.followingId) AS followerCounts
@@ -516,11 +454,9 @@ const userController = {
     const id = Number(req.params.id);
     try {
       // 先確認當前使用者只能修改自己的封面
-      if (currentUserId !== id) {
-        const err = new Error("無法修改其他使用者的封面照片");
-        err.status = 401;
-        throw err;
-      }
+      if (currentUserId !== id)
+        throw newError(401, "無法修改其他使用者的封面照片!");
+
       const user = await User.findByPk(id, { attributes: ["id", "cover"] });
       const userCover = await user.update({
         cover:
