@@ -4,6 +4,7 @@ const { User, Tweet, Reply, Like } = require('../models')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
+const sequelize = require('sequelize')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -29,52 +30,82 @@ const adminController = {
   },
   getUsers: (req, res, next) => {
     return User.findAll({
-      attributes: ['id', 'name', 'account', 'avatar', 'cover'],
-      include: [
-        { model: Tweet, include: Like },
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ]
+      attributes: ['id', 'name', 'account', 'avatar', 'cover',
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*) FROM Tweets 
+            WHERE Tweets.UserId = User.id
+          )`),
+          'tweetCounts'
+        ],
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*) FROM Tweets RIGHT OUTER JOIN Likes ON Tweets.id=Likes.TweetId 
+            WHERE Tweets.UserId = User.id 
+          )`),
+          'beLikedCounts'
+        ],
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*) FROM Followships 
+            WHERE Followships.followingId = User.id
+          )`),
+          'followerCounts'
+        ],
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*) FROM Followships 
+            WHERE Followships.followerId = User.id
+          )`),
+          'followingCounts'
+        ]
+      ],
+      order: [
+        [sequelize.literal('tweetCounts'), 'DESC']
+      ],
+      raw: true
     })
-      .then(users => {
-        const usersData = users.map(user => {
-          const data = {
-            ...user.toJSON(),
-            tweetCounts: user.Tweets.length,
-            // 先取出每篇推文被like的數量, 再透過array.reduce依序加起來(達到加總的效果)
-            beLikedCounts: user.Tweets.map(tweet => tweet.Likes.length).reduce((accumulator, currentValue) => accumulator + currentValue, 0),
-            followerCounts: user.Followers.length,
-            followingCounts: user.Followings.length
-          }
-          delete data.Tweets
-          delete data.Followers
-          delete data.Followings
-          return data
-        })
-        res.json(usersData.sort((a, b) => b.tweetCounts - a.tweetCounts))
-      })
+      .then(users => res.json(users))
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT SUBSTR(description,1,50) FROM Tweets
+              WHERE Tweets.id = Tweet.id
+            )`),
+            'description'
+          ],
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*) FROM Replies 
+              WHERE Replies.TweetId = Tweet.id
+            )`),
+            'replyCounts'
+          ],
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*) FROM Likes 
+              WHERE Likes.TweetId = Tweet.id
+            )`),
+            'likeCounts'
+          ]
+        ]
+      },
       order: [['createdAt', 'DESC']],
       include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: Reply },
-        { model: Like }
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ]
     })
       .then(tweets => {
         const tweetsData = tweets.map(tweet => {
           const data = {
             ...tweet.toJSON(),
-            description: tweet.description.substring(0, 50),
-            period: dayjs(tweet.createdAt).fromNow(),
-            replyCounts: tweet.Replies.length,
-            likeCounts: tweet.Likes.length
+            period: dayjs(tweet.createdAt).fromNow()
           }
-          delete data.Replies
-          delete data.Likes
           return data
         })
 
