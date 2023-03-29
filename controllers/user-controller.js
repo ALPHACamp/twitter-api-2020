@@ -1,7 +1,7 @@
-const sequelize = require('sequelize')
+const { Op } = require('sequelize')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
-const { User, Followship, Tweet, Reply, Like } = db
+const { User, Followship, Tweet, Reply, Like, sequelize } = db
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -69,7 +69,7 @@ const userController = {
         raw: true,
         attributes: ['id']
       }),
-      Followship.findOne({ where: { [sequelize.Op.and]: [{ followerId }, { followingId }] } })
+      Followship.findOne({ where: { [Op.and]: [{ followerId }, { followingId }] } })
     ])
       .then(([users, followship]) => {
         if (!users.some(user => user.id === followingId)) throw new Error("User didn't exist!")
@@ -94,7 +94,7 @@ const userController = {
         raw: true,
         attributes: ['id']
       }),
-      Followship.findOne({ where: { [sequelize.Op.and]: [{ followerId }, { followingId }] } })
+      Followship.findOne({ where: { [Op.and]: [{ followerId }, { followingId }] } })
     ])
       .then(([users, followship]) => {
         if (!users.some(user => user.id === followingId)) throw new Error("User didn't exist!")
@@ -345,14 +345,14 @@ const userController = {
       User.findAll({
         attributes: ['id'],
         where: {
-          id: { [sequelize.Op.ne]: req.params.id },
+          id: { [Op.ne]: req.params.id },
           account
         }
       }),
       User.findAll({
         attributes: ['id'],
         where: {
-          id: { [sequelize.Op.ne]: req.params.id },
+          id: { [Op.ne]: req.params.id },
           email
         }
       }),
