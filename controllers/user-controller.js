@@ -175,9 +175,26 @@ const userController = {
         where: { UserId: id },
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-          { model: Reply, attributes: ['id'] },
           { model: Like, attributes: ['UserId'] }
         ],
+        attributes: {
+          include: [
+            [
+              sequelize.literal(`(
+                SELECT COUNT(*) FROM replies 
+                WHERE replies.TweetId = tweet.id
+              )`),
+              'replyCounts'
+            ],
+            [
+              sequelize.literal(`(
+                SELECT COUNT(*) FROM likes 
+                WHERE likes.TweetId = tweet.id
+              )`),
+              'likeCounts'
+            ]
+          ]
+        },
         order: [['createdAt', 'DESC']]
       }),
       User.findByPk(id)
@@ -188,12 +205,9 @@ const userController = {
         const userTweets = tweets.map(tweet => {
           const data = {
             ...tweet.toJSON(),
-            replyCounts: tweet.Replies.length,
-            likeCounts: tweet.Likes.length,
             isLiked: tweet.Likes.some(like => like.UserId === userId),
             period: dayjs(tweet.createdAt).fromNow()
           }
-          delete data.Replies
           delete data.Likes
 
           return data
