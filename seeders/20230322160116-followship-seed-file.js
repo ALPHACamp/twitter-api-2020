@@ -17,7 +17,7 @@ module.exports = {
       users.map(user => ({
         follower_id: user.follower_id,
         following_id: user.following_id,
-        created_at: faker.date.between('2023-03-01T00:00:00.000Z', '2023-03-20T00:00:00.000Z'),
+        created_at: faker.date.between('2023-03-20T00:00:00.000Z', '2023-03-28T00:00:00.000Z'),
         updated_at: new Date()
       })), {})
   },
