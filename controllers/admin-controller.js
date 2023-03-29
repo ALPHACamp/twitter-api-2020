@@ -1,10 +1,9 @@
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
-const sequelize = require('sequelize')
 
 const adminController = {
   signIn: (req, res, next) => {
