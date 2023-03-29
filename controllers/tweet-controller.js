@@ -45,7 +45,6 @@ const tweetController = {
       nest: true
     })
       .then(tweet => {
-        console.log(tweet)
         if (!tweet) throw new Error('推文不存在')
         return res.status(200).json(tweet)
       })
