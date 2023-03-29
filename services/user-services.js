@@ -194,7 +194,7 @@ const userServices = {
     return Followship.findAll({
       where: { followerId: req.params.id },
       include: [
-        { model: User, as: 'Following', attributes: ['id', 'account', 'name', 'avatar'] }
+        { model: User, as: 'Following', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }
       ],
       order: [['createdAt', 'DESC']]
     }).then(followings => {
@@ -205,7 +205,7 @@ const userServices = {
     return Followship.findAll({
       where: { followingId: req.params.id },
       include: [
-        { model: User, as: 'Follower', attributes: ['id', 'account', 'name', 'avatar'] }
+        { model: User, as: 'Follower', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }
       ],
       order: [['createdAt', 'DESC']]
     }).then(followers => {
@@ -221,24 +221,33 @@ const userServices = {
     if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
     return User.findOne({
       where: {
-        [Op.or]: [{ account: { [Op.or]: { [Op.is]: null, [Op.eq]: account } } }, { email: { [Op.or]: { [Op.is]: null, [Op.eq]: email } } }]
+        [Op.or]: [{ account: { [Op.or]: { [Op.is]: null, [Op.eq]: account } } }]
       }
     })
       .then(user => {
-        if (user.account !== null && user.account === account) throw new Error('此帳號已被註冊')
-        if (user.email !== null && user.email === email) throw new Error('此信箱已被註冊')
-
+        const findUser = User.findOne({
+          where: {
+            [Op.or]: [{ email: { [Op.or]: { [Op.is]: null, [Op.eq]: email } } }]
+          }
+        })
+        if (user === null) return findUser
+        if (user.account !== null && user.id !== currentUserId) throw new Error('此帳號已被註冊')
+        return findUser
+      })
+      .then(user => {
+        if (user === null) return User.findByPk(currentUserId)
+        if (user.email !== null && user.id !== currentUserId) throw new Error('此信箱已被註冊')
         return User.findByPk(currentUserId)
       })
       .then(user => {
-        return user.update({
-          account,
-          name,
-          email,
-          password: hashedPassword || user.password,
-          introduction
-        })
-      })
+        user.name = name
+        user.account = account
+        user.email = email
+        user.introduction = introduction
+        if (password) { user.password = hashedPassword }
+        return user.save()
+      }
+      )
       .then(user => {
         const userData = user.toJSON()
         delete userData.password
