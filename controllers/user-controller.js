@@ -308,19 +308,23 @@ const userController = {
       }
 
       userInfo = {
-        id: userInfo.id,
+        userId: userInfo.id,
         account: userInfo.account,
         name: userInfo.name,
-        avatar: userInfo.avatar || 'https://reurl.cc/7RVA5N',
-        cover: userInfo.cover || 'https://reurl.cc/4QNDE3',
-        introduction: userInfo.introduction || 'Newbie here!',
+        avatar:
+          userInfo.avatar ||
+          "https://live.staticflickr.com/65535/52777903968_c0460ba4d6_z.jpg",
+        cover:
+          userInfo.cover ||
+          "https://live.staticflickr.com/65535/52777507974_aa5dcee4aa_z.jpg",
+        introduction: userInfo.introduction || "Newbie here!",
         tweetCount: userInfo.Tweets.length,
         followingCount: userInfo.Followings.length,
         followerCount: userInfo.Followers.length,
-        isFollowing: userInfo.Followings.some(
-          (u) => u.id === helpers.getUser(req).id
-        )
-      }
+        isFollowing: helpers
+          .getUser(req)
+          .Followings.some((u) => u.Followship.followingId === userInfo.id),
+      };
 
       return res.status(200).json(userInfo)
     } catch (error) {
