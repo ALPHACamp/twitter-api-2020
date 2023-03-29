@@ -1,5 +1,6 @@
 'use strict'
 const bcrypt = require('bcryptjs')
+const userAmount = 12 // ! 最後要改回 5 ~~~~~~~~~~~
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -15,7 +16,7 @@ module.exports = {
       updated_at: new Date()
     }], {})
       .then(() => queryInterface.bulkInsert('Users',
-        Array.from({ length: 5 }).map((_, i) =>
+        Array.from({ length: userAmount }).map((_, i) =>
           ({
             email: `user${i}@example.com`,
             password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
