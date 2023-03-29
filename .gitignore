@@ -89,4 +89,4 @@ typings/
 temp/
 
 # DynamoDB Local files
-async/
+note/
