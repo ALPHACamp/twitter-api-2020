@@ -345,7 +345,7 @@ const userController = {
       User.findByPk(getUser(req).dataValues.id, {
         attributes: ['id'],
         include: [
-          { model: User, as: 'Followers', attributes: ['id'] }
+          { model: User, as: 'Followings', attributes: ['id'] }
         ]
       })
     ])
@@ -361,7 +361,7 @@ const userController = {
           name: follower.name,
           avatar: follower.avatar,
           introduction: follower.introduction,
-          isFollowed: currentUser.toJSON().Followers.some(currentUserfollower => currentUserfollower.id === follower.id),
+          isFollowed: currentUser.toJSON().Followings.some(currentUserfollowing => currentUserfollowing.id === follower.id),
           isCurrentUser: follower.id === getUser(req).dataValues.id
         }))
           .sort((a, b) => (new Date(b.createdAt)).getTime() - (new Date(a.createdAt)).getTime())
