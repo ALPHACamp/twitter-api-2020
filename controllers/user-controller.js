@@ -505,18 +505,26 @@ const userController = {
           as: 'Followers',
           attributes: ['id']
         },
-        limit
+        limit,
+        raw: true,
+        nest: true
       })
       if (!users) {
         return res.status(404).json({ status: 'error', message: '無使用者資料!' })
       }
-      let usersData = users.map((user) => ({
-        ...user.toJSON(),
-        followerCount: user.Followers.length,
-        isFollowing: helpers.getUser(req).Followings.some(fg => fg.id === user.id)
-      }))
+
+      let usersData = users.map(user => {
+        return {
+          UserId: user.id,
+          account: user.account, 
+          name: user.name,
+          avatar: user.avatar || 'https://live.staticflickr.com/65535/52777903968_c0460ba4d6_z.jpg',
+          followerCount: user.Followers.length,
+          isFollowing: helpers.getUser(req).Followings.some(fg => fg.id === user.id)
+        }
+      })
       usersData = usersData.sort((a, b) => b.followerCount - a.followerCount)
-      return res.status(200).json({ status: 'success', data: usersData })
+      return res.status(200).json( usersData )
     } catch (error) { next(error) }
   }
 }
