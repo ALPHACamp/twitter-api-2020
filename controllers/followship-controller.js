@@ -89,8 +89,8 @@ const followshipController = {
           'account',
           'avatar',
           'cover',
-          [Sequelize.literal('(SELECT COUNT(*) FROM Followships  WHERE Followships.FollowingId = User.id )'), 'follower_count'],
-          [Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${ownerId} AND Followships.followingId = Followings.id )`),
+          [Sequelize.literal('(SELECT COUNT(*) FROM Followships  WHERE Followships.followingId = User.id )'), 'follower_count'],
+          [Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${ownerId} AND Followships.followingId = User.id )`),
             'is_followed']
         ],
         order: [[Sequelize.literal('follower_count'), 'DESC']],
