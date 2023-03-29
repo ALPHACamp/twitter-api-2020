@@ -61,11 +61,11 @@ const adminController = {
 
       const tweetData = tweets.map((tweet) => ({
         id: tweet.id,
-        description: tweet.description,
+        description: tweet.description.substring(0, 50),
         createdAt: tweet.createdAt,
         avatar: tweet.User.avatar,
         name: tweet.User.name,
-        account: tweet.User.account
+        account: tweet.User.account,
       }))
 
       return res.status(200).json(tweetData)
