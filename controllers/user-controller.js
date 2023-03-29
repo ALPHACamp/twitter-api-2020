@@ -63,6 +63,7 @@ const userController = {
     }
   },
   getUser: async (req, res, next) => {
+    const ownerId = helpers.getUser(req)?.id
     const id = Number(req.params?.id)
     try {
       const user = await User.findByPk(id, {
@@ -75,9 +76,11 @@ const userController = {
           'introduction',
           'role',
           [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id )'), 'tweet_count'],
-          [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowerId = User.id )'), 'following_count'],
-          [Sequelize.literal('(SELECT COUNT(*) FROM Followships  WHERE Followships.FollowingId = User.id )'), 'follower_count'],
-          [Sequelize.literal('(SELECT COUNT(*) FROM Likes JOIN Tweets ON Likes.TweetId = Tweets.id WHERE Tweets.UserId = User.id )'), 'total_like']
+          [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id )'), 'following_count'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Followships  WHERE Followships.followingId = User.id )'), 'follower_count'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Likes JOIN Tweets ON Likes.TweetId = Tweets.id WHERE Tweets.UserId = User.id )'), 'total_like'],
+          [Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${ownerId} AND Followships.followingId = User.id )`),
+            'is_followed']
         ]
       })
       if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'User not found' })
