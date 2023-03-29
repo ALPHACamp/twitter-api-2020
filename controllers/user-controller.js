@@ -108,9 +108,7 @@ const userController = {
       const temp = e.toJSON()
       temp.Replies = temp.Replies.length
       temp.Likes = temp.Likes.length
-      temp.currentIsLiked = currentUser.Likes.some(
-        like => like.TweetId === e.id
-      )
+      temp.currentIsLiked = currentUser.Likes?.some(like => like.TweetId === e.id)
       temp.avatar = user.avatar
       return temp
     })
@@ -152,7 +150,7 @@ const userController = {
   getLikes: tryCatch(async (req, res) => { // 可優化 將SQL語法轉為Squelize
     const { id } = req.params
     const user = await User.findByPk(id)
-    const currentUser = getUser(req)
+    const currentUser = getUser(req).dataValues
     if (!user) throw new ReqError('無此使用者資料')
     let likes = await Like.findAll({
       where: { UserId: id },
@@ -172,14 +170,15 @@ const userController = {
         { model: User, as: 'poster', attributes: ['id', 'name', 'account', 'avatar', 'updatedAt'] }
       ],
       nest: true,
+      raw: true,
       order: [['updatedAt', 'DESC']]
     })
     result = result.map(LikedPost => {
       delete Object.assign(LikedPost, { TweetId: LikedPost.id }).id
-      return {
-        LikedPost,
-        currentIsLiked: currentUser.Likes.some(lu => lu.id === LikedPost.id)
-      }
+      LikedPost.currentIsLiked = currentUser.Likes?.some(lu => {
+        return lu.TweetId === LikedPost.TweetId
+      })
+      return LikedPost
     })
     return Promise.resolve(result).then(result =>
       res.status(200).json(result)
@@ -205,7 +204,7 @@ const userController = {
     const result = followings.toJSON().Followings.map(e => {
       e = { ...e }
       delete Object.assign(e, { followingId: e.id }).id
-      e.currentfollowed = userData.Followings
+      e.currentIsFollowed = userData.Followings
         ? userData.Followings.some(element => element.id === e.followingId)
         : false
       delete e.Followship
@@ -235,7 +234,7 @@ const userController = {
     const result = followers.toJSON().Followers.map(e => {
       e = { ...e }
       delete Object.assign(e, { followerId: e.id }).id
-      e.currentfollowed = userData.Followings
+      e.currentIsFollowed = userData.Followings
         ? userData.Followings.some(
           element => element.id === e.followerId
         )

@@ -1,6 +1,6 @@
 const passport = require('../config/passport')
 const { AuthError, AutherError } = require('../helpers/errorInstance')
-const { getUser } = require('../_helpers')
+const helper = require('../_helpers')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -10,7 +10,7 @@ const authenticated = (req, res, next) => {
   })(req, res, next)
 }
 const authenticatedAdmin = (req, res, next) => {
-  if (getUser(req) && req.user.role === 'admin') return next()
+  if (helper.getUser(req)?.role === 'admin') return next()
 
   return next(new AutherError('他不是管理員！'))
 }
