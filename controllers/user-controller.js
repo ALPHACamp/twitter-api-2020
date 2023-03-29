@@ -62,13 +62,14 @@ const userController = {
     err = new AuthError(req.session.messages)
     next(err)
   },
-  userVerify: (req, res) => {
+  userVerify: tryCatch(async (req, res) => {
     const token = req.header('Authorization').replace('Bearer ', '')
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    delete decoded.updatedAt
-    delete decoded.createdAt
-    res.status(200).json(decoded)
-  },
+    const user = await User.findByPk(decoded.id)
+    delete user.updatedAt
+    delete user.createdAt
+    res.status(200).json(user)
+  }),
   getUser: tryCatch(async (req, res) => {
     const userData = getUser(req) instanceof Model
       ? getUser(req).toJSON()
