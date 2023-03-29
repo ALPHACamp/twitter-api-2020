@@ -31,18 +31,10 @@ const adminController = {
   getUsers: (req, res, next) => {
     return User.findAll({
       attributes: ['id', 'name', 'account', 'avatar', 'cover',
-        [
-          sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id)'), 'tweetCounts'
-        ],
-        [
-          sequelize.literal('(SELECT COUNT(*) FROM tweets RIGHT OUTER JOIN likes ON tweets.id=likes.TweetId WHERE tweets.UserId = user.id)'), 'beLikedCounts'
-        ],
-        [
-          sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id)'), 'followerCounts'
-        ],
-        [
-          sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id)'), 'followingCounts'
-        ]
+        [sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = user.id)'), 'tweetCounts'],
+        [sequelize.literal('(SELECT COUNT(*) FROM tweets RIGHT OUTER JOIN likes ON tweets.id=likes.TweetId WHERE tweets.UserId = user.id)'), 'beLikedCounts'],
+        [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = user.id)'), 'followerCounts'],
+        [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = user.id)'), 'followingCounts']
       ],
       order: [
         [sequelize.literal('tweetCounts'), 'DESC']
@@ -56,15 +48,9 @@ const adminController = {
     return Tweet.findAll({
       attributes: {
         include: [
-          [
-            sequelize.literal('(SELECT SUBSTR(description,1,50) FROM tweets WHERE tweets.id = tweet.id)'), 'description'
-          ],
-          [
-            sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id)'), 'replyCounts'
-          ],
-          [
-            sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id)'), 'likeCounts'
-          ]
+          [sequelize.literal('(SELECT SUBSTR(description,1,50) FROM tweets WHERE tweets.id = tweet.id)'), 'description'],
+          [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id)'), 'replyCounts'],
+          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id)'), 'likeCounts']
         ]
       },
       order: [['createdAt', 'DESC']],
