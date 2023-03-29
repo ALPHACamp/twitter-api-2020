@@ -173,7 +173,7 @@ const userController = {
       const data = await Reply.findAll({
         where: { userId },
         order: [['updatedAt', 'DESC']],
-        attributes: ['comment', 'updatedAt'],
+        attributes: ['id', 'comment', 'updatedAt'],
         include: [
           {
             model: Tweet,
