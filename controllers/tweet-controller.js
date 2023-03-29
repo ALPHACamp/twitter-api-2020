@@ -24,7 +24,7 @@ const tweetController = {
     const tweets = await Tweet.findAll({
       where: { UserId: showIds },
       include: [
-        { model: User, as: 'poster', attributes: ['id','name', 'account', 'avatar'] },
+        { model: User, as: 'poster', attributes: ['id', 'name', 'account', 'avatar'] },
         { model: Reply },
         { model: Like }
       ],
@@ -44,9 +44,10 @@ const tweetController = {
   }),
   getTweet: tryCatch(async (req, res) => {
     const TweetId = req.params.tweet_id
+    const currentUser = getUser(req)
     const tweet = await Tweet.findByPk(TweetId, {
       attributes: [
-        'description', 'createdAt',
+        'id', 'description', 'createdAt',
         [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'Likes'],
         [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'Replies']
       ],
@@ -58,9 +59,11 @@ const tweetController = {
           as: 'poster'
         }
       ],
+      raw: true,
       nest: true
     })
     if (!tweet) throw new ReqError('此推文不存在')
+    tweet.currentIsLiked = currentUser.Likes?.some(like => like.TweetId === tweet.id)
     res.status(200).json(tweet)
   }),
   postTweet: tryCatch(async (req, res) => {
