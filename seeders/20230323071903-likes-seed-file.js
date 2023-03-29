@@ -24,12 +24,15 @@ module.exports = {
       usedNums.push(random)
       return random
     }
-    let targetArr = []
-    for (let j = 0; j < users.length; j++) {
+    const targetArr = []
+    const aaa = 3 // 從第一個 user 開始，希望有多少 user 會有 like 記錄
+    const userAmount = (aaa <= users.length) ? aaa : users.length // 檢查，若超過最大值，則以最大值計算
+    for (let j = 0; j < userAmount; j++) {
       const usedNums = []
-      targetArr = targetArr.concat(
-        // ~~~~~~~~~~~~~~~第一個 user 有十個 like 的推文，依序遞減~~~~~~~~~~
-        Array.from({ length: 10 - j }, (_, i) => ({
+      const likeAmountPerUser = users.length - j
+      // ~~~~~~~~~~~~~~~第一個 user 有 user.length 個 like 的推文，依序遞減~~~~~~~~~~
+      targetArr.push(
+        ...Array.from({ length: likeAmountPerUser }, (_, i) => ({
           created_at: new Date(),
           updated_at: new Date(),
           user_id: users[j].id,

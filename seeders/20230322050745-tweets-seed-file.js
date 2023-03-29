@@ -8,9 +8,10 @@ module.exports = {
       'SELECT id FROM Users WHERE role = "user";',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
+    const tweetAmount = users.length * 2 // ! 最後要改回 ... * 10 ~~~~~~~~~~
 
     await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: users.length * 10 }, (_, i) => ({
+      Array.from({ length: tweetAmount }, (_, i) => ({
         // description: faker.lorem.text(), // 會過字數上限，先不用
         description: faker.lorem.words(10),
         created_at: new Date(),
