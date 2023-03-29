@@ -5,7 +5,7 @@ const userLogin = (req, res, next) => {
   if (req.body.account === undefined || req.body.account.trim() === '') return res.status(400).json({ status: 'error', message: '帳號為必填項目' })
   if (req.body.password === undefined || req.body.password.trim() === '') return res.status(400).json({ status: 'error', message: '密碼為必填項目' })
   // 在前台登入輸入管理員帳號(root)，則給錯誤：帳號不存在
-  if (req.body.account === adminAccount) throw new Error('帳號不存在')
+  if (req.body.account === adminAccount) return res.status(403).json({ status: 'error', message: '帳號不存在' })
 
   return next()
 }
