@@ -7,7 +7,11 @@ const tweetController = {
       const tweets = await Tweet.findAll({
         raw: true,
         nest: true,
-        include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
+        include: [
+          { model: User, attributes: ['name', 'account', 'avatar'] },
+          { model: Reply, attributes: ['User_id', 'Tweet_id', 'created_at'] },
+          { model: Like, attributes: ['User_id', 'Tweet_id', 'created_at'] },
+        ],
         order: [['updatedAt', 'DESC']],
       });
       return res.status(200).json(tweets);
