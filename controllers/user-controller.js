@@ -39,7 +39,7 @@ const userController = {
       if (isEmailExist) throw new Error('email 已重複註冊！')
       const user = await User.create({
         role: 'user',
-        avatar: 'https://i.imgur.com/zPtV6xw.png',
+        avatar: 'https://i.imgur.com/TGuHpHB.jpg',
         cover: 'https://i.imgur.com/vzIPCvD.png',
         account,
         name,
