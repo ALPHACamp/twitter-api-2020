@@ -4,7 +4,7 @@ const { User, Tweet, Reply, Like } = require('../models')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
-const Sequelize = require('sequelize')
+const Sequelize = require('sequelize') 
 
 const adminController = {
   signIn: (req, res, next) => {
