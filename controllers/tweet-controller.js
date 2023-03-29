@@ -3,6 +3,7 @@ const helpers = require('../_helpers')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
+const sequelize = require('sequelize')
 
 const tweetController = {
   postTweet: (req, res, next) => {
@@ -33,9 +34,14 @@ const tweetController = {
     const UserId = Number(user.id)
 
     return Tweet.findAll({
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id)'), 'replyCounts'],
+          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id)'), 'likeCounts']
+        ]
+      },
       include: [
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: Reply },
         { model: Like }
       ],
       order: [['createdAt', 'DESC']]
@@ -45,11 +51,8 @@ const tweetController = {
           const data = {
             ...tweet.toJSON(),
             period: dayjs(tweet.createdAt).fromNow(),
-            replyCounts: tweet.Replies.length,
-            likeCounts: tweet.Likes.length,
             isLiked: tweet.Likes.some(like => like.UserId === UserId)
           }
-          delete data.Replies
           delete data.Likes
           return data
         })
