@@ -307,7 +307,10 @@ const userController = {
               'likedDate'
             ]
           ]
-        }
+        },
+        order: [[
+          sequelize.literal('likedDate'), 'DESC'
+        ]]
       }),
       Like.findAll({
         where: { UserId: id },
@@ -323,18 +326,16 @@ const userController = {
 
         const likeTweets = Tweets.filter(tweet => Likes.some(like => like.TweetId === tweet.id))
           .map(tweet => {
-            const likedDate = tweet.Likes.filter(like => like.UserId === id)[0].createdAt
             const data = {
               ...tweet,
               isLiked: tweet.Likes.some(like => like.UserId === userId),
               TweetId: tweet.id,
-              period: dayjs(likedDate).fromNow()
+              period: dayjs(tweet.likedDate).fromNow()
             }
             delete data.Likes
 
             return data
           })
-          .sort((a, b) => (b.likedDate - a.likedDate))
 
         res.json(likeTweets)
       })
