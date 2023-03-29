@@ -1,7 +1,7 @@
-const { Op } = require('sequelize')
+const sequelize = require('sequelize')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
-const { User, Followship, Tweet, Reply, Like, sequelize } = db
+const { User, Followship, Tweet, Reply, Like } = db
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -69,7 +69,7 @@ const userController = {
         raw: true,
         attributes: ['id']
       }),
-      Followship.findOne({ where: { [Op.and]: [{ followerId }, { followingId }] } })
+      Followship.findOne({ where: { [sequelize.Op.and]: [{ followerId }, { followingId }] } })
     ])
       .then(([users, followship]) => {
         if (!users.some(user => user.id === followingId)) throw new Error("User didn't exist!")
@@ -94,7 +94,7 @@ const userController = {
         raw: true,
         attributes: ['id']
       }),
-      Followship.findOne({ where: { [Op.and]: [{ followerId }, { followingId }] } })
+      Followship.findOne({ where: { [sequelize.Op.and]: [{ followerId }, { followingId }] } })
     ])
       .then(([users, followship]) => {
         if (!users.some(user => user.id === followingId)) throw new Error("User didn't exist!")
@@ -150,15 +150,15 @@ const userController = {
         include: [
           [
             sequelize.literal(`(
-                SELECT COUNT(*) FROM followships 
-                WHERE followships.followingId = ${id}
+                SELECT COUNT(*) FROM Followships 
+                WHERE Followships.followingId = ${id}
               )`),
             'followerCounts'
           ],
           [
             sequelize.literal(`(
-                SELECT COUNT(*) FROM followships 
-                WHERE followships.followerId = ${id}
+                SELECT COUNT(*) FROM Followships 
+                WHERE Followships.followerId = ${id}
               )`),
             'followingCounts'
           ]
@@ -194,15 +194,15 @@ const userController = {
           include: [
             [
               sequelize.literal(`(
-                SELECT COUNT(*) FROM replies 
-                WHERE replies.TweetId = tweet.id
+                SELECT COUNT(*) FROM Replies 
+                WHERE Replies.TweetId = Tweet.id
               )`),
               'replyCounts'
             ],
             [
               sequelize.literal(`(
-                SELECT COUNT(*) FROM likes 
-                WHERE likes.TweetId = tweet.id
+                SELECT COUNT(*) FROM Likes 
+                WHERE Likes.TweetId = Tweet.id
               )`),
               'likeCounts'
             ]
@@ -279,22 +279,22 @@ const userController = {
           include: [
             [
               sequelize.literal(`(
-                SELECT COUNT(*) FROM replies 
-                WHERE replies.TweetId = tweet.id
+                SELECT COUNT(*) FROM Replies 
+                WHERE Replies.TweetId = Tweet.id
               )`),
               'replyCounts'
             ],
             [
               sequelize.literal(`(
-                SELECT COUNT(*) FROM likes 
-                WHERE likes.TweetId = tweet.id
+                SELECT COUNT(*) FROM Likes 
+                WHERE Likes.TweetId = Tweet.id
               )`),
               'likeCounts'
             ],
             [
               sequelize.literal(`(
-                SELECT createdAt FROM likes 
-                WHERE likes.UserId = ${id} AND tweet.id = likes.TweetId
+                SELECT createdAt FROM Likes 
+                WHERE Likes.UserId = ${id} AND Tweet.id = Likes.TweetId
               )`),
               'likedDate'
             ]
@@ -345,14 +345,14 @@ const userController = {
       User.findAll({
         attributes: ['id'],
         where: {
-          id: { [Op.ne]: req.params.id },
+          id: { [sequelize.Op.ne]: req.params.id },
           account
         }
       }),
       User.findAll({
         attributes: ['id'],
         where: {
-          id: { [Op.ne]: req.params.id },
+          id: { [sequelize.Op.ne]: req.params.id },
           email
         }
       }),
