@@ -2,7 +2,6 @@ const { User, sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const createError = require('http-errors')
-const { imgurFileHandler } = require('../_helpers')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -118,21 +117,27 @@ const userController = {
 
   putUser: (req, res, next) => {
     if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
-    const { files } = req
     const { name, introduction } = req.body
-    return Promise.all([
-      User.findByPk(req.params.userId),
-      imgurFileHandler(files)
-    ])
-      .then(([user, ...filePath]) => {
+    const { files } = req
+    return User.findByPk(req.params.userId)
+      .then(user => {
+        let avatar = user.avatar
+        let coverUrl = user.coverUrl
+        if (files) {
+          avatar = files.avatar ? files.avatar[0].path : user.avatar
+          coverUrl = files.coverUrl ? files.coverUrl[0].path : user.coverUrl
+        }
         return user.update({
           name,
           introduction,
-          avatar: filePath[0] || user.avatar,
-          coverUrl: filePath[1] || user.coverUrl
+          avatar,
+          coverUrl
         })
       })
-      .then(updatedUser => res.json(updatedUser))
+      .then(updatedUser => {
+        const { password, ...userData } = updatedUser.dataValues
+        return res.json(userData)
+      })
       .catch(error => next(error))
   },
 
