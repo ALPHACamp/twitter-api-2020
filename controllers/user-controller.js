@@ -188,7 +188,9 @@ const userController = {
     return Reply.findAll({
       where: { UserId: req.params.id }, // 因測試檔，改大駝峰
       raw: true,
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      include: { model: Tweet, attributes: [], include: { model: User, attributes: ['account'] } },
+      nest: true
     })
       .then(replies => res.status(200).json(replies))
       .catch(err => next(err))
@@ -197,27 +199,54 @@ const userController = {
     return Like.findAll({
       where: { UserId: req.params.id }, // 因測試檔，改大駝峰
       raw: true,
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      include: { model: Tweet, attributes: [], include: { model: User, attributes: ['id', 'account', 'avatar'] } },
+      nest: true
     })
       .then(likes => res.status(200).json(likes))
       .catch(err => next(err))
   },
   getFollowings: (req, res, next) => {
-    return Followship.findAll({
-      where: { followerId: req.params.id },
-      order: [['createdAt', 'DESC']]
+    const currentUser = helpers.getUser(req)
+    // return Followship.findAll({
+    //   where: { followerId: req.params.id },
+    //   order: [['createdAt', 'DESC']],
+    //   include: { model: User }
+    // })
+    return User.findByPk(req.params.id, {
+      attributes: [],
+      include: { model: User, as: 'Followings', attributes: ['id', 'name', 'avatar', 'introduction'] }
     })
       // (下1) 沒做 toJSON() 處理也能輸出正常 json 檔，但得注意
-      .then(followings => res.status(200).json(followings))
+      .then(user => {
+        const data = user.Followings.map(u => {
+          u = u.toJSON()
+          u.currentUserIsFollowing = currentUser.Followings.some(f => f.id === u.id)
+          u.followingId = u.Followship.followingId
+          delete u.Followship
+          return u
+        })
+        res.status(200).json(data)
+      })
       .catch(err => next(err))
   },
   getFollowers: (req, res, next) => {
-    return Followship.findAll({
-      where: { followingId: req.params.id },
-      order: [['createdAt', 'DESC']]
+    const currentUser = helpers.getUser(req)
+    return User.findByPk(req.params.id, {
+      attributes: [],
+      include: { model: User, as: 'Followers', attributes: ['id', 'name', 'avatar', 'introduction'] }
     })
       // (下1) 沒做 toJSON() 處理也能輸出正常 json 檔，但得注意
-      .then(followers => res.status(200).json(followers))
+      .then(user => {
+        const data = user.Followers.map(u => {
+          u = u.toJSON()
+          u.currentUserIsFollowing = currentUser.Followings.some(f => f.id === u.id)
+          u.followerId = u.Followship.followerId
+          delete u.Followship
+          return u
+        })
+        res.status(200).json(data)
+      })
       .catch(err => next(err))
   },
   addFollowing: (req, res, next) => {
