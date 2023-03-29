@@ -34,10 +34,10 @@ const adminController = {
 
         // [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'],
 
-        [sequelize.literal('(SELECT COUNT(*) FROM tweets WHERE tweets.UserId = User.id)'), 'tweetCounts'],
-        [sequelize.literal('(SELECT COUNT(*) FROM tweets RIGHT OUTER JOIN likes ON tweets.id=likes.TweetId WHERE tweets.UserId = User.id)'), 'beLikedCounts'],
-        [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = User.id)'), 'followerCounts'],
-        [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followerId = User.id)'), 'followingCounts']
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCounts'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets RIGHT OUTER JOIN Likes ON Tweets.id=Likes.TweetId WHERE Tweets.UserId = User.id)'), 'beLikedCounts'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowingId = User.id)'), 'followerCounts'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowerId = User.id)'), 'followingCounts']
       ],
       order: [
         [sequelize.literal('tweetCounts'), 'DESC']
@@ -51,9 +51,9 @@ const adminController = {
     return Tweet.findAll({
       attributes: {
         include: [
-          [sequelize.literal('(SELECT SUBSTR(description,1,50) FROM tweets WHERE tweets.id = Tweet.id)'), 'description'],
-          [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = Tweet.id)'), 'replyCounts'],
-          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = Tweet.id)'), 'likeCounts']
+          [sequelize.literal('(SELECT SUBSTR(description,1,50) FROM Tweets WHERE Tweets.id = Tweet.id)'), 'description'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCounts'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCounts']
         ]
       },
       order: [['createdAt', 'DESC']],
