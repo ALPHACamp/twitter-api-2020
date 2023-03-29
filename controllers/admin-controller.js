@@ -63,14 +63,9 @@ const adminController = {
       order: [
         [sequelize.literal('tweetCounts'), 'DESC']
       ],
-      raw: true,
-      where: {
-        role: {
-          [sequelize.Op.ne]: 'admin'
-        }
-      }
+      raw: true
     })
-      .then(users => { res.json(users) })
+      .then(users => res.json(users))
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
