@@ -74,6 +74,13 @@ const adminController = {
         include: [
           [
             sequelize.literal(`(
+              SELECT SUBSTR(description,1,50) FROM tweets
+              WHERE tweets.id = tweet.id
+            )`),
+            'description'
+          ],
+          [
+            sequelize.literal(`(
               SELECT COUNT(*) FROM replies 
               WHERE replies.TweetId = tweet.id
             )`),
@@ -97,7 +104,6 @@ const adminController = {
         const tweetsData = tweets.map(tweet => {
           const data = {
             ...tweet.toJSON(),
-            description: tweet.description.substring(0, 50),
             period: dayjs(tweet.createdAt).fromNow()
           }
           return data
