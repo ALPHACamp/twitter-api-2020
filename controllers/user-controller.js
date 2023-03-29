@@ -241,7 +241,7 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     const id = Number(req.params?.id)
-    const { name, introduction } = req.body
+    const { name, introduction, resetCover } = req.body
     const { avatar = null, cover = null } = req.files || {}
     try {
       const user = await User.findByPk(id)
@@ -253,7 +253,7 @@ const userController = {
       const updatedUser = await user.update({
         name,
         avatar: filePaths.updatedAvatar || user.avatar,
-        cover: filePaths.updatedCover || user.cover,
+        cover: resetCover ? 'https://raw.githubusercontent.com/mirageapache/simple_twitter_frontend/main/src/assets/images/default_user_cover.jpg' : filePaths.updatedCover || user.cover,
         introduction
       })
       delete updatedUser.password
