@@ -41,9 +41,13 @@ const tweetController = {
       const TweetId = req.params.tweetId;
       const tweet = await Tweet.findOne({
         where: { id: TweetId },
-        raw: true,
+        // raw: true,
         nest: true,
-        include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
+        include: [
+          { model: User, attributes: ['name', 'account', 'avatar'] },
+          { model: Reply, attributes: ['User_id', 'created_at'] },
+          { model: Like, attributes: ['User_id', 'created_at'] },
+        ],
       });
       if (!tweet) throw new Error('The tweet is not available');
 
