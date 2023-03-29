@@ -232,32 +232,80 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       const { userId } = req.params
-      const users = await User.findByPk(userId, {
-        include: [{model: Tweet}, { model: User, as: 'Followings' }],
+      const users = await User.findAll({
+        where: { id: userId },
+        include: [{ model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }],
         raw: true,
         nest: true
       })
       if (!users) {
         return res.status(404).json({ status: 'error', message: '帳戶不存在' })
       }
-      const userData = users
-      const followingData = []
-      followingData.push({
-        UserId: userData.id,
-        UserName: userData.name,
-        tweetCount: userData.Tweets.length,
-        followingId: userData.Followings.id,
-        followingAccount: userData.Followings.account,
-        followingAvatar: userData.Followings.avatar,
-        followingIntro: userData.Followings.introduction,
-        followingCount: userData.Followings.length,
-        isFollowing: helpers
-          .getUser(req)
-          .Followings.some(
-            (fu) => fu.Followship.followingId === users.Followers.id
-          )
+      
+      console.log(users)
+      
+      const tweetCount = await Tweet.count({
+        where: { UserId: userId },
+        col: 'id'
       })
-      return res.status(200).json(followingData)
+      const followingCount = await Followship.count({
+        where: {followerId: userId}
+      })
+      // console.log(tweeCount)
+      // followingData.push({
+      //   UserId: userData.id,
+      //   UserName: userData.name,
+      //   tweetCount: tweetCount,
+      //   followingId: userData.Followings.id,
+      //   followingAccount: userData.Followings.account,
+      //   followingAvatar: userData.Followings.avatar,
+      //   followingIntro: userData.Followings.introduction,
+      //   followingCount: userData.Followings.length,
+      //   isFollowing: helpers
+      //     .getUser(req)
+      //     .Followings.some(
+      //       (fu) => fu.Followship.followingId === users.Followers.id
+      //     )
+      // })
+      const userData = users.map(user => {
+        return {
+          userId: user.id,
+          tweetCount: tweetCount,
+          followingCount: followingCount,
+          followingId: user.Followings.id,
+          followingAccount: user.Followings.account,
+          followingAvatar: user.Followings.avatar,
+          followingName: user.Followings.name,
+          followingIntro: user.Followings.introduction,
+          isFollowing: helpers
+            .getUser(req)
+            .Followings.some(
+              (fg) => fg.Followship.followingId === user.Followings.id
+            ),
+        };
+      })
+      //  const UserData = []
+      //  UserData.push(userData)
+      //  console.log(UserData)
+      // .map((user) => {
+      //    const { id, name } = user;
+      //    return {
+      //      id,
+      //      name,
+      //      tweetCount: user.Tweets.length,
+      //      followingId: user.Followings.id,
+           //  followingAccount: userData.Followings.account,
+           //  followingAvatar: userData.Followings.avatar,
+           //  followingIntro: userData.Followings.introduction,
+           //  followingCount: userData.Followings.length,
+           //  isFollowing: helpers
+           //    .getUser(req)
+           //    .Followings.some(
+           //      (fu) => fu.Followship.followingId === users.Followers.id
+           //    ),
+      //    };
+      //  });
+      return res.status(200).json(userData)
     } catch (error) {
       next(error)
     }
