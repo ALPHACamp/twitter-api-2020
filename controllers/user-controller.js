@@ -234,77 +234,49 @@ const userController = {
       const { userId } = req.params
       const users = await User.findAll({
         where: { id: userId },
-        include: [{ model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }],
+        include: [
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
+          }
+        ],
+        order: [
+          [{ model: User, as: 'Followings' }, Followship, 'createdAt', 'DESC']
+        ],
         raw: true,
         nest: true
       })
       if (!users) {
         return res.status(404).json({ status: 'error', message: '帳戶不存在' })
       }
-      
-      console.log(users)
-      
       const tweetCount = await Tweet.count({
         where: { UserId: userId },
         col: 'id'
       })
       const followingCount = await Followship.count({
-        where: {followerId: userId}
+        where: { followerId: userId }
       })
-      // console.log(tweeCount)
-      // followingData.push({
-      //   UserId: userData.id,
-      //   UserName: userData.name,
-      //   tweetCount: tweetCount,
-      //   followingId: userData.Followings.id,
-      //   followingAccount: userData.Followings.account,
-      //   followingAvatar: userData.Followings.avatar,
-      //   followingIntro: userData.Followings.introduction,
-      //   followingCount: userData.Followings.length,
-      //   isFollowing: helpers
-      //     .getUser(req)
-      //     .Followings.some(
-      //       (fu) => fu.Followship.followingId === users.Followers.id
-      //     )
-      // })
+
       const userData = users.map(user => {
         return {
           userId: user.id,
-          tweetCount: tweetCount,
-          followingCount: followingCount,
+          tweetCount,
+          followingCount,
           followingId: user.Followings.id,
           followingAccount: user.Followings.account,
           followingAvatar: user.Followings.avatar,
           followingName: user.Followings.name,
           followingIntro: user.Followings.introduction,
+          followshipCreatedAt: user.Followings.Followship.createdAt,
           isFollowing: helpers
             .getUser(req)
             .Followings.some(
               (fg) => fg.Followship.followingId === user.Followings.id
-            ),
-        };
+            )
+        }
       })
-      //  const UserData = []
-      //  UserData.push(userData)
-      //  console.log(UserData)
-      // .map((user) => {
-      //    const { id, name } = user;
-      //    return {
-      //      id,
-      //      name,
-      //      tweetCount: user.Tweets.length,
-      //      followingId: user.Followings.id,
-           //  followingAccount: userData.Followings.account,
-           //  followingAvatar: userData.Followings.avatar,
-           //  followingIntro: userData.Followings.introduction,
-           //  followingCount: userData.Followings.length,
-           //  isFollowing: helpers
-           //    .getUser(req)
-           //    .Followings.some(
-           //      (fu) => fu.Followship.followingId === users.Followers.id
-           //    ),
-      //    };
-      //  });
+
       return res.status(200).json(userData)
     } catch (error) {
       next(error)
@@ -327,6 +299,7 @@ const userController = {
           .status(404)
           .json({ status: 'error', message: '此帳戶不存在' })
       }
+
       userInfo = {
         id: userInfo.id,
         account: userInfo.account,
@@ -350,8 +323,15 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const { userId } = req.params
-      const users = await User.findByPk(userId, {
-        include: [Tweet, { model: User, as: 'Followers' }],
+      const users = await User.findAll({
+        where: { id: userId },
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
+          }
+        ],
         order: [
           [{ model: User, as: 'Followers' }, Followship, 'createdAt', 'DESC']
         ],
@@ -363,26 +343,34 @@ const userController = {
           .status(404)
           .json({ status: 'error', message: '此帳戶不存在!' })
       }
-
-      const followerData = []
-      followerData.push({
-        tweetCount: users.Tweets.length,
-        followerId: users.Followers.id,
-        followerAccount: users.Followers.account,
-        followerName: users.Followers.name,
-        followerAvatar: users.Followers.avatar,
-        followerIntro: users.Followers.introduction,
-        followerCount: users.Followers.length,
-        followshipCreatedAt: users.Followers.Followship.createdAt,
-        isFollowing: helpers
-          .getUser(req)
-          .Followings.some(
-            (fg) => fg.Followship.followingId === users.Followers.id
-          )
+      const tweetCount = await Tweet.count({
+        where: { UserId: userId },
+        col: 'id'
       })
-      console.log(followerData)
+      const followerCount = await Followship.count({
+        where: { followingId: userId }
+      })
 
-      return res.status(200).json(followerData)
+      const userData = users.map((user) => {
+        return {
+          userId: user.id,
+          tweetCount,
+          followerCount,
+          followerId: user.Followers.id,
+          followerAccount: user.Followers.account,
+          followerAvatar: user.Followers.avatar,
+          followerName: user.Followers.name,
+          followerIntro: user.Followers.introduction,
+          followshipCreatedAt: user.Followers.Followship.createdAt,
+          isFollowing: helpers
+            .getUser(req)
+            .Followings.some(
+              (fg) => fg.Followship.followingId === user.Followers.id
+            )
+        }
+      })
+
+      return res.status(200).json(userData)
     } catch (error) {
       next(error)
     }

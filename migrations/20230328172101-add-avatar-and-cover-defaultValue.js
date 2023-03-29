@@ -23,14 +23,14 @@ module.exports = {
 
   down: async (queryInterface, Sequelize) => {
     try {
-      await queryInterface.changeColumn("Users", "avatar", {
+      await queryInterface.changeColumn('Users', 'avatar', {
         type: Sequelize.STRING,
-        allowNull: false,
-      });
-      await queryInterface.changeColumn("Users", "cover", {
+        allowNull: false
+      })
+      await queryInterface.changeColumn('Users', 'cover', {
         type: Sequelize.STRING,
-        allowNull: false,
-      });
+        allowNull: false
+      })
       return Promise.resolve()
     } catch (error) {
       return Promise.reject(error)
