@@ -196,14 +196,30 @@ const userController = {
       .catch(err => next(err))
   },
   getLikes: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
     return Like.findAll({
       where: { UserId: req.params.id }, // 因測試檔，改大駝峰
       raw: true,
       order: [['createdAt', 'DESC']],
-      include: { model: Tweet, attributes: [], include: { model: User, attributes: ['id', 'account', 'avatar'] } },
+      include: {
+        model: Tweet,
+        attributes: ['description'],
+        include: {
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        }
+      },
       nest: true
     })
-      .then(likes => res.status(200).json(likes))
+      .then(likes => {
+        const data = likes.map(i => {
+          if (currentUser.Likes) {
+            i.currentUserLikes = currentUser.Likes.some(l => l.TweetId === i.TweetId)
+          }
+          return i
+        })
+        res.status(200).json(data)
+      })
       .catch(err => next(err))
   },
   getFollowings: (req, res, next) => {
@@ -214,8 +230,11 @@ const userController = {
     //   include: { model: User }
     // })
     return User.findByPk(req.params.id, {
-      attributes: [],
-      include: { model: User, as: 'Followings', attributes: ['id', 'name', 'avatar', 'introduction'] }
+      include: {
+        model: User,
+        as: 'Followings',
+        attributes: ['id', 'name', 'avatar', 'introduction']
+      }
     })
       // (下1) 沒做 toJSON() 處理也能輸出正常 json 檔，但得注意
       .then(user => {
@@ -223,8 +242,11 @@ const userController = {
           u = u.toJSON()
           u.currentUserIsFollowing = currentUser.Followings.some(f => f.id === u.id)
           u.followingId = u.Followship.followingId
+          u.followshipCreatedAt = u.Followship.createdAt
           delete u.Followship
           return u
+        }).sort((a, b) => {
+          return b.followshipCreatedAt.getTime() - a.followshipCreatedAt.getTime()
         })
         res.status(200).json(data)
       })
@@ -242,8 +264,11 @@ const userController = {
           u = u.toJSON()
           u.currentUserIsFollowing = currentUser.Followings.some(f => f.id === u.id)
           u.followerId = u.Followship.followerId
+          u.followshipCreatedAt = u.Followship.createdAt
           delete u.Followship
           return u
+        }).sort((a, b) => {
+          return b.followshipCreatedAt.getTime() - a.followshipCreatedAt.getTime()
         })
         res.status(200).json(data)
       })
