@@ -447,7 +447,10 @@ const userController = {
     if (introduction.length > 160) throw new Error("Introduction can't larger than 160 characters!")
 
     if (!files) { // test沒有file
-      return User.findByPk(req.params.id)
+      return User.findOne({
+        where: { id: req.params.id },
+        attributes: { exclude: ['password', 'role'] }
+      })
         .then(user => {
           if (!user) throw new Error("User did't exist!")
           // 避免有人惡意修改其他人的設定
@@ -458,18 +461,14 @@ const userController = {
             introduction
           })
         })
-        .then(user => {
-          const userData = {
-            ...user.toJSON()
-          }
-          delete userData.password
-          delete userData.role
-          res.json(userData)
-        })
+        .then(user => res.json(user))
         .catch(err => next(err))
     } else {
       return Promise.all([
-        User.findByPk(req.params.id),
+        User.findOne({
+          where: { id: req.params.id },
+          attributes: { exclude: ['password', 'role'] }
+        }),
         imgurFileHandler(files.avatar === undefined ? null : files.avatar[0]),
         imgurFileHandler(files.cover === undefined ? null : files.cover[0])
       ])
@@ -485,14 +484,7 @@ const userController = {
             cover: cover || user.cover
           })
         })
-        .then(user => {
-          const userData = {
-            ...user.toJSON()
-          }
-          delete userData.password
-          delete userData.role
-          res.json(userData)
-        })
+        .then(user => res.json(user))
         .catch(err => next(err))
     }
   }
