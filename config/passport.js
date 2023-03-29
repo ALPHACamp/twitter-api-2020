@@ -6,7 +6,7 @@ const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 
 // 先這樣，之後有要再加 model
-const { User } = require('../models')
+const { User, Like } = require('../models')
 
 // set up Local Passport strategy
 passport.use(new LocalStrategy(
@@ -54,7 +54,8 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
     //   { model: Restaurant, as: 'FavoritedRestaurants' },
     //   { model: Restaurant, as: 'LikeRestaurants' },
       { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
+      { model: User, as: 'Followings' },
+      { model: Like }
     ]
   })
     .then(user => cb(null, user))
