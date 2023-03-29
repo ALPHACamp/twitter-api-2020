@@ -59,11 +59,15 @@ const adminController = {
   },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE replies.TweetId = tweet.id)'), 'replyCounts'],
+          [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE likes.TweetId = tweet.id)'), 'likeCounts']
+        ]
+      },
       order: [['createdAt', 'DESC']],
       include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: Reply },
-        { model: Like }
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ]
     })
       .then(tweets => {
@@ -71,12 +75,8 @@ const adminController = {
           const data = {
             ...tweet.toJSON(),
             description: tweet.description.substring(0, 50),
-            period: dayjs(tweet.createdAt).fromNow(),
-            replyCounts: tweet.Replies.length,
-            likeCounts: tweet.Likes.length
+            period: dayjs(tweet.createdAt).fromNow()
           }
-          delete data.Replies
-          delete data.Likes
           return data
         })
 
