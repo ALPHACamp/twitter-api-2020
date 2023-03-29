@@ -1,5 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const defaultImageLink = require('../helpers/default-image-helper')
+const { faker } = require("@faker-js/faker");
 const { newError } = require("../helpers/error-helper");
 const { Op, QueryTypes } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
@@ -34,6 +36,9 @@ const userController = {
         name,
         account,
         email,
+        avatar: defaultImageLink.avatar,
+        cover: defaultImageLink.cover,
+        introduction: "Please introduce yourself...",
         password: bcrypt.hashSync(password, 10),
       });
       const newUser = user.toJSON();
@@ -238,7 +243,8 @@ const userController = {
 
       const foundUser = await User.findByPk(followingId, { raw: true });
 
-      if (!foundUser || foundUser.isAdmin) throw newError(404, "使帳號不存在！");
+      if (!foundUser || foundUser.isAdmin)
+        throw newError(404, "使帳號不存在！");
 
       // - 取消追蹤 (回傳刪除的資料筆數)
       const deletedCount = await Followship.destroy({
