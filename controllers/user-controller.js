@@ -143,23 +143,36 @@ const userController = {
 
     return User.findByPk(id, {
       include: [
-        { model: User, as: 'Followings', attributes: ['id'] },
         { model: User, as: 'Followers', attributes: ['id'] }
-      ]
+      ],
+      attributes: {
+        exclude: ['password', 'role'],
+        include: [
+          [
+            sequelize.literal(`(
+                SELECT COUNT(*) FROM followships 
+                WHERE followships.followingId = ${id}
+              )`),
+            'followerCounts'
+          ],
+          [
+            sequelize.literal(`(
+                SELECT COUNT(*) FROM followships 
+                WHERE followships.followerId = ${id}
+              )`),
+            'followingCounts'
+          ]
+        ]
+      }
     })
       .then(user => {
         if (!user) throw new Error("This User didn't exists!")
 
         const userProfile = {
           ...user.toJSON(),
-          followerCounts: user.Followers.length,
-          followingCounts: user.Followings.length,
           isFollowed: user.Followers.some(follower => follower.id === userId)
         }
         delete userProfile.Followers
-        delete userProfile.Followings
-        delete userProfile.password
-        delete userProfile.role
 
         return res.json(userProfile)
       })
