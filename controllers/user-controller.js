@@ -2,8 +2,8 @@ const passport = require('passport')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like, sequelize } = require('../models')
-const { Sequelize, QueryTypes, Op } = require('sequelize')
+const { User, Tweet, Reply, Like } = require('../models')
+const { Sequelize, Op } = require('sequelize')
 const { valueTrim } = require('../helpers/obj-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
@@ -242,24 +242,32 @@ const userController = {
       const followingId = req.params.id
       const user = await User.findByPk(followingId)
       if (!user) throw new Error('使用者不存在')
-      const data = await sequelize.query(
-        `
-        SELECT followerId, name, avatar, introduction
-        FROM followships JOIN users ON users.id = followships.followerId
-        WHERE followingId = ?
-        ORDER BY followships.createdAt DESC
-        `,
-        {
-          replacements: [followingId],
-          raw: true,
-          type: QueryTypes.SELECT
-        }
-      )
+      const data = await User.findAll({
+        attributes: [],
+        include:
+        [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'name', 'avatar', 'introduction'],
+            through: { attributes: [] }
+          }
+        ],
+        where: { id: followingId },
+        nest: true,
+        raw: true
+      })
       const signinUser = helpers.getUser(req)
-      const followers = data.map(el => ({
-        ...el,
-        isFollowing: signinUser.Followings ? signinUser.Followings.some(following => following.id === el.followerId) : false
-      }))
+      const followers = data.map(el => {
+        const follower = {
+          followerId: el.Followers.id,
+          name: el.Followers.name,
+          avatar: el.Followers.avatar,
+          introduction: el.Followers.introduction,
+          isFollowing: signinUser.Followings ? signinUser.Followings.some(following => following.id === el.Followers.id) : false
+        }
+        return follower
+      })
       res.status(200).json(followers)
     } catch (err) {
       next(err)
@@ -270,24 +278,32 @@ const userController = {
       const followerId = req.params.id
       const user = await User.findByPk(followerId)
       if (!user) throw new Error('使用者不存在')
-      const data = await sequelize.query(
-        `
-        SELECT followingId, name, avatar, introduction
-        FROM followships JOIN users ON users.id = followships.followingId
-        WHERE followerId = ?
-        ORDER BY followships.createdAt DESC
-        `,
-        {
-          replacements: [followerId],
-          raw: true,
-          type: QueryTypes.SELECT
-        }
-      )
+      const data = await User.findAll({
+        attributes: [],
+        include:
+          [
+            {
+              model: User,
+              as: 'Followings',
+              attributes: ['id', 'name', 'avatar', 'introduction'],
+              through: { attributes: [] }
+            }
+          ],
+        where: { id: followerId },
+        nest: true,
+        raw: true
+      })
       const signinUser = helpers.getUser(req)
-      const followings = data.map(el => ({
-        ...el,
-        isFollowing: signinUser.Followings ? signinUser.Followings.some(following => following.id === el.followingId) : false
-      }))
+      const followings = data.map(el => {
+        const following = {
+          followingId: el.Followings.id,
+          name: el.Followings.name,
+          avatar: el.Followings.avatar,
+          introduction: el.Followings.introduction,
+          isFollowing: signinUser.Followings ? signinUser.Followings.some(following => following.id === el.Followings.id) : false
+        }
+        return following
+      })
       res.status(200).json(followings)
     } catch (err) {
       next(err)
