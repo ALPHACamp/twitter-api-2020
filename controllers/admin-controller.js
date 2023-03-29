@@ -1,32 +1,6 @@
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcryptjs')
 const { Tweet, User, Sequelize, Reply } = require('../models')
 const adminController = {
-  // 登入
-  signIn: async (req, res, next) => {
-    const { account, password } = req.body
-    try {
-      const user = await User.findOne({ where: { account } })
-      if (!user) return res.status(404).json({ status: 'error', message: 'User does not exist' })
-      if (user.role === 'user') return res.status(404).json({ status: 'error', message: 'User does not exist' })
-      if (!bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ status: 'error', message: 'Incorrect password' })
-      }
-      const userData = user.toJSON()
-      delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET)
-      return res.status(200).json({
-        status: 'success',
-        message: 'Successfully sign in',
-        data: {
-          token,
-          user: userData
-        }
-      })
-    } catch (err) {
-      next(err)
-    }
-  }, // 推文清單(每筆資料顯示推文內容的前50字)
+  // 推文清單(每筆資料顯示推文內容的前50字)
   getTweets: async (_req, res, next) => {
     try {
       const tweets = await Tweet.findAll({

@@ -7,12 +7,13 @@ const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const userController = {
-  // 登入
   signIn: async (req, res, next) => {
     const { account, password } = req.body
     try {
       const user = await User.findOne({ where: { account } })
-      if (!user || user.role === 'admin') return res.status(404).json({ status: 'error', message: 'User does not exist' })
+      if (!user) return res.status(404).json({ status: 'error', message: 'User does not exist' })
+      if (req.route.path === '/users/signin' && user.role === 'admin') return res.status(404).json({ status: 'error', message: 'User does not exist' })
+      if (req.route.path === '/admin/signin' && user.role === 'user') return res.status(404).json({ status: 'error', message: 'User does not exist' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'Incorrect password' })
       }
@@ -32,7 +33,6 @@ const userController = {
       next(err)
     }
   },
-  // 註冊
   signUp: async (req, res, next) => {
     const { account, name, email, password } = req.body
     try {
@@ -122,7 +122,6 @@ const userController = {
         ],
         order: [['updatedAt', 'DESC']],
         nest: true
-        // 使用 raw: true 會造成回覆資料只有一筆，故移除
       })
       if (!tweets) return res.status(404).json({ status: 'error', message: 'Tweets not found' })
       return res.status(200).json(tweets)

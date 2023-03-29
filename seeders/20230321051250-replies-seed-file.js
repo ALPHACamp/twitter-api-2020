@@ -16,14 +16,21 @@ module.exports = {
     // 每則推文
     for (const tweet of tweets) {
       const replies = []
-      // 生成3個留言
-      for (let i = 0; i < 3; i++) {
+      // 選擇5個使用者
+      for (let i = 0; i < 5; i++) {
         // 以do-while確保使用者不同
         let randomUserId
         do {
           randomUserId = users[Math.floor(Math.random() * users.length)].id
         } while (replies.some(reply => reply.UserId === randomUserId)) // 若已存在則再次隨機
+        // 生成2個留言
         replies.push({
+          UserId: randomUserId,
+          TweetId: tweet.id,
+          comment: faker.lorem.text().substring(0, 140),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }, {
           UserId: randomUserId,
           TweetId: tweet.id,
           comment: faker.lorem.text().substring(0, 140),

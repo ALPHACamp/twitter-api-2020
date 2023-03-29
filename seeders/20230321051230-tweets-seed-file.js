@@ -11,8 +11,8 @@ module.exports = {
     // 每個使用者
     for (const user of users) {
       const UserId = user.id
-      // 生成10筆推文
-      const tweets = Array.from({ length: 10 }, () => ({
+      // 生成15筆推文
+      const tweets = Array.from({ length: 15 }, () => ({
         UserId,
         description: faker.lorem.text().substring(0, 140),
         createdAt: new Date(),
