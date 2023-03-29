@@ -260,9 +260,33 @@ const userController = {
       Tweet.findAll({
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-          { model: Reply, attributes: ['id'] },
           { model: Like, attributes: ['UserId', 'createdAt'] }
-        ]
+        ],
+        attributes: {
+          include: [
+            [
+              sequelize.literal(`(
+                SELECT COUNT(*) FROM replies 
+                WHERE replies.TweetId = tweet.id
+              )`),
+              'replyCounts'
+            ],
+            [
+              sequelize.literal(`(
+                SELECT COUNT(*) FROM likes 
+                WHERE likes.TweetId = tweet.id
+              )`),
+              'likeCounts'
+            ],
+            [
+              sequelize.literal(`(
+                SELECT createdAt FROM likes 
+                WHERE likes.UserId = ${id} AND tweet.id = likes.TweetId
+              )`),
+              'likedDate'
+            ]
+          ]
+        }
       }),
       Like.findAll({
         where: { UserId: id },
@@ -281,14 +305,10 @@ const userController = {
             const likedDate = tweet.Likes.filter(like => like.UserId === id)[0].createdAt
             const data = {
               ...tweet,
-              replyCounts: tweet.Replies.length,
-              likeCounts: tweet.Likes.length,
               isLiked: tweet.Likes.some(like => like.UserId === userId),
               TweetId: tweet.id,
-              likedDate,
               period: dayjs(likedDate).fromNow()
             }
-            delete data.Replies
             delete data.Likes
 
             return data
