@@ -152,8 +152,8 @@ const userController = {
       const userTweets = data.map(el => {
         const tweet = {
           ...el.toJSON(),
-          replies: el.Replies?.length,
-          likes: el.Likes?.length,
+          replies: el.Replies.length,
+          likes: el.Likes.length,
           isLike: signinUser.Likes ? signinUser.Likes.some(like => like.TweetId === el.id) : false
         }
         delete tweet.Replies
@@ -185,8 +185,8 @@ const userController = {
       const userReplies = data.map(el => {
         const reply = {
           ...el.toJSON(),
-          tweeterId: el.Tweet.User?.id,
-          tweeterName: el.Tweet.User?.name
+          tweeterId: el.Tweet.User.id,
+          tweeterName: el.Tweet.User.name
         }
         delete reply.Tweet
         return reply
@@ -225,8 +225,8 @@ const userController = {
           name: el.Tweet.User.name,
           avatar: el.Tweet.User.avatar,
           description: el.Tweet.description,
-          replies: el.Tweet.Replies?.length,
-          likes: el.Tweet.Likes?.length,
+          replies: el.Tweet.Replies.length,
+          likes: el.Tweet.Likes.length,
           isLike: signinUser.Likes ? signinUser.Likes.some(like => like.TweetId === el.TweetId) : false
         }
         delete userLike.Tweet
