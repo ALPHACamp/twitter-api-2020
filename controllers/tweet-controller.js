@@ -1,14 +1,15 @@
-const helper = require('../_helpers')
-const { Tweet, User, Reply, Like } = require('../models')
+const helpers = require('../_helpers')
+const { valueTrim } = require('../helpers/obj-helpers')
+const { User, Tweet, Reply, Like } = require('../models')
 
 const tweetController = {
   postTweet: async (req, res, next) => {
     try {
-      const { description } = req.body
-      if (!description) throw new Error('推文不可空白')
-      if (description.length > 140) throw new Error('字數限制 140 字')
-      const UserId = helper.getUser(req).id
-      const newTweet = await Tweet.create({ description, UserId })
+      const { description } = valueTrim(req.body)
+      if (!description) throw new Error('內容不可空白')
+      if (description.length > 140) throw new Error('推文不可超過140字')
+      const userId = helpers.getUser(req).id
+      const newTweet = await Tweet.create({ description, UserId: userId })
       res.status(200).json(newTweet)
     } catch (err) {
       next(err)
@@ -24,12 +25,12 @@ const tweetController = {
         ],
         order: [['updatedAt', 'DESC']]
       })
-      const signinUser = helper.getUser(req)
+      const signinUser = helpers.getUser(req)
       const tweets = data.map(d => {
         const tweet = {
           ...d.toJSON(),
-          replies: d.Replies?.length || 0,
-          likes: d.Likes?.length || 0,
+          replies: d.Replies.length,
+          likes: d.Likes.length,
           isLike: signinUser.Likes ? signinUser.Likes.some(like => like.TweetId === d.id) : false
         }
         delete tweet.Replies
@@ -43,8 +44,8 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
-      const data = await Tweet.findByPk(TweetId, {
+      const id = req.params.tweet_id
+      const data = await Tweet.findByPk(id, {
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
           { model: Reply, attributes: ['id'] },
@@ -52,11 +53,11 @@ const tweetController = {
         ]
       })
       if (!data) throw new Error('推文不存在')
-      const signinUser = helper.getUser(req)
+      const signinUser = helpers.getUser(req)
       const tweet = {
         ...data.toJSON(),
-        replies: data.Replies?.length || 0,
-        likes: data.Likes?.length || 0,
+        replies: data.Replies.length,
+        likes: data.Likes.length,
         isLike: signinUser.Likes ? signinUser.Likes.some(like => like.TweetId === data.id) : false
       }
       delete tweet.Replies
@@ -68,13 +69,13 @@ const tweetController = {
   },
   addTweetLike: async (req, res, next) => {
     try {
-      const TweetId = req.params.id
-      const UserId = helper.getUser(req).id
-      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+      const tweetId = req.params.id
+      const userId = helpers.getUser(req).id
+      const tweet = await Tweet.findByPk(tweetId, { raw: true })
       if (!tweet) throw new Error('推文不存在')
-      const like = await Like.findOne({ where: { TweetId, UserId } })
+      const like = await Like.findOne({ where: { tweetId, userId }, raw: true })
       if (like) throw new Error('已按過喜歡')
-      await Like.create({ TweetId, UserId })
+      await Like.create({ TweetId: tweetId, UserId: userId })
       res.status(200).end()
     } catch (err) {
       next(err)
@@ -82,11 +83,11 @@ const tweetController = {
   },
   removeTweetLike: async (req, res, next) => {
     try {
-      const TweetId = req.params.id
-      const UserId = helper.getUser(req).id
-      const tweet = await Tweet.findByPk(TweetId, { raw: true })
+      const tweetId = req.params.id
+      const userId = helpers.getUser(req).id
+      const tweet = await Tweet.findByPk(tweetId, { raw: true })
       if (!tweet) throw new Error('推文不存在')
-      const like = await Like.findOne({ where: { TweetId, UserId } })
+      const like = await Like.findOne({ where: { tweetId, userId }, attribute: [] })
       if (!like) throw new Error('未按過喜歡')
       await like.destroy()
       res.status(200).end()
