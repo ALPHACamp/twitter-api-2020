@@ -14,8 +14,8 @@ module.exports = {
       Array.from({ length: tweetAmount }, (_, i) => ({
         // description: faker.lorem.text(), // 會過字數上限，先不用
         description: faker.lorem.words(10),
-        created_at: new Date(),
-        updated_at: new Date(),
+        created_at: new Date(Date.now() + i * 1000),
+        updated_at: new Date(Date.now() + i * 1000),
         user_id: users[i % users.length].id
       }))
     )

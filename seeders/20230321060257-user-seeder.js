@@ -7,7 +7,7 @@ module.exports = {
     return queryInterface.bulkInsert('Users', [{
       email: 'root@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-      account: 'root@example.com',
+      account: 'root',
       name: 'root',
       avatar: `https://loremflickr.com/320/240/avatar/?random=${Math.random() * 100}`,
       role: 'admin',
@@ -20,13 +20,13 @@ module.exports = {
           ({
             email: `user${i}@example.com`,
             password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-            account: `user${i}@example.com`,
+            account: `user${i}`,
             name: `user${i}`,
             avatar: `https://loremflickr.com/320/240/avatar/?random=${Math.random() * 100}`,
             role: 'user',
             image: 'https://i.imgur.com/gerdVUX.png',
-            created_at: new Date(),
-            updated_at: new Date()
+            created_at: new Date(Date.now() + (i + 1) * 1000),
+            updated_at: new Date(Date.now() + (i + 1) * 1000)
           })
         ), {}))
   },
