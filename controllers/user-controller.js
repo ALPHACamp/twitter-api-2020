@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 const helpers = require('../_helpers')
 const imgurFileHandler = require('../helpers/file-helpers')
-const { Op } = require("sequelize");
+const { sequelize, Op } = require("sequelize");
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const userController = {
@@ -503,20 +503,21 @@ const userController = {
       const limit = Number(req.query.limit) || DEFAULT_LIMIT
       const currentUser = helpers.getUser(req)
       const users = await User.findAll({
-        where: { role: 'user', id: {[Op.ne]: currentUser.id} },
+        where: { role: 'user', id: { [Op.ne]: currentUser.id} },
         attributes: ['id', 'account', 'name', 'avatar'],
-        include: {
+        include: [{
           model: User,
           as: 'Followers',
           attributes: ['id']
-        },
-        limit,
-        raw: true,
-        nest: true
+        }], 
+        limit
       })
+     
       if (!users) {
         return res.status(404).json({ status: 'error', message: '無使用者資料!' })
       }
+     
+      console.log(users)
 
       let usersData = users.map(user => {
         return {
