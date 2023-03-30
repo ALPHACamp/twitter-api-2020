@@ -346,6 +346,7 @@ const userController = {
     // ? 第一版寫法 end~~~~~~~~~~~~
     return Followship.findOne({ where: { followingId, followerId: helpers.getUser(req).id } })
       .then(following => {
+        if (!following) throw new Error('Cannot find this record.')
         // 若沒資料 (沒 following) 下1 會自動跳錯 (驗證)，因此沒建 if，若需要再建
         following.destroy()
         return res.status(200).json({ success: true, following })
@@ -380,11 +381,18 @@ const userController = {
       .catch(err => next(err))
   },
   addLike: (req, res, next) => {
-    const TweetId = req.params.id
-    // return User.findOne(helpers.getUser(req).id)
-    // return User.findOne(getUser(req).id)
-    return User.findByPk(helpers.getUser(req).id)
-      .then(user => Like.create({ UserId: user.id, TweetId }))
+    return Promise.all([
+      Tweet.findByPk(req.params.id),
+      User.findByPk(helpers.getUser(req).id)
+    ])
+      .then(([tweet, user]) => {
+        if (!tweet) throw new Error('Tweet does not exist.')
+        if (!user) throw new Error('User does not exsit.')
+        return Like.create({
+          TweetId: tweet.id,
+          UserId: user.id
+        })
+      })
       .then(like => res.status(200).json({ success: true, like }))
       .catch(err => next(err))
   },
@@ -392,7 +400,7 @@ const userController = {
     const TweetId = req.params.id
     return Like.findOne({ where: { TweetId } })
       .then(like => {
-        if (!like) return res.status(404).json({ success: false, message: 'We can not find this like record.' })
+        if (!like) throw new Error('We can not find this like record.')
         return like.destroy()
       })
       .then(like => res.status(200).json({ success: true, like }))
