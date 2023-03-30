@@ -2,7 +2,7 @@
 
 ## General info
 
-<details open><summary>Click me</summary>
+<details hide><summary>Click me</summary>
 
 The repository contains the backend code for the project of ALPHAcamp Simple Twitter course. In the project, we were instructed to build a twitter-like website. The frontend of the project is available [here](https://), and the backend is deployed on Heroku cloud application platform [here](https://dry-lowlands-42863.herokuapp.com).
 
@@ -13,7 +13,7 @@ The reason why we choose Node.js to construct the server is because it was the c
 
 Here are the features of our website.
 
-<details open><summary>Click me</summary>
+<details hide><summary>Click me</summary>
     
 ### Seed Data
 * Seed Account (at least two shown below)
