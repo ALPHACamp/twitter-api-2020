@@ -142,7 +142,7 @@ const userController = {
           delete userData.Followers
           return userData
         })
-        res.json({ topUsers })
+        res.json({ topUsers: topUsers.slice(0, 10) })
       })
       .catch(err => next(err))
   },
