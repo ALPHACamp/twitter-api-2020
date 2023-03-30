@@ -33,7 +33,20 @@ const tweetServices = {
           [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.tweet_id = Tweet.id) '), 'tweetsLikedCount']
         ]
       },
-      include: [Reply],
+      include: [{
+        model: User,
+        attributes: {
+          exclude: ['password', 'role', 'createdAt', 'updatedAt', 'email', 'introduction']
+        }
+      }, {
+        model: Reply,
+        include: [{
+          model: User,
+          attributes: {
+            exclude: ['password', 'role', 'createdAt', 'updatedAt', 'email', 'introduction']
+          }
+        }]
+      }],
       order: [[Reply, 'createdAt', 'DESC']]
     })
       .then(tweet => {
@@ -57,7 +70,15 @@ const tweetServices = {
   // 回覆
   getReplies: (req, cb) => {
     Tweet.findByPk(req.params.id, {
-      include: [Reply],
+      include: [{
+        model: Reply,
+        include: [{
+          model: User,
+          attributes: {
+            exclude: ['password', 'role', 'createdAt', 'updatedAt', 'email', 'introduction']
+          }
+        }]
+      }],
       order: [[Reply, 'createdAt', 'DESC']]
     })
       .then(tweet => {
