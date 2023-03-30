@@ -59,7 +59,7 @@ const userController = {
       const id = Number(req.params.id)
       const user = await User.findByPk(id, {
         attributes: [
-          'id', 'account', 'name', 'introduction', 'avatar', 'cover', 'role',
+          'id', 'account', 'name', 'email', 'introduction', 'avatar', 'cover', 'role',
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount']
         ]
@@ -121,7 +121,7 @@ const userController = {
       const id = Number(req.params.id)
       const { account, name, email, password, checkPassword } = req.body
 
-      if (!account || !name || !email || !password || !checkPassword) throw createError(400, '欄位不得為空')
+      if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw createError(400, '欄位不得為空')
 
       const [user, foundAccount, foundEmail] = await Promise.all([
         User.findByPk(id),
@@ -149,27 +149,26 @@ const userController = {
     try {
       const loginUser = helpers.getUser(req)
       const id = Number(req.params.id)
-      const [user, tweets] = await Promise.all([
-        User.findByPk(id),
-        Tweet.findAll({
-          raw: true,
-          nest: true,
-          where: { UserId: id },
+      const user = await User.findByPk(id, {
+        attributes: ['role'],
+        include: {
+          model: Tweet,
           include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
           attributes: [
             'id', 'description', 'createdAt',
-            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id )'), 'replyCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweet.id )'), 'likeCount'],
-            [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.User_id = ${loginUser.id} AND Likes.Tweet_id = Tweet.id)`), 'isLiked']
-          ],
-          order: [['createdAt', 'DESC']]
-        })
-      ])
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweets.id )'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweets.id )'), 'likeCount'],
+            [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.User_id = ${loginUser.id} AND Likes.Tweet_id = Tweets.id)`), 'isLiked']
+          ]
+        },
+        order: [[Tweet, 'createdAt', 'DESC']]
+      })
 
       if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
 
+      const tweets = [...user.Tweets]
       const result = tweets.map(tweet => ({
-        ...tweet,
+        ...tweet.toJSON(),
         createdAt: timeFormat(tweet.createdAt),
         isLiked: !!tweet.isLiked
       }))
@@ -182,25 +181,22 @@ const userController = {
   getUserReplies: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
-      const [user, replies] = await Promise.all([
-        User.findByPk(id),
-        Reply.findAll({
-          where: { UserId: id },
+      const user = await User.findByPk(id, {
+        attributes: ['role'],
+        include: {
+          model: Reply,
           attributes: { exclude: ['updatedAt'] },
           include: [
             { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-            {
-              model: Tweet,
-              attributes: { exclude: ['id', 'description', 'createdAt', 'updatedAt'] },
-              include: { model: User, attributes: ['id', 'account'] }
-            }
-          ],
-          order: [['createdAt', 'DESC']]
-        })
-      ])
+            { model: Tweet, attributes: ['UserId'], include: { model: User, attributes: ['id', 'account'] } }
+          ]
+        },
+        order: [[Reply, 'createdAt', 'DESC']]
+      })
 
       if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
 
+      const replies = [...user.Replies]
       const result = replies.map(reply => ({
         ...reply.toJSON(),
         createdAt: timeFormat(reply.createdAt)
