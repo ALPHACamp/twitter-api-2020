@@ -101,7 +101,7 @@ const userController = {
           ],
         },
       });
-      
+
       if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在!");
 
       const user = foundUser.toJSON();
@@ -259,42 +259,48 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     const { id } = req.params;
+    const loginUserId = getUser(req).id;
     try {
       const foundUser = await User.findByPk(id);
 
       if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在！");
 
-      const [tweets, loginUser] = await Promise.all([
-        Tweet.findAll({
-          include: [
-            { model: Reply, attributes: ["id"] },
-            { model: Like, attributes: ["id"] },
+      const tweets = await Tweet.findAll({
+        attributes: [
+          "id",
+          "description",
+          "UserId",
+          "createdAt",
+          [
+            sequelize.literal(`
+            (SELECT COUNT(r.id) from Replies as r WHERE Tweet.id = r.TweetId )
+          `),
+            "replyCounts",
           ],
-          attributes: ["id", "description", "UserId", "createdAt"],
-          where: {
-            UserId: id,
-          },
-          order: [["createdAt", "DESC"]],
-        }),
-        User.findByPk(getUser(req).id, {
-          include: [{ model: Like, attributes: ["TweetId"] }],
-        }),
-      ]);
-      const loginUserLikeTweetIds = loginUser?.Likes
-        ? loginUser.Likes.map((l) => l.TweetId)
-        : [];
+          [
+            sequelize.literal(`
+            (SELECT COUNT(l.id) from Likes as l WHERE Tweet.id = l.TweetId )
+          `),
+            "likeCounts",
+          ],
+          [
+            sequelize.literal(`
+            (EXISTS (SELECT l.id from Likes as l WHERE Tweet.id = l.TweetId AND l.UserId = ${loginUserId}))
+          `),
+            "isLiked",
+          ],
+        ],
+        where: {
+          UserId: id,
+        },
+        order: [["createdAt", "DESC"]],
+      });
       const data = tweets.map((t) => {
         const tweet = t.toJSON();
-        const replyCounts = t.Replies.length;
-        const likeCounts = t.Likes.length;
-        delete tweet.Replies;
-        delete tweet.Likes;
         return {
           ...tweet,
-          replyCounts,
-          likeCounts,
           // - 目前登入的使用者有無按過喜歡
-          isLiked: loginUserLikeTweetIds.some((tid) => tid === tweet.id),
+          isLiked: tweet.isLiked === 1,
         };
       });
       return res.json(data);
