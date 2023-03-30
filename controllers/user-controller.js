@@ -235,7 +235,7 @@ const userController = {
     try {
       const { userId } = req.params
       const user = await User.findByPk(userId)
-      if (user.role === 'admin') {
+      if (!user || user.role === 'admin') {
         return res
           .status(404)
           .json({ status: 'error', message: '找不到使用者' })
@@ -255,12 +255,6 @@ const userController = {
         raw: true,
         nest: true
       })
-
-      if (!users) {
-        return res
-          .status(404)
-          .json({ status: 'error', message: '找不到使用者' })
-      }
 
       const tweetCount = await Tweet.count({
         where: { UserId: userId },
@@ -341,7 +335,7 @@ const userController = {
     try {
       const { userId } = req.params
       const user = await User.findByPk(userId)
-      if (user.role === 'admin') {
+      if (!user || user.role === 'admin') {
         return res
           .status(404)
           .json({ status: 'error', message: '找不到使用者' })
@@ -361,11 +355,6 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!users) {
-        return res
-          .status(404)
-          .json({ status: 'error', message: '找不到使用者' })
-      }
 
       const tweetCount = await Tweet.count({
         where: { UserId: userId },
