@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 const helpers = require('../_helpers')
 const imgurFileHandler = require('../helpers/file-helpers')
-const { sequelize, Op } = require('sequelize')
+const { Op } = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const userController = {
