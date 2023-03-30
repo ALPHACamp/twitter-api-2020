@@ -220,6 +220,7 @@ const userController = {
       const userLikes = data.map(el => {
         const userLike = {
           ...el.toJSON(),
+          tweetUpdatedAt: el.Tweet.updatedAt,
           tweeterId: el.Tweet.User.id,
           account: el.Tweet.User.account,
           name: el.Tweet.User.name,
