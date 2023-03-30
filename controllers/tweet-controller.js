@@ -1,4 +1,4 @@
-const { Reply, Tweet, User } = require('../models')
+const { Like, Reply, Tweet, User } = require('../models')
 // const { getUser } = require('../helpers/auth-helpers')
 const { getUser } = require('../_helpers')
 
@@ -21,31 +21,52 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
+    const currentUser = getUser(req)
     return Tweet.findAll({
-      include: { model: User },
-      raw: true,
-      nest: true,
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Reply },
+        { model: Like }
+      ],
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
-        return res.status(200).json(tweets)
+        const data = tweets.map(t => {
+          t = t.toJSON()
+          if (currentUser.Likes) {
+            t.currentUserLikes = currentUser.Likes.some(l => l.TweetId === t.id)
+            t.replyCounts = t.Replies.length
+            t.likeCounts = t.Likes.length
+          }
+          delete t.Replies
+          delete t.Likes
+          return t
+        })
+        return res.status(200).json(data)
       })
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
+    const currentUser = getUser(req)
     return Tweet.findByPk(req.params.id, {
       include: [
-        { model: User },
-        {
-          model: Reply,
-          order: [['createdAt', 'DESC']]
-        }
+        { model: User, attributes: ['id', 'avatar', 'name', 'account'] },
+        { model: Reply, include: { model: User, attributes: ['id', 'avatar', 'name', 'account'] } },
+        { model: Like, attributes: ['id'] }
       ],
-      raw: true,
-      nest: true
+      order: [
+        [{ model: Reply }, 'createdAt', 'DESC']
+      ]
     })
       .then(tweet => {
         if (!tweet) throw new Error('推文不存在')
+        tweet = tweet.toJSON()
+        if (currentUser.Likes) {
+          tweet.currentUserLikes = currentUser.Likes.some(l => l.TweetId === tweet.id)
+          tweet.replyCounts = tweet.Replies.length
+          tweet.likeCounts = tweet.Likes.length
+        }
+        delete tweet.Likes
         return res.status(200).json(tweet)
       })
       .catch(err => next(err))
