@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const validator = require('validator')
 const helpers = require('../_helpers')
 const imgurFileHandler = require('../helpers/file-helpers')
-
+const { sequelize, Op } = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const userController = {
@@ -312,18 +312,18 @@ const userController = {
         name: userInfo.name,
         avatar:
           userInfo.avatar ||
-          "https://live.staticflickr.com/65535/52777903968_c0460ba4d6_z.jpg",
+          'https://live.staticflickr.com/65535/52777903968_c0460ba4d6_z.jpg',
         cover:
           userInfo.cover ||
-          "https://live.staticflickr.com/65535/52777507974_aa5dcee4aa_z.jpg",
-        introduction: userInfo.introduction || "Newbie here!",
+          'https://live.staticflickr.com/65535/52777507974_aa5dcee4aa_z.jpg',
+        introduction: userInfo.introduction || 'Newbie here!',
         tweetCount: userInfo.Tweets.length,
         followingCount: userInfo.Followings.length,
         followerCount: userInfo.Followers.length,
         isFollowing: helpers
           .getUser(req)
-          .Followings.some((u) => u.Followship.followingId === userInfo.id),
-      };
+          .Followings.some((u) => u.Followship.followingId === userInfo.id)
+      }
 
       return res.status(200).json(userInfo)
     } catch (error) {
@@ -501,22 +501,23 @@ const userController = {
     try {
       const DEFAULT_LIMIT = 10
       const limit = Number(req.query.limit) || DEFAULT_LIMIT
+      const currentUser = helpers.getUser(req)
       const users = await User.findAll({
+        where: { role: 'user', id: { [Op.ne]: currentUser.id } },
         attributes: ['id', 'account', 'name', 'avatar'],
-        include: {
+        include: [{
           model: User,
           as: 'Followers',
           attributes: ['id']
-        },
-        limit,
-        raw: true,
-        nest: true
+        }],
+        limit
       })
+
       if (!users) {
         return res.status(404).json({ status: 'error', message: '無使用者資料!' })
       }
 
-      let usersData = users.map(user => {
+      const usersData = users.map(user => {
         return {
           UserId: user.id,
           account: user.account,
@@ -525,8 +526,7 @@ const userController = {
           followerCount: user.Followers.length,
           isFollowing: helpers.getUser(req).Followings.some(fg => fg.id === user.id)
         }
-      })
-      usersData = usersData.sort((a, b) => b.followerCount - a.followerCount)
+      }).sort((a, b) => b.followerCount - a.followerCount)
       return res.status(200).json(usersData)
     } catch (error) { next(error) }
   }
