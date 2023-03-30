@@ -13,7 +13,7 @@ const userController = {
   },
 
   getUserTweets: (req, res, next) => {
-    return sequelize.query(`SELECT id TweetId, description, !ISNULL(like_tweet.tweet_id) isLiked, likesNum, repliesNum
+    return sequelize.query(`SELECT id TweetId, description, !ISNULL(like_tweet.tweet_id) isLiked, IFNULL(likesNum, 0) likesNum, IFNULL(repliesNum, 0) repliesNum
 FROM Tweets t 
 LEFT JOIN(SELECT tweet_id FROM Likes WHERE user_id = :ownId) like_tweet ON t.id = like_tweet.tweet_id 
 LEFT JOIN(SELECT l.tweet_id, COUNT(tweet_id) likesNum
