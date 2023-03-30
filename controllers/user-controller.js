@@ -258,16 +258,18 @@ const userController = {
         raw: true
       })
       const signinUser = helpers.getUser(req)
-      const followers = data.map(el => {
-        const follower = {
-          followerId: el.Followers.id,
-          name: el.Followers.name,
-          avatar: el.Followers.avatar,
-          introduction: el.Followers.introduction,
-          isFollowing: signinUser.Followings ? signinUser.Followings.some(following => following.id === el.Followers.id) : false
-        }
-        return follower
-      })
+      const followers = (data[0].Followers.id === null)
+        ? []
+        : data.map(el => {
+          const follower = {
+            followerId: el.Followers.id,
+            name: el.Followers.name,
+            avatar: el.Followers.avatar,
+            introduction: el.Followers.introduction,
+            isFollowing: signinUser.Followings ? signinUser.Followings.some(following => following.id === el.Followers.id) : false
+          }
+          return follower
+        })
       res.status(200).json(followers)
     } catch (err) {
       next(err)
@@ -294,16 +296,18 @@ const userController = {
         raw: true
       })
       const signinUser = helpers.getUser(req)
-      const followings = data.map(el => {
-        const following = {
-          followingId: el.Followings.id,
-          name: el.Followings.name,
-          avatar: el.Followings.avatar,
-          introduction: el.Followings.introduction,
-          isFollowing: signinUser.Followings ? signinUser.Followings.some(following => following.id === el.Followings.id) : false
-        }
-        return following
-      })
+      const followings = (data[0].Followings.id === null)
+        ? []
+        : data.map(el => {
+          const following = {
+            followingId: el.Followings.id,
+            name: el.Followings.name,
+            avatar: el.Followings.avatar,
+            introduction: el.Followings.introduction,
+            isFollowing: signinUser.Followings ? signinUser.Followings.some(following => following.id === el.Followings.id) : false
+          }
+          return following
+        })
       res.status(200).json(followings)
     } catch (err) {
       next(err)
