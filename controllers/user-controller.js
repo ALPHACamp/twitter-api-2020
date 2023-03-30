@@ -129,7 +129,6 @@ const userController = {
   getUserReplies: async (req, res, next) => {
     try {
       const { userId } = req.params
-      const currentUserId = helpers.getUser(req).id
 
       const user = await User.findByPk(userId)
       if (!user) {
@@ -159,15 +158,15 @@ const userController = {
       }
 
       const repliesData = replies.map((reply) => {
-        const { id, TweetId, comment, createdAt } = reply
+        const { id, UserId, TweetId, comment, createdAt } = reply
         return {
           id,
+          UserId,
           TweetId,
           comment,
           createdAt,
-          tweetAuthorId: reply.Tweet.UserId,
+          tweetAuthorId: reply.Tweet.User.id,
           tweetAuthorAccount: reply.Tweet.User.account,
-          replyUserId: reply.UserId,
           replyAccount: reply.User.account,
           replyName: reply.User.name,
           replyAvatar: reply.User.avatar
