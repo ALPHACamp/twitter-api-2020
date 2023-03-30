@@ -1,4 +1,4 @@
-const { Tweet, Reply, Like } = require('../models')
+const { Tweet, Reply, Like, User } = require('../models')
 const helpers = require('../_helpers')
 const Sequelize = require('sequelize')
 
@@ -6,6 +6,12 @@ const tweetServices = {
   // 推文
   getTweets: (req, cb) => {
     Tweet.findAll({
+      include: [{
+        model: User,
+        attributes: {
+          exclude: ['password', 'role', 'createdAt', 'updatedAt', 'email', 'introduction']
+        }
+      }],
       attributes: {
         include: [
           [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'tweetsRepliesCount'],
