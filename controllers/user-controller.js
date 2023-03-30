@@ -40,7 +40,7 @@ ORDER BY t.created_at DESC LIMIT 5`,
     return sequelize.query(`
     SELECT r.tweet_id TweetId, comment, account
 FROM Replies r
-LEFT JOIN (SELECT t.id tweet_id, user_id, account FROM Tweets t JOIN Users u ON t.user_id = u.id) t_account USING (tweet_id)
+LEFT JOIN (SELECT t.id tweet_id, user_id, account, created_at FROM Tweets t JOIN Users u ON t.user_id = u.id) t_account USING (tweet_id)
 WHERE r.user_id = :userId
 ORDER BY created_at LIMIT 5
     `,
