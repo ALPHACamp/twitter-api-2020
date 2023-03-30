@@ -212,19 +212,18 @@ const userController = {
       const likedTweetsData = likedTweets.map((like) => {
         return {
           likeId: like.id,
-          userId: like.UserId,
-          TweetId: like.TweetId,
           likeCreatedAt: like.createdAt,
-          tweetAuthorId: like.Tweet.UserId,
-          tweetAuthorAccount: like.Tweet.User.account,
-          tweetAuthorName: like.Tweet.User.name,
-          tweetAuthorAvatar: like.Tweet.User.avatar,
-          tweetContent: like.Tweet.description,
-          tweetCreatedAt: like.Tweet.createdAt,
+          id: like.TweetId,
+          UserId: like.Tweet.UserId,
+          account: like.Tweet.User.account,
+          name: like.Tweet.User.name,
+          avatar: like.Tweet.User.avatar,
+          description: like.Tweet.description,
+          createdAt: like.Tweet.createdAt,
           isLike: like.Tweet.Likes.some((u) => u.UserId === currentUserId),
           likedCount: like.Tweet.Likes.length,
-          replyCount: like.Tweet.Replies.length
-        }
+          replyCount: like.Tweet.Replies.length,
+        };
       })
       return res.status(200).json(likedTweetsData)
     } catch (error) {
