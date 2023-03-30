@@ -90,7 +90,10 @@ const userServices = {
           name,
           email,
           password: hashedPassword,
-          role: 'user'
+          role: 'user',
+          avatar: 'https://i.imgur.com/3ZQZQ9I.png',
+          cover: 'https://imgur.com/a/NkB8zFB'
+
         })
           .then(user => {
             const userData = user.toJSON()
