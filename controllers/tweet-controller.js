@@ -33,9 +33,11 @@ const tweetController = {
       .then(tweets => {
         const data = tweets.map(t => {
           t = t.toJSON()
-          t.currentUserLikes = currentUser.Likes.some(l => l.TweetId === t.id)
-          t.replyCounts = t.Replies.length
-          t.likeCounts = t.Likes.length
+          if (currentUser.Likes) {
+            t.currentUserLikes = currentUser.Likes.some(l => l.TweetId === t.id)
+            t.replyCounts = t.Replies.length
+            t.likeCounts = t.Likes.length
+          }
           delete t.Replies
           delete t.Likes
           return t
@@ -59,9 +61,11 @@ const tweetController = {
       .then(tweet => {
         if (!tweet) throw new Error('推文不存在')
         tweet = tweet.toJSON()
-        tweet.currentUserLikes = currentUser.Likes.some(l => l.TweetId === tweet.id)
-        tweet.replyCounts = tweet.Replies.length
-        tweet.likeCounts = tweet.Likes.length
+        if (currentUser.Likes) {
+          tweet.currentUserLikes = currentUser.Likes.some(l => l.TweetId === tweet.id)
+          tweet.replyCounts = tweet.Replies.length
+          tweet.likeCounts = tweet.Likes.length
+        }
         delete tweet.Likes
         return res.status(200).json(tweet)
       })
