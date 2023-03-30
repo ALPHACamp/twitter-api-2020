@@ -344,55 +344,60 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     const { id } = req.params;
+    const loginUserId = getUser(req).id;
     try {
       const foundUser = await User.findByPk(id);
 
       if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在！");
 
-      const [likes, loginUser] = await Promise.all([
-        Like.findAll({
-          include: [
-            {
-              model: Tweet,
-              attributes: ["description"],
-              include: [
-                {
-                  model: User,
-                  attributes: ["id", "name", "account", "avatar"],
-                  required: true,
-                },
-                { model: Reply, attributes: ["id"] },
-                { model: Like, attributes: ["id"] },
+      const likes = await Like.findAll({
+        include: [
+          {
+            model: Tweet,
+            attributes: [
+              "description",
+              [
+                sequelize.literal(`
+                  (SELECT COUNT(r.id) from Replies as r WHERE Tweet.id = r.TweetId )
+                `),
+                "replyCounts",
               ],
-            },
-          ],
-          where: {
-            UserId: id,
+              [
+                sequelize.literal(`
+                  (SELECT COUNT(l.id) from Likes as l WHERE Tweet.id = l.TweetId )
+                `),
+                "likeCounts",
+              ],
+              [
+                sequelize.literal(`
+                  (EXISTS (SELECT l.id from Likes as l WHERE Tweet.id = l.TweetId AND l.UserId = ${loginUserId}))
+                `),
+                "isLiked",
+              ],
+            ],
+            include: [
+              {
+                model: User,
+                attributes: ["id", "name", "account", "avatar"],
+                required: true,
+              },
+            ],
           },
-          order: [["createdAt", "DESC"]],
-        }),
-        User.findByPk(getUser(req).id, {
-          include: [{ model: Like, attributes: ["TweetId"] }],
-        }),
-      ]);
-      const loginUserLikeTweetIds = loginUser?.Likes
-        ? loginUser.Likes.map((ul) => ul.TweetId)
-        : [];
+        ],
+        where: {
+          UserId: id,
+        },
+        order: [["createdAt", "DESC"]],
+      });
       const data = likes.map((l) => {
         const { TweetId, createdAt, Tweet } = l.toJSON();
-        const replyCounts = Tweet.Replies.length;
-        const likeCounts = Tweet.Likes.length;
-        delete Tweet.Replies;
-        delete Tweet.Likes;
         return {
           id: TweetId,
           TweetId,
           createdAt, // - 什麼時候按喜歡推文
           ...Tweet,
-          replyCounts,
-          likeCounts,
           // - 目前登入的使用者有無按過喜歡
-          isLiked: loginUserLikeTweetIds.some((tid) => tid === TweetId),
+          isLiked: Tweet.isLiked === 1
         };
       });
       return res.json(data);
