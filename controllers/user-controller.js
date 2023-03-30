@@ -222,8 +222,8 @@ const userController = {
           createdAt: like.Tweet.createdAt,
           isLike: like.Tweet.Likes.some((u) => u.UserId === currentUserId),
           likedCount: like.Tweet.Likes.length,
-          replyCount: like.Tweet.Replies.length,
-        };
+          replyCount: like.Tweet.Replies.length
+        }
       })
       return res.status(200).json(likedTweetsData)
     } catch (error) {
