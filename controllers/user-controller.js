@@ -38,11 +38,17 @@ ORDER BY t.created_at DESC LIMIT 5`,
   },
 
   getUserReplies: (req, res, next) => {
-    return sequelize.query('SELECT tweet_id TweetId, comment FROM Replies WHERE user_id = :userId ORDER BY created_at LIMIT 5',
-      {
-        replacements: { userId: req.params.userId },
-        type: sequelize.QueryTypes.SELECT
-      })
+    return sequelize.query(`
+    SELECT r.tweet_id TweetId, comment, account
+FROM Replies r
+LEFT JOIN (SELECT t.id tweet_id, user_id, account FROM Tweets t JOIN Users u ON t.user_id = u.id) t_account USING (tweet_id)
+WHERE r.user_id = :userId
+ORDER BY created_at LIMIT 5
+    `,
+    {
+      replacements: { userId: req.params.userId },
+      type: sequelize.QueryTypes.SELECT
+    })
       .then(replies => {
         return res.json(replies)
       })
@@ -50,11 +56,24 @@ ORDER BY t.created_at DESC LIMIT 5`,
   },
 
   getUserLikes: (req, res, next) => {
-    return sequelize.query('SELECT l.tweet_id TweetId, !ISNULL(ownLike.tweet_id) isliked FROM Likes l LEFT JOIN (SELECT tweet_id FROM Likes WHERE user_id = :ownId) ownLike USING(tweet_id) WHERE l.user_id = :userId',
-      {
-        replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
-        type: sequelize.QueryTypes.SELECT
-      })
+    return sequelize.query(`
+    SELECT l.tweet_id TweetId, !ISNULL(ownLike.tweet_id) isliked, description, IFNULL(likesNum, 0) likesNum, IFNULL(repliesNum, 0) repliesNum
+FROM Likes l 
+LEFT JOIN (SELECT tweet_id FROM Likes WHERE user_id = :ownId) ownLike USING(tweet_id)
+JOIN Tweets t ON t.id = l.tweet_id
+LEFT JOIN(SELECT l.tweet_id, COUNT(tweet_id) likesNum
+FROM Likes l 
+JOIN Tweets t ON l.tweet_id = t.id
+GROUP BY l.tweet_id) t_like USING(tweet_id)
+LEFT JOIN(SELECT tweet_id, COUNT(r.user_id) repliesNum FROM Replies r 
+JOIN Tweets t ON r.tweet_id = t.id
+GROUP BY tweet_id) t_reply USING(tweet_id)
+WHERE l.user_id = :userId
+    `,
+    {
+      replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
+      type: sequelize.QueryTypes.SELECT
+    })
       .then(likes => {
         return res.json(likes)
       })
