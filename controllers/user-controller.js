@@ -199,24 +199,29 @@ const userController = {
     const currentUser = helpers.getUser(req)
     return Like.findAll({
       where: { UserId: req.params.id }, // 因測試檔，改大駝峰
-      raw: true,
       order: [['createdAt', 'DESC']],
       include: {
         model: Tweet,
         attributes: ['description'],
-        include: {
-          model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
-        }
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          { model: Reply },
+          { model: Like }
+        ]
       },
       nest: true
     })
       .then(likes => {
-        const data = likes.map(i => {
+        const data = likes.map(li => {
+          li = li.toJSON()
           if (currentUser.Likes) {
-            i.currentUserLikes = currentUser.Likes.some(l => l.TweetId === i.TweetId)
+            li.Tweet.currentUserLikes = currentUser.Likes.some(l => l.TweetId === li.TweetId)
+            li.Tweet.replyCounts = li.Tweet.Replies.length
+            li.Tweet.likeCounts = li.Tweet.Likes.length
+            delete li.Tweet.Replies
+            delete li.Tweet.Likes
           }
-          return i
+          return li
         })
         res.status(200).json(data)
       })
