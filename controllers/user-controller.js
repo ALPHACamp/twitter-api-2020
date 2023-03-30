@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const defaultImageLink = require('../helpers/default-image-helper')
+const defaultImageLink = require("../helpers/default-image-helper");
 const { newError } = require("../helpers/error-helper");
 const { Op, QueryTypes } = require("sequelize");
 const imgurFileHandler = require("../helpers/file-helper");
@@ -75,33 +75,33 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     const { id } = req.params;
+    const loginUserId = getUser(req).id;
     try {
-      const [foundUser, loginUser] = await Promise.all([
-        User.findByPk(id, {
-          attributes: {
-            include: [
-              [
-                sequelize.literal(
-                  `(SELECT COUNT(*) FROM Followships WHERE followingId = ${id})`
-                ),
-                "followerCounts",
-              ],
-              [
-                sequelize.literal(
-                  `(SELECT COUNT(*) FROM Followships WHERE followerId = ${id})`
-                ),
-                "followingCounts",
-              ],
+      const foundUser = await User.findByPk(id, {
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                `(SELECT COUNT(*) FROM Followships WHERE followingId = ${id})`
+              ),
+              "followerCounts",
             ],
-          },
-        }),
-        User.findByPk(getUser(req).id, {
-          include: [{ model: User, as: "Followings", attributes: ["id"] }],
-        }),
-      ]);
-      const loginUserFollowingIds = loginUser?.Followings
-        ? loginUser.Followings.map((f) => f.id)
-        : [];
+            [
+              sequelize.literal(
+                `(SELECT COUNT(*) FROM Followships WHERE followerId = ${id})`
+              ),
+              "followingCounts",
+            ],
+            [
+              sequelize.literal(
+                `(EXISTS (SELECT * FROM Followships AS f WHERE f.followerId = ${loginUserId} AND f.followingId = ${id}))`
+              ),
+              "isFollowed",
+            ],
+          ],
+        },
+      });
+
       if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在!");
 
       const user = foundUser.toJSON();
@@ -109,7 +109,7 @@ const userController = {
       return res.json({
         ...user,
         // - 目前登入的使用者有無追蹤查詢的使用者
-        isFollowed: loginUserFollowingIds.some((fid) => fid === Number(id)),
+        isFollowed: user.isFollowed === 1,
       });
     } catch (error) {
       return next(error);
@@ -259,42 +259,48 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     const { id } = req.params;
+    const loginUserId = getUser(req).id;
     try {
       const foundUser = await User.findByPk(id);
 
       if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在！");
 
-      const [tweets, loginUser] = await Promise.all([
-        Tweet.findAll({
-          include: [
-            { model: Reply, attributes: ["id"] },
-            { model: Like, attributes: ["id"] },
+      const tweets = await Tweet.findAll({
+        attributes: [
+          "id",
+          "description",
+          "UserId",
+          "createdAt",
+          [
+            sequelize.literal(`
+            (SELECT COUNT(r.id) from Replies as r WHERE Tweet.id = r.TweetId )
+          `),
+            "replyCounts",
           ],
-          attributes: ["id", "description", "UserId", "createdAt"],
-          where: {
-            UserId: id,
-          },
-          order: [["createdAt", "DESC"]],
-        }),
-        User.findByPk(getUser(req).id, {
-          include: [{ model: Like, attributes: ["TweetId"] }],
-        }),
-      ]);
-      const loginUserLikeTweetIds = loginUser?.Likes
-        ? loginUser.Likes.map((l) => l.TweetId)
-        : [];
+          [
+            sequelize.literal(`
+            (SELECT COUNT(l.id) from Likes as l WHERE Tweet.id = l.TweetId )
+          `),
+            "likeCounts",
+          ],
+          [
+            sequelize.literal(`
+            (EXISTS (SELECT l.id from Likes as l WHERE Tweet.id = l.TweetId AND l.UserId = ${loginUserId}))
+          `),
+            "isLiked",
+          ],
+        ],
+        where: {
+          UserId: id,
+        },
+        order: [["createdAt", "DESC"]],
+      });
       const data = tweets.map((t) => {
         const tweet = t.toJSON();
-        const replyCounts = t.Replies.length;
-        const likeCounts = t.Likes.length;
-        delete tweet.Replies;
-        delete tweet.Likes;
         return {
           ...tweet,
-          replyCounts,
-          likeCounts,
           // - 目前登入的使用者有無按過喜歡
-          isLiked: loginUserLikeTweetIds.some((tid) => tid === tweet.id),
+          isLiked: tweet.isLiked === 1,
         };
       });
       return res.json(data);
@@ -338,55 +344,61 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     const { id } = req.params;
+    const loginUserId = getUser(req).id;
     try {
       const foundUser = await User.findByPk(id);
 
       if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在！");
 
-      const [likes, loginUser] = await Promise.all([
-        Like.findAll({
-          include: [
-            {
-              model: Tweet,
-              attributes: ["description"],
-              include: [
-                {
-                  model: User,
-                  attributes: ["id", "name", "account", "avatar"],
-                  required: true,
-                },
-                { model: Reply, attributes: ["id"] },
-                { model: Like, attributes: ["id"] },
+      const likes = await Like.findAll({
+        include: [
+          {
+            model: Tweet,
+            attributes: [
+              "description",
+              [
+                sequelize.literal(`
+                  (SELECT COUNT(r.id) from Replies as r WHERE Tweet.id = r.TweetId )
+                `),
+                "replyCounts",
               ],
-            },
-          ],
-          where: {
-            UserId: id,
+              [
+                sequelize.literal(`
+                  (SELECT COUNT(l.id) from Likes as l WHERE Tweet.id = l.TweetId )
+                `),
+                "likeCounts",
+              ],
+              [
+                sequelize.literal(`
+                  (EXISTS (SELECT l.id from Likes as l WHERE Tweet.id = l.TweetId AND l.UserId = ${loginUserId}))
+                `),
+                "isLiked",
+              ],
+            ],
+            include: [
+              {
+                model: User,
+                attributes: ["id", "name", "account", "avatar"],
+                required: true,
+              },
+            ],
           },
-          order: [["createdAt", "DESC"]],
-        }),
-        User.findByPk(getUser(req).id, {
-          include: [{ model: Like, attributes: ["TweetId"] }],
-        }),
-      ]);
-      const loginUserLikeTweetIds = loginUser?.Likes
-        ? loginUser.Likes.map((ul) => ul.TweetId)
-        : [];
+        ],
+        attributes: ["TweetId", "createdAt"],
+        where: {
+          UserId: id,
+        },
+        order: [["createdAt", "DESC"]],
+      });
       const data = likes.map((l) => {
         const { TweetId, createdAt, Tweet } = l.toJSON();
-        const replyCounts = Tweet.Replies.length;
-        const likeCounts = Tweet.Likes.length;
-        delete Tweet.Replies;
-        delete Tweet.Likes;
         return {
           id: TweetId,
           TweetId,
           createdAt, // - 什麼時候按喜歡推文
           ...Tweet,
-          replyCounts,
-          likeCounts,
           // - 目前登入的使用者有無按過喜歡
-          isLiked: loginUserLikeTweetIds.some((tid) => tid === TweetId),
+          isLiked: Tweet.isLiked === 1
         };
       });
       return res.json(data);
