@@ -6,7 +6,6 @@ const helpers = require('../_helpers')
 
 const userController = {
   getUser: (req, res, next) => {
-    if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     return User.findByPk(req.params.userId, { attributes: { exclude: ['password'] } })
       .then(user => res.json({ ...user.toJSON() }))
       .catch(error => next(error))
