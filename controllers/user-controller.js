@@ -384,6 +384,7 @@ const userController = {
             ],
           },
         ],
+        attributes: ["TweetId", "createdAt"],
         where: {
           UserId: id,
         },
