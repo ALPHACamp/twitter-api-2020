@@ -82,14 +82,13 @@ const userController = {
     try {
       const { userId } = req.params
       const currentUserId = helpers.getUser(req).id
-
       const user = await User.findByPk(userId)
 
-      if (!user) {
+      if (!user || user.role === "admin") {
         return res.status(404).json({
-          status: 'error',
-          message: '找不到使用者'
-        })
+          status: "error",
+          message: "找不到使用者",
+        });
       }
 
       const tweets = await Tweet.findAll({
@@ -131,11 +130,11 @@ const userController = {
       const { userId } = req.params
 
       const user = await User.findByPk(userId)
-      if (!user) {
+      if (!user || user.role === "admin") {
         return res.status(404).json({
-          status: 'error',
-          message: '找不到使用者'
-        })
+          status: "error",
+          message: "找不到使用者",
+        });
       }
 
       const replies = await Reply.findAll({
@@ -184,12 +183,13 @@ const userController = {
       const currentUserId = helpers.getUser(req).id
 
       const user = await User.findByPk(userId)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(404).json({
           status: 'error',
           message: '找不到使用者'
         })
       }
+    
 
       const likedTweets = await Like.findAll({
         where: { UserId: userId },
@@ -236,25 +236,27 @@ const userController = {
     try {
       const { userId } = req.params
       const users = await User.findAll({
-        where: { id: userId },
+        where: { id: userId, role: "user" },
         include: [
           {
             model: User,
-            as: 'Followings',
-            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
-          }
+            as: "Followings",
+            attributes: ["id", "account", "name", "avatar", "introduction"],
+          },
         ],
         order: [
-          [{ model: User, as: 'Followings' }, Followship, 'createdAt', 'DESC']
+          [{ model: User, as: "Followings" }, Followship, "createdAt", "DESC"],
         ],
         raw: true,
-        nest: true
-      })
+        nest: true,
+      });
 
       if (!users) {
-        return res.status(404).json({ status: 'error', message: '找不到使用者' })
+        return res
+          .status(404)
+          .json({ status: "error", message: "找不到使用者" });
       }
-
+     
       const tweetCount = await Tweet.count({
         where: { UserId: userId },
         col: 'id'
@@ -334,25 +336,26 @@ const userController = {
     try {
       const { userId } = req.params
       const users = await User.findAll({
-        where: { id: userId },
+        where: { role: 'user', id: userId },
         include: [
           {
             model: User,
-            as: 'Followers',
-            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
-          }
+            as: "Followers",
+            attributes: ["id", "account", "name", "avatar", "introduction"],
+          },
         ],
         order: [
-          [{ model: User, as: 'Followers' }, Followship, 'createdAt', 'DESC']
+          [{ model: User, as: "Followers" }, Followship, "createdAt", "DESC"],
         ],
         raw: true,
-        nest: true
-      })
+        nest: true,
+      });
       if (!users) {
         return res
           .status(404)
-          .json({ status: 'error', message: '找不到使用者' })
+          .json({ status: "error", message: "找不到使用者" });
       }
+
       const tweetCount = await Tweet.count({
         where: { UserId: userId },
         col: 'id'
@@ -396,8 +399,10 @@ const userController = {
       }
 
       const user = await User.findByPk(userId)
-      if (!user) {
-        return res.status(404).json({ status: 'error', message: '找不到使用者' })
+      if (!user || user.role === "admin") {
+        return res
+          .status(404)
+          .json({ status: "error", message: "找不到使用者" });
       }
 
       if (name && !validator.isByteLength(name, { max: 50 })) {
@@ -443,8 +448,10 @@ const userController = {
       }
       // confirm if this user exists
       const user = await User.findByPk(userId)
-      if (!user) {
-        return res.status(404).json({ status: 'error', message: '找不到使用者!' })
+      if (!user || user.role === "admin") {
+        return res
+          .status(404)
+          .json({ status: "error", message: "找不到使用者!" });
       }
 
       const errors = []
