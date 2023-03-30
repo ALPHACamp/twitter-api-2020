@@ -4,6 +4,8 @@ const { User, Tweet, Reply, Like } = require('../models')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
+require('dayjs/locale/zh-tw')
+dayjs.locale('zh-tw')
 const sequelize = require('sequelize')
 
 const adminController = {
@@ -40,7 +42,7 @@ const adminController = {
         ],
         [
           sequelize.literal(`(
-            SELECT COUNT(*) FROM Tweets RIGHT OUTER JOIN Likes ON Tweets.id=Likes.TweetId 
+            SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id=Likes.TweetId 
             WHERE Tweets.UserId = User.id 
           )`),
           'beLikedCounts'
