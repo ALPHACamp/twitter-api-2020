@@ -444,6 +444,44 @@ const userController = {
       next(err);
     }
   },
+  getTopUsers: async (req, res, next) => {
+    try {
+      const UserId = getUser(req).id;
+      const users = await User.findAll({
+        where: { role: 'user' },
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'avatar',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(following_id) FROM Followships WHERE Followships.following_id = User.id)'
+            ),
+            'followersCount',
+          ],
+          [
+            // no include 所以要多寫tableName
+            // EXISTS 用法有點像if，有結果則為true or 1 , 無則為false or 0
+            sequelize.literal(
+              `EXISTS (SELECT follower_id FROM Followships WHERE Followships.following_id = User.id AND Followships.follower_id  = ${UserId})`
+            ),
+            'isFollowedUser',
+          ],
+        ],
+        order: [[sequelize.col('followersCount'), 'DESC']],
+        limit: 10,
+        raw: true,
+        nest: true,
+      });
+
+      if (!users.length) throw new Error('No users found');
+
+      res.status(200).json({ Message: 'Top 10 Users', users });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 
 module.exports = userController;

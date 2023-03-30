@@ -11,6 +11,8 @@ router.put(
   userController.editUserProfile
 );
 
+router.get('/top', userController.getTopUsers);
+
 router.get('/:id/replied_tweets', userController.getUserRepliedTweet);
 
 router.get('/:id/tweets', userController.getUserTweets);
