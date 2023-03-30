@@ -32,7 +32,7 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
     const user = await User.findByPk(jwtPayload.id, {
-      attributes: ['id', 'name', 'account', 'email', 'role']
+      attributes: ['id', 'name', 'account', 'email', 'avatar', 'role']
     })
 
     done(null, user.toJSON())

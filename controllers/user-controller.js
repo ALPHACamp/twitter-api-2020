@@ -31,7 +31,7 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
 
-      if (!account || !name || !email || !password || !checkPassword) throw createError(400, '欄位不得為空')
+      if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw createError(400, '欄位不得為空')
 
       const [foundAccount, foundEmail] = await Promise.all([
         User.findOne({ where: { account }, raw: true }),

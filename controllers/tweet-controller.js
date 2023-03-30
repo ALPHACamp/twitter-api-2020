@@ -36,19 +36,30 @@ const tweetController = {
   },
   postTweets: async (req, res, next) => {
     try {
-      const UserId = helpers.getUser(req).id
+      const loginUser = helpers.getUser(req)
       const { description } = req.body
       if (!description) throw createError(400, '內容不可空白')
       if (description.length > 140) throw createError(400, '字數不可超過 140 字')
 
       const tweet = await Tweet.create({
         description,
-        UserId
+        UserId: loginUser.id
       })
       // const createdAt = tweet.get('createdAt')
       // const formattedCreatedAt = timeFormat(createdAt)
       // tweet.setDataValue('createdAt', formattedCreatedAt)
-      const result = { ...tweet.toJSON() }
+      const result = {
+        ...tweet.toJSON(),
+        replyCount: 0,
+        likeCount: 0,
+        isLiked: false,
+        User: {
+          id: loginUser.id,
+          account: loginUser.account,
+          name: loginUser.name,
+          avatar: loginUser.avatar
+        }
+      }
       result.createdAt = timeFormat(result.createdAt)
 
       return res.json(result)
@@ -114,7 +125,7 @@ const tweetController = {
     }
   },
   postReplies: async (req, res, next) => {
-    const UserId = helpers.getUser(req).id
+    const loginUser = helpers.getUser(req)
     const TweetId = Number(req.params.tweet_id)
     const { comment } = req.body
 
@@ -122,18 +133,36 @@ const tweetController = {
     if (!comment) throw createError(400, '內容不可空白')
 
     try {
-      const tweet = await Tweet.findByPk(TweetId)
+      const tweet = await Tweet.findByPk(TweetId, {
+        include: { model: User, attributes: ['id', 'account'] }
+      })
       if (!tweet) throw createError(404, '該推文不存在')
 
       const reply = await Reply.create({
         comment,
-        UserId,
+        UserId: loginUser.id,
         TweetId
       })
       // const createdAt = reply.get('createdAt')
       // const formattedCreatedAt = timeFormat(createdAt)
       // reply.setDataValue('createdAt', formattedCreatedAt)
-      const result = { ...reply.toJSON() }
+      const result = {
+        ...reply.toJSON(),
+        User: {
+          id: loginUser.id,
+          name: loginUser.name,
+          account: loginUser.account,
+          avatar: loginUser.avatar
+        },
+        Tweet: {
+          id: tweet.id,
+          UserId: tweet.UserId,
+          User: {
+            id: tweet.User.id,
+            account: tweet.User.account
+          }
+        }
+      }
       result.createdAt = timeFormat(result.createdAt)
 
       return res.json(result)
