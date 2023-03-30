@@ -214,6 +214,7 @@ const userController = {
           likeId: like.id,
           likeCreatedAt: like.createdAt,
           id: like.TweetId,
+          TweetId: like.TweetId,
           UserId: like.Tweet.UserId,
           account: like.Tweet.User.account,
           name: like.Tweet.User.name,
