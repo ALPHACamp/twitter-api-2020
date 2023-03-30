@@ -3,6 +3,8 @@ const helpers = require('../_helpers')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
+require('dayjs/locale/zh-tw')
+dayjs.locale('zh-tw')
 const sequelize = require('sequelize')
 
 const tweetController = {
