@@ -60,10 +60,13 @@ Here are the features of our website.
 ```
 git clone https://github.com/freeway26tw/twitter-api-2020.git
 ```
-### Install npm dependencies
+### Install npm dependencies and initialize database setting
 ```
 cd twitter-api-2020
 npm install
+npx sequelize db:create
+npx sequelize db:migrate
+npx sequelize seed:all
 npm start
 ```
 
@@ -71,8 +74,8 @@ npm start
 1. You will find a file named `.env.example` on root directory of project.
 2.  Create a new file by copying and pasting the file and then renaming it to just `.env`
 `cp .env.example .env`
-4. The file `.env` is already ignored, so you never commit your credentials.
-5. Change the values of the file to your environment. Helpful comments added to `.env.example` file to understand the constants.
+3. The file `.env` is already ignored, so you never commit your credentials.
+4. Change the values of the file to your environment. Helpful comments added to `.env.example` file to understand the constants.
 
 <table>
   <tr>
@@ -87,6 +90,16 @@ npm start
   </tr>
 </table>
 
+5. In config/config.json, please fill up your own database config
+```
+"development": {
+    "username": [username],
+    "password": [password],
+    "database": [database name],
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+```
 
 ## Project structure
 ```sh
@@ -137,6 +150,25 @@ You can check if the server is running from the message below
 Twitter app listening on port 3000!
 Press CTRL + C to stop the process.
 ```
+
+## Default account and password
+<table>
+  <th>
+    <td style="font-weight:bold">Account</td>
+    <td style="font-weight:bold">Password</td>
+  </th>
+  <tr>
+    <td>admin</td>
+    <td>root</td>
+    <td>12345678</td>
+  </tr>
+  <tr>
+    <td>user</td>
+    <td>user1</td>
+    <td>12345678</td>
+  </tr>
+</table>
+
 
 ## Test
 `npm run test`
