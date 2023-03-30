@@ -1,4 +1,4 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 const createError = require('http-errors')
 const helpers = require('../_helpers')
@@ -23,7 +23,43 @@ const adminController = {
 
   getUsers: (req, res, next) => {
     return User.findAll({
-      attributes: { exclude: ['password'] },
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'avatar',
+        'coverUrl',
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM `Tweets` JOIN `Likes` ON `Tweets`.`id` = `Likes`.`Tweet_id` WHERE `Tweets`.`User_id` = `User`.`id`)'
+          ),
+          'likesNum'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`User_id` = `User`.`id`)'
+          ),
+          'tweetsNum'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`follower_id` = `User`.`id`)'
+          ),
+          'followingNum'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`following_id` = `User`.`id`)'
+          ),
+          'followerNum'
+        ]
+      ],
+      order: [
+        [sequelize.literal('TweetsNum'), 'desc'],
+        [sequelize.literal('likesNum'), 'desc'],
+        [sequelize.literal('followingNum'), 'desc'],
+        [sequelize.literal('followerNum'), 'desc']
+      ],
       raw: true
     })
       .then(users => {
