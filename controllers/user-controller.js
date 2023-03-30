@@ -234,6 +234,12 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       const { userId } = req.params
+      const user = await User.findByPk(userId);
+      if (user.role === "admin") {
+        return res
+          .status(404)
+          .json({ status: "error", message: "找不到使用者" });
+      }
       const users = await User.findAll({
         where: { id: userId, role: 'user' },
         include: [
@@ -334,6 +340,12 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const { userId } = req.params
+      const user = await User.findByPk(userId);
+      if (user.role === "admin") {
+        return res
+          .status(404)
+          .json({ status: "error", message: "找不到使用者" });
+      }
       const users = await User.findAll({
         where: { role: 'user', id: userId },
         include: [
