@@ -212,9 +212,10 @@ const userController = {
       nest: true
     })
       .then(likes => {
+        if (!likes) throw new Error('Cannot find this record.')
         const data = likes.map(li => {
           li = li.toJSON()
-          if (currentUser.Likes) {
+          if (li.Tweet && currentUser.Likes) {
             li.Tweet.currentUserLikes = currentUser.Likes.some(l => l.TweetId === li.TweetId)
             li.Tweet.replyCounts = li.Tweet.Replies.length
             li.Tweet.likeCounts = li.Tweet.Likes.length
@@ -243,6 +244,7 @@ const userController = {
     })
       // (下1) 沒做 toJSON() 處理也能輸出正常 json 檔，但得注意
       .then(user => {
+        if (!user) throw new Error('Cannot find this user.')
         const data = user.Followings.map(u => {
           u = u.toJSON()
           u.currentUserIsFollowing = currentUser.Followings.some(f => f.id === u.id)
@@ -261,10 +263,15 @@ const userController = {
     const currentUser = helpers.getUser(req)
     return User.findByPk(req.params.id, {
       attributes: [],
-      include: { model: User, as: 'Followers', attributes: ['id', 'name', 'avatar', 'introduction'] }
+      include: {
+        model: User,
+        as: 'Followers',
+        attributes: ['id', 'name', 'avatar', 'introduction']
+      }
     })
       // (下1) 沒做 toJSON() 處理也能輸出正常 json 檔，但得注意
       .then(user => {
+        if (!user) throw new Error('Cannot find this user.')
         const data = user.Followers.map(u => {
           u = u.toJSON()
           u.currentUserIsFollowing = currentUser.Followings.some(f => f.id === u.id)
