@@ -4,12 +4,15 @@ const createError = require('http-errors')
 const { Strategy: LocalStrategy } = require('passport-local')
 const { Strategy: JWTStrategy, ExtractJwt } = require('passport-jwt')
 const { User } = require('../models')
+const sequelize = require('sequelize')
 
 passport.use(new LocalStrategy({
   usernameField: 'account'
 }, async (account, password, done) => {
   try {
-    const user = await User.findOne({ where: { account } })
+    const user = await User.findOne({
+      where: sequelize.where(sequelize.fn('BINARY', sequelize.col('account')), account)
+    })
     if (!user) throw createError(404, '帳號不存在')
 
     const isMatch = await bcrypt.compare(password, user.password)
