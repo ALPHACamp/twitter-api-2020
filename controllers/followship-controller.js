@@ -17,10 +17,10 @@ const followshipController = {
           }
         })
       ])
-      if (!user || user.role === "admin") {
+      if (!user || user.role === 'admin') {
         return res
           .status(404)
-          .json({ status: "error", message: "找不到使用者" });
+          .json({ status: 'error', message: '找不到使用者' })
       }
       if (followship) {
         return res.status(404).json({ status: 'error', message: '你已追蹤此使用者!' })
@@ -49,7 +49,7 @@ const followshipController = {
           }
         })
       ])
-      if (!user || user.role === "admin") {
+      if (!user || user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: '此帳戶不存在' })
       }
       if (!followship) {
