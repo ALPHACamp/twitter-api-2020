@@ -18,8 +18,8 @@ module.exports = {
         comment: faker.lorem.text(),
         user_id: users[Math.floor(Math.random() * users.length)].id, // 若要 "不重複的 3 人"，之後再修
         tweet_id: tweets[i % tweets.length].id,
-        created_at: new Date(),
-        updated_at: new Date()
+        created_at: new Date(Date.now() + i * 1000),
+        updated_at: new Date(Date.now() + i * 1000)
       }))
     )
   },

@@ -33,8 +33,8 @@ module.exports = {
       // ~~~~~~~~~~~~~~~第一個 user 有 user.length 個 like 的推文，依序遞減~~~~~~~~~~
       targetArr.push(
         ...Array.from({ length: likeAmountPerUser }, (_, i) => ({
-          created_at: new Date(),
-          updated_at: new Date(),
+          created_at: new Date(Date.now() + (targetArr.length + i) * 1000),
+          updated_at: new Date(Date.now() + (targetArr.length + i) * 1000),
           user_id: users[j].id,
           tweet_id: tweets[getRandom(usedNums)].id
         }))
