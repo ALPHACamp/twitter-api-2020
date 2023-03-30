@@ -185,8 +185,8 @@ const userController = {
       const userReplies = data.map(el => {
         const reply = {
           ...el.toJSON(),
-          tweeterId: el.Tweet.User.id,
-          tweeterName: el.Tweet.User.name
+          tweeterId: el.Tweet.User?.id,
+          tweeterName: el.Tweet.User?.name
         }
         delete reply.Tweet
         return reply
