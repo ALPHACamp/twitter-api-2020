@@ -7,15 +7,19 @@ const { User } = require('../models')
 const sequelize = require('sequelize')
 
 passport.use(new LocalStrategy({
-  usernameField: 'account'
-}, async (account, password, done) => {
+  usernameField: 'account',
+  passReqToCallback: true
+}, async (req, account, password, done) => {
   try {
     const user = await User.findOne({
       where: sequelize.where(sequelize.fn('BINARY', sequelize.col('account')), account)
     })
-    if (!user) throw createError(404, '帳號不存在')
+
+    if (!user || (req.originalUrl === '/api/users/login' && user.role !== 'user') ||
+      (req.originalUrl === '/api/admin/login' && user.role !== 'admin')) throw createError(404, '帳號不存在')
 
     const isMatch = await bcrypt.compare(password, user.password)
+
     if (!isMatch) throw createError(401, '帳號或密碼錯誤')
 
     done(null, user.toJSON())
