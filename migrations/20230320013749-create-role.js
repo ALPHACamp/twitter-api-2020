@@ -16,6 +16,11 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
+    await queryInterface.bulkInsert('Roles',
+      [
+        { role: 'user', created_at: new Date(), updated_at: new Date() },
+        { role: 'admin', created_at: new Date(), updated_at: new Date() }
+      ])
   },
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('roles')
