@@ -7,7 +7,7 @@ const helpers = require('../_helpers')
 const userController = {
   getUser: (req, res, next) => {
     return sequelize.query(`
-    SELECT id, email, account, name, avatar, cover_url coverUrl, introduction, role, created_at createdAt, updated_at updatedAt, IFNULL(followingNum, 0), IFNULL(followerNum, 0)
+    SELECT id, email, account, name, avatar, cover_url coverUrl, introduction, role, created_at createdAt, updated_at updatedAt, IFNULL(followingNum, 0) followingNum, IFNULL(followerNum, 0) followerNum
 FROM Users u
 LEFT JOIN (
 SELECT follower_id, COUNT(1) followingNum 
