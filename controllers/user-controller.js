@@ -261,7 +261,7 @@ const userController = {
         col: 'id'
       })
 
-      const followingCount = await Followship.count({
+      const followCount = await Followship.count({
         where: { followerId: userId }
       })
 
@@ -269,18 +269,15 @@ const userController = {
         return {
           userId: user.id,
           tweetCount,
-          followingCount,
+          followCount,
           followingId: user.Followings.id,
-          followingAccount: user.Followings.account,
-          followingAvatar: user.Followings.avatar,
-          followingName: user.Followings.name,
-          followingIntro: user.Followings.introduction,
+          followId: user.Followings.id,
+          followAccount: user.Followings.account,
+          followAvatar: user.Followings.avatar,
+          followName: user.Followings.name,
+          followIntro: user.Followings.introduction,
           followshipCreatedAt: user.Followings.Followship.createdAt,
-          isFollowing: helpers
-            .getUser(req)
-            .Followings.some(
-              (fg) => fg.Followship.followingId === user.Followings.id
-            )
+          isFollowing: helpers.getUser(req).Followings.some((fg) => fg.Followship.followingId === user.Followings.id)
         }
       })
 
@@ -360,7 +357,7 @@ const userController = {
         where: { UserId: userId },
         col: 'id'
       })
-      const followerCount = await Followship.count({
+      const followCount = await Followship.count({
         where: { followingId: userId }
       })
 
@@ -368,12 +365,13 @@ const userController = {
         return {
           userId: user.id,
           tweetCount,
-          followerCount,
+          followCount,
           followerId: user.Followers.id,
-          followerAccount: user.Followers.account,
-          followerAvatar: user.Followers.avatar,
-          followerName: user.Followers.name,
-          followerIntro: user.Followers.introduction,
+          followId: user.Followers.id,
+          followAccount: user.Followers.account,
+          followAvatar: user.Followers.avatar,
+          followName: user.Followers.name,
+          followIntro: user.Followers.introduction,
           followshipCreatedAt: user.Followers.Followship.createdAt,
           isFollowing: helpers
             .getUser(req)
