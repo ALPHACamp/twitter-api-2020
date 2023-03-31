@@ -84,7 +84,25 @@ const tweetController = {
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
         { model: Like }
-      ]
+      ],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*) FROM Replies
+              WHERE Replies.TweetId = ${id}
+            )`),
+            'replyCounts'
+          ],
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*) FROM Likes 
+              WHERE Likes.TweetId = ${id}
+            )`),
+            'likeCounts'
+          ]
+        ]
+      }
     })
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
