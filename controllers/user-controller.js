@@ -18,6 +18,7 @@ SELECT following_id, COUNT(1) followerNum
 FROM Followships 
 GROUP BY following_id) f_er ON id = following_id
 WHERE id = :userId
+ORDER BY u.created_at DESC
     `,
     {
       replacements: { userId: req.params.userId },
@@ -86,6 +87,7 @@ LEFT JOIN(SELECT tweet_id, COUNT(r.user_id) repliesNum FROM Replies r
 JOIN Tweets t ON r.tweet_id = t.id
 GROUP BY tweet_id) t_reply USING(tweet_id)
 WHERE l.user_id = :userId
+ORDER BY l.created_at DESC
     `,
     {
       replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
@@ -101,10 +103,11 @@ WHERE l.user_id = :userId
     return sequelize.query(`
     SELECT follower_id followerId, !ISNULL(own_follow) isFollowed, avatar, name, introduction
 FROM Followships f1 
-LEFT JOIN (SELECT following_id own_follow FROM Followships WHERE follower_id = :ownId) follow 
+LEFT JOIN (SELECT following_id own_follow, created_at FROM Followships WHERE follower_id = :ownId) follow 
 ON follower_id = own_follow
 JOIN Users u ON u.id = follower_id 
 WHERE f1.following_id = :userId
+ORDER BY follow.created_at DESC
     `,
     {
       replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
@@ -118,10 +121,11 @@ WHERE f1.following_id = :userId
     return sequelize.query(`
     SELECT following_id followingId, !ISNULL(own_follow) isFollowed, avatar, name, introduction
 FROM Followships f1 
-LEFT JOIN (SELECT following_id own_follow FROM Followships WHERE follower_id = :ownId) follow 
+LEFT JOIN (SELECT following_id own_follow, created_at FROM Followships WHERE follower_id = :ownId) follow 
 ON following_id = own_follow 
 JOIN Users u ON f1.following_id = u.id
 WHERE f1.follower_id = :userId
+ORDER BY follow.created_at DESC 
     `,
     {
       replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
@@ -182,6 +186,7 @@ WHERE f1.follower_id = :userId
     if (helpers.getUser(req).id.toString() !== req.params.userId) throw createError(403, 'Forbidden Error')
     const { name, introduction } = req.body
     const { files } = req
+    if (name?.length > 50 || introduction?.length > 160) throw createError(400, 'Character Length Exceeds!')
     return User.findByPk(req.params.userId)
       .then(user => {
         let avatar = user.avatar
