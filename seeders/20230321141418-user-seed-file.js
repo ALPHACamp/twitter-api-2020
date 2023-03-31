@@ -3,16 +3,15 @@ const bcrypt = require('bcryptjs')
 const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const hashedPassword = await bcrypt.hash('12345678', 10)
     // 先產出所有user seed data後再調整
-    const userSeedData = Array.from({ length: 20 }).map(item => {
+    const userSeedData = Array.from({ length: 20 }).map((item, index) => {
       return {
         email: faker.internet.email(),
         account: faker.internet.userName(),
-        password: hashedPassword,
+        password: bcrypt.hashSync('12345678', 10),
         name: faker.internet.userName(),
-        avatar: 'https://picsum.photos/141/140',
-        cover_url: 'https://picsum.photos/639/200',
+        avatar: `https://picsum.photos/141/140?random=${index}`,
+        cover_url: `https://picsum.photos/639/200?random=${index}`,
         introduction: faker.lorem.paragraph(),
         role: 'user',
         created_at: faker.date.past(),
