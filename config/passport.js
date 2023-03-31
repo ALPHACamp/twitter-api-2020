@@ -12,14 +12,15 @@ const { User, Like } = require('../models')
 passport.use(new LocalStrategy(
   // customize user field
   {
-    usernameField: 'email',
+    // usernameField: 'email', // 前端要改成下1
+    usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true // 把 req pass 給 callback (下面那個)
   },
   // authenticate user
   // 這個就是上面提到的 callback
-  (req, email, password, cb) => { // cb 則是這函式準備的 callback Fn.，就是官方文件的 .done()，傳驗證的結果
-    User.findOne({ where: { email } })
+  (req, account, password, cb) => { // cb 則是這函式準備的 callback Fn.，就是官方文件的 .done()，傳驗證的結果
+    User.findOne({ where: { account } })
       .then(user => {
         // (下1) 舊的
         // if (!user) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
