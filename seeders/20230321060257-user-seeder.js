@@ -1,6 +1,6 @@
 'use strict'
 const bcrypt = require('bcryptjs')
-const userAmount = 12 // ! 最後要改回 5 ~~~~~~~~~~~
+const userAmount = 5 // ! 最後要改回 5 ~~~~~~~~~~~
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
