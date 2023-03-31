@@ -6,6 +6,7 @@ imgur.setClientId(IMGUR_CLIENT_ID)
 const imgurFileHandler = (file) => {
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null)
+    
     return imgur
       .uploadFile(file.path)
       .then((img) => {
@@ -15,4 +16,5 @@ const imgurFileHandler = (file) => {
   })
 }
 
-module.exports = imgurFileHandler
+
+module.exports =  imgurFileHandler 
