@@ -1,28 +1,20 @@
 'use strict'
-const { User } = require('../models')
+const { sequelize } = require('../models')
 const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const userIdData = await User.findAll({ attributes: ['id'], raw: true })
-    const followshipSeedData = []
-
-    for (let i = 0; i < userIdData.length; i++) {
-      // userIdData先排除自己 (followerId)
-      let followingIdArr = userIdData.filter(item => item.id !== userIdData[i].id)
-      for (let j = 0; j < 5; j++) {
-        // 排序打亂
-        followingIdArr = followingIdArr.sort(() => Math.random() - 0.5)
-        // 因為排序打亂了，所以從index取id就可以實現隨機分配
-        const followingId = followingIdArr[j].id
-        followshipSeedData.push({
-          follower_id: userIdData[i].id,
-          following_id: followingId,
-          created_at: faker.date.past(),
-          updated_at: faker.date.recent()
-        })
-      }
-    }
+    const followshipSeedData = await sequelize.query(`
+    WITH CTE AS (SELECT u1.id follower_id, u2.id following_id, ROW_NUMBER() OVER (PARTITION BY u1.id ORDER BY RAND()) row_num FROM Users u1
+JOIN
+(SELECT id FROM Users) u2 WHERE u1.id <> u2.id)
+SELECT follower_id, following_id FROM CTE
+WHERE row_num <= FLOOR(RAND()*(SELECT COUNT(1)-1 FROM Users))
+    `, { type: sequelize.QueryTypes.SELECT })
+    followshipSeedData.forEach(e => {
+      e.created_at = faker.date.past()
+      e.updated_at = faker.date.recent()
+    })
 
     await queryInterface.bulkInsert('Followships', followshipSeedData)
   },
