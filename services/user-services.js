@@ -34,6 +34,7 @@ const userServices = {
         name,
         email,
         avatar: `https://loremflickr.com/320/320/headshot/?random=${Math.random() * 100}`,
+        cover: `https://loremflickr.com/720/240/landscape?random=${Math.random() * 100}`,
         role: 'user',
         password: hash
       })
