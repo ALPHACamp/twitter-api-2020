@@ -7,13 +7,13 @@ const helpers = require('../_helpers')
 const userController = {
   getUser: (req, res, next) => {
     return sequelize.query(`
-    SELECT id, email, account, name, avatar, cover_url coverUrl, introduction, role, created_at createdAt, updated_at updatedAt, followingNum, followerNum
+    SELECT id, email, account, name, avatar, cover_url coverUrl, introduction, role, created_at createdAt, updated_at updatedAt, IFNULL(followingNum, 0), IFNULL(followerNum, 0)
 FROM Users u
-JOIN (
+LEFT JOIN (
 SELECT follower_id, COUNT(1) followingNum 
 FROM Followships 
 GROUP BY follower_id) f_ing ON id = follower_id
-JOIN (
+LEFT JOIN (
 SELECT following_id, COUNT(1) followerNum 
 FROM Followships 
 GROUP BY following_id) f_er ON id = following_id
@@ -22,9 +22,10 @@ WHERE id = :userId
     {
       replacements: { userId: req.params.userId },
       type: sequelize.QueryTypes.SELECT
-    }
-    )
-      .then(user => res.json(user))
+    })
+      .then(user => {
+        return res.json(user[0])
+      })
       .catch(error => next(error))
   },
 
