@@ -88,9 +88,19 @@ const tweetController = {
     })
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
+        const date = new Date(tweet.createdAt).toLocaleString('zh-TW', {
+          hour12: true,
+          hour: 'numeric',
+          minute: 'numeric',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }).split(' ')
+        const createdAt = date[1] + '．' + date[0]
 
         const tweetData = {
           ...tweet.toJSON(),
+          createdAt,
           period: dayjs(tweet.createdAt).fromNow(),
           isLiked: tweet.Likes.some(like => like.UserId === UserId)
         }
