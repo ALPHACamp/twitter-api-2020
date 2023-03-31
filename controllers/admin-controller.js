@@ -1,4 +1,4 @@
-const { Like, Tweet, User } = require('../models')
+const { Like, Tweet, User, Reply } = require('../models')
 
 const adminController = {
   getUsers: (req, res, next) => {
@@ -50,8 +50,13 @@ const adminController = {
   },
   // 刪除單一推文
   deleteTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.id)
-      .then(tweet => {
+    // return Tweet.findByPk(req.params.id)
+    return Promise.all([
+      Tweet.findByPk(req.params.id),
+      Reply.destroy({ where: { TweetId: req.params.id } }),
+      Like.destroy({ where: { TweetId: req.params.id } })
+    ])
+      .then(([tweet, reply, like]) => {
         if (!tweet) throw new Error('找不到這則推文')
         //! 功能能用 但 console 跳錯，檢查
         return tweet.destroy()
