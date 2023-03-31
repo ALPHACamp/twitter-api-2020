@@ -147,8 +147,14 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
-  getUserTweets: (req, cb) => {
-    return Tweet.findAll({
+  getUserTweets: async (req, cb) => {
+    const UserId = req.params.id
+    if (!UserId) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
+
+    const user = await User.findByPk(UserId)
+    if (!user) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
+
+    await Tweet.findAll({
       where: { UserId: req.params.id },
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']]
@@ -159,9 +165,15 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
-  getUserRepliedTweets: (req, cb) => {
-    return Reply.findAll({
-      where: { UserId: req.params.id },
+  getUserRepliedTweets: async (req, cb) => {
+    const UserId = req.params.id
+    if (!UserId) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
+
+    const user = await User.findByPk(UserId)
+    if (!user) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
+
+    await Reply.findAll({
+      where: { UserId },
       include: {
         model: Tweet,
         attributes: [
@@ -175,8 +187,13 @@ const userServices = {
     })
       .catch(err => cb(err))
   },
-  getUserLikedTweets: (req, cb) => {
-    return Like.findAll({
+  getUserLikedTweets: async (req, cb) => {
+    const UserId = req.params.id
+    if (!UserId) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
+
+    const user = await User.findByPk(UserId)
+    if (!user) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
+    await Like.findAll({
       where: { UserId: req.params.id },
       include: [
         {
@@ -193,8 +210,13 @@ const userServices = {
     })
       .catch(err => cb(err))
   },
-  getUserFollowings: (req, cb) => {
-    return Followship.findAll({
+  getUserFollowings: async (req, cb) => {
+    const UserId = req.params.id
+    if (!UserId) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
+
+    const user = await User.findByPk(UserId)
+    if (!user) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
+    await Followship.findAll({
       where: { followerId: req.params.id },
       include: [
         { model: User, as: 'Following', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }
@@ -204,8 +226,13 @@ const userServices = {
       return cb(null, [...followings])
     }).catch(err => cb(err))
   },
-  getUserFollowers: (req, cb) => {
-    return Followship.findAll({
+  getUserFollowers: async (req, cb) => {
+    const UserId = req.params.id
+    if (!UserId) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
+
+    const user = await User.findByPk(UserId)
+    if (!user) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
+    await Followship.findAll({
       where: { followingId: req.params.id },
       include: [
         { model: User, as: 'Follower', attributes: ['id', 'account', 'name', 'avatar', 'introduction'] }
@@ -234,12 +261,12 @@ const userServices = {
           }
         })
         if (user === null) return findUser
-        if (user.account !== null && user.id !== currentUserId) throw new Error('此帳號已被註冊')
+        if (user.account !== null && user.id !== currentUserId) throw new Error('account 已重複註冊！')
         return findUser
       })
       .then(user => {
         if (user === null) return User.findByPk(currentUserId)
-        if (user.email !== null && user.id !== currentUserId) throw new Error('此信箱已被註冊')
+        if (user.email !== null && user.id !== currentUserId) throw new Error('email 已重複註冊！')
         return User.findByPk(currentUserId)
       })
       .then(user => {
