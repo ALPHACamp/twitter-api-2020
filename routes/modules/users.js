@@ -10,7 +10,6 @@ router.get('/:id/likes', userController.getUserLikes)
 router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id/replied_tweets', userController.getUserReplies)
 router.put('/:id/setting', authenticatedSelf, userController.putUserSetting)
-router.get('/:id/setting', authenticatedSelf, userController.getUserSetting)
 router.put('/:id', authenticatedSelf, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUser)
 router.get('/:id', userController.getUser)
 

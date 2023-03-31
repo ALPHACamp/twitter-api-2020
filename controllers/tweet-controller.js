@@ -1,8 +1,8 @@
 const createError = require('http-errors')
+const { Op } = require('sequelize')
 const helpers = require('../_helpers')
 const { User, Tweet, Like, sequelize, Reply } = require('../models')
 const timeFormat = require('../helpers/date-helpers')
-const { Op } = require('sequelize')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -13,13 +13,12 @@ const tweetController = {
         raw: true,
         nest: true,
         include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
-        attributes: {
-          include: [
-            [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCount'],
-            [sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCount'],
-            [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${loginUserId})`), 'isLiked']
-          ]
-        },
+        attributes: [
+          'id', 'UserId', 'description', 'createdAt',
+          [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCount'],
+          [sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCount'],
+          [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${loginUserId})`), 'isLiked']
+        ],
         order: [['createdAt', 'DESC']]
       })
 
@@ -48,8 +47,9 @@ const tweetController = {
       // const createdAt = tweet.get('createdAt')
       // const formattedCreatedAt = timeFormat(createdAt)
       // tweet.setDataValue('createdAt', formattedCreatedAt)
-      const result = {
+      const data = {
         ...tweet.toJSON(),
+        createdAt: timeFormat(tweet.createdAt),
         replyCount: 0,
         likeCount: 0,
         isLiked: false,
@@ -60,7 +60,7 @@ const tweetController = {
           avatar: loginUser.avatar
         }
       }
-      result.createdAt = timeFormat(result.createdAt)
+      const { updatedAt, ...result } = data
 
       return res.json(result)
     } catch (err) {
@@ -78,14 +78,12 @@ const tweetController = {
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
         ],
-        attributes: {
-          include:
-            [
-              [sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCount'],
-              [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCount'],
-              [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${loginUserId})`), 'isLiked']
-            ]
-        }
+        attributes: [
+          'id', 'UserId', 'description', 'createdAt',
+          [sequelize.literal('( SELECT COUNT(*) FROM Replies AS repliesCount  WHERE Tweet_id = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('( SELECT COUNT(*) FROM Likes AS likedCount  WHERE Tweet_id = Tweet.id)'), 'likeCount'],
+          [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${loginUserId})`), 'isLiked']
+        ]
       })
 
       if (!tweet) throw createError(404, '該推文不存在')
@@ -101,19 +99,22 @@ const tweetController = {
     const TweetId = Number(req.params.tweet_id)
 
     try {
-      const [tweet, replies] = await Promise.all([
-        Tweet.findByPk(TweetId),
-        Reply.findAll({
-          where: { TweetId },
+      const tweet = await Tweet.findByPk(TweetId, {
+        attributes: ['id'],
+        include: {
+          model: Reply,
+          attributes: { exclude: ['updatedAt'] },
           include: [
             { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
             { model: Tweet, attributes: { exclude: ['description', 'createdAt', 'updatedAt'] }, include: { model: User, attributes: ['id', 'account'] } }
-          ],
-          order: [['createdAt', 'DESC']]
-        })
-      ])
+          ]
+        },
+        order: [[Reply, 'createdAt', 'DESC']]
+      })
 
       if (!tweet) throw createError(404, '該推文不存在')
+
+      const replies = [...tweet.Replies]
       const result = replies.map(reply => ({
         ...reply.toJSON(),
         createdAt: timeFormat(reply.createdAt)
@@ -146,8 +147,9 @@ const tweetController = {
       // const createdAt = reply.get('createdAt')
       // const formattedCreatedAt = timeFormat(createdAt)
       // reply.setDataValue('createdAt', formattedCreatedAt)
-      const result = {
+      const data = {
         ...reply.toJSON(),
+        createdAt: timeFormat(reply.createdAt),
         User: {
           id: loginUser.id,
           name: loginUser.name,
@@ -163,7 +165,7 @@ const tweetController = {
           }
         }
       }
-      result.createdAt = timeFormat(result.createdAt)
+      const { updatedAt, ...result } = data
 
       return res.json(result)
     } catch (err) {

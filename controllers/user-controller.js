@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const createError = require('http-errors')
+const { Op } = require('sequelize')
 const helpers = require('../_helpers')
 const { User, Tweet, Like, Reply, Followship, sequelize } = require('../models')
 const imgurFileHandler = require('../helpers/file-helpers')
@@ -11,10 +12,6 @@ const userController = {
   login: (req, res, next) => {
     try {
       const loginUser = helpers.getUser(req)
-
-      if ((req.originalUrl === '/api/users/login' && loginUser.role !== 'user') ||
-        (req.originalUrl === '/api/admin/login' && loginUser.role !== 'admin')) throw createError(404, '帳號不存在')
-
       const token = jwt.sign({ id: loginUser.id }, process.env.JWT_SECRET, { expiresIn: '30d' })
 
       return res.json({
@@ -32,15 +29,16 @@ const userController = {
       const { account, name, email, password, checkPassword } = req.body
 
       if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw createError(400, '欄位不得為空')
+      if (!validator.isAlphanumeric(account) || !validator.isAlphanumeric(name)) throw createError(400, '帳號和名稱只能有英文字母和數字')
 
-      const [foundAccount, foundEmail] = await Promise.all([
-        User.findOne({ where: { account }, raw: true }),
-        User.findOne({ where: { email }, raw: true })
-      ])
+      const foundUser = await User.findOne({
+        where: { [Op.or]: [{ account }, { email }] },
+        attributes: ['account', 'email']
+      })
 
-      if (foundAccount) throw createError(400, 'Account 重複註冊')
+      if (foundUser && foundUser.account === account) throw createError(400, 'Account 重複註冊')
       if (name.length > 50) throw createError(400, '名稱不能超過 50 個字')
-      if (foundEmail) throw createError(400, 'Email 重複註冊')
+      if (foundUser && foundUser.email === email) throw createError(400, 'Email 重複註冊')
       if (!validator.isEmail(email)) throw createError(400, 'Email 格式有誤')
       if (password !== checkPassword) throw createError(400, '兩次輸入的密碼不相同')
 
@@ -56,18 +54,26 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
+      const loginUser = helpers.getUser(req)
       const id = Number(req.params.id)
       const user = await User.findByPk(id, {
         attributes: [
           'id', 'account', 'name', 'email', 'introduction', 'avatar', 'cover', 'role',
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE follower_id = User.id)'), 'followingCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE following_id = User.id)'), 'followerCount'],
+          [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE Followships.follower_id = ${loginUser.id} AND Followships.following_id = User.id)`), 'isFollowed']
         ]
       })
 
       if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
 
-      return res.json(user)
+      const { isFollowed, ...data } = user.toJSON()
+      const result = {
+        ...data,
+        isFollowed: !!isFollowed
+      }
+
+      return res.json(result)
     } catch (error) {
       next(error)
     }
@@ -104,29 +110,22 @@ const userController = {
       next(error)
     }
   },
-  getUserSetting: async (req, res, next) => {
-    try {
-      const id = Number(req.params.id)
-      const user = await User.findByPk(id, {
-        attributes: ['id', 'account', 'name', 'email']
-      })
-
-      return res.json(user)
-    } catch (error) {
-      next(error)
-    }
-  },
   putUserSetting: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
       const { account, name, email, password, checkPassword } = req.body
 
       if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw createError(400, '欄位不得為空')
+      if (!validator.isAlphanumeric(account) || !validator.isAlphanumeric(name)) throw createError(400, '帳號和名稱只能有英文字母和數字')
 
       const [user, foundAccount, foundEmail] = await Promise.all([
         User.findByPk(id),
-        User.findOne({ where: { account }, raw: true }),
-        User.findOne({ where: { email }, raw: true })
+        User.findOne({
+          where: sequelize.where(sequelize.fn('BINARY', sequelize.col('account')), account),
+          attributes: ['account'],
+          raw: true
+        }),
+        User.findOne({ where: { email }, attributes: ['email'], raw: true })
       ])
 
       if (foundAccount && foundAccount.account !== user.account) throw createError(400, 'Account 重複註冊')
@@ -155,7 +154,7 @@ const userController = {
           model: Tweet,
           include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
           attributes: [
-            'id', 'description', 'createdAt',
+            'id', 'UserId', 'description', 'createdAt',
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweets.id )'), 'replyCount'],
             [sequelize.literal('(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweets.id )'), 'likeCount'],
             [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.User_id = ${loginUser.id} AND Likes.Tweet_id = Tweets.id)`), 'isLiked']
