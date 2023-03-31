@@ -12,6 +12,15 @@ const { apis } = require('./routes')
 const app = express()
 const port = process.env.PORT || 3000
 
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  )
+  next()
+})
+
 const limiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   max: 1000,
