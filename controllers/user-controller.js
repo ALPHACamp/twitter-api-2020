@@ -183,10 +183,11 @@ const userController = {
         ]
       })
       const userReplies = data.map(el => {
+        const item = el.toJSON()
         const reply = {
-          ...el.toJSON(),
-          tweeterId: el.Tweet.User.id,
-          tweeterName: el.Tweet.User.name
+          ...item,
+          tweeterId: item.Tweet.User.id,
+          tweeterName: item.Tweet.User.name
         }
         delete reply.Tweet
         return reply
@@ -218,17 +219,18 @@ const userController = {
       })
       const signinUser = helpers.getUser(req)
       const userLikes = data.map(el => {
+        const item = el.toJSON()
         const userLike = {
-          ...el.toJSON(),
-          tweetUpdatedAt: el.Tweet.updatedAt,
-          tweeterId: el.Tweet.User.id,
-          account: el.Tweet.User.account,
-          name: el.Tweet.User.name,
-          avatar: el.Tweet.User.avatar,
-          description: el.Tweet.description,
-          replies: el.Tweet.Replies.length,
-          likes: el.Tweet.Likes.length,
-          isLike: signinUser.Likes ? signinUser.Likes.some(like => like.TweetId === el.TweetId) : false
+          ...item,
+          tweetUpdatedAt: item.Tweet.updatedAt,
+          tweeterId: item.Tweet.User.id,
+          account: item.Tweet.User.account,
+          name: item.Tweet.User.name,
+          avatar: item.Tweet.User.avatar,
+          description: item.Tweet.description,
+          replies: item.Tweet.Replies.length,
+          likes: item.Tweet.Likes.length,
+          isLike: signinUser.Likes ? signinUser.Likes.some(like => like.TweetId === item.TweetId) : false
         }
         delete userLike.Tweet
         return userLike
