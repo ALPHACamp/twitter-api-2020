@@ -365,9 +365,9 @@ const userController = {
         where: { followingId: userId }
       })
       if (followCount === 0) {
-        return res.json([]);
+        return res.json([])
       }
-      
+
       const userData = users.map((user) => {
         return {
           userId: user.id,
