@@ -8,7 +8,7 @@ module.exports = {
       'SELECT id FROM Users WHERE role = "user";',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-    const tweetAmount = users.length * 2 // ! 最後要改回 ... * 10 ~~~~~~~~~~
+    const tweetAmount = users.length * 10 // ! 最後要改回 ... * 10 ~~~~~~~~~~
 
     await queryInterface.bulkInsert('Tweets',
       Array.from({ length: tweetAmount }, (_, i) => ({

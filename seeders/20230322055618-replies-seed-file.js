@@ -11,7 +11,7 @@ module.exports = {
       'SELECT id FROM Tweets;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-    const replyAmount = tweets.length * 2 // ! 最後要改回 ... * 3 ~~~~~~~~~~~~~~~
+    const replyAmount = tweets.length * 3 // ! 最後要改回 ... * 3 ~~~~~~~~~~~~~~~
 
     await queryInterface.bulkInsert('Replies',
       Array.from({ length: replyAmount }, (_, i) => ({
