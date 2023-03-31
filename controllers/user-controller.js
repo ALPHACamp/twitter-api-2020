@@ -6,8 +6,25 @@ const helpers = require('../_helpers')
 
 const userController = {
   getUser: (req, res, next) => {
-    return User.findByPk(req.params.userId, { attributes: { exclude: ['password'] } })
-      .then(user => res.json({ ...user.toJSON() }))
+    return sequelize.query(`
+    SELECT id, email, account, name, avatar, cover_url coverUrl, introduction, role, created_at createdAt, updated_at updatedAt, followingNum, followerNum
+FROM Users u
+JOIN (
+SELECT follower_id, COUNT(1) followingNum 
+FROM Followships 
+GROUP BY follower_id) f_ing ON id = follower_id
+JOIN (
+SELECT following_id, COUNT(1) followerNum 
+FROM Followships 
+GROUP BY following_id) f_er ON id = following_id
+WHERE id = :userId
+    `,
+    {
+      replacements: { userId: req.params.userId },
+      type: sequelize.QueryTypes.SELECT
+    }
+    )
+      .then(user => res.json(user))
       .catch(error => next(error))
   },
 
@@ -80,21 +97,35 @@ WHERE l.user_id = :userId
   },
 
   getUserFollowers: (req, res, next) => {
-    return sequelize.query('SELECT follower_id followerId, !ISNULL(own_follow) isFollowed FROM Followships f1 LEFT JOIN (SELECT following_id own_follow FROM Followships WHERE follower_id = :ownId) follow ON follower_id = own_follow WHERE f1.following_id = :userId',
-      {
-        replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
-        type: sequelize.QueryTypes.SELECT
-      })
+    return sequelize.query(`
+    SELECT follower_id followerId, !ISNULL(own_follow) isFollowed, avatar, name, introduction
+FROM Followships f1 
+LEFT JOIN (SELECT following_id own_follow FROM Followships WHERE follower_id = :ownId) follow 
+ON follower_id = own_follow
+JOIN Users u ON u.id = follower_id 
+WHERE f1.following_id = :userId
+    `,
+    {
+      replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
+      type: sequelize.QueryTypes.SELECT
+    })
       .then(followers => res.json(followers))
       .catch(error => next(error))
   },
 
   getUserFollowings: (req, res, next) => {
-    return sequelize.query('SELECT following_id followingId, !ISNULL(own_follow) isFollowed FROM Followships f1 LEFT JOIN (SELECT following_id own_follow FROM Followships WHERE follower_id = :ownId) follow ON following_id = own_follow WHERE f1.follower_id = :userId',
-      {
-        replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
-        type: sequelize.QueryTypes.SELECT
-      })
+    return sequelize.query(`
+    SELECT following_id followingId, !ISNULL(own_follow) isFollowed, avatar, name, introduction
+FROM Followships f1 
+LEFT JOIN (SELECT following_id own_follow FROM Followships WHERE follower_id = :ownId) follow 
+ON following_id = own_follow 
+JOIN Users u ON f1.following_id = u.id
+WHERE f1.follower_id = :userId
+    `,
+    {
+      replacements: { userId: req.params.userId, ownId: helpers.getUser(req).id },
+      type: sequelize.QueryTypes.SELECT
+    })
       .then(followings => res.json(followings))
       .catch(error => next(error))
   },
