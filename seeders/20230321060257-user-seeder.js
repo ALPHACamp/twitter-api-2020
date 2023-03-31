@@ -23,6 +23,7 @@ module.exports = {
             account: `user${i}`,
             name: `user${i}`,
             avatar: `https://loremflickr.com/320/240/avatar/?random=${Math.random() * 100}`,
+            introduction: 'This is only a demo introduction~~~',
             role: 'user',
             image: 'https://i.imgur.com/gerdVUX.png',
             created_at: new Date(Date.now() + (i + 1) * 1000),
