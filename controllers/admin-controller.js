@@ -54,6 +54,7 @@ const adminController = {
         include: [
           { model: User, as: 'poster', attributes: ['id', 'name', 'account', 'avatar'] }
         ],
+        order: [['createdAt', 'DESC']],
         nest: true
       })
       res.status(200).json(tweets)

@@ -89,6 +89,7 @@ const userController = {
     })
     // 字串比數字 用==
     user.currentUser = id == userData.id
+    user.currentfollowed = userData.Followings.some(userF => userF.id === Number(id))
     return Promise.resolve(user).then(
       user => res.status(200).json(user)
       // res.status(200).json({ status: 'success', user })

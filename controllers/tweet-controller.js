@@ -31,13 +31,19 @@ const tweetController = {
       order: [['createdAt', 'DESC']], // or ['id', 'DESC'] 因為理論上id越後面越新
       nest: true
     })
-    const result = tweets.map(e => {
+    let result = tweets.map(e => {
       const temp = e.toJSON()
       temp.Replies = temp.Replies.length
       temp.Likes = temp.Likes.length
       temp.currentIsLiked = userData.Likes?.some(like => like.TweetId === e.id)
       return temp
     })
+    if (!tweets.length) {
+      result = await Tweet.findAll({
+        order: [['createdAt', 'DESC']],
+        limit: 10
+      })
+    }
     return Promise.resolve(result).then(
       result => res.status(200).json(result)
     )
@@ -108,6 +114,17 @@ const tweetController = {
   }),
   getReplies: tryCatch(async (req, res) => {
     const TweetId = req.params.tweet_id
+    const tweet = await Tweet.findByPk(TweetId, {
+      include: [
+        { model: User, as: 'poster' }
+      ],
+      raw: true,
+      nest: true
+    })
+    const poster = {
+      id: tweet.poster.id,
+      account: tweet.poster.account
+    }
     const replies = await Reply.findAll({
       where: { TweetId },
       include: [
@@ -115,7 +132,11 @@ const tweetController = {
       ]
     })
     if (!replies.length) throw new ReqError('資料庫無此筆資料或尚無留言!')
-    res.status(200).json(replies)
+    const result = replies.map(reply => ({
+      reply,
+      poster
+    }))
+    res.status(200).json(result)
   }),
   postReplies: tryCatch(async (req, res) => {
     const TweetId = req.params.tweet_id
