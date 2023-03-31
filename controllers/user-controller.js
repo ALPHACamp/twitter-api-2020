@@ -265,6 +265,10 @@ const userController = {
         where: { followerId: userId }
       })
 
+      if (followCount === 0) {
+        return res.json([])
+      }
+
       const userData = users.map(user => {
         return {
           userId: user.id,
@@ -360,6 +364,9 @@ const userController = {
       const followCount = await Followship.count({
         where: { followingId: userId }
       })
+      if (followCount === 0) {
+        return res.json([])
+      }
 
       const userData = users.map((user) => {
         return {
