@@ -68,7 +68,7 @@ const tweetServices = {
         }
       })
 
-      if (!tweet) throw new Error('此貼文不存在!')
+      if (!tweet) return cb(Object.assign(new Error('此貼文不存在!'), { status: 404 }))
 
       const currentUserLikedTweets = await Like.findAll({ where: { UserId: currentUserId } })
       const isLikedByCurrentUser = currentUserLikedTweets.some(l => l.TweetId === tweet.id)
@@ -86,7 +86,7 @@ const tweetServices = {
     const TweetId = req.params.tweet_id
     Tweet.findByPk(TweetId)
       .then(tweet => {
-        if (!tweet) throw new Error('找不到這篇推文')
+        if (!tweet) return cb(Object.assign(new Error('找不到這篇推文'), { status: 404 }))
         return Reply.create({
           comment: req.body.comment,
           UserId,
@@ -110,7 +110,7 @@ const tweetServices = {
       })
     ])
       .then(([tweet, replies]) => {
-        if (!tweet) throw new Error('找不到這篇推文')
+        if (!tweet) return cb(Object.assign(new Error('找不到這篇推文'), { status: 404 }))
         cb(null, replies)
       })
       .catch(err => cb(err, null))
