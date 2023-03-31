@@ -187,6 +187,7 @@ ORDER BY follow.created_at DESC
     const { name, introduction } = req.body
     const { files } = req
     if (name?.length > 50 || introduction?.length > 160) throw createError(400, 'Character Length Exceeds!')
+    console.log(files)
     return User.findByPk(req.params.userId)
       .then(user => {
         let avatar = user.avatar
