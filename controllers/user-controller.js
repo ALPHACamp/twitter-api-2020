@@ -110,19 +110,6 @@ const userController = {
       next(error)
     }
   },
-  getUserSetting: async (req, res, next) => {
-    try {
-      const id = Number(req.params.id)
-      const user = await User.findByPk(id, {
-        attributes: ['id', 'account', 'name', 'email'],
-        raw: true
-      })
-
-      return res.json(user)
-    } catch (error) {
-      next(error)
-    }
-  },
   putUserSetting: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
