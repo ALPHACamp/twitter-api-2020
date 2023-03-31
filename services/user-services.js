@@ -33,6 +33,7 @@ const userServices = {
         account,
         name,
         email,
+        avatar: `https://loremflickr.com/320/320/headshot/?random=${Math.random() * 100}`,
         role: 'user',
         password: hash
       })
