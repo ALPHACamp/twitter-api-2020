@@ -174,13 +174,23 @@ const userServices = {
 
     await Reply.findAll({
       where: { UserId },
-      include: {
-        model: Tweet,
-        attributes: [
-          'id',
-          'description',
-          'createdAt']
-      },
+      include: [
+        {
+          model: Tweet,
+          attributes: [
+            'id',
+            'description',
+            'createdAt',
+            'UserId' // 關聯 User 資料
+          ],
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'account', 'name']
+            }
+          ]
+        }
+      ],
       order: [['createdAt', 'desc']]
     }).then(replies => {
       return cb(null, [...replies])
