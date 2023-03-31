@@ -5,6 +5,7 @@ const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
+        where: { role: 'user' },
         attributes: [
           'id',
           'account',
