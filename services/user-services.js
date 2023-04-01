@@ -156,6 +156,16 @@ const userServices = {
 
     await Tweet.findAll({
       where: { UserId: req.params.id },
+      attributes: {
+        include: [
+          [
+            sequelize.literal('(SELECT COUNT(*)FROM Likes WHERE Tweet_id = Tweet.id )'), 'LikedCounts'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*)FROM Replies WHERE Tweet_id = Tweet.id )'), 'RepliesCounts'
+          ]
+        ]
+      },
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     })
@@ -208,7 +218,16 @@ const userServices = {
       include: [
         {
           model: Tweet,
-
+          attributes: {
+            include: [
+              [
+                sequelize.literal('(SELECT COUNT(*)FROM Likes WHERE Tweet_id = Tweet.id )'), 'LikedCounts'
+              ],
+              [
+                sequelize.literal('(SELECT COUNT(*)FROM Replies WHERE Tweet_id = Tweet.id )'), 'RepliesCounts'
+              ]
+            ]
+          },
           include: [
             { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
           ]
