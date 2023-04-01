@@ -236,7 +236,6 @@ const userServices = {
     }).then(followings => {
       const followingsWithIsFollowedByCurrentUser = followings.map(following => {
         const followingData = following.toJSON()
-        console.log(followingData.followerId)
         if (followingData.followerId === currentUserId) {
           followingData.isFollowed = true
         } else {
