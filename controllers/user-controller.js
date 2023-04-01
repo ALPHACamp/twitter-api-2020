@@ -51,10 +51,8 @@ const userController = {
       expiresIn: '30d'
     })
     res.status(200).json({
-      data: {
-        token,
-        user: userData
-      }
+      token,
+      user: userData
     })
   }),
   signInFail: (err, req, res, next) => {

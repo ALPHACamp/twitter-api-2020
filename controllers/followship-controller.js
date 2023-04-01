@@ -45,11 +45,12 @@ const adminController = {
       ],
       group: ['User.id'],
       limit: Number(limit) || null,
-      order: sort ? [[sequelize.literal('followersCount'), 'DESC']] : null
+      order: sort ? [[sequelize.literal('followersCount'), 'DESC']] : null,
+      raw: true
     })
     const result = users.map(user => {
       return {
-        user,
+        ...user,
         currentfollowed: currentUser.Followings.some(fu => fu.id === user.id) // fu = following user
       }
     })

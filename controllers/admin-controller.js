@@ -12,10 +12,8 @@ const adminController = {
     if (userData.role === 'user') throw new ReqError('帳號不存在！')
     const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
     res.status(200).json({
-      data: {
-        token,
-        user: userData
-      }
+      token,
+      user: userData
     })
   }),
   signInFail: (error, req, res, next) => {
