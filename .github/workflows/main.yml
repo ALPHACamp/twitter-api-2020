@@ -19,15 +19,14 @@ jobs:
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: ac_twitter
+          MYSQL_INIT_COMMAND: "--character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
         ports:
           - 3306:3306
-        options: >-
+        options: 
           --health-cmd="mysqladmin ping"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
-          --character-set-server=utf8mb4
-          --collation-server=utf8mb4_unicode_ci
 
     strategy:
       matrix:
