@@ -5,38 +5,46 @@ const helpers = require('../_helpers')
 const followshipController = {
   postFollowships: async (req, res, next) => {
     try {
-      const loginUserId = helpers.getUser(req).id
+      const loginUser = helpers.getUser(req)
       const { id } = req.body
 
       const [user, followship] = await Promise.all([
-        User.findByPk(id),
+        User.findByPk(id, {
+          attributes: {
+            exclude: ['createdAt', 'updatedAt']
+          }
+        }),
         Followship.findOne({
           where: {
-            followerId: loginUserId,
+            followerId: loginUser.id,
             followingId: id
           }
         })
       ])
 
-      if (!user || user.role === 'admin') {
-        throw createError(404, '帳號不存在')
-      }
-      if (user.id === loginUserId) {
-        throw createError(400, '無法追蹤自己')
-      }
-      if (followship) {
-        throw createError(400, '已追蹤該使用者')
-      }
+      if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
+      if (user.id === loginUser.id) throw createError(400, '無法追蹤自己')
+      if (followship) throw createError(400, '已追蹤該使用者')
 
-      await Followship.create({
-        followerId: loginUserId,
+      const newFollowship = await Followship.create({
+        followerId: loginUser.id,
         followingId: Number(id)
       })
 
-      return res.json({
-        status: 'success',
-        message: '使用者新增追蹤成功'
-      })
+      const { updatedAt, ...data } = newFollowship.toJSON()
+
+      const result = {
+        ...data,
+        Followings: {
+          account: user.account,
+          name: user.account,
+          introduction: user.introduction,
+          avatar: user.avatar,
+          isFollowed: true
+        }
+      }
+
+      return res.json(result)
     } catch (err) {
       return next(err)
     }
