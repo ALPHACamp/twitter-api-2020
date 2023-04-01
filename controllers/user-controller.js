@@ -29,7 +29,7 @@ const userController = {
       const { account, name, email, password, checkPassword } = req.body
 
       if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw createError(400, '欄位不得為空')
-      if (!validator.isAlphanumeric(account) || !validator.isAlphanumeric(name)) throw createError(400, '帳號和名稱只能有英文字母和數字')
+      // if (!validator.isAlphanumeric(account) || !validator.isAlphanumeric(name)) throw createError(400, '帳號和名稱只能有英文字母和數字')
 
       const foundUser = await User.findOne({
         where: { [Op.or]: [{ account }, { email }] },
@@ -116,7 +116,7 @@ const userController = {
       const { account, name, email, password, checkPassword } = req.body
 
       if (!account?.trim() || !name?.trim() || !email?.trim() || !password?.trim() || !checkPassword?.trim()) throw createError(400, '欄位不得為空')
-      if (!validator.isAlphanumeric(account) || !validator.isAlphanumeric(name)) throw createError(400, '帳號和名稱只能有英文字母和數字')
+      // if (!validator.isAlphanumeric(account) || !validator.isAlphanumeric(name)) throw createError(400, '帳號和名稱只能有英文字母和數字')
 
       const [user, foundAccount, foundEmail] = await Promise.all([
         User.findByPk(id),
