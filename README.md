@@ -5,7 +5,7 @@
 
 這是一個使用Node.js、Express、及 MySQL 建立的簡單Twitter  RESTful API，它可以讓使用者註冊、登入、發推文、查看推文，並且追蹤其他用戶。此外，API也提供了一些基本的驗證和授權機制。
 
-![cover](./public/image/cover_simple_twitter.jpg)
+![cover](./public/image/cover_simple_twitter.png)
 
 ## 專案作品
 
