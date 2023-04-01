@@ -5,21 +5,15 @@ const {
 
 module.exports = (sequelize, DataTypes) => {
   class Reply extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate (models) {
-      // define association here
       Reply.belongsTo(models.User, { foreignKey: 'UserId' })
       Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
       Reply.hasMany(models.Like, { foreignKey: 'ReplyId' })
     }
   }
   Reply.init({
-    UserId: DataTypes.STRING, // 因測試檔，改大駝峰
-    TweetId: DataTypes.STRING, // 因為測試檔，而改大駝峰
+    UserId: DataTypes.STRING,
+    TweetId: DataTypes.STRING,
     comment: DataTypes.TEXT
   }, {
     sequelize,

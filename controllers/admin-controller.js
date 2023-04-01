@@ -1,6 +1,7 @@
 const { Like, Tweet, User, Reply } = require('../models')
 
 const adminController = {
+  // 取得 user 資料
   getUsers: (req, res, next) => {
     return User.findAll({
       attributes: ['id', 'email', 'name', 'account', 'image', 'avatar'],
@@ -26,7 +27,6 @@ const adminController = {
         })
         result.sort((a, b) => b.TweetsCount - a.TweetsCount)
         return res.status(200).json(result)
-        // return res.status(200).json({ success: true, result })
       })
       .catch(err => next(err))
   },
@@ -37,7 +37,6 @@ const adminController = {
       include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
       raw: true,
       nest: true
-      //! 等下再想能不能直接從資料庫 slice(0, 50)
     })
       .then(tweets => {
         const result = tweets.map(tweet => ({
@@ -50,7 +49,6 @@ const adminController = {
   },
   // 刪除單一推文
   deleteTweet: (req, res, next) => {
-    // return Tweet.findByPk(req.params.id)
     return Promise.all([
       Tweet.findByPk(req.params.id),
       Reply.destroy({ where: { TweetId: req.params.id } }),
@@ -58,7 +56,6 @@ const adminController = {
     ])
       .then(([tweet, reply, like]) => {
         if (!tweet) throw new Error('找不到這則推文')
-        //! 功能能用 但 console 跳錯，檢查
         return tweet.destroy()
       })
       .then(removedTweet => res.status(200).json({ success: true, removedTweet }))

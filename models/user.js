@@ -5,25 +5,19 @@ const {
 
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate (models) {
-      // define association here
-      User.hasMany(models.Reply, { foreignKey: 'UserId' }) // 因為測試檔，使用 UserId 而不用 userId 試試
+      User.hasMany(models.Reply, { foreignKey: 'UserId' })
       User.hasMany(models.Tweet, { foreignKey: 'UserId' })
       User.hasMany(models.Like, { foreignKey: 'UserId' })
       User.belongsToMany(User, {
         through: models.Followship,
         foreignKey: 'followingId',
-        as: 'Followers' // 幫關係取名字，我先想成命名一個 table，也就是說，這張表是 followers，它會記錄這個 followingId 被那些 follower follow 了
+        as: 'Followers'
       })
       User.belongsToMany(User, {
         through: models.Followship,
         foreignKey: 'followerId',
-        as: 'Followings' // 假設是張表，表的名字 followings(被追蹤者)，意思是 "藉由搜尋某一 followerId，找到他 following 的人們"
+        as: 'Followings'
       })
     }
   };
@@ -39,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
-    tableName: 'Users', // 這是手動新增的，好像有原因
+    tableName: 'Users',
     underscored: true
   })
   return User
