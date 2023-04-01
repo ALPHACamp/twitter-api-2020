@@ -1,4 +1,4 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const Sequelize = require('sequelize')
 
 const adminController = {
@@ -74,14 +74,23 @@ const adminController = {
     }
   },
   deleteTweet: async (req, res, next) => {
+    const { tweetId } = req.params
     try {
-      const { tweetId } = req.params
+      // 在 Sequelize ORM 中使用 transaction，要麼全部執行成功，要麼全部執行失敗，以確保資料庫的一致性和完整性
+      await sequelize.transaction(async (t) => {
+        const tweet = await Tweet.findByPk(tweetId, { include: [Reply, Like] })
 
-      const tweet = await Tweet.findByPk(tweetId)
+        if (!tweet) {
+          return res.status(404).json({ status: 'error', message: '此則推文不存在' })
+        }
 
-      if (!tweet) return res.status(404).json({ status: 'error', message: '此則推文不存在' })
-
-      await tweet.destroy()
+        // 刪除該推文所有回覆
+        await Reply.destroy({ where: { TweetId: tweetId } }, { transaction: t })
+        // 刪除該推文所有喜歡
+        await Like.destroy({ where: { TweetId: tweetId } }, { transaction: t })
+        // 最後刪除該推文
+        await tweet.destroy({ transaction: t })
+      })
 
       return res.status(200).json({ status: 'success', message: '成功刪除此推文' })
     } catch (err) {
