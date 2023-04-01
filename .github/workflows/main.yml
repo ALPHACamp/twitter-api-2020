@@ -13,7 +13,7 @@ jobs:
       - name: Decrypt large secret
         run: ./decrypt_secret.sh
         env:
-          NODE_ENV: travis
+          NODE_ENV: ghactions
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
     services:
