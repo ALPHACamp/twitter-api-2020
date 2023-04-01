@@ -438,7 +438,7 @@ const userController = {
 
       res.json({ status: 'success', message: '成功編輯個人資料' })
     } catch (err) {
-      next(err)
+      return res.status(err.status || 400).json({ status: 'error', message: err.message || 'Internal Server Error' })
     }
   },
   editUserAccount: async (req, res, next) => {
