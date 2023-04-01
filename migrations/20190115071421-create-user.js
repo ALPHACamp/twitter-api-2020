@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('Users', {
@@ -14,6 +14,9 @@ module.exports = {
       password: {
         type: Sequelize.STRING
       },
+      account: {
+        type: Sequelize.STRING
+      },
       name: {
         type: Sequelize.STRING
       },
@@ -26,17 +29,21 @@ module.exports = {
       role: {
         type: Sequelize.STRING
       },
-      createdAt: {
+      image: {
+        type: Sequelize.STRING,
+        defaultValue: 'https://i.imgur.com/GPlwyDu.png'
+      },
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }
-    });
+    })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Users');
+    return queryInterface.dropTable('Users')
   }
-};
+}

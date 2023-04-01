@@ -85,3 +85,9 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# custom
+models/user-origin.js
+temp/
+upload/
+followships-seeder-origin.js
