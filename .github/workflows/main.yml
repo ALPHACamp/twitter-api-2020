@@ -19,6 +19,7 @@ jobs:
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: ac_twitter
+          MYSQL_INITDB_CHARSET: utf8mb4
         ports:
           - 3306:3306
         options:
