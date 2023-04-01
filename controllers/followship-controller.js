@@ -37,7 +37,7 @@ const followshipController = {
         ...data,
         Followings: {
           account: user.account,
-          name: user.account,
+          name: user.name,
           introduction: user.introduction,
           avatar: user.avatar,
           isFollowed: true
