@@ -132,10 +132,11 @@ const tweetController = {
       ]
     })
     if (!replies.length) throw new ReqError('資料庫無此筆資料或尚無留言!')
-    const result = replies.map(reply => ({
-      reply,
-      poster
-    }))
+    const result = replies.map(reply => {
+      const temp = { ...reply.toJSON() }
+      temp.poster = poster
+      return temp
+    })
     res.status(200).json(result)
   }),
   postReplies: tryCatch(async (req, res) => {
