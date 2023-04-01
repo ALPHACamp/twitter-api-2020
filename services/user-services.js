@@ -222,6 +222,7 @@ const userServices = {
   },
   getUserFollowings: async (req, cb) => {
     const UserId = req.params.id
+    const currentUserId = helpers.getUser(req)?.id
     if (!UserId) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
 
     const user = await User.findByPk(UserId)
@@ -233,11 +234,22 @@ const userServices = {
       ],
       order: [['createdAt', 'DESC']]
     }).then(followings => {
-      return cb(null, [...followings])
+      const followingsWithIsFollowedByCurrentUser = followings.map(following => {
+        const followingData = following.toJSON()
+        console.log(followingData.followerId)
+        if (followingData.followerId === currentUserId) {
+          followingData.isFollowed = true
+        } else {
+          followingData.isFollowed = false
+        }
+        return followingData
+      })
+      return cb(null, followingsWithIsFollowedByCurrentUser)
     }).catch(err => cb(err))
   },
   getUserFollowers: async (req, cb) => {
     const UserId = req.params.id
+    const currentUserId = helpers.getUser(req)?.id
     if (!UserId) return cb(Object.assign(new Error('找不到使用者'), { status: 404 }))
 
     const user = await User.findByPk(UserId)
@@ -249,8 +261,18 @@ const userServices = {
       ],
       order: [['createdAt', 'DESC']]
     }).then(followers => {
-      return cb(null, [...followers])
-    }).catch(err => cb(err))
+      const followersWithIsFollowedByCurrentUser = followers.map(follower => {
+        const followerData = follower.toJSON()
+        if (followerData.followerId === currentUserId) {
+          followerData.isFollowed = true
+        } else {
+          followerData.isFollowed = false
+        }
+        return followerData
+      })
+      return cb(null, followersWithIsFollowedByCurrentUser)
+    })
+      .catch(err => cb(err))
   },
   putUserSetting: (req, cb) => {
     const id = Number(req.params.id)
