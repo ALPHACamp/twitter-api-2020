@@ -92,7 +92,7 @@ const userServices = {
           password: hashedPassword,
           role: 'user',
           avatar: 'https://i.imgur.com/3ZQZQ9I.png',
-          cover: 'https://imgur.com/a/NkB8zFB'
+          cover: 'https://i.imgur.com/wHEDOtN.png'
 
         })
           .then(user => {
