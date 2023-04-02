@@ -45,7 +45,7 @@ module.exports = {
       ),
       queryInterface.bulkInsert(
         'Users',
-        Array.from({ length: 10 }, () => ({
+        Array.from({ length: 4 }, () => ({
           name: faker.name.findName(),
           email: faker.internet.email(),
           password: bcrypt.hashSync('12345678', 10),
