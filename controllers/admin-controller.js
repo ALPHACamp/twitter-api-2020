@@ -37,17 +37,6 @@ const adminController = {
             'TweetsCount',
           ],
         ],
-        include: [
-          {
-            model: Tweet,
-            as: 'Tweets',
-            attributes: ['User_id', 'description', 'created_at'],
-            order: [
-              ['User_id', 'ASC'],
-              ['created_at', 'DESC'],
-            ],
-          },
-        ],
         raw: true,
         nest: true,
       });
