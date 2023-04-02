@@ -26,6 +26,12 @@ const adminController = {
           ],
           [
             sequelize.literal(
+              '(SELECT COUNT(User_id) FROM Likes WHERE User_id = User.id)'
+            ),
+            'LikesCount',
+          ],
+          [
+            sequelize.literal(
               '(SELECT COUNT(User_id) FROM Tweets WHERE User_id = User.id)'
             ),
             'TweetsCount',
