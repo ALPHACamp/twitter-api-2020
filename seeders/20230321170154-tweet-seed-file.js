@@ -5,8 +5,8 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const userData = await User.findAndCountAll()
-    const tweetSeedData = Array.from({ length: 5 * userData.count }).map((_, i) => {
-      const userId = userData.rows[Math.floor(i / 5)].dataValues.id
+    const tweetSeedData = Array.from({ length: 10 * userData.count }).map((_, i) => {
+      const userId = userData.rows[Math.floor(i / 10)].dataValues.id
       return {
         user_id: userId,
         description: faker.lorem.paragraph(),
