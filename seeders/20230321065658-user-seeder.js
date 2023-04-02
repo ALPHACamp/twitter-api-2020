@@ -13,6 +13,9 @@ module.exports = {
           avatar: `https://i.pravatar.cc/140?img=${Math.floor(
             Math.random() * 70
           )}`,
+          cover_image: `https://picsum.photos/id/${Math.floor(
+            Math.random() * 500
+          )}/400/300`,
           introduction: 'Hi!',
           role: 'admin',
           created_at: new Date(),
@@ -26,6 +29,9 @@ module.exports = {
           avatar: `https://i.pravatar.cc/140?img=${Math.floor(
             Math.random() * 70
           )}`,
+          cover_image: `https://picsum.photos/id/${Math.floor(
+            Math.random() * 500
+          )}/400/300`,
           introduction: 'Hi!',
           role: 'user',
           created_at: new Date(),
@@ -39,6 +45,9 @@ module.exports = {
           avatar: `https://i.pravatar.cc/140?img=${Math.floor(
             Math.random() * 70
           )}`,
+          cover_image: `https://picsum.photos/id/${Math.floor(
+            Math.random() * 500
+          )}/400/300`,
           introduction: 'Hi!',
           role: 'user',
           created_at: new Date(),
@@ -52,6 +61,9 @@ module.exports = {
           avatar: `https://i.pravatar.cc/140?img=${Math.floor(
             Math.random() * 70
           )}`,
+          cover_image: `https://picsum.photos/id/${Math.floor(
+            Math.random() * 500
+          )}/400/300`,
           introduction: 'Hi!',
           role: 'user',
           created_at: new Date(),
@@ -65,6 +77,9 @@ module.exports = {
           avatar: `https://i.pravatar.cc/140?img=${Math.floor(
             Math.random() * 70
           )}`,
+          cover_image: `https://picsum.photos/id/${Math.floor(
+            Math.random() * 500
+          )}/400/300`,
           introduction: 'Hi!',
           role: 'user',
           created_at: new Date(),
@@ -78,6 +93,9 @@ module.exports = {
           avatar: `https://i.pravatar.cc/140?img=${Math.floor(
             Math.random() * 70
           )}`,
+          cover_image: `https://picsum.photos/id/${Math.floor(
+            Math.random() * 500
+          )}/400/300`,
           introduction: 'Hi!',
           role: 'user',
           created_at: new Date(),
