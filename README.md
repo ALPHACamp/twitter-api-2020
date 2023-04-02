@@ -1,7 +1,12 @@
 # Simple Twitter API
 ***
-此專案為使用node.js、Express作為後端語言及框架，搭配 MySQL 關連式資料庫，打造的 API 伺服器
-[按此查看API文件](https://app.apiary.io/mjcjtwitterproject/editor)
+這是一個前後端分離，使用Express框架搭配MySQL關聯式資料庫打造的Twitter後端API專案。這個API提供了列出推文、回覆貼文、喜歡貼文以及追蹤使用者等功能，且具備後台管理者獨立帳號。
+
+### 概述
+***
+此專案為使用Node.js、Express作為後端語言及框架，搭配MySQL關聯式資料庫，打造的API伺服器。這個API遵循RESTful API設計原則，並採用JWT驗證機制確保使用者身份驗證。API的資料儲存使用MySQL關聯式資料庫，並使用Sequelize作為ORM。詳細API文件請見[連結](https://mjcjtwitterproject.docs.apiary.io/#)
+
+搭配前端專案可參考共同開發組員[repo](https://github.com/Jasminechych/simple_twitter)
 
 ### Getting start
 ***
@@ -28,8 +33,8 @@
 
             $ code .
     
- 
 5. 確認資料庫連線，本地資料庫的username、password以及database 名稱 和 config/config.json 檔案內設置的一樣
+
 6. 在 MySQL Workbench 建立資料庫
 
           create database ac_twitter_workspace;
@@ -62,8 +67,15 @@
 
 ### API文件
 ***
-[按此查看API文件](https://app.apiary.io/mjcjtwitterproject/editor)
+[按此查看API文件](https://mjcjtwitterproject.docs.apiary.io/#)
 裡面提供API文件的描述、用途、功能、接口 URL，包含請求方式，請求參數，及成功回傳與錯誤回傳資訊與代碼
+
+
+### 專案優化方向
+***
+1. 增加API針對如XSS、SQL Injection、CSRF等安全性防範性功能
+2. 增加通知功能
+3. 實時對話聊天功能
 
 #### Built With - 使用工具
 ***
@@ -81,6 +93,7 @@
 * [passport-local](http://www.passportjs.org/packages/passport-local/)  1.0.0
 * [bcryptjs](https://www.npmjs.com/package/bcryptjs)  2.4.3
 * [faker](https://fakerjs.dev/guide/)  4.1.0
+
 #### Contributor - 專案開發人員
 ---
 [Chloe905](https://github.com/Chloe905)
