@@ -13,9 +13,13 @@ module.exports = {
             email: 'root@example.com',
             password: await bcrypt.hash('12345678', 10),
             account: 'root',
-            avatar: 'https://source.unsplash.com/random/320×240/?people',
+            avatar: `https://picsum.photos/id/${Math.floor(
+              Math.random() * 300
+            )}/320/240`,
             introduction: faker.lorem.text().substring(0, 160),
-            cover: 'https://source.unsplash.com/random/639×200/?nature',
+            cover: `https://picsum.photos/id/${Math.floor(
+              Math.random() * 300
+            )}/639/200`,
             role: 'admin',
             createdAt: new Date(),
             updatedAt: new Date()
@@ -25,9 +29,13 @@ module.exports = {
             email: 'user1@example.com',
             password: await bcrypt.hash('12345678', 10),
             account: 'user1',
-            avatar: 'https://source.unsplash.com/random/320×240/?people',
-            introduction: faker.lorem.text(),
-            cover: 'https://source.unsplash.com/random/639×200/?nature',
+            avatar: `https://picsum.photos/id/${Math.floor(
+              Math.random() * 300
+            )}/320/240`,
+            introduction: faker.lorem.text().substring(0, 160),
+            cover: `https://picsum.photos/id/${Math.floor(
+              Math.random() * 300
+            )}/639/200`,
             role: 'user',
             createdAt: new Date(),
             updatedAt: new Date()
@@ -37,14 +45,18 @@ module.exports = {
       ),
       queryInterface.bulkInsert(
         'Users',
-        Array.from({ length: 4 }, () => ({
+        Array.from({ length: 10 }, () => ({
           name: faker.name.findName(),
           email: faker.internet.email(),
           password: bcrypt.hashSync('12345678', 10),
           account: faker.name.findName(),
-          avatar: 'https://source.unsplash.com/random/320×240/?people',
+          avatar: `https://picsum.photos/id/${Math.floor(
+            Math.random() * 300
+          )}/320/240`,
           introduction: faker.lorem.text().substring(0, 160),
-          cover: 'https://source.unsplash.com/random/639×200/?nature',
+          cover: `https://picsum.photos/id/${Math.floor(
+            Math.random() * 300
+          )}/639/200`,
           createdAt: new Date(),
           updatedAt: new Date()
         })),
