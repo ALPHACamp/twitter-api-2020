@@ -86,7 +86,7 @@ GROUP BY l.tweet_id) t_like USING(tweet_id)
 LEFT JOIN(SELECT tweet_id, COUNT(r.user_id) repliesNum FROM Replies r 
 JOIN Tweets t ON r.tweet_id = t.id
 GROUP BY tweet_id) t_reply USING(tweet_id)
-JOIN Users u ON l.user_id = u.id
+JOIN Users u ON t.user_id = u.id
 WHERE l.user_id = :userId
 ORDER BY l.created_at DESC
     `,
