@@ -91,8 +91,8 @@ const userServices = {
           email,
           password: hashedPassword,
           role: 'user',
-          avatar: 'https://i.imgur.com/3ZQZQ9I.png',
-          cover: 'https://i.imgur.com/wHEDOtN.png'
+          avatar: 'https://i.imgur.com/wHEDOtN.png',
+          cover: 'https://i.imgur.com/2dr5z4M.png'
 
         })
           .then(user => {
