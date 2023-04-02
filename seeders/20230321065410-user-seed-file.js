@@ -2,6 +2,7 @@
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
 const { loremFaker } = require('../helpers/faker-helpers')
+const avatarId = [64, 65, 91, 129, 177, 319, 338, 342, 349, 373]
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const hashedPassword = await bcrypt.hash('12345678', 10)
@@ -18,8 +19,8 @@ module.exports = {
       introduction: loremFaker(100),
       created_at: new Date(),
       updated_at: new Date(),
-      avatar: `https://loremflickr.com/320/240/people,casual/?random=${Math.random() * 100}`,
-      cover: `https://loremflickr.com/320/240/scenary,city/?random=${Math.random() * 100}`
+      avatar: `https://picsum.photos/id/${avatarId[Math.floor(Math.random() * 10)]}/320/240`,
+      cover: `https://picsum.photos/320/240?random=${Math.floor(Math.random() * 100)}`
     })))
     await queryInterface.bulkInsert('Users', [{ // 一次新增三筆資料
       email: 'root@example.com',
@@ -30,8 +31,8 @@ module.exports = {
       introduction: faker.lorem.text(100),
       created_at: new Date(),
       updated_at: new Date(),
-      avatar: `https://loremflickr.com/320/240/people,casual/?random=${Math.random() * 100}`,
-      cover: `https://loremflickr.com/320/240/scenary,city/?random=${Math.random() * 100}`
+      avatar: `https://picsum.photos/id/${avatarId[Math.floor(Math.random() * 10)]}/320/240`,
+      cover: `https://picsum.photos/320/240?random=${Math.floor(Math.random() * 100)}`
 
     }], {})
   },
