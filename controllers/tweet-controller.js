@@ -1,5 +1,14 @@
 const { Tweet, Like, Reply, User, sequelize } = require('../models')
 const helpers = require('../_helpers')
+const dayjs = require('dayjs')
+require('dayjs/locale/zh-tw')
+const utc = require('dayjs/plugin/utc')
+const timezone = require('dayjs/plugin/timezone')
+const relativeTime = require('dayjs/plugin/relativeTime')
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(relativeTime)
 
 const createError = require('http-errors')
 
@@ -81,6 +90,17 @@ const tweetController = {
 
         const tweetData = tweet.toJSON()
         tweetData.isLiked = likes.some(like => like.TweetId === tweet.id)
+
+        tweetData.diffTime = dayjs(tweetData.createdAt)
+          .tz('Asia/Taipei')
+          .locale('zh-tw')
+          .fromNow()
+        tweetData.createdAt = dayjs(tweetData.createdAt)
+          .tz('Asia/Taipei')
+          .locale('zh-tw')
+          .format('A h:mm ‧ YYYY年M月D日')
+          .replace('AM', '上午')
+          .replace('PM', '下午')
 
         return res.json(tweetData)
       })
