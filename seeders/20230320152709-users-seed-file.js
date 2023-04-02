@@ -13,9 +13,9 @@ module.exports = {
             email: 'root@example.com',
             password: await bcrypt.hash('12345678', 10),
             account: 'root',
-            avatar: faker.image.business(320, 240, true),
+            avatar: faker.image.people(320, 240, true),
             introduction: faker.lorem.text().substring(0, 160),
-            cover: faker.image.city(639, 200, true),
+            cover: faker.image.nature(639, 200, true),
             role: 'admin',
             createdAt: new Date(),
             updatedAt: new Date()
@@ -27,7 +27,7 @@ module.exports = {
             account: 'user1',
             avatar: faker.image.people(320, 240, true),
             introduction: faker.lorem.text(),
-            cover: faker.image.food(639, 200, true),
+            cover: faker.image.nature(639, 200, true),
             role: 'user',
             createdAt: new Date(),
             updatedAt: new Date()
