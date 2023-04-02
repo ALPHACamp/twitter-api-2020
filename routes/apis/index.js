@@ -5,6 +5,7 @@ const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const adminController = require('../../controllers/admin-controller')
 const userController = require('../../controllers/user-controller')
+const { RouteError } = require('../../helpers/errorInstance')
 const followships = require('./followship.js')
 
 const tweets = require('./tweet')
@@ -26,5 +27,9 @@ router.use('/users', users)
 router.use('/tweets', tweets)
 router.use('/followships', followships)
 
+router.use('/*', (req, res, next) => {
+  const err = new RouteError('此路徑不存在')
+  next(err)
+})
 router.use('/', apiErrorHandler)
 module.exports = router
