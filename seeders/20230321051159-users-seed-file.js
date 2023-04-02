@@ -12,7 +12,7 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date()
     },
-    ...Array.from({ length: 10 }, (_, i) => ({
+    ...Array.from({ length: 20 }, (_, i) => ({
       account: `user${i + 1}`,
       name: `user${i + 1}`,
       email: `user${i + 1}@example.com`,
