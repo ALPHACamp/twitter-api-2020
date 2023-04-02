@@ -95,8 +95,8 @@ const userController = {
       if (!user) throw new Error('使用者不存在')
       const images = (!req.files) ? null : await imgurFileHandler(req.files) // 回傳為物件，{avatar: '...', cover: '...'}
       const editedUser = await user.update({
-        name: name || user.toJSON().name,
-        introduction: introduction || user.toJSON().introduction,
+        name: name,
+        introduction: introduction,
         avatar: images ? images.avatar : user.toJSON().avatar,
         cover: images ? images.cover : user.toJSON().cover
       })
