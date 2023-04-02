@@ -1,4 +1,24 @@
 # twitter-api
+
+This is an API developed for Simple Twitter, using nodejs and MySQL database to create a server. It utilizes passport.js and jwt for identity management and squelize ORM to manipulate the database. It provides Simple Twitter users with access to user data, tweet data, reply data, follow relationships, like records, and administrator data management on the front end.
+
+| Error Class  | HTTP Status Code | Description                                               |
+| ------------ | ---------------- | --------------------------------------------------------- |
+| ReqError     | 400              | Indicates a bad request                                   |
+| AuthError    | 401              | Indicates that the client is unauthenticated to access a resource |
+| AutherError  | 403              | Indicates that the client is forbidden from accessing a resource |
+| RouteError   | 404              | Indicates that the requested resource is not found on the server |
+| -            | 200              | Indicates that the request was successful                 |
+
+You can access the API through the following URLs that have been deployed on Heroku: https://twitter-api-03.herokuapp.com/ and https://secret-caverns-10798.herokuapp.com/. If you experience any errors, it may be because of a post limitation from Heroku. In such a situation, we suggest using the alternative URL: https://secret-caverns-10798.herokuapp.com/.
+
+If you have any questions, please contact the developers, [小江](https://github.com/sd880428) and [TH](https://github.com/thk61159).
+
+see our [API Doc](https://documenter.getpostman.com/view/25669324/2s93RUvXoN)
+
+see our [front-end website](https://thk61159.github.io/ToughTwitter/)
+
+
 ## 環境:
 + 程式編輯器: [Visual Studio Code](https://visualstudio.microsoft.com/zh-hant/ "Visual Studio Code") 
 + 使用框架: [express](https://www.npmjs.com/package/express)@4.16.4
