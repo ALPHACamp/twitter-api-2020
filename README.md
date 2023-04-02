@@ -4,9 +4,12 @@
 
 <details hide><summary>Click me</summary>
 
-The repository contains the backend code for the project of ALPHAcamp Simple Twitter course. In the project, we were instructed to build a twitter-like website. The frontend of the project is available [here](https://ljbl22.github.io/react_twitter/), and the backend is deployed on Heroku cloud application platform [here](https://dry-lowlands-42863.herokuapp.com).
+The repository contains the backend code for the project of ALPHAcamp Simple Twitter course. In the project, we were instructed to build a twitter-like website. The frontend of the project is available [here](https://ljbl22.github.io/react_twitter/), and the backend is deployed on Heroku cloud application platform [here](https://dry-lowlands-42863.herokuapp.com/api).
 
 </details>
+
+## API Docs
+[Simple Twitter Project](https://documenter.getpostman.com/view/21270873/2s93RUvsWY)
 
 ## Project features
 The reason why we choose Node.js to construct the server is because it was the course syllabus. And as to database, MySQL is our choice since it's free and open-source.
