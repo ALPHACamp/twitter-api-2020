@@ -421,7 +421,6 @@ const userController = {
       }
 
       const { files } = req
-      
 
       // handle the user's uploaded avatar and cover image, if no image is uploaded, the path is set to null.
       const uploadAvatar = files?.avatar ? imgurFileHandler(files.avatar[0]) : null
