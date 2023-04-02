@@ -18,10 +18,10 @@ const adminController = {
       const users = data.map(d => {
         const user = {
           ...d.toJSON(),
-          tweets: d.Tweets?.length || 0,
-          likes: (d.Tweets?.map(t => t.Likes.length)).reduce((a, b) => a + b, 0),
-          followings: d.Followings?.length || 0,
-          followers: d.Followers?.length || 0
+          tweets: d.Tweets.length,
+          likes: (d.Tweets.map(t => t.Likes.length)).reduce((a, b) => a + b, 0),
+          followings: d.Followings.length,
+          followers: d.Followers.length
         }
         delete user.Tweets
         delete user.Followers
