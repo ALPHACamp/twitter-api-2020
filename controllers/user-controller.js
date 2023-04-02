@@ -75,7 +75,7 @@ ORDER BY created_at LIMIT 5
 
   getUserLikes: (req, res, next) => {
     return sequelize.query(`
-    SELECT l.tweet_id TweetId, !ISNULL(ownLike.tweet_id) isLiked, description, IFNULL(likesNum, 0) likesNum, IFNULL(repliesNum, 0) repliesNum
+    SELECT l.tweet_id TweetId, !ISNULL(ownLike.tweet_id) isLiked, description, IFNULL(likesNum, 0) likesNum, IFNULL(repliesNum, 0) repliesNum, t.created_at createdAt, avatar, name, account
 FROM Likes l 
 LEFT JOIN (SELECT tweet_id FROM Likes WHERE user_id = :ownId) ownLike USING(tweet_id)
 JOIN Tweets t ON t.id = l.tweet_id
@@ -86,6 +86,7 @@ GROUP BY l.tweet_id) t_like USING(tweet_id)
 LEFT JOIN(SELECT tweet_id, COUNT(r.user_id) repliesNum FROM Replies r 
 JOIN Tweets t ON r.tweet_id = t.id
 GROUP BY tweet_id) t_reply USING(tweet_id)
+JOIN Users u ON l.user_id = u.id
 WHERE l.user_id = :userId
 ORDER BY l.created_at DESC
     `,
