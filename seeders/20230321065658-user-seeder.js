@@ -10,9 +10,9 @@ module.exports = {
           email: 'root@example.com',
           password: await bcrypt.hash('12345678', 10),
           name: 'root',
-          avatar: `https://loremflickr.com/320/240/person/?lock=${
-            Math.random() * 100
-          }`,
+          avatar: `https://i.pravatar.cc/140?img=${Math.floor(
+            Math.random() * 70
+          )}`,
           introduction: 'Hi!',
           role: 'admin',
           created_at: new Date(),
@@ -23,9 +23,9 @@ module.exports = {
           email: 'user1@example.com',
           password: await bcrypt.hash('12345678', 10),
           name: 'user1',
-          avatar: `https://loremflickr.com/320/240/person/?lock=${
-            Math.random() * 100
-          }`,
+          avatar: `https://i.pravatar.cc/140?img=${Math.floor(
+            Math.random() * 70
+          )}`,
           introduction: 'Hi!',
           role: 'user',
           created_at: new Date(),
@@ -36,9 +36,9 @@ module.exports = {
           email: 'user2@example.com',
           password: await bcrypt.hash('12345678', 10),
           name: 'user2',
-          avatar: `https://loremflickr.com/320/240/person/?lock=${
-            Math.random() * 100
-          }`,
+          avatar: `https://i.pravatar.cc/140?img=${Math.floor(
+            Math.random() * 70
+          )}`,
           introduction: 'Hi!',
           role: 'user',
           created_at: new Date(),
@@ -49,9 +49,9 @@ module.exports = {
           email: 'user3@example.com',
           password: await bcrypt.hash('12345678', 10),
           name: 'user3',
-          avatar: `https://loremflickr.com/320/240/person/?lock=${
-            Math.random() * 100
-          }`,
+          avatar: `https://i.pravatar.cc/140?img=${Math.floor(
+            Math.random() * 70
+          )}`,
           introduction: 'Hi!',
           role: 'user',
           created_at: new Date(),
@@ -62,9 +62,9 @@ module.exports = {
           email: 'user4@example.com',
           password: await bcrypt.hash('12345678', 10),
           name: 'user4',
-          avatar: `https://loremflickr.com/320/240/person/?lock=${
-            Math.random() * 100
-          }`,
+          avatar: `https://i.pravatar.cc/140?img=${Math.floor(
+            Math.random() * 70
+          )}`,
           introduction: 'Hi!',
           role: 'user',
           created_at: new Date(),
@@ -75,9 +75,9 @@ module.exports = {
           email: 'user5@example.com',
           password: await bcrypt.hash('12345678', 10),
           name: 'user5',
-          avatar: `https://loremflickr.com/320/240/person/?lock=${
-            Math.random() * 100
-          }`,
+          avatar: `https://i.pravatar.cc/140?img=${Math.floor(
+            Math.random() * 70
+          )}`,
           introduction: 'Hi!',
           role: 'user',
           created_at: new Date(),
