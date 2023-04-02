@@ -1,7 +1,7 @@
 # Simple Twitter API
 ***
 此專案為使用node.js、Express作為後端語言及框架，搭配 MySQL 關連式資料庫，打造的 API 伺服器
-[按此查看API文件](https://app.apiary.io/mjcjtwitterproject/editor)
+[按此查看API文件](https://mjcjtwitterproject.docs.apiary.io/#)
 
 ### Getting start
 ***
@@ -62,7 +62,7 @@
 
 ### API文件
 ***
-[按此查看API文件](https://app.apiary.io/mjcjtwitterproject/editor)
+[按此查看API文件](https://mjcjtwitterproject.docs.apiary.io/#)
 裡面提供API文件的描述、用途、功能、接口 URL，包含請求方式，請求參數，及成功回傳與錯誤回傳資訊與代碼
 
 #### Built With - 使用工具
@@ -70,17 +70,19 @@
 * [Visual Studio Code](https://visualstudio.microsoft.com/zh-hant/) - 開發環境
 * [Node.js](https://nodejs.org/en/)  v14.16.0
 * [Express](https://www.npmjs.com/package/express)  4.16.4- 應用程式架構
-* [mysql2](https://www.npmjs.com/package/mysql2)  2.3.0
-* [sequelize](https://www.npmjs.com/package/sequelize)  6.6.5
+* [mysql2](https://www.npmjs.com/package/mysql2)  1.6.4
+* [sequelize](https://www.npmjs.com/package/sequelize)  6.18.0
 * [sequelize-cli](https://www.npmjs.com/package/sequelize-cli)  6.2.0
 * [dotenv](https://www.npmjs.com/package/dotenv)  10.0.0
 * [method override](https://www.npmjs.com/package/method-override)  3.0.0
 * [express-session](https://www.npmjs.com/package/express-session)  1.15.6
 * [passport](http://www.passportjs.org/)  0.4.0
-* [passport-jwt](http://www.passportjs.org/packages/passport-jwt/)  5.0.0
+* [passport-jwt](http://www.passportjs.org/packages/passport-jwt/)  4.0.0
 * [passport-local](http://www.passportjs.org/packages/passport-local/)  1.0.0
 * [bcryptjs](https://www.npmjs.com/package/bcryptjs)  2.4.3
 * [faker](https://fakerjs.dev/guide/)  4.1.0
+* [imgur](https://www.npmjs.com/package/imgur)  1.0.2
+* [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)  8.5.1
 #### Contributor - 專案開發人員
 ---
 [Chloe905](https://github.com/Chloe905)
