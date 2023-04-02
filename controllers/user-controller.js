@@ -2,7 +2,7 @@ const passport = require('passport')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { Sequelize, Op } = require('sequelize')
 const { valueTrim } = require('../helpers/obj-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -248,15 +248,24 @@ const userController = {
       const data = await User.findAll({
         attributes: [],
         include:
-        [
-          {
-            model: User,
-            as: 'Followers',
-            attributes: ['id', 'name', 'avatar', 'introduction'],
-            through: { attributes: [] }
-          }
-        ],
+          [
+            {
+              model: User,
+              as: 'Followers',
+              attributes: ['id', 'name', 'avatar', 'introduction'],
+              through: { attributes: [] }
+            }
+          ],
         where: { id: followingId },
+        order:
+          [
+            [
+              { model: User, as: 'Followers' },
+              { model: Followship },
+              'createdAt',
+              'DESC'
+            ]
+          ],
         nest: true,
         raw: true
       })
@@ -295,6 +304,15 @@ const userController = {
             }
           ],
         where: { id: followerId },
+        order:
+          [
+            [
+              { model: User, as: 'Followings' },
+              { model: Followship },
+              'createdAt',
+              'DESC'
+            ]
+          ],
         nest: true,
         raw: true
       })
