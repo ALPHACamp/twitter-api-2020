@@ -67,8 +67,8 @@ const userController = {
       const user = {
         ...data.toJSON(),
         tweets: data.Tweets.length,
-        followers: data.Followers.length,
-        followings: data.Followings.length,
+        followers: data.Followers.map(f => f.id),
+        followings: data.Followings.map(f => f.id),
         isMyself: signinUser.id === Number(id),
         isFollowing: signinUser ? signinUser.Followings.some(following => following.id === Number(id)) : false
       }

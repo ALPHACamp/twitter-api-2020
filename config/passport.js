@@ -4,7 +4,7 @@ const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 const bcrypt = require('bcryptjs')
-const { User, Like } = require('../models')
+const { User, Like, Followship } = require('../models')
 
 passport.use(new LocalStrategy(
   {
@@ -24,9 +24,18 @@ passport.use(new LocalStrategy(
       if (!user) throw new Error('帳號不存在！')
       const isMatch = bcrypt.compareSync(password, user.password)
       if (!isMatch) throw new Error('輸入的帳號或密碼錯誤')
+
+      const [followings, followers] = await Promise.all([
+        Followship.findAll({ where: { followerId: user.id }, raw: true }),
+        Followship.findAll({ where: { followingId: user.id }, raw: true })
+      ])
       const userData = user.toJSON()
       delete userData.password
-      return done(null, userData)
+      return done(null, {
+        ...userData,
+        followingsId: followings.map(f => f.followingId),
+        followersId: followers.map(f => f.followerId)
+      })
     } catch (err) {
       return done(err, null)
     }
