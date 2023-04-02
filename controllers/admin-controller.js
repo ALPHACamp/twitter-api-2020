@@ -37,6 +37,7 @@ const adminController = {
             'TweetsCount',
           ],
         ],
+        order: [[sequelize.col('TweetsCount'), 'DESC']],
         raw: true,
         nest: true,
       });
