@@ -8,7 +8,11 @@ const tweetController = {
       const { description } = valueTrim(req.body)
       if (!description) throw new Error('推文不可空白')
       if (description.length > 140) throw new Error('字數限制 140 字')
+
       const userId = helpers.getUser(req).id
+      const user = await User.findByPk(userId, { raw: true })
+      if (!user) throw new Error('使用者不存在')
+
       const newTweet = await Tweet.create({ description, UserId: userId })
       res.status(200).json(newTweet)
     } catch (err) {
