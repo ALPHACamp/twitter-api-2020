@@ -342,14 +342,13 @@ const userServices = {
     const { name, introduction } = req.body
     const files = req.files
     if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
-    return Promise.all([User.findByPk(currentUserId), imgurFileHandler(files)])
-      .then(([user, imgurData]) => {
-        console.log(imgurData)
+    return Promise.all([User.findByPk(currentUserId), imgurFileHandler(files.avatar), imgurFileHandler(files.cover)])
+      .then(([user, avatarFile, coverFile]) => {
         user.update({
           name,
           introduction,
-          avatar: imgurData[0] || user.avatar,
-          cover: imgurData[1] || user.cover
+          avatar: avatarFile || user.avatar,
+          cover: coverFile || user.cover
         })
           .then(user => {
             const userData = user.toJSON()

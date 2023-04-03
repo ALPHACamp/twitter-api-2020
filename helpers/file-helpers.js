@@ -16,24 +16,14 @@ imgur.setClientId(IMGUR_CLIENT_ID)
 const imgurFileHandler = files => {
   return new Promise((resolve, reject) => {
     if (!files) return resolve(null)
-    const promises = []
-    for (const key in files) {
-      const fileArray = Array.isArray(files[key]) ? files[key] : [files[key]]
-      fileArray.forEach(file => {
-        promises.push(imgur.uploadFile(file.path))
-      })
-    }
-    return Promise.all(promises)
-      .then(imgs => {
-        const links = []
-        imgs.forEach(img => {
-          links.push(img?.link || null)
-        })
-        resolve(links)
+    return imgur.uploadFile(files[0].path)
+      .then(img => {
+        resolve(img?.link || null) // 檢查 img 是否存在
       })
       .catch(err => reject(err))
   })
 }
+
 
 module.exports = {
   imgurFileHandler
