@@ -63,7 +63,7 @@ const tweetController = {
         where: { TweetId },
         raw: true,
         nest: true,
-        include: [{ model: User, attributes: ['account', 'name'] }],
+        include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
         order: [['updatedAt', 'DESC']],
       });
       if (!replies || !replies.length)
