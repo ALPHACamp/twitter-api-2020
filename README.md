@@ -18,6 +18,13 @@ see our [API Doc](https://documenter.getpostman.com/view/25669324/2s93RUvXoN)
 
 see our [front-end website](https://thk61159.github.io/ToughTwitter/)
 
+seeder帳號:
+| account  | password | role|
+| ------------ | ---------------- | --------------------------------------------------------- |
+| root    | 12345678              |admin 
+| user1    | 12345678              |user
+| ...    | ...              |...
+| user5    | 12345678              |user
 
 ## 環境:
 + 程式編輯器: [Visual Studio Code](https://visualstudio.microsoft.com/zh-hant/ "Visual Studio Code") 
@@ -39,11 +46,23 @@ npm i
 ```
 4. 自行加入.env 檔(參考.env.example)
 
-5. 執行
+5. 建立資料庫
+```
+npx sequelize db:create
+```
+6. 匯入model與seeder
+```
+npm run migrate & npm run seed
+```
+7. 執行(windows)
 ```
 npm run dev
 ```
+7. 執行(mac)
+```
+npm run devMac
+```
 如成功終端機會顯示:[Example app listening on port 4000!]
 
-6. 顯示成功訊息後即可使用api
+8. 顯示成功訊息後即可使用api
 
