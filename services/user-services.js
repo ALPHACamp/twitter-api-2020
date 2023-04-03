@@ -344,6 +344,7 @@ const userServices = {
     if (id !== currentUserId) throw new Error('您沒有權限編輯此使用者資料')
     return Promise.all([User.findByPk(currentUserId), imgurFileHandler(files)])
       .then(([user, imgurData]) => {
+        console.log(imgurData)
         user.update({
           name,
           introduction,
