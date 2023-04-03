@@ -18,7 +18,10 @@ const imgurFileHandler = files => {
     if (!files) return resolve(null)
     const promises = []
     for (const key in files) {
-      promises.push(imgur.uploadFile(files[key][0].path))
+      const fileArray = Array.isArray(files[key]) ? files[key] : [files[key]]
+      fileArray.forEach(file => {
+        promises.push(imgur.uploadFile(file.path))
+      })
     }
     return Promise.all(promises)
       .then(imgs => {
