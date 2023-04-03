@@ -12,7 +12,7 @@ const tweetController = {
           { model: Reply, attributes: ['User_id', 'created_at'] },
           { model: Like, attributes: ['User_id', 'created_at'] },
         ],
-        order: [['updatedAt', 'DESC']],
+        order: [['createdAt', 'DESC']],
       });
 
       return res.status(200).json(tweets);
