@@ -11,7 +11,8 @@ jobs:
 
     env:
       NODE_ENV: ghactions
-
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
     services:
       mysql:
         image: mysql:5.7
