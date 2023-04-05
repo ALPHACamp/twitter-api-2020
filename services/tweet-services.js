@@ -24,7 +24,8 @@ const tweetServices = {
       .then(tweetsData => {
         const tweets = tweetsData.map(t => ({
           ...t,
-          transferDateTime: relativeTimeFromNow(t.createdAt),
+          transferDateTimeforpage: transferDateTime(t.createdAt),
+          transferDateTimeformodel: relativeTimeFromNow(t.createdAt),
           isLiked: t.isLiked === 1
         }))
         cb(null, tweets)
