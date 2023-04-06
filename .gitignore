@@ -1,3 +1,6 @@
+# 照片暫存資料夾
+temp/
+
 .DS_Store
 *.DS_Store
 

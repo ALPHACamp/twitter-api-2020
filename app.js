@@ -1,15 +1,25 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+
 const express = require('express')
-const helpers = require('./_helpers');
+const cors = require('cors')
+const passport = require('./config/passport')
+const { apiErrorHandler } = require('./middleware/error-handler')
+const routes = require('./routes')
 
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+app.use(cors())
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+app.use(passport.initialize())
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.use('/api', routes)
+app.use('/', (req, res) => { res.send('Fallback: Oops! Something went wrong.') })
+app.use('/', apiErrorHandler)
+
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
