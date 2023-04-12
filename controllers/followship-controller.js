@@ -6,14 +6,16 @@ const helpers = require('../_helpers')
 const followshipController = {
   // follow account
   postFollowing: (req, res, next) => {
+    // 登入者 id
     const UserId = helpers.getUser(req).id
+    // 登入者選擇要追蹤的對象
     const followingId = Number(req.body.id)
     if (UserId === followingId) throw new Error('無法追蹤、退追自己')
 
     return User.findByPk(UserId)
       .then(user => {
         if (!user) throw new Error('此使用者不存在')
-
+        // 搜尋我的帳號下有是否有追蹤該 id
         return Followship.findOne({
           where: {
             followerId: UserId,
@@ -22,8 +24,9 @@ const followshipController = {
         })
       })
       .then(followship => {
+        // 存在表示有追蹤該 id
         if (followship) throw new Error('已追蹤此帳號')
-
+        // 不存在表示沒有追蹤該 id 所以要新增
         return Followship.create({
           followerId: UserId,
           followingId

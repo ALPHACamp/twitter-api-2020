@@ -13,8 +13,8 @@ const userController = {
       const user = helpers.getUser(req).toJSON()
       // sign a token (payload + key)
       if (user?.role === 'admin') throw new Error('此帳號不存在')
-      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
       delete user.password
+      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
         status: 'success',
         data:
