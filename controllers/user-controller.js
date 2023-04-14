@@ -77,24 +77,26 @@ const userController = {
     const { id } = req.params;
     const loginUserId = getUser(req).id;
     try {
+      if (!Number(id) || Number(id) < 0) throw newError(400, "id 值有誤!");
       const foundUser = await User.findByPk(id, {
+        replacements: [id, id, loginUserId, id],
         attributes: {
           include: [
             [
               sequelize.literal(
-                `(SELECT COUNT(*) FROM Followships WHERE followingId = ${id})`
+                `(SELECT COUNT(*) FROM Followships WHERE followingId = ?)`
               ),
               "followerCounts",
             ],
             [
               sequelize.literal(
-                `(SELECT COUNT(*) FROM Followships WHERE followerId = ${id})`
+                `(SELECT COUNT(*) FROM Followships WHERE followerId = ?)`
               ),
               "followingCounts",
             ],
             [
               sequelize.literal(
-                `(EXISTS (SELECT * FROM Followships AS f WHERE f.followerId = ${loginUserId} AND f.followingId = ${id}))`
+                `(EXISTS (SELECT * FROM Followships AS f WHERE f.followerId = ? AND f.followingId = ?))`
               ),
               "isFollowed",
             ],
@@ -261,11 +263,13 @@ const userController = {
     const { id } = req.params;
     const loginUserId = getUser(req).id;
     try {
+      if (!Number(id) || Number(id) < 0) throw newError(400, "id 值有誤!");
       const foundUser = await User.findByPk(id);
 
       if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在！");
 
       const tweets = await Tweet.findAll({
+        replacements: [loginUserId],
         attributes: [
           "id",
           "description",
@@ -285,7 +289,7 @@ const userController = {
           ],
           [
             sequelize.literal(`
-            (EXISTS (SELECT l.id from Likes as l WHERE Tweet.id = l.TweetId AND l.UserId = ${loginUserId}))
+            (EXISTS (SELECT l.id from Likes as l WHERE Tweet.id = l.TweetId AND l.UserId = ?))
           `),
             "isLiked",
           ],
@@ -311,6 +315,7 @@ const userController = {
   getUserReplies: async (req, res, next) => {
     const { id } = req.params;
     try {
+      if (!Number(id) || Number(id) < 0) throw newError(400, "id 值有誤!");
       const foundUser = await User.findByPk(id);
 
       if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在！");
@@ -346,11 +351,13 @@ const userController = {
     const { id } = req.params;
     const loginUserId = getUser(req).id;
     try {
+      if (!Number(id) || Number(id) < 0) throw newError(400, "id 值有誤!");
       const foundUser = await User.findByPk(id);
 
       if (!foundUser || foundUser.isAdmin) throw newError(404, "帳號不存在！");
 
       const likes = await Like.findAll({
+        replacements: [loginUserId],
         include: [
           {
             model: Tweet,
@@ -370,7 +377,7 @@ const userController = {
               ],
               [
                 sequelize.literal(`
-                  (EXISTS (SELECT l.id from Likes as l WHERE Tweet.id = l.TweetId AND l.UserId = ${loginUserId}))
+                  (EXISTS (SELECT l.id from Likes as l WHERE Tweet.id = l.TweetId AND l.UserId = ?))
                 `),
                 "isLiked",
               ],
@@ -398,7 +405,7 @@ const userController = {
           createdAt, // - 什麼時候按喜歡推文
           ...Tweet,
           // - 目前登入的使用者有無按過喜歡
-          isLiked: Tweet.isLiked === 1
+          isLiked: Tweet.isLiked === 1,
         };
       });
       return res.json(data);
@@ -409,15 +416,19 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     const { id } = req.params;
     try {
+      if (!Number(id) || Number(id) < 0) throw newError(400, "id 值有誤!");
       const followers = await sequelize.query(
         `
       SELECT f.followerId AS id, f.followerId, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
       FROM Followships AS f INNER JOIN Users AS u
       ON f.followerId = u.id
-      WHERE followingId = ${id}
+      WHERE followingId = ?
       ORDER BY followedDate DESC;
       `,
-        { type: QueryTypes.SELECT }
+        {
+          replacements: [id],
+          type: QueryTypes.SELECT,
+        }
       );
       return res.json(followers);
     } catch (error) {
@@ -427,15 +438,19 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     const { id } = req.params;
     try {
+      if (!Number(id) || Number(id) < 0) throw newError(400, "id 值有誤!");
       const followings = await sequelize.query(
         `
       SELECT f.followingId AS id, f.followingId, u.account, u.name, u.avatar, u.introduction, f.createdAt AS followedDate
       FROM Followships AS f INNER JOIN Users AS u
       ON f.followingId = u.id
-      WHERE followerId = ${id}
+      WHERE followerId = ?
       ORDER BY followedDate DESC;
       `,
-        { type: QueryTypes.SELECT }
+        {
+          replacements: [id],
+          type: QueryTypes.SELECT,
+        }
       );
       return res.json(followings);
     } catch (error) {
@@ -455,11 +470,14 @@ const userController = {
         FROM Followships AS f INNER JOIN Users AS u
         ON f.followingId = u.id
         GROUP BY f.followingId
-        HAVING f.followingId <> ${loginUserId}
+        HAVING f.followingId <> ?
         ORDER BY followerCounts DESC, f.followingId ASC
-        LIMIT ${limit};
+        LIMIT ?;
         `,
-        { type: QueryTypes.SELECT }
+        { 
+          replacements: [loginUserId, Number(limit)],
+          type: QueryTypes.SELECT
+         }
       );
       return res.json(users);
     } catch (error) {
