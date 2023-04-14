@@ -148,26 +148,27 @@ const userController = {
     try {
       const loginUser = helpers.getUser(req)
       const id = Number(req.params.id)
-      const user = await User.findByPk(id, {
-        attributes: ['role'],
-        include: {
-          model: Tweet,
+      const [user, tweets] = await Promise.all([
+        User.findByPk(id),
+        Tweet.findAll({
+          raw: true,
+          nest: true,
+          where: { UserId: id },
           include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
           attributes: [
-            'id', 'UserId', 'description', 'createdAt',
-            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweets.id )'), 'replyCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweets.id )'), 'likeCount'],
-            [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.User_id = ${loginUser.id} AND Likes.Tweet_id = Tweets.id)`), 'isLiked']
-          ]
-        },
-        order: [[Tweet, 'createdAt', 'DESC']]
-      })
+            'id', 'description', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Tweet_id = Tweet.id )'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes  WHERE Tweet_id = Tweet.id )'), 'likeCount'],
+            [sequelize.literal(`EXISTS(SELECT id FROM Likes WHERE Likes.User_id = ${loginUser.id} AND Likes.Tweet_id = Tweet.id)`), 'isLiked']
+          ],
+          order: [['createdAt', 'DESC']]
+        })
+      ])
 
       if (!user || user.role === 'admin') throw createError(404, '帳號不存在')
 
-      const tweets = [...user.Tweets]
       const result = tweets.map(tweet => ({
-        ...tweet.toJSON(),
+        ...tweet,
         createdAt: timeFormat(tweet.createdAt),
         isLiked: !!tweet.isLiked
       }))
