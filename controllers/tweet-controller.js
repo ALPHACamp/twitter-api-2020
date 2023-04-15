@@ -12,6 +12,7 @@ const tweetController = {
       if (!currentUserId) throw newError(404, "找不到使用者");
 
       const tweets = await Tweet.findAll({
+        replacements: [currentUserId],
         nest: true,
         raw: true,
         include: [
@@ -41,7 +42,7 @@ const tweetController = {
           // 找出每筆Tweet，目前登入的使用者是否有按讚，若 EXISTS 為真，就會繼續執行外查詢中的 SQL；若 EXISTS 為假，則整個 SQL 查詢就不會返回任何結果
           [
             sequelize.literal(
-              `EXISTS (SELECT id FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${currentUserId})`
+              `EXISTS (SELECT id FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ?)`
             ),
             "isLiked",
           ],
@@ -81,6 +82,7 @@ const tweetController = {
       const tweetId = req.params.tweet_id;
       const currentUserId = getUser(req).id;
       const tweet = await Tweet.findByPk(tweetId, {
+        replacements: [currentUserId],
         nest: true,
         raw: true,
         include: {
@@ -105,7 +107,7 @@ const tweetController = {
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT id FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${currentUserId})`
+              `EXISTS (SELECT id FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ?)`
             ),
             "isLiked",
           ],
