@@ -237,8 +237,8 @@ const tweetController = {
         attributes: {
           include: [
             [sequelize.literal(
-              '(SELECT COUNT(*) FROM Followships WHERE following_id = user.id )'), 'followerCount'],
-            [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE following_id = user.id AND follower_id = ${loginUserId})`), 'isFollowed']
+              '(SELECT COUNT(*) FROM Followships WHERE following_id = User.id )'), 'followerCount'],
+            [sequelize.literal(`EXISTS(SELECT id FROM Followships WHERE following_id = User.id AND follower_id = ${loginUserId})`), 'isFollowed']
           ],
           exclude: ['password', 'email', 'cover', 'role', 'introduction', 'createdAt', 'updatedAt']
         },
