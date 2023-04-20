@@ -2,7 +2,7 @@
   "name": "simple-twitter",
   "version": "1.0.1",
   "description": "",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=development node app.js",
     "dev": "cross-env NODE_ENV=development nodemon app.js",
