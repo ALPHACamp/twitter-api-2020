@@ -15,7 +15,7 @@
     "logging": false
   },
   "production": {
-    "use_env_variable": "mysql://root:c68Efjx8hIG45REg6198@containers-us-west-2.railway.app:5783/railway"
+    "use_env_variable": "MYSQLDATABASE"
   },
   "travis": {
     "username": "travis",
