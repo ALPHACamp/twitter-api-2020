@@ -82,7 +82,6 @@ describe('# user requests', () => {
             if (err) return done(err);
             // 檢查是否回傳資料裡有 root 的資料
             res.body.name.should.equal('root');
-
             return done();
           })
       });
