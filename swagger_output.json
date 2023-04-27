@@ -1,0 +1,2217 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "version": "1.0.0",
+    "title": "simple twitter REST API",
+    "description": ""
+  },
+  "servers": [
+    { "url": "https://arcane-wave-79231.herokuapp.com" }
+  ],
+  "tags": [
+    { "name": "admin" },
+    { "name": "user" },
+    { "name": "followship" },
+    { "name": "like" },
+    { "name": "reply" },
+    { "name": "tweet" }
+  ],
+  "paths": {
+    "/api/admin/users": {
+      "post": {
+        "tags": ["admin"],        
+        "description": "後台登入",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/signin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功登入",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功登入"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": { "type": "string" },
+                        "user": { "$ref": "#/components/schemas/user" }
+                      }
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "以使用者之帳密登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          },
+          "500": {
+            "description": "帳號或密碼輸入錯誤",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["admin"],
+        "description": "後台瀏覽所有的使用者",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功取得所有使用者之資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功取得所有使用者之資料"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items":{ "$ref": "#/components/schemas/users" }                   
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "未使用admin帳號登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/tweets": {
+      "get": {
+        "tags": ["admin"],
+        "description": "後台取得所有推文",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功取得所有推文資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功取得所有推文資料"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items":{ "$ref": "#/components/schemas/tweets" }                   
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "未使用admin帳號登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/tweets/{id}": {
+      "delete": {
+        "tags": ["admin"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功刪除",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功刪除"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {  
+                        "id": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "description": { "type": "string" },
+                        "userId": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        },
+                        "UserId": {
+                          "type": "number",
+                          "example": 2
+                        }   
+                      }        
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "未使用admin帳號登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          },
+          "500": {
+            "description": "這篇推文不存在",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "post": {
+        "tags": ["user"],
+        "description": "註冊",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user2@example.com"
+                  },
+                  "account": {
+                    "type": "string",
+                    "example": "user2"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "user2"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "12345678"
+                  },
+                  "checkPassword": {
+                    "type": "string",
+                    "example": "12345678"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功註冊",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功註冊"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {                       
+                        "id": {
+                          "type": "number",
+                          "example": 15
+                        },
+                        "account": {
+                          "type": "string",
+                          "example": "root"
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "root"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "root@example.com"
+                        },
+                        "password": { "type": "string" },                        
+                        "avatar": {
+                          "type": "string",
+                          "example": null
+                        },
+                        "cover": {
+                          "type": "string",
+                          "example": null
+                        },
+                        "role": {
+                          "type": "string",
+                          "example": "admin"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        } ,                        
+                        "createdAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        }                  
+                      }                      
+                    }                                       
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "已被註冊",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/signin": {
+      "post": {
+       "tags": ["user"],
+        "description": "使用者登入",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/signin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功登入",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功登入"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": { "type": "string" },
+                        "user": { "$ref": "#/components/schemas/user" }
+                      }
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "以 admin 之帳密登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          },
+          "500": {
+            "description": "帳號或密碼輸入錯誤",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/currentUser": {
+      "get": {
+        "tags": ["user"],
+        "description": "拿到當前使用者資訊",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功取得當前使用者之資訊",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功取得當前使用者之資訊"
+                    },
+                    "currentUserData": {
+                      "$ref": "#/components/schemas/user"                      
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未使用使用者帳號登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": ["user"],
+        "description": "拿到一筆使用者資訊",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功取得使用者資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功取得使用者資料"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number",
+                          "example": 15
+                        },
+                        "account": {
+                          "type": "string",
+                          "example": "root"
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "root"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "root@example.com"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "example": null
+                        },
+                        "cover": {
+                          "type": "string",
+                          "example": null
+                        },
+                        "introduction": {
+                          "type": "string",
+                          "example": null
+                        },                    
+                        "TweetsCount": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "LikesCount": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "FollowingCount": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "FollowerCount": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "isFollowing": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "isCurrentUser": {
+                          "type": "boolean",
+                          "example": false
+                        }                        
+                      }                          
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未使用使用者帳號登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          },
+          "500": {
+            "description": "id 不正確，沒有這個使用者",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}/followings": {
+      "get": {
+        "tags": ["user"],
+        "description": "看見某使用者跟隨中的人",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "您已成功！"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items":{
+                        "type": "object",
+                        "properties": {
+                          "followingId": {
+                            "type": "number",
+                            "example": 15
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "example": "2022-07-29T07:28:40.000Z"
+                          },                        
+                          "avatar": {
+                            "type": "string",
+                            "example": null
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "root"
+                          },
+                          "introduction": {
+                            "type": "string",
+                            "example": null
+                          },                    
+                          "isFollowing": {
+                            "type": "boolean",
+                            "example": true
+                          }                      
+                        }   
+                      }                        
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "使用者不存在",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}/followers": {
+      "get": {
+        "tags": ["user"],
+        "description": "看見某使用者的跟隨者",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "您已成功！"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items":{
+                        "type": "object",
+                        "properties": {
+                          "followerId": {
+                            "type": "number",
+                            "example": 15
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "example": "2022-07-29T07:28:40.000Z"
+                          },                        
+                          "avatar": {
+                            "type": "string",
+                            "example": null
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "root"
+                          },
+                          "introduction": {
+                            "type": "string",
+                            "example": null
+                          },                    
+                          "isFollowing": {
+                            "type": "boolean",
+                            "example": true
+                          }                      
+                        }   
+                      }                        
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "使用者不存在",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}/setting": {
+      "put": {
+        "tags": ["user"],
+        "description": "使用者編輯自己的資訊",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "account": {
+                    "type": "string",                    
+                    "example": "any"
+                  },
+                  "name": {
+                    "type": "string",                    
+                    "example": "any"
+                  },
+                  "email": {
+                    "type": "string",                    
+                    "example": "any"
+                  },
+                  "password": {
+                    "type": "string",                    
+                    "example": "any"
+                  },
+                  "checkPassword": {
+                    "type": "string",                    
+                    "example": "any"
+                  },
+                  "introduction": {
+                    "type": "string",                    
+                    "example": "any"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "example": null
+                  },
+                  "cover": {
+                    "type": "string",
+                    "example": null
+                  }                                         
+                }
+              }
+            }
+          }
+        },        
+        "responses": {
+          "200": {
+            "description": "成功編輯使用者資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功編輯使用者資料"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/user"                       
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未使用使用者帳號登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          },          
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}/tweets": {
+      "get": {
+        "tags": ["user"],
+        "description": "取得一位使用者發的所有推文",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功取得使用者的所有推文",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功取得使用者的所有推文"
+                    },
+                    "tweets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 152
+                          },
+                          "description": { "type": "string" },
+                          "userId": {
+                            "type": "number",
+                            "example": 14
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "example": "2022-07-29T07:28:40.000Z"
+                          },
+                          "likesCount": {
+                            "type": "number",
+                            "example": 10
+                          },
+                          "repliesCount": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "isLike": {
+                            "type": "boolean",
+                            "example": true
+                          },                        
+                          "User": {
+                            "type": "object",
+                            "properties": {  
+                              "name": {
+                                "type": "string",
+                                "example": "user2"
+                              },
+                              "account": {
+                                "type": "string",
+                                "example": "user2"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "example": null
+                              }                            
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未使用使用者帳號登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          },          
+          "500": {
+            "description": "沒有這個使用者",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}/replied_tweets": {
+      "get": {
+        "tags": ["user"],
+        "description": "取得一位使用者的所有回覆",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功取得使用者的所有的回覆",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功取得使用者的所有的回覆"
+                    },
+                    "replies": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 31
+                          },
+                          "comment": { "type": "string" },
+                          "tweetId": {
+                            "type": "number",
+                            "example": 11
+                          },                         
+                          "userId": {
+                            "type": "number",
+                            "example": 2
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "example": "2022-07-29T07:28:40.000Z"
+                          },
+                          "User": {
+                            "type": "object",
+                            "properties": {  
+                              "id": {
+                                "type": "number",
+                                "example": 2
+                              },
+                              "account": {
+                                "type": "string",
+                                "example": "user2"
+                              },                             
+                              "name": {
+                                "type": "string",
+                                "example": "user2"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "example": null
+                              }                            
+                            }
+                          },                          
+                          "Tweet": {
+                            "type": "object",
+                            "properties": {  
+                              "id": {
+                                "type": "number",
+                                "example": 11
+                              },
+                              "description": { "type": "string" },
+                              "userId": {
+                                "type": "number",
+                                "example": 3
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "example": "2022-07-29T07:28:40.000Z"
+                              },
+                              "updatedAt": {
+                                "type": "string",
+                                "example": "2022-07-29T07:28:40.000Z"
+                              },
+                              "UserId": {
+                                "type": "number",
+                                "example": 3
+                              },                        
+                              "User": {
+                                "type": "object",
+                                "properties": {  
+                                  "id": {
+                                    "type": "number",
+                                    "example": 3
+                                  },
+                                  "account": {
+                                    "type": "string",
+                                    "example": "user3"
+                                  },                             
+                                  "name": {
+                                    "type": "string",
+                                    "example": "user3"
+                                  },
+                                  "avatar": {
+                                    "type": "string",
+                                    "example": null
+                                  }                            
+                                }
+                              }                         
+                            }
+                          }                    
+                        }
+                      }
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未使用使用者帳號登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          },          
+          "500": {
+            "description": "沒有這個使用者",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}/likes": {
+      "get": {
+        "tags": ["user"],
+        "description": "取得一位使用者喜歡的所有推文",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功取得所有使用者之資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功取得所有使用者之資料"
+                    },
+                    "likedTweets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 274
+                          },
+                          "TweetId": {
+                            "type": "number",
+                            "example": 264
+                          },                        
+                          "UserId": {
+                            "type": "number",
+                            "example": 64
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "example": "2022-07-29T07:28:40.000Z"
+                          },                         
+                          "Tweet": {
+                            "type": "object",
+                            "properties": {  
+                              "id": {
+                                "type": "number",
+                                "example": 264
+                              },
+                              "description": { "type": "string" },
+                              "UserId": {
+                                "type": "number",
+                                "example": 34
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "example": "2022-07-29T07:28:40.000Z"
+                              },
+                              "likesCount": {
+                                "type": "number",
+                                "example": 10
+                              },
+                              "repliesCount": {
+                                "type": "number",
+                                "example": 1
+                              },                              
+                              "isLike": {
+                                "type": "boolean",
+                                "example": true
+                              },                         
+                              "User": {
+                                "type": "object",
+                                "properties": {  
+                                  "id": {
+                                    "type": "number",
+                                    "example": 3
+                                  },
+                                  "account": {
+                                    "type": "string",
+                                    "example": "user3"
+                                  },                             
+                                  "name": {
+                                    "type": "string",
+                                    "example": "user3"
+                                  },
+                                  "avatar": {
+                                    "type": "string",
+                                    "example": null
+                                  }                            
+                                }
+                              }                         
+                            }
+                          },
+                          "isLike": {
+                            "type": "boolean",
+                            "example": true
+                          },                   
+                          "likesCount": {
+                            "type": "number",
+                            "example": 10
+                          },
+                          "repliesCount": {
+                            "type": "number",
+                            "example": 1
+                          } 
+                        }
+                      }
+                    }                                       
+                  }                                  
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未使用使用者帳號登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          },          
+          "500": {
+            "description": "沒有這個使用者",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/recommendUsers": {
+      "get": {
+        "tags": ["user"],
+        "description": "取得前十位最多人追蹤的使用者",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功取得被追蹤人數前十之使用者資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "成功取得被追蹤人數前十之使用者資料"
+                    },
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 15
+                          },
+                          "account": {
+                            "type": "string",
+                            "example": "user2"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "user2"
+                          },
+                          "email": {
+                            "type": "string",
+                            "example": "user2@example.com"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "example": null
+                          },
+                          "TweetsCount": {
+                            "type": "number",
+                            "example": 10
+                          },
+                          "LikesCount": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "FollowingCount": {
+                            "type": "number",
+                            "example": 2
+                          },
+                          "FollowerCount": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "isFollowing": {
+                            "type": "boolean",
+                            "example": true
+                          }
+                        }
+                      } 
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未使用使用者帳號登入",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/followships/": {
+      "post": {
+        "tags": ["followship"],
+        "description": "新增當前登入使用者的某一筆追蹤",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "已成功追蹤該名使用者",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "已成功追蹤該名使用者"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "followerId": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "followingId": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        }                        
+                      }
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/followships/{followingId}": {
+      "delete": {
+        "tags": ["followship"],
+        "description": "刪除當前登入使用者的某一筆追蹤",
+        "parameters": [
+          {
+            "name": "followingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "已成功取消追蹤該使用者",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "已成功取消追蹤該使用者"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "followerId": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "followingId": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        },                       
+                        "updatedAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        }                      
+                      }
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "不存在的使用者",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          },          
+          "500": {
+            "description": "尚未追蹤該使用者",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tweets/{id}/like": {
+      "post": {
+        "tags": ["like"],
+        "description": "新增當前登入使用者，對某一筆推文的喜歡",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "您已成功喜歡該則推文",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "您已成功喜歡該則推文"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number",
+                          "example": 14
+                        },                        
+                        "UserId": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "TweetId": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        },                        
+                        "createdAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        }                    
+                      }
+                    }
+                  }                                  
+                }
+              }
+            }
+          },         
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tweets/{id}/unlike": {
+      "post": {
+        "tags": ["like"],
+        "description": "刪除當前登入使用者，對某一筆推文的喜歡",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "您已成功取消喜歡該則推文",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "您已成功取消喜歡該則推文"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number",
+                          "example": 10
+                        },   
+                        "description": { "type": "string" },                                             
+                        "UserId": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        },                       
+                        "updatedAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        }                   
+                      }
+                    }
+                  }                                  
+                }
+              }
+            }
+          },         
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tweets/{tweet_id}/replies": {
+      "post": {
+        "tags": ["reply"],
+        "description": "新增當前登入使用者，對某一筆推文的回覆",
+        "parameters": [
+          {
+            "name": "tweet_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "您已成功回覆該則推文",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "您已成功回覆該則推文"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number",
+                          "example": 152
+                        },                                                
+                        "UserId": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "TweetId": {
+                          "type": "number",
+                          "example": 6
+                        },                        
+                        "comment": { "type": "string" },  
+                        "updatedAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        },                                              
+                        "createdAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        }                                   
+                      }
+                    }
+                  }                                  
+                }
+              }
+            }
+          },         
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["reply"],
+        "description": "某一筆推文的所有回覆",
+        "parameters": [
+          {
+            "name": "tweet_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "您已成功！"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number",
+                          "example": 112
+                        },  
+                        "comment": { "type": "string" },
+                        "TweetId": {
+                          "type": "number",
+                          "example": 38
+                        },                                                        "UserId": {
+                          "type": "number",
+                          "example": 2
+                        },                                          
+                        "createdAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        },
+                        "Tweet": {
+                          "type": "object",
+                          "properties": {
+                            "description": { "type": "string" },
+                            "User": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "number",
+                                  "example": 5
+                                },
+                                "account": {
+                                  "type": "string",
+                                  "example": "user4"
+                                }
+                              }
+                            }
+                          }
+                        }, 
+                        "User": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "example": "user3"
+                            },                            
+                            "account": {
+                              "type": "string",
+                              "example": "user3"
+                            },
+                            "avatar": {
+                              "type": "string",
+                              "example": null
+                            }
+                          }
+                        }                                                       
+                      }
+                    }
+                  }                                  
+                }
+              }
+            }
+          },         
+          "500": {
+            "description": "推文不存在",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tweets/": {
+      "get": {
+        "tags": ["tweet"],
+        "description": "所有推文",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "您已成功！"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items":{
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 51
+                          },
+                          "description": { "type": "string" },
+                          "UserId": {
+                            "type": "number",
+                            "example": 2
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "example": "2022-07-29T07:28:40.000Z"
+                          },
+                          "likesCount": {
+                            "type": "number",
+                            "example": 10
+                          },
+                          "repliesCount": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "User": {
+                            "type": "object",
+                            "properties": {  
+                              "name": {
+                                "type": "string",
+                                "example": "user2"
+                              },
+                              "account": {
+                                "type": "string",
+                                "example": "user2"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "example": null
+                              }                            
+                            }
+                          },
+                          "isLike": {
+                            "type": "boolean",
+                            "example": true
+                          }                                                  
+                        }                        
+                      }                   
+                    }
+                  }                                  
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["tweet"],
+        "description": "新增當前登入使用者的某一筆推文",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "example": "抹茶好好吃"
+                  }
+                }
+              }
+            }
+          }
+        },        
+        "responses": {
+          "200": {
+            "description": "您已成功推文",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "您已成功推文"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number",
+                          "example": 51
+                        },                        
+                        "UserId": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "description": {
+                          "type": "string",                          
+                          "example": "抹茶好好吃"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        },                        
+                        "createdAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        },
+                        "userId": {
+                          "type": "number",
+                          "example": 2
+                        }                                          
+                      }
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }          
+        }
+      }
+    },
+    "/api/tweets/{tweet_id}": {
+      "get": {
+        "tags": ["tweet"],
+        "description": "某一筆推文的所有資訊",
+        "parameters": [
+          {
+            "name": "tweet_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {                    
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "您已成功！"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number",
+                          "example": 64
+                        },   
+                        "description": { "type": "string" },                                             
+                        "UserId": {
+                          "type": "number",
+                          "example": 14
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "example": "2022-07-29T07:28:40.000Z"
+                        },                       
+                        "likesCount": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "repliesCount": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "User": {
+                          "type": "object",
+                          "properties": {  
+                            "name": {
+                              "type": "string",
+                              "example": "user1"
+                            },
+                            "account": {
+                              "type": "string",
+                              "example": "user1"
+                            },
+                            "avatar": {
+                              "type": "string",
+                              "example": null
+                            }                            
+                          }
+                        },
+                        "isLike": {
+                          "type": "boolean",
+                          "example": true
+                        }                   
+                      }
+                    },                    
+                    "replies": {
+                      "type": "array",
+                      "items":{
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 184
+                          },
+                          "comment": { "type": "string" },
+                          "UserId": {
+                            "type": "number",
+                            "example": 34
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "example": "2022-08-07T08:21:10.000Z"
+                          },
+                          "User": {
+                            "type": "object",
+                            "properties": {  
+                              "name": {
+                                "type": "string",
+                                "example": "user2"
+                              },
+                              "account": {
+                                "type": "string",
+                                "example": "user2"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "example": null
+                              }                            
+                            }
+                          }                                                
+                        }                        
+                      }                   
+                    }
+                  }                                  
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "推文不存在",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/error" }
+              }
+            }
+          }  
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "signin": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "example": "root"
+          },
+          "password": {
+            "type": "string",
+            "example": "12345678"
+          }
+        }
+      },
+      "users": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 15
+          },
+          "account": {
+            "type": "string",
+            "example": "user2"
+          },
+          "name": {
+            "type": "string",
+            "example": "user2"
+          },
+          "email": {
+            "type": "string",
+            "example": "user2@example.com"
+          },
+          "avatar": {
+            "type": "string",
+            "example": "https://loremflickr.com/320/240/cat/?lock=75.13205674938455"
+          },
+          "TweetsCount": {
+            "type": "number",
+            "example": 10
+          },
+          "LikesCount": {
+            "type": "number",
+            "example": 1
+          },
+          "FollowingCount": {
+            "type": "number",
+            "example": 2
+          },
+          "FollowerCount": {
+            "type": "number",
+            "example": 1
+          }
+        }
+      },
+      "user": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 15
+          },
+          "account": {
+            "type": "string",
+            "example": "root"
+          },
+          "name": {
+            "type": "string",
+            "example": "root"
+          },
+          "email": {
+            "type": "string",
+            "example": "root@example.com"
+          },
+          "avatar": {
+            "type": "string",
+            "example": null
+          },
+          "introduction": {
+            "type": "string",
+            "example": null
+          },
+          "cover": {
+            "type": "string",
+            "example": null
+          },
+          "role": {
+            "type": "string",
+            "example": "admin"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2022-07-29T07:28:40.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2022-07-29T07:28:40.000Z"
+          }
+        }
+      },
+      "tweets": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 152
+          },
+          "description": { "type": "string" },
+          "userid": {
+            "type": "number",
+            "example": 14
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2022-07-29T07:28:40.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2022-07-29T07:28:40.000Z"
+          },
+          "UserId": {
+            "type": "number",
+            "example": 14
+          },
+          "User": { "$ref": "#/components/schemas/user" }
+        }
+      },
+      "error": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "error"
+          },
+          "message": { "type": "string" }
+        }        
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about simple-tiwtter",
+    "url": "https://arcane-wave-79231.herokuapp.com/api-doc"
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}

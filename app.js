@@ -14,7 +14,9 @@ const cors = require('cors')
 
 const app = express()
 const port = process.env.PORT || 3000
-
+const swaggerUi = require('swagger-ui-express')
+const swaggerFile = require('./swagger_output.json')
+app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
