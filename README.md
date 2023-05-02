@@ -39,7 +39,7 @@ IMGUR_CLIENT_ID=
     "dialect": "mysql"
   }
 ```
-6. 建立MySQL資料庫，於MySQl Workbench中輸入並執行以下指令：
+6. 建立MySQL資料庫，於MySQL Workbench中輸入並執行以下指令：
 ```
 create database ac_twitter_workspace;
 ```
@@ -48,7 +48,7 @@ create database ac_twitter_workspace;
 $ npx sequelize db:migrate
 $ npx sequelize db:seed:all
 ```
-若沒跳出錯誤訊息，即代表資料建置完成。另可至MySQl Workbench中的database做確認。
+若沒跳出錯誤訊息，即代表資料建置完成。另可至MySQL Workbench中的database做確認。
 
 8. 切換至開發環境，並啟動伺服器
 ```
