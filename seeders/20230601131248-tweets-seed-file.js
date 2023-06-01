@@ -10,12 +10,15 @@ module.exports = {
     )
     await queryInterface.bulkInsert(
       'Tweets',
-      Array.from({ length: 10 }, () => ({
-        description: faker.lorem.paragraph(),
-        userId: users[Math.floor(Math.random() * users.length)].id,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }))
+      // 每個使用者有 10 篇 tweet
+      Array.from(users, user => (
+        Array.from({ length: 10 }, () => ({
+          description: faker.lorem.paragraph(),
+          userId: user.id,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }))
+      )).flat()
     )
   },
   down: async (queryInterface, Sequelize) => {

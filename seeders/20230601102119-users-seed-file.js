@@ -24,7 +24,6 @@ module.exports = {
           updatedAt: new Date()
         },
         {
-          // 一次新增三筆資料
           name: 'user1',
           account: 'user1',
           email: 'user1@example.com',
@@ -41,10 +40,57 @@ module.exports = {
           updatedAt: new Date()
         },
         {
-          // 一次新增三筆資料
           name: 'user2',
           account: 'uesr2',
           email: 'user2@example.com',
+          password: await bcrypt.hash('12345678', 10),
+          avatar: `https://loremflickr.com/320/240/people/?random=${
+            Math.random() * 10
+          }`,
+          cover: `https://loremflickr.com/320/240/mountain/?random=${
+            Math.random() * 100
+          }`,
+          role: 'user',
+          introduction: faker.lorem.text(),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          name: 'user3',
+          account: 'uesr3',
+          email: 'user3@example.com',
+          password: await bcrypt.hash('12345678', 10),
+          avatar: `https://loremflickr.com/320/240/people/?random=${
+            Math.random() * 10
+          }`,
+          cover: `https://loremflickr.com/320/240/mountain/?random=${
+            Math.random() * 100
+          }`,
+          role: 'user',
+          introduction: faker.lorem.text(),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          name: 'user4',
+          account: 'uesr4',
+          email: 'user4@example.com',
+          password: await bcrypt.hash('12345678', 10),
+          avatar: `https://loremflickr.com/320/240/people/?random=${
+            Math.random() * 10
+          }`,
+          cover: `https://loremflickr.com/320/240/mountain/?random=${
+            Math.random() * 100
+          }`,
+          role: 'user',
+          introduction: faker.lorem.text(),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          name: 'user5',
+          account: 'uesr5',
+          email: 'user5@example.com',
           password: await bcrypt.hash('12345678', 10),
           avatar: `https://loremflickr.com/320/240/people/?random=${
             Math.random() * 10
