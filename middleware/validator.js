@@ -1,5 +1,4 @@
 const { body, validationResult } = require('express-validator')
-
 const signUpValidator = [
   body('account')
     .trim()
