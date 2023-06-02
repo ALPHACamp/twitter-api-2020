@@ -4,7 +4,6 @@ const { Op } = require('sequelize')
 const userController = {
   signUp: async (req, res, next) => {
     try {
-      console.log(req.body)
       // 反查accout 與email 是否有被註冊過
       const user = await User.findOne({
         where: {
