@@ -99,7 +99,7 @@ module.exports = {
             Math.random() * 100
           }`,
           role: 'user',
-          introduction: faker.lorem.text(),
+          introduction: faker.lorem.text().substring(0, 160),
           createdAt: new Date(),
           updatedAt: new Date()
         }
