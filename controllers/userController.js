@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const { Op } = require('sequelize')
+const { getUser } = require('../_helpers')
 const userController = {
   signUp: async (req, res, next) => {
     try {
@@ -29,6 +31,24 @@ const userController = {
       return res.status(200).json({
         status: 'success',
         message: '註冊成功'
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  signIn: async (req, res, next) => {
+    try {
+      // get user data
+      const userData = getUser(req)?.toJSON()
+      delete userData.password
+      // sign token
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      res.json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
       })
     } catch (err) {
       next(err)
