@@ -41,7 +41,7 @@ module.exports = {
         },
         {
           name: 'user2',
-          account: 'uesr2',
+          account: 'user2',
           email: 'user2@example.com',
           password: await bcrypt.hash('12345678', 10),
           avatar: `https://loremflickr.com/320/240/people/?random=${
@@ -57,7 +57,7 @@ module.exports = {
         },
         {
           name: 'user3',
-          account: 'uesr3',
+          account: 'user3',
           email: 'user3@example.com',
           password: await bcrypt.hash('12345678', 10),
           avatar: `https://loremflickr.com/320/240/people/?random=${
@@ -73,7 +73,7 @@ module.exports = {
         },
         {
           name: 'user4',
-          account: 'uesr4',
+          account: 'user4',
           email: 'user4@example.com',
           password: await bcrypt.hash('12345678', 10),
           avatar: `https://loremflickr.com/320/240/people/?random=${
@@ -89,7 +89,7 @@ module.exports = {
         },
         {
           name: 'user5',
-          account: 'uesr5',
+          account: 'user5',
           email: 'user5@example.com',
           password: await bcrypt.hash('12345678', 10),
           avatar: `https://loremflickr.com/320/240/people/?random=${
@@ -99,7 +99,7 @@ module.exports = {
             Math.random() * 100
           }`,
           role: 'user',
-          introduction: faker.lorem.text(),
+          introduction: faker.lorem.text().substring(0, 160),
           createdAt: new Date(),
           updatedAt: new Date()
         }

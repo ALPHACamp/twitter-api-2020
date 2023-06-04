@@ -3,7 +3,7 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
-      'SELECT id FROM Users;',
+      'SELECT id FROM Users WHERE role = "user";',
       {
         type: queryInterface.sequelize.QueryTypes.SELECT
       }
@@ -11,14 +11,14 @@ module.exports = {
     await queryInterface.bulkInsert(
       'Tweets',
       // 每個使用者有 10 篇 tweet
-      Array.from(users, user => (
+      Array.from(users, user =>
         Array.from({ length: 10 }, () => ({
-          description: faker.lorem.paragraph(),
+          description: faker.lorem.paragraph().substring(0, 140),
           userId: user.id,
           createdAt: new Date(),
           updatedAt: new Date()
         }))
-      )).flat()
+      ).flat()
     )
   },
   down: async (queryInterface, Sequelize) => {
