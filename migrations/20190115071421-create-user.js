@@ -8,31 +8,41 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      email: {
-        type: Sequelize.STRING
-      },
-      password: {
-        type: Sequelize.STRING
-      },
       name: {
         type: Sequelize.STRING
       },
+      account: {
+        type: Sequelize.STRING,
+        unique: true
+      },
+      email: {
+        type: Sequelize.STRING,
+        unique: true
+      },
+      password: {
+        type: Sequelize.STRING,
+        unique: true
+      },
+      created_at: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
       avatar: {
+        type: Sequelize.STRING
+      },
+      cover_photo: {
         type: Sequelize.STRING
       },
       introduction: {
         type: Sequelize.TEXT
       },
+      updated_at: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
       role: {
+        // allowNull: false,
         type: Sequelize.STRING
-      },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
       }
     })
   },
