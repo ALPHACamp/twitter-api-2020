@@ -1,61 +1,81 @@
 const { getUser } = require('../_helpers')
+// helpers.getUser(req);
 const { Op } = require('sequelize')
-
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
-    // name, accout, tweet, count(reply), count(like)
     // 確認user存在
     try {
       const user = getUser(req)
-      console.log(req)
-      if (!user) {
+      // console.log(req)
+      if (!(user instanceof User)) {
         return res.status(400).json({ error: 'User not found' })
       }
-      const userData = user.toJSON()
+      const userData = user.get({ plain: true })
+      delete userData.password
+      // console.log(userData)
 
       // 先找到user追蹤的人
-      const followingIds = await Followship.findAll({
+      const followships = await Followship.findAll({
         where: { followerId: userData.id },
         attributes: ['followingId'],
         raw: true
-      }).map(followship => followship.followingId)
+      })
+      const followingIds = followships.map(followship => followship.followingId)
 
       const tweets = await Tweet.findAll({
+        attributes: [
+          'id',
+          'description',
+          'createdAt',
+          [
+            sequelize.fn('COUNT', sequelize.col('Replies.TweetId')),
+            'replyCount'
+          ],
+          [sequelize.fn('COUNT', sequelize.col('Likes.TweetId')), 'likeCount']
+        ],
         include: [
           {
             model: User,
-            as: 'Users',
-            attributes: ['id', 'name', 'account'],
-            where: {
-              id: {
-                [Op.in]: followingIds
-              }
-            }
+            attributes: ['id', 'name', 'account', 'avatar']
+            // where: {
+            //   id: {
+            //     [Op.in]: followingIds
+            //   }
+            // }
           },
           {
             model: Reply,
-            as: 'Replies'
+            attributes: []
           },
           {
             model: Like,
-            as: 'Likes'
+            // where: { isLiked: true },
+            attributes: []
           }
         ],
+        group: ['Tweet.id', 'User.id'],
         order: [['createdAt', 'DESC']],
-        nest: true,
         raw: true
       })
 
-      const data = tweets.rows.map(t => ({
-        ...t,
-        replyCount: t['Replies.length'],
-        likeCount: t['Likes.length']
-      }))
-      console.log(data)
-      res(null, { tweets: data })
-
+      const data = tweets.map(tweet => {
+        return {
+          tweetId: tweet.id,
+          tweetText: tweet.description,
+          user: {
+            id: tweet['User.id'],
+            name: tweet['User.name'],
+            avatar: tweet['User.avatar'],
+            account: tweet['User.account']
+          },
+          tweetTime: tweet.createdAt,
+          replyCount: tweet.replyCount || 0,
+          likeCount: tweet.likeCount || 0
+        }
+      })
+      // ------------------------------
       return res.status(200).json({
         tweets: data
       })
