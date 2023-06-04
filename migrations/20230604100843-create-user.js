@@ -25,7 +25,7 @@ module.exports = {
       },
       backgroundImage: {
         type: Sequelize.STRING,
-        defaultValue: 'https://img.onl/rQmjhp'
+        defaultValue: 'https://img.onl/Ass09D'
       },
       introduction: {
         type: Sequelize.TEXT

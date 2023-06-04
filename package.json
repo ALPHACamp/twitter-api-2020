@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=development node app.js",
-    "dev": "NODE_ENV=development nodemon app.js",
-    "lint": "eslint \"**/*.js\" --fix",
+    "start": " set \"NODE_ENV=development\" &&  node app.js",
+    "dev": "set \"NODE_ENV=development\" && nodemon app.js",
+    "lint": "set \"NODE_ENV=development\" && eslint \"**/*.js\" --fix",
     "test": "mocha test --exit --recursive --timeout 5000"
   },
   "author": "",
@@ -17,7 +17,7 @@
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
     "express": "^4.16.4",
-    "express-session": "^1.15.6",
+    "express-session": "^1.17.2",
     "faker": "^4.1.0",
     "method-override": "^3.0.0",
     "mocha": "^6.0.2",
