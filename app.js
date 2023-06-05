@@ -38,7 +38,7 @@ app.use((req, res, next) => {
 })
 
 // routes
-app.use('/apis', apis)
+app.use('/api', apis)
 
 app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
 
