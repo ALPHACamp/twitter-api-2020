@@ -3,13 +3,37 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
-const helpers = require('./_helpers')
+const { getUser } = require('./_helpers')
+const passport = require('./config/passport')
+const session = require('express-session')
+const flash = require('connect-flash')
 
 const app = express()
 const port = 3000
 
+// 解析request主體
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+
+// session設定
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'NonSecret',
+  resave: false,
+  saveUninitialized: true
+}))
+
+// passport初始化
+app.use(passport.initialize())
+app.use(passport.session())
+
+// flash
+app.use(flash())
+
+// locals
+app.use((req, res, next) => {
+  res.locals.error_messages = req.flash('error_messages')
+  res.locals.user = getUser(req)
+})
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
