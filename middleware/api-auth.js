@@ -15,7 +15,7 @@ module.exports = {
   //前台User登入驗證
   authenticatedUser: (req, res, next) => {
     req.user = helpers.getUser(req);
-    if (req.user.role === "user") {
+    if (req.user.role !== "admin") {
       return next();
     }
     return res.status(403).json({
