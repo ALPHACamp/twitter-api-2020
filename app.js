@@ -7,6 +7,7 @@ const { getUser } = require('./_helpers')
 const passport = require('./config/passport')
 const session = require('express-session')
 const flash = require('connect-flash')
+const { apis } = require('./routes')
 
 const app = express()
 const port = 3000
@@ -29,13 +30,16 @@ app.use(passport.session())
 // flash
 app.use(flash())
 
-// locals
+// // locals
 app.use((req, res, next) => {
   res.locals.error_messages = req.flash('error_messages')
   res.locals.user = getUser(req)
+  next()
 })
 
-app.get('/', (req, res) => res.send('Hello World!'))
+// routes
+app.use(apis)
+
 app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
 
 module.exports = app

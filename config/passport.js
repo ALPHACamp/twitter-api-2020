@@ -8,8 +8,13 @@ passport.use(new LocalStrategy(
   { usernameField: 'account', passwordField: 'password', passReqToCallback: true },
   async (req, account, password, cb) => {
     try {
+      const users = await User.findAll()
+      console.log(users)
       const user = await User.findOne({ where: { account } })
-      if (!user) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
+      if (!user) {
+        console.log('帳號或密碼輸入錯誤！')
+        return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
+      }
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
       return cb(null, user)
