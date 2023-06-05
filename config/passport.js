@@ -5,6 +5,7 @@ const { User } = require('../models')
 const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
+const { newErrorGenerate } = require('../helpers/newError-helper')
 // set up Passport strategy
 passport.use(new LocalStrategy(
   // customize user field
@@ -17,9 +18,9 @@ passport.use(new LocalStrategy(
   async (account, password, cb) => {
     try {
       const user = await User.findOne({ where: { account } })
-      if (!user) throw new Error('帳號或密碼輸入錯誤！')
+      if (!user) newErrorGenerate('帳號不存在！', 404)
       const res = await bcrypt.compare(password, user.password)
-      if (!res) throw new Error('帳號或密碼輸入錯誤！')
+      if (!res) newErrorGenerate('帳號不存在！', 404)
       return cb(null, user)
     } catch (err) {
       return cb(err)
