@@ -13,8 +13,8 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: true,
         account: 'root',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         email: 'user1@example.com',
@@ -24,8 +24,8 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: false,
         account: 'user1',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       }, {
         email: 'user2@example.com',
         password: await bcrypt.hash('12345678', 10),
@@ -34,8 +34,8 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: false,
         account: 'user2',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       }, {
         email: 'user3@example.com',
         password: await bcrypt.hash('12345678', 10),
@@ -44,8 +44,8 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: false,
         account: 'user3',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       }, {
         email: 'user4@example.com',
         password: await bcrypt.hash('12345678', 10),
@@ -54,8 +54,8 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: false,
         account: 'user4',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       }, {
         email: 'user5@example.com',
         password: await bcrypt.hash('12345678', 10),
@@ -64,8 +64,8 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: false,
         account: 'user5',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       }
     ])
   },
