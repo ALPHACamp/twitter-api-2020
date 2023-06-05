@@ -20,7 +20,7 @@ module.exports = {
     }
     return res.status(403).json({
       status: "error",
-      message: "Permission deneid, it's only for user!",
+      message: "Permission denied, it's only for user!",
     });
   },
   //後台admin登入驗證
