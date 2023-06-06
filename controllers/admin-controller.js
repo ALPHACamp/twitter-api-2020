@@ -27,17 +27,17 @@ const adminController = {
   getTweets: async (req, res, next) => {
     try {
       const TWEETS_WORD_LIMIT = 50
-      let tweets = await Tweet.findAll({
+      const tweets = await Tweet.findAll({
         raw: true,
         nest: true,
         include: [User]
       })
-      tweets = tweets.map(tweet => ({
+      const tweetsData = tweets.map(tweet => ({
         ...tweet,
         description: tweet.description.substring(0, TWEETS_WORD_LIMIT),
         relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt)
       }))
-      return res.json({ status: 'success', data: { tweets } })
+      return res.json({ status: 'success', data: { tweetsData } })
     } catch (err) {
       next(err)
     }
