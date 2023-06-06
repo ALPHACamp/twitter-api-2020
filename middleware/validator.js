@@ -16,8 +16,8 @@ const signUpValidator = [
     .notEmpty().withMessage('姓名為必填項目')
     .bail() // 第一個條件不通過 不繼續檢查
     .isLength({ max: 50 }).withMessage('姓名最多50個字'),
-  body('password').trim().isLength({ min: 6, max: 32 }).withMessage('密碼長度至少六位'),
-  body('passwordCheck')
+  body('password').trim().isLength({ min: 4, max: 32 }).withMessage('密碼長度至少4位'),
+  body('checkPassword')
     .trim()
     .custom((value, { req }) => {
       // 確認密碼欄位的值需要和密碼欄位的值相符
