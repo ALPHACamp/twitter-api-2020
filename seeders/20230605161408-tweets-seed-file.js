@@ -8,12 +8,17 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 50 }, () => ({
-        description: faker.lorem.text(),
-        created_at: new Date(),
-        updated_at: new Date(),
-        user_id: users[Math.floor(Math.random() * users.length)].id
-      })))
+      Array.from({ length: 50 }, () => {
+        const randomUser = users[Math.floor(Math.random() * users.length)]
+        const user = {
+          email: randomUser.email,
+          description: faker.lorem.text(),
+          created_at: new Date(),
+          updated_at: new Date(),
+          user_id: randomUser.id
+        }
+        return user
+      }))
   },
 
   down: async (queryInterface, Sequelize) => {
