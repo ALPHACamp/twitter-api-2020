@@ -7,8 +7,8 @@
     "start": "NODE_ENV=development node app.js",
     "dev": "NODE_ENV=development nodemon app.js",
     "test": "mocha test --exit --recursive --timeout 5000",
-    "start1": "set NODE_ENV=development && nodemon app.js",
-    "dev1": "set NODE_ENV=development && nodemon app.js",
+    "start1": "node app.js",
+    "dev1": "nodemon app.js",
     "test1": "set NODE_ENV=test && mocha test --exit --recursive --timeout 5000"
   },
   "author": "",

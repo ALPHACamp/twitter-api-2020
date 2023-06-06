@@ -21,16 +21,16 @@ module.exports = {
         type: Sequelize.STRING
       },
       avatar: {
-        allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: `https://loremflickr.com/320/240/person/?random=${Math.random() * 100}`
       },
       introduction: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.TEXT
       },
       role: {
-        allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       created_at: {
         allowNull: false,
