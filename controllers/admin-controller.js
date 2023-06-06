@@ -1,6 +1,7 @@
 const { User, Tweet } = require('../models')
-const tweet = require('../models/tweet')
+
 const adminController = {
+  // function still need to be modified
   getUsers: (req, res, next) => {
     User.findAll({
       include: [
