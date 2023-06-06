@@ -4,7 +4,7 @@ const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 const bcrypt = require('bcryptjs')
-const { User, Tweet } = require('../models')
+const { User } = require('../models')
 
 // LocalStrategy Setting
 passport.use(new LocalStrategy(
@@ -35,20 +35,26 @@ passport.use(new LocalStrategy(
 // JWTStrategy Setting
 const jwtOptions = { jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(), secretOrKey: process.env.JWT_SECRET }
 
-passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
-    include: [
-      // join table Like
-      { model: Tweet, as: 'LikedUsers' },
-      { model: User, as: 'LikedTweets' },
-      // join table Reply
-      { model: Tweet, as: 'RepliedUsers' },
-      { model: User, as: 'RepliedTweets' },
-      // join table FollowShip
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
-    ]
-  })
+passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
+  try {
+    const user = await User.findByPk(jwtPayload.id, {
+      include: [
+        // join table Like
+        // { model: Tweet, as: 'LikedUsers' },
+        // { model: User, as: 'LikedTweets' },
+        // join table Reply
+        // { model: Tweet, as: 'RepliedUsers' },
+        // { model: User, as: 'RepliedTweets' },
+        // join table FollowShip
+        // { model: User, as: 'Followers' },
+        // { model: User, as: 'Followings' }
+      ]
+    })
+    console.log(user.toJSON()) // 測試用
+    return cb(null, user)
+  } catch (error) {
+    cb(error)
+  }
 }))
 
 // passport serializeUser & deserializeUser
