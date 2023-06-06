@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+    const USERS_INTRO_LIMIT = 160
     await queryInterface.bulkInsert('Users', [{
       name: 'root',
       email: 'root@example.com',
@@ -10,7 +11,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
-      introduction: faker.lorem.text(),
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: '管理員',
       createdAt: new Date(),
       updatedAt: new Date()
@@ -21,7 +22,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
-      introduction: faker.lorem.text(),
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: '普通會員',
       createdAt: new Date(),
       updatedAt: new Date()
@@ -32,7 +33,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
-      introduction: faker.lorem.text(),
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: '普通會員',
       createdAt: new Date(),
       updatedAt: new Date()
@@ -43,7 +44,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
-      introduction: faker.lorem.text(),
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: '普通會員',
       createdAt: new Date(),
       updatedAt: new Date()
@@ -54,7 +55,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
-      introduction: faker.lorem.text(),
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: '普通會員',
       createdAt: new Date(),
       updatedAt: new Date()
@@ -65,7 +66,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
-      introduction: faker.lorem.text(),
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: '普通會員',
       createdAt: new Date(),
       updatedAt: new Date()
