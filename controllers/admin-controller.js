@@ -2,7 +2,7 @@ const { User, Tweet } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
-const { Sequelize } = require('sequelize')
+const { relativeTimeFromNow } = require('../helpers/dayFix-helper')
 
 const adminController = {
   // 後台登入
@@ -26,16 +26,17 @@ const adminController = {
   // 取得所有推文及該推文使用者資料
   getTweets: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll({
+      const TWEETS_WORD_LIMIT = 50
+      let tweets = await Tweet.findAll({
         raw: true,
         nest: true,
-        include: [User],
-        attributes: [
-          'id',
-          'UserId',
-          [Sequelize.literal('LEFT(description, 50)'), 'description']
-        ]
+        include: [User]
       })
+      tweets = tweets.map(tweet => ({
+        ...tweet,
+        description: tweet.description.substring(0, TWEETS_WORD_LIMIT),
+        relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt)
+      }))
       return res.json({ status: 'success', data: { tweets } })
     } catch (err) {
       next(err)
