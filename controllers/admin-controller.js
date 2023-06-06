@@ -2,6 +2,7 @@ const { User, Tweet } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
+const { Sequelize } = require('sequelize')
 
 const adminController = {
   // 後台登入
@@ -28,7 +29,12 @@ const adminController = {
       const tweets = await Tweet.findAll({
         raw: true,
         nest: true,
-        include: [User]
+        include: [User],
+        attributes: [
+          'id',
+          'UserId',
+          [Sequelize.literal('LEFT(description, 50)'), 'description']
+        ]
       })
       return res.json({ status: 'success', data: { tweets } })
     } catch (err) {
