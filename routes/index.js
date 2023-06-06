@@ -2,22 +2,24 @@ const router = require('express').Router()
 const admin = require('./modules/admin')
 const users = require('./modules/users')
 const { apiErrorHandler } = require('../middleware/error-handler')
+const { authenticated } = require('../middleware/auth')
+const passport = require('passport')
+const userController = require('../controllers/user-controller')
+const adminController = require('../controllers/admin-controller')
+const { isUser, isAdmin, isAuthUser, isAuthAdmin } = require('../middleware/role-check')
 
 // admin
-router.use('/api/admin', admin)
+router.post('/api/admin/login', passport.authenticate('local', { session: false }), isAdmin, adminController.login)
+router.use('/api/admin', authenticated, isAuthAdmin, admin)
 
 // users
-router.use('/api/users', users)
+router.post('/api/users/login', passport.authenticate('local', { session: false }), isUser, userController.login)
+router.use('/api/users', authenticated, isAuthUser, users)
 
 // error (test router delete later)
 router.use('/error', (req, res, next) => {
   const error = new Error('This is an error response!')
   next(error)
-})
-
-// root (test router delete later)
-router.use('/api', (req, res, next) => {
-  res.json('/  (Test API Delete Later)')
 })
 
 // error handler
