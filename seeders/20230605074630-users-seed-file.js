@@ -11,7 +11,7 @@ module.exports = {
         name: 'root',
         avatar: `https://loremflickr.com/320/240/person/?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
-        role: true,
+        role: 'admin',
         account: 'root',
         created_at: new Date(),
         updated_at: new Date()
@@ -22,7 +22,7 @@ module.exports = {
         name: 'user1',
         avatar: `https://loremflickr.com/320/240/person/?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
-        role: false,
+        role: 'user',
         account: 'user1',
         created_at: new Date(),
         updated_at: new Date()
@@ -32,7 +32,7 @@ module.exports = {
         name: 'user2',
         avatar: `https://loremflickr.com/320/240/person/?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
-        role: false,
+        role: 'user',
         account: 'user2',
         created_at: new Date(),
         updated_at: new Date()
@@ -42,7 +42,7 @@ module.exports = {
         name: 'user3',
         avatar: `https://loremflickr.com/320/240/person/?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
-        role: false,
+        role: 'user',
         account: 'user3',
         created_at: new Date(),
         updated_at: new Date()
@@ -52,7 +52,7 @@ module.exports = {
         name: 'user4',
         avatar: `https://loremflickr.com/320/240/person/?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
-        role: false,
+        role: 'user',
         account: 'user4',
         created_at: new Date(),
         updated_at: new Date()
@@ -62,7 +62,7 @@ module.exports = {
         name: 'user5',
         avatar: `https://loremflickr.com/320/240/person/?random=${Math.random() * 100}`,
         introduction: faker.lorem.text(),
-        role: false,
+        role: 'user',
         account: 'user5',
         created_at: new Date(),
         updated_at: new Date()
