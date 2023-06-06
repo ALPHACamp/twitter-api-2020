@@ -12,7 +12,7 @@ const app = express()
 const port = 3000
 // authenticated() 搬去 middleware
 // use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next) {
+function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
