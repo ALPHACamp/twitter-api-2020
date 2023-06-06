@@ -1,6 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+const cors = require('cors')
 // const path = require('path')
 const express = require('express')
 const routes = require('./routes')
@@ -13,6 +14,7 @@ const SESSION_SECRET = 'secret'
 const app = express()
 const port = process.env.PORT || 3000
 
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
