@@ -14,6 +14,12 @@ module.exports = {
       description: {
         type: Sequelize.TEXT
       },
+      likable: {
+        type: Sequelize.BOOLEAN
+      },
+      commendable: {
+        type: Sequelize.BOOLEAN
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
