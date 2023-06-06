@@ -5,6 +5,7 @@ const adminController = require('../controllers/admin-controller')
 const userController = require('../controllers/user-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const admin = require('./modules/admin')
+const tweets = require('./modules/tweet')
 const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
@@ -15,5 +16,6 @@ router.post('/adminSignin', passport.authenticate('local', { session: false }), 
 // 前台登入
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
+router.use('/tweets', tweets) // todo 測試後加上authenticated
 router.use('/', apiErrorHandler)
 module.exports = router
