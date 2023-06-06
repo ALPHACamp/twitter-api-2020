@@ -7,8 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId'})
   };
   Reply.init({
-    UserId: DataTypes.STRING,
-    TweetId: DataTypes.STRING,
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER,
     comment: DataTypes.TEXT
   },{
     sequelize,

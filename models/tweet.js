@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     Tweet.belongsTo(models.User, { foreignKey: 'UserId'})
   };
   Tweet.init({
-    UserId: DataTypes.STRING,
+    UserId: DataTypes.INTEGER,
     description: DataTypes.TEXT,
   }, {
     sequelize,
