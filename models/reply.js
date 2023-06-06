@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       { foreignKey: 'UserId' })
   };
   Reply.init({
-    comment: DataTypes.STRING,
+    comment: DataTypes.TEXT,
     UserId: DataTypes.INTEGER,
     TweetId: DataTypes.INTEGER
   }, {

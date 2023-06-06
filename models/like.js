@@ -9,8 +9,8 @@ module.exports = (sequelize, DataTypes) => {
       { foreignKey: 'UserId' })
   };
   Like.init({
-    userId: DataTypes.INTEGER,
-    restaurantId: DataTypes.INTEGER
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Like',

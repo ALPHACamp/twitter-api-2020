@@ -11,15 +11,12 @@ module.exports = (sequelize, DataTypes) => {
       { foreignKey: 'UserId' })
     User.hasMany(models.Tweet,
       { foreignKey: 'UserId' })
+    User.hasMany(models.Like,
+      {foreignKey: 'UserId'})
     User.belongsToMany(models.Tweet, {
       through: models.Like,
       foreignKey: 'UserId',
       as: 'LikedTweets'
-    })
-    User.belongsToMany(models.Reply, {
-      through: models.Tweet,
-      foreignKey: 'UserId',
-      as: 'RepliedTweets'
     })
     User.belongsToMany(User, {
       through: models.Followship,
@@ -41,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
     telephone: dataTypes.STRING,
     avatar: dataTypes.STRING,
     coverPhoto: dataTypes.STRING,
-    role: dataTypes.STRING
+    role: dataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'User',
