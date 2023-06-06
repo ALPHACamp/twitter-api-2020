@@ -3,7 +3,6 @@ const { User, Followship } = require("../models");
 const jwt = require("jsonwebtoken");
 const { getUser } = require("../_helpers");
 const sequelize = require("sequelize");
-const { imgurFileHandler } = require("../helpers/file-helpers");
 
 const userController = {
   signUp: (req, res, next) => {
