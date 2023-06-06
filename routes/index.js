@@ -16,6 +16,6 @@ router.post('/adminSignin', passport.authenticate('local', { session: false }), 
 // 前台登入
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
-router.use('/tweets', tweets) // todo 測試後加上authenticated
+router.use('/tweets', tweets)
 router.use('/', apiErrorHandler)
 module.exports = router
