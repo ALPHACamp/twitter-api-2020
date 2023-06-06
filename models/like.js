@@ -6,8 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Like',
-    tableName: 'Likes',
-    underscored: true
+    tableName: 'Likes'
   });
   Like.associate = function (models) {
   };
