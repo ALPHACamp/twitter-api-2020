@@ -11,5 +11,16 @@ const {
 //users
 router.post("/api/users/signin", userController.signIn);
 router.post("/api/users", userController.signUp);
-
+router.get(
+  "/api/users/:id",
+  authenticated,
+  authenticatedUser,
+  userController.getUser
+);
+router.put(
+  "/api/users/:id",
+  authenticated,
+  authenticatedUser,
+  userController.putUser
+);
 module.exports = router;

@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const { User } = require("../models");
 const jwt = require("jsonwebtoken");
+const { getUser } = require("../_helpers");
 
 const userController = {
   signUp: (req, res, next) => {
@@ -63,6 +64,8 @@ const userController = {
       })
       .catch((err) => next(err));
   },
+  getUserProfile: (req, res, next) => {},
+  putUserProfile: (req, res, next) => {},
 };
 
 module.exports = userController;
