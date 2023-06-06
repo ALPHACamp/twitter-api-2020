@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
-const { User } = require("../models");
+const { Sequelize, literal } = require('sequelize');
+const { User, Tweet, Reply } = require("../models");
 const jwt = require("jsonwebtoken");
 const { getUser } = require("../_helpers");
 
@@ -64,8 +65,74 @@ const userController = {
       })
       .catch((err) => next(err));
   },
-  getUserProfile: (req, res, next) => {},
-  putUserProfile: (req, res, next) => {},
+  // getUserProfile: (req, res, next) => { },
+  // putUserProfile: (req, res, next) => { },
+
+  getUserTweets: (req, res, next) => {
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Tweet.findAll({
+        where: { userId: req.params.id },
+        attributes: {
+          include: [
+            [
+              literal(`(
+                SELECT COUNT(*) 
+                FROM replies AS reply
+                WHERE 
+                    reply.tweet_id = tweet.id
+                )`), 'replyCount'
+            ],
+            [
+              literal(`(
+                SELECT COUNT(*) 
+                FROM likes AS liked
+                WHERE 
+                    liked.tweet_id = tweet.id
+                )`), 'likeCount'
+            ]
+          ]
+        },
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, tweets]) => {
+        // Error: user not found
+        if (!user) { return res.status(404).json({ status: 'error', message: 'No user found' }) }
+        // Error: tweets not found
+        if (!tweets || tweets.length === 0) { return res.status(404).json({ status: 'error', message: 'No tweets found' }) }
+        return res.status(200).json(tweets);
+      })
+
+      .catch(err => next(err))
+  },
+
+  getUserRepliedTweets: (req, res, next) => {
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Reply.findAll({
+        where: { userId: req.params.id },
+        include: [
+          {
+            model: Tweet,
+            include: [{ model: User, attributes: ['id', 'name', 'account'], },],
+          },
+        ],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, replies]) => {
+        // Error: user not found
+        if (!user) { return res.status(404).json({ status: 'error', message: 'No user found' }) }
+        // Error: replies not found
+        if (!replies || replies.length === 0) { return res.status(404).json({ status: 'error', message: 'No replies found' }) }
+        return res.status(200).json(replies);
+      })
+
+      .catch(err => next(err))
+  }
 };
 
 module.exports = userController;
