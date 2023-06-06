@@ -10,7 +10,7 @@ const helpers = require('./_helpers');
 const routes = require('./routes')
 
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 const SESSION_SECRET = process.env.SESSION_SECRET
 
 app.use(express.urlencoded({ extended: true }))
