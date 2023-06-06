@@ -54,6 +54,16 @@ module.exports = {
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
+      },
+      {
+        email: 'user5@example.com',
+        password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+        name: 'user5',
+        avatar: `https://loremflickr.com/320/240/people`,
+        introduction: faker.lorem.text(),
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     ]);
   },
