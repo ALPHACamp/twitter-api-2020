@@ -1,21 +1,20 @@
-'use strict';
+'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Tweet = sequelize.define(
-    "Tweet",
+    'Tweet',
     {
       UserId: DataTypes.INTEGER,
-      description: DataTypes.TEXT,
+      description: DataTypes.TEXT
     },
     {
-      modelName: "Tweet",
-      tableName: "Tweets",
+      modelName: 'Tweet',
+      tableName: 'Tweets'
     }
-  );
-  Tweet.associate = function(models) {
-    Tweet.belongsTo(models.User, { foreignKey: "UserId" });
-    Tweet.hasMany(models.Reply,{foreignKey: "TweetId"})
-    Tweet.hasMany(models.Like,{foreignKey: 'TweetId'})
-
-  };
-  return Tweet;
-};
+  )
+  Tweet.associate = function (models) {
+    Tweet.belongsTo(models.User, { foreignKey: 'UserId' })
+    Tweet.hasMany(models.Reply, { foreignKey: 'TweetId' })
+    Tweet.hasMany(models.Like, { foreignKey: 'TweetId' })
+  }
+  return Tweet
+}
