@@ -20,6 +20,7 @@ const userController = {
       next(error)
     }
   },
+
   signUp: async (req, res, next) => {
     try {
       const errors = []

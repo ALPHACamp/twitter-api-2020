@@ -13,6 +13,7 @@ router.get('/', (req, res) => {
 router.use('/admin', admin)
 
 router.post('/signup', userController.signUp)
+
 router.post('/login', passport.authenticate('local', { session: false }), userController.login)
 
 router.use('/', apiErrorHandler)
