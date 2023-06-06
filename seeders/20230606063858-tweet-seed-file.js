@@ -1,26 +1,24 @@
-// 'use strict';
+'use strict';
 
-// module.exports = {
-//   up: (queryInterface, Sequelize) => {
-//     /*
-//       Add altering commands here.
-//       Return a promise to correctly handle asynchronicity.
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    const users = await queryInterface.sequelize.query(
+      'SELECT id FROM Users;',
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
+    for (let i = 0; i < 5; i++) {
+      await queryInterface.bulkInsert('Tweets', Array.from({ length: 10 }, (_, index) => ({
+        User_id: users[i].id,
+        description: `這是我的第${index + 1}篇推文，好爽，耶嘿！`,
+        likable: true,
+        commendable: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      })))
+    }
+  },
 
-//       Example:
-//       return queryInterface.bulkInsert('People', [{
-//         name: 'John Doe',
-//         isBetaMember: false
-//       }], {});
-//     */
-//   },
-
-//   down: (queryInterface, Sequelize) => {
-//     /*
-//       Add reverting commands here.
-//       Return a promise to correctly handle asynchronicity.
-
-//       Example:
-//       return queryInterface.bulkDelete('People', null, {});
-//     */
-//   }
-// };
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.bulkDelete('Tweets', {})
+  }
+};
