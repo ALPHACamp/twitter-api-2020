@@ -3,7 +3,8 @@ module.exports = (sequelize, DataTypes) => {
   const Reply = sequelize.define('Reply', {
   }, {})
   Reply.associate = function (models) {
-
+    Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
+    Reply.belongsTo(models.User, { foreignKey: 'UserId' })
   }
   Reply.init({
     UserId: DataTypes.INTEGER,

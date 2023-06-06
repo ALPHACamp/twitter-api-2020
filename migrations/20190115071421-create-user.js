@@ -21,6 +21,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       avatar: {
+        allowNull: true,
         type: Sequelize.STRING,
         defaultValue: `https://loremflickr.com/320/240/person/?random=${Math.random() * 100}`
       },
@@ -29,8 +30,9 @@ module.exports = {
         type: Sequelize.TEXT
       },
       role: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
+        allowNull: true,
+        type: Sequelize.STRING,
+        defaultValue: 'user'
       },
       created_at: {
         allowNull: false,
