@@ -21,6 +21,6 @@ router.put(
   "/api/users/:id",
   authenticated,
   authenticatedUser,
-  userController.putUser
+  userController.putUserProfile
 );
 module.exports = router;

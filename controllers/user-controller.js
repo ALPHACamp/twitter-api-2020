@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
-const { User } = require("../models");
+const { User, Followship } = require("../models");
 const jwt = require("jsonwebtoken");
 const { getUser } = require("../_helpers");
+const sequelize = require("sequelize");
 
 const userController = {
   signUp: (req, res, next) => {
@@ -64,8 +65,51 @@ const userController = {
       })
       .catch((err) => next(err));
   },
-  getUserProfile: (req, res, next) => {},
-  putUserProfile: (req, res, next) => {},
+  getUser: (req, res, next) => {
+    const id = req.params.id || getUser(req).dataValues.id;
+    return Promise.all([
+      User.findByPk(id, {
+        raw: true,
+        nest: true,
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.followingId = user.id)"
+              ),
+              "follower",
+            ],
+            [
+              sequelize.literal(
+                "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.followerId = user.id)"
+              ),
+              "following",
+            ],
+            [
+              sequelize.literal(
+                "(SELECT COUNT(id) FROM Tweets WHERE Tweets.userId = user.id)"
+              ),
+              "tweetAmount",
+            ],
+          ],
+          exclude: ["password", "createdAt", "updatedAt"],
+        },
+      }),
+      Followship.findAll({
+        where: { followerId: getUser(req).dataValues.id },
+        raw: true,
+        nest: true,
+      }),
+    ])
+      .then(([user, currentUserFollowing]) => {
+        // 如果是從get users/:id 路由進來，需要多回傳當前使用者是否有追蹤特定使用者
+        if (req.params.id)
+          user.followed = currentUserFollowing.some(
+            (f) => f.followingId === user.id
+          );
+        return cb(null, user);
+      })
+      .catch((err) => cb(err));
+  },
 };
-
 module.exports = userController;
