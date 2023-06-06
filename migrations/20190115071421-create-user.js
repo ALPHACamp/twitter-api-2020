@@ -20,6 +20,9 @@ module.exports = {
       avatar: {
         type: Sequelize.STRING
       },
+      banner: {
+        type: Sequelize.STRING
+      },
       introduction: {
         type: Sequelize.TEXT
       },
