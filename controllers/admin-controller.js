@@ -1,8 +1,10 @@
+const { User, Tweet } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
 
 const adminController = {
+  // 後台登入
   signIn: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
@@ -16,6 +18,19 @@ const adminController = {
           user: userData
         }
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得所有推文及該推文使用者資料
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        raw: true,
+        nest: true,
+        include: [User]
+      })
+      return res.json({ status: 'success', data: { tweets } })
     } catch (err) {
       next(err)
     }
