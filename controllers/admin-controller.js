@@ -3,13 +3,14 @@ const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
 const { relativeTimeFromNow } = require('../helpers/dayFix-helper')
+const TWEETS_WORD_INDICATE = 50
 
 const adminController = {
   // 後台登入
   signIn: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      if (userData.role !== '管理員') newErrorGenerate('帳號不存在！', 404)
+      if (userData.role !== 'admin') newErrorGenerate('帳號不存在！', 404)
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       return res.json({
@@ -26,7 +27,6 @@ const adminController = {
   // 取得所有推文及該推文使用者資料
   getTweets: async (req, res, next) => {
     try {
-      const TWEETS_WORD_LIMIT = 50
       const tweets = await Tweet.findAll({
         raw: true,
         nest: true,
@@ -34,7 +34,7 @@ const adminController = {
       })
       const tweetsData = tweets.map(tweet => ({
         ...tweet,
-        description: tweet.description.substring(0, TWEETS_WORD_LIMIT),
+        description: tweet.description.substring(0, TWEETS_WORD_INDICATE),
         relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt)
       }))
       return res.json({ status: 'success', data: { tweetsData } })

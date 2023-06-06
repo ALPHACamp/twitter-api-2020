@@ -9,7 +9,7 @@ const authenticated = (req, res, next) => {
   })(req, res, next)
 }
 const authenticatedAdmin = (req, res, next) => {
-  if (helpers.getUser(req)?.role === '管理員') return next()
+  if (helpers.getUser(req)?.role === 'admin') return next()
   return res.status(403).json({ status: 'error', message: '使用者不是管理員' })
 }
 module.exports = {

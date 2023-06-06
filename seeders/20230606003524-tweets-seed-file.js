@@ -1,15 +1,15 @@
 'use strict'
 const faker = require('faker')
+const DEFAULT_TWEETS_FOR_EACH_PERSON = 10
+const TWEETS_WORD_LIMIT = 140
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const userData = await queryInterface.sequelize.query(
-      "SELECT id FROM Users WHERE role = '普通會員';",
+      "SELECT id FROM Users WHERE role = 'user';",
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     // 預設一人10篇tweets
-    const DEFAULT_TWEETS_FOR_EACH_PERSON = 10
-    const TWEETS_WORD_LIMIT = 140
     const tweetsSeeder = []
 
     userData.forEach(user => {

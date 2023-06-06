@@ -1,9 +1,9 @@
 'use strict'
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
+const USERS_INTRO_LIMIT = 160
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const USERS_INTRO_LIMIT = 160
     await queryInterface.bulkInsert('Users', [{
       name: 'root',
       email: 'root@example.com',
@@ -12,7 +12,7 @@ module.exports = {
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
-      role: '管理員',
+      role: 'admin',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -23,7 +23,7 @@ module.exports = {
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
-      role: '普通會員',
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -34,7 +34,7 @@ module.exports = {
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
-      role: '普通會員',
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -45,7 +45,7 @@ module.exports = {
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
-      role: '普通會員',
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -56,7 +56,7 @@ module.exports = {
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
-      role: '普通會員',
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -67,7 +67,7 @@ module.exports = {
       avatar: 'https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg',
       backgroundImage: '',
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
-      role: '普通會員',
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }], {})

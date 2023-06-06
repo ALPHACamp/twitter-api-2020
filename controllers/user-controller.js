@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
+const USERS_WORD_LIMIT = 50
 
 const userController = {
   // 使用者註冊
@@ -10,7 +11,7 @@ const userController = {
     try {
       const { name, account, email, password, checkPassword } = req.body
       if (!name || !account || !email || !password || !checkPassword) newErrorGenerate('所有欄位皆為必填!', 404)
-      if (name.length > 50) newErrorGenerate('暱稱字數超出上限!', 404)
+      if (name.length > USERS_WORD_LIMIT) newErrorGenerate('暱稱字數超出上限!', 404)
       if (password !== checkPassword) newErrorGenerate('密碼及確認密碼不相符!', 404)
       const userAccount = await User.findOne({ where: { account } })
       const userEmail = await User.findOne({ where: { email } })
@@ -22,7 +23,7 @@ const userController = {
         account,
         email,
         password: hash,
-        role: '普通會員'
+        role: 'user'
       })
       user = user.toJSON()
       delete user.password
@@ -35,7 +36,7 @@ const userController = {
   signIn: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      if (userData.role === '管理員') newErrorGenerate('帳號不存在！', 404)
+      if (userData.role === 'admin') newErrorGenerate('帳號不存在！', 404)
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
