@@ -1,6 +1,6 @@
 const userController = {
-  signIn: (req,res,next) => {
-    
+  signIn: (req, res, next) => {
+
   }
 }
 
