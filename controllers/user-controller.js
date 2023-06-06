@@ -1,8 +1,9 @@
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
+const { isUser } = require('../helpers/isUser-helper')
 const USERS_WORD_LIMIT = 50
 
 const userController = {
@@ -39,13 +40,46 @@ const userController = {
       if (userData.role === 'admin') newErrorGenerate('帳號不存在！', 404)
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
-      res.json({
+      return res.json({
         status: 'success',
         data: {
           token,
           user: userData
         }
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 查看使用者資料
+  getUser: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId, {
+        nest: true,
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      })
+      const tweets = await Tweet.findAll({
+        where: { UserId: userId },
+        raw: true
+      })
+      if (!user) newErrorGenerate('使用者不存在', 404)
+      let userData = user.toJSON()
+      const followersCount = user.Followers.length
+      const followingsCount = user.Followings.length
+      delete userData.Followers
+      delete userData.Followings
+      userData.isSignInUser = isUser(req)
+      userData.tweetsCount = tweets.length
+      userData = {
+        ...userData,
+        followersCount,
+        followingsCount
+      }
+      return res.json(userData)
     } catch (err) {
       next(err)
     }
