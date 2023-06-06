@@ -11,18 +11,31 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const repliesData = []
-      for (let j = 0; j < tweets.length; j++) {
-        for (let i = 1; i < 4; i++) {
-          const replyData = {
-            User_id: users[Math.floor(Math.random() * users.length)].id,
-            Tweet_id: tweets[j].id,
-            comment: `你好棒${i}`,
-            created_at: new Date(),
-            updated_at: new Date()
-          }
-          repliesData.push(replyData)
+    const getRandomUsers = (users, count) => {
+      const randomUsers = []
+      while (randomUsers.length < count) {
+        const randomIndex = Math.floor(Math.random() * users.length)
+        const randomUser = users[randomIndex]
+        if (!randomUsers.includes(randomUser)) {
+          randomUsers.push(randomUser)
         }
       }
+      return randomUsers
+    }
+
+    for (let j = 0; j < tweets.length; j++) {
+      const randomUsers = getRandomUsers(users, 3)
+      for (let i = 0; i < 3; i++) {
+        const replyData = {
+          User_id: randomUsers[i].id,
+          Tweet_id: tweets[j].id,
+          comment: `你好棒${i + 1}`,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+        repliesData.push(replyData)
+      }
+    }
     await queryInterface.bulkInsert('Replies', repliesData)
   },
 
