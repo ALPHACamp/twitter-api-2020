@@ -1,14 +1,14 @@
 const passport = require('../config/passport')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 
 // 檢查user role
 const userRole = (req, res, next) => {
-  if (getUser(req).role === 'admin') return res.status(403).json({ status: 'error', message: '帳號不存在' })
+  if (helpers.getUser(req).role === 'admin') return res.status(403).json({ status: 'error', message: '帳號不存在' })
   next()
 }
 
 const adminRole = (req, res, next) => {
-  if (getUser(req).role === 'user') return res.status(403).json({ status: 'error', message: '帳號不存在' })
+  if (helpers.getUser(req).role === 'user') return res.status(403).json({ status: 'error', message: '帳號不存在' })
   next()
 }
 // 驗證token
@@ -22,13 +22,13 @@ const authenticated = (req, res, next) => {
 
 // 驗證user
 const authenticatedUser = (req, res, next) => {
-  if (getUser(req).role === 'user') return next()
+  if (helpers.getUser(req).role === 'user') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 
 // 驗證admin
 const authenticatedAdmin = (req, res, next) => {
-  if (getUser(req).role === 'admin') return next()
+  if (helpers.getUser(req).role === 'admin') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 module.exports = {
