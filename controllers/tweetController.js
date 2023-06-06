@@ -1,19 +1,27 @@
-const { getUser } = require('../_helpers')
+const { getUser, ensureAuthenticated } = require('../_helpers')
+// const helpers = require('../_helpers')
 const { Op } = require('sequelize')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
+    // const user = helpers.getUser(req) // 使用 helpers.getUser 來取得用戶
+    // if (!helpers.ensureAuthenticated(req)) {
+    // 使用 helpers.ensureAuthenticated 進行身份驗證
+    //   return res.status(401).json({ error: 'Unauthorized' })
+    // }
     // 確認user存在
     try {
-      const user = getUser(req)
+      // getUser(req)
+      // ensureAuthenticated(req)
       // console.log(req)
-      console.log(req.user)
-      if (!(user instanceof User)) {
-        return res.status(400).json({ error: 'User not found' })
-      }
-      const userData = user.get({ plain: true })
-      delete userData.password
+      // console.log(req.user)
+      // if (!(user instanceof User)) {
+      //   return res.status(400).json({ error: 'User not found' })
+      // }
+      // console.log(user)
+      // const userData = user.get({ plain: true })
+      // delete user.password
       // console.log(userData)
 
       // 先找到user追蹤的人
@@ -64,7 +72,7 @@ const tweetController = {
         return {
           tweetId: tweet.id,
           description: tweet.description,
-          user: {
+          userId: {
             id: tweet['User.id'],
             name: tweet['User.name'],
             avatar: tweet['User.avatar'],
@@ -75,6 +83,7 @@ const tweetController = {
           likeCount: tweet.likeCount || 0
         }
       })
+
       return res.status(200).json(
         // {tweets: data}
         data
@@ -85,6 +94,21 @@ const tweetController = {
   },
   postTweet: async (req, res, next) => {
     try {
+      // Ensure the user is authenticated
+      if (!ensureAuthenticated(req)) {
+        return res.status(401).json({ error: 'Unauthorized' })
+      }
+      console.log(req)
+      // 取得發文者id
+      // const req = ensureAuthenticated()
+      // getUser(req);
+      const user = getUser(req)
+      // user.ensureAuthenticated();
+      console.log(user);
+
+      if (!user || !user.id) {
+        return res.status(400).json({ error: 'User not found' })
+      }
       const { description } = req.body
       // if (!description) {
       //   return res.status(400).json({ error: 'Description is required!' })
@@ -100,11 +124,6 @@ const tweetController = {
         return res
           .status(400)
           .json({ error: 'Description cannot be only whitespace!' })
-      }
-      // 取得發文者id
-      const user = getUser(req)
-      if (!user || !user.id) {
-        return res.status(400).json({ error: 'User not found' })
       }
       console.log(user)
       const UserId = user.id
