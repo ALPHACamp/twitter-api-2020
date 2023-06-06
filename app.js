@@ -30,7 +30,7 @@ app.use(passport.session())
 // flash
 app.use(flash())
 
-// // locals
+// locals
 app.use((req, res, next) => {
   res.locals.error_messages = req.flash('error_messages')
   res.locals.user = getUser(req)
@@ -38,7 +38,7 @@ app.use((req, res, next) => {
 })
 
 // routes
-app.use('/apis', apis)
+app.use('/api', apis)
 
 app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
 
