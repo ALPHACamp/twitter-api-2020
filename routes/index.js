@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const admin = require('./modules/admin');
+const admin = require("./modules/admin");
 const userController = require("../controllers/user-controller");
+const multer = require("../middleware/multer");
 const passport = require("../config/passport");
 const {
   authenticated,
@@ -19,7 +20,7 @@ router.get(
   "/api/users/:id",
   authenticated,
   authenticatedUser,
-  userController.getUser
+  userController.getUserProfile
 );
 router.put(
   "/api/users/:id",

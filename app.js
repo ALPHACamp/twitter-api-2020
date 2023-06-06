@@ -7,6 +7,7 @@ const routes = require("./routes");
 const methodOverride = require("method-override");
 const db = require("./models");
 const passport = require("passport");
+const path = require("path");
 const app = express();
 const port = 3000;
 
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(passport.initialize());
 app.use(methodOverride("_method"));
+app.use("/upload", express.static(path.join(__dirname, "upload")));
 app.use(routes);
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));

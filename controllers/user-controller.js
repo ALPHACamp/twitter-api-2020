@@ -3,6 +3,7 @@ const { User, Followship } = require("../models");
 const jwt = require("jsonwebtoken");
 const { getUser } = require("../_helpers");
 const sequelize = require("sequelize");
+const { imgurFileHandler } = require("../helpers/file-helpers");
 
 const userController = {
   signUp: (req, res, next) => {
@@ -65,51 +66,59 @@ const userController = {
       })
       .catch((err) => next(err));
   },
-  getUser: (req, res, next) => {
+  getUserProfile: (req, res, next) => {
     const id = req.params.id || getUser(req).dataValues.id;
-    return Promise.all([
-      User.findByPk(id, {
-        raw: true,
-        nest: true,
-        attributes: {
-          include: [
-            [
-              sequelize.literal(
-                "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.followingId = user.id)"
-              ),
-              "follower",
-            ],
-            [
-              sequelize.literal(
-                "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.followerId = user.id)"
-              ),
-              "following",
-            ],
-            [
-              sequelize.literal(
-                "(SELECT COUNT(id) FROM Tweets WHERE Tweets.userId = user.id)"
-              ),
-              "tweetAmount",
-            ],
+    return User.findByPk(id, {
+      raw: true,
+      nest: true,
+      attributes: {
+        include: [
+          [
+            sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = user.id)"
+            ),
+            "follower",
           ],
-          exclude: ["password", "createdAt", "updatedAt"],
-        },
-      }),
-      Followship.findAll({
-        where: { followerId: getUser(req).dataValues.id },
-        raw: true,
-        nest: true,
-      }),
-    ])
-      .then(([user, currentUserFollowing]) => {
-        // 如果是從get users/:id 路由進來，需要多回傳當前使用者是否有追蹤特定使用者
-        if (req.params.id)
-          user.followed = currentUserFollowing.some(
-            (f) => f.followingId === user.id
-          );
-        return cb(null, user);
+          [
+            sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = user.id)"
+            ),
+            "following",
+          ],
+          [
+            sequelize.literal(
+              "(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = user.id)"
+            ),
+            "tweetAmount",
+          ],
+        ],
+        exclude: ["password", "createdAt", "updatedAt"],
+      },
+    })
+      .then((user) => {
+        if (!user) throw new Error("帳號不存在！");
+        if (user.role === "admin") throw new Error("帳號不存在！");
+        res.status(200).json(user);
       })
-      .catch((err) => cb(err));
+      .catch((err) => next(err));
+  },
+  putUserProfile: (req, res, next) => {
+    const userId = Number(req.params.id);
+    const { name, introduction, avatar, cover } = req.body;
+    if (!name) throw new Error("name is required!");
+    if (getUser(req).id !== userId) throw new Error("permission denied");
+    return User.findByPk(userId)
+      .then((user) => {
+        if (!user) throw new Error("帳號不存在！");
+        return user.update({
+          name,
+          introduction,
+          avatar: avatar ? avatar : user.avatar,
+          cover: cover ? cover : user.cover,
+        });
+      })
+      .then((updatedUser) => res.status(200).json({ user: updatedUser }))
+      .catch((err) => next(err));
   },
 };
 module.exports = userController;
