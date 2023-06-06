@@ -1,5 +1,5 @@
 // const tweetServices = require('../../services/restaurant-services')
-const { Tweet,User, Replies } = require('../../models')
+const { Tweet } = require('../models')
 const tweetController = {
     getTweets: (req, res, next) => {
       return Tweet.findAll({

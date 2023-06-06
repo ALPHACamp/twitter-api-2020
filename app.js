@@ -1,7 +1,7 @@
 const express = require('express')
 const helpers = require('./_helpers');
 
-const { apis } = require('./routes')
+const routes = require('./routes')
 
 const app = express()
 const port = 3000
@@ -11,7 +11,7 @@ const port = 3000
 //   // passport.authenticate('jwt', { ses...
 // };
 
-app.use('/api', apis)
+app.use(routes)
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
