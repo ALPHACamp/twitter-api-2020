@@ -3,6 +3,8 @@ const passport = require('../../config/passport')
 const admin = require('./modules/admin')
 const userController = require('../../controllers/apis/user-controller')
 const { apiErrorHandler } = require('../../middleware/error-handler')
+const tweetController = require('../../controllers/apis/tweet-controller')
+const { authenticated } = require('../../middleware/api-auth')
 
 // 測試postman 是否正常運作
 router.get('/', (req, res) => {
@@ -13,8 +15,10 @@ router.get('/', (req, res) => {
 router.use('/admin', admin)
 
 router.post('/signup', userController.signUp)
-
 router.post('/login', passport.authenticate('local', { session: false }), userController.login)
+
+// 有關tweet的routes
+router.post('/tweets', authenticated, tweetController.postTweet)
 
 router.use('/', apiErrorHandler)
 
