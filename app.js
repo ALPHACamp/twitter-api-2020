@@ -9,8 +9,6 @@ const passport = require('./config/passport')
 const helpers = require('./_helpers');
 const routes = require('./routes')
 
-const routes = require('./routes')
-
 const app = express()
 const port = 3000
 const SESSION_SECRET = process.env.SESSION_SECRET
