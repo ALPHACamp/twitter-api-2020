@@ -29,7 +29,7 @@ const tweetController = {
           { model: Reply, attributes: ['id'] },
           { model: Like, attributes: ['id'] }
         ],
-        order: [['updatedAt', 'DESC']]
+        order: [['createdAt', 'DESC']]
       })
       if (!tweets) newErrorGenerate('推文不存在', 404)
       const tweetsData = tweets?.map(tweet => {
