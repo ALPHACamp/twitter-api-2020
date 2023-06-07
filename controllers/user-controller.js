@@ -156,8 +156,8 @@ const userController = {
           UserId: req.params.id,
           isLike: true
         },
-        // 因為likes是可以修改狀態的, 因此用updated來排序
-        order: [['updatedAt', 'DESC']],
+        // user story規定用likes記錄成立時間排序
+        order: [['createdAt', 'DESC']],
         include: [
           {
             model: Tweet,
