@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
 const bcrypt = require('bcryptjs')
 const userController = {
@@ -22,19 +22,38 @@ const userController = {
   signUp: (req, res, next) => {
     if (req.body.password !== req.body.passwordCheck) throw new Error('Password do not match!')
     if (req.body.name)
-    User.findOne({ where: { email: req.body.email } })
-      .then(user => {
-        if (user) throw new Error('Email already exists!')
-        return bcrypt.hash(req.body.password, 10)
+      User.findOne({ where: { email: req.body.email } })
+        .then(user => {
+          if (user) throw new Error('Email already exists!')
+          return bcrypt.hash(req.body.password, 10)
+        })
+        .then(hash => User.create({
+          account: req.body.account,
+          name: req.body.name,
+          email: req.body.email,
+          password: hash
+        }))
+        .then(data => {
+          res.send({ status: 'success', data })
+        })
+        .catch(err => next(err))
+  },
+  getUser: async (req, res, next) => {
+    const userId = req.params.id
+    Promise.all([
+      User.findOne({
+        where: { id: userId },
+        raw: true
+      }),
+      Tweet.findAll({
+        where: { UserId: userId },
+        raw: true
       })
-      .then(hash => User.create({
-        account: req.body.account,
-        name: req.body.name,
-        email: req.body.email,
-        password: hash
-      }))
-      .then(data => {
-        res.send({ status: 'success', data })
+    ])
+      .then(([data, tweets]) => {
+        delete data.password
+        data.tweetsCounts = tweets.length
+        res.json({ status: 'success', data })
       })
       .catch(err => next(err))
   }
