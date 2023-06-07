@@ -24,7 +24,7 @@ const userServices = {
     signUp: (req, cb) => {
         User.findOne({
             where: {
-                email: req.body.email
+                account: req.body.account
             }
         })
             .then(user => {
