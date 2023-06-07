@@ -52,7 +52,7 @@ const userController = {
         name,
         email,
         password: bcrypt.hashSync(password),
-        role: '',
+        role: 'user',
         createAt: new Date(),
         updatedAt: new Date()
       })
@@ -90,8 +90,7 @@ const userController = {
       delete userData.password
 
       res.status(200).json({
-        status: 'success',
-        data: userData
+        ...userData
       })
     } catch (err) { next(err) }
   },
