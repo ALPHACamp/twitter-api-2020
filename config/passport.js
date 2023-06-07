@@ -7,12 +7,12 @@ const JWTStrategy = passportJWT.Strategy
 const ExtractJWWT = passportJWT.ExtractJwt
 passport.use(new LocalStrategy(
   {
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
   },
-  (req, email, password, cb) => {
-    User.findOne({ where: { email } })
+  (req, account, password, cb) => {
+    User.findOne({ where: { account } })
       .then(user => {
         if(!user) return cb(null, false)
         bcrypt.compare(password, user.password)
