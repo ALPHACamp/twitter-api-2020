@@ -10,8 +10,8 @@ const userController = {
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '7d' })
       res.json({
         status: 'success',
+        token,
         data: {
-          token,
           user: userData
         }
       })
@@ -21,7 +21,7 @@ const userController = {
   },
   signUp: (req, res, next) => {
     if (req.body.password !== req.body.passwordCheck) throw new Error('Password do not match!')
-    if (req.body.name)
+    if(req.body.name.length > 50) throw new Error('Max length 50')
       User.findOne({ where: { email: req.body.email } })
         .then(user => {
           if (user) throw new Error('Email already exists!')
@@ -34,11 +34,13 @@ const userController = {
           password: hash
         }))
         .then(data => {
-          res.send({ status: 'success', data })
+        userData = data.toJSON()
+        delete userData.password
+        res.json({ status: 'success', data:userData })
         })
         .catch(err => next(err))
   },
-  getUser: async (req, res, next) => {
+  getUser: (req, res, next) => {
     const userId = req.params.id
     Promise.all([
       User.findOne({
