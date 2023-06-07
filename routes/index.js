@@ -9,6 +9,6 @@ const userController = require('../controllers/userController')
 // router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.post('/signup', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn) // 告訴passport不用session了 改用token驗證
-router.get('/users/:id',authenticated , userController.getUser)
+router.get('/users/:id',authenticated, userController.getUser)
 router.use('/', apiErrorHandler)
 module.exports = router
