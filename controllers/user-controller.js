@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const { Op } = require('sequelize')
-const { User, Tweet, Reply } = db
+const { User, Tweet, Reply, Like } = db
 const sequelize = require('sequelize')
 
 const userController = {
@@ -150,7 +150,27 @@ const userController = {
     }
   },
   getUserLikes: async (req, res, next) => {
-    try { // 找出Likes中 userId = 2 && isLike = 1的tweetsID,並顯示其資料，依照Likes UpdatedAt 排序
+    try {
+      const likes = await Like.findAll({
+        where: {
+          UserId: req.params.id,
+          isLike: true
+        },
+        // 因為likes是可以修改狀態的, 因此用updated來排序
+        order: [['updatedAt', 'DESC']],
+        include: [
+          {
+            model: Tweet,
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'account', 'name', 'avatar']
+              }]
+          }]
+      })
+
+      const likesData = likes.map(like => like.toJSON())
+      res.status(200).json(likesData)
     } catch (err) {
       next(err)
     }
