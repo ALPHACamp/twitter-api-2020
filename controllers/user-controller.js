@@ -55,6 +55,8 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
+      const user = await User.findByPk(userId, { raw: true, attributes: ['id'] })
+      if (!user) newErrorGenerate('使用者不存在', 404)
       const tweets = await Tweet.findAll({
         where: { UserId: userId },
         order: [['createdAt', 'DESC']],
@@ -63,14 +65,14 @@ const userController = {
           { model: Like, include: User }
         ]
       })
-      const tweetsData = tweets.map(tweet => {
+      const tweetsData = tweets?.map(tweet => {
         tweet = tweet.toJSON()
         const { Replies, Likes, ...tweetData } = tweet
         return {
           ...tweetData,
           relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt),
-          repliesCount: tweet.Replies.length,
-          likesCount: tweet.Likes.length
+          repliesCount: tweet.Replies?.length,
+          likesCount: tweet.Likes?.length
         }
       })
       return res.json(tweetsData)
