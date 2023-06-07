@@ -20,10 +20,8 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      const users = User.findAll({
-        raw: true,
-        nest: true
-      })
+      const users = await User.findAll()
+      console.log(users)
       return res.json({ status: 'success', data: users })
     } catch (error) {
       next(error)
