@@ -58,8 +58,13 @@ const tweetController = {
           {
             model: User,
             attributes: { exclude: ['password'] }
+          },
+          {
+            model: Reply,
+            order: [['createdAt', 'DESC']]
           }
-        ]
+        ],
+        nest: true
       })
       if (!tweet) throw new Error('找不到tweet資料！')
       // 回傳一則tweet
@@ -72,6 +77,7 @@ const tweetController = {
     try {
       const { description } = req.body
       if (!description) throw new Error('請輸入內容！')
+      if (description.length > 140) throw new Error('內容限制為140字以內！')
       await Tweet.create({
         userId: req.user.id,
         description
