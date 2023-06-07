@@ -46,6 +46,32 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  // 查看一篇推文
+  getTweet: async (req, res, next) => {
+    try {
+      const id = req.params.tweet_id
+      const data = await Tweet.findByPk(id, {
+        include: [
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
+          { model: Reply, attributes: ['id'] },
+          { model: Like, attributes: ['id'] }
+        ]
+      })
+      if (!data) newErrorGenerate('推文不存在', 404)
+      const tweetData = data?.toJSON()
+      const tweet = {
+        ...tweetData,
+        relativeTimeFromNow: relativeTimeFromNow(tweetData.createdAt),
+        repliesCount: tweetData.Replies?.length,
+        likesCount: tweetData.Likes?.length
+      }
+      delete tweet.Replies
+      delete tweet.Likes
+      return res.json(tweet)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = tweetController
