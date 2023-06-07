@@ -1,12 +1,14 @@
-const { getUser } = require('../../_helpers')
 const { Tweet } = require('../../models')
 
 const tweetController = {
   postTweet: async (req, res, next) => {
     try {
-      console.log('Now is tweet controller')
-      console.log(res.locals.userId)
-      return res.json({ status: 'Now tweet is success' })
+      const { description } = req.body
+      const tweet = await Tweet.create({
+        UserId: res.locals.userId,
+        description
+      })
+      return res.json({ status: 'success', data: tweet })
     } catch (error) {
       next(error)
     }
