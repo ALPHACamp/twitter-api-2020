@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 const faker = require('faker')
 const { Tweet, User } = require('../models')
 const tweetCount = 10 // 每個 user 10 個 tweets
@@ -16,7 +16,7 @@ module.exports = {
         TweetId: tweets[Math.floor(i / 3)].id,
         UserId: users[Math.floor(i % 5)].id,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updatedAt: new Date()
       })),
       {}
     )
@@ -25,4 +25,4 @@ module.exports = {
   down: (queryInterface, Sequelize) => {
     return queryInterface.bulkDelete('Replies', null, {})
   }
-};
+}

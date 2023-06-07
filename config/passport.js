@@ -1,75 +1,67 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const bcrypt = require('bcryptjs')
-<<<<<<< HEAD
-=======
-const { User } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models') // 之後要改成{ User } = require('../models')
 const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
->>>>>>> A02
 
 passport.use(new LocalStrategy(
-    // customize user field
-    {
-      usernameField: 'email',
-      passwordField: 'password',
-      passReqToCallback: true
-    },
-    // authenticate user
-    (req, email, password, cb) => {
-<<<<<<< HEAD
-=======
-      console.log(User.findOne({ where: { email } }))
->>>>>>> A02
-      User.findOne({ where: { email } })
-        .then(user => {
-          if (!user) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
-          bcrypt.compare(password, user.password).then(res => {
-            if (!res) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
-            return cb(null, user)
-          })
-        })
+  // customize user field
+  {
+    usernameField: 'account',
+    passwordField: 'password'
+  },
+  // authenticate user
+  async (req, account, password, cb) => {
+    try {
+      const user = await User.findOne({ where: { account } })
+      if (!user) throw new Error('帳號不存在!')
+      const comparePassword = await bcrypt.compare(password, user.password)
+      if (!comparePassword) throw new Error('密碼錯誤!')
+      return cb(null, user)
+    } catch (err) {
+      return cb(err, null)
     }
+  }
 ))
 
-<<<<<<< HEAD
-=======
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET
 }
-passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
-    include: [
-      { model: Tweet, as: 'LikedTweets' },
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
-    ]
-  })
-    .then(user => cb(null, user))
-    .catch(err => cb(err))
+
+passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
+  try {
+    const user = await User.findByPk(jwtPayload.id, {
+      include: [
+        { model: Tweet, as: 'LikedTweets' },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+    return cb(null, user)
+  } catch (err) {
+    return cb(err, null)
+  }
 }))
 
->>>>>>> A02
 passport.serializeUser((user, cb) => {
-    cb(null, user.id)
+  cb(null, user.id)
 })
 
-passport.deserializeUser((id, cb) => {
-    return User.findByPk(id, {
-        include: [
-<<<<<<< HEAD
-        { model: Restaurant, as: 'FavoritedRestaurants' },
-        { model: Restaurant, as: 'LikedRestaurants' }
-=======
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
->>>>>>> A02
-        ]
+passport.deserializeUser(async (id, cb) => {
+  try {
+    const user = await User.findByPk(id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
     })
-    .then(user => cb(null, user.toJSON()))
-    .catch(err => cb(err))
+    return cb(null, user.toJSON())
+  } catch (err) {
+    return cb(err, null)
+  }
 })
 
 module.exports = passport
