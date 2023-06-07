@@ -1,4 +1,4 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like, Followship } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
@@ -53,6 +53,31 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+  // 取得所有使用者資料
+  getUsers: async (req, res, next) => {
+    const users = await User.findAll({
+      raw: true,
+      nest: true
+    })
+    const userData = await Promise.all(users.map(async user => {
+      const userId = user.id
+      let tweetsCount = await Tweet.findAll({ where: { UserId: userId }, raw: true, attributes: ['id'] })
+      let likesCount = await Like.findAll({ where: { UserId: userId }, raw: true, attributes: ['id'] })
+      let followersCount = await Followship.findAll({ where: { followerId: userId }, raw: true, attributes: ['id'] })
+      let followingsCount = await Followship.findAll({ where: { followingId: userId }, raw: true, attributes: ['id'] })
+      tweetsCount = tweetsCount?.length
+      likesCount = likesCount?.length
+      followersCount = followersCount?.length
+      followingsCount = followingsCount?.length
+      user.tweetsCount = tweetsCount
+      user.likesCount = likesCount
+      user.followersCount = followersCount
+      user.followingsCount = followingsCount
+      delete user.password
+      return user
+    }))
+    return res.json(userData)
   }
 }
 
