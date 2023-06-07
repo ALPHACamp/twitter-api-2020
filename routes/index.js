@@ -22,6 +22,12 @@ router.get(
   "/api/users/:id/replied_tweets", userController.getUserRepliedTweets);
 router.get(
   "/api/users/:id/likes", userController.getUserLikes);
+router.get(
+  "/api/tweets/:tweet_id", userController.getTweet);
+router.get(
+  "/api/tweets", userController.getTweets);
+router.post(
+  "/api/tweets", authenticated, authenticatedUser, userController.postTweets);
 // router.get(
 //   "/api/users/:id",
 //   authenticated,
