@@ -1,11 +1,32 @@
 const db = require('../models')
 const { Op } = require('sequelize')
-const { Tweet } = db
+const { User, Tweet } = db
+const sequelize = require('sequelize')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'
+              ), 'repliesCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id AND isLike = 1)'
+              ), 'likesCount'
+            ]
+          ]
+        },
+        include: [
+          {
+            model: User,
+            attributes: { exclude: ['password'] }
+          }
+        ],
         sort: ['createdAt', 'DESC']
       })
       if (!tweets) throw new Error('找不到tweets資料！')
@@ -18,7 +39,28 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     try {
       const tweedId = req.params.tweetId
-      const tweet = await Tweet.findByPk(tweedId)
+      const tweet = await Tweet.findByPk(tweedId, {
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'
+              ), 'repliesCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id AND isLike = 1)'
+              ), 'likesCount'
+            ]
+          ]
+        },
+        include: [
+          {
+            model: User,
+            attributes: { exclude: ['password'] }
+          }
+        ]
+      })
       if (!tweet) throw new Error('找不到tweet資料！')
       // 回傳一則tweet
       res.json(tweet)
