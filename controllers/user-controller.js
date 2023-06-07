@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const { Op } = require('sequelize')
-const { User } = db
+const { User, Tweet } = db
 const sequelize = require('sequelize')
 
 const userController = {
@@ -94,11 +94,67 @@ const userController = {
       })
     } catch (err) { next(err) }
   },
-  putUserData: (req, res, next) => {},
-  getUserTweets: (req, res, next) => {},
-  getUserReplies: (req, res, next) => {},
-  getUserLikes: (req, res, next) => {},
-  getFollowings: (req, res, next) => {},
-  getFollowers: (req, res, next) => {}
+  putUserData: async (req, res, next) => {
+    try {
+      // write later
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        where: { userId: req.params.id },
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'
+              ),
+              'repliesCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id AND isLike = 1)'
+              ),
+              'likesCount'
+            ]
+          ]
+        }
+      })
+
+      const tweetsData = tweets.map(tweet => tweet.toJSON())
+      res.status(200).json(tweetsData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try { // write later
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try { // write later
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowings: async (req, res, next) => {
+    try { // write later
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowers: async (req, res, next) => {
+    try { // write later
+    } catch (err) {
+      next(err)
+    }
+  }
 }
 module.exports = userController
