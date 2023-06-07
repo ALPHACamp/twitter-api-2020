@@ -7,4 +7,6 @@ const { signInValidator } = require('../../middleware/validator')
 
 router.post('/login', signInValidator, passport.authenticate('local', { session: false }), adminRole, adminController.login)
 router.get('/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.delete('/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+
 module.exports = router
