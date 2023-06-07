@@ -21,10 +21,11 @@ function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   next();
 });
-app.use('/api',router)
+app.use('/api', router)
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.info(`Example app listening on port ${port}!`))
 module.exports = app

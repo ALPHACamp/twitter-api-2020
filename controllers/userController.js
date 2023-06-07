@@ -21,6 +21,7 @@ const userController = {
   },
   signUp: (req, res, next) => {
     if (req.body.password !== req.body.passwordCheck) throw new Error('Password do not match!')
+    if (req.body.name)
     User.findOne({ where: { email: req.body.email } })
       .then(user => {
         if (user) throw new Error('Email already exists!')
