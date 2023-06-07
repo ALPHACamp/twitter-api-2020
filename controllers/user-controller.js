@@ -227,6 +227,34 @@ const userController = {
         return res.status(200).json(newTweet)
       })
       .catch((err) => next(err))
+  },
+
+  postTweetLike: (req, res, next) => {
+    const TweetId = req.params.id
+    const user = getUser(req)
+    const userId = user.id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          userId,
+          TweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet doesn't exist!")
+        if (like) throw new Error("You have liked this tweet!")
+
+        return Like.create({
+          userId,
+          TweetId
+        })
+      })
+      .then((newLike) => {
+        return res.status(200).json(newLike)
+      })
+      .catch((err) => next(err))
   }
 };
 
