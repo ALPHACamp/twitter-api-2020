@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const { Op } = require('sequelize')
-const { User, Tweet } = db
+const { User, Tweet, Reply, Like } = db
 const sequelize = require('sequelize')
 
 const userController = {
@@ -104,8 +104,8 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
-        where: { userId: req.params.id },
-        include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+        where: { UserId: req.params.id },
+        include: [{ model: User, attributes: { exclude: ['password'] } }],
         order: [['createdAt', 'DESC']],
         nest: true,
         attributes: {
@@ -133,25 +133,37 @@ const userController = {
     }
   },
   getUserReplies: async (req, res, next) => {
-    try { // write later
+    try {
+      const replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          { model: User, attributes: { exclude: ['password'] } },
+          { model: Tweet }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      const repliesData = replies.map(reply => reply.toJSON())
+      res.status(200).json(repliesData)
     } catch (err) {
       next(err)
     }
   },
   getUserLikes: async (req, res, next) => {
-    try { // write later
+    try { // 找出Likes中 userId = 2 && isLike = 1的tweetsID,並顯示其資料，依照Likes UpdatedAt 排序
     } catch (err) {
       next(err)
     }
   },
   getFollowings: async (req, res, next) => {
-    try { // write later
+    try { // 找出followerId = req.params.id的資料，並顯示出其Users data，加入isFollowing給前端判斷是否正在追蹤
     } catch (err) {
       next(err)
     }
   },
   getFollowers: async (req, res, next) => {
-    try { // write later
+    try {
+      // 找出followingId = req.params.id的資料，並顯示出其Users data，加入isFollowing給前端判斷是否正在追蹤
     } catch (err) {
       next(err)
     }
