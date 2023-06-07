@@ -33,7 +33,6 @@ app.use(flash())
 // locals
 app.use((req, res, next) => {
   res.locals.error_messages = req.flash('error_messages')
-  res.locals.user = getUser(req)
   next()
 })
 
