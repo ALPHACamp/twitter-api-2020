@@ -44,16 +44,16 @@ router.get(
   "/api/tweets", authenticated, authenticatedUser, userController.getTweets);
 router.post(
   "/api/tweets", authenticated, authenticatedUser, userController.postTweets);
-// router.get(
-//   "/api/users/:id",
-//   authenticated,
-//   authenticatedUser,
-//   userController.getUserProfile
-// );
-// router.put(
-//   "/api/users/:id",
-//   authenticated,
-//   authenticatedUser,
-//   userController.putUserProfile
-// );
+router.get(
+  "/api/users/:id",
+  authenticated,
+  authenticatedUser,
+  userController.getUserProfile
+);
+router.put(
+  "/api/users/:id",
+  authenticated,
+  authenticatedUser,
+  userController.putUserProfile
+);
 module.exports = router;
