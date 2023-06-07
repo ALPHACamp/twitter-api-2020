@@ -12,8 +12,8 @@ const roleCheck = (role, errorMessage) => {
 }
 
 module.exports = {
-  isUser: roleCheck('', '使用者不存在!'),
+  isUser: roleCheck('user', '使用者不存在!'),
   isAdmin: roleCheck('admin', '使用者不存在!'),
-  isAuthUser: roleCheck('', 'Unauthorized'),
+  isAuthUser: roleCheck('user', 'Unauthorized'),
   isAuthAdmin: roleCheck('admin', 'Unauthorized')
 }
