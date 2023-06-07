@@ -1,8 +1,4 @@
 'use strict';
-
-const { dataTypes } = require("sequelize-test-helpers");
-const { Sequelize } = require(".");
-
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
   }, {});
@@ -30,15 +26,15 @@ module.exports = (sequelize, DataTypes) => {
     })
   };
   User.init({
-    account: dataTypes.STRING,
-    name: dataTypes.STRING,
-    email: dataTypes.STRING,
-    password: dataTypes.STRING,
-    introduction: dataTypes.TEXT,
-    telephone: dataTypes.STRING,
-    avatar: dataTypes.STRING,
-    coverPhoto: dataTypes.STRING,
-    role: dataTypes.BOOLEAN
+    account: DataTypes.STRING,
+    name: DataTypes.STRING,
+    email: DataTypes.STRING,
+    password: DataTypes.STRING,
+    introduction: DataTypes.TEXT,
+    telephone: DataTypes.STRING,
+    avatar: DataTypes.STRING,
+    coverPhoto: DataTypes.STRING,
+    role: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'User',
