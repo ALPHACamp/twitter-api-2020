@@ -16,15 +16,15 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 // session設定
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'NonSecret',
-  resave: false,
-  saveUninitialized: true
-}))
+// app.use(session({
+//   secret: process.env.SESSION_SECRET || 'NonSecret',
+//   resave: false,
+//   saveUninitialized: true
+// }))
 
 // passport初始化
 app.use(passport.initialize())
-app.use(passport.session())
+// app.use(passport.session())
 
 // flash
 app.use(flash())
