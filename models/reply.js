@@ -6,13 +6,13 @@ module.exports = (sequelize, DataTypes) => {
     Reply.belongsTo(models.User, { foreignKey: 'userId' })
     Reply.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
   };
-  Reply.init({
-    comment: DataTypes.TEXT
-  }, {
-    sequelize,
-    modelName: 'Reply',
-    tableName: 'Replies',
-    underscored: true
-  })
+  // Reply.init({
+  //   comment: DataTypes.TEXT
+  // }, {
+  //   sequelize,
+  //   modelName: 'Reply',
+  //   tableName: 'Replies',
+  //   underscored: true
+  // })
   return Reply;
 };

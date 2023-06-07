@@ -11,15 +11,15 @@ module.exports = (sequelize, DataTypes) => {
       as: 'LikedUsers' // 幫這個關聯取個名稱
     })
   };
-  Tweet.init({
-    description: DataTypes.TEXT,
-    numberLike: DataTypes.INTEGER,
-    numberUnlike: DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'Tweet',
-    tableName: 'Tweets',
-    underscored: true
-  })
+  // Tweet.init({
+  //   description: DataTypes.TEXT,
+  //   numberLike: DataTypes.INTEGER,
+  //   numberUnlike: DataTypes.INTEGER
+  // }, {
+  //   sequelize,
+  //   modelName: 'Tweet',
+  //   tableName: 'Tweets',
+  //   underscored: true
+  // })
   return Tweet;
 };
