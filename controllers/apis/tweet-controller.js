@@ -5,8 +5,9 @@ const tweetController = {
   postTweet: async (req, res, next) => {
     try {
       const { description } = req.body
+      console.log('req--------------------------req')
+      console.log(req.user)
       const user = getUser(req)
-      console.log(user)
       const tweet = await Tweet.create({
         UserId: user.id,
         description

@@ -11,11 +11,10 @@ module.exports = {
       Array.from({ length: 50 }, () => {
         const randomUser = users[Math.floor(Math.random() * users.length)]
         const user = {
-          email: randomUser.email,
           description: faker.lorem.text(),
-          created_at: new Date(),
-          updated_at: new Date(),
-          user_id: randomUser.id
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          userId: randomUser.id
         }
         return user
       }))
