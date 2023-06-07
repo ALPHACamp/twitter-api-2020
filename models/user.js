@@ -28,13 +28,10 @@ module.exports = (sequelize, DataTypes) => {
     avatar: DataTypes.STRING,
     introduction: DataTypes.TEXT,
     role: DataTypes.STRING,
-    isAdmin: DataTypes.BOOLEAN,
-    image: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',
     tableName: 'Users',
-    underscored: true
   })
   return User;
 };
