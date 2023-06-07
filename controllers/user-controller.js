@@ -2,7 +2,8 @@ const bcrypt = require("bcryptjs");
 const { User, Followship } = require("../models");
 const jwt = require("jsonwebtoken");
 const { getUser } = require("../_helpers");
-const sequelize = require("sequelize");
+const Sequelize = require("sequelize");
+const { Op } = Sequelize;
 
 const userController = {
   signUp: (req, res, next) => {
@@ -16,7 +17,7 @@ const userController = {
     // Error: 字數限制
     // 待設定password, name, account
     return User.findAll({
-      $or: [{ where: { account } }, { where: { email } }],
+      [Op.or]: [{ where: { account } }, { where: { email } }],
     })
       .then((users) => {
         if (users.some((u) => u.email === email))
@@ -73,19 +74,19 @@ const userController = {
       attributes: {
         include: [
           [
-            sequelize.literal(
+            Sequelize.literal(
               "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = user.id)"
             ),
             "follower",
           ],
           [
-            sequelize.literal(
+            Sequelize.literal(
               "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = user.id)"
             ),
             "following",
           ],
           [
-            sequelize.literal(
+            Sequelize.literal(
               "(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = user.id)"
             ),
             "tweetAmount",
