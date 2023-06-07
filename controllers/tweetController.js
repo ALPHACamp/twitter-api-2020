@@ -6,33 +6,39 @@ const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
-      // const userData = user.get({ plain: true })
-      // delete user.password
-      // console.log(userData)
+      // check user
+      // const user = helpers.getUser(req)
+      // if (!user || !user.id) {
+      //   return res.status(400).json({ error: 'User not found' })
+      // }
 
-      // 找到user追蹤的人
+      // get user's following people
       // const followships = await Followship.findAll({
-      //   where: { followerId: userData.id },
+      //   where: { followerId: user.id },
       //   attributes: ['followingId'],
       //   raw: true
       // })
       // const followingIds = followships.map(followship => followship.followingId)
 
       const tweets = await Tweet.findAll({
+        // define output attributes
         attributes: [
           'id',
           'description',
           'createdAt',
+          // use Sequelize's count
           [
             sequelize.fn('COUNT', sequelize.col('Replies.TweetId')),
             'replyCount'
           ],
           [sequelize.fn('COUNT', sequelize.col('Likes.TweetId')), 'likeCount']
         ],
+        // include related models
         include: [
           {
             model: User,
             attributes: ['id', 'name', 'account', 'avatar']
+            // where option will implicitly use the IN operator, like id : [1,2,3]
             // where: {
             //   id: {
             //     [Op.in]: followingIds
@@ -45,11 +51,12 @@ const tweetController = {
           },
           {
             model: Like,
-            // where: { isLiked: true },
             attributes: []
           }
         ],
+        // Group by tweetID and userID
         group: ['Tweet.id', 'User.id'],
+        // sort time
         order: [['createdAt', 'DESC']],
         raw: true
       })
@@ -71,17 +78,12 @@ const tweetController = {
       })
 
       return res.status(200).json(data)
-      // return res.json(data)
     } catch (err) {
       next(err)
     }
   },
   postTweet: async (req, res, next) => {
     try {
-      // Ensure the user is authenticated
-      if (!helpers.ensureAuthenticated(req)) {
-        return res.status(401).json({ error: 'Unauthorized' })
-      }
       const user = helpers.getUser(req)
 
       if (!user || !user.id) {
@@ -89,29 +91,27 @@ const tweetController = {
       }
       const { description } = req.body
 
-      // Check if description is more than 160 characters
+      // check if description is more than 160 characters
       if (description.trim().length > 140) {
         return res
           .status(400)
           .json({ error: 'Description should be within 160 characters!' })
       }
-      // Check if description is whitespace
+      // check if description is whitespace
       if (!description.trim().length) {
         return res
           .status(400)
           .json({ error: 'Description cannot be only whitespace!' })
       }
 
+      // create a new tweet
       const UserId = user.id
-      console.log(UserId)
-
-      // Create a new tweet
       const newTweet = await Tweet.create({
         description,
         UserId
       })
 
-      return res.status(201).json([newTweet])
+      return res.status(200).json(newTweet)
     } catch (err) {
       next(err)
     }
@@ -137,7 +137,6 @@ const tweetController = {
           },
           {
             model: Like
-            // attributes: []
           }
         ]
       })
@@ -175,10 +174,10 @@ const tweetController = {
       }
 
       const replies = await Reply.findAll({
-        raw: true,
-        nest: true,
         where: { TweetId: tweetId },
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
 
       return res.status(200).json(replies)
@@ -193,21 +192,23 @@ const tweetController = {
       if (!tweet) {
         return res.status(404).json({ error: 'Tweet not found!' })
       }
+
+      // check if comment is whitespace
       const { comment } = req.body
-      // Check if comment is whitespace
       if (!comment.trim().length) {
         return res
           .status(400)
           .json({ error: 'Comment cannot be only whitespace!' })
       }
-      // Get user id
+
+      // get user id
       const user = helpers.getUser(req)
       if (!user || !user.id) {
         return res.status(400).json({ error: 'User not found' })
       }
       const UserId = user.id
 
-      // Create new reply
+      // create new reply
       const newReply = await Reply.create({
         comment,
         UserId,
@@ -216,7 +217,7 @@ const tweetController = {
 
       return (
         res
-          .status(201)
+          .status(200)
           // .json({ message: 'Tweet successfully posted!', tweet: [newTweet] })
           .json(newReply)
       )
@@ -226,13 +227,14 @@ const tweetController = {
   },
   addLike: async (req, res, next) => {
     try {
+      console.log(req.body)
       const { tweet_id: tweetId } = req.params
       const tweet = await Tweet.findByPk(tweetId)
 
       if (!tweet) {
         return res.status(404).json({ error: 'Tweet not found!' })
       }
-      // Get user id
+      // get user id
       const user = helpers.getUser(req)
       if (!user || !user.id) {
         return res.status(400).json({ error: 'User not found' })
@@ -245,13 +247,15 @@ const tweetController = {
           TweetId: tweetId
         }
       })
+
       if (like) {
-        return res.status(404).json({ error: 'You have liked this tweet!' })
+        return res.status(200).json({ error: 'You have liked this tweet!' })
       }
 
       await Like.create({
         UserId: UserId,
-        TweetId: tweetId
+        TweetId: tweetId,
+        isLiked: true
       })
       return res.status(200).json({
         status: 'success'
@@ -268,10 +272,10 @@ const tweetController = {
       if (!tweet) {
         return res.status(404).json({ error: 'Tweet not found!' })
       }
-      // Get user id
+      // get user id
       const user = helpers.getUser(req)
       if (!user || !user.id) {
-        return res.status(400).json({ error: 'User not found' })
+        return res.status(404).json({ error: 'User not found' })
       }
 
       const UserId = user.id
@@ -281,7 +285,14 @@ const tweetController = {
           TweetId: tweetId
         }
       })
+
+      // if the user hasn't liked the tweet
+      if (!like) {
+        return res.status(404).json({ error: "You haven't liked this tweet!" })
+      }
+
       await like.destroy()
+
       return res.status(200).json({ message: 'Like removed successfully' })
     } catch (err) {
       next(err)
