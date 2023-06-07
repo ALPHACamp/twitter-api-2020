@@ -114,6 +114,39 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  // 獲取使用者的like資料
+  getUserLikes: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId)
+      if (!user) newErrorGenerate('使用者不存在', 404)
+      const likes = await Like.findAll({
+        where: { UserId: userId },
+        order: [['createdAt', 'DESC'], ['Tweet', 'createdAt', 'DESC']],
+        include: {
+          model: Tweet,
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+            { model: Like, attributes: ['id'] },
+            { model: Reply, attributes: ['id'] }
+          ]
+        }
+      })
+      const likesData = likes?.map(like => {
+        like = like?.toJSON()
+        like.User = like?.Tweet.User
+        like.likesCount = like?.Tweet?.Likes?.length
+        like.repliesCount = like?.Tweet?.Replies?.length
+        like.Tweet.relativeTimeFromNow = relativeTimeFromNow(like?.Tweet?.createdAt)
+        const { User, Likes, Replies, ...cleanLike } = like?.Tweet
+        like.Tweet = cleanLike
+        return like
+      })
+      return res.json(likesData)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = userController
