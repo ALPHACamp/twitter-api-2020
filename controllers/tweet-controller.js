@@ -1,7 +1,7 @@
 const db = require('../models')
-const { Op } = require('sequelize')
-const { User, Tweet } = db
+const { User, Tweet, Reply } = db
 const sequelize = require('sequelize')
+const { getUser } = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -27,7 +27,7 @@ const tweetController = {
             attributes: { exclude: ['password'] }
           }
         ],
-        sort: ['createdAt', 'DESC']
+        order: [['createdAt', 'DESC']]
       })
       if (!tweets) throw new Error('找不到tweets資料！')
       // 回傳全部tweet，最新的在前面
@@ -38,8 +38,8 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
-      const tweedId = req.params.tweetId
-      const tweet = await Tweet.findByPk(tweedId, {
+      const tweetId = req.params.tweetId
+      const tweet = await Tweet.findByPk(tweetId, {
         attributes: {
           include: [
             [
@@ -72,7 +72,6 @@ const tweetController = {
     try {
       const { description } = req.body
       if (!description) throw new Error('請輸入內容！')
-
       await Tweet.create({
         userId: req.user.id,
         description
@@ -84,6 +83,40 @@ const tweetController = {
       })
     } catch (err) {
       next(err)
+    }
+  },
+  postReply: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweetId
+      const { comment } = req.body
+      if (!comment) throw new Error('請輸入內容！')
+      await Reply.create({
+        UserId: getUser(req).id,
+        TweetId: tweetId,
+        comment
+      })
+      res.json({
+        status: 'success', message: '成功建立留言'
+      })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweetId
+      const replies = await Reply.findAll({
+        where: { TweetId: tweetId },
+        include: [
+          { model: User, attributes: { exclude: ['password'] } }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      res.json(replies)
+    } catch (error) {
+      next(error)
     }
   }
 }
