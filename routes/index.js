@@ -13,6 +13,7 @@ router.post('/api/admin/login', passport.authenticate('local', { session: false 
 router.use('/api/admin', authenticated, isAuthAdmin, admin)
 
 // users
+router.post('/api/users', userController.signup)
 router.post('/api/users/login', passport.authenticate('local', { session: false }), isUser, userController.login)
 router.use('/api/users', authenticated, isAuthUser, users)
 
