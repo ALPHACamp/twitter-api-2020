@@ -4,7 +4,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     // find user id first and exclude admin account
     const users = await queryInterface.sequelize.query(
-      "SELECT id FROM Users WHERE role <> 'admin'", // WHERE role <> 'admin'找不到東西
+      "SELECT id FROM Users WHERE role <> 'admin'",
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     // find all tweets id
