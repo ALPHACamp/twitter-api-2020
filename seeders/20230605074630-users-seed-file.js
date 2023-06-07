@@ -1,6 +1,7 @@
 'use strict'
 const faker = require('faker')
 const bcrypt = require('bcryptjs')
+const background = 'https://plus.unsplash.com/premium_photo-1668852917755-0e6fc9a66db5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80'
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -13,8 +14,9 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'admin',
         account: 'root',
-        created_at: new Date(),
-        updated_at: new Date()
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
       },
       {
         email: 'user1@example.com',
@@ -24,8 +26,9 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'user',
         account: 'user1',
-        created_at: new Date(),
-        updated_at: new Date()
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }, {
         email: 'user2@example.com',
         password: await bcrypt.hash('12345678', 10),
@@ -34,8 +37,9 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'user',
         account: 'user2',
-        created_at: new Date(),
-        updated_at: new Date()
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }, {
         email: 'user3@example.com',
         password: await bcrypt.hash('12345678', 10),
@@ -44,8 +48,9 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'user',
         account: 'user3',
-        created_at: new Date(),
-        updated_at: new Date()
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }, {
         email: 'user4@example.com',
         password: await bcrypt.hash('12345678', 10),
@@ -54,8 +59,9 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'user',
         account: 'user4',
-        created_at: new Date(),
-        updated_at: new Date()
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }, {
         email: 'user5@example.com',
         password: await bcrypt.hash('12345678', 10),
@@ -64,8 +70,9 @@ module.exports = {
         introduction: faker.lorem.text(),
         role: 'user',
         account: 'user5',
-        created_at: new Date(),
-        updated_at: new Date()
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     ])
   },

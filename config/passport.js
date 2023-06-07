@@ -41,21 +41,20 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
   try {
     const user = await User.findByPk(jwtPayload.id
-      // , {
-      //   include: [
-      //   // join table Like
-      //     { model: Tweet, as: 'LikedUsers' },
-      //     { model: User, as: 'LikedTweets' },
-      //     // join table Reply
-      //     { model: Tweet, as: 'RepliedUsers' },
-      //     { model: User, as: 'RepliedTweets' },
-      //     // join table FollowShip
-      //     { model: User, as: 'Followers' },
-      //     { model: User, as: 'Followings' }
-      //   ]
-      // }
+      , {
+        // include: [
+        // // join table Like
+        //   { model: Tweet, as: 'LikedUsers' },
+        //   { model: User, as: 'LikedTweets' },
+        //   // join table Reply
+        //   { model: Tweet, as: 'RepliedUsers' },
+        //   { model: User, as: 'RepliedTweets' },
+        //   // join table FollowShip
+        //   { model: User, as: 'Followers' },
+        //   { model: User, as: 'Followings' }
+        // ]
+      }
     )
-    console.log(user.toJSON()) // 測試用
     return cb(null, user)
   } catch (error) {
     cb(error)
@@ -69,7 +68,6 @@ passport.deserializeUser(async (id, cb) => {
   try {
     let user = await User.findByPk(id)
     user = user.toJSON()
-    console.log(user)
     return cb(null, user)
   } catch (error) {
     cb(error)
