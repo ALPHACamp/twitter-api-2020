@@ -34,6 +34,7 @@ const userController = {
         password: hash
       }))
       .then(data => {
+        delete data.password
         res.send({ status: 'success', data })
       })
       .catch(err => next(err))
