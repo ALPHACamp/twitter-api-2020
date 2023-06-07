@@ -20,7 +20,10 @@ app.use(passport.initialize())
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
-
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+});
 app.use('/api',router)
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.info(`Example app listening on port ${port}!`))
