@@ -24,7 +24,6 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     try {
       const id = req.params.tweet_id
-      console.log(id)
       const data = await Tweet.findByPk(id, {
         include: [
           { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
