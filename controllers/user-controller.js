@@ -89,7 +89,7 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const user = await User.findByPk(userId, { raw: true, attributes: ['id'] })
+      const user = await User.findByPk(userId, { raw: true, attributes: ['name', 'account', 'avatar'] })
       if (!user) newErrorGenerate('使用者不存在', 404)
       const tweets = await Tweet.findAll({
         where: { UserId: userId },
@@ -109,6 +109,7 @@ const userController = {
           likesCount: tweet.Likes?.length
         }
       })
+      tweetsData.push(user)
       return res.json(tweetsData)
     } catch (err) {
       next(err)
