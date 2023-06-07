@@ -1,46 +1,19 @@
-
-module.exports = {
-  isUser: (req, res, next) => {
-    if (req.user.role !== '') {
-      const error = new Error('帳號不存在！')
+const roleCheck = (role, errorMessage) => {
+  return (req, res, next) => {
+    if (req.user.role !== role) {
+      const error = new Error(errorMessage)
       return res.status(401).json({
         status: 'error',
-        message: `${error.message}`
-      })
-    }
-    next()
-  },
-
-  isAdmin: (req, res, next) => {
-    if (req.user.role !== 'admin') {
-      const error = new Error('帳號不存在！')
-      return res.status(401).json({
-        status: 'error',
-        message: `${error.message}`
-      })
-    }
-    next()
-  },
-
-  isAuthUser: (req, res, next) => {
-    if (req.user.role !== '') {
-      const error = new Error('unauthorized')
-      return res.status(401).json({
-        status: 'error',
-        message: `${error.message}`
-      })
-    }
-    next()
-  },
-
-  isAuthAdmin: (req, res, next) => {
-    if (req.user.role !== 'admin') {
-      const error = new Error('unauthorized')
-      return res.status(401).json({
-        status: 'error',
-        message: `${error.message}`
+        message: error.message
       })
     }
     next()
   }
+}
+
+module.exports = {
+  isUser: roleCheck('', '使用者不存在!'),
+  isAdmin: roleCheck('admin', '使用者不存在!'),
+  isAuthUser: roleCheck('', 'Unauthorized'),
+  isAuthAdmin: roleCheck('admin', 'Unauthorized')
 }

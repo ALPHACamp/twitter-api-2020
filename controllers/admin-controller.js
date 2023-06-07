@@ -6,7 +6,6 @@ const adminController = {
       // 製作token給管理員
       const userData = req.user
       delete userData.password
-      delete userData.Tweets
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.status(200).json({
         status: 'success',

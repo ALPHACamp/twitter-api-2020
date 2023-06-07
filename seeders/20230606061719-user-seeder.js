@@ -8,7 +8,7 @@ module.exports = {
       Array.from({ length: 10 }, (_, i) =>
         i === 0
           ? {
-              // admin account
+            // admin account
               email: 'root@example.com',
               account: 'root',
               password: bcrypt.hashSync('12345678', 10), // 直接使用hashSync同步生成hash
@@ -21,10 +21,11 @@ module.exports = {
               updatedAt: new Date()
             }
           : {
-              // at least 5 users
+            // at least 5 users
               email: `user${i}@example.com`,
               account: `user${i}`,
               password: bcrypt.hashSync('12345678', 10),
+              role: '',
               name: `user${i}`,
               avatar: `https://i.pravatar.cc/300?img=${Math.floor(Math.random() * 100)}`,
               introduction: faker.lorem.words(5),
