@@ -16,12 +16,6 @@ router.use('/api/admin', authenticated, isAuthAdmin, admin)
 router.post('/api/users/login', passport.authenticate('local', { session: false }), isUser, userController.login)
 router.use('/api/users', authenticated, isAuthUser, users)
 
-// error (test router delete later)
-router.use('/error', (req, res, next) => {
-  const error = new Error('This is an error response!')
-  next(error)
-})
-
 // error handler
 router.use('/', apiErrorHandler)
 

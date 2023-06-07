@@ -1,5 +1,5 @@
 const LocalStrategy = require('passport-local')
-const { User, Tweet } = require('../../models')
+const { User } = require('../../models')
 const bcrypt = require('bcryptjs')
 
 module.exports = passport => {
@@ -9,12 +9,7 @@ module.exports = passport => {
   }, (email, password, done) => {
     // use email to check user exist
     // 查出使用者資料，放入req.user
-    User.findOne({
-      where: { email },
-      include: [
-        { model: Tweet, as: 'Tweets', order: [['createdAt', 'DESC']] }
-      ]
-    })
+    User.findOne({ where: { email } })
       .then(user => {
         if (!user) {
           const error = new Error('使用者不存在！')
