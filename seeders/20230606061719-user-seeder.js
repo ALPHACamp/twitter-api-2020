@@ -25,7 +25,7 @@ module.exports = {
               email: `user${i}@example.com`,
               account: `user${i}`,
               password: bcrypt.hashSync('12345678', 10),
-              role: '',
+              role: 'user',
               name: `user${i}`,
               avatar: `https://i.pravatar.cc/300?img=${Math.floor(Math.random() * 100)}`,
               introduction: faker.lorem.words(5),

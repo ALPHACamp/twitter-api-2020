@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const db = require('../models')
 const { Op } = require('sequelize')
 const { User } = db
+const sequelize = require('sequelize')
 
 const userController = {
   login: (req, res, next) => {
@@ -11,7 +12,9 @@ const userController = {
       const userData = req.user
       delete userData.password
 
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const token = jwt.sign(userData, process.env.JWT_SECRET, {
+        expiresIn: '30d'
+      })
       res.status(200).json({
         status: 'success',
         data: {
@@ -49,7 +52,7 @@ const userController = {
         name,
         email,
         password: bcrypt.hashSync(password),
-        role: '',
+        role: 'user',
         createAt: new Date(),
         updatedAt: new Date()
       })
@@ -60,6 +63,42 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  }
+  },
+  getUserData: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'
+              ),
+              'followersCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'
+              ),
+              'followingsCount'
+            ]
+          ]
+        }
+      })
+      if (!user) throw new Error('使用者不存在！')
+      // reorganize user data
+      const userData = user.toJSON()
+      delete userData.password
+
+      res.status(200).json({
+        ...userData
+      })
+    } catch (err) { next(err) }
+  },
+  putUserData: (req, res, next) => {},
+  getUserTweets: (req, res, next) => {},
+  getUserReplies: (req, res, next) => {},
+  getUserLikes: (req, res, next) => {},
+  getFollowings: (req, res, next) => {},
+  getFollowers: (req, res, next) => {}
 }
 module.exports = userController
