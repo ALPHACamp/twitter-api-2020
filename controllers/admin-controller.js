@@ -1,18 +1,14 @@
-const { Tweet, User } = require('../models')
-const router = require('../routes')
-// const { imgurFileHandler } = require('../helpers/file-helpers') // 引入處理檔案上傳的 helper
-
+const adminServices = require('../services/admin-service')
 const adminController = {
-  getTweets: (req, res, next) => {
-    return Tweet.findAll({
-      raw: true,
-      nest: true,
-      include: [User]
-    }).then(tweets => {
-      res.send('happy')
-      // return res.json({tweets})
-    }).catch(err=>next(err))
-  }
-}
+  getTweets: (req, res, next) =>{
+    adminServices.getTweets(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  getUsers: (req, res, next) =>{
+    adminServices.getUsers(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  deleteTweet: (req, res, next) =>{
+    adminServices.deleteTweet(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+}  
 
 module.exports = adminController

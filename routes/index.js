@@ -6,5 +6,3 @@ const admin = require('./modules/admin')
 router.use('/admin', admin)
 
 module.exports = router
-
-module.exports = router

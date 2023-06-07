@@ -10,14 +10,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Like',
-    tableName: 'Likes', // 新增這裡
-  })
-  Like.init({
-    userId: DataTypes.INTEGER, 
-    tweetId: DataTypes.INTEGER 
-  }, {
-    sequelize,
-    modelName: 'Like',
     tableName: 'Likes',
   })
   return Like;
