@@ -1,20 +1,27 @@
 {
-  "name": "test",
+  "name": "twitter-api-2020",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "NODE_ENV=development node app.js",
-    "dev": "NODE_ENV=development nodemon app.js",
-    "test": "mocha test --exit --recursive --timeout 5000"
+    "start": "set NODE_ENV=development && node app.js",
+    "dev": "set NODE_ENV=development && nodemon app.js",
+    "lint": "eslint \"**/*.js\" --fix",
+    "test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
+    "eslint": "^8.42.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "faker": "^4.1.0",
