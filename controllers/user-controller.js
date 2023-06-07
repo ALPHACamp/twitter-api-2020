@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const db = require('../models')
 const { Op } = require('sequelize')
 const { User } = db
+const sequelize = require('sequelize')
 
 const userController = {
   login: (req, res, next) => {
@@ -63,7 +64,37 @@ const userController = {
       next(err)
     }
   },
-  getUserData: (req, res, next) => {},
+  getUserData: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'
+              ),
+              'followersCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'
+              ),
+              'followingsCount'
+            ]
+          ]
+        }
+      })
+      if (!user) throw new Error('使用者不存在！')
+      // reorganize user data
+      const userData = user.toJSON()
+      delete userData.password
+
+      res.status(200).json({
+        status: 'success',
+        data: userData
+      })
+    } catch (err) { next(err) }
+  },
   putUserData: (req, res, next) => {},
   getUserTweets: (req, res, next) => {},
   getUserReplies: (req, res, next) => {},
