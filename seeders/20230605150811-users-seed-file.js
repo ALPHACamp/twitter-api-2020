@@ -7,6 +7,7 @@ module.exports = {
     await queryInterface.bulkInsert('Users', [
       {
         email: 'root@example.com',
+        account: 'root',
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'root',
         avatar: `https://loremflickr.com/320/240/people`,
@@ -17,6 +18,7 @@ module.exports = {
       },
       {
         email: 'user1@example.com',
+        account: 'user1',
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user1',
         avatar: `https://loremflickr.com/320/240/people`,
@@ -27,6 +29,7 @@ module.exports = {
       },
       {
         email: 'user2@example.com',
+        account: 'user2',
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user2',
         avatar: `https://loremflickr.com/320/240/people`,
@@ -37,6 +40,7 @@ module.exports = {
       },
       {
         email: 'user3@example.com',
+        account: 'user3',
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user3',
         avatar: `https://loremflickr.com/320/240/people`,
@@ -47,6 +51,7 @@ module.exports = {
       },
       {
         email: 'user4@example.com',
+        account: 'user4',
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user4',
         avatar: `https://loremflickr.com/320/240/people`,
@@ -57,6 +62,7 @@ module.exports = {
       },
       {
         email: 'user5@example.com',
+        account: 'user5',
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user5',
         avatar: `https://loremflickr.com/320/240/people`,
