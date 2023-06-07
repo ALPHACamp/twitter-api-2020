@@ -4,14 +4,13 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Followship.associate = function(models) {
   };
-  // Followship.init({
-  //   followerId: DataTypes.INTEGER, 
-  //   followingId: DataTypes.INTEGER 
-  // }, {
-  //   sequelize,
-  //   modelName: 'Followship',
-  //   tableName: 'Followships',
-  //   underscored: true
-  // })
+  Followship.init({
+    followerId: DataTypes.INTEGER, 
+    followingId: DataTypes.INTEGER 
+  }, {
+    sequelize,
+    modelName: 'Followship',
+    tableName: 'Followships',
+  })
   return Followship;
 };
