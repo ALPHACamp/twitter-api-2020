@@ -12,9 +12,9 @@ const { generalErrorHandler } = require('../middleware/error-handler')
 router.post('/api/users/signin', passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
 router.post('/api/admin/signin', passport.authenticate('local', { session: false }), authenticatedAdmin, userController.signIn)
 
-router.post('/api/users/signup', userController.signUp)
+router.post('/api/users', userController.signUp)
 
-router.get('/api/tweets', tweetController.getTweets)
+router.get('/api/tweets', authenticatedUser, tweetController.getTweets)
 
 router.use('/', generalErrorHandler)
 
