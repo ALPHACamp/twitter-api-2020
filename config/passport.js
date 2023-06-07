@@ -1,8 +1,8 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
-const passportJWT = require('passport-jwt')
-const JWTStrategy = passportJWT.Strategy
-const ExtractJWT = passportJWT.ExtractJwt
+// const passportJWT = require('passport-jwt')
+// const JWTStrategy = passportJWT.Strategy
+// const ExtractJWT = passportJWT.ExtractJwt
 const bcrypt = require('bcryptjs')
 const { User } = require('../models')
 
@@ -33,29 +33,29 @@ passport.use(new LocalStrategy(
 ))
 
 // JWTStrategy Setting
-const jwtOptions = { jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(), secretOrKey: process.env.JWT_SECRET }
+// const jwtOptions = { jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(), secretOrKey: process.env.JWT_SECRET || 'secret' }
 
-passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
-  try {
-    const user = await User.findByPk(jwtPayload.id, {
-      include: [
-        // join table Like
-        // { model: Tweet, as: 'LikedUsers' },
-        // { model: User, as: 'LikedTweets' },
-        // join table Reply
-        // { model: Tweet, as: 'RepliedUsers' },
-        // { model: User, as: 'RepliedTweets' },
-        // join table FollowShip
-        // { model: User, as: 'Followers' },
-        // { model: User, as: 'Followings' }
-      ]
-    })
-    console.log(user.toJSON()) // 測試用
-    return cb(null, user)
-  } catch (error) {
-    cb(error)
-  }
-}))
+// passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
+//   try {
+//     const user = await User.findByPk(jwtPayload.id, {
+//       include: [
+//         // join table Like
+//         // { model: Tweet, as: 'LikedUsers' },
+//         // { model: User, as: 'LikedTweets' },
+//         // join table Reply
+//         // { model: Tweet, as: 'RepliedUsers' },
+//         // { model: User, as: 'RepliedTweets' },
+//         // join table FollowShip
+//         // { model: User, as: 'Followers' },
+//         // { model: User, as: 'Followings' }
+//       ]
+//     })
+//     console.log(user.toJSON()) // 測試用
+//     return cb(null, user)
+//   } catch (error) {
+//     cb(error)
+//   }
+// }))
 
 // passport serializeUser & deserializeUser
 passport.serializeUser((user, cb) => cb(null, user.id))
