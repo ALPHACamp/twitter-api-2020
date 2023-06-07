@@ -4,9 +4,9 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express')
 const passport = require('./config/passport')
-const session = require('express-session')
 const flash = require('connect-flash')
 const { apis, pages } = require('./routes')
+const session = require('express-session')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -24,7 +24,7 @@ app.use(session({
 
 // passport初始化
 app.use(passport.initialize())
-app.use(passport.session())
+// app.use(passport.session())
 
 // flash
 app.use(flash())
