@@ -13,13 +13,13 @@ const userServices = {
         })
             .then(user => {
             if (user) throw new Error('Email already exists!')
-
+            if (req.body.name.length >= 50) throw new Error('50 words restriction')
             const salt = bcrypt.genSaltSync(10);
             const hash = bcrypt.hashSync(req.body.password, salt);
             return User.create({
-              name: req.body.name,
-              email: req.body.email,
-              password: hash
+                name: req.body.name,
+                email: req.body.email,
+                password: hash
             })
         })
             .then(newUser => cb(null, {
