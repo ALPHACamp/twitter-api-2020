@@ -8,16 +8,16 @@ const ExtractJWT = passportJWT.ExtractJwt
 
 passport.use(new LocalStrategy(
   { // 自訂欄位名稱
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
   },
-  (req, email, password, cb) => {
-    User.findOne({ where: { email } })
+  (req, account, password, cb) => {
+    User.findOne({ where: { account } })
       .then(user => {
-        if (!user) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
+        if (!user) throw new Error('帳號不存在！')
         const result = bcrypt.compareSync(password, user.password)
-        if (!result) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
+        if (!result) throw new Error('帳密錯誤！')
         return cb(null, user)
       })
       .catch(err => cb(err))

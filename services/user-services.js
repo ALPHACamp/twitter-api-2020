@@ -8,7 +8,7 @@ const userServices = {
     signUp: (req, cb) => {
         User.findOne({
             where: {
-                email: req.body.email
+                account: req.body.account
             }
         })
             .then(user => {
@@ -18,7 +18,9 @@ const userServices = {
             const hash = bcrypt.hashSync(req.body.password, salt);
             return User.create({
                 name: req.body.name,
+                account: req.body.account,
                 email: req.body.email,
+                role: 'user',
                 password: hash
             })
         })
