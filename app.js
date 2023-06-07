@@ -13,7 +13,6 @@ const app = express()
 const port = process.env.PORT || 3000 //allison少加了
 const SESSION_SECRET = process.env.SESSION_SECRET
 
-app.set('Access-Control-Allow-Origin', 'http://localhost:3000')
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
