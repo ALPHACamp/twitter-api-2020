@@ -6,6 +6,7 @@ const express = require('express')
 const passport = require('./config/passport')
 const flash = require('connect-flash')
 const { apis, pages } = require('./routes')
+const session = require('express-session')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -15,11 +16,11 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 // session設定
-// app.use(session({
-//   secret: process.env.SESSION_SECRET || 'NonSecret',
-//   resave: false,
-//   saveUninitialized: true
-// }))
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'NonSecret',
+  resave: false,
+  saveUninitialized: true
+}))
 
 // passport初始化
 app.use(passport.initialize())
