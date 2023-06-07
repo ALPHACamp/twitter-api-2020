@@ -32,7 +32,7 @@ const adminController = {
         nest: true,
         include: [User]
       })
-      const tweetsData = tweets.map(tweet => ({
+      const tweetsData = tweets?.map(tweet => ({
         ...tweet,
         description: tweet.description.substring(0, TWEETS_WORD_INDICATE),
         relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt)
