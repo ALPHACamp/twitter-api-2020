@@ -9,36 +9,30 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       email: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       password: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       name: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       avatar: {
-        allowNull: true,
-        type: Sequelize.STRING,
-        defaultValue: `https://loremflickr.com/320/240/person/?random=${Math.random() * 100}`
+        type: Sequelize.STRING
       },
       introduction: {
-        allowNull: true,
         type: Sequelize.TEXT
       },
       role: {
-        allowNull: true,
         type: Sequelize.STRING,
+        allowNull: false,
         defaultValue: 'user'
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
