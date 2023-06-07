@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const admin = require('./modules/admin');
+const admin = require("./modules/admin");
 const userController = require("../controllers/user-controller");
 const passport = require("../config/passport");
 const {
@@ -29,6 +29,18 @@ router.post(
 router.get(
   "/api/tweets/:tweet_id", authenticated, authenticatedUser, userController.getTweet);
 router.get(
+  "/api/users/:id/followings",
+  authenticated,
+  authenticatedUser,
+  userController.getFollowings
+);
+// router.get(
+//   "/api/users/:id/followers",
+//   authenticated,
+//   authenticatedUser,
+//   userController.getFollowers
+// );
+router.get(
   "/api/tweets", authenticated, authenticatedUser, userController.getTweets);
 router.post(
   "/api/tweets", authenticated, authenticatedUser, userController.postTweets);
@@ -36,12 +48,12 @@ router.post(
 //   "/api/users/:id",
 //   authenticated,
 //   authenticatedUser,
-//   userController.getUser
+//   userController.getUserProfile
 // );
 // router.put(
 //   "/api/users/:id",
 //   authenticated,
 //   authenticatedUser,
-//   userController.putUser
+//   userController.putUserProfile
 // );
 module.exports = router;

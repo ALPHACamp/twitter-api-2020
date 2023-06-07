@@ -1,9 +1,9 @@
 const bcrypt = require("bcryptjs");
-const { Sequelize, literal } = require('sequelize');
-const { User, Tweet, Reply, Like } = require("../models");
+const { User, Tweet, Reply, Like, Followship } = require("../models");
 const jwt = require("jsonwebtoken");
 const { getUser } = require("../_helpers");
-const like = require("../models/like");
+const Sequelize = require("sequelize");
+const { Op, literal } = Sequelize;
 
 const userController = {
   signUp: (req, res, next) => {
@@ -15,9 +15,10 @@ const userController = {
     if (!email || email.trim() === "") throw new Error("Email為必填項目");
     if (!password || password.trim() === "") throw new Error("密碼為必填項目");
     // Error: 字數限制
+
     // 待設定password, name, account
     return User.findAll({
-      $or: [{ where: { account } }, { where: { email } }],
+      [Op.or]: [{ where: { account } }, { where: { email } }],
     })
       .then((users) => {
         if (users.some((u) => u.email === email))
@@ -66,8 +67,94 @@ const userController = {
       })
       .catch((err) => next(err));
   },
-  getUserProfile: (req, res, next) => { },
-  putUserProfile: (req, res, next) => { },
+  getUserProfile: (req, res, next) => {
+    const id = req.params.id || getUser(req).dataValues.id;
+    return User.findByPk(id, {
+      raw: true,
+      nest: true,
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = user.id)"
+            ),
+            "follower",
+          ],
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = user.id)"
+            ),
+            "following",
+          ],
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = user.id)"
+            ),
+            "tweetAmount",
+          ],
+        ],
+        exclude: ["password", "createdAt", "updatedAt"],
+      },
+    })
+      .then((user) => {
+        if (!user) throw new Error("帳號不存在！");
+        if (user.role === "admin") throw new Error("帳號不存在！");
+        res.status(200).json(user);
+      })
+      .catch((err) => next(err));
+  },
+  putUserProfile: (req, res, next) => {
+    const userId = Number(req.params.id);
+    const { name, introduction, avatar, cover } = req.body;
+    if (!name) throw new Error("name is required!");
+    if (getUser(req).id !== userId) throw new Error("permission denied");
+    return User.findByPk(userId)
+      .then((user) => {
+        if (!user) throw new Error("帳號不存在！");
+        return user.update({
+          name,
+          introduction,
+          avatar: avatar ? avatar : user.avatar,
+          cover: cover ? cover : user.cover,
+        });
+      })
+      .then((updatedUser) => res.status(200).json({ user: updatedUser }))
+      .catch((err) => next(err));
+  },
+  getFollowings: (req, res, next) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,
+          as: "Followings",
+          attributes: [
+            ["id", "followingId"],
+            "name",
+            "account",
+            "avatar",
+            "cover",
+            "introduction",
+          ],
+        },
+      ],
+      attributes: [["id", "userId"], "name", "account", "avatar", "cover"],
+    })
+      .then((followings) => {
+        if (followings.Followings.length === 0)
+          return res.status(200).json({ isEmpty: true });
+        const followingId = getUser(req).Followings.map((user) => user.id);
+        const result = followings.Followings.map((f) => ({
+          ...f.toJSON(),
+          isFollowed: followingId.includes(f.toJSON().followingId) || false,
+        })).sort(
+          (a, b) =>
+            b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime()
+        );
+        result.forEach((i) => delete i.Followship);
+        return res.json(result);
+      })
+      .catch((err) => next(err));
+  },
 
   getUserTweets: (req, res, next) => {
     return Promise.all([
@@ -282,5 +369,4 @@ const userController = {
       .catch(err => next(err))
   }
 };
-
 module.exports = userController;
