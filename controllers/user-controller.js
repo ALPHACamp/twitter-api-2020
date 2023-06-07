@@ -1,8 +1,9 @@
 const bcrypt = require("bcryptjs");
 const { Sequelize, literal } = require('sequelize');
-const { User, Tweet, Reply } = require("../models");
+const { User, Tweet, Reply, Like } = require("../models");
 const jwt = require("jsonwebtoken");
 const { getUser } = require("../_helpers");
+const like = require("../models/like");
 
 const userController = {
   signUp: (req, res, next) => {
@@ -65,8 +66,8 @@ const userController = {
       })
       .catch((err) => next(err));
   },
-  // getUserProfile: (req, res, next) => { },
-  // putUserProfile: (req, res, next) => { },
+  getUserProfile: (req, res, next) => { },
+  putUserProfile: (req, res, next) => { },
 
   getUserTweets: (req, res, next) => {
     return Promise.all([
@@ -116,7 +117,7 @@ const userController = {
         include: [
           {
             model: Tweet,
-            include: [{ model: User, attributes: ['id', 'name', 'account'], },],
+            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'], },],
           },
         ],
         raw: true,
@@ -129,6 +130,32 @@ const userController = {
         // Error: replies not found
         if (!replies || replies.length === 0) { return res.status(404).json({ status: 'error', message: 'No replies found' }) }
         return res.status(200).json(replies);
+      })
+
+      .catch(err => next(err))
+  },
+
+  getUserLikes: (req, res, next) => {
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Like.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          {
+            model: Tweet,
+            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'], },],
+          },
+        ],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, likes]) => {
+        // Error: user not found
+        if (!user) { return res.status(404).json({ status: 'error', message: 'No user found' }) }
+        // Error: likes not found
+        if (!likes || likes.length === 0) { return res.status(404).json({ status: 'error', message: 'No likes found' }) }
+        return res.status(200).json(likes)
       })
 
       .catch(err => next(err))

@@ -20,6 +20,8 @@ router.get(
   "/api/users/:id/tweets", userController.getUserTweets);
 router.get(
   "/api/users/:id/replied_tweets", userController.getUserRepliedTweets);
+router.get(
+  "/api/users/:id/likes", userController.getUserLikes);
 // router.get(
 //   "/api/users/:id",
 //   authenticated,
