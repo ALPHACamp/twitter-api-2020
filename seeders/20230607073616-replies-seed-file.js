@@ -35,5 +35,6 @@ module.exports = {
       return queryInterface.bulkDelete('People', null, {});
     */
     await queryInterface.bulkDelete('Replies', {})
+    await queryInterface.sequelize.query('ALTER TABLE Replies AUTO_INCREMENT = 1')
   }
 }
