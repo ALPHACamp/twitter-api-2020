@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const admin = require('./modules/admin')
 const users = require('./modules/users')
+const tweets = require('./modules/tweets')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated } = require('../middleware/auth')
 const passport = require('passport')
@@ -16,6 +17,9 @@ router.use('/api/admin', authenticated, isAuthAdmin, admin)
 router.post('/api/users', userController.signup)
 router.post('/api/users/login', passport.authenticate('local', { session: false }), isUser, userController.login)
 router.use('/api/users', authenticated, isAuthUser, users)
+
+// tweets
+router.use('/api/tweets', authenticated, isAuthUser, tweets)
 
 // error handler
 router.use('/', apiErrorHandler)
