@@ -14,5 +14,4 @@ router.get('/:id/followers', userController.getFollowers)// 取得正在追蹤us
 router.get('/:id', userController.getUserData) // 取得user資料
 router.put('/:id', userController.putUserData) // 編輯user資料
 
-
 module.exports = router
