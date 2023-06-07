@@ -18,8 +18,8 @@ module.exports = {
         comment: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date(),
-        UserId: users[i % 5].id,
-        TweetId: tweets[Math.floor(i / 3)].id
+        UserId: users[i % 5].id, // 照user順序分配reply
+        TweetId: tweets[Math.floor(i / 3)].id // 每個tweet照順序分配3個reply
       }))
     )
   },

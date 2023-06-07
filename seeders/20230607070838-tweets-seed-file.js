@@ -12,7 +12,7 @@ module.exports = {
         description: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date(),
-        UserId: users[Math.floor(i / 10)].id,
+        UserId: users[Math.floor(i / 10)].id, // 每個tweets照順序分配10個tweets
         numberLike: Math.floor(Math.random() * 10),
         numberUnlike: Math.floor(Math.random() * 10)
       }))
