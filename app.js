@@ -10,11 +10,6 @@ const passport = require('./config/passport')
 
 const app = express()
 const port = 3000
-// authenticated() 搬去 middleware
-// use helpers.getUser(req) to replace req.user
-function authenticated (req, res, next) {
-  // passport.authenticate('jwt', { ses...
-};
 
 // middleware
 app.use(express.urlencoded({ extended: true }))
