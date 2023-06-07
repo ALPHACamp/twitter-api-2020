@@ -38,6 +38,9 @@ app.use((req, res, next) => {
 })
 
 // routes
+app.get('/', (req, res) => {
+  res.json({ status: 'Hello world!' })
+})
 app.use('/api', apis)
 app.use('/', pages)
 
