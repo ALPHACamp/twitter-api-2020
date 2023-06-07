@@ -85,7 +85,7 @@ const userController = {
       next(err)
     }
   },
-  // 查看使用者所寫過的推文資料
+  // 獲取使用者所寫過的推文資料
   getUserTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
@@ -111,6 +111,38 @@ const userController = {
       })
       tweetsData.push(user)
       return res.json(tweetsData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 獲取使用者所寫過的推文回覆資料
+  getUserReplies: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId, { raw: true, attributes: ['name', 'account', 'avatar'] })
+      if (!user) newErrorGenerate('使用者不存在', 404)
+      const replies = await Reply.findAll({
+        where: { UserId: userId },
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: Tweet,
+            attributes: ['id'],
+            include: {
+              model: User,
+              attributes: ['account']
+            }
+          }
+        ],
+        raw: true,
+        nest: true
+      })
+      const repliesData = replies?.map(reply => ({
+        ...reply,
+        relativeTimeFromNow: relativeTimeFromNow(reply.createdAt)
+      }))
+      repliesData.push(user)
+      return res.json(repliesData)
     } catch (err) {
       next(err)
     }
