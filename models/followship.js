@@ -1,14 +1,17 @@
-'use strict';
+'use strict'
+const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  const Followship = sequelize.define('Followship', {
+  class Followship extends Model {
+    static associate(models) {
+    }
+  };
+  Followship.init({
     followingId: DataTypes.INTEGER,
     followerId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Followship',
     tableName: 'Followships'
-  });
-  Followship.associate = function (models) {
-  };
-  return Followship;
-};
+  })
+  return Followship
+}
