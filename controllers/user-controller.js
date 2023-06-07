@@ -15,6 +15,7 @@ const userController = {
     if (!email || email.trim() === "") throw new Error("Email為必填項目");
     if (!password || password.trim() === "") throw new Error("密碼為必填項目");
     // Error: 字數限制
+
     // 待設定password, name, account
     return User.findAll({
       [Op.or]: [{ where: { account } }, { where: { email } }],
@@ -118,6 +119,40 @@ const userController = {
         });
       })
       .then((updatedUser) => res.status(200).json({ user: updatedUser }))
+      .catch((err) => next(err));
+  },
+  getFollowings: (req, res, next) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,
+          as: "Followings",
+          attributes: [
+            ["id", "followingId"],
+            "name",
+            "account",
+            "avatar",
+            "cover",
+            "introduction",
+          ],
+        },
+      ],
+      attributes: [["id", "userId"], "name", "account", "avatar", "cover"],
+    })
+      .then((followings) => {
+        if (followings.Followings.length === 0)
+          return res.status(200).json({ isEmpty: true });
+        const followingId = getUser(req).Followings.map((user) => user.id);
+        const result = followings.Followings.map((f) => ({
+          ...f.toJSON(),
+          isFollowed: followingId.includes(f.toJSON().followingId) || false,
+        })).sort(
+          (a, b) =>
+            b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime()
+        );
+        result.forEach((i) => delete i.Followship);
+        return res.json(result);
+      })
       .catch((err) => next(err));
   },
 };

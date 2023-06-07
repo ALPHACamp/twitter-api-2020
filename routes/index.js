@@ -16,6 +16,18 @@ router.use("/api/admin", admin);
 router.post("/api/users/signin", userController.signIn);
 router.post("/api/users", userController.signUp);
 router.get(
+  "/api/users/:id/followings",
+  authenticated,
+  authenticatedUser,
+  userController.getFollowings
+);
+// router.get(
+//   "/api/users/:id/followers",
+//   authenticated,
+//   authenticatedUser,
+//   userController.getFollowers
+// );
+router.get(
   "/api/users/:id",
   authenticated,
   authenticatedUser,
