@@ -1,9 +1,10 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
 const { isUser } = require('../helpers/isUser-helper')
+const { relativeTimeFromNow } = require('../helpers/dayFix-helper')
 const USERS_WORD_LIMIT = 50
 
 const userController = {
@@ -80,6 +81,35 @@ const userController = {
         followingsCount
       }
       return res.json(userData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 查看使用者所寫過的推文資料
+  getUserTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId, { raw: true, attributes: ['id'] })
+      if (!user) newErrorGenerate('使用者不存在', 404)
+      const tweets = await Tweet.findAll({
+        where: { UserId: userId },
+        order: [['createdAt', 'DESC']],
+        include: [
+          { model: Reply, include: User },
+          { model: Like, include: User }
+        ]
+      })
+      const tweetsData = tweets?.map(tweet => {
+        tweet = tweet.toJSON()
+        const { Replies, Likes, ...tweetData } = tweet
+        return {
+          ...tweetData,
+          relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt),
+          repliesCount: tweet.Replies?.length,
+          likesCount: tweet.Likes?.length
+        }
+      })
+      return res.json(tweetsData)
     } catch (err) {
       next(err)
     }
