@@ -1,6 +1,7 @@
+const { getUser } = require('../_helpers') // for test
 const roleCheck = (role, errorMessage) => {
   return (req, res, next) => {
-    if (req.user.role !== role) {
+    if (getUser(req).role !== role) {
       const error = new Error(errorMessage)
       return res.status(401).json({
         status: 'error',
