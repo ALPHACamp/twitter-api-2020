@@ -1,4 +1,5 @@
 const { User, Tweet } = require('../../models')
+const { getUser } = require('../../_helpers')
 
 const adminController = {
   adminLogin: async (req, res, next) => {
@@ -8,9 +9,11 @@ const adminController = {
         where: { account },
         raw: true
       })
-      if (!user) return res.json({ status: 'failed', data: 'You are not admin' })
-      if (user.role !== 'admin') return res.json({ status: 'failed', data: 'You are not admin' })
-      return res.json({ status: 'success', data: 'You are admin' })
+      if (!user) return res.json({ status: 'error', data: 'You are not admin' })
+      if (user.role !== 'admin') return res.json({ status: 'error', data: 'You are not admin' })
+      const userData = user
+      delete userData.password
+      return res.json({ status: 'success', data: user })
     } catch (error) {
       next(error)
     }
