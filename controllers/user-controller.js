@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const { Op } = require('sequelize')
-const { User, Tweet, Reply, Like } = db
+const { User, Tweet, Reply, Like, Followship } = db
 const sequelize = require('sequelize')
 
 const userController = {
@@ -176,7 +176,22 @@ const userController = {
     }
   },
   getFollowings: async (req, res, next) => {
-    try { // 找出followerId = req.params.id的資料，並顯示出其Users data，加入isFollowing給前端判斷是否正在追蹤
+    try { // 使用者正在追蹤的對象
+      const followings = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: User,
+            as: 'Followings',
+            attributes: { exclude: ['password'] },
+            order: [['Followship.createdAt', 'DESC']]
+          }
+        ],
+        attributes: { exclude: ['password'] }
+      })
+
+      console.log(followings.toJSON())
+      // const followingsData = followings.Followings.map(following => following.toJSON())
+      res.status(200).json(followings)
     } catch (err) {
       next(err)
     }
