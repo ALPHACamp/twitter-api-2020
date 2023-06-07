@@ -51,7 +51,7 @@ const userController = {
       next(err)
     }
   },
-  // 獲取使用者資料及其推文
+  // 獲取使用者所寫過的推文資料
   getUserTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
