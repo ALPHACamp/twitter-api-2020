@@ -25,8 +25,9 @@ const userController = {
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
-    User.findByPk(userId, {
+    const UserId = Number(req.params.user_id) || ''
+    User.findByPk(UserId, {
+      attributes: { exclude: ['password'] },
       nest: true,
       raw: true
     }
@@ -41,13 +42,16 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
+    const UserId = Number(req.params.user_id) || ''
     Tweet.findAll({
       include: [
-        User
+        {
+          model: User,
+          attributes: { exclude: ['password'] },
+        }
       ],
       where: {
-        ...userId ? { userId } : {}
+        ...UserId ? { UserId } : {}
       },
       nest: true,
       raw: true
@@ -59,14 +63,17 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserRepliedTweets: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
+    const UserId = Number(req.params.user_id) || ''
     Reply.findAll({
       include: [
-        User,
+        {
+          model: User,
+          attributes: { exclude: ['password'] },
+        },
         Tweet
       ],
       where: {
-        ...userId ? { userId } : {}
+        ...UserId ? { UserId } : {}
       },
       nest: true,
       raw: true
@@ -78,11 +85,12 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserLikes: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
-    User.findByPk(userId, {
+    const UserId = Number(req.params.user_id) || ''
+    User.findByPk(UserId, {
       include: [
         { model: Tweet, as: 'LikedTweets' }
       ],
+      attributes: { exclude: ['password'] },
       nest: true,
       raw: true
     })
@@ -93,11 +101,15 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserFollowings: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
-    User.findByPk(userId, {
+    const UserId = Number(req.params.user_id) || ''
+    User.findByPk(UserId, {
       include: [
-        { model: User, as: 'Followings' }
+        {
+          model: User, as: 'Followings',
+          attributes: { exclude: ['password'] }
+        }
       ],
+      attributes: { exclude: ['password'] },
       nest: true,
       raw: true
     })
@@ -108,10 +120,13 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserFollowers: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
-    User.findByPk(userId, {
+    const UserId = Number(req.params.user_id) || ''
+    User.findByPk(UserId, {
       include: [
-        { model: User, as: 'Followers' }
+        {
+          model: User, as: 'Followers',
+          attributes: { exclude: ['password'] }
+        }
       ],
       nest: true,
       raw: true
@@ -135,17 +150,19 @@ const userController = {
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
-    const { name, email, introduction } = req.body
+    const { name, email, introduction, password } = req.body
     if (!name) throw new Error('User name is required!')
     if (!email) throw new Error('User email is required!')
 
     const { file } = req
     return Promise.all([
       User.findByPk(req.params.user_id),
-      imgurFileHandler(file)])
-      .then(([user, filePath]) => {
+      imgurFileHandler(file),
+      bcrypt.hash(password, 10)])
+      .then(([user, filePath, hash]) => {
         if (!user) throw new Error("User didn't exist!")
         return user.update({
+          password: hash,
           name,
           email,
           introduction,
@@ -161,7 +178,13 @@ const userController = {
   getTopUsers: (req, cb) => {
     const rank = req.query.rank
     return User.findAll({
-      include: [{ model: User, as: 'Followers' }]
+      include: [
+        {
+          model: User, as: 'Followers',
+          attributes: { exclude: ['password'] }
+        }
+      ],
+      attributes: { exclude: ['password'] }
     })
       .then(users => {
         const result = users.map(user => ({
@@ -177,13 +200,13 @@ const userController = {
       .catch(err => cb(err))
   },
   addLike: (req, cb) => {
-    const tweetId = req.params.tweet_id
+    const TweetId = req.params.tweet_id
     return Promise.all([
-      Tweet.findByPk(tweetId),
+      Tweet.findByPk(TweetId),
       Like.findOne({
         where: {
-          userId: req.user.id,
-          tweetId
+          UserId: req.user.id,
+          TweetId
         }
       })
     ])
@@ -192,8 +215,8 @@ const userController = {
         if (like) throw new Error('You have liked this tweet!')
 
         return Like.create({
-          userId: req.user.id,
-          tweetId
+          UserId: req.user.id,
+          TweetId
         })
       })
       .then(like => cb(null, like))
@@ -202,8 +225,8 @@ const userController = {
   removeLike: (req, cb) => {
     return Like.findOne({
       where: {
-        userId: req.user.id,
-        tweetId: req.params.tweet_id
+        UserId: req.user.id,
+        TweetId: req.params.tweet_id
       }
     })
       .then(like => {
@@ -214,13 +237,13 @@ const userController = {
       .catch(err => cb(err))
   },
   addFollowing: (req, cb) => {
-    const userId = req.params.user_id
+    const UserId = req.params.user_id
     Promise.all([
-      User.findByPk(userId),
+      User.findByPk(UserId),
       Followship.findOne({
         where: {
           followerId: req.user.id,
-          followingId: userId
+          followingId: UserId
         }
       })
     ])
@@ -229,7 +252,7 @@ const userController = {
         if (followship) throw new Error('You are already following this user!')
         return Followship.create({
           followerId: req.user.id,
-          followingId: userId
+          followingId: UserId
         })
       })
       .then(followship => cb(null, followship))
