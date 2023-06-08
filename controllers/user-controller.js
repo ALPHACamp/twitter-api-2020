@@ -180,6 +180,28 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  // 使用者能編輯自己的資料
+  putUser: async (req, res, next) => {
+    const userId = req.params.id
+    const user = await User.findByPk(userId, { attributes: ['id'] })
+    if (!user) newErrorGenerate('使用者不存在', 404)
+    if (!isUser(req)) newErrorGenerate('使用者非本帳號無權限編輯', 404)
+    const { name, account, email, password, checkPassword, avatar, introduction, backgroundImage } = req.body
+    if (account ? await User.findOne({ attributes: ['id'], where: { account } }) : false) newErrorGenerate('account 已重複註冊', 404)
+    if (email ? await User.findOne({ attributes: ['id'], where: { email } }) : false) newErrorGenerate('email 已重複註冊', 404)
+    if (name && name > 50) newErrorGenerate('字數超出上限', 404)
+    if (password && password !== checkPassword) newErrorGenerate('密碼與確認密碼不相符', 404)
+    if (introduction && introduction > 160) newErrorGenerate('字數超出上限', 404)
+    
+
+    const { userAccount, userEmail } = await Promise.all([
+      User.findOne({ attributes: ['id'], where: { account } }),
+      User.findOne({ attributes: ['id'], where: { email } })
+    ])
+    if (userAccount) 
+    if (userEmail) newErrorGenerate('email 已重複註冊', 404)
+    
   }
 }
 module.exports = userController
