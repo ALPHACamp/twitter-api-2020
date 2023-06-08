@@ -186,7 +186,7 @@ const tweetController = {
 
       // check if comment is whitespace
       const { comment } = req.body
-      if (comment.trim().length > 0) {
+      if (comment.trim().length === 0) {
         return res
           .status(400)
           .json({ error: "Comment cannot be only whitespace!" });
