@@ -6,7 +6,8 @@ const tweetController = require('../../controllers/tweet-controller')
 router.post('/:tweet_id/replies', tweetController.postReply)
 // 查看一篇推文
 router.get('/:tweet_id', tweetController.getTweet)
-// 新增推文(tweet)
+// 瀏覽所有推文
 router.get('/', tweetController.getTweets)
+// 新增推文(tweet)
 router.post('/', tweetController.postTweet)
 module.exports = router
