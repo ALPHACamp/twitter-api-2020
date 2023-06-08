@@ -2,6 +2,7 @@ const router = require('express').Router()
 const userController = require('../../controllers/user-controller')
 const { multiUpload } = require('../../middleware/multer')
 
+router.get('/topFollowers', userController.getTopFollower) // 取得follower 前10多的user資料
 router.get('/:id/tweets', userController.getUserTweets) // 取得user發過的tweets
 router.get('/:id/replied_tweets', userController.getUserReplies)// 取得user回覆的tweets
 router.get('/:id/likes', userController.getUserLikes) // 取得user Like過的tweets
