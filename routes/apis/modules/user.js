@@ -1,0 +1,14 @@
+const express = require('express')
+const router = express.Router()
+const userController = require('../../../controllers/apis/user-controller')
+const upload = require('../../../middleware/multer')
+const profileUpload = upload.fields([{ name: 'coverPhoto', maxCount: 1 }, { name: 'avatar', maxCount: 1 }])
+const { authenticated } = require('../../../middleware/api-auth')
+
+router.post('/', userController.signUp)
+router.put('/:id/account', authenticated, userController.putAccount)
+router.put('/:id', authenticated, profileUpload, userController.putUser)
+// for JWT test purpose
+// router.get('/getuser', authenticated, userController.getUser)
+
+module.exports = router
