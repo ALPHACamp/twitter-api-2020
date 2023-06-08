@@ -17,10 +17,10 @@ passport.use(new LocalStrategy(
   (req, email, password, cb) => {
     User.findOne({ where: { email } })
       .then(user => {
-        if (!user) return cb(null, false)
+        if (!user) cb(new Error('That email is not registered!'))
         bcrypt.compare(password, user.password).then(res => {
-          if (!res) return cb(null, false)
-          return cb(null, user)
+          if (!res) cb(new Error('Email or Password incorrect.'))
+          cb(null, user)
         })
       })
   }

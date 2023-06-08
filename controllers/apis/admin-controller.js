@@ -6,7 +6,7 @@ const userController = {
   signIn: (req, res, next) => {
     try {
       const userData = req.user.toJSON()
-      if (role !== 'admin') throw new Error('帳號不存在！')
+      if (userData.role !== 'admin') throw new Error('帳號不存在！')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
