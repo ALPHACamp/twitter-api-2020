@@ -1,5 +1,5 @@
 const { User, Tweet, Reply } = require('../models')
-
+const { getLastUpdated } = require('../_helpers')
 const adminController = {
   getUsers: (req, res, next) => {
     User.findAll({
@@ -38,29 +38,8 @@ const adminController = {
         tweets.forEach(tweet => {
           // 只顯示前50個字
           if (tweet.description.length > 50) tweet.description = tweet.description.substring(0, 50) + '...'
-          // 取得現在的時間
-          const now = new Date()
-
-          // 計算 createdAt 和 updatedAt 和現在的時間差
-          const createdDiff = now - new Date(tweet.createdAt)
-          const updatedDiff = now - new Date(tweet.updatedAt)
-
-          // 選擇最近的時間差
-          const lastUpdatedDiff = createdDiff < updatedDiff ? createdDiff : updatedDiff
-
-          // 轉換成所需的格式
-          let lastUpdated
-          const diffInHours = lastUpdatedDiff / 1000 / 60 / 60
-          if (diffInHours < 1) {
-            lastUpdated = `${Math.round(diffInHours * 60)} minutes ago`
-          } else if (diffInHours < 24) {
-            lastUpdated = `${Math.round(diffInHours)} hours ago`
-          } else {
-            lastUpdated = `${Math.round(diffInHours / 24)} days ago`
-          }
-
-          // 新增 lastUpdated 欄位到 tweet 物件中
-          tweet.lastUpdated = lastUpdated
+          // 取得現在的時間 - 更新時間
+          getLastUpdated(tweet)
         })
         return res.json({ status: 'success', data: tweets })
       })
@@ -90,28 +69,8 @@ const adminController = {
           // 只顯示前50個字
           if (reply.comment.length > 50) reply.comment = reply.comment.substring(0, 50) + '...'
           // 取得現在的時間
-          const now = new Date()
-
-          // 計算 createdAt 和 updatedAt 和現在的時間差
-          const createdDiff = now - new Date(reply.createdAt)
-          const updatedDiff = now - new Date(reply.updatedAt)
-
-          // 選擇最近的時間差
-          const lastUpdatedDiff = createdDiff < updatedDiff ? createdDiff : updatedDiff
-
-          // 轉換成所需的格式
-          let lastUpdated
-          const diffInHours = lastUpdatedDiff / 1000 / 60 / 60
-          if (diffInHours < 1) {
-            lastUpdated = `${Math.round(diffInHours * 60)} minutes ago`
-          } else if (diffInHours < 24) {
-            lastUpdated = `${Math.round(diffInHours)} hours ago`
-          } else {
-            lastUpdated = `${Math.round(diffInHours / 24)} days ago`
-          }
-
-          // 新增 lastUpdated 欄位到 tweet 物件中
-          reply.lastUpdated = lastUpdated
+          // 取得現在的時間 - 更新時間
+          getLastUpdated(reply)
         })
         return res.json({ status: 'success', data: replies })
       })
