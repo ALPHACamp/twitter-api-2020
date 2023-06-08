@@ -9,12 +9,12 @@ const ExtractJWT = passportJWT.ExtractJwt
 passport.use(new LocalStrategy(
   // customize user field
   {
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
   },
   // authenticate user
-  async (req, email, password, cb) => {
+  async (req, account, password, cb) => {
     // User.findOne({ where: { email } })
     //   .then(user => {
     //     if (!user) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤'))
@@ -25,7 +25,7 @@ passport.use(new LocalStrategy(
     //       })
     //   })
     try {
-      const user = await User.findOne({ where: { email } })
+      const user = await User.findOne({ where: { account } })
       if (!user) {
         throw new Error('帳號不存在')
       }

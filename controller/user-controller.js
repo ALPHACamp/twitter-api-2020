@@ -10,28 +10,27 @@ const userController = {
       res.json({ status: 'success', data: { token, user: req.user } })
     } catch (err) { next(err) }
   },
-  signUp: (req, res, next) => {
+  signUp: async (req, res, next) => {
     if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match')
-    User.findOne({ where: { email: req.body.email } })
-      .then(user => {
-        if (user) throw new Error('Email already exist!')
-        return bcrypt.hash(req.body.password, 10)
-      })
-      .then(hash => User.create({
+    try {
+      // check if user with given email or account already exists
+      const existingAccount = await User.findOne({ where: { account: req.body.account } })
+      const existingEmail = await User.findOne({ where: { email: req.body.email } })
+      if (existingAccount) { throw new Error('Account already exists!') }
+      if (existingEmail) { throw new Error('Email already exists!') }
+      // If user does not exist, hash password and create new user
+      const hash = await bcrypt.hash(req.body.password, 10)
+      const newUser = await User.create({
         name: req.body.name,
         email: req.body.email,
         password: hash,
         account: req.body.account,
         role: 'user'
-      }))
-      .then(newUser => {
-        const userJSON = newUser.toJSON()
-        delete userJSON.password
-        return res.json({ status: 'success', data: { user: userJSON } })
       })
-      .catch(err => {
-        next(err)
-      })
+      const userJSON = newUser.toJSON()
+      delete userJSON.password
+      return res.json({ status: 'success', data: { user: userJSON } })
+    } catch (err) { next(err) }
   }
 }
 
