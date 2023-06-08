@@ -1,6 +1,8 @@
 const { User, Tweet } = require('../models')
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const Sequelize = require("sequelize")
+const { literal } = Sequelize
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -28,20 +30,49 @@ const adminController = {
       .catch((err) => next(err));
   },
 
-  // function still need to be modified
   getUsers: (req, res, next) => {
-    User.findAll({
-      include: [
-        Tweet,
-        { model: User, as: 'Followings' },
-        { model: User, as: 'Followers' },
-      ],
+    return User.findAll({
+      where: { role: "user" },
+      attributes: {
+        include: [
+          // user data
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = user.id)"
+            ),
+            "tweetCount",
+          ],
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = user.id)"
+            ),
+            "likeCount",
+          ],
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = user.id)"
+            ),
+            "followerCount",
+          ],
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = user.id)"
+            ),
+            "followingCount",
+          ],
+        ],
+        exclude: ["password", "createdAt", "updatedAt", "role"]},
       raw: true,
       nest: true,
     })
       .then((users) => {
-        console.log(users)
-        return res.status(200).json(users)
+        const result = users
+        // sort by tweets count
+        .sort(
+          (a, b) =>
+            b.tweetCount - a.tweetCount
+        )
+        return res.status(200).json(result)
       })
       .catch((err) => next(err))
   },
