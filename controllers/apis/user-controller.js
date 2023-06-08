@@ -27,6 +27,16 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  putUser: (req, res, next) => {
+    userServices.putUser(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
+  },
+  putAccount: (req, res, next) => {
+    userServices.putAccount(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
   }
 
   // for JWT test purpose
