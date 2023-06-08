@@ -3,25 +3,27 @@ const { Tweet, User, Reply } = require('../models')
 
 const replyServices = {
   postComment: (req, cb) => {
-  return Tweet.findByPk(req.params.id, {
-    include: [Reply]
-  }).then(tweet => {
-    const { tweetId, comment } = req.body
-    const userId = req.user.id
-    console.log('userId', userId)
-    console.log('user.id', req.user.id)
-    if (!comment) throw new Error('Comment text is required!')
-    if (!tweet) throw new Error("Tweet didn't exist!")
-    return Reply.create({
-      userId,
-      tweetId,
-      comment
-    })
-  }).then(reply => cb(null, { reply }))
-    .catch(err => cb(err))
+    const tweetId = req.params.tweet_id
+    return Tweet.findByPk(tweetId, {
+      include: [Reply]
+    }).then(tweet => {
+      const { tweetId, comment } = req.body
+      const userId = req.user.user_id
+      console.log('userId', userId)
+      console.log('user.id', req.user.user_id)
+      if (!comment) throw new Error('Comment text is required!')
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      return Reply.create({
+        userId,
+        tweetId,
+        comment
+      })
+    }).then(reply => cb(null, { reply }))
+      .catch(err => cb(err))
   },
   getComment: (req, cb) => {
-    return Tweet.findByPk(req.params.id, { include: [Reply] }).then(tweet => cb(null, { tweet }))
+    const tweetId = req.params.tweet_id
+    return Tweet.findByPk(tweetId, { include: [Reply] }).then(tweet => cb(null, { tweet }))
       .catch(err => cb(err))
   }
 }

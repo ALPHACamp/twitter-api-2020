@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     User.belongsToMany(models.Tweet, {
       through: models.Like,
       foreignKey: 'userId',
-      as: 'FavoritedTweets'
+      as: 'LikedTweets'
     })
     User.belongsToMany(User, {
       through: models.Followship,
@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     })
   };
   User.init({
+    account: DataTypes.STRING,
     email: DataTypes.STRING,
     password: DataTypes.STRING,
     name: DataTypes.STRING,
