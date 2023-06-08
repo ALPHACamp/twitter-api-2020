@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const { Op } = require('sequelize')
-const { User, Tweet, Reply, Like } = db
+const { User, Tweet, Reply, Like, Followship } = db
 const sequelize = require('sequelize')
 
 const userController = {
@@ -176,14 +176,52 @@ const userController = {
     }
   },
   getFollowings: async (req, res, next) => {
-    try { // 找出followerId = req.params.id的資料，並顯示出其Users data，加入isFollowing給前端判斷是否正在追蹤
+    try { // 使用者正在追蹤的對象
+      const user = await User.findByPk(req.params.id, {
+        attributes: { exclude: ['password'] }
+      })
+      if (!user) throw new Error('使用者不存在!')
+
+      const followings = await Followship.findAll({
+        where: { followerId: req.params.id },
+        include: [
+          {
+            model: User,
+            as: 'Following',
+            attributes: { exclude: ['password'] }
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      const followingsData = followings.map(following => following.toJSON())
+      res.status(200).json(followingsData)
     } catch (err) {
       next(err)
     }
   },
   getFollowers: async (req, res, next) => {
     try {
-      // 找出followingId = req.params.id的資料，並顯示出其Users data，加入isFollowing給前端判斷是否正在追蹤
+      // 找出正在追蹤此使用者的其它使用者
+      const user = await User.findByPk(req.params.id, {
+        attributes: { exclude: ['password'] }
+      })
+      if (!user) throw new Error('使用者不存在!')
+
+      const followers = await Followship.findAll({
+        where: { followingId: req.params.id },
+        include: [
+          {
+            model: User,
+            as: 'Follower',
+            attributes: { exclude: ['password'] }
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      const followersData = followers.map(follower => follower.toJSON())
+      res.status(200).json(followersData)
     } catch (err) {
       next(err)
     }
