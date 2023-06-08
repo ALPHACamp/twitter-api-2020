@@ -54,6 +54,29 @@ const tweetServices = {
     })
       .then(tweet => cb(null, tweet))
       .catch(err => cb(err))
+  },
+  getTweetReplies: (req, cb) => {
+    console.log(req.params.tweet_id)
+    Promise.all([
+      Reply.findAll({
+        where: { TweetId: req.params.tweet_id },
+        include: User
+      }),
+      Tweet.findByPk(req.params.tweet_id, { include: User })
+    ])
+      .then(([replies, tweet]) => {
+        if (!tweet) throw new Error('tweet not found')
+        replies = replies.map(reply => {
+          reply = {
+            ...reply.toJSON(),
+            repliesAccount: tweet.User.account
+          }
+          delete reply.User.password
+          return reply
+        })
+        return cb(null, replies)
+      })
+      .catch(err => cb(err))
   }
 }
 
