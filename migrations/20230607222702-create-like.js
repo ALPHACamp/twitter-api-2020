@@ -1,30 +1,30 @@
-'use strict';
+'use strict'
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Followships', {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('Likes', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      followerId: {
+      user_id: {
         type: Sequelize.INTEGER
       },
-      followingId: {
+      tweet_id: {
         type: Sequelize.INTEGER
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }
-    });
+    })
   },
-  down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Followships');
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable('Likes')
   }
-};
+}
