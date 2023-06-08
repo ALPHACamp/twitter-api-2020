@@ -226,10 +226,13 @@ const userController = {
       if (Number(currentUser.id) !== Number(req.params.id)) { throw new Error('你沒有權限可以編輯他人資料') }
 
       // 使用者能編輯自己的 account、name、email 和 password
-      const { account, name, email, password, checkPassword } = req.body
+      const { account, name, email, password, checkPassword, introduction } = req.body
 
       // 暱稱上限 50 字
-      if (name && name.length > 50) throw new Error('超過 name 字數限制50字元')
+      if (name && name.length > 50) throw new Error('name 超過字數限制50字元')
+
+      // 自我介紹上限 160字
+      if (introduction && introduction.length > 160) { throw new Error(' introduction 超過字數限制160字元') }
 
       // check password
       if (password !== checkPassword) throw new Error('密碼不相同')
@@ -251,7 +254,8 @@ const userController = {
         account: account || user.account,
         name: name || user.name,
         email: email || user.email,
-        password: password ? bcrypt.hashSync(password) : user.password
+        password: password ? bcrypt.hashSync(password) : user.password,
+        introduction: introduction || user.introduction
       })
 
       // 回傳成功訊息
@@ -265,8 +269,18 @@ const userController = {
   },
   putUserProfile: async (req, res, next) => {
     try {
+      // 使用者僅能編輯自己的資料
+      const currentUser = helpers.getUser(req).dataValues
+      if (Number(currentUser.id) !== Number(req.params.id)) {
+        throw new Error('你沒有權限可以編輯他人資料')
+      }
       const { name, introduction } = req.body
       // 自我介紹字數上限 160 字、暱稱上限 50 字
+      if (name && name.length > 50) throw new Error(' name 超過字數限制50字元')
+      if (introduction && introduction.length > 160) { throw new Error(' introduction 超過字數限制160字元') }
+
+      const user = await User.findByPk(currentUser.id)
+      console.log(user)
     } catch (err) {
       next(err)
     }
