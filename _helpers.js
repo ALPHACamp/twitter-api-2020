@@ -1,8 +1,13 @@
 
-function getUser(req) {
-  return req.user;
+function getUser (req) {
+  return req.user || null
 }
 
 module.exports = {
-  getUser,
-};
+  getUser
+}
+
+// use helpers.getUser(req) to replace req.user
+// function authenticated (req, res, next) {
+//   // passport.authenticate('jwt', { ses...
+// }
