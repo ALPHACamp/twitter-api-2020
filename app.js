@@ -20,6 +20,9 @@ app.use(express.json());
 app.use(passport.initialize());
 app.use(methodOverride("_method"));
 app.use(routes);
+app.get("/", (req, res) => {
+  res.send("Hello world!");
+});
 app.get("/favicon.ico", (req, res) => {
   res.sendStatus(204);
 });
