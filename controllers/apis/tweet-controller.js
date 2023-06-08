@@ -15,6 +15,9 @@ const tweetController = {
   },
   postTweetReplies: (req, res, next) => {
     tweetServices.postTweetReplies(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  postTweetLike: (req, res, next) => {
+    tweetServices.postTweetLike(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 

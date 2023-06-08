@@ -93,6 +93,27 @@ const tweetServices = {
       })
       .then(newReply => cb(null, newReply))
       .catch(err => cb(err))
+  },
+  postTweetLike: (req, cb) => {
+    return Promise.all([
+      Like.findOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.id
+        }
+      }),
+      Tweet.findByPk(req.params.id)
+    ])
+      .then(([like, tweet]) => {
+        if (like) throw new Error('user had been liked')
+        if (!tweet) throw new Error('tweet not found')
+        return Like.create({
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.id
+        })
+      })
+      .then(like => cb(null, like))
+      .catch(err => cb(err))
   }
 }
 
