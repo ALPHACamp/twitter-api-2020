@@ -4,7 +4,7 @@ const db = require('../models')
 const { Op } = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = db
 const sequelize = require('sequelize')
-
+const helpers = require('../_helpers')
 const userController = {
   login: (req, res, next) => {
     try {
@@ -93,13 +93,6 @@ const userController = {
         ...userData
       })
     } catch (err) { next(err) }
-  },
-  putUserData: async (req, res, next) => {
-    try {
-      // write later
-    } catch (err) {
-      next(err)
-    }
   },
   getUserTweets: async (req, res, next) => {
     try {
@@ -222,6 +215,58 @@ const userController = {
 
       const followersData = followers.map(follower => follower.toJSON())
       res.status(200).json(followersData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  putUserSetting: async (req, res, next) => {
+    try {
+      // 使用者僅能編輯自己的資料
+      const currentUser = helpers.getUser(req).dataValues
+      if (Number(currentUser.id) !== Number(req.params.id)) { throw new Error('你沒有權限可以編輯他人資料') }
+
+      // 使用者能編輯自己的 account、name、email 和 password
+      const { account, name, email, password, checkPassword } = req.body
+
+      // 暱稱上限 50 字
+      if (name && name.length > 50) throw new Error('超過 name 字數限制50字元')
+
+      // check password
+      if (password !== checkPassword) throw new Error('密碼不相同')
+
+      // 檢查account, email 是否重複
+      if (email || account) {
+        const checkUser = await User.findOne({
+          where: {
+            [Op.or]: [email ? { email } : {}, account ? { account } : {}]
+          }
+        })
+        if (checkUser?.email === email) throw new Error('email 已重複註冊！')
+        if (checkUser?.account === account) throw new Error('account 已重複註冊！')
+      }
+
+      const user = await User.findByPk(req.params.id)
+      // 更新使用者資訊
+      await user.update({
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        password: password ? bcrypt.hashSync(password) : user.password
+      })
+
+      // 回傳成功訊息
+      res.json({
+        status: 'success',
+        message: '成功編輯帳號資訊'
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  putUserProfile: async (req, res, next) => {
+    try {
+      const { name, introduction } = req.body
+      // 自我介紹字數上限 160 字、暱稱上限 50 字
     } catch (err) {
       next(err)
     }

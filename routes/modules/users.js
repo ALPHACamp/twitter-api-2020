@@ -12,6 +12,6 @@ router.get('/:id/likes', userController.getUserLikes) // 取得user Like過的tw
 router.get('/:id/followings', userController.getFollowings)// 取得user正在追蹤的使用者
 router.get('/:id/followers', userController.getFollowers)// 取得正在追蹤user的使用者
 router.get('/:id', userController.getUserData) // 取得user資料
-router.put('/:id', userController.putUserData) // 編輯user資料
+router.put('/:id', userController.putUserSetting) // 編輯user account資料
 
 module.exports = router
