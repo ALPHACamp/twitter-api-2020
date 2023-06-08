@@ -32,7 +32,6 @@ const adminController = {
 
   getUsers: (req, res, next) => {
     return User.findAll({
-      where: { role: "user" },
       attributes: {
         include: [
           // user data
