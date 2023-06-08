@@ -119,13 +119,14 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const user = await User.findByPk(userId)
+      const user = await User.findByPk(userId, { raw: true, attributes: ['id'] })
       if (!user) newErrorGenerate('使用者不存在', 404)
       const likes = await Like.findAll({
         where: { UserId: userId },
         order: [['createdAt', 'DESC'], ['Tweet', 'createdAt', 'DESC']],
         include: {
           model: Tweet,
+          distinct: true,
           include: [
             { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
             { model: Like, attributes: ['id'] },
