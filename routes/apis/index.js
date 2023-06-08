@@ -19,6 +19,8 @@ router.post('/login', passport.authenticate('local', { session: false }), userCo
 
 // 有關tweet的routes
 router.post('/tweets', authenticated, tweetController.postTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
 
 router.use('/', apiErrorHandler)
 
