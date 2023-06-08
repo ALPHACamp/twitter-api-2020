@@ -20,21 +20,33 @@ const userController = {
       res.status(500).json({ status: 'error', error: err.message })
     }
   },
-  signUp: (req, res, next) => {
+  signUp: (req, res) => {
+    const { name, email, password, avatar, introduction, role, account, passwordCheck } = req.body
     new Promise((resolve, reject) => {
-      if (req.body.password != req.body.passwordCheck) reject(new Error('Password do not match'))
+      if (name.length > 50) reject(new Error(`Name too long`))
+      if (introduction.length > 160) reject(new Error('Introduction too long'))
+      if (password != passwordCheck) reject(new Error('Password do not match'))
       resolve()
     })
-
-      .then(() => User.findOne({ where: { email: req.body.email } }))
-      .then(user => {
+      .then(() => {
+        return Promise.all([
+          User.findOne({ where: { email } }),
+          User.findOne({ where: { account } })
+        ])
+      })
+      .then(([user, account]) => {
         if (user) throw new Error('Email already exists!')
-        return bcrypt.hash(req.body.password, 10)
+        if (account) throw new Error('Account already registered!')
+        return bcrypt.hash(password, 10)
       })
       .then(hash => {
         return User.create({
-          name: req.body.name,
-          email: req.body.email,
+          name,
+          email,
+          avatar,
+          introduction,
+          role,
+          account,
           password: hash
         })
       })
