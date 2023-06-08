@@ -29,7 +29,12 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id)
+  User.findByPk(jwtPayload.id,{
+    include: [
+      {model: User, as: 'Followers'},
+      {model: User, as: 'Followings'}
+    ]
+  })
     .then(user => {
       user = user.toJSON()
       return cb(null, user)
@@ -41,7 +46,12 @@ passport.serializeUser((user, cb) => {
   cb(null, user.id)
 })
 passport.deserializeUser((id, cb) => {
-  return User.findByPk(id)
+  return User.findByPk(id,{
+    include:[
+      {model: User, as: 'Followers'},
+      {model: User, as: 'Followings'}
+    ]
+  })
     .then(user => {
       cb(null, user.toJSON())
     })
