@@ -1,9 +1,9 @@
 const bcrypt = require("bcryptjs");
-const { User, Followship } = require("../models");
+const { User, Tweet, Reply, Like, Followship } = require("../models");
 const jwt = require("jsonwebtoken");
 const { getUser } = require("../_helpers");
 const Sequelize = require("sequelize");
-const { Op } = Sequelize;
+const { Op, literal } = Sequelize;
 
 const userController = {
   signUp: (req, res, next) => {
@@ -155,5 +155,218 @@ const userController = {
       })
       .catch((err) => next(err));
   },
+
+  getUserTweets: (req, res, next) => {
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Tweet.findAll({
+        where: { userId: req.params.id },
+        attributes: {
+          include: [
+            [
+              literal(`(
+                SELECT COUNT(*) 
+                FROM replies AS reply
+                WHERE 
+                    reply.tweet_id = tweet.id
+                )`), 'replyCount'
+            ],
+            [
+              literal(`(
+                SELECT COUNT(*) 
+                FROM likes AS liked
+                WHERE 
+                    liked.tweet_id = tweet.id
+                )`), 'likeCount'
+            ]
+          ],
+          exclude: ['UserId']
+        },
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, tweets]) => {
+        // Error: user not found
+        if (!user) { return res.status(404).json({ status: 'error', message: 'No user found' }) }
+        // Error: tweets not found
+        if (!tweets || tweets.length === 0) { return res.status(404).json({ status: 'error', message: 'No tweets found' }) }
+        return res.status(200).json(tweets);
+      })
+
+      .catch(err => next(err))
+  },
+
+  getUserRepliedTweets: (req, res, next) => {
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Reply.findAll({
+        where: { userId: req.params.id },
+        include: [
+          {
+            model: Tweet,
+            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+          },
+        ],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, replies]) => {
+        // Error: user not found
+        if (!user) { return res.status(404).json({ status: 'error', message: 'No user found' }) }
+        // Error: replies not found
+        if (!replies || replies.length === 0) { return res.status(404).json({ status: 'error', message: 'No replies found' }) }
+        return res.status(200).json(replies);
+      })
+
+      .catch(err => next(err))
+  },
+
+  getUserLikes: (req, res, next) => {
+    // unable to pass test request
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Like.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          {
+            model: Tweet,
+            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'], },],
+          },
+        ],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, likes]) => {
+        // Error: user not found
+        if (!user) { return res.status(404).json({ status: 'error', message: 'No user found' }) }
+        // Error: likes not found
+        if (!likes || likes.length === 0) { return res.status(404).json({ status: 'error', message: 'No likes found' }) }
+        return res.status(200).json(likes)
+      })
+
+      .catch(err => next(err))
+  },
+
+  getTweets: (req, res, next) => {
+    // function duplicate with admin-controller
+    Tweet.findAll({
+      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'], },],
+      nest: true,
+      raw: true
+    })
+      .then((tweets) => {
+        if (!tweets) { return res.status(404).json({ status: 'error', message: 'No tweets found' }) }
+        return res.status(200).json(tweets)
+      })
+      .catch((err) => next(err))
+  },
+
+  getTweet: (req, res, next) => {
+    return Tweet.findByPk(req.params.tweet_id, {
+      attributes: {
+        include: [
+          [
+            literal(`(
+              SELECT COUNT(*) 
+              FROM replies AS reply
+              WHERE 
+                  reply.tweet_id = tweet.id
+              )`), 'replyCount'
+          ],
+          [
+            literal(`(
+              SELECT COUNT(*) 
+              FROM likes AS liked
+              WHERE 
+                  liked.tweet_id = tweet.id
+              )`), 'likeCount'
+          ]
+        ]
+      },
+      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+    })
+      .then((tweet) => {
+        if (!tweet) {
+          // Error: tweet not found
+          return res.status(404).json({ status: 'error', message: 'No tweet found' });
+        }
+        return res.status(200).json(tweet)
+      })
+      .catch(err => next(err))
+  },
+
+  postTweets: (req, res, next) => {
+    const { description } = req.body
+    if (!description) {
+      throw new Error('Tweet content is required!')
+    }
+    // get current user id
+    const user = getUser(req)
+    const userId = user.id
+
+    return Tweet.create({
+      userId,
+      description
+    })
+      .then((newTweet) => {
+        return res.status(200).json(newTweet)
+      })
+      .catch((err) => next(err))
+  },
+
+  postTweetLike: (req, res, next) => {
+    const TweetId = req.params.id
+    const user = getUser(req)
+    const userId = user.id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          userId,
+          TweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet doesn't exist!")
+        if (like) throw new Error("You have liked this tweet!")
+
+        return Like.create({
+          userId,
+          TweetId
+        })
+      })
+      .then((newLike) => {
+        return res.status(200).json({ status: 'success', message: 'Like succeed', newLike })
+      })
+      .catch((err) => next(err))
+  },
+
+  postTweetUnlike: (req, res, next) => {
+    const TweetId = req.params.id
+    return Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          TweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet doesn't exist!")
+        if (!like) throw new Error("You haven't liked this tweet!")
+
+        // keep the deleted data
+        const deletedLike = like.toJSON()
+        return like.destroy()
+          .then(() => {
+            return res.status(200).json({ status: 'success', message: 'Unlike succeed', deletedLike })
+          })
+      })
+      .catch(err => next(err))
+  }
 };
 module.exports = userController;
