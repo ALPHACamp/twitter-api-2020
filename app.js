@@ -23,8 +23,8 @@ function authenticated(req, res, next) {
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-  next();
-});
+  next()
+})
 app.use('/api', router)
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.info(`Example app listening on port ${port}!`))
