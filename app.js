@@ -7,6 +7,7 @@ const passport = require('./config/passport')
 const flash = require('connect-flash')
 const { apis, pages } = require('./routes')
 const session = require('express-session')
+const cors = require('cors')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -28,6 +29,9 @@ app.use(passport.initialize())
 
 // flash
 app.use(flash())
+
+// cors
+app.use(cors())
 
 // locals
 app.use((req, res, next) => {
