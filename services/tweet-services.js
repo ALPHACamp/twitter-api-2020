@@ -77,6 +77,22 @@ const tweetServices = {
         return cb(null, replies)
       })
       .catch(err => cb(err))
+  },
+  postTweetReplies: (req, cb) => {
+    const { comment } = req.body
+    if (comment.length > 140) throw new Error('字數不能超過 140 字')
+    if (!comment.trim()) throw new Error('留言不能為空白')
+    Tweet.findByPk(req.params.tweet_id)
+      .then(tweet => {
+        if (!tweet) throw new Error('tweet not found')
+        return Reply.create({
+          comment,
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.tweet_id
+        })
+      })
+      .then(newReply => cb(null, newReply))
+      .catch(err => cb(err))
   }
 }
 

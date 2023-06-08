@@ -3,6 +3,7 @@ const router = express.Router()
 const tweetController = require('../../../controllers/apis/tweet-controller')
 
 router.get('/:tweet_id/replies', tweetController.getTweetReplies)
+router.post('/:tweet_id/replies', tweetController.postTweetReplies)
 router.get('/:tweet_id', tweetController.getTweet)
 router.get('/', tweetController.getTweets)
 router.post('/', tweetController.postTweet)
