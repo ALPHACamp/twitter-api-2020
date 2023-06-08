@@ -18,6 +18,7 @@ router.get('/users/:userId/followers', authenticated, userController.getUserFoll
 router.get('/users/:userId/edit', authenticated, userController.editUser)
 router.put('/users/:userId', authenticated, upload.single('image'), userController.putUser)
 router.get('/users/:userId', authenticated, userController.getUser)
+router.get('/users/tops', authenticated, userController.getTopUsers)
 router.post('/users', userController.signUp)
 
 router.use('/', apiErrorHandler)

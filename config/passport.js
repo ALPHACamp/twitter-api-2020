@@ -32,7 +32,7 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
+  return User.findByPk(jwtPayload.id, {
     include: [
       { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followers' },

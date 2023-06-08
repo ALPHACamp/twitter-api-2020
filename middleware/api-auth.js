@@ -2,7 +2,6 @@ const passport = require('../config/passport') // 引入 passport
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
-    console.log(err)
     if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
     req.user = user.dataValues
     delete req.user.password

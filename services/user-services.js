@@ -155,6 +155,21 @@ const userController = {
         return cb(null, user)
       })
       .catch(err => cb(err))
-  }
+  },
+  getTopUsers: (req, cb) => {
+    return User.findAll({
+      include: [{ model: User, as: 'Followers' }]
+    })
+      .then(users => {
+        const result = users.map(user => ({
+          ...user.toJSON(),
+          followerCount: user.Followers.length,
+          isFollowed: req.user.Followings.some(f => f.id === user.id)
+        }))
+          .sort((a, b) => b.followerCount - a.followerCount)
+        cb(null, { users: result })
+      })
+      .catch(err => cb(err))
+  },
 }
 module.exports = userController
