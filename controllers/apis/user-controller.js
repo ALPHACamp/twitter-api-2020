@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../../_helpers')
-const { User } = require('../../models')
+const { User, Tweet, Reply } = require('../../models')
 
 const userController = {
   login: (req, res, next) => {
@@ -47,6 +47,48 @@ const userController = {
       delete userData.password
       console.log(userData)
       return res.json({ status: 'success', data: userData })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      let { id } = req.params
+      id = Number(id)
+      const userTweets = await Tweet.findAll({
+        where: { UserId: id },
+        raw: true,
+        nest: true
+      })
+      console.log(userTweets)
+      if (!userTweets) return res.json({ status: 'error', data: 'The user have not post any tweet yet' })
+      return res.json({ status: 'success', data: userTweets })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      let id = req.params.id
+      id = Number(id)
+      const user = await User.findByPk(id)
+      console.log(user)
+      if (!user) return res.json({ status: 'error', data: 'The user does not exist' })
+      res.json({ status: 'success', data: user })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserRepliedTweet: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const repliedTweets = await Reply.findAll({
+        where: { UserId: id },
+        raw: true,
+        nest: true
+      })
+      if (!repliedTweets) return res.json({ status: 'error', data: 'The user does not exist' })
+      return res.json({ status: 'success', data: repliedTweets })
     } catch (error) {
       next(error)
     }

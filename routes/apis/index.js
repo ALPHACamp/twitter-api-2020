@@ -20,6 +20,11 @@ router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 
+// 有關user的routes
+router.get('/users/:id', authenticated, userController.getUser)
+router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserRepliedTweet)
+
 router.use('/', apiErrorHandler)
 
 module.exports = router

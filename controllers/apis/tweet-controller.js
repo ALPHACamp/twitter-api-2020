@@ -1,5 +1,4 @@
 const { Tweet } = require('../../models')
-const { getUser } = require('../../_helpers')
 
 const tweetController = {
   postTweet: async (req, res, next) => {
@@ -16,13 +15,9 @@ const tweetController = {
   },
   getTweets: async (req, res, next) => {
     try {
-      const userTweets = await Tweet.findAll({
-        where: { userId: getUser(req).id },
-        raw: true,
-        nest: true
-      })
-      if (!userTweets) return res.json({ status: 'error', data: 'You have not post any tweet yet' })
-      return res.json({ status: 'success', data: userTweets })
+      const tweets = await Tweet.findAll()
+      if (!tweets) return res.json({ status: 'error', data: 'There is no tweet' })
+      return res.json({ status: 'success', data: tweets })
     } catch (error) {
       next(error)
     }
