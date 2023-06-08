@@ -7,6 +7,10 @@ const {
     Followship
 } = db
 
+const dayjs = require('dayjs')
+const relativeTime = require('dayjs/plugin/relativeTime')
+dayjs.extend(relativeTime)
+
 const userServices = {
     signIn: (req, cb) => {
         try {
@@ -23,17 +27,21 @@ const userServices = {
     },
     signUp: (req, cb) => {
         const { name, account, email, password, confirmPassword } = req.body
-        User.findOne({
-            where: {
-                account
-            }
-        })
-            .then(user => {
-                if (user) throw new Error('帳號已存在！')
+        User.findAll()
+            .then(users => {
+                if (users.length > 0) {
+                    const existingAccount = users.find(user => user.account === account)
+                    const existingEmail = users.find(user => user.email === email)
+                    if (existingAccount) {
+                        throw new Error('帳號已存在！')
+                    } else if (existingEmail) {
+                        throw new Error('信箱已存在！')
+                    }
+                }
                 if (name.length >= 50) throw new Error('名稱不可超過50字！')
                 if (password !== confirmPassword) throw new Error('密碼與確認密碼不一致！')
-                const salt = bcrypt.genSaltSync(10);
-                const hash = bcrypt.hashSync(password, salt);
+                const salt = bcrypt.genSaltSync(10)
+                const hash = bcrypt.hashSync(password, salt)
                 return User.create({
                     name,
                     account,
@@ -48,42 +56,57 @@ const userServices = {
             .catch(err => cb(err))
     },
     getUser: (req, cb) => {
+        const { id } = req.params
         return Promise.all([
             User.findByPk(req.params.id, { raw: true }),
-            Tweet.findAll({
-                raw: true,
-                nest: true,
+            Tweet.count({
                 where: {
-                    UserId: req.params.id
+                    UserId: id
                 }
             }),
-            Followship.findAll({
-                raw: true,
-                nest: true,
+            Followship.count({
                 where: {
-                    followerId: req.params.id
+                    followerId: id
                 }
             }),
-            Followship.findAll({
-                raw: true,
-                nest: true,
+            Followship.count({
                 where: {
-                    followingId: req.params.id
+                    followingId: id
                 }
             })
         ])
             .then(([user, tweets, followings, followers]) => {
-                if (!user) throw new Error("User didn't exist!")
+                if (!user) throw new Error("使用者不存在！")
                 delete user.password
                 cb(null, {
-                    user,
-                    followingCount: followings.length,
-                    followerCount: followers.length,
-                    tweetCount: tweets.length
+                    ...user,
+                    followingCount: followings,
+                    followerCount: followers,
+                    tweetCount: tweets
                 })
             })
             .catch(err => cb(err))
-    }
+    },
+    getUserTweets: (req, cb) => {
+        const { id } = req.params
+        return Tweet.findAll({
+            raw: true,
+            nest: true,
+            include: User,
+            where: {
+                UserId: id
+            }
+        })
+            .then((tweets) => {
+                const newData = tweets.map(tweet => {
+                    tweet.createdAt = dayjs().to(tweet.createdAt)
+                    delete tweet.User.password
+                    return tweet
+                })
+                cb(null, newData)
+            })
+            .catch(err => cb(err))
+    },
 }
 
 module.exports = userServices
