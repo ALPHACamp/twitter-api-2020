@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
 const userCount = 5 // default user
@@ -7,7 +7,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     return await Promise.all([
       queryInterface.bulkInsert(
-        'Users', //admin
+        'Users', // admin
         [
           {
             name: 'root',
@@ -45,4 +45,4 @@ module.exports = {
   down: (queryInterface, Sequelize) => {
     return queryInterface.bulkDelete('Users', null, {})
   }
-};
+}

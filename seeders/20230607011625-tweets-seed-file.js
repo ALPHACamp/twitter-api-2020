@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 const faker = require('faker')
 const { User } = require('../models')
 const tweetCount = 10 // 每個 user 10 個 tweets
@@ -12,7 +12,7 @@ module.exports = {
         description: faker.lorem.sentences().substring(0, 140),
         UserId: users[Math.floor(i / 10)].id,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updatedAt: new Date()
       })),
       {}
     )
@@ -21,4 +21,4 @@ module.exports = {
   down: (queryInterface, Sequelize) => {
     return queryInterface.bulkDelete('Tweets', null, {})
   }
-};
+}
