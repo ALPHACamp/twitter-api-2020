@@ -15,7 +15,9 @@ const userController = {
     if (!email || email.trim() === "") throw new Error("Email為必填項目");
     if (!password || password.trim() === "") throw new Error("密碼為必填項目");
     // Error: 字數限制
-
+    if (account.trim().length > 20) throw new Error("帳號字數超過上限");
+    if (password.length < 8 || password.length > 12)
+      throw new Error("密碼字數不符合規定");
     // 待設定password, name, account
     return User.findAll({
       [Op.or]: [{ where: { account } }, { where: { email } }],
@@ -155,7 +157,40 @@ const userController = {
       })
       .catch((err) => next(err));
   },
-
+  getFollowers: (req, res, next) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,
+          as: "Followers",
+          attributes: [
+            ["id", "followerId"],
+            "name",
+            "account",
+            "avatar",
+            "cover",
+            "introduction",
+          ],
+        },
+      ],
+      attributes: [["id", "userId"], "name", "account", "avatar", "cover"],
+    })
+      .then((followers) => {
+        if (followers.Followers.length === 0)
+          return res.status(200).json({ isEmpty: true });
+        const followingId = getUser(req).Followings.map((user) => user.id);
+        const result = followers.Followers.map((f) => ({
+          ...f.toJSON(),
+          isFollowed: followingId.includes(f.toJSON().followerId) || false,
+        })).sort(
+          (a, b) =>
+            b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime()
+        );
+        result.forEach((i) => delete i.Followship);
+        return res.json(result);
+      })
+      .catch((err) => next(err));
+  },
   getUserTweets: (req, res, next) => {
     return Promise.all([
       User.findByPk(req.params.id),
@@ -406,13 +441,11 @@ const userController = {
         // keep the deleted data
         const deletedLike = like.toJSON();
         return like.destroy().then(() => {
-          return res
-            .status(200)
-            .json({
-              status: "success",
-              message: "Unlike succeed",
-              deletedLike,
-            });
+          return res.status(200).json({
+            status: "success",
+            message: "Unlike succeed",
+            deletedLike,
+          });
         });
       })
       .catch((err) => next(err));
