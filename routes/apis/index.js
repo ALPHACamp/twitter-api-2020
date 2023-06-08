@@ -5,11 +5,11 @@ const userController = require('../../controllers/apis/user-controller')
 const adminController = require('../../controllers/apis/admin-controller')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const tweetController = require('../../controllers/apis/tweet-controller')
-const { authenticated, roleChecker } = require('../../middleware/api-auth')
+const { authenticated, roleChecker, authenticatedAdmin } = require('../../middleware/api-auth')
 
 // 有關admin的routes
 router.post('/admin/users', passport.authenticate('local', { session: false }), roleChecker, adminController.adminLogin)
-router.use('/admin', authenticated, roleChecker, admin)
+router.use('/admin', authenticatedAdmin, roleChecker, admin)
 
 // 使用者登入註冊
 router.post('/signup', userController.signUp)

@@ -11,8 +11,12 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user && req.user.isAdmin) return next()
-  return res.status(403).json({ status: 'error', message: 'permission denied' })
+  passport.authenticate('jwt', { session: false }, (err, user) => {
+    if (err || !user) return res.status(403).json({ status: 'error', message: 'Forbidden' })
+    res.locals.userId = user.dataValues.id
+    req.user = user.dataValues
+    next()
+  })(req, res, next)
 }
 
 const roleChecker = (req, res, next) => {
