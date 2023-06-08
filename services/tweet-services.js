@@ -56,7 +56,6 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   getTweetReplies: (req, cb) => {
-    console.log(req.params.tweet_id)
     Promise.all([
       Reply.findAll({
         where: { TweetId: req.params.tweet_id },
