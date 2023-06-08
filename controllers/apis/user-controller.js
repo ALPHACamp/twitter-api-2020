@@ -8,7 +8,6 @@ const userController = {
     try {
       const userData = getUser(req).toJSON()
       delete userData.password
-      // if(!user) return res.json({status: 'failed'})
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
         status: 'success',
