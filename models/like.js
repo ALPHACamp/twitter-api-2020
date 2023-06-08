@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Like',
     tableName: 'Likes', // 新增這裡
+    underscored: true
   })
   return Like;
 };

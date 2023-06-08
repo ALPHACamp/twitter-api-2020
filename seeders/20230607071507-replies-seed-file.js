@@ -16,10 +16,10 @@ module.exports = {
       Array.from({ length: 150 }, (v, i) => ({
 
         comment: faker.lorem.text(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        UserId: users[i % 5].id, // 照user順序分配reply
-        TweetId: tweets[Math.floor(i / 3)].id // 每個tweet照順序分配3個reply
+        created_at: new Date(),
+        updated_at: new Date(),
+        user_id: users[i % 5].id, // 照user順序分配reply
+        tweet_id: tweets[Math.floor(i / 3)].id // 每個tweet照順序分配3個reply
       }))
     )
   },

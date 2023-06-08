@@ -2,16 +2,16 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.addColumn('Tweets', 'numberLike', {
+    await queryInterface.addColumn('Tweets', 'number_like', {
       type: Sequelize.INTEGER
     })
-    await queryInterface.addColumn('Tweets', 'numberUnlike', {
+    await queryInterface.addColumn('Tweets', 'number_unlike', {
       type: Sequelize.INTEGER
     })
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.removeColumn('Tweets', 'numberLike')
-    await queryInterface.removeColumn('Tweets', 'numberUnlike')
+    await queryInterface.removeColumn('Tweets', 'number_like')
+    await queryInterface.removeColumn('Tweets', 'number_unlike')
   }
 };
