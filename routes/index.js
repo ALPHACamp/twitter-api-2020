@@ -18,7 +18,9 @@ router.post('/api/users', cors, userController.signUp)
 router.get('/api/users/:id', cors, authenticated, authenticatedUser, userController.getUser)
 router.get('/api/users/:id/tweets', cors, authenticated, authenticatedUser, userController.getUserTweets)
 
+router.get('/api/tweets/:id',cors, authenticated, authenticatedUser, tweetController.getTweet)
 router.get('/api/tweets', cors, authenticated, authenticatedUser, tweetController.getTweets)
+router.post('/api/tweets', cors, authenticated, tweetController.postTweets)
 
 router.use('/', cors, generalErrorHandler)
 
