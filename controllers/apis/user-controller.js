@@ -8,7 +8,6 @@ const userController = {
     try {
       const userData = getUser(req).toJSON()
       delete userData.password
-      // if(!user) return res.json({status: 'failed'})
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
         status: 'success',
@@ -61,7 +60,7 @@ const userController = {
         nest: true
       })
       console.log(userTweets)
-      if (!userTweets) return res.json({ status: 'error', data: 'The user have not post any tweet yet' })
+      if (!userTweets.length) return res.json({ status: 'error', data: 'The user have not post any tweet yet' })
       return res.json({ status: 'success', data: userTweets })
     } catch (error) {
       next(error)
@@ -87,7 +86,7 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!repliedTweets) return res.json({ status: 'error', data: 'The user does not exist' })
+      if (!repliedTweets.length) return res.json({ status: 'error', data: 'The user does not exist' })
       return res.json({ status: 'success', data: repliedTweets })
     } catch (error) {
       next(error)

@@ -16,14 +16,14 @@ passport.use(new LocalStrategy(
 
       // 帳號或密碼輸入錯誤 暫時的錯誤處理
       if (!user) {
-        return cb(null, false, { message: errorMessage })
+        return cb(errorMessage, false, { message: errorMessage })
       }
       const isMatch = await bcrypt.compare(password, user.password)
 
       // 帳號或密碼輸入錯誤 暫時的錯誤處理
       if (!isMatch) {
         console.log('帳號或密碼輸入錯誤！')
-        return cb(null, false, { message: errorMessage })
+        return cb(errorMessage, false, { message: errorMessage })
       }
       return cb(null, user)
     } catch (error) {
@@ -40,6 +40,7 @@ const jwtOptions = {
 
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
   try {
+    const errorMessage = 'unAuthenticated'
     const user = await User.findByPk(jwtPayload.id
       , {
         // include: [
@@ -55,7 +56,7 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
         // ]
       }
     )
-    if (!user) { return cb(null, false) }
+    if (!user) return cb(errorMessage, false, { message: errorMessage })
     return cb(null, user)
   } catch (error) {
     cb(error)
