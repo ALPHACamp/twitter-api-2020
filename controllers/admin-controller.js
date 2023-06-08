@@ -58,25 +58,24 @@ const adminController = {
   getUsers: async (req, res, next) => {
     const users = await User.findAll({
       raw: true,
-      nest: true
+      attributes: ['id', 'name', 'email', 'account', 'backgroundImage', 'avatar', 'createdAt'],
+      order: [['createdAt', 'DESC']]
     })
     const userData = await Promise.all(users.map(async user => {
       const userId = user.id
-      let tweetsCount = await Tweet.findAll({ where: { UserId: userId }, raw: true, attributes: ['id'] })
-      let likesCount = await Like.findAll({ where: { UserId: userId }, raw: true, attributes: ['id'] })
-      let followersCount = await Followship.findAll({ where: { followerId: userId }, raw: true, attributes: ['id'] })
-      let followingsCount = await Followship.findAll({ where: { followingId: userId }, raw: true, attributes: ['id'] })
-      tweetsCount = tweetsCount?.length
-      likesCount = likesCount?.length
-      followersCount = followersCount?.length
-      followingsCount = followingsCount?.length
-      user.tweetsCount = tweetsCount
-      user.likesCount = likesCount
-      user.followersCount = followersCount
-      user.followingsCount = followingsCount
-      delete user.password
+      const [tweets, likes, followers, followings] = await Promise.all([
+        Tweet.findAll({ where: { UserId: userId }, raw: true, attributes: ['id'] }),
+        Like.findAll({ where: { UserId: userId }, raw: true, attributes: ['id'] }),
+        Followship.findAll({ where: { followerId: userId }, raw: true, attributes: ['id'] }),
+        Followship.findAll({ where: { followingId: userId }, raw: true, attributes: ['id'] })
+      ])
+      user.tweetsCount = tweets?.length
+      user.likesCount = likes?.length
+      user.followersCount = followers?.length
+      user.followingsCount = followings?.length
       return user
     }))
+
     return res.json(userData)
   }
 }
