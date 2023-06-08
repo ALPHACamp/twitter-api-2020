@@ -9,9 +9,13 @@ module.exports = {
     )
     const tweets = []
     for (let i = 0; i < 50; i++) {
+      let description = faker.lorem.text()
+      if (description.length > 140) {
+        description = description.slice(0, 140)
+      }
       tweets.push({
         UserId: users[i % users.length].id,
-        description: faker.lorem.text(),
+        description,
         createdAt: new Date(),
         updatedAt: new Date()
       })

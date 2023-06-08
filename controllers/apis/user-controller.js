@@ -83,11 +83,16 @@ const userController = {
       const { id } = req.params
       const repliedTweets = await Reply.findAll({
         where: { UserId: id },
+        include: [Tweet],
         raw: true,
         nest: true
       })
       if (!repliedTweets.length) return res.json({ status: 'error', data: 'The user does not exist' })
-      return res.json({ status: 'success', data: repliedTweets })
+      const tweets = []
+      for (const i of repliedTweets) {
+        tweets.push(i.Tweet)
+      }
+      return res.json({ status: 'success', data: tweets })
     } catch (error) {
       next(error)
     }
