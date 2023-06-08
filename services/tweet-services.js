@@ -105,7 +105,7 @@ const tweetServices = {
       Tweet.findByPk(req.params.id)
     ])
       .then(([like, tweet]) => {
-        if (like) throw new Error('user had been liked')
+        if (like) throw new Error('user had been liked this tweet')
         if (!tweet) throw new Error('tweet not found')
         return Like.create({
           UserId: helpers.getUser(req).id,
@@ -113,6 +113,20 @@ const tweetServices = {
         })
       })
       .then(like => cb(null, like))
+      .catch(err => cb(err))
+  },
+  postTweetUnlike: (req, cb) => {
+    return Like.findOne({
+      where: {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.id
+      }
+    })
+      .then(like => {
+        if (!like) throw new Error('user haven\'t liked this tweet')
+        return like.destroy()
+      })
+      .then(unlike => cb(null, unlike))
       .catch(err => cb(err))
   }
 }

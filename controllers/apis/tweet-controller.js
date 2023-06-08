@@ -18,6 +18,9 @@ const tweetController = {
   },
   postTweetLike: (req, res, next) => {
     tweetServices.postTweetLike(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  postTweetUnlike: (req, res, next) => {
+    tweetServices.postTweetUnlike(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 
