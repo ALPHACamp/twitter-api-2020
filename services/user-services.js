@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
@@ -23,7 +23,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
-    const userId = Number(req.params.userId) || ''
+    const userId = Number(req.params.user_id) || ''
     User.findByPk(userId, {
       nest: true,
       raw: true
@@ -39,7 +39,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
-    const userId = Number(req.params.userId) || ''
+    const userId = Number(req.params.user_id) || ''
     Tweet.findAll({
       include: [
         User
@@ -57,7 +57,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserRepliedTweets: (req, cb) => {
-    const userId = Number(req.params.userId) || ''
+    const userId = Number(req.params.user_id) || ''
     Reply.findAll({
       include: [
         User,
@@ -76,7 +76,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserLikes: (req, cb) => {
-    const userId = Number(req.params.userId) || ''
+    const userId = Number(req.params.user_id) || ''
     User.findByPk(userId, {
       include: [
         { model: Tweet, as: 'LikedTweets' }
@@ -91,7 +91,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserFollowings: (req, cb) => {
-    const userId = Number(req.params.userId) || ''
+    const userId = Number(req.params.user_id) || ''
     User.findByPk(userId, {
       include: [
         { model: User, as: 'Followings' }
@@ -106,7 +106,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserFollowers: (req, cb) => {
-    const userId = Number(req.params.userId) || ''
+    const userId = Number(req.params.user_id) || ''
     User.findByPk(userId, {
       include: [
         { model: User, as: 'Followers' }
@@ -121,7 +121,7 @@ const userController = {
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    return User.findByPk((req.params.userId), {
+    return User.findByPk((req.params.user_id), {
       nest: true,
       raw: true
     })
@@ -139,7 +139,7 @@ const userController = {
 
     const { file } = req
     return Promise.all([
-      User.findByPk(req.params.userId),
+      User.findByPk(req.params.user_id),
       imgurFileHandler(file)])
       .then(([user, filePath]) => {
         if (!user) throw new Error("User didn't exist!")
@@ -157,6 +157,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getTopUsers: (req, cb) => {
+    const rank = req.query.rank
     return User.findAll({
       include: [{ model: User, as: 'Followers' }]
     })
@@ -167,9 +168,47 @@ const userController = {
           isFollowed: req.user.Followings.some(f => f.id === user.id)
         }))
           .sort((a, b) => b.followerCount - a.followerCount)
-        cb(null, { users: result })
+          .slice(0, rank)
+        if (!result.length) throw new Error("Top users not exist!")
+        return cb(null, { users: result })
       })
       .catch(err => cb(err))
   },
+  addFollowing: (req, cb) => {
+    const userId = req.params.user_id
+    Promise.all([
+      User.findByPk(userId),
+      Followship.findOne({
+        where: {
+          followerId: req.user.id,
+          followingId: userId
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (followship) throw new Error('You are already following this user!')
+        return Followship.create({
+          followerId: req.user.id,
+          followingId: userId
+        })
+      })
+      .then(followship => cb(null, followship))
+      .catch(err => cb(err))
+  },
+  removeFollowing: (req, cb) => {
+    Followship.findOne({
+      where: {
+        followerId: req.user.id,
+        followingId: req.params.user_id
+      }
+    })
+      .then(followship => {
+        if (!followship) throw new Error("You haven't followed this user!")
+        return followship.destroy()
+      })
+      .then(deletedFollowship => cb(null, deletedFollowship))
+      .catch(err => cb(err))
+  }
 }
 module.exports = userController
