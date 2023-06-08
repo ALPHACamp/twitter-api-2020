@@ -13,7 +13,7 @@ const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 router.post('/api/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn)
 router.post('/api/signup', userController.signUp)
 // if  req.user.role = admin 才能登入
-router.post('/api/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn)
+router.post('/api/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn)
 
 router.use('/', apiErrorHandler)
 
