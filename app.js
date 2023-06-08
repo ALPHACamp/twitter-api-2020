@@ -17,6 +17,7 @@ app.use(passport.initialize())
 app.use(methodOverride('_method'))
 
 // routes
+app.get('/', (req, res) => { res.send('Welcome to the real world!') })
 app.use(routes)
 
 // start
