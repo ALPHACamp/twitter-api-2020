@@ -65,6 +65,49 @@ const tweetController = {
     } catch (error) {
       next(error)
     }
+  },
+  likeTweet: async (req, res, next) => {
+    try {
+      const { tweet_id } = req.params
+      const PromiseArr = await Promise.all(
+        [
+          Tweet.findByPk(tweet_id),
+          Like.findOne({
+            where: {
+              UserId: res.locals.userId,
+              TweetId: tweet_id
+            }
+          })
+        ])
+      if (!PromiseArr[0]) return res.json({ status: 'error', data: 'The tweet does not exist' })
+      if (PromiseArr[1]) return res.json({ status: 'error', data: 'The like already exists' })
+
+      const like = await Like.create({
+        UserId: res.locals.userId,
+        TweetId: tweet_id
+      })
+      return res.json({ status: 'success', data: like })
+    } catch (error) {
+      next(error)
+    }
+  },
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const { tweet_id } = req.params
+      const tweet = await Tweet.findByPk(tweet_id)
+      if (!tweet) return res.json({ status: 'error', data: 'The tweet does not exist' })
+      const like = await Like.findOne({
+        where: {
+          UserId: res.locals.userId,
+          TweetId: tweet_id
+        }
+      })
+      if (!like) return res.json({ status: 'error', data: 'The like does not exist' })
+      await like.destroy()
+      return res.json({ status: 'success', data: like })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
