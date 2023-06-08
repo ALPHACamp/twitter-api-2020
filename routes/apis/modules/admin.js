@@ -4,6 +4,11 @@ const adminController = require('../../../controllers/apis/admin-controller')
 // admin 登入
 router.post('/users', adminController.adminLogin)
 
-// 瀏覽所有users
+// users有關
 router.get('/users', adminController.getUsers)
+
+// tweets有關
+router.get('/tweets', adminController.getTweets)
+router.delete('/tweets/:id', adminController.deleteTweet)
+
 module.exports = router

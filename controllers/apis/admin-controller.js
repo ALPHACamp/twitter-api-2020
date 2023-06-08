@@ -29,11 +29,20 @@ const adminController = {
   },
   getTweets: async (req, res, next) => {
     try {
-      const tweets = Tweet.findAll({
-        raw: true,
-        nest: true
-      })
+      const tweets = await Tweet.findAll()
       return res.json({ status: 'success', data: tweets })
+    } catch (error) {
+      next(error)
+    }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const tweet = await Tweet.findByPk(id)
+      console.log(tweet)
+      if (!tweet) return res.json({ status: 'error', data: 'The tweet does not exist' })
+      await tweet.destroy()
+      return res.json({ status: 'success', data: tweet })
     } catch (error) {
       next(error)
     }
