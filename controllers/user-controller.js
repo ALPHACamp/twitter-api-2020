@@ -33,6 +33,7 @@ const userController = {
         email,
         password: hash,
         avatar: 'https://i.imgur.com/V4RclNb.png',
+        banner: 'https://i.imgur.com/ZFz8ZEI.png',
         role: 'user'
       }))
       .then(signUpUser => {
