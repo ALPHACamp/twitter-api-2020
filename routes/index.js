@@ -7,7 +7,7 @@ const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 
-router.use('/admin', authenticated, authenticatedAdmin, admin)
+router.use('/admin', authenticatedAdmin, admin)
 
 // 告訴passport不用session了 改用token驗證
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
