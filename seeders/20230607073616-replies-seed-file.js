@@ -15,8 +15,9 @@ module.exports = {
     const tweets = await queryInterface.sequelize.query('SELECT id FROM Tweets;', { type: queryInterface.sequelize.QueryTypes.SELECT })
     const users = await queryInterface.sequelize.query('SELECT id FROM Users;', { type: queryInterface.sequelize.QueryTypes.SELECT })
     const replies = tweets.flatMap(tweet => {
-      return Array.from({ length: 3 }, () => ({
-        UserId: users[Math.floor(Math.random() * users.length)].id,
+      const shuffledUsers = users.sort(() => 0.5 - Math.random())
+      return Array.from({ length: 3 }, (_, i) => ({
+        UserId: shuffledUsers[i].id,
         TweetId: tweet.id,
         comment: faker.lorem.text(),
         createdAt: new Date(),
@@ -35,5 +36,6 @@ module.exports = {
       return queryInterface.bulkDelete('People', null, {});
     */
     await queryInterface.bulkDelete('Replies', {})
+    await queryInterface.sequelize.query('ALTER TABLE Replies AUTO_INCREMENT = 1')
   }
 }
