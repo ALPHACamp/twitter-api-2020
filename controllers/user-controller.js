@@ -5,6 +5,8 @@ const { Op } = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = db
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
+
 const userController = {
   login: (req, res, next) => {
     try {
@@ -259,7 +261,7 @@ const userController = {
       })
 
       // 回傳成功訊息
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: '成功編輯帳號資訊'
       })
@@ -275,12 +277,31 @@ const userController = {
         throw new Error('你沒有權限可以編輯他人資料')
       }
       const { name, introduction } = req.body
+      const { files } = req
+
       // 自我介紹字數上限 160 字、暱稱上限 50 字
-      if (name && name.length > 50) throw new Error(' name 超過字數限制50字元')
+      if (name && name.length > 50) throw new Error('name 超過字數限制50字元')
       if (introduction && introduction.length > 160) { throw new Error(' introduction 超過字數限制160字元') }
 
-      const user = await User.findByPk(currentUser.id)
-      console.log(user)
+      const user = await User.findByPk(req.params.id)
+      if (!user) throw new Error('使用者不存在!')
+
+      const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
+
+      const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
+
+      const newData = await user.update({
+        name: name || user.name,
+        introduction: introduction || user.introduction,
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover
+      })
+
+      res.json({
+        status: 'success',
+        message: '成功編輯使用者Profile',
+        data: newData.toJSON()
+      })
     } catch (err) {
       next(err)
     }
