@@ -25,8 +25,8 @@ const userController = {
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
-    const UserId = Number(req.params.user_id) || ''
-    User.findByPk(UserId, {
+    const userId = Number(req.params.user_id) || ''
+    User.findByPk(userId, {
       attributes: { exclude: ['password'] },
       nest: true,
       raw: true
@@ -42,7 +42,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
-    const UserId = Number(req.params.user_id) || ''
+    const userId = Number(req.params.user_id) || ''
     Tweet.findAll({
       include: [
         {
@@ -51,7 +51,7 @@ const userController = {
         }
       ],
       where: {
-        ...UserId ? { UserId } : {}
+        ...userId ? { userId } : {}
       },
       nest: true,
       raw: true
@@ -63,7 +63,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserRepliedTweets: (req, cb) => {
-    const UserId = Number(req.params.user_id) || ''
+    const userId = Number(req.params.user_id) || ''
     Reply.findAll({
       include: [
         {
@@ -73,7 +73,7 @@ const userController = {
         Tweet
       ],
       where: {
-        ...UserId ? { UserId } : {}
+        ...userId ? { userId } : {}
       },
       nest: true,
       raw: true
@@ -85,8 +85,8 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserLikes: (req, cb) => {
-    const UserId = Number(req.params.user_id) || ''
-    User.findByPk(UserId, {
+    const userId = Number(req.params.user_id) || ''
+    User.findByPk(userId, {
       include: [
         { model: Tweet, as: 'LikedTweets' }
       ],
@@ -101,8 +101,8 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserFollowings: (req, cb) => {
-    const UserId = Number(req.params.user_id) || ''
-    User.findByPk(UserId, {
+    const userId = Number(req.params.user_id) || ''
+    User.findByPk(userId, {
       include: [
         {
           model: User, as: 'Followings',
@@ -120,8 +120,8 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserFollowers: (req, cb) => {
-    const UserId = Number(req.params.user_id) || ''
-    User.findByPk(UserId, {
+    const userId = Number(req.params.user_id) || ''
+    User.findByPk(userId, {
       include: [
         {
           model: User, as: 'Followers',
@@ -200,13 +200,13 @@ const userController = {
       .catch(err => cb(err))
   },
   addLike: (req, cb) => {
-    const TweetId = req.params.tweet_id
+    const tweetId = req.params.tweet_id
     return Promise.all([
-      Tweet.findByPk(TweetId),
+      Tweet.findByPk(tweetId),
       Like.findOne({
         where: {
-          UserId: req.user.id,
-          TweetId
+          userId: req.user.id,
+          tweetId
         }
       })
     ])
@@ -215,8 +215,8 @@ const userController = {
         if (like) throw new Error('You have liked this tweet!')
 
         return Like.create({
-          UserId: req.user.id,
-          TweetId
+          userId: req.user.id,
+          tweetId
         })
       })
       .then(like => cb(null, like))
@@ -225,8 +225,8 @@ const userController = {
   removeLike: (req, cb) => {
     return Like.findOne({
       where: {
-        UserId: req.user.id,
-        TweetId: req.params.tweet_id
+        userId: req.user.id,
+        tweetId: req.params.tweet_id
       }
     })
       .then(like => {
@@ -237,13 +237,13 @@ const userController = {
       .catch(err => cb(err))
   },
   addFollowing: (req, cb) => {
-    const UserId = req.params.user_id
+    const userId = req.params.user_id
     Promise.all([
-      User.findByPk(UserId),
+      User.findByPk(userId),
       Followship.findOne({
         where: {
           followerId: req.user.id,
-          followingId: UserId
+          followingId: userId
         }
       })
     ])
@@ -252,7 +252,7 @@ const userController = {
         if (followship) throw new Error('You are already following this user!')
         return Followship.create({
           followerId: req.user.id,
-          followingId: UserId
+          followingId: userId
         })
       })
       .then(followship => cb(null, followship))
