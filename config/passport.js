@@ -40,6 +40,7 @@ const jwtOptions = {
 
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
   try {
+    const errorMessage = 'unAuthenticated'
     const user = await User.findByPk(jwtPayload.id
       , {
         // include: [
@@ -55,7 +56,7 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
         // ]
       }
     )
-    if (!user) return cb(null, false)
+    if (!user) return cb(errorMessage, false, { message: errorMessage })
     return cb(null, user)
   } catch (error) {
     cb(error)
