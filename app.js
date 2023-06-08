@@ -5,6 +5,7 @@ const express = require("express");
 const helpers = require("./_helpers");
 const routes = require("./routes");
 const methodOverride = require("method-override");
+const cors = require("cors");
 const db = require("./models");
 const passport = require("passport");
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(passport.initialize());
 app.use(methodOverride("_method"));
+app.use(cors());
 app.use(routes);
 app.get("", (req, res) => {
   res.send("Hello world!");
