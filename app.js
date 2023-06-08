@@ -21,6 +21,9 @@ app.use(passport.initialize());
 app.use(methodOverride("_method"));
 app.use(routes);
 app.get("/", (req, res) => res.send("Hello World!"));
+app.get("/favicon.ico", (req, res) => {
+  res.sendStatus(204);
+});
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 module.exports = app;
