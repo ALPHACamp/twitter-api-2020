@@ -1,55 +1,34 @@
-// const tweetServices = require('../../services/restaurant-services')
-const { Tweet, User } = require('../models')
+const tweetServices = require('../services/tweet-services')
+const { Tweet } = require('../models')
 const tweetController = {
-    getTweets: (req, res, next) => {
-      Tweet.findAll({
-        include: User,
-        nest: true,
-        raw: true
-      })
-      .then(tweets => {
-        const data =Array.from(tweets)
-          return res.json(data)
-      }).catch (err => next(err))
-      //  tweetServices.getTweets(req, (err, data) => err ? next(err) : res.json(data))
+    getTweets: async(req, res, next) => {
+      tweetServices.getTweets(req, (err, data) => err ? next(err) : res.json(data))
     },
-    getTweet: (req, res, next) => {
-        return Tweet.findByPk(req.params.id, {
-                include: User,
-                nest: true,
-                raw: true
-        })
-          .then(tweet => {
-            //const isLiked = tweet.LikedUsers.some(l => l.id === req.user.id)
-            if (!tweet) throw new Error("Tweet didn't exist!")
-            res.json({
-                tweet,
-                //isLiked
-            })
-        }).catch (err => next(err))
+    getTweet: async(req, res, next) => {
+      tweetServices.getTweet(req, (err, data) => err ? next(err) : res.json(data))
     },
-    postTweets: (req, res, next) => {   
-      const { description } = req.body
-      const UserId = req.user.id
-      console.log(UserId)
-      if (!description) {
-        return Promise.reject(new Error('Tweet不能為空!'))
-      }
+    postTweets: async (req, res, next) => {
+      try {
+        const { description } = req.body;
+        const UserId = req.user.id;
 
-      if (description.length > 140) {
-        return Promise.reject(new Error('輸入不得超過140字!'))
-      }
+        if (!description) {
+          throw new Error('Tweet不能為空!');
+        }
 
-      return Tweet.create({
-        description,
-        UserId
-        })
-        .then(tweet => {
-          res.status(200).json(tweet)
-        })
-        .catch(err => {
-          next(err)
-        })
+        if (description.length > 140) {
+          throw new Error('輸入不得超過140字!');
+        }
+
+        const tweet = await Tweet.create({
+          description,
+          UserId
+        });
+
+        res.status(200).json(tweet);
+      } catch (err) {
+            next(err)
       }
+    }
 }
 module.exports = tweetController

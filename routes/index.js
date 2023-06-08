@@ -22,6 +22,10 @@ router.get('/api/tweets/:id',cors, authenticated, authenticatedUser, tweetContro
 router.get('/api/tweets', cors, authenticated, authenticatedUser, tweetController.getTweets)
 router.post('/api/tweets', cors, authenticated, tweetController.postTweets)
 
+// router.get('/api/tweets/:id', tweetController.getTweet)
+// router.get('/api/tweets', tweetController.getTweets)
+// router.post('/api/tweets', cors, authenticated, tweetController.postTweets)
+
 router.use('/', cors, generalErrorHandler)
 
 module.exports = router
