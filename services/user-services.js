@@ -1,20 +1,22 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
-const { User, Tweet, Reply, Followship } = require('../models')
+const { User, Tweet, Reply, Followship, Like } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signUp: (req, cb) => {
-    console.log(req.body)
     if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match!')
-    User.findOne({ where: { email: req.body.email } })
-      .then(user => {
-        console.log(user)
-        if (user) throw new Error('Email already exists!')
+    Promise.all([
+      User.findOne({ where: { email: req.body.email } }),
+      User.findOne({ where: { account: req.body.account } })
+    ])
+      .then(([userByEmail, userByAccount]) => {
+        if (userByEmail || userByAccount) throw new Error('Email or Account already exists!')
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => User.create({
         name: req.body.name,
         email: req.body.email,
+        account: req.body.account,
         password: hash
       }))
       .then(user => {
@@ -172,6 +174,43 @@ const userController = {
         if (!result.length) throw new Error("Top users not exist!")
         return cb(null, { users: result })
       })
+      .catch(err => cb(err))
+  },
+  addLike: (req, cb) => {
+    const tweetId = req.params.tweet_id
+    return Promise.all([
+      Tweet.findByPk(tweetId),
+      Like.findOne({
+        where: {
+          userId: req.user.id,
+          tweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        if (like) throw new Error('You have liked this tweet!')
+
+        return Like.create({
+          userId: req.user.id,
+          tweetId
+        })
+      })
+      .then(like => cb(null, like))
+      .catch(err => cb(err))
+  },
+  removeLike: (req, cb) => {
+    return Like.findOne({
+      where: {
+        userId: req.user.id,
+        tweetId: req.params.tweet_id
+      }
+    })
+      .then(like => {
+        if (!like) throw new Error("You haven't liked this restaurant")
+        return like.destroy()
+      })
+      .then(removedLike => cb(null, removedLike))
       .catch(err => cb(err))
   },
   addFollowing: (req, cb) => {
