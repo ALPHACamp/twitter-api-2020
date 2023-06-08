@@ -7,6 +7,11 @@ const SESSION_SECRET = 'secret'
 const passport = require('./config/passport')
 const methodOverride = require('method-override')
 const routes = require('./routes')
+const passport = require('./config/passport')
+const flash = require('connect-flash')
+const session = require('express-session')
+const SESSION_SECRET = 'secret'
+const methodOverride = require('method-override')
 
 const app = express()
 const port = 3000
