@@ -11,7 +11,7 @@
 //       const follows = await queryInterface.Sequelize.bulkInsert('Followships',
 //         [{
 //           followerId: Math.floor(Math.random()* followers.length),
-//           followingId: Math.floor(Math.random() * followers.length) 
+//           followingId: Math.floor(Math.random() * followers.length)
 //         }]
 //    )
 //   }

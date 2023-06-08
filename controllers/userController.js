@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Followship } = require('../models')
+const { User, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
 const bcrypt = require('bcryptjs')
 const userController = {
@@ -34,7 +34,7 @@ const userController = {
         password: hash
       }))
       .then(data => {
-        userData = data.toJSON()
+        const userData = data.toJSON()
         delete userData.password
         res.json({ status: 'success', data: userData })
       })

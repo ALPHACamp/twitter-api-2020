@@ -5,7 +5,7 @@ const adminController = {
     User.findAll({
       raw: true,
       nest: true,
-      attributes: ['account', 'name', 'avatar', 'coverPhoto'],
+      attributes: ['account', 'name', 'avatar', 'coverPhoto']
     })
       .then(users => {
         res.json({ status: 'success', data: users })
@@ -17,9 +17,9 @@ const adminController = {
     User.findByPk(userId).then((user) => {
       user.destroy().then(() => {
         res.json({
-          status: "success",
-          message: `admin success delete user ${userId}`,
-        });
+          status: 'success',
+          message: `admin success delete user ${userId}`
+        })
       })
         .catch(error => next(error))
     })
@@ -37,30 +37,30 @@ const adminController = {
       .then(tweets => {
         tweets.forEach(tweet => {
           // 只顯示前50個字
-          if (tweet.description.length > 50) tweet.description = tweet.description.substring(0, 50) + '...';
+          if (tweet.description.length > 50) tweet.description = tweet.description.substring(0, 50) + '...'
           // 取得現在的時間
-          const now = new Date();
+          const now = new Date()
 
           // 計算 createdAt 和 updatedAt 和現在的時間差
-          const createdDiff = now - new Date(tweet.createdAt);
-          const updatedDiff = now - new Date(tweet.updatedAt);
+          const createdDiff = now - new Date(tweet.createdAt)
+          const updatedDiff = now - new Date(tweet.updatedAt)
 
           // 選擇最近的時間差
-          const lastUpdatedDiff = createdDiff < updatedDiff ? createdDiff : updatedDiff;
+          const lastUpdatedDiff = createdDiff < updatedDiff ? createdDiff : updatedDiff
 
           // 轉換成所需的格式
-          let lastUpdated;
-          const diffInHours = lastUpdatedDiff / 1000 / 60 / 60;
+          let lastUpdated
+          const diffInHours = lastUpdatedDiff / 1000 / 60 / 60
           if (diffInHours < 1) {
-            lastUpdated = `${Math.round(diffInHours * 60)} minutes ago`;
+            lastUpdated = `${Math.round(diffInHours * 60)} minutes ago`
           } else if (diffInHours < 24) {
-            lastUpdated = `${Math.round(diffInHours)} hours ago`;
+            lastUpdated = `${Math.round(diffInHours)} hours ago`
           } else {
-            lastUpdated = `${Math.round(diffInHours / 24)} days ago`;
+            lastUpdated = `${Math.round(diffInHours / 24)} days ago`
           }
 
           // 新增 lastUpdated 欄位到 tweet 物件中
-          tweet.lastUpdated = lastUpdated;
+          tweet.lastUpdated = lastUpdated
         })
         return res.json({ status: 'success', data: tweets })
       })
@@ -71,9 +71,9 @@ const adminController = {
     Tweet.findByPk(tweetId).then((tweet) => {
       tweet.destroy().then(() => {
         res.json({
-          status: "success",
-          message: `admin success delete tweet ${tweetId}`,
-        });
+          status: 'success',
+          message: `admin success delete tweet ${tweetId}`
+        })
       })
         .catch(error => next(error))
     })
@@ -88,31 +88,31 @@ const adminController = {
       .then(replies => {
         replies.forEach((reply) => {
           // 只顯示前50個字
-          if (reply.comment.length > 50) reply.comment = reply.comment.substring(0, 50) + '...';
+          if (reply.comment.length > 50) reply.comment = reply.comment.substring(0, 50) + '...'
           // 取得現在的時間
-          const now = new Date();
+          const now = new Date()
 
           // 計算 createdAt 和 updatedAt 和現在的時間差
-          const createdDiff = now - new Date(reply.createdAt);
-          const updatedDiff = now - new Date(reply.updatedAt);
+          const createdDiff = now - new Date(reply.createdAt)
+          const updatedDiff = now - new Date(reply.updatedAt)
 
           // 選擇最近的時間差
-          const lastUpdatedDiff = createdDiff < updatedDiff ? createdDiff : updatedDiff;
+          const lastUpdatedDiff = createdDiff < updatedDiff ? createdDiff : updatedDiff
 
           // 轉換成所需的格式
-          let lastUpdated;
-          const diffInHours = lastUpdatedDiff / 1000 / 60 / 60;
+          let lastUpdated
+          const diffInHours = lastUpdatedDiff / 1000 / 60 / 60
           if (diffInHours < 1) {
-            lastUpdated = `${Math.round(diffInHours * 60)} minutes ago`;
+            lastUpdated = `${Math.round(diffInHours * 60)} minutes ago`
           } else if (diffInHours < 24) {
-            lastUpdated = `${Math.round(diffInHours)} hours ago`;
+            lastUpdated = `${Math.round(diffInHours)} hours ago`
           } else {
-            lastUpdated = `${Math.round(diffInHours / 24)} days ago`;
+            lastUpdated = `${Math.round(diffInHours / 24)} days ago`
           }
 
           // 新增 lastUpdated 欄位到 tweet 物件中
-          reply.lastUpdated = lastUpdated;
-        });
+          reply.lastUpdated = lastUpdated
+        })
         return res.json({ status: 'success', data: replies })
       })
       .catch(error => next(error))
@@ -122,9 +122,9 @@ const adminController = {
     Reply.findByPk(replyId).then((reply) => {
       reply.destroy().then(() => {
         res.json({
-          status: "success",
-          message: `admin success delete reply ${replyId}`,
-        });
+          status: 'success',
+          message: `admin success delete reply ${replyId}`
+        })
       })
         .catch(error => next(error))
     })
@@ -132,4 +132,4 @@ const adminController = {
   }
 }
 
-module.exports = adminController  
+module.exports = adminController
