@@ -18,6 +18,10 @@ router.post('/login', passport.authenticate('local', { session: false }), userCo
 // 有關tweet的routes
 router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
+router.post('/tweets/:tweet_id/replies', authenticated, tweetController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, tweetController.getReply)
+// router.post('/tweets/:tweet_id/like', authenticated, tweetController.postReply)
+// router.get('/tweets/:tweet_id/unlike', authenticated, tweetController.getReply)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 
 // 有關user的routes
