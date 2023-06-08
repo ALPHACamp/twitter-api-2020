@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const { apiErrorHandler } = require('../../middleware/error-handler')
 
 // import modules
 const admin = require('./modules/admin')
@@ -14,5 +15,8 @@ router.use('/followships', followships)
 router.use('/likes', likes)
 router.use('/tweets', tweets)
 router.use('/users', users)
+
+// Error Handler
+router.use('/', apiErrorHandler)
 
 module.exports = router
