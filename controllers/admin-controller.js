@@ -77,10 +77,31 @@ const adminController = {
   },
 
   getTweets: (req, res, next) => {
-    Tweet.findAll({
-      include: User,
+    return Tweet.findAll({
+      include: [
+        {
+          model: User,
+          attributes: { exclude: ["password", "createdAt", "updatedAt", "role"] }
+        },
+      ],
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = tweet.id)"
+            ),
+            "replyCount",
+          ],
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = tweet.id)"
+            ),
+            "likeCount",
+          ],
+        ],
+      },
       nest: true,
-      raw: true
+      raw: true,
     })
       .then((tweets) => {
         if (!tweets) { return res.status(404).json({ status: 'error', message: 'No tweets found' }) }
