@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
-const { User } = require('../models')
+const { User, Tweet, Reply } = require('../models')
+const { imgurFileHandler } = require('../helpers/file-helpers')
+
 const userController = {
   signUp: (req, cb) => {
     console.log(req.body)
@@ -8,9 +10,9 @@ const userController = {
       .then(user => {
         console.log(user)
         if (user) throw new Error('Email already exists!')
-        return bcrypt.hash(req.body.password, 10) 
+        return bcrypt.hash(req.body.password, 10)
       })
-      .then(hash => User.create({ 
+      .then(hash => User.create({
         name: req.body.name,
         email: req.body.email,
         password: hash
@@ -19,7 +21,136 @@ const userController = {
         return cb(null, { user })
       })
       .catch(err => cb(err))
+  },
+  getUser: (req, cb) => {
+    const userId = Number(req.params.userId) || ''
+    User.findByPk(userId, {
+      nest: true,
+      raw: true
+    }
+    )
+      .then((user) => {
+        if (!user) throw new Error("User didn't exist!")
+        cb(null, {
+          user,
+          accountUser: req.user
+        })
+      })
+      .catch(err => cb(err))
+  },
+  getUserTweets: (req, cb) => {
+    const userId = Number(req.params.userId) || ''
+    Tweet.findAll({
+      include: [
+        User
+      ],
+      where: {
+        ...userId ? { userId } : {}
+      },
+      nest: true,
+      raw: true
+    })
+      .then(tweets => {
+        if (!tweets) throw new Error("Tweets didn't exist!")
+        cb(null, tweets)
+      })
+      .catch(err => cb(err))
+  },
+  getUserRepliedTweets: (req, cb) => {
+    const userId = Number(req.params.userId) || ''
+    Reply.findAll({
+      include: [
+        User,
+        Tweet
+      ],
+      where: {
+        ...userId ? { userId } : {}
+      },
+      nest: true,
+      raw: true
+    })
+      .then(replies => {
+        if (!replies) throw new Error("Replies didn't exist!")
+        cb(null, replies)
+      })
+      .catch(err => cb(err))
+  },
+  getUserLikes: (req, cb) => {
+    const userId = Number(req.params.userId) || ''
+    User.findByPk(userId, {
+      include: [
+        { model: Tweet, as: 'LikedTweets' }
+      ],
+      nest: true,
+      raw: true
+    })
+      .then(likedtweets => {
+        if (!likedtweets) throw new Error("Likedtweets didn't exist!")
+        cb(null, likedtweets)
+      })
+      .catch(err => cb(err))
+  },
+  getUserFollowings: (req, cb) => {
+    const userId = Number(req.params.userId) || ''
+    User.findByPk(userId, {
+      include: [
+        { model: User, as: 'Followings' }
+      ],
+      nest: true,
+      raw: true
+    })
+      .then(followings => {
+        if (!followings) throw new Error("Followings didn't exist!")
+        cb(null, followings)
+      })
+      .catch(err => cb(err))
+  },
+  getUserFollowers: (req, cb) => {
+    const userId = Number(req.params.userId) || ''
+    User.findByPk(userId, {
+      include: [
+        { model: User, as: 'Followers' }
+      ],
+      nest: true,
+      raw: true
+    })
+      .then(followers => {
+        if (!followers) throw new Error("Followers didn't exist!")
+        cb(null, followers)
+      })
+      .catch(err => cb(err))
+  },
+  editUser: (req, cb) => {
+    return User.findByPk((req.params.id), {
+      nest: true,
+      raw: true
+    })
+      .then(user => {
+        if (!user) throw new Error("User didn't exist!")
+        return cb(null, user)
+      })
+      .catch(err => cb(err))
+  },
+  putUser: (req, cb) => {
+    const { name, email, introduction } = req.body
+    if (!name) throw new Error('User name is required!')
+    if (!email) throw new Error('User email is required!')
+
+    const { file } = req
+    return Promise.all([
+      User.findByPk(req.params.userId),
+      imgurFileHandler(file)])
+      .then(([user, filePath]) => {
+        if (!user) throw new Error("User didn't exist!")
+        user.update({
+          name,
+          email,
+          introduction,
+          avatar: filePath || user.avatar
+        })
+        return cb(null, user)
+      })
+      .catch(err => cb(err))
   }
 }
-
 module.exports = userController
