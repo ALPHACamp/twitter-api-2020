@@ -57,7 +57,7 @@ const userController = {
           throw new Error("密碼不相符");
         const userData = user.toJSON();
         delete userData.password;
-        const token = jwt.sign(userData, process.env.JWT_SECRET || "password", {
+        const token = jwt.sign(userData, process.env.JWT_SECRET, {
           expiresIn: "30d",
         });
         return res.status(200).json({
@@ -169,7 +169,8 @@ const userController = {
                 FROM replies AS reply
                 WHERE 
                     reply.tweet_id = tweet.id
-                )`), 'replyCount'
+                )`),
+              "replyCount",
             ],
             [
               literal(`(
@@ -177,24 +178,33 @@ const userController = {
                 FROM likes AS liked
                 WHERE 
                     liked.tweet_id = tweet.id
-                )`), 'likeCount'
-            ]
+                )`),
+              "likeCount",
+            ],
           ],
-          exclude: ['UserId']
+          exclude: ["UserId"],
         },
         raw: true,
-        nest: true
-      })
+        nest: true,
+      }),
     ])
       .then(([user, tweets]) => {
         // Error: user not found
-        if (!user) { return res.status(404).json({ status: 'error', message: 'No user found' }) }
+        if (!user) {
+          return res
+            .status(404)
+            .json({ status: "error", message: "No user found" });
+        }
         // Error: tweets not found
-        if (!tweets || tweets.length === 0) { return res.status(404).json({ status: 'error', message: 'No tweets found' }) }
+        if (!tweets || tweets.length === 0) {
+          return res
+            .status(404)
+            .json({ status: "error", message: "No tweets found" });
+        }
         return res.status(200).json(tweets);
       })
 
-      .catch(err => next(err))
+      .catch((err) => next(err));
   },
 
   getUserRepliedTweets: (req, res, next) => {
@@ -205,22 +215,32 @@ const userController = {
         include: [
           {
             model: Tweet,
-            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+            include: [
+              { model: User, attributes: ["id", "name", "account", "avatar"] },
+            ],
           },
         ],
         raw: true,
-        nest: true
-      })
+        nest: true,
+      }),
     ])
       .then(([user, replies]) => {
         // Error: user not found
-        if (!user) { return res.status(404).json({ status: 'error', message: 'No user found' }) }
+        if (!user) {
+          return res
+            .status(404)
+            .json({ status: "error", message: "No user found" });
+        }
         // Error: replies not found
-        if (!replies || replies.length === 0) { return res.status(404).json({ status: 'error', message: 'No replies found' }) }
+        if (!replies || replies.length === 0) {
+          return res
+            .status(404)
+            .json({ status: "error", message: "No replies found" });
+        }
         return res.status(200).json(replies);
       })
 
-      .catch(err => next(err))
+      .catch((err) => next(err));
   },
 
   getUserLikes: (req, res, next) => {
@@ -232,36 +252,52 @@ const userController = {
         include: [
           {
             model: Tweet,
-            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'], },],
+            include: [
+              { model: User, attributes: ["id", "name", "account", "avatar"] },
+            ],
           },
         ],
         raw: true,
-        nest: true
-      })
+        nest: true,
+      }),
     ])
       .then(([user, likes]) => {
         // Error: user not found
-        if (!user) { return res.status(404).json({ status: 'error', message: 'No user found' }) }
+        if (!user) {
+          return res
+            .status(404)
+            .json({ status: "error", message: "No user found" });
+        }
         // Error: likes not found
-        if (!likes || likes.length === 0) { return res.status(404).json({ status: 'error', message: 'No likes found' }) }
-        return res.status(200).json(likes)
+        if (!likes || likes.length === 0) {
+          return res
+            .status(404)
+            .json({ status: "error", message: "No likes found" });
+        }
+        return res.status(200).json(likes);
       })
 
-      .catch(err => next(err))
+      .catch((err) => next(err));
   },
 
   getTweets: (req, res, next) => {
     // function duplicate with admin-controller
     Tweet.findAll({
-      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'], },],
+      include: [
+        { model: User, attributes: ["id", "name", "account", "avatar"] },
+      ],
       nest: true,
-      raw: true
+      raw: true,
     })
       .then((tweets) => {
-        if (!tweets) { return res.status(404).json({ status: 'error', message: 'No tweets found' }) }
-        return res.status(200).json(tweets)
+        if (!tweets) {
+          return res
+            .status(404)
+            .json({ status: "error", message: "No tweets found" });
+        }
+        return res.status(200).json(tweets);
       })
-      .catch((err) => next(err))
+      .catch((err) => next(err));
   },
 
   getTweet: (req, res, next) => {
@@ -274,7 +310,8 @@ const userController = {
               FROM replies AS reply
               WHERE 
                   reply.tweet_id = tweet.id
-              )`), 'replyCount'
+              )`),
+            "replyCount",
           ],
           [
             literal(`(
@@ -282,91 +319,103 @@ const userController = {
               FROM likes AS liked
               WHERE 
                   liked.tweet_id = tweet.id
-              )`), 'likeCount'
-          ]
-        ]
+              )`),
+            "likeCount",
+          ],
+        ],
       },
-      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+      include: [
+        { model: User, attributes: ["id", "name", "account", "avatar"] },
+      ],
     })
       .then((tweet) => {
         if (!tweet) {
           // Error: tweet not found
-          return res.status(404).json({ status: 'error', message: 'No tweet found' });
+          return res
+            .status(404)
+            .json({ status: "error", message: "No tweet found" });
         }
-        return res.status(200).json(tweet)
+        return res.status(200).json(tweet);
       })
-      .catch(err => next(err))
+      .catch((err) => next(err));
   },
 
   postTweets: (req, res, next) => {
-    const { description } = req.body
+    const { description } = req.body;
     if (!description) {
-      throw new Error('Tweet content is required!')
+      throw new Error("Tweet content is required!");
     }
     // get current user id
-    const user = getUser(req)
-    const userId = user.id
+    const user = getUser(req);
+    const userId = user.id;
 
     return Tweet.create({
       userId,
-      description
+      description,
     })
       .then((newTweet) => {
-        return res.status(200).json(newTweet)
+        return res.status(200).json(newTweet);
       })
-      .catch((err) => next(err))
+      .catch((err) => next(err));
   },
 
   postTweetLike: (req, res, next) => {
-    const TweetId = req.params.id
-    const user = getUser(req)
-    const userId = user.id
+    const TweetId = req.params.id;
+    const user = getUser(req);
+    const userId = user.id;
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({
         where: {
           userId,
-          TweetId
-        }
-      })
+          TweetId,
+        },
+      }),
     ])
       .then(([tweet, like]) => {
-        if (!tweet) throw new Error("Tweet doesn't exist!")
-        if (like) throw new Error("You have liked this tweet!")
+        if (!tweet) throw new Error("Tweet doesn't exist!");
+        if (like) throw new Error("You have liked this tweet!");
 
         return Like.create({
           userId,
-          TweetId
-        })
+          TweetId,
+        });
       })
       .then((newLike) => {
-        return res.status(200).json({ status: 'success', message: 'Like succeed', newLike })
+        return res
+          .status(200)
+          .json({ status: "success", message: "Like succeed", newLike });
       })
-      .catch((err) => next(err))
+      .catch((err) => next(err));
   },
 
   postTweetUnlike: (req, res, next) => {
-    const TweetId = req.params.id
+    const TweetId = req.params.id;
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({
         where: {
-          TweetId
-        }
-      })
+          TweetId,
+        },
+      }),
     ])
       .then(([tweet, like]) => {
-        if (!tweet) throw new Error("Tweet doesn't exist!")
-        if (!like) throw new Error("You haven't liked this tweet!")
+        if (!tweet) throw new Error("Tweet doesn't exist!");
+        if (!like) throw new Error("You haven't liked this tweet!");
 
         // keep the deleted data
-        const deletedLike = like.toJSON()
-        return like.destroy()
-          .then(() => {
-            return res.status(200).json({ status: 'success', message: 'Unlike succeed', deletedLike })
-          })
+        const deletedLike = like.toJSON();
+        return like.destroy().then(() => {
+          return res
+            .status(200)
+            .json({
+              status: "success",
+              message: "Unlike succeed",
+              deletedLike,
+            });
+        });
       })
-      .catch(err => next(err))
-  }
+      .catch((err) => next(err));
+  },
 };
 module.exports = userController;
