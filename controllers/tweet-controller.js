@@ -72,6 +72,26 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  postReply: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweet_id
+      const userId = helpers.getUser(req).id
+      const [tweet, user] = await Promise.all([
+        Tweet.findByPk(tweetId, { raw: true, attributes: ['id'] }),
+        User.findByPk(userId, { raw: true, attributes: ['id'] })
+      ])
+      if (!tweet) newErrorGenerate('推文不存在', 404)
+      if (!user) newErrorGenerate('使用者不存在', 404)
+
+      const { comment } = req.body
+      if (!comment.trim()) newErrorGenerate('內容不可空白', 400)
+      if (comment.length > TWEETS_WORD_LIMIT) newErrorGenerate(`字數限制${TWEETS_WORD_LIMIT}字以內`, 400)
+      const newReply = await Reply.create({ TweetId: tweetId, UserId: userId, comment })
+      return res.json(newReply)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = tweetController
