@@ -22,19 +22,23 @@ const userServices = {
         }
     },
     signUp: (req, cb) => {
+        const { name, account, email, password, confirmPassword } = req.body
         User.findOne({
             where: {
-                account: req.body.account
+                account
             }
         })
             .then(user => {
-                if (user) throw new Error('Email already exists!')
-                if (req.body.name.length >= 50) throw new Error('50 words restriction')
+                if (user) throw new Error('帳號已存在！')
+                if (name.length >= 50) throw new Error('名稱不可超過50字！')
+                if (password !== confirmPassword) throw new Error('密碼與確認密碼不一致！')
                 const salt = bcrypt.genSaltSync(10);
-                const hash = bcrypt.hashSync(req.body.password, salt);
+                const hash = bcrypt.hashSync(password, salt);
                 return User.create({
-                    name: req.body.name,
-                    email: req.body.email,
+                    name,
+                    account,
+                    email,
+                    role: 'user',
                     password: hash
                 })
             })
