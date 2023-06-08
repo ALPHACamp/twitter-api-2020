@@ -201,14 +201,16 @@ const userController = {
         imgurFileHandler(files),
         User.findByPk(helpers.getUser(req).id)
       ])
+      const avatar = fixedFile ? fixedFile[0] : null
+      const backgroundImage = fixedFile ? fixedFile[1] : null
       let updatedUser = await selfUser.update({
         name: name?.trim() || selfUser.name,
         account: account?.trim() || selfUser.account,
         email: email?.trim() || selfUser.email,
         password: hash || selfUser.password,
         introduction: introduction?.trim() || selfUser.introduction,
-        avatar: fixedFile[0] || user.avatar,
-        backgroundImage: fixedFile[1] || user.backgroundImage
+        avatar: avatar || user.avatar,
+        backgroundImage: backgroundImage || user.backgroundImage
       })
       updatedUser = updatedUser.toJSON()
       delete updatedUser.password
