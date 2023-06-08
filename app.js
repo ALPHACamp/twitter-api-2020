@@ -4,7 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const helpers = require('./_helpers');
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 const passport = require('./config/passport')
 const routes = require('./routes')
 
