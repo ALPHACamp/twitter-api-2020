@@ -37,15 +37,20 @@ const followshipController = {
   deleteFollowship: async (req, res, next) => {
     try {
       // 確認沒有這個followship
-      const followshipId = req.params.followshipId
-      const followship = await Followship.findOne({ where: { id: followshipId } })
-      if (!followship) throw new Error('Followship不存在！')
+      const followerId = helpers.getUser(req).id.toString()
+      const followingId = req.params.followingId
+
+      if (followerId === followingId) throw new Error('不能取消追隨自己!')
+      const followship = await Followship.findOne({
+        where: { followingId, followerId }
+      })
+      if (!followship) throw new Error('你沒有在追蹤這位使用者')
 
       // 刪除
       await followship.destroy()
       res.json({
         status: 'success',
-        message: '成功刪除Followship！'
+        message: '成功取消追隨該使用者！'
       })
     } catch (error) {
       next(error)
