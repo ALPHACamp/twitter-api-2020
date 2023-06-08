@@ -4,6 +4,8 @@ const db = require('../models')
 const { Op } = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = db
 const sequelize = require('sequelize')
+const helpers = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   login: (req, res, next) => {
@@ -93,13 +95,6 @@ const userController = {
         ...userData
       })
     } catch (err) { next(err) }
-  },
-  putUserData: async (req, res, next) => {
-    try {
-      // write later
-    } catch (err) {
-      next(err)
-    }
   },
   getUserTweets: async (req, res, next) => {
     try {
@@ -222,6 +217,91 @@ const userController = {
 
       const followersData = followers.map(follower => follower.toJSON())
       res.status(200).json(followersData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  putUserSetting: async (req, res, next) => {
+    try {
+      // 使用者僅能編輯自己的資料
+      const currentUser = helpers.getUser(req).dataValues
+      if (Number(currentUser.id) !== Number(req.params.id)) { throw new Error('你沒有權限可以編輯他人資料') }
+
+      // 使用者能編輯自己的 account、name、email 和 password
+      const { account, name, email, password, checkPassword, introduction } = req.body
+
+      // 暱稱上限 50 字
+      if (name && name.length > 50) throw new Error('name 超過字數限制50字元')
+
+      // 自我介紹上限 160字
+      if (introduction && introduction.length > 160) { throw new Error(' introduction 超過字數限制160字元') }
+
+      // check password
+      if (password !== checkPassword) throw new Error('密碼不相同')
+
+      // 檢查account, email 是否重複
+      if (email || account) {
+        const checkUser = await User.findOne({
+          where: {
+            [Op.or]: [email ? { email } : {}, account ? { account } : {}]
+          }
+        })
+        if (checkUser?.email === email) throw new Error('email 已重複註冊！')
+        if (checkUser?.account === account) throw new Error('account 已重複註冊！')
+      }
+
+      const user = await User.findByPk(req.params.id)
+      // 更新使用者資訊
+      await user.update({
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        password: password ? bcrypt.hashSync(password) : user.password,
+        introduction: introduction || user.introduction
+      })
+
+      // 回傳成功訊息
+      res.status(200).json({
+        status: 'success',
+        message: '成功編輯帳號資訊'
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  putUserProfile: async (req, res, next) => {
+    try {
+      // 使用者僅能編輯自己的資料
+      const currentUser = helpers.getUser(req).dataValues
+      if (Number(currentUser.id) !== Number(req.params.id)) {
+        throw new Error('你沒有權限可以編輯他人資料')
+      }
+      const { name, introduction } = req.body
+      const { files } = req
+
+      // 自我介紹字數上限 160 字、暱稱上限 50 字
+      if (name && name.length > 50) throw new Error('name 超過字數限制50字元')
+      if (introduction && introduction.length > 160) { throw new Error(' introduction 超過字數限制160字元') }
+
+      const user = await User.findByPk(req.params.id)
+      if (!user) throw new Error('使用者不存在!')
+
+      const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
+
+      const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
+
+      const newData = await user.update({
+        name: name || user.name,
+        introduction: introduction || user.introduction,
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover
+      })
+
+      res.json({
+        status: 'success',
+        message: '成功編輯使用者Profile',
+        data: newData.toJSON()
+      })
     } catch (err) {
       next(err)
     }
