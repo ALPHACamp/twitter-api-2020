@@ -2,18 +2,16 @@ const router = require('express').Router()
 const passport = require('../../config/passport')
 const admin = require('./modules/admin')
 const userController = require('../../controllers/apis/user-controller')
+const adminController = require('../../controllers/apis/admin-controller')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const tweetController = require('../../controllers/apis/tweet-controller')
-const { authenticated } = require('../../middleware/api-auth')
-
-// 測試postman 是否正常運作
-router.get('/', (req, res) => {
-  res.json({ status: 'success', data: 'Hello world' })
-})
+const { authenticated, roleChecker } = require('../../middleware/api-auth')
 
 // 有關admin的routes
-router.use('/admin', admin)
+router.post('/admin/users', passport.authenticate('local', { session: false }), roleChecker, adminController.adminLogin)
+router.use('/admin', authenticated, roleChecker, admin)
 
+// 使用者登入註冊
 router.post('/signup', userController.signUp)
 router.post('/login', passport.authenticate('local', { session: false }), userController.login)
 

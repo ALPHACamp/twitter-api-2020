@@ -1,9 +1,6 @@
 const router = require('express').Router()
 const adminController = require('../../../controllers/apis/admin-controller')
 
-// admin 登入
-router.post('/users', adminController.adminLogin)
-
 // users有關
 router.get('/users', adminController.getUsers)
 

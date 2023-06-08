@@ -8,7 +8,7 @@ const { User } = require('../models')
 
 // LocalStrategy Setting
 passport.use(new LocalStrategy(
-  ({ usernameField: 'account', passwordField: 'password', passReqToCallback: true }),
+  { usernameField: 'account', passwordField: 'password', passReqToCallback: true },
   async (req, account, password, cb) => {
     try {
       const user = await User.findOne({ where: { account } })
