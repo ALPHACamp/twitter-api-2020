@@ -10,10 +10,11 @@ const { authenticatedAdmin, authenticatedUser, authenticated } = require('../mid
 const { generalErrorHandler } = require('../middleware/error-handler')
 const cors = require('../middleware/cors')
 
-router.post('/api/users/signin',cors, passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
-router.post('/api/admin/signin',cors, passport.authenticate('local', { session: false }), authenticatedAdmin, userController.signIn)
+router.post('/api/users/signin', cors, passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
+router.post('/api/admin/signin', cors, passport.authenticate('local', { session: false }), authenticatedAdmin, userController.signIn)
 
 router.post('/api/users', cors, userController.signUp)
+router.get('/api/users/:id', cors, authenticated, authenticatedUser, userController.getUser)
 
 router.get('/api/tweets/:id',cors, authenticated, authenticatedUser, tweetController.getTweet)
 router.get('/api/tweets', cors, authenticated, authenticatedUser, tweetController.getTweets)
