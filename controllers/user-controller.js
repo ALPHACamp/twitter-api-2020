@@ -32,10 +32,13 @@ const userController = {
     try {
       // 註冊時，使用者可以設定 account、name、email 和 password
       const { account, name, email, password, checkPassword } = req.body
-      if (!account || !name || !email || !password || !checkPassword) throw new Error('請輸入完整資訊')
+      if (!account || !name || !email || !password || !checkPassword) throw new Error('請輸入完整資訊!')
 
       // check password
-      if (password !== checkPassword) throw new Error('密碼不相同')
+      if (password !== checkPassword) throw new Error('密碼不相同!')
+
+      // check name 不能超過50字
+      if (name.length > 50) throw new Error('name 超過字數限制50字元！')
 
       // 檢查account, email 是否重複
       const user = await User.findOne({
@@ -231,10 +234,10 @@ const userController = {
       const { account, name, email, password, checkPassword, introduction } = req.body
 
       // 暱稱上限 50 字
-      if (name && name.length > 50) throw new Error('name 超過字數限制50字元')
+      if (name && name.length > 50) throw new Error('name 超過字數限制50字元!')
 
       // 自我介紹上限 160字
-      if (introduction && introduction.length > 160) { throw new Error(' introduction 超過字數限制160字元') }
+      if (introduction && introduction.length > 160) { throw new Error(' introduction 超過字數限制160字元!') }
 
       // check password
       if (password !== checkPassword) throw new Error('密碼不相同')
@@ -280,8 +283,8 @@ const userController = {
       const { files } = req
 
       // 自我介紹字數上限 160 字、暱稱上限 50 字
-      if (name && name.length > 50) throw new Error('name 超過字數限制50字元')
-      if (introduction && introduction.length > 160) { throw new Error(' introduction 超過字數限制160字元') }
+      if (name && name.length > 50) throw new Error('name 超過字數限制50字元!')
+      if (introduction && introduction.length > 160) { throw new Error(' introduction 超過字數限制160字元!') }
 
       const user = await User.findByPk(req.params.id)
       if (!user) throw new Error('使用者不存在!')
