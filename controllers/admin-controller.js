@@ -105,6 +105,12 @@ const adminController = {
     })
       .then((tweets) => {
         if (!tweets) { return res.status(404).json({ status: 'error', message: 'No tweets found' }) }
+        const result = tweets
+        // sort by date
+        .sort(
+          (a, b) =>
+            b.createdAt.getTime() - a.createdAt.getTime()
+        )
         return res.status(200).json(tweets)
       })
       .catch((err) => next(err))
