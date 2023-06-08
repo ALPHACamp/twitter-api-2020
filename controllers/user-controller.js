@@ -189,9 +189,8 @@ const userController = {
       const user = await User.findByPk(userId, { attributes: ['id'] })
       if (!user) newErrorGenerate('使用者不存在', 404)
       if (!isUser(req)) newErrorGenerate('使用者非本帳號無權限編輯', 404)
-      const { name, account, email, password, checkPassword, avatar, introduction, backgroundImage } = req.body
-      const { file } = req
-      console.log(file)
+      const { name, account, email, password, checkPassword, introduction } = req.body
+      const { files } = req
       if (account ? await User.findOne({ attributes: ['id'], where: { account: account.trim() } }) : false) newErrorGenerate('account 已重複註冊', 404)
       if (email ? await User.findOne({ attributes: ['id'], where: { email: email.trim() } }) : false) newErrorGenerate('email 已重複註冊', 404)
       if (name?.length > 50) newErrorGenerate('字數超出上限', 404)
@@ -199,18 +198,17 @@ const userController = {
       if (introduction?.length > 160) newErrorGenerate('字數超出上限', 404)
       const hash = password ? await bcrypt.hash(password, 10) : null
       const [fixedFile, selfUser] = await Promise.all([
-        imgurFileHandler(file),
+        imgurFileHandler(files),
         User.findByPk(helpers.getUser(req).id)
       ])
-      console.log(fixedFile)
       let updatedUser = await selfUser.update({
         name: name?.trim() || selfUser.name,
         account: account?.trim() || selfUser.account,
         email: email?.trim() || selfUser.email,
         password: hash || selfUser.password,
         introduction: introduction?.trim() || selfUser.introduction,
-        avatar: fixedFile || user.avatar,
-        backgroundImage: fixedFile || user.backgroundImage
+        avatar: fixedFile[0] || user.avatar,
+        backgroundImage: fixedFile[1] || user.backgroundImage
       })
       updatedUser = updatedUser.toJSON()
       delete updatedUser.password
