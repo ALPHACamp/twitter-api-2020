@@ -1,4 +1,9 @@
-const { Tweet, User } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
+
+const dayjs = require('dayjs')
+const relativeTime = require('dayjs/plugin/relativeTime')
+dayjs.extend(relativeTime)
+
 const tweetServices = {
   getTweets: async(req, cb) => {
       try{
@@ -14,27 +19,36 @@ const tweetServices = {
         }
     },
     getTweet: async(req, cb) => {
-      try{
-        const tweet = await Tweet.findByPk(req.params.id, {
+      const { id } = req.params
+        return Promise.all([
+        Tweet.findByPk(req.params.id, {
           include: [
             User, 
-            //{ model: User, as: 'LikedUsers' },
-            // { model: Replies, include: User },
           ],
           nest: true,
           raw: true
-          })
-        //const likeCount = tweet.LikedUsers.length
-        // const replyCount = tweet.User.length
-        if (!tweet) throw new Error("Tweet didn't exist!")
-        return cb(null,{
-            tweet,
-            //likeCount,
-            // replyCount
-        })
-      } catch (err) {
-            cb(err)
-      }
+          }),
+            Like.count({
+                where: {
+                    TweetId: id
+                }
+            }),
+            Reply.count({
+                where: {
+                    TweetId: id
+                }
+            })
+        ])
+            .then(([tweet, likes, replies]) => {
+                if (!tweet) throw new Error("Tweet didn't exist!")
+                cb(null, {
+                    tweet,
+                    likeCount: likes,
+                    replyCount: replies,
+                    createdAt: dayjs().to(tweet.createdAt)
+                })
+            })
+            .catch(err => cb(err))
     }
 }
 
