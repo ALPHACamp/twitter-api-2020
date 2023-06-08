@@ -1,8 +1,8 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+const path = require('path')
 const cors = require('cors')
-// const path = require('path')
 const express = require('express')
 const routes = require('./routes')
 // const helpers = require('./_helpers')
@@ -21,7 +21,7 @@ app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: fals
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
-// app.use('/upload', express.static(path.join(__dirname, 'upload')))
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 // use helpers.getUser(req) to replace req.user
 // function authenticated (req, res, next) {
 //   // passport.authenticate('jwt', { ses...

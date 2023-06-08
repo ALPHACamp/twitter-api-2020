@@ -5,6 +5,7 @@ const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
 const { isUser } = require('../helpers/isUser-helper')
 const { relativeTimeFromNow } = require('../helpers/dayFix-helper')
+const { imgurFileHandler } = require('../helpers/file-helper')
 const USERS_WORD_LIMIT = 50
 
 const userController = {
@@ -183,25 +184,40 @@ const userController = {
   },
   // 使用者能編輯自己的資料
   putUser: async (req, res, next) => {
-    const userId = req.params.id
-    const user = await User.findByPk(userId, { attributes: ['id'] })
-    if (!user) newErrorGenerate('使用者不存在', 404)
-    if (!isUser(req)) newErrorGenerate('使用者非本帳號無權限編輯', 404)
-    const { name, account, email, password, checkPassword, avatar, introduction, backgroundImage } = req.body
-    if (account ? await User.findOne({ attributes: ['id'], where: { account } }) : false) newErrorGenerate('account 已重複註冊', 404)
-    if (email ? await User.findOne({ attributes: ['id'], where: { email } }) : false) newErrorGenerate('email 已重複註冊', 404)
-    if (name && name > 50) newErrorGenerate('字數超出上限', 404)
-    if (password && password !== checkPassword) newErrorGenerate('密碼與確認密碼不相符', 404)
-    if (introduction && introduction > 160) newErrorGenerate('字數超出上限', 404)
-    
-
-    const { userAccount, userEmail } = await Promise.all([
-      User.findOne({ attributes: ['id'], where: { account } }),
-      User.findOne({ attributes: ['id'], where: { email } })
-    ])
-    if (userAccount) 
-    if (userEmail) newErrorGenerate('email 已重複註冊', 404)
-    
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId, { attributes: ['id'] })
+      if (!user) newErrorGenerate('使用者不存在', 404)
+      if (!isUser(req)) newErrorGenerate('使用者非本帳號無權限編輯', 404)
+      const { name, account, email, password, checkPassword, avatar, introduction, backgroundImage } = req.body
+      const { file } = req
+      console.log(file)
+      if (account ? await User.findOne({ attributes: ['id'], where: { account: account.trim() } }) : false) newErrorGenerate('account 已重複註冊', 404)
+      if (email ? await User.findOne({ attributes: ['id'], where: { email: email.trim() } }) : false) newErrorGenerate('email 已重複註冊', 404)
+      if (name?.length > 50) newErrorGenerate('字數超出上限', 404)
+      if (password && password !== checkPassword) newErrorGenerate('密碼與確認密碼不相符', 404)
+      if (introduction?.length > 160) newErrorGenerate('字數超出上限', 404)
+      const hash = password ? await bcrypt.hash(password, 10) : null
+      const [fixedFile, selfUser] = await Promise.all([
+        imgurFileHandler(file),
+        User.findByPk(helpers.getUser(req).id)
+      ])
+      console.log(fixedFile)
+      let updatedUser = await selfUser.update({
+        name: name?.trim() || selfUser.name,
+        account: account?.trim() || selfUser.account,
+        email: email?.trim() || selfUser.email,
+        password: hash || selfUser.password,
+        introduction: introduction?.trim() || selfUser.introduction,
+        avatar: fixedFile || user.avatar,
+        backgroundImage: fixedFile || user.backgroundImage
+      })
+      updatedUser = updatedUser.toJSON()
+      delete updatedUser.password
+      res.json(updatedUser)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = userController
