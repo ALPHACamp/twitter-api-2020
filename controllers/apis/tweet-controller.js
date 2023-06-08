@@ -27,6 +27,7 @@ const tweetController = {
       const { tweet_id } = req.params
       const tweet = await Tweet.findByPk(tweet_id)
       if (!tweet) return res.json({ status: 'error', data: 'The tweet does not exist' })
+
       return res.json({ status: 'success', data: tweet })
     } catch (error) {
       next(error)
