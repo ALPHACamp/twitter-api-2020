@@ -53,32 +53,36 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
-      const { id } = req.params
+      let { id } = req.params
+      id = Number(id)
       const userTweets = await Tweet.findAll({
-        where: { userId: id },
+        where: { UserId: id },
         raw: true,
         nest: true
       })
+      console.log(userTweets)
       if (!userTweets) return res.json({ status: 'error', data: 'The user have not post any tweet yet' })
       return res.json({ status: 'success', data: userTweets })
     } catch (error) {
       next(error)
     }
   },
-  getUser: (req, res, next) => {
+  getUser: async (req, res, next) => {
     try {
-      const { id } = req.params
-      const user = User.findByPk(id)
+      let id = req.params.id
+      id = Number(id)
+      const user = await User.findByPk(id)
+      console.log(user)
       if (!user) return res.json({ status: 'error', data: 'The user does not exist' })
       res.json({ status: 'success', data: user })
     } catch (error) {
       next(error)
     }
   },
-  getUserRepliedTweet: (req, res, next) => {
+  getUserRepliedTweet: async (req, res, next) => {
     try {
       const { id } = req.params
-      const repliedTweets = Reply.findAll({
+      const repliedTweets = await Reply.findAll({
         where: { UserId: id },
         raw: true,
         nest: true

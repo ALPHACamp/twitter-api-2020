@@ -11,19 +11,19 @@ passport.use(new LocalStrategy(
   { usernameField: 'account', passwordField: 'password', passReqToCallback: true },
   async (req, account, password, cb) => {
     try {
+      const errorMessage = '帳號或密碼輸入錯誤！'
       const user = await User.findOne({ where: { account } })
 
       // 帳號或密碼輸入錯誤 暫時的錯誤處理
       if (!user) {
-        console.log('帳號或密碼輸入錯誤！')
-        return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
+        return cb(null, false, { message: errorMessage })
       }
       const isMatch = await bcrypt.compare(password, user.password)
 
       // 帳號或密碼輸入錯誤 暫時的錯誤處理
       if (!isMatch) {
         console.log('帳號或密碼輸入錯誤！')
-        return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
+        return cb(null, false, { message: errorMessage })
       }
       return cb(null, user)
     } catch (error) {
@@ -55,6 +55,7 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
         // ]
       }
     )
+    if (!user) { return cb(null, false) }
     return cb(null, user)
   } catch (error) {
     cb(error)
