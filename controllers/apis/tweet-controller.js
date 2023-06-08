@@ -68,14 +68,14 @@ const tweetController = {
   },
   likeTweet: async (req, res, next) => {
     try {
-      const { tweet_id } = req.params
+      const { id } = req.params
       const PromiseArr = await Promise.all(
         [
-          Tweet.findByPk(tweet_id),
+          Tweet.findByPk(id),
           Like.findOne({
             where: {
               UserId: res.locals.userId,
-              TweetId: tweet_id
+              TweetId: id
             }
           })
         ])
@@ -84,7 +84,7 @@ const tweetController = {
 
       const like = await Like.create({
         UserId: res.locals.userId,
-        TweetId: tweet_id
+        TweetId: id
       })
       return res.json({ status: 'success', data: like })
     } catch (error) {
@@ -93,13 +93,13 @@ const tweetController = {
   },
   unlikeTweet: async (req, res, next) => {
     try {
-      const { tweet_id } = req.params
-      const tweet = await Tweet.findByPk(tweet_id)
+      const { id } = req.params
+      const tweet = await Tweet.findByPk(id)
       if (!tweet) return res.json({ status: 'error', data: 'The tweet does not exist' })
       const like = await Like.findOne({
         where: {
           UserId: res.locals.userId,
-          TweetId: tweet_id
+          TweetId: id
         }
       })
       if (!like) return res.json({ status: 'error', data: 'The like does not exist' })
