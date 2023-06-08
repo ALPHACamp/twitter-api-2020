@@ -15,7 +15,7 @@ router.get('/users/:userId/likes', authenticated, userController.getUserLikes)
 
 router.get('/users/:userId/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:userId/followers', authenticated, userController.getUserFollowers)
-router.put('/users/:userId/edit', authenticated, userController.editUser)
+router.get('/users/:userId/edit', authenticated, userController.editUser)
 router.put('/users/:userId', authenticated, upload.single('image'), userController.putUser)
 router.get('/users/:userId', authenticated, userController.getUser)
 router.post('/users', userController.signUp)

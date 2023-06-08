@@ -51,7 +51,7 @@ const userController = {
       raw: true
     })
       .then(tweets => {
-        if (!tweets) throw new Error("Tweets didn't exist!")
+        if (!tweets.length) throw new Error("Tweets didn't exist!")
         cb(null, tweets)
       })
       .catch(err => cb(err))
@@ -70,7 +70,7 @@ const userController = {
       raw: true
     })
       .then(replies => {
-        if (!replies) throw new Error("Replies didn't exist!")
+        if (!replies.length) throw new Error("Replies didn't exist!")
         cb(null, replies)
       })
       .catch(err => cb(err))
@@ -121,12 +121,13 @@ const userController = {
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    return User.findByPk((req.params.id), {
+    return User.findByPk((req.params.userId), {
       nest: true,
       raw: true
     })
       .then(user => {
         if (!user) throw new Error("User didn't exist!")
+        delete user.password
         return cb(null, user)
       })
       .catch(err => cb(err))
@@ -142,12 +143,15 @@ const userController = {
       imgurFileHandler(file)])
       .then(([user, filePath]) => {
         if (!user) throw new Error("User didn't exist!")
-        user.update({
+        return user.update({
           name,
           email,
           introduction,
           avatar: filePath || user.avatar
         })
+      })
+      .then(user => {
+        delete user.password
         return cb(null, user)
       })
       .catch(err => cb(err))
