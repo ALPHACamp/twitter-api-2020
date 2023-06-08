@@ -31,10 +31,21 @@ const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req).role === 'admin') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
+
+// 確認user是否存在
+function validateUser (req, res, next) {
+  const user = helpers.getUser(req)
+  if (!user || !user.id) {
+    return res.status(400).json({ error: 'User not found' })
+  }
+  next()
+}
+
 module.exports = {
   authenticated,
   authenticatedAdmin,
   authenticatedUser,
   userRole,
-  adminRole
+  adminRole,
+  validateUser
 }
