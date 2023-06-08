@@ -15,8 +15,9 @@ router.post('/api/admin/signin',cors, passport.authenticate('local', { session: 
 
 router.post('/api/users', cors, userController.signUp)
 
-router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet)
+router.get('/api/tweets/:id',cors, authenticated, authenticatedUser, tweetController.getTweet)
 router.get('/api/tweets', cors, authenticated, authenticatedUser, tweetController.getTweets)
+router.post('/api/tweets', cors, authenticated, tweetController.postTweets)
 
 router.use('/', cors, generalErrorHandler)
 
