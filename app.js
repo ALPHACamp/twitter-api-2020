@@ -22,11 +22,7 @@ app.use(methodOverride('_method'))
 app.use(flash())
 app.use(routes)
 
-<<<<<<< HEAD
 app.use(routes)
-=======
-// app.get('/', (req, res) => res.send('Hello World!'))
->>>>>>> 525e157e1eb46f1a8596ba611a8cca351ffcc3d4
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
