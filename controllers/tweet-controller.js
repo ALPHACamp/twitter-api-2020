@@ -1,7 +1,7 @@
 const db = require('../models')
-const { User, Tweet, Reply } = db
+const { User, Tweet, Reply, Like } = db
 const sequelize = require('sequelize')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -97,7 +97,7 @@ const tweetController = {
       const { comment } = req.body
       if (!comment) throw new Error('請輸入內容！')
       await Reply.create({
-        UserId: getUser(req).id,
+        UserId: helpers.getUser(req).id,
         TweetId: tweetId,
         comment
       })
@@ -121,6 +121,58 @@ const tweetController = {
         nest: true
       })
       res.json(replies)
+    } catch (error) {
+      next(error)
+    }
+  },
+  postLike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.tweetId
+      const UserId = helpers.getUser(req).id
+
+      const like = await Like.findOne({
+        where: { TweetId, UserId }
+      })
+
+      // 存在同時isLike = true
+      if (like?.isLike) throw new Error('已經Like過這篇推文了！')
+
+      // 不存在 (建立一個like)
+      if (!like) await Like.create({ UserId, TweetId, isLike: true })
+
+      // 存在同時isLike = false
+      if (like?.isLike === false) await like.update({ isLike: true })
+
+      res.json({
+        status: 'success',
+        message: '成功按讚！'
+      })
+    } catch (error) {
+      next(error)
+    }
+  },
+  postUnlike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.tweetId
+      const UserId = helpers.getUser(req).id
+
+      const like = await Like.findOne({
+        where: { TweetId, UserId }
+      })
+
+      // 不存在
+      if (!like) throw new Error('這篇推文不存在這個like！')
+
+      // 存在同時isLike = false
+      if (like?.isLike === false) throw new Error('已經unlike過這篇推文了！')
+
+      // 存在同時isLike = true
+      if (like?.isLike === true) await like.update({ isLike: false })
+
+      res.json({
+        status: 'success',
+        message: '成功取消按讚！'
+      })
     } catch (error) {
       next(error)
     }
