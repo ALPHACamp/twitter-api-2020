@@ -57,7 +57,7 @@ const userController = {
           throw new Error("密碼不相符");
         const userData = user.toJSON();
         delete userData.password;
-        const token = jwt.sign(userData, process.env.JWT_SECRET, {
+        const token = jwt.sign(userData, process.env.JWT_SECRET || "password", {
           expiresIn: "30d",
         });
         return res.status(200).json({
