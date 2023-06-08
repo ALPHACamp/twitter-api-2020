@@ -37,7 +37,7 @@ const userController = {
         role: 'user'
       }))
       .then(signUpUser => {
-        res.json({ status: 'success', signUpUser })
+        res.status(200).json({ status: 'Accept', signUpUser })
       })
       .catch(err => next(err))
   },
@@ -50,7 +50,7 @@ const userController = {
       // process.env.JWT_SECRET
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
-        status: 'success',
+        status: 'Accept',
         data: {
           token,
           user: userData

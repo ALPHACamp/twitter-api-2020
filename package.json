@@ -8,9 +8,9 @@
     "url": "https://github.com/YuZheLin1987/twitter-api-2020.git"
   },
   "scripts": {
-    "start": "NODE_ENV=development node app.js",
+    "start": "set \"NODE_ENV=test\" && NODE_ENV=development node app.js",
     "dev": "NODE_ENV=development nodemon app.js",
-    "test": "mocha test --exit --recursive --timeout 5000",
+    "test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000",
     "lint": "eslint src/*.js"
   },
   "author": "",

@@ -12,7 +12,7 @@ const tweets = require('./modules/tweets')
 const users = require('./modules/users')
 
 // sign signup單獨拉出來
-router.post('/signup', userController.signUp)
+router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
 // use modules
