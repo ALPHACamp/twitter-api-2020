@@ -71,8 +71,10 @@ const userController = {
   },
   getUserData: async (req, res, next) => {
     try {
+      const currentUser = helpers.getUser(req).dataValues
       const user = await User.findByPk(req.params.id, {
         attributes: {
+          exclude: ['password'],
           include: [
             [
               sequelize.literal(
@@ -89,21 +91,30 @@ const userController = {
           ]
         }
       })
+      const followers = await Followship.findOne({
+        where: {
+          followingId: req.params.id,
+          followerId: currentUser.id
+        }
+      })
       if (!user) throw new Error('使用者不存在！')
       // reorganize user data
-      const userData = user.toJSON()
-      delete userData.password
 
       res.status(200).json({
-        ...userData
+        ...user.toJSON(),
+        isCurrentUserFollowed: !!followers
       })
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
     try {
+      const currentUser = helpers.getUser(req).dataValues
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: User, attributes: { exclude: ['password'] } }],
+        include: [
+          { model: User, attributes: { exclude: ['password'] } },
+          { model: Like, attributes: ['UserId'] }
+        ],
         order: [['createdAt', 'DESC']],
         nest: true,
         attributes: {
@@ -124,7 +135,10 @@ const userController = {
         }
       })
 
-      const tweetsData = tweets.map(tweet => tweet.toJSON())
+      const tweetsData = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        isCurrentUserLiked: tweet.Likes.some(like => like.UserId.toString() === currentUser.id.toString())
+      }))
       res.status(200).json(tweetsData)
     } catch (err) {
       next(err)
@@ -149,6 +163,7 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
+      const currentUser = helpers.getUser(req).dataValues
       const likes = await Like.findAll({
         where: {
           UserId: req.params.id,
@@ -167,14 +182,19 @@ const userController = {
           }]
       })
 
-      const likesData = likes.map(like => like.toJSON())
+      const likesData = likes.map(like => ({
+        ...like.toJSON(),
+        isCurrentUserLiked: like.UserId.toString() === currentUser.id.toString()
+      }))
       res.status(200).json(likesData)
     } catch (err) {
       next(err)
     }
   },
   getFollowings: async (req, res, next) => {
-    try { // 使用者正在追蹤的對象
+    try {
+      const currentUser = helpers.getUser(req).dataValues
+      // 使用者正在追蹤的對象
       const user = await User.findByPk(req.params.id, {
         attributes: { exclude: ['password'] }
       })
@@ -192,7 +212,10 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
 
-      const followingsData = followings.map(following => following.toJSON())
+      const followingsData = followings.map(following => ({
+        ...following.toJSON(),
+        isCurrentUserFollowed: following.followerId.toString() === currentUser.id.toString()
+      }))
       res.status(200).json(followingsData)
     } catch (err) {
       next(err)
@@ -200,6 +223,7 @@ const userController = {
   },
   getFollowers: async (req, res, next) => {
     try {
+      const currentUser = helpers.getUser(req).dataValues
       // 找出正在追蹤此使用者的其它使用者
       const user = await User.findByPk(req.params.id, {
         attributes: { exclude: ['password'] }
@@ -218,7 +242,10 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
 
-      const followersData = followers.map(follower => follower.toJSON())
+      const followersData = followers.map(follower => ({
+        ...follower.toJSON(),
+        isCurrentUserFollowed: follower.followerId.toString() === currentUser.id.toString()
+      }))
       res.status(200).json(followersData)
     } catch (err) {
       next(err)
@@ -300,11 +327,50 @@ const userController = {
         cover: cover || user.cover
       })
 
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: '成功編輯使用者Profile',
         data: newData.toJSON()
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTopFollower: async (req, res, next) => {
+    try {
+      // get current login user data
+      const currentUser = helpers.getUser(req).dataValues
+      // find top 10 followers users
+      const users = await User.findAll({
+        attributes: {
+          exclude: ['password'],
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) as followersCount FROM Followships WHERE followingId = User.id ORDER BY followersCount)'
+              ),
+              'followersCount'
+            ]
+          ]
+        },
+        include: {
+          model: User,
+          as: 'Followers',
+          attributes: ['id']
+        },
+        order: [
+          [sequelize.literal('followersCount'), 'DESC']
+        ],
+        limit: 10
+      })
+
+      // reorganize user data
+      const topUsersData = users.map(user => ({
+        ...user.toJSON(),
+        isCurrentUserFollowed: user.Followers.map(follower => follower.id).some(id => id.toString() === currentUser.id.toString())
+      }))
+
+      res.status(200).json(topUsersData)
     } catch (err) {
       next(err)
     }
