@@ -11,7 +11,7 @@ const tweetServices = {
         tweets = tweets.map(tweet => {
           tweet = {
             ...tweet.toJSON(),
-            isLiked: tweet.Likes.map(tweet => tweet.userId).includes(helpers.getUser(req).id),
+            isLiked: tweet.Likes.map(tweet => tweet.UserId).includes(helpers.getUser(req).id),
             replyCount: tweet.Replies.length,
             likedCount: tweet.Likes.length
           }
@@ -21,6 +21,17 @@ const tweetServices = {
         })
         return cb(null, tweets)
       })
+      .catch(err => cb(err))
+  },
+  postTweet: (req, cb) => {
+    const { description } = req.body
+    if (description.length > 140) throw new Error('字數不能超過 140 字')
+    if (!description.trim()) throw new Error('留言不能為空白')
+    return Tweet.create({
+      description,
+      UserId: helpers.getUser(req).id
+    })
+      .then(tweet => cb(null, tweet))
       .catch(err => cb(err))
   }
 }
