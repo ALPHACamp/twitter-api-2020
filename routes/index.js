@@ -2,6 +2,7 @@ const router = require('express').Router()
 const admin = require('./modules/admin')
 const users = require('./modules/users')
 const tweets = require('./modules/tweets')
+const followships = require('./modules/followship')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated } = require('../middleware/auth')
 const passport = require('passport')
@@ -20,6 +21,9 @@ router.use('/api/users', authenticated, isAuthUser, users)
 
 // tweets
 router.use('/api/tweets', authenticated, isAuthUser, tweets)
+
+// followships
+router.use('/api/followships', authenticated, isAuthUser, followships)
 
 // error handler
 router.use('/', apiErrorHandler)
