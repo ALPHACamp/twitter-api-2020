@@ -8,7 +8,7 @@ const adminController = {
       attributes: ['account', 'name', 'avatar', 'coverPhoto'],
     })
       .then(users => {
-        res.json({ status: 'success', users })
+        res.json({ status: 'success', data: users })
       })
       .catch(error => next(error))
   },
@@ -36,9 +36,8 @@ const adminController = {
     })
       .then(tweets => {
         tweets.forEach(tweet => {
-          tweet.description = tweet.description.substring(0, 50); // 只顯示前50個字
-          tweet.description = tweet.description + "...";
-
+          // 只顯示前50個字
+          if (tweet.description.length > 50) tweet.description = tweet.description.substring(0, 50) + '...';
           // 取得現在的時間
           const now = new Date();
 
@@ -63,7 +62,7 @@ const adminController = {
           // 新增 lastUpdated 欄位到 tweet 物件中
           tweet.lastUpdated = lastUpdated;
         })
-        return res.json({ status: 'success', tweets })
+        return res.json({ status: 'success', data: tweets })
       })
       .catch(error => next(error))
   },
@@ -80,14 +79,16 @@ const adminController = {
     })
       .catch(error => next(error))
   },
-  getReplies: (req, res) => {
+  getReplies: (req, res, next) => {
     Reply.findAll({
       raw: true,
       nest: true,
-      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }]
     })
-      .then((replies) => {
+      .then(replies => {
         replies.forEach((reply) => {
+          // 只顯示前50個字
+          if (reply.comment.length > 50) reply.comment = reply.comment.substring(0, 50) + '...';
           // 取得現在的時間
           const now = new Date();
 
@@ -112,11 +113,11 @@ const adminController = {
           // 新增 lastUpdated 欄位到 tweet 物件中
           reply.lastUpdated = lastUpdated;
         });
-        return res.json({ status: 'success', replies })
+        return res.json({ status: 'success', data: replies })
       })
       .catch(error => next(error))
   },
-  deleteReply: (req, res) => {
+  deleteReply: (req, res, next) => {
     const replyId = req.params.id
     Reply.findByPk(replyId).then((reply) => {
       reply.destroy().then(() => {

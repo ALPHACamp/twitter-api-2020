@@ -96,6 +96,7 @@ const userController = {
       .catch(err => next(err))
   },
   getTopUsers: (req, res, next) => {
+    // 研究如何把followers從res中移除，否則回傳資料太大包
     User.findAll({
       include: [{
         model: User,
@@ -103,7 +104,6 @@ const userController = {
       }]
     })
       .then(users => {
-        console.log(req.user)
         const newUsers = users
           .map(user => ({
             ...user.toJSON(),
