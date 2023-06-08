@@ -8,7 +8,7 @@ const { authenticatedAdmin } = require('../../middleware/api-auth')
 const adminController = require('../../controllers/admin-controller')
 
 // set router
+router.get('/users', authenticatedAdmin, adminController.getUsers)
 router.post('/login', passport.authenticate('local', { session: false }), adminController.login)
-router.get('/users', authenticatedAdmin)
 
 module.exports = router

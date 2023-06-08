@@ -20,6 +20,22 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUsers: async (req, res, next) => {
+    try {
+      const usersData = await User.findAll({
+        raw: true,
+        nest: true,
+        include: [Like, Reply, Tweet, followship]
+      })
+      return res.json({
+        usersData: {
+
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
