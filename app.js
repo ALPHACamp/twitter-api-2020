@@ -15,7 +15,6 @@ function authenticated (req, res, next) {
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(router)
-
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app

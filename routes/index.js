@@ -2,12 +2,13 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
 const userController = require('../controller/user-controller')
-const tweetController = require('../controller/tweet-Controller')
+const tweetController = require('../controller/tweet-controller')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/api-auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 // Tweets
 router.get('/api/tweets', tweetController.getTweets)
+router.post('/api/tweets', authenticated, tweetController.createTweet)
 
 // Users
 router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
