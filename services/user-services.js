@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
+const helpers = require('../_helpers')
 const db = require('../models')
 const {
     User,
@@ -10,15 +11,27 @@ const {
     Reply
 } = db
 
-const { relativeTimeFromNow } = require('../helper.js/dayjs-helpers')
+const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 
 const userServices = {
-    signIn: (req, cb) => {
+    signIn: async (req, cb) => {
         try {
-            const userData = req.user.toJSON()
+            const { account, password } = req.body
+            if (!account || !password) throw new Error('請輸入帳號和密碼！')
+
+            const user = await User.findOne({
+                where: { account }
+            })
+            if (!user) throw new Error('帳號不存在！')
+            if (user.role === 'admin') throw new Error('帳號不存在！')
+            if (!bcrypt.compareSync(password, user.password)) throw new Error('帳密錯誤！')
+            const payload = { id: user.id }
+            const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' })
+            const userData = user.toJSON()
             delete userData.password
-            const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-            cb(null, {
+            return cb(null, {
+                status: 'success',
+                message: '登入成功！',
                 token,
                 user: userData
             })
@@ -28,7 +41,7 @@ const userServices = {
     },
     signUp: async (req, cb) => {
         try {
-            const { name, account, email, password, confirmPassword } = req.body
+            const { name, account, email, password, checkPassword } = req.body
             const users = await User.findAll()
             if (users.length > 0) {
                 const existingAccount = users.find(user => user.account === account)
@@ -38,19 +51,25 @@ const userServices = {
                 } else if (existingEmail) {
                     throw new Error('信箱已存在！')
                 }
-                if (name.length >= 50) throw new Error('名稱不可超過50字!')
-                if (password !== confirmPassword) throw new Error('密碼與確認密碼不一致！')
-                const salt = bcrypt.genSaltSync(10)
-                const hash = bcrypt.hashSync(password, salt)
-                return User.create({
-                    name,
-                    account,
-                    email,
-                    role: 'user',
-                    password: hash
-                })
+            }
+            if (name.length >= 50) throw new Error('名稱不可超過50字！')
+            if (password !== checkPassword) throw new Error('密碼與確認密碼不一致！')
+            const salt = bcrypt.genSaltSync(10)
+            const hash = bcrypt.hashSync(password, salt)
+            const newUser = await User.create({
+                name,
+                account,
+                email,
+                role: 'user',
+                password: hash
             })
-            cb(null, { user: newUser })
+            const userData = newUser.toJSON()
+            delete userData.password
+            cb(null, {
+                status: 'success',
+                message: '註冊成功！',
+                user: userData
+            })
         } catch (err) {
             cb(err)
         }
