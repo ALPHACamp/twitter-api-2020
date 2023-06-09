@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../../_helpers')
+const { imgurFileHandler } = require('../../helpers/file-helper')
 const { User, Tweet, Reply, Like, Followship } = require('../../models')
 
 const userController = {
@@ -28,7 +29,7 @@ const userController = {
       if (!name || !account || !email || !password || !checkPassword) errors.push('每個欄位都必填')
       // 密碼與確認密碼不一致
       if (password !== checkPassword) errors.push('密碼與確認密碼不一致')
-      // 確認account與email是否與資料庫重複
+      // 確認account與email是否 與 資料庫重複
       const [userAccount, userEmail] = await Promise.all([
         User.findOne({ where: { account } }),
         User.findOne({ where: { email } })
@@ -57,7 +58,7 @@ const userController = {
       let { id } = req.params
       id = Number(id)
 
-      // 確認使用者是否存在與發過文
+      // 確認使用者是否存在 與 發過文
       const [user, userTweets] = await Promise.all([
         User.findByPk(id),
         Tweet.findAll({
@@ -91,7 +92,7 @@ const userController = {
       let { id } = req.params
       id = Number(id)
 
-      // 確認使用者是否存在與回過文
+      // 確認使用者是否存在 與 回過文
       const [user, repliedTweets] = await Promise.all([
         User.findByPk(id),
         Reply.findAll({
@@ -118,7 +119,7 @@ const userController = {
       let { id } = req.params
       id = Number(id)
 
-      // 確認使用者是否存在與喜歡的貼文
+      // 確認使用者是否存在 與 喜歡的貼文
       const [user, userLiked] = await Promise.all([
         User.findByPk(id),
         Like.findAll({
@@ -144,7 +145,7 @@ const userController = {
       let { id } = req.params
       id = Number(id)
 
-      // 確認使用者是否存在其追蹤者
+      // 確認使用者是否存在 與 其追蹤者
       const [user, userFollows] = await Promise.all([
         User.findByPk(id),
         Followship.findAll({
@@ -169,7 +170,7 @@ const userController = {
       let { id } = req.params
       id = Number(id)
 
-      // 確認使用者是否存在其追隨者
+      // 確認使用者是否存在 與 其追隨者
       const [user, userFollowers] = await Promise.all([
         User.findByPk(id),
         Followship.findAll({
@@ -188,21 +189,45 @@ const userController = {
       next(error)
     }
   },
-  putUser: async (req, res, next) => {
+  editUser: async (req, res, next) => {
     try {
-      const { email, password, name, avatar, introduction, background, account } = req.body
+      const { email, password, name, introduction, account } = req.body
+      let { id } = req.params
+      id = Number(id)
 
+      // introduction與name的字數限制
       if (introduction.length < 160) throw new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
       if (name.length < 50) throw new Error('Your self-introduction is a little too long for me to handle! ! Please less than 50.')
-      const [checkEmail, checkAccount] = await Promise.all([
+
+      // 確認使用者是否存在 與 email & account是否重複
+      const [user, checkEmail, checkAccount] = await Promise.all([
+        User.findByPk(id),
         User.findOne({ where: { email } }),
         User.findOne({ where: { account } })
       ])
+
+      // 錯誤處理
+      if (!user) throw new Error('The user does not exist')
       if (checkEmail) throw new Error('Oops! Your email already exist')
       if (checkAccount) throw new Error('Oops! Your account already exist')
-      User.update({
-        email, password, name, avatar, introduction, background, account
+
+      // 取得 avatar、background圖片
+      const { file } = req
+      const { avatar, background } = req
+      const [avatarFilePath, backgroundFilePath] = await Promise.all([
+        imgurFileHandler(avatar),
+        imgurFileHandler(background)
+      ])
+      const updatedUser = User.update({
+        email,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+        name,
+        avatar: avatarFilePath || null,
+        introduction,
+        background: backgroundFilePath || null,
+        account
       })
+      res.status(200).json(updatedUser)
     } catch (error) {
       next(error)
     }
