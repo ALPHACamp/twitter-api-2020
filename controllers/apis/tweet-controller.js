@@ -16,7 +16,8 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll()
-      if (!tweets) return res.json({ status: 'error', data: 'There is no tweet' })
+      if (!tweets) throw new Error('There is no tweet')
+
       return res.json({ status: 'success', data: tweets })
     } catch (error) {
       next(error)
@@ -26,7 +27,7 @@ const tweetController = {
     try {
       const { tweet_id } = req.params
       const tweet = await Tweet.findByPk(tweet_id)
-      if (!tweet) return res.json({ status: 'error', data: 'The tweet does not exist' })
+      if (!tweet) throw new Error('The tweet does not exist')
 
       return res.json({ status: 'success', data: tweet })
     } catch (error) {
@@ -38,7 +39,7 @@ const tweetController = {
       const { tweet_id } = req.params
       const { comment } = req.body
       const tweet = await Tweet.findByPk(tweet_id)
-      if (!tweet) return res.json({ status: 'error', data: 'The tweet does not exist' })
+      if (!tweet) throw new Error('The tweet does not exist')
 
       const reply = await Reply.create({
         UserId: res.locals.userId,
@@ -54,7 +55,7 @@ const tweetController = {
     try {
       const { tweet_id } = req.params
       const tweet = await Tweet.findByPk(tweet_id)
-      if (!tweet) return res.json({ status: 'error', data: 'The tweet does not exist' })
+      if (!tweet) throw new Error('The tweet does not exist')
 
       const replies = await Reply.findAll({
         where: { TweetId: tweet_id },
@@ -79,8 +80,8 @@ const tweetController = {
             }
           })
         ])
-      if (!PromiseArr[0]) return res.json({ status: 'error', data: 'The tweet does not exist' })
-      if (PromiseArr[1]) return res.json({ status: 'error', data: 'The like already exists' })
+      if (!PromiseArr[0]) throw new Error('The tweet does not exist')
+      if (PromiseArr[1]) throw new Error('The like already exists')
 
       const like = await Like.create({
         UserId: res.locals.userId,
@@ -95,14 +96,14 @@ const tweetController = {
     try {
       const { id } = req.params
       const tweet = await Tweet.findByPk(id)
-      if (!tweet) return res.json({ status: 'error', data: 'The tweet does not exist' })
+      if (!tweet) throw new Error('The tweet does not exist')
       const like = await Like.findOne({
         where: {
           UserId: res.locals.userId,
           TweetId: id
         }
       })
-      if (!like) return res.json({ status: 'error', data: 'The like does not exist' })
+      if (!like) throw new Error('The like does not exist')
       await like.destroy()
       return res.json({ status: 'success', data: like })
     } catch (err) {
