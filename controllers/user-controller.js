@@ -11,7 +11,7 @@ const userController = {
   login: (req, res, next) => {
     try {
       // 製作token給使用者
-      const userData = req.user
+      const userData = helpers.getUser(req)
       delete userData.password
 
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
@@ -32,7 +32,7 @@ const userController = {
     try {
       // 註冊時，使用者可以設定 account、name、email 和 password
       const { account, name, email, password, checkPassword } = req.body
-      if (!account || !name || !email || !password || !checkPassword) throw new Error('請輸入完整資訊!')
+      if (!account?.trim() || !name?.trim() || !email?.trim() || !password.trim() || !checkPassword.trim()) throw new Error('請輸入完整資訊!')
 
       // check password
       if (password !== checkPassword) throw new Error('密碼不相同!')

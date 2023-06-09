@@ -4,12 +4,19 @@ const bcrypt = require('bcryptjs')
 
 module.exports = passport => {
   passport.use(new LocalStrategy({
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password'
-  }, (email, password, done) => {
+  }, (account, password, done) => {
+    // check input
+    if (!account?.trim() || !password?.trim()) {
+      const error = new Error('請輸入完整資料')
+      error.status = 401
+      return done(error, false)
+    }
+
     // use email to check user exist
     // 查出使用者資料，放入req.user
-    User.findOne({ where: { email } })
+    User.findOne({ where: { account } })
       .then(user => {
         if (!user) {
           const error = new Error('使用者不存在！')
