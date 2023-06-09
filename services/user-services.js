@@ -1,15 +1,16 @@
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 const db = require('../models')
 const {
     User,
     Tweet,
-    Followship
+    Followship,
+    Like,
+    Reply
 } = db
 
-const dayjs = require('dayjs')
-const relativeTime = require('dayjs/plugin/relativeTime')
-dayjs.extend(relativeTime)
+const { relativeTimeFromNow } = require('../helper.js/dayjs-helpers')
 
 const userServices = {
     signIn: (req, cb) => {
@@ -25,40 +26,41 @@ const userServices = {
             cb(err)
         }
     },
-    signUp: (req, cb) => {
-        const { name, account, email, password, confirmPassword } = req.body
-        User.findAll()
-            .then(users => {
-                if (users.length > 0) {
-                    const existingAccount = users.find(user => user.account === account)
-                    const existingEmail = users.find(user => user.email === email)
-                    if (existingAccount) {
-                        throw new Error('帳號已存在！')
-                    } else if (existingEmail) {
-                        throw new Error('信箱已存在！')
-                    }
+    signUp: async (req, cb) => {
+        try {
+            const { name, account, email, password, confirmPassword } = req.body
+            const users = await User.findAll()
+            if (users.length > 0) {
+                const existingAccount = users.find(user => user.account === account)
+                const existingEmail = users.find(user => user.email === email)
+                if (existingAccount) {
+                    throw new Error('帳號已存在！')
+                } else if (existingEmail) {
+                    throw new Error('信箱已存在！')
                 }
-                if (name.length >= 50) throw new Error('名稱不可超過50字！')
-                if (password !== confirmPassword) throw new Error('密碼與確認密碼不一致！')
-                const salt = bcrypt.genSaltSync(10)
-                const hash = bcrypt.hashSync(password, salt)
-                return User.create({
-                    name,
-                    account,
-                    email,
-                    role: 'user',
-                    password: hash
-                })
+            }
+            if (name.length >= 50) throw new Error('名稱不可超過50字！')
+            if (password !== confirmPassword) throw new Error('密碼與確認密碼不一致！')
+            const salt = bcrypt.genSaltSync(10)
+            const hash = bcrypt.hashSync(password, salt)
+            const newUser = await User.create({
+                name,
+                account,
+                email,
+                role: 'user',
+                password: hash
             })
-            .then(newUser => cb(null, {
-                user: newUser
-            }))
-            .catch(err => cb(err))
+            cb(null, { user: newUser })
+        } catch (err) {
+            cb(err)
+        }
     },
     getUser: (req, cb) => {
         const { id } = req.params
         return Promise.all([
-            User.findByPk(req.params.id, { raw: true }),
+            User.findByPk(id, {
+                raw: true
+            }),
             Tweet.count({
                 where: {
                     UserId: id
@@ -87,26 +89,49 @@ const userServices = {
             })
             .catch(err => cb(err))
     },
-    getUserTweets: (req, cb) => {
-        const { id } = req.params
-        return Tweet.findAll({
-            raw: true,
-            nest: true,
-            include: User,
-            where: {
-                UserId: id
-            }
-        })
-            .then((tweets) => {
-                const newData = tweets.map(tweet => {
-                    tweet.createdAt = dayjs().to(tweet.createdAt)
-                    delete tweet.User.password
-                    return tweet
-                })
-                cb(null, newData)
+    getUserTweets: async (req, cb) => {
+        try {
+            const { id } = req.params
+            const tweets = await Tweet.findAll({
+                raw: true,
+                nest: true,
+                where: {
+                    UserId: id
+                },
+                order: [['createdAt', 'DESC']],
+                include: [
+                    {
+                        model: User
+                    },
+                    {
+                        model: Reply,
+                        as: 'replied',
+                        attributes: []
+                    },
+                    {
+                        model: Like,
+                        as: 'liked',
+                        attributes: []
+                    },
+                ],
+                attributes: {
+                    include: [
+                        [sequelize.fn('COUNT', sequelize.col('replied.id')), 'replyCount'],
+                        [sequelize.fn('COUNT', sequelize.col('liked.id')), 'likeCount']
+                    ],
+                },
+                group: ['Tweet.id', 'User.id']
             })
-            .catch(err => cb(err))
-    },
+            const newData = tweets.map(tweet => {
+                tweet.createdAt = relativeTimeFromNow(tweet.createdAt)
+                delete tweet.User.password
+                return tweet
+            })
+            cb(null, newData)
+        } catch (err) {
+            cb(err)
+        }
+    }
 }
 
 module.exports = userServices
