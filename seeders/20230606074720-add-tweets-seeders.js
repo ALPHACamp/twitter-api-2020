@@ -13,7 +13,7 @@ module.exports = {
     const tweets = [] // add this variable in to table
     users.forEach(user => {
       tweets.push(
-        ...Array.from({ length: 10 }, (_, i) => ({
+        ...Array.from({ length: 20 }, (_, i) => ({
           UserId: user.id,
           description: faker.lorem.paragraph(1).slice(0, 140),
           createdAt: new Date(),

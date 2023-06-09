@@ -320,7 +320,7 @@ const userController = {
 
       const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
 
-      const newData = await user.update({
+      await user.update({
         name: name || user.name,
         introduction: introduction || user.introduction,
         avatar: avatar || user.avatar,
@@ -329,8 +329,7 @@ const userController = {
 
       res.status(200).json({
         status: 'success',
-        message: '成功編輯使用者Profile',
-        data: newData.toJSON()
+        message: '成功編輯使用者Profile'
       })
     } catch (err) {
       next(err)

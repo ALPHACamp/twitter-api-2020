@@ -15,7 +15,7 @@ module.exports = {
 
     const likes = []
     // Each user randomly likes 3 tweets
-    const numOfLikes = 3
+    const numOfLikes = 10
     users.forEach(user => {
       const unlikeTweets = tweets.map(tweet => tweet.id)
       for (let i = 0; i < numOfLikes; i++) {

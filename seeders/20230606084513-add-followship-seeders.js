@@ -10,7 +10,7 @@ module.exports = {
 
     const followships = []
     // Each user randomly follows 2 users
-    const numOfFollowing = 2
+    const numOfFollowing = 5
     users.forEach(user => {
       // avoid to follow self
       const excludeSelfUsers = users.filter(u => u.id !== user.id)
