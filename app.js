@@ -17,7 +17,7 @@ app.use(passport.initialize())
 // 先關 需要再開
 // app.use(methodOverride('_method'))
 // use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next) {
+function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 app.use((req, res, next) => {
