@@ -64,7 +64,7 @@ const userController = {
       })
       console.log(userTweets)
       if (!userTweets.length) throw new Error('The user have not post any tweet yet')
-      return res.json({ status: 'success', data: userTweets })
+      return res.json(userTweets)
     } catch (error) {
       next(error)
     }
@@ -96,7 +96,7 @@ const userController = {
       for (const i of repliedTweets) {
         tweets.push(i.Tweet)
       }
-      return res.json({ status: 'success', data: tweets })
+      return res.json(repliedTweets)
     } catch (error) {
       next(error)
     }
