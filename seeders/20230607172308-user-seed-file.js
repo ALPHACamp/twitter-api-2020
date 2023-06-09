@@ -6,42 +6,42 @@ module.exports = {
       email: 'root@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'admin',
-      name: 'root',
+      account: 'root',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
       email: 'user1@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: '',
-      name: 'user1',
+      account: 'user1',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
       email: 'user2@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: '',
-      name: 'user2',
+      account: 'user2',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
       email: 'user3@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: '',
-      name: 'user3',
+      account: 'user3',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
       email: 'user4@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: '',
-      name: 'user4',
+      account: 'user4',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
       email: 'user5@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: '',
-      name: 'user5',
+      account: 'user5',
       createdAt: new Date(),
       updatedAt: new Date()
     }], {})
