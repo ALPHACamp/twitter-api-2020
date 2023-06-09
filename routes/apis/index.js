@@ -21,8 +21,8 @@ router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets/:tweet_id/replies', authenticated, tweetController.postReply)
 router.get('/tweets/:tweet_id/replies', authenticated, tweetController.getReply)
-router.get('/tweets/:id/like', authenticated, tweetController.likeTweet)
-router.get('/tweets/:id/unlike', authenticated, tweetController.unlikeTweet)
+router.post('/tweets/:id/like', authenticated, tweetController.likeTweet)
+router.post('/tweets/:id/unlike', authenticated, tweetController.unlikeTweet)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 
 // 有關followship的routes
