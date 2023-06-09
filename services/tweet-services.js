@@ -46,7 +46,7 @@ const tweetServices = {
   getTweet: async(req, cb) => {
     const { id } = req.params
       return Promise.all([
-        Tweet.findByPk(req.params.id, {
+        Tweet.findByPk(id, {
           include: [
             User, 
           ],
@@ -65,9 +65,9 @@ const tweetServices = {
         })
       ])
       .then(([tweet, likes, replies]) => {
-          if (!tweet) throw new Error("Tweet didn't exist!")
+          if (!tweet) throw new Error("Tweet不存在!")
           cb(null, {
-              tweet,
+              ...tweet,
               likeCount: likes,
               replyCount: replies,
               createdAt: relativeTimeFromNow(tweet.createdAt)
