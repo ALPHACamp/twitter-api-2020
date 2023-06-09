@@ -18,9 +18,6 @@ router.post('/api/users', cors, userController.signUp)
 router.get('/api/users/:id', cors, authenticated, authenticatedUser, userController.getUser)
 router.get('/api/users/:id/tweets', cors, authenticated, authenticatedUser, userController.getUserTweets)
 
-router.post('/api/tweets/:id/like',cors, authenticated, authenticatedUser, tweetController.addLike)
-router.post('/api/tweets/:id/unlike',cors, authenticated, authenticatedUser, tweetController.removeLike)
-
 router.get('/api/tweets/:id',cors, authenticated, authenticatedUser, tweetController.getTweet)
 router.get('/api/tweets', cors, authenticated, authenticatedUser, tweetController.getTweets)
 router.post('/api/tweets', cors, authenticated, tweetController.postTweets)
