@@ -17,7 +17,7 @@ router.put('/api/users/:id', authenticated, userController.putUser)
 
 router.get('/api/users/:id', authenticated, userController.getUser)
 // 登入& 註冊
-router.post('/api/users/login', userController.signIn)
+router.post('/api/users/login', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/api/users', userController.signUp)
 // 錯誤訊息處理
 router.use('/', apiErrorHandler)
