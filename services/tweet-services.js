@@ -11,7 +11,7 @@ const tweetServices = {
         if (!tweet) throw new Error('tweet not found')
         const data = {
           ...tweet.toJSON(),
-          isLiked: tweet.Likes.map(tweet => tweet.UserId).includes(helpers.getUser(req).id),
+          isLiked: tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id),
           replyCount: tweet.Replies.length,
           likedCount: tweet.Likes.length
         }
@@ -31,7 +31,7 @@ const tweetServices = {
         tweets = tweets.map(tweet => {
           tweet = {
             ...tweet.toJSON(),
-            isLiked: tweet.Likes.map(tweet => tweet.UserId).includes(helpers.getUser(req).id),
+            isLiked: tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id),
             replyCount: tweet.Replies.length,
             likedCount: tweet.Likes.length
           }
