@@ -8,7 +8,7 @@ const followshipController = {
       // 確認使用者是否已經追蹤該用戶
       const followship = await Followship.findOne({ where: { followingId: id, followerId: getUser(req).id } })
       // 如果有 => 不用新增
-      if (followship) return res.json({ status: 'error', data: 'You have followed this user.' })
+      if (followship) throw new Error('You have followed this user.')
 
       const newFollow = await Followship.create({
         followerId: getUser(req).id,
@@ -27,7 +27,7 @@ const followshipController = {
         where: { followerId: getUser(req).id, followingId }
       })
       // 如果沒有 => 不用刪除
-      if (!follow) return res.json({ status: 'error', data: 'You can follow this user.' })
+      if (!follow) throw new Error('You have not followed this user.')
 
       const deleteFollow = await follow.destroy()
       return res.json({ status: 'success', data: deleteFollow.toJSON() })

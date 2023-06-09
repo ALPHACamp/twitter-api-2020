@@ -35,7 +35,9 @@ const userController = {
       ])
       if (userAccount) errors.push('account已存在')
       if (userEmail) errors.push('email已存在')
-      if (errors.length) return res.json({ status: 'error', data: errors })
+      if (errors.length) {
+        throw new Error(errors)
+      }
       const user = await User.create({
         name,
         account,
@@ -60,7 +62,7 @@ const userController = {
         nest: true
       })
       console.log(userTweets)
-      if (!userTweets.length) return res.json({ status: 'error', data: 'The user have not post any tweet yet' })
+      if (!userTweets.length) throw new Error('The user have not post any tweet yet')
       return res.json({ status: 'success', data: userTweets })
     } catch (error) {
       next(error)
@@ -72,7 +74,7 @@ const userController = {
       id = Number(id)
       const user = await User.findByPk(id)
       console.log(user)
-      if (!user) return res.json({ status: 'error', data: 'The user does not exist' })
+      if (!user) throw new Error('The user does not exist')
       res.json({ status: 'success', data: user })
     } catch (error) {
       next(error)
@@ -87,7 +89,8 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (!repliedTweets.length) return res.json({ status: 'error', data: 'The user does not exist' })
+      if (!repliedTweets.length) throw new Error('The user does not exist')
+
       const tweets = []
       for (const i of repliedTweets) {
         tweets.push(i.Tweet)

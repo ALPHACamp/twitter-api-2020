@@ -12,8 +12,8 @@ const adminController = {
         where: { account },
         raw: true
       })
-      if (!user) return res.json({ status: 'error', data: 'You are not admin' })
-      if (user.role !== 'admin') return res.json({ status: 'error', data: 'You are not admin' })
+      if (!user) throw new Error('You are not admin')
+      if (user.role !== 'admin') throw new Error('You are not admin')
       const userData = user
       delete userData.password
       userData.token = token
@@ -43,7 +43,7 @@ const adminController = {
       const { id } = req.params
       const tweet = await Tweet.findByPk(id)
       console.log(tweet)
-      if (!tweet) return res.json({ status: 'error', data: 'The tweet does not exist' })
+      if (!tweet) throw new Error('The tweet does not exist')
       await tweet.destroy()
       return res.json({ status: 'success', data: tweet })
     } catch (error) {
