@@ -71,7 +71,7 @@ const userController = {
   },
   getUserData: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req).dataValues
+      const currentUserId = helpers.getUser(req).id
       const user = await User.findByPk(req.params.id, {
         attributes: {
           exclude: ['password'],
@@ -94,21 +94,21 @@ const userController = {
       const followers = await Followship.findOne({
         where: {
           followingId: req.params.id,
-          followerId: currentUser.id
+          followerId: currentUserId
         }
       })
       if (!user) throw new Error('使用者不存在！')
       // reorganize user data
-
-      res.status(200).json({
+      const userData = {
         ...user.toJSON(),
         isCurrentUserFollowed: !!followers
-      })
+      }
+      res.status(200).json(userData)
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req).dataValues
+      const currentUserId = helpers.getUser(req).id
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         include: [
@@ -137,7 +137,7 @@ const userController = {
 
       const tweetsData = tweets.map(tweet => ({
         ...tweet.toJSON(),
-        isCurrentUserLiked: tweet.Likes.some(like => like.UserId.toString() === currentUser.id.toString())
+        isCurrentUserLiked: tweet.Likes.some(like => like.UserId.toString() === currentUserId.toString())
       }))
       res.status(200).json(tweetsData)
     } catch (err) {
@@ -163,7 +163,7 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req).dataValues
+      const currentUserId = helpers.getUser(req).id
       const likes = await Like.findAll({
         where: {
           UserId: req.params.id,
@@ -184,7 +184,7 @@ const userController = {
 
       const likesData = likes.map(like => ({
         ...like.toJSON(),
-        isCurrentUserLiked: like.UserId.toString() === currentUser.id.toString()
+        isCurrentUserLiked: like.UserId.toString() === currentUserId.toString()
       }))
       res.status(200).json(likesData)
     } catch (err) {
@@ -193,7 +193,7 @@ const userController = {
   },
   getFollowings: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req).dataValues
+      const currentUserId = helpers.getUser(req).id
       // 使用者正在追蹤的對象
       const user = await User.findByPk(req.params.id, {
         attributes: { exclude: ['password'] }
@@ -214,7 +214,8 @@ const userController = {
 
       const followingsData = followings.map(following => ({
         ...following.toJSON(),
-        isCurrentUserFollowed: following.followerId.toString() === currentUser.id.toString()
+        isCurrentUserFollowed:
+          following.followerId.toString() === currentUserId.toString()
       }))
       res.status(200).json(followingsData)
     } catch (err) {
@@ -223,7 +224,7 @@ const userController = {
   },
   getFollowers: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req).dataValues
+      const currentUserId = helpers.getUser(req).id
       // 找出正在追蹤此使用者的其它使用者
       const user = await User.findByPk(req.params.id, {
         attributes: { exclude: ['password'] }
@@ -244,7 +245,8 @@ const userController = {
 
       const followersData = followers.map(follower => ({
         ...follower.toJSON(),
-        isCurrentUserFollowed: follower.followerId.toString() === currentUser.id.toString()
+        isCurrentUserFollowed:
+          follower.followerId.toString() === currentUserId.toString()
       }))
       res.status(200).json(followersData)
     } catch (err) {
@@ -254,8 +256,8 @@ const userController = {
   putUserSetting: async (req, res, next) => {
     try {
       // 使用者僅能編輯自己的資料
-      const currentUser = helpers.getUser(req).dataValues
-      if (Number(currentUser.id) !== Number(req.params.id)) { throw new Error('你沒有權限可以編輯他人資料') }
+      const currentUserId = helpers.getUser(req).id
+      if (currentUserId.toString() !== req.params.id) { throw new Error('你沒有權限可以編輯他人資料') }
 
       // 使用者能編輯自己的 account、name、email 和 password
       const { account, name, email, password, checkPassword, introduction } = req.body
@@ -302,8 +304,8 @@ const userController = {
   putUserProfile: async (req, res, next) => {
     try {
       // 使用者僅能編輯自己的資料
-      const currentUser = helpers.getUser(req).dataValues
-      if (Number(currentUser.id) !== Number(req.params.id)) {
+      const currentUserId = helpers.getUser(req).id
+      if (currentUserId.toString() !== req.params.id) {
         throw new Error('你沒有權限可以編輯他人資料')
       }
       const { name, introduction } = req.body
@@ -338,7 +340,7 @@ const userController = {
   getTopFollower: async (req, res, next) => {
     try {
       // get current login user data
-      const currentUser = helpers.getUser(req).dataValues
+      const currentUserId = helpers.getUser(req).id
       // find top 10 followers users
       const users = await User.findAll({
         attributes: {
@@ -366,7 +368,7 @@ const userController = {
       // reorganize user data
       const topUsersData = users.map(user => ({
         ...user.toJSON(),
-        isCurrentUserFollowed: user.Followers.map(follower => follower.id).some(id => id.toString() === currentUser.id.toString())
+        isCurrentUserFollowed: user.Followers.map(follower => follower.id).some(id => id.toString() === currentUserId.toString())
       }))
 
       res.status(200).json(topUsersData)
