@@ -14,7 +14,6 @@ const app = express()
 const port = 3000
 const SESSION_SECRET = 'secret'
 
-
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
@@ -22,7 +21,7 @@ app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: fals
 app.use(passport.initialize()) 
 app.use(passport.session()) 
 app.use(methodOverride('_method'))
-app.use(flash()) // 掛載套件
+app.use(flash()) 
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash('success_messages') 
   res.locals.error_messages = req.flash('error_messages') 
@@ -31,7 +30,6 @@ app.use((req, res, next) => {
 })
 
 app.use('/api', routes)
-app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app

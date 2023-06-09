@@ -7,24 +7,26 @@ const { authenticated } = require('../middleware/api-auth')
 const upload = require('../middleware/multer') // 載入 multer
 
 
-router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
+router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.get('/users/:user_id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:user_id/replied_tweets', authenticated, userController.getUserRepliedTweets)
 
 router.get('/users/tops', authenticated, userController.getTopUsers)
-router.get('/users/:user_id/likes', authenticated, userController.getUserLikes)
-router.get('/users/:user_id/followings', authenticated, userController.getUserFollowings)
-router.get('/users/:user_id/followers', authenticated, userController.getUserFollowers)
-router.get('/users/:user_id/edit', authenticated, userController.editUser)
-router.put('/users/:user_id', authenticated, upload.single('image'), userController.putUser)
-router.get('/users/:user_id', authenticated, userController.getUser)
-router.post('/users', userController.signUp)
 
 router.post('/users/following/:user_id', authenticated, userController.addFollowing)
 router.delete('/users/following/:user_id', authenticated, userController.removeFollowing)
 
 router.post('/users/like/:tweet_id', authenticated, userController.addLike)
 router.delete('/users/like/:tweet_id', authenticated, userController.removeLike)
+
+router.get('/users/:user_id/likes', authenticated, userController.getUserLikes)
+router.get('/users/:user_id/followings', authenticated, userController.getUserFollowings)
+router.get('/users/:user_id/followers', authenticated, userController.getUserFollowers)
+router.get('/users/:user_id/edit', authenticated, userController.editUser)
+router.put('/users/:user_id', authenticated, upload.single('image'), userController.putUser)
+router.get('/users/:user_id', authenticated, userController.getUser)
+
+router.post('/users', userController.signUp)
 
 router.use('/', apiErrorHandler)
 

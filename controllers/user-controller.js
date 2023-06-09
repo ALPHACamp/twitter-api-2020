@@ -6,7 +6,7 @@ const userController = {
   signUp: (req, res, next) => {
     userServices.signUp(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
-  signin: (req, res, next) => {
+  signIn: (req, res, next) => {
     const userData = req.user.toJSON()
     delete userData.password
     try {
