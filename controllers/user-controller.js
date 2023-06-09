@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
@@ -6,6 +6,7 @@ const { newErrorGenerate } = require('../helpers/newError-helper')
 const { isUser } = require('../helpers/isUser-helper')
 const { relativeTimeFromNow } = require('../helpers/dayFix-helper')
 const USERS_WORD_LIMIT = 50
+const { Sequelize } = require('sequelize')
 
 const userController = {
   // 使用者註冊
@@ -177,6 +178,41 @@ const userController = {
         return like
       })
       return res.json(likesData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 獲取使用者所追蹤的所有人
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = await User.findByPk(userId, {
+        raw: true,
+        nest: true,
+        attributes: ['id', 'name',
+          [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount']]
+      })
+      if (!user) newErrorGenerate('使用者不存在', 404)
+      const selfUser = await User.findByPk(helpers.getUser(req).id, {
+        include: [{ model: User, as: 'Followings', attributes: ['id'] }],
+        attributes: []
+      })
+      const follows = await Followship.findAll({
+        raw: true,
+        nest: true,
+        where: { followerId: userId },
+        order: [['createdAt', 'DESC']],
+        include: [{
+          model: User,
+          attributes: ['id', 'name', 'avatar', 'introduction']
+        }]
+      })
+      const followsData = follows?.map(follow => ({
+        ...follow,
+        isSelfUserFollow: selfUser?.toJSON().Followings.some(s => s.id === follow.followingId)
+      }))
+      const doneFollowsData = [...followsData, user]
+      return res.json(doneFollowsData)
     } catch (err) {
       next(err)
     }
