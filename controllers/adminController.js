@@ -1,16 +1,38 @@
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Sequelize } = require('../models')
 const { getLastUpdated } = require('../_helpers')
 const adminController = {
   getUsers: (req, res, next) => {
     User.findAll({
       raw: true,
       nest: true,
-      attributes: ['account', 'name', 'avatar', 'coverPhoto']
+      attributes: [
+        'account',
+        'name',
+        'avatar',
+        'coverPhoto',
+        [Sequelize.fn('COUNT', Sequelize.col('Followers.id')), 'followersCount'],
+        [Sequelize.fn('COUNT', Sequelize.col('Followings.id')), 'followingsCount']
+      ],
+      include: [
+        {
+          model: User,
+          as: 'Followers',
+          attributes: [],
+          through: { attributes: [] }
+        },
+        {
+          model: User,
+          as: 'Followings',
+          attributes: [],
+          through: { attributes: [] }
+        }
+      ],
+      group: ['User.id']
     })
-      .then(users => {
+      .then((users) => {
         res.json({ status: 'success', data: users })
       })
-      .catch(error => next(error))
+      .catch((error) => next(error))
   },
   deleteUser: (req, res, next) => {
     const userId = req.params.id

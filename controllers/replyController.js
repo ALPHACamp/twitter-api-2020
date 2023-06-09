@@ -35,7 +35,8 @@ const replyController = {
       .catch((error) => next(error))
   },
   putReply: (req, res, next) => {
-    const { tweetId, replyId } = req.params
+    const tweetId = req.params.tweet_id
+    const replyId = req.params.reply_id
     const { comment } = req.body
     if (!tweetId || !replyId) return res.json({ status: 'error', message: 'tweet_id and reply_id are required' })
     if (!comment) return res.json({ status: 'error', message: 'Comment is required' })
@@ -56,7 +57,8 @@ const replyController = {
       .catch((error) => next(error))
   },
   deleteReply: (req, res, next) => {
-    const { tweetId, replyId } = req.params
+    const tweetId = req.params.tweet_id
+    const replyId = req.params.reply_id
     if (!tweetId || !replyId) return res.json({ status: 'error', message: 'tweet_id and reply_id are required' })
 
     return Reply.findOne({ where: { id: replyId, TweetId: tweetId } })
