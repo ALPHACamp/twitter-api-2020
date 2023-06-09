@@ -1,4 +1,4 @@
-const { Tweet, User, Reply, Like } = require('../models')
+const { Tweet, User, Like } = require('../models')
 // POST /tweets/:id/like
 const likeServices = {
   addLike: (req, cb) => {
@@ -35,7 +35,27 @@ const likeServices = {
       return like.destroy()
     }).then(reply => cb(null, { reply }))
       .catch(err => cb(err))
-  }
+  },
+  // addFollowing: (req, cb) => {
+  //   const followerId = req.user.id; // 取得當前使用者的 ID
+  //   const followingId = req.query.id; // 從查詢字串中取得被追蹤者的 ID
+  //   Promise.all([
+  //     User.findByPk(followingId),
+  //     Followship.findOne({
+  //       where: {
+  //         followerId,
+  //         followingId
+  //       }
+  //     })
+  //   ]).then(([user, followship]) => {
+  //     if (!user) throw new Error("User didn't exist!")
+  //     if (followship) throw new Error('You are already following this user!')
+  //     return Followship.create({
+  //       followerId,
+  //       followingId
+  //     })
+  //   })
+  // }
 }
 
 module.exports = likeServices

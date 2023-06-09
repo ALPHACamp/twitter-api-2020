@@ -262,7 +262,7 @@ const userController = {
     Followship.findOne({
       where: {
         followerId: req.user.id,
-        followingId: req.params.user_id
+        followingId: req.params.follwingId
       }
     })
       .then(followship => {

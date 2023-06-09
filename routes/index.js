@@ -17,7 +17,8 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 router.get('/users/:user_id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:user_id/replied_tweets', authenticated, userController.getUserRepliedTweets)
 
-// branch api/admin
+// ! branch api/admin
+// router.post('/followships/:user_id', authenticated, likeController.addFollowing)
 router.post('/tweets/:id/like', authenticated, likeController.addLike)
 router.post('/tweets/:id/unlike', authenticated, likeController.unLike)
 
@@ -26,7 +27,7 @@ router.get('/tweets/:tweet_id/replies', authenticated, replyController.getCommen
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets', authenticated, tweetController.createTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
-// branch api/admin
+// ! branch api/admin
 
 router.get('/users/tops', authenticated, userController.getTopUsers)
 router.get('/users/:user_id/likes', authenticated, userController.getUserLikes)
@@ -37,8 +38,8 @@ router.put('/users/:user_id', authenticated, upload.single('image'), userControl
 router.get('/users/:user_id', authenticated, userController.getUser)
 router.post('/users', userController.signUp)
 
-router.post('/users/following/:user_id', authenticated, userController.addFollowing)
-router.delete('/users/following/:user_id', authenticated, userController.removeFollowing)
+router.post('/followships/:user_id', authenticated, userController.addFollowing)
+router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 
 router.post('/users/like/:tweet_id', authenticated, userController.addLike)
 router.delete('/users/like/:tweet_id', authenticated, userController.removeLike)
