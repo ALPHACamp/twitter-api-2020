@@ -1,7 +1,9 @@
 // admin routes
 const express = require('express')
 const router = express.Router()
+// import controller
 const adminController = require('../../controllers/admin-controller')
+// import auth
 const {
   authenticated,
   authenticatedAdmin,

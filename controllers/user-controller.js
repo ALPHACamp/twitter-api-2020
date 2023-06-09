@@ -1,5 +1,5 @@
 const bcrypt = require("bcryptjs");
-const { User, Tweet, Reply, Like, Followship } = require("../models");
+const { User, Tweet, Reply, Like } = require("../models");
 const jwt = require("jsonwebtoken");
 const { getUser } = require("../_helpers");
 const Sequelize = require("sequelize");
@@ -120,74 +120,7 @@ const userController = {
       .then((updatedUser) => res.status(200).json({ user: updatedUser }))
       .catch((err) => next(err));
   },
-  getFollowings: (req, res, next) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        {
-          model: User,
-          as: "Followings",
-          attributes: [
-            ["id", "followingId"],
-            "name",
-            "account",
-            "avatar",
-            "cover",
-            "introduction",
-          ],
-        },
-      ],
-      attributes: [["id", "userId"], "name", "account", "avatar", "cover"],
-    })
-      .then((followings) => {
-        if (followings.Followings.length === 0)
-          return res.status(200).json({ isEmpty: true });
-        const followingId = getUser(req).Followings.map((user) => user.id);
-        const result = followings.Followings.map((f) => ({
-          ...f.toJSON(),
-          isFollowed: followingId.includes(f.toJSON().followingId) || false,
-        })).sort(
-          (a, b) =>
-            b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime()
-        );
-        result.forEach((i) => delete i.Followship);
-        return res.json(result);
-      })
-      .catch((err) => next(err));
-  },
-  getFollowers: (req, res, next) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        {
-          model: User,
-          as: "Followers",
-          attributes: [
-            ["id", "followerId"],
-            "name",
-            "account",
-            "avatar",
-            "cover",
-            "introduction",
-          ],
-        },
-      ],
-      attributes: [["id", "userId"], "name", "account", "avatar", "cover"],
-    })
-      .then((followers) => {
-        if (followers.Followers.length === 0)
-          return res.status(200).json({ isEmpty: true });
-        const followingId = getUser(req).Followings.map((user) => user.id);
-        const result = followers.Followers.map((f) => ({
-          ...f.toJSON(),
-          isFollowed: followingId.includes(f.toJSON().followerId) || false,
-        })).sort(
-          (a, b) =>
-            b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime()
-        );
-        result.forEach((i) => delete i.Followship);
-        return res.json(result);
-      })
-      .catch((err) => next(err));
-  },
+
   getUserTweets: (req, res, next) => {
     return Promise.all([
       User.findByPk(req.params.id),
@@ -319,141 +252,73 @@ const userController = {
 
       .catch((err) => next(err));
   },
-
-  getTweets: (req, res, next) => {
-    // function duplicate with admin-controller
-    Tweet.findAll({
+  getFollowings: (req, res, next) => {
+    return User.findByPk(req.params.id, {
       include: [
-        { model: User, attributes: ["id", "name", "account", "avatar"] },
+        {
+          model: User,
+          as: "Followings",
+          attributes: [
+            ["id", "followingId"],
+            "name",
+            "account",
+            "avatar",
+            "cover",
+            "introduction",
+          ],
+        },
       ],
-      nest: true,
-      raw: true,
+      attributes: [["id", "userId"], "name", "account", "avatar", "cover"],
     })
-      .then((tweets) => {
-        if (!tweets) {
-          return res
-            .status(404)
-            .json({ status: "error", message: "No tweets found" });
-        }
-        return res.status(200).json(tweets);
+      .then((followings) => {
+        if (followings.Followings.length === 0)
+          return res.status(200).json({ isEmpty: true });
+        const followingId = getUser(req).Followings.map((user) => user.id);
+        const result = followings.Followings.map((f) => ({
+          ...f.toJSON(),
+          isFollowed: followingId.includes(f.toJSON().followingId) || false,
+        })).sort(
+          (a, b) =>
+            b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime()
+        );
+        result.forEach((i) => delete i.Followship);
+        return res.json(result);
       })
       .catch((err) => next(err));
   },
-
-  getTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.tweet_id, {
-      attributes: {
-        include: [
-          [
-            literal(`(
-              SELECT COUNT(*) 
-              FROM replies AS reply
-              WHERE 
-                  reply.tweet_id = tweet.id
-              )`),
-            "replyCount",
-          ],
-          [
-            literal(`(
-              SELECT COUNT(*) 
-              FROM likes AS liked
-              WHERE 
-                  liked.tweet_id = tweet.id
-              )`),
-            "likeCount",
-          ],
-        ],
-      },
+  getFollowers: (req, res, next) => {
+    return User.findByPk(req.params.id, {
       include: [
-        { model: User, attributes: ["id", "name", "account", "avatar"] },
+        {
+          model: User,
+          as: "Followers",
+          attributes: [
+            ["id", "followerId"],
+            "name",
+            "account",
+            "avatar",
+            "cover",
+            "introduction",
+          ],
+        },
       ],
+      attributes: [["id", "userId"], "name", "account", "avatar", "cover"],
     })
-      .then((tweet) => {
-        if (!tweet) {
-          // Error: tweet not found
-          return res
-            .status(404)
-            .json({ status: "error", message: "No tweet found" });
-        }
-        return res.status(200).json(tweet);
+      .then((followers) => {
+        if (followers.Followers.length === 0)
+          return res.status(200).json({ isEmpty: true });
+        const followingId = getUser(req).Followings.map((user) => user.id);
+        const result = followers.Followers.map((f) => ({
+          ...f.toJSON(),
+          isFollowed: followingId.includes(f.toJSON().followerId) || false,
+        })).sort(
+          (a, b) =>
+            b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime()
+        );
+        result.forEach((i) => delete i.Followship);
+        return res.json(result);
       })
       .catch((err) => next(err));
-  },
-
-  postTweets: (req, res, next) => {
-    const { description } = req.body;
-    if (!description) {
-      throw new Error("Tweet content is required!");
-    }
-    // get current user id
-    const user = getUser(req);
-    const userId = user.id;
-
-    return Tweet.create({
-      userId,
-      description,
-    })
-      .then((newTweet) => {
-        return res.status(200).json(newTweet);
-      })
-      .catch((err) => next(err));
-  },
-
-  postTweetLike: (req, res, next) => {
-    const TweetId = req.params.id;
-    const user = getUser(req);
-    const userId = user.id;
-    return Promise.all([
-      Tweet.findByPk(TweetId),
-      Like.findOne({
-        where: {
-          userId,
-          TweetId,
-        },
-      }),
-    ])
-      .then(([tweet, like]) => {
-        if (!tweet) throw new Error("Tweet doesn't exist!");
-        if (like) throw new Error("You have liked this tweet!");
-
-        return Like.create({
-          userId,
-          TweetId,
-        });
-      })
-      .then((newLike) => {
-        return res
-          .status(200)
-          .json({ status: "success", message: "Like succeed", newLike });
-      })
-      .catch((err) => next(err));
-  },
-
-  postTweetUnlike: (req, res, next) => {
-    const TweetId = req.params.id;
-    return Promise.all([
-      Tweet.findByPk(TweetId),
-      Like.findOne({
-        where: {
-          TweetId,
-        },
-      }),
-    ])
-      .then(([tweet, like]) => {
-        if (!tweet) throw new Error("Tweet doesn't exist!");
-        if (!like) throw new Error("You haven't liked this tweet!");
-
-        // keep the deleted data
-        const deletedLike = like.toJSON();
-        return like.destroy().then(() => {
-          return res.status(200).json({
-            status: "success",
-            message: "Unlike succeed",
-            deletedLike,
-          });
-        });
-      })
-      .catch((err) => next(err));
-  },
+  }
 };
 module.exports = userController;
