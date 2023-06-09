@@ -5,18 +5,21 @@ const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
 const tweetController = require('../controllers/tweet-controller')
 
+const cors = require('../middleware/cors')
+const upload = require('../middleware/multer')
+
 const { authenticatedAdmin, authenticatedUser, authenticated } = require('../middleware/auth')
 const { generalErrorHandler } = require('../middleware/error-handler')
-const cors = require('../middleware/cors')
 
 // signup & signin
-router.post('/api/admin/signin', cors, adminController.signIn) // ! admin登入要和user拆開
+router.post('/api/admin/signin', cors, adminController.signIn)
 router.post('/api/users/signin', cors, userController.signIn)
 router.post('/api/users', cors, userController.signUp)
 
 // user
-router.get('/api/users/:id', cors, authenticated, authenticatedUser, userController.getUser)
 router.get('/api/users/:id/tweets', cors, authenticated, authenticatedUser, userController.getUserTweets)
+router.get('/api/users/:id', cors, authenticated, authenticatedUser, userController.getUser)
+router.put('/api/users/:id', cors, authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), userController.putUser)
 
 // tweet
 router.get('/api/tweets/:id', cors, authenticated, authenticatedUser, tweetController.getTweet)
