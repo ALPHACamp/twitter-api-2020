@@ -38,7 +38,7 @@ const userServices = {
                         throw new Error('信箱已存在！')
                     }
                 }
-                if (name.length >= 50) throw new Error('名稱不可超過50字！')
+                if (name.length >= 50) throw new Error('名稱不可超過50字!')
                 if (password !== confirmPassword) throw new Error('密碼與確認密碼不一致！')
                 const salt = bcrypt.genSaltSync(10)
                 const hash = bcrypt.hashSync(password, salt)
