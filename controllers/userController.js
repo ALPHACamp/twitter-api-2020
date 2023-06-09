@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcrypt-nodejs')
 const userController = {
   signIn: (req, res, next) => {
     try {
