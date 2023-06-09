@@ -12,10 +12,10 @@ const admin = require('./modules/admin')
 router.use('/admin', admin)
 
 router.post('/tweets/:tweet_id/replies', authenticated,replyController.postComment)//加回authenticated
-router.get('/tweets/:tweet_id/replies', replyController.getComment) //加回authenticated
-router.get('/tweets/:tweet_id', tweetController.getTweet)
-router.post('/tweets', tweetController.createTweet)
-router.get('/tweets', tweetController.getTweets)
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getComment) //加回authenticated
+router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
+router.post('/tweets', authenticated, tweetController.createTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
 
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
 router.get('/users/:user_id/tweets', authenticated, userController.getUserTweets)
