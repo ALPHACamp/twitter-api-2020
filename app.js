@@ -1,4 +1,6 @@
 const express = require('express')
+const routes = require('./routes')
+
 const helpers = require('./_helpers');
 
 const app = express()
@@ -9,7 +11,7 @@ function authenticated(req, res, next){
   // passport.authenticate('jwt', { ses...
 };
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.use(routes)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
