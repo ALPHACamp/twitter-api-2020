@@ -4,6 +4,7 @@ const router = express.Router()
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
 const tweetController = require('../controllers/tweet-controller')
+const replyController = require('../controllers/reply-controller')
 
 const cors = require('../middleware/cors')
 const upload = require('../middleware/multer')
@@ -29,6 +30,13 @@ router.post('/api/tweets', cors, authenticated, authenticatedUser, tweetControll
 //like
 router.post('/api/tweets/:id/like', cors, authenticated, authenticatedUser, tweetController.addLike)
 router.post('/api/tweets/:id/unlike', cors, authenticated, authenticatedUser, tweetController.removeLike)
+
+
+
+//reply
+router.post('/api/tweets/:id/replies', cors, authenticated, authenticatedUser, replyController.postReplies)
+router.get('/api/tweets/:id/replies', cors, authenticated, authenticatedUser, replyController.getReplies)
+
 
 router.use('/', cors, generalErrorHandler)
 
