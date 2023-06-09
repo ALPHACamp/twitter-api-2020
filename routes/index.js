@@ -2,11 +2,20 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
 const userController = require('../controller/user-controller')
-const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
+const tweetController = require('../controller/tweet-Controller')
+const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/api-auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
-router.post('/api/users/login', passport.authenticate('local', { session: false }), userController.signIn)
-router.post('/api/users/signup', userController.signUp)
+// Tweets
+router.get('/api/tweets', tweetController.getTweets)
+
+// Users
+router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
+router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
+// 登入& 註冊
+router.post('/api/users/login', userController.signIn)
+router.post('/api/users', userController.signUp)
+// 錯誤訊息處理
 router.use('/', apiErrorHandler)
 
 module.exports = router
