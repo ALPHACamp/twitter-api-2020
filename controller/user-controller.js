@@ -1,8 +1,7 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
-const { NUMBER } = require('sequelize')
 const userController = {
   signIn: async (req, res, next) => {
     try {
@@ -102,6 +101,48 @@ const userController = {
       const likesJSON = likesTweets.map(l => l.toJSON())
       if (likesJSON.length === 0) throw new Error('此用戶沒有對任何貼文按讚')
       return res.status(200).json(likesJSON)
+    } catch (err) { next(err) }
+  },
+  getFollowings: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const followships = await Followship.findAll({
+        where: { followerId: userId },
+        include: [
+          { model: User, as: 'Followings', attributes: { exclude: ['password'] } }
+        ]
+      })
+
+      if (followships.length === 0) throw new Error('該用戶無正在追蹤對象')
+      return res.status(200).json(followships)
+    } catch (err) { next(err) }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const followships = await Followship.findAll({
+        where: { followingId: userId },
+        include: [
+          { model: User, as: 'Followers', attributes: { exclude: ['password'] } }
+        ]
+      })
+      // delete followships.Followers.password
+      if (followships.length === 0) throw new Error('該用戶無正在追蹤對象')
+      return res.status(200).json(followships)
+    } catch (err) { next(err) }
+  },
+  putUser: async (req, res, next) => {
+    try {
+      const { name, password, introduction } = req.body
+      const userId = helpers.getUser(req).id
+      const user = await User.findByPk(userId, { attributes: { exclude: ['password'] } })
+      if (!user) throw new Error('User not found!')
+      await user.update({
+        name: name || user.name,
+        password: password || user.password,
+        introduction: introduction || user.introduction
+      })
+      return res.status(200).json(user)
     } catch (err) { next(err) }
   }
 }
