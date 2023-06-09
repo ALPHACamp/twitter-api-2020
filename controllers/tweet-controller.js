@@ -16,7 +16,7 @@ const tweetController = {
             ],
             [
               sequelize.literal(
-                '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id AND isLike = 1)'
+                '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id)'
               ), 'likesCount'
             ]
           ]
@@ -49,7 +49,7 @@ const tweetController = {
             ],
             [
               sequelize.literal(
-                '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id AND isLike = 1)'
+                '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id )'
               ), 'likesCount'
             ]
           ]
