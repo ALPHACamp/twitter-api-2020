@@ -36,7 +36,8 @@ const userController = {
       if (userAccount) errors.push('account已存在')
       if (userEmail) errors.push('email已存在')
       if (errors.length) {
-        throw new Error(errors)
+        // throw new Error(errors)
+        return res.json({ status: 'error', message: errors })
       }
       const user = await User.create({
         name,
