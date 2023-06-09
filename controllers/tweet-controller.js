@@ -115,26 +115,34 @@ const tweetController = {
   tweetReplies: async (req, res, next) => {
     try {
       const id = req.params.tweet_id
-      const tweet = await Tweet.findByPk(id, { raw: true })
+      const [tweet, replies] = await Promise.all([
+        Tweet.findByPk(id, {
+          attributes: ['id'],
+          include: [
+            { model: User, attributes: ['id', 'account'] }
+          ],
+          raw: true,
+          nest: true
+        }),
+        Reply.findAll({
+          attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
+          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+          where: { TweetId: id },
+          order: [['createdAt', 'DESC']],
+          raw: true,
+          nest: true
+        })
+      ])
+
       if (!tweet) newErrorGenerate('推文不存在', 404)
-
-      let replies = await Reply.findAll({
-        attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
-        where: { TweetId: id },
-        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
-      })
-
       if (!replies) newErrorGenerate('找不到回應訊息', 404)
-
-      replies = replies.map(reply => ({
+      const repliesData = replies.map(reply => ({
+        tweet,
         ...reply,
         relativeTimeFromNow: relativeTimeFromNow(reply.createdAt)
       }))
 
-      return res.json(replies)
+      return res.json(repliesData)
     } catch (err) {
       next(err)
     }
