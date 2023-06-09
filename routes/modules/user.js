@@ -15,5 +15,7 @@ router.get('/:id/likes', userController.getUserLikes)
 router.get('/:id/followings', userController.getUserFollowings)
 // 查看使用者資料
 router.get('/:id', userController.getUser)
+// 查看推薦跟隨
+router.get('/', userController.getTopUser)
 
 module.exports = router

@@ -255,6 +255,27 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  // 查看推薦跟隨
+  getTopUser: async (req, res, next) => {
+    try {
+      const TOP_USER_COUNT = req.query?.top
+      const users = await User.findAll({
+        attributes: ['id', 'name', 'account', 'avatar', 'role'],
+        include: [{ model: User, as: 'Followers' }]
+      })
+      const usersData = users?.map(user => {
+        user = user?.toJSON()
+        if (user?.role === 'admin') return null
+        user.isUserFollowed = helpers.getUser(req)?.Followings?.some(f => f.id === user.id)
+        user.followersCount = user.Followers.length
+        delete user.Followers
+        return user
+      })?.filter(user => user !== null)?.sort((a, b) => b.followersCount - a.followersCount)?.slice(0, TOP_USER_COUNT)
+      res.json(usersData)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = userController
