@@ -7,7 +7,6 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../mid
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 // Tweets
-router.get('/api/tweets', tweetController.getTweets)
 
 // Users
 router.get('/api/users/:id/tweets', authenticated, userController.getUserTweets)
