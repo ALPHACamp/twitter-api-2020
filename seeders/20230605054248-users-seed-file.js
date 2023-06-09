@@ -12,8 +12,8 @@ module.exports = {
       avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: 'admin',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
     }, {
       name: 'user1',
       email: 'user1@example.com',
@@ -22,8 +22,8 @@ module.exports = {
       avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
     }, {
       name: 'user2',
       email: 'user2@example.com',
@@ -32,8 +32,8 @@ module.exports = {
       avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
     }, {
       name: 'user3',
       email: 'user3@example.com',
@@ -42,8 +42,8 @@ module.exports = {
       avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
     }, {
       name: 'user4',
       email: 'user4@example.com',
@@ -52,8 +52,8 @@ module.exports = {
       avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
     }, {
       name: 'user5',
       email: 'user5@example.com',
@@ -62,8 +62,8 @@ module.exports = {
       avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
       role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
     }], {})
   },
 
