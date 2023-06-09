@@ -8,10 +8,14 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 
 // Tweets
 router.get('/api/tweets', tweetController.getTweets)
+
 // Users
+router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
+router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
+// 登入& 註冊
 router.post('/api/users/login', userController.signIn)
 router.post('/api/users', userController.signUp)
-router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
+// 錯誤訊息處理
 router.use('/', apiErrorHandler)
 
 module.exports = router

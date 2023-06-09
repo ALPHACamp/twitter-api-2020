@@ -48,7 +48,7 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const userId = Number(req.params.id)
+      const userId = req.params.id
       const reqUserId = helpers.getUser(req).id
       const user = await User.findByPk(userId, {
         attributes: { exclude: ['password'] },
@@ -61,6 +61,8 @@ const userController = {
       user.dataValues.isFollowed = user.Followers.map(u => u.id).includes(reqUserId)
       return res.status(200).json(user)
     } catch (err) { next(err) }
+  },
+  getUserTweets: async (req, res, next) => {
   }
 }
 
