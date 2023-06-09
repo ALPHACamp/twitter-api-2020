@@ -233,7 +233,12 @@ const userController = {
             .status(404)
             .json({ status: "error", message: "No tweets found" });
         }
-        return res.status(200).json(tweets);
+        // sort tweets descending
+        const result = tweets.sort(
+          (a, b) =>
+            b.createdAt.getTime() - a.createdAt.getTime()
+        )
+        return res.status(200).json(result);
       })
 
       .catch((err) => next(err));
@@ -306,7 +311,12 @@ const userController = {
             .status(404)
             .json({ status: "error", message: "No likes found" });
         }
-        return res.status(200).json(likes);
+        // sort likes descending
+        const result = likes.sort(
+          (a, b) =>
+            b.createdAt.getTime() - a.createdAt.getTime()
+        )
+        return res.status(200).json(result);
       })
 
       .catch((err) => next(err));
