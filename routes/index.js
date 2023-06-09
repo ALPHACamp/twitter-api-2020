@@ -5,13 +5,17 @@ const userController = require('../controllers/user-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated } = require('../middleware/api-auth')
 const upload = require('../middleware/multer') // 載入 multer
-
+const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const admin = require('./modules/admin')
 
 router.use('/admin', admin)
+
 router.post('/tweets/:tweet_id/replies', authenticated,replyController.postComment)//加回authenticated
 router.get('/tweets/:tweet_id/replies', replyController.getComment) //加回authenticated
+router.get('/tweets/:tweet_id', tweetController.getTweet)
+router.post('/tweets', tweetController.createTweet)
+router.get('/tweets', tweetController.getTweets)
 
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
 router.get('/users/:user_id/tweets', authenticated, userController.getUserTweets)

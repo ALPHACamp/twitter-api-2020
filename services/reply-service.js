@@ -7,7 +7,7 @@ const replyServices = {
     return Tweet.findByPk(tweetId, {
       include: [Reply]
     }).then(tweet => {
-      const { tweetId, comment } = req.body
+      const { comment } = req.body
       const userId = req.user.user_id
       console.log('userId', userId)
       console.log('user.id', req.user.user_id)
