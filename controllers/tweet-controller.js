@@ -79,7 +79,7 @@ const tweetController = {
       if (!description) throw new Error('請輸入內容！')
       if (description.length > 140) throw new Error('內容限制為140字以內！')
       await Tweet.create({
-        userId: req.user.id,
+        userId: helpers.getUser(req).id,
         description
       })
       // 回傳成功訊息
@@ -134,15 +134,11 @@ const tweetController = {
         where: { TweetId, UserId }
       })
 
-      // 存在同時isLike = true
-      if (like?.isLike) throw new Error('已經Like過這篇推文了！')
+      // 已經有Like
+      if (like) throw new Error('已經Like過這篇推文了！')
 
-      // 不存在 (建立一個like)
-      if (!like) await Like.create({ UserId, TweetId, isLike: true })
-
-      // 存在同時isLike = false
-      if (like?.isLike === false) await like.update({ isLike: true })
-
+      // 不存在: 建立一個like
+      if (!like) await Like.create({ UserId, TweetId })
       res.json({
         status: 'success',
         message: '成功按讚！'
@@ -163,12 +159,8 @@ const tweetController = {
       // 不存在
       if (!like) throw new Error('這篇推文不存在這個like！')
 
-      // 存在同時isLike = false
-      if (like?.isLike === false) throw new Error('已經unlike過這篇推文了！')
-
-      // 存在同時isLike = true
-      if (like?.isLike === true) await like.update({ isLike: false })
-
+      // 刪除 Like
+      await like.destroy()
       res.json({
         status: 'success',
         message: '成功取消按讚！'
