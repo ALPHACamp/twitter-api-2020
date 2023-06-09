@@ -127,7 +127,7 @@ const userController = {
             ],
             [
               sequelize.literal(
-                '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id AND isLike = 1)'
+                '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id)'
               ),
               'likesCount'
             ]
@@ -166,8 +166,7 @@ const userController = {
       const currentUserId = helpers.getUser(req).id
       const likes = await Like.findAll({
         where: {
-          UserId: req.params.id,
-          isLike: true
+          UserId: req.params.id
         },
         // user story規定用likes記錄成立時間排序
         order: [['createdAt', 'DESC']],
