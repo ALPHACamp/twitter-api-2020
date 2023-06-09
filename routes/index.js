@@ -8,18 +8,25 @@ const upload = require('../middleware/multer') // 載入 multer
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const admin = require('./modules/admin')
+const likeController = require('../controllers/like-controller')
 
 router.use('/admin', admin)
 
-router.post('/tweets/:tweet_id/replies', authenticated,replyController.postComment)//加回authenticated
-router.get('/tweets/:tweet_id/replies', authenticated, replyController.getComment) //加回authenticated
-router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
-router.post('/tweets', authenticated, tweetController.createTweet)
-router.get('/tweets', authenticated, tweetController.getTweets)
 
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
 router.get('/users/:user_id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:user_id/replied_tweets', authenticated, userController.getUserRepliedTweets)
+
+// branch api/admin
+router.post('/tweets/:id/like', authenticated, likeController.addLike)
+router.post('/tweets/:id/unlike', authenticated, likeController.unLike)
+
+router.post('/tweets/:tweet_id/replies', authenticated,replyController.postComment)
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getComment) 
+router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
+router.post('/tweets', authenticated, tweetController.createTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
+// branch api/admin
 
 router.get('/users/tops', authenticated, userController.getTopUsers)
 router.get('/users/:user_id/likes', authenticated, userController.getUserLikes)

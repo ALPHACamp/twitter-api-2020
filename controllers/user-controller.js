@@ -11,6 +11,7 @@ const userController = {
     delete userData.password
     try {
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      console.log('USERDATA = ', userData)
       res.json({
         status: 'success',
         data: {
