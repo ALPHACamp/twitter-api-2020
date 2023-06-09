@@ -10,7 +10,8 @@ passport.use(new LocalStrategy(
   // customize user field
   {
     usernameField: 'account',
-    passwordField: 'password'
+    passwordField: 'password',
+    passReqToCallback: true
   },
   // authenticate user
   async (req, account, password, cb) => {
@@ -54,6 +55,8 @@ passport.deserializeUser(async (id, cb) => {
   try {
     const user = await User.findByPk(id, {
       include: [
+        { model: Tweet, as: 'LikedTweets' },
+        { model: Tweet, as: 'Tweets' },
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
       ]
