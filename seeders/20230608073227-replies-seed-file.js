@@ -29,7 +29,7 @@ module.exports = {
         updatedAt: new Date()
       })
     }
-    queryInterface.bulkInsert('Replies', repliedTweets)
+    await queryInterface.bulkInsert('Replies', repliedTweets)
   },
 
   down: async (queryInterface, Sequelize) => {
