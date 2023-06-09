@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const userController = require('../controllers/user-controller')
+const adminController = require('../controllers/admin-controller')
 const tweetController = require('../controllers/tweet-controller')
 
 const { authenticatedAdmin, authenticatedUser, authenticated } = require('../middleware/auth')
@@ -9,7 +10,7 @@ const { generalErrorHandler } = require('../middleware/error-handler')
 const cors = require('../middleware/cors')
 
 // signup & signin
-// router.post('/api/admin/signin', cors, userController.signIn) // ! admin登入要和user拆開
+router.post('/api/admin/signin', cors, adminController.signIn) // ! admin登入要和user拆開
 router.post('/api/users/signin', cors, userController.signIn)
 router.post('/api/users', cors, userController.signUp)
 
