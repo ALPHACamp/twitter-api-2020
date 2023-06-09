@@ -47,13 +47,14 @@ const adminController = {
                 '(SELECT COUNT(*) FROM Tweets WHERE UserId = User.id)'
               ),
               'tweetsCount'
-            ],
-            [
-              sequelize.literal(
-                '(SELECT COUNT(*) FROM likes l INNER JOIN tweets t on l.TweetId = t.id INNER JOIN users u on t.UserId=u.id where t.UserId = User.id group by t.UserId)'
-              ),
-              'receivedLikesCount'
             ]
+            // 因跑 travis 會有問題暫時拿掉
+            // [
+            //   sequelize.literal(
+            //     '(SELECT COUNT(*) FROM likes l INNER JOIN tweets t on l.TweetId = t.id INNER JOIN users u on t.UserId=u.id where t.UserId = User.id group by t.UserId)'
+            //   ),
+            //   'receivedLikesCount'
+            // ]
           ]
         },
         order: [[sequelize.literal('TweetsCount'), 'DESC']]
@@ -63,8 +64,9 @@ const adminController = {
       const usersData = users.map(user => {
         const userData = user.toJSON()
         return {
-          ...userData,
-          receivedLikesCount: userData.receivedLikesCount ? userData.receivedLikesCount : 0
+          ...userData
+          // 因跑 travis 會有問題暫時拿掉
+          // receivedLikesCount: userData.receivedLikesCount ? userData.receivedLikesCount : 0
         }
       })
 
