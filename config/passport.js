@@ -21,6 +21,7 @@ const strategy = new JwtStrategy(jwtOptions, function (jwtPayload, next) {
   })
 })
 
+
 passport.use(strategy)
 
 module.exports = passport
