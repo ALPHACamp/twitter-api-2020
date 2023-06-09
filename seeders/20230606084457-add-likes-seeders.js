@@ -23,7 +23,6 @@ module.exports = {
         likes.push({
           UserId: user.id,
           TweetId: unlikeTweets[randomIndex],
-          isLike: true,
           createdAt: new Date(),
           updatedAt: new Date()
         })
