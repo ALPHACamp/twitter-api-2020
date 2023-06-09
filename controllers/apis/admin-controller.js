@@ -42,7 +42,6 @@ const adminController = {
     try {
       const { id } = req.params
       const tweet = await Tweet.findByPk(id)
-      console.log(tweet)
       if (!tweet) throw new Error('The tweet does not exist')
       await tweet.destroy()
       return res.json({ status: 'success', data: tweet })

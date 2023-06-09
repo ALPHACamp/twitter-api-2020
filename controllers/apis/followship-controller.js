@@ -27,7 +27,7 @@ const followshipController = {
         where: { followerId: getUser(req).id, followingId }
       })
       // 如果沒有 => 不用刪除
-      if (!follow) throw new Error('You have not followed this user.')
+      if (!follow) throw new Error("You have'nt followed this user.")
 
       const deleteFollow = await follow.destroy()
       return res.json({ status: 'success', data: deleteFollow.toJSON() })

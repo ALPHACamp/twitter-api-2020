@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../../_helpers')
-const { User, Tweet, Reply } = require('../../models')
+const { User, Tweet, Reply, Like, Followship } = require('../../models')
 
 const userController = {
   login: (req, res, next) => {
@@ -47,7 +47,6 @@ const userController = {
       })
       const userData = user.toJSON()
       delete userData.password
-      console.log(userData)
       return res.json({ status: 'success', data: userData })
     } catch (error) {
       next(error)
@@ -57,13 +56,18 @@ const userController = {
     try {
       let { id } = req.params
       id = Number(id)
-      const userTweets = await Tweet.findAll({
-        where: { UserId: id },
-        raw: true,
-        nest: true
-      })
-      console.log(userTweets)
-      if (!userTweets.length) throw new Error('The user have not post any tweet yet')
+
+      // 確認使用者是否存在與發過文
+      const [user, userTweets] = await Promise.all([
+        User.findByPk(id),
+        Tweet.findAll({
+          where: { UserId: id },
+          raw: true,
+          nest: true
+        })
+      ])
+      if (!user) throw new Error('The user does not exist')
+      if (!userTweets.length) throw new Error("The user have'nt post any tweet yet")
       return res.json({ status: 'success', data: userTweets })
     } catch (error) {
       next(error)
@@ -73,8 +77,9 @@ const userController = {
     try {
       let id = req.params.id
       id = Number(id)
+
+      // 確認使用者是否存在
       const user = await User.findByPk(id)
-      console.log(user)
       if (!user) throw new Error('The user does not exist')
       res.json({ status: 'success', data: user })
     } catch (error) {
@@ -83,20 +88,121 @@ const userController = {
   },
   getUserRepliedTweet: async (req, res, next) => {
     try {
-      const { id } = req.params
-      const repliedTweets = await Reply.findAll({
-        where: { UserId: id },
-        include: [Tweet],
-        raw: true,
-        nest: true
-      })
-      if (!repliedTweets.length) throw new Error('The user does not exist')
+      let { id } = req.params
+      id = Number(id)
 
-      const tweets = []
+      // 確認使用者是否存在與回過文
+      const [user, repliedTweets] = await Promise.all([
+        User.findByPk(id),
+        Reply.findAll({
+          where: { UserId: id },
+          include: [Tweet],
+          raw: true,
+          nest: true
+        })
+      ])
+      if (!user) throw new Error('The user does not exist')
+      if (!repliedTweets.length) throw new Error("The user have'nt replied any tweets yet.")
+
+      const data = []
       for (const i of repliedTweets) {
-        tweets.push(i.Tweet)
+        data.push(i.Tweet)
       }
-      return res.json({ status: 'success', data: tweets })
+      return res.json({ status: 'success', data })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserLiked: async (req, res, next) => {
+    try {
+      let { id } = req.params
+      id = Number(id)
+
+      // 確認使用者是否存在與喜歡的貼文
+      const [user, userLiked] = await Promise.all([
+        User.findByPk(id),
+        Like.findAll({
+          where: { UserId: Number(id) },
+          include: [Tweet],
+          raw: true,
+          nest: true
+        })
+      ])
+      if (!user) throw new Error('The user does not exist')
+      if (!userLiked.length) throw new Error('He does not like anyone.')
+      const data = []
+      for (const i of userLiked) {
+        data.push(i.Tweet)
+      }
+      return res.json({ status: 'success', data })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserFollows: async (req, res, next) => {
+    try {
+      let { id } = req.params
+      id = Number(id)
+
+      // 確認使用者是否存在其追蹤者
+      const [user, userFollows] = await Promise.all([
+        User.findByPk(id),
+        Followship.findAll({
+          where: { followerId: Number(id) },
+          raw: true,
+          nest: true
+        })
+      ])
+      if (!user) throw new Error('The user does not exist')
+      if (!userFollows.length) throw new Error("He haven't followed anyone")
+      const data = []
+      for (const i of req.user.Followings) {
+        data.push(i.dataValues)
+      }
+      return res.json({ status: 'success', data })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      let { id } = req.params
+      id = Number(id)
+
+      // 確認使用者是否存在其追隨者
+      const [user, userFollowers] = await Promise.all([
+        User.findByPk(id),
+        Followship.findAll({
+          where: { followingId: Number(id) }
+        })
+      ])
+      if (!user) throw new Error('The user does not exist')
+      if (!userFollowers.length) throw new Error('He is lonely')
+
+      const data = []
+      for (const i of req.user.Followers) {
+        data.push(i.dataValues)
+      }
+      return res.json({ status: 'success', data })
+    } catch (error) {
+      next(error)
+    }
+  },
+  putUser: async (req, res, next) => {
+    try {
+      const { email, password, name, avatar, introduction, background, account } = req.body
+
+      if (introduction.length < 160) throw new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
+      if (name.length < 50) throw new Error('Your self-introduction is a little too long for me to handle! ! Please less than 50.')
+      const [checkEmail, checkAccount] = await Promise.all([
+        User.findOne({ where: { email } }),
+        User.findOne({ where: { account } })
+      ])
+      if (checkEmail) throw new Error('Oops! Your email already exist')
+      if (checkAccount) throw new Error('Oops! Your account already exist')
+      User.update({
+        email, password, name, avatar, introduction, background, account
+      })
     } catch (error) {
       next(error)
     }
