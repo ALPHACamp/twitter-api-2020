@@ -12,6 +12,7 @@ router.get('/api/tweets', tweetController.getTweets)
 // Users
 router.get('/api/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/api/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+router.get('/api/users/:id/likes', authenticated, userController.getLikedTweets)
 router.get('/api/users/:id', authenticated, userController.getUser)
 // 登入& 註冊
 router.post('/api/users/login', userController.signIn)

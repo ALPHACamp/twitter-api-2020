@@ -88,6 +88,21 @@ const userController = {
       if (RepliesJSON.length === 0) throw new Error('此用戶沒有回覆任何貼文')
       return res.status(200).json(RepliesJSON)
     } catch (err) { next(err) }
+  },
+  getLikedTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const likesTweets = await Like.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: Tweet }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      const likesJSON = likesTweets.map(l => l.toJSON())
+      if (likesJSON.length === 0) throw new Error('此用戶沒有對任何貼文按讚')
+      return res.status(200).json(likesJSON)
+    } catch (err) { next(err) }
   }
 }
 
