@@ -6,7 +6,10 @@
   "scripts": {
     "start": "NODE_ENV=development node app.js",
     "dev": "NODE_ENV=development nodemon app.js",
-    "test": "mocha test --exit --recursive --timeout 5000"
+    "test": "mocha test --exit --recursive --timeout 5000",
+    "startWin": "set \"NODE_ENV=development\" && node app.js",
+    "devWin": "set \"NODE_ENV=development\" && nodemon app.js",
+    "testWin": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000"
   },
   "author": "",
   "license": "ISC",
