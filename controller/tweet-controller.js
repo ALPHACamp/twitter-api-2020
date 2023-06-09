@@ -1,4 +1,4 @@
-const { Tweet } = require('../models')
+const { Tweet, User } = require('../models')
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {

@@ -1,8 +1,6 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
-const db = require('../models')
-const User = db.User
-const Tweet = db.Tweet
+const { User, Tweet } = require('../models')
 const bcrypt = require('bcryptjs')
 // JWT set up
 const passportJWT = require('passport-jwt')
