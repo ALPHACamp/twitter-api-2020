@@ -1,8 +1,12 @@
 {
   "name": "test",
   "version": "1.0.0",
-  "description": "",
+  "description": "測試項目",
   "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YuZheLin1987/twitter-api-2020.git"
+  },
   "scripts": {
     "start": "NODE_ENV=development node app.js",
     "dev": "NODE_ENV=development nodemon app.js",
@@ -13,16 +17,20 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
+    "dotenv": "^16.1.4",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "faker": "^4.1.0",
+    "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
     "mocha": "^6.0.2",
     "mysql2": "^2.3.0",
     "passport": "^0.4.0",
+    "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "sequelize": "^6.6.5",
     "sequelize-cli": "^6.2.0",
