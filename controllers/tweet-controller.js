@@ -86,7 +86,7 @@ const tweetController = {
       if (!tweet) newErrorGenerate('推文不存在', 404)
       if (!user) newErrorGenerate('使用者不存在', 404)
       if (like) newErrorGenerate('已按過喜歡', 400)
-      const addLike = await Like.create({ TweedId: tweetId, UserId: userId })
+      const addLike = await Like.create({ TweetId: tweetId, UserId: userId })
       return res.json(addLike)
     } catch (err) {
       next(err)
@@ -100,13 +100,13 @@ const tweetController = {
       const [tweet, user, like] = await Promise.all([
         Tweet.findByPk(tweetId, { raw: true, attributes: ['id'] }),
         User.findByPk(userId, { raw: true, attributes: ['id'] }),
-        Like.findOne({ where: { tweetId, userId }, raw: true })
+        Like.findOne({ where: { tweetId, userId } })
       ])
       if (!tweet) newErrorGenerate('推文不存在', 404)
       if (!user) newErrorGenerate('使用者不存在', 404)
-      if (like) newErrorGenerate('已按過喜歡', 400)
-      const addLike = await Like.create({ TweedId: tweetId, UserId: userId })
-      return res.json(addLike)
+      if (!like) newErrorGenerate('未按過喜歡', 400)
+      const removeLike = await like.destroy()
+      return res.json(removeLike)
     } catch (err) {
       next(err)
     }
