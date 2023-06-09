@@ -1,37 +1,66 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const jwt = require('jsonwebtoken')
+const helpers = require('../_helpers')
 const userController = {
-  signIn: (req, res, next) => {
+  signIn: async (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
+      const { account, password } = req.body
+      if (!account || !password) throw new Error('account & password are required!')
+      const user = await User.findOne({ where: { account } })
+      if (!user || user.role === 'admin') throw new Error('帳號不存在!')
+      if (!bcrypt.compareSync(password, user.password)) throw new Error('password incorrect!')
+      const userData = user.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })// 簽證效期30天
-      res.json({ status: 'success', data: { token, user: req.user } })
+      return res.status(200).json({ token, user: userData })
     } catch (err) { next(err) }
   },
-  signUp: (req, res, next) => {
-    if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match')
-    User.findOne({ where: { email: req.body.email } })
-      .then(user => {
-        if (user) throw new Error('Email already exist!')
-        return bcrypt.hash(req.body.password, 10)
-      })
-      .then(hash => User.create({
+  signUp: async (req, res, next) => {
+    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match')
+    try {
+      // check if user with given email or account already exists
+      const existingAccount = await User.findOne({ where: { account: req.body.account } })
+      const existingEmail = await User.findOne({ where: { email: req.body.email } })
+      if (existingAccount) { throw new Error('Account already exists!') }
+      if (existingEmail) { throw new Error('Email already exists!') }
+      // If user does not exist, hash password and create new user
+      const hash = await bcrypt.hash(req.body.password, 10)
+      const newUser = await User.create({
         name: req.body.name,
         email: req.body.email,
         password: hash,
         account: req.body.account,
         role: 'user'
-      }))
-      .then(newUser => {
-        const userJSON = newUser.toJSON()
-        delete userJSON.password
-        return res.json({ status: 'success', data: { user: userJSON } })
       })
-      .catch(err => {
-        next(err)
+      const userJSON = newUser.toJSON()
+      delete userJSON.password
+      return res.json({ status: 'success', data: { user: userJSON } })
+    } catch (err) { next(err) }
+  },
+  getCurrentUser: (req, res, next) => {
+    const reqUser = helpers.getUser(req)
+    const result = reqUser.toJSON()
+    delete result.password
+    delete result.Followers
+    delete result.Followings
+    return res.status(200).json(result)
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const userId = Number(req.params.id)
+      const reqUserId = helpers.getUser(req).id
+      const user = await User.findByPk(userId, {
+        attributes: { exclude: ['password'] },
+        include: [
+          { model: User, as: 'Followers', attributes: { exclude: ['password'] } },
+          { model: User, as: 'Followings', attributes: { exclude: ['password'] } }
+        ]
       })
+      if (!user || user.role === 'admin') throw new Error('帳號不存在!')
+      user.dataValues.isFollowed = user.Followers.map(u => u.id).includes(reqUserId)
+      return res.status(200).json(user)
+    } catch (err) { next(err) }
   }
 }
 
