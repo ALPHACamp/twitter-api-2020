@@ -22,9 +22,9 @@ router.get('/api/tweets/:id', cors, authenticated, authenticatedUser, tweetContr
 router.get('/api/tweets', cors, authenticated, authenticatedUser, tweetController.getTweets)
 router.post('/api/tweets', cors, authenticated, authenticatedUser, tweetController.postTweets)
 
-// router.get('/api/tweets/:id', tweetController.getTweet)
-// router.get('/api/tweets', tweetController.getTweets)
-// router.post('/api/tweets', cors, authenticated, tweetController.postTweets)
+//like
+router.post('/api/tweets/:id/like', cors, authenticated, authenticatedUser, tweetController.addLike)
+router.post('/api/tweets/:id/unlike', cors, authenticated, authenticatedUser, tweetController.removeLike)
 
 router.use('/', cors, generalErrorHandler)
 
