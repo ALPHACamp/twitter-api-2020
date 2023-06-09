@@ -28,6 +28,11 @@ const userController = {
       next(err)
     }
   },
+  getUser: (req, res, next) => {
+    userServices.getUser(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
+  },
   putUser: (req, res, next) => {
     userServices.putUser(req, (err, data) => err
       ? next(err)
@@ -37,8 +42,12 @@ const userController = {
     userServices.putAccount(req, (err, data) => err
       ? next(err)
       : res.json(data))
+  },
+  getFollowers: (req, res, next) => {
+    userServices.getFollowers(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
   }
-
   // for JWT test purpose
   /* getUser: (req, res, next) => {
     console.log('get user')

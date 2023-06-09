@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { Sequelize, Op } = require('sequelize')
+const { Op } = require('sequelize')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { User } = require('../models')
 const userServices = {
@@ -30,6 +30,32 @@ const userServices = {
         })
       })
       .then(() => cb(null))
+      .catch(err => cb(err))
+  },
+  getUser: (req, cb) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ],
+      nest: true
+    })
+      .then(user => {
+        if (!user) throw new Error('使用者不存在')
+        const data = {
+          ...user.toJSON(),
+          Follower_count: user.Followers.length,
+          Following_count: user.Followers.length,
+          isFollowed: user.Followers.some(f => f.id === req.user.id)
+        }
+        delete data.password
+        delete data.role
+        delete data.createdAt
+        delete data.updatedAt
+        delete data.Followers
+        delete data.Followings
+        return cb(null, data)
+      })
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
@@ -108,10 +134,24 @@ const userServices = {
       .then(() => {
         cb(null, {
           status: 'success',
-          message: '操作成功',
+          message: '操作成功'
         })
       })
       .catch(err => cb(err))
+  },
+  getFollowers: (req, cb) => {
+    return User.findByPk(req.params.id, {
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: ['id', 'name', 'avatar', 'introduction']
+      }],
+      raw: true,
+      nest: true
+    })
+      .then(users => {
+        console.log(users)
+      })
   }
 }
 
