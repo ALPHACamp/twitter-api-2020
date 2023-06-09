@@ -3,7 +3,7 @@ const { getUser } = require("../_helpers");
 
 const replyController = {
   getTweetReply: (req, res, next) => {
-    const getTweetId = req.params.id;
+    const getTweetId = req.params.tweet_id;
     return Reply.findAll({
       where: { TweetId: getTweetId },
       order: [["createdAt", "DESC"]],
@@ -49,7 +49,7 @@ const replyController = {
       .catch((err) => next(err));
   },
   postTweetReply: (req, res, next) => {
-    const getTweetId = req.params.id;
+    const getTweetId = req.params.tweet_id;
     const userId = getUser(req).id;
     const { comment } = req.body;
 

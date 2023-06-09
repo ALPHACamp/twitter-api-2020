@@ -78,13 +78,13 @@ router.post(
 );
 //replies
 router.get(
-  "/api/tweets/:id/replies",
+  "/api/tweets/:tweet_id/replies",
   authenticated,
   authenticatedUser,
   replyController.getTweetReply
 );
 router.post(
-  "/api/tweets/:id/replies",
+  "/api/tweets/:tweet_id/replies",
   authenticated,
   authenticatedUser,
   replyController.postTweetReply
