@@ -15,12 +15,10 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     include: [
-      // 看要加那些
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
+      // 看要include那些
     ]
   })
-    .then(user => cb(null, user))
+    .then(user => cb(null, user.toJSON()))
     .catch(err => cb(err))
 }))
 
@@ -28,17 +26,17 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
 passport.use(new LocalStrategy(
   // set Field, use email and password
   {
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
   },
   // authenticate user
-  (req, email, password, cb) => {
-    User.findOne({ where: { email } })
+  (req, account, password, cb) => {
+    return User.findOne({ where: { account } })
       .then(user => {
-        if (!user) return cb(null, false, req.flash('error_messages', '帳號不存在'))
+        if (!user) return cb(null, false, 'error_messages', '帳號不存在')
         bcrypt.compare(password, user.password).then(res => {
-          if (!res) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
+          if (!res) return cb(null, 'error_messages', '帳號或密碼輸入錯誤！')
           return cb(null, user)
         })
       })
@@ -51,9 +49,7 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser((id, cb) => {
   return User.findByPk(id, {
     include: [
-      // 看還要加那些
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
+      // 看要include那些 這邊應該不用動, seesion: false 了
     ]
   })
     .then(user => {
