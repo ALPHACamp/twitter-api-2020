@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+const { NUMBER } = require('sequelize')
 const userController = {
   signIn: async (req, res, next) => {
     try {
@@ -10,10 +11,10 @@ const userController = {
       const user = await User.findOne({ where: { account } })
       if (!user || user.role === 'admin') throw new Error('帳號不存在!')
       if (!bcrypt.compareSync(password, user.password)) throw new Error('password incorrect!')
-      const userData = user.toJSON()
-      delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })// 簽證效期30天
-      return res.status(200).json({ token, user: userData })
+      const userJSON = user.toJSON()
+      delete userJSON.password
+      const token = jwt.sign(userJSON, process.env.JWT_SECRET, { expiresIn: '30d' })// 簽證效期30天
+      return res.status(200).json({ token, user: userJSON })
     } catch (err) { next(err) }
   },
   signUp: async (req, res, next) => {
@@ -35,16 +36,8 @@ const userController = {
       })
       const userJSON = newUser.toJSON()
       delete userJSON.password
-      return res.json({ status: 'success', data: { user: userJSON } })
+      return res.status(200).json(userJSON)
     } catch (err) { next(err) }
-  },
-  getCurrentUser: (req, res, next) => {
-    const reqUser = helpers.getUser(req)
-    const result = reqUser.toJSON()
-    delete result.password
-    delete result.Followers
-    delete result.Followings
-    return res.status(200).json(result)
   },
   getUser: async (req, res, next) => {
     try {
@@ -59,10 +52,27 @@ const userController = {
       })
       if (!user || user.role === 'admin') throw new Error('帳號不存在!')
       user.dataValues.isFollowed = user.Followers.map(u => u.id).includes(reqUserId)
-      return res.status(200).json(user)
+      const userJSON = user.toJSON()
+      return res.status(200).json(userJSON)
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
+    try {
+      const userId = Number(req.params.id)
+      const user = await User.findByPk(userId)
+      if (!user) throw new Error('此用戶不存在')
+      const tweets = await Tweet.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          { model: Like, attributes: ['userId'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      if (tweets.length === 0) throw new Error('此用戶尚未發布推文')
+      const tweetsJSON = tweets.map(t => t.toJSON())
+      return res.status(200).json(tweetsJSON)
+    } catch (err) { next(err) }
   }
 }
 
