@@ -25,8 +25,8 @@ router.get('/users/:id/follow_counts', authenticated, followController.getFollow
 
 router.get('/tweets/:id/replies', authenticated, replyController.getReplies)
 router.post('/tweets/:id/replies', authenticated, replyController.postReply)
-router.put('/tweets/:tweet_id/replies/:reply_id', authenticated, replyController.putReply)
-router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, replyController.deleteReply)
+router.put('/replies/:id', authenticated, replyController.putReply)
+router.delete('/replies/:id', authenticated, replyController.deleteReply)
 
 router.get('/users/:id/tweets', authenticated, tweetController.getTweets)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
