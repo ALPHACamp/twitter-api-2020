@@ -24,7 +24,9 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      const users = await User.findAll()
+      const users = await User.findAll({
+        raw: true
+      })
       return res.json({ status: 'success', data: users })
     } catch (error) {
       next(error)
@@ -42,10 +44,9 @@ const adminController = {
     try {
       const { id } = req.params
       const tweet = await Tweet.findByPk(id)
-      console.log(tweet)
       if (!tweet) throw new Error('The tweet does not exist')
       await tweet.destroy()
-      return res.json({ status: 'success', data: tweet })
+      return res.json({ status: 'success', data: {} })
     } catch (error) {
       next(error)
     }
