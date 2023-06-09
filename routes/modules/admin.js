@@ -1,8 +1,7 @@
 const router = require('express').Router()
+const adminController = require('../../controllers/admin-controller')
 
-// test route (delete later)
-router.get('/', (req, res, next) => {
-  res.json('/api/admin/  (Test API Delete Later)')
-})
+router.delete('/tweets/:id', adminController.deleteTweet)
+router.get('/users', adminController.getUsers)
 
 module.exports = router
