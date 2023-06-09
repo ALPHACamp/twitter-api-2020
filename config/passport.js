@@ -8,27 +8,22 @@ const { User, Tweet } = require('../models')
 
 passport.use(new LocalStrategy(
   {
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
   },
-  (req, email, password, cb) => {
-    User.findOne({ where: { email } })
+  (req, account, password, cb) => {
+    User.findOne({ where: { account } })
       .then(user => {
-        console.log(user)
         if (!user) {
           return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
         }
         bcrypt.compare(password, user.password)
           .then(res => {
-            // console.log(res)
-            if (!res) {
-              return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
-            }
+            if (!res) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
             return cb(null, user)
           })
       })
-      .catch(err => cb(err))
   }
 ))
 
