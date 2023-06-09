@@ -50,7 +50,7 @@ const adminController = {
             ],
             [
               sequelize.literal(
-                '(SELECT COUNT(*) FROM likes l INNER JOIN tweets t on l.TweetId = t.id INNER JOIN users u on t.UserId=u.id where t.UserId = User.id and l.isLike=1 group by t.UserId)'
+                '(SELECT COUNT(*) FROM likes l INNER JOIN tweets t on l.TweetId = t.id INNER JOIN users u on t.UserId=u.id where t.UserId = User.id group by t.UserId)'
               ),
               'receivedLikesCount'
             ]
@@ -76,7 +76,7 @@ const adminController = {
   deleteTweet: async (req, res, next) => {
     try {
       // 確認是否為admin身分
-      const isCurrentUserAdim = helpers.getUser(req).dataValues.role === 'admin'
+      const isCurrentUserAdim = helpers.getUser(req).role === 'admin'
       if (!isCurrentUserAdim) throw new Error('您沒有權限刪除推文')
 
       const tweet = await Tweet.findByPk(req.params.id)
