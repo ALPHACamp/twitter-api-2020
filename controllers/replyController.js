@@ -12,7 +12,7 @@ const replyController = {
       raw: true
     })
       .then((replies) => {
-        replies.forEach(reply => {
+        replies.forEach((reply) => {
           getLastUpdated(reply)
         })
         console.log(replies)
@@ -23,32 +23,51 @@ const replyController = {
   postReply: (req, res, next) => {
     const TweetId = req.params.id
     const { comment } = req.body
-    if (!comment) return res.json({ status: 'error', message: 'Comment is required' })
-    if (comment.length > 140) return res.json({ status: 'error', message: 'Comment should not be more than 140 characters' })
+    if (!comment) { return res.json({ status: 'error', message: 'Comment is required' }) }
+    if (comment.length > 140) {
+      return res.json({
+        status: 'error',
+        message: 'Comment should not be more than 140 characters'
+      })
+    }
 
     return Reply.create({
       UserId: req.user.id,
       TweetId,
       comment
     })
-      .then((user) => res.json({ status: 'success', message: 'Reply was successfully created' }))
+      .then((user) =>
+        res.json({
+          status: 'success',
+          message: 'Reply was successfully created'
+        })
+      )
       .catch((error) => next(error))
   },
   putReply: (req, res, next) => {
-    const tweetId = req.params.tweet_id
-    const replyId = req.params.reply_id
+    const { id } = req.params
     const { comment } = req.body
-    if (!tweetId || !replyId) return res.json({ status: 'error', message: 'tweet_id and reply_id are required' })
-    if (!comment) return res.json({ status: 'error', message: 'Comment is required' })
-    if (comment.length > 140) return res.json({ status: 'error', message: 'Comment should not be more than 140 characters' })
+    if (!id) { return res.json({ status: 'error', message: 'reply_id are required' }) }
+    if (!comment) { return res.json({ status: 'error', message: 'Comment is required' }) }
+    if (comment.length > 140) {
+      return res.json({
+        status: 'error',
+        message: 'Comment should not be more than 140 characters'
+      })
+    }
 
-    return Reply.findOne({ where: { id: replyId, TweetId: tweetId } })
-      .then(reply => {
-        if (req.user.id !== reply.UserId) return res.json({ status: 'error', message: 'You can only edit your own reply' })
+    return Reply.findOne({ where: { id } })
+      .then((reply) => {
+        if (req.user.id !== reply.UserId) {
+          return res.json({
+            status: 'error',
+            message: 'You can only edit your own reply'
+          })
+        }
         reply.comment = comment
         return reply.save()
       })
-      .then(reply =>
+      .then((reply) =>
         res.json({
           status: 'success',
           message: 'Reply was successfully updated'
@@ -57,16 +76,20 @@ const replyController = {
       .catch((error) => next(error))
   },
   deleteReply: (req, res, next) => {
-    const tweetId = req.params.tweet_id
-    const replyId = req.params.reply_id
-    if (!tweetId || !replyId) return res.json({ status: 'error', message: 'tweet_id and reply_id are required' })
+    const { id } = req.params
+    if (!id) { return res.json({ status: 'error', message: 'reply_id are required' }) }
 
-    return Reply.findOne({ where: { id: replyId, TweetId: tweetId } })
-      .then(reply => {
-        if (req.user.id !== reply.UserId) return res.json({ status: 'error', message: 'You can only delete your own reply' })
+    return Reply.findOne({ where: { id } })
+      .then((reply) => {
+        if (req.user.id !== reply.UserId) {
+          return res.json({
+            status: 'error',
+            message: 'You can only delete your own reply'
+          })
+        }
         reply.destroy()
       })
-      .then(reply =>
+      .then((reply) =>
         res.json({
           status: 'success',
           message: 'Reply was successfully deleted'
