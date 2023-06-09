@@ -10,6 +10,7 @@ const {
 } = require('../models')
 
 const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
     signIn: async (req, cb) => {
@@ -50,6 +51,7 @@ const userServices = {
                     throw new Error('信箱已存在！')
                 }
             }
+            if (!name) throw new Error('請填入名稱！')
             if (name.length >= 50) throw new Error('名稱不可超過50字！')
             if (password !== checkPassword) throw new Error('密碼與確認密碼不一致！')
             const salt = bcrypt.genSaltSync(10)
@@ -148,6 +150,38 @@ const userServices = {
         } catch (err) {
             cb(err)
         }
+    },
+    putUser: (req, cb) => {
+        const { id } = req.params
+        const { name, introduction } = req.body
+        const { files } = req
+        if (!name) throw new Error('請填入名稱！')
+        if (name.length >= 50) throw new Error('名稱不可超過50字！')
+        return Promise.all([
+            User.findByPk(req.user.id),
+            imgurFileHandler(files)
+        ])
+            .then(([user, filePath]) => {
+                if (!user) throw new Error("使用者不存在！")
+                if (user.id !== Number(id)) throw new Error('只能編輯自己的使用者資料！')
+                user.update({
+                    name: name.trim(),
+                    introduction: introduction.trim(),
+                    avatar: filePath[0] || user.avatar,
+                    banner: filePath[1] || user.banner
+                })
+                    .then(updateUser => {
+                        const userData = updateUser.toJSON()
+                        delete userData.password
+                        cb(null, userData)
+                    })
+                    .catch(err => {
+                        cb(err)
+                    })
+            })
+            .catch(err => {
+                cb(err)
+            })
     }
 }
 
