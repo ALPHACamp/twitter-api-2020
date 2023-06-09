@@ -22,7 +22,7 @@ describe('# admin requests', () => {
         // 模擬登入資料
         const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null)
-          return (req, res, next) => {}
+          return (req, res, next) => { }
         })
         this.getUser = sinon.stub(
           helpers, 'getUser'
@@ -39,7 +39,10 @@ describe('# admin requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function (err, res) {
-            if (err) return done(err)
+            if (err) {
+              console.log('the error:', err)
+              return done(err)
+            }
             // 檢查回傳資料是否是陣列類型
             expect(res.body).to.be.an('array')
             // 檢查回傳資料是否有 3 筆使用者資料
@@ -70,7 +73,7 @@ describe('# admin requests', () => {
         // 模擬登入資料
         const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null)
-          return (req, res, next) => {}
+          return (req, res, next) => { }
         })
         this.getUser = sinon.stub(
           helpers, 'getUser'
