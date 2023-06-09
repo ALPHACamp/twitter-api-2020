@@ -16,11 +16,15 @@ module.exports = {
     const eachUserTweetsCount = 3
     const repliedTweets = []
     for (let i = 0; i < 150; i++) {
+      let comment = faker.lorem.text()
+      if (comment.length > 140) {
+        comment = comment.slice(0, 140)
+      }
       const randomUser = Math.floor(Math.random() * users.length)
       repliedTweets.push({
         UserId: users[randomUser].id,
         TweetId: tweets[Math.floor(i / eachUserTweetsCount)].id,
-        comment: faker.lorem.text(),
+        comment,
         createdAt: new Date(),
         updatedAt: new Date()
       })
