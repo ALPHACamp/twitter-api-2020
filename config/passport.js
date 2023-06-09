@@ -7,7 +7,7 @@ const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 
 passport.use(new LocalStrategy(
-  { // 自訂欄位名稱
+  {
     usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
@@ -30,8 +30,6 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     include: [
-      //{ model: User, as: 'LikedUsers' },
-      // { model: Replies, include: User },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
@@ -47,8 +45,6 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser((id, cb) => {
   User.findByPk(id, {
     include: [
-       //{ model: User, as: 'LikedUsers' },
-        // { model: Replies, include: User },
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
     ]
