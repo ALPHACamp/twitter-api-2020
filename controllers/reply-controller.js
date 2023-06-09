@@ -49,16 +49,16 @@ const replyController = {
       .catch((err) => next(err));
   },
   postTweetReply: (req, res, next) => {
-    const getTweetId = req.params.tweet_id;
+    const tweetId = req.params.tweet_id;
     const userId = getUser(req).id;
     const { comment } = req.body;
 
-    return Tweet.findByPk(getTweetId)
+    return Tweet.findByPk(tweetId)
       .then((tweet) => {
         if (!tweet) throw new Error("Tweet not exist!");
         return Reply.create({
           comment,
-          tweetId: getTweetId,
+          tweetId,
           userId,
         });
       })
