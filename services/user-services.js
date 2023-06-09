@@ -1,15 +1,13 @@
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const helpers = require('../_helpers')
-const db = require('../models')
 const {
     User,
     Tweet,
     Followship,
     Like,
     Reply
-} = db
+} = require('../models')
 
 const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 
