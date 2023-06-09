@@ -7,7 +7,7 @@ const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 
 passport.use(new LocalStrategy(
-  { // 自訂欄位名稱
+  {
     usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
@@ -45,8 +45,8 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser((id, cb) => {
   User.findByPk(id, {
     include: [
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
     ]
   })
     .then(user => cb(null, user.toJSON()))

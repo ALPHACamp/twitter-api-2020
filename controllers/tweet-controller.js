@@ -1,55 +1,35 @@
-// const tweetServices = require('../../services/restaurant-services')
-const { Tweet, User } = require('../models')
+const tweetServices = require('../services/tweet-services')
+const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
+const { Tweet } = require('../models')
+const { getUser } = require('../_helpers')
 const tweetController = {
-    getTweets: (req, res, next) => {
-      Tweet.findAll({
-        include: User,
-        nest: true,
-        raw: true
-      })
-      .then(tweets => {
-        const data =Array.from(tweets)
-          return res.json(data)
-      }).catch (err => next(err))
-      //  tweetServices.getTweets(req, (err, data) => err ? next(err) : res.json(data))
-    },
-    getTweet: (req, res, next) => {
-        return Tweet.findByPk(req.params.id, {
-                include: User,
-                nest: true,
-                raw: true
-        })
-          .then(tweet => {
-            //const isLiked = tweet.LikedUsers.some(l => l.id === req.user.id)
-            if (!tweet) throw new Error("Tweet didn't exist!")
-            res.json({
-                tweet,
-                //isLiked
-            })
-        }).catch (err => next(err))
-    },
-    postTweets: (req, res, next) => {   
-      const { description } = req.body
-      const UserId = req.user.id
-      console.log(UserId)
+  getTweets: async(req, res, next) => {
+    tweetServices.getTweets(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getTweet: async(req, res, next) => {
+    tweetServices.getTweet(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  postTweets: async (req, res, next) => {
+    try {
+      const { description } = req.body;
+      const UserId = req.user.id;
+
       if (!description) {
-        return Promise.reject(new Error('Tweet不能為空!'))
+        throw new Error('Tweet不能為空!');
       }
 
       if (description.length > 140) {
-        return Promise.reject(new Error('輸入不得超過140字!'))
+        throw new Error('輸入不得超過140字!');
       }
 
-      return Tweet.create({
+      const tweet = await Tweet.create({
         description,
-        UserId
-        })
-        .then(tweet => {
-          res.status(200).json(tweet)
-        })
-        .catch(err => {
+        UserId,
+      })
+      res.status(200).json(tweet);
+    } catch (err) {
           next(err)
-        })
-      }
+    }
+  },
 }
 module.exports = tweetController
