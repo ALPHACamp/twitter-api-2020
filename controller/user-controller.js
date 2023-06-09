@@ -9,7 +9,7 @@ const userController = {
       const { account, password } = req.body
       if (!account || !password) throw new Error('account & password are required!')
       const user = await User.findOne({ where: { account } })
-      if (!user || user.role === 'admin') throw new Error('帳號不存在!')
+      if (!user) throw new Error('帳號不存在!')
       if (!bcrypt.compareSync(password, user.password)) throw new Error('password incorrect!')
       const userJSON = user.toJSON()
       delete userJSON.password
@@ -72,6 +72,21 @@ const userController = {
       if (tweets.length === 0) throw new Error('此用戶尚未發布推文')
       const tweetsJSON = tweets.map(t => t.toJSON())
       return res.status(200).json(tweetsJSON)
+    } catch (err) { next(err) }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const userReplies = await Reply.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: Tweet }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      const RepliesJSON = userReplies.map(r => r.toJSON())
+      if (RepliesJSON.length === 0) throw new Error('此用戶沒有回覆任何貼文')
+      return res.status(200).json(RepliesJSON)
     } catch (err) { next(err) }
   }
 }
