@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../../controllers/user-controller')
-const upload = require('../../middleware/multer')
 
 // 獲取使用者所寫過的推文資料
 router.get('/:id/tweets', userController.getUserTweets)
