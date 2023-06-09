@@ -1,0 +1,120 @@
+{
+  "getTweets": {
+    "status": "success",
+    "data": {
+        "tweets": [
+            {
+                "id": 1,
+                "userId": 1,
+                "description": "Test-Tweet-user1-1",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z",
+                "isLiked": true,
+                "repliesCount": 1,
+                "user": {
+                    "name": "test-1-name",
+                    "account": "test-1-account",
+                    "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+                }
+            },
+            {
+                "id": 2,
+                "userId": 1,
+                "description": "Test-Tweet-user1-2",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z",
+                "isLiked": false,
+                "repliesCount": 2,
+                "user": {
+                    "name": "test-1-name",
+                    "account": "test-1-account",
+                    "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+                }
+            },
+            {
+                "id": 3,
+                "userId": 1,
+                "description": "Test-Tweet-user3-3",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z",
+                "isLiked": false,
+                "repliesCount": 3,
+                "user": {
+                    "name": "test-1-name",
+                    "account": "test-1-account",
+                    "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+                }
+            },
+            {
+                "id": 4,
+                "userId": 2,
+                "description": "Test-Tweet-user2-1",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z",
+                "isLiked": false,
+                "repliesCount": 4,
+                "user": {
+                    "name": "test-1-name",
+                    "account": "test-1-account",
+                    "avatar": "https://i.imgur.com/D5wcicT.jpeg"
+                }
+            },
+            {
+                "id": 5,
+                "userId": 2,
+                "description": "Test-Tweet-user2-2",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z",
+                "isLiked": false,
+                "repliesCount": 5,
+                "user": {
+                    "name": "test-1-name",
+                    "account": "test-1-account",
+                    "avatar": "https://i.imgur.com/D5wcicT.jpeg"
+                }
+            },
+            {
+                "id": 6,
+                "userId": 3,
+                "description": "Test-Tweet-user3-1",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z",
+                "isLiked": false,
+                "repliesCount": 6,
+                "user": {
+                    "name": "test-1-name",
+                    "account": "test-1-account",
+                    "avatar": "https://i.imgur.com/iM1zUJP.gif"
+                }
+            },{
+                "id": 7,
+                "userId": 3,
+                "description": "Test-Tweet-user3-2",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z",
+                "isLiked": true,
+                "repliesCount": 7,
+                "user": {
+                    "name": "test-1-name",
+                    "account": "test-1-account",
+                    "avatar": "https://i.imgur.com/iM1zUJP.gif"
+                }
+            }
+        ]
+    }
+},
+  "getTweet": {
+    "status": "success",
+    "data": {
+        "tweet": {
+            "description": "PopuLady出身的宇珊8日驚喜宣布自己被交往4年的男友Josh求婚成功，經紀人證實喜訊，宇珊也笑說，其實男友是一天照三餐在問「願意當我老婆嗎？」直到去露營第五次時，男友這回直接單膝下跪，把戒指拿出來正式求婚，讓她感動到直接飆淚：「這一切他居然都沒有用任何的器材或設備記錄下來，我才發現原來求婚就是3分鐘這樣子的事情而已呀！」",
+            "user": {
+                "name": "apple-name",
+                "account": "apple-account",
+                "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+            }
+        }
+
+    }
+}
+}
