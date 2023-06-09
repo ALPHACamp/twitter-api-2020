@@ -142,7 +142,6 @@ const userController = {
         if (followings.Followings.length === 0)
           return res.status(200).json({ isEmpty: true });
         const followingId = getUser(req).Followings.map((user) => user.id);
-        console.log(followingId);
         const result = followings.Followings.map((f) => ({
           ...f.toJSON(),
           isFollowed: followingId.includes(f.toJSON().followingId) || false,
@@ -236,9 +235,8 @@ const userController = {
         }
         // sort tweets descending
         const result = tweets.sort(
-          (a, b) =>
-            b.createdAt.getTime() - a.createdAt.getTime()
-        )
+          (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+        );
         return res.status(200).json(result);
       })
 
@@ -314,9 +312,8 @@ const userController = {
         }
         // sort likes descending
         const result = likes.sort(
-          (a, b) =>
-            b.createdAt.getTime() - a.createdAt.getTime()
-        )
+          (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+        );
         return res.status(200).json(result);
       })
 
