@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const db = require('../models')
-const { User, Tweet } = db
+const { User, Tweet, Like, Reply } = db
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
 
@@ -77,15 +77,17 @@ const adminController = {
     try {
       // 確認是否為admin身分
       const isCurrentUserAdim = helpers.getUser(req).dataValues.role === 'admin'
-      if (!isCurrentUserAdim) throw new Error('您沒有權限刪除貼文')
+      if (!isCurrentUserAdim) throw new Error('您沒有權限刪除推文')
 
       const tweet = await Tweet.findByPk(req.params.id)
       if (!tweet) throw new Error('推文不存在!')
+      await Reply.destroy({ where: { TweetId: req.params.id } })
+      await Like.destroy({ where: { TweetId: req.params.id } })
 
       await tweet.destroy()
       res.status(200).json({
         status: 'success',
-        message: '成功刪除貼文'
+        message: '成功刪除推文'
 
       })
     } catch (err) {
