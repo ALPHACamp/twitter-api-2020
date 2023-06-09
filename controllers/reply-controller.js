@@ -48,6 +48,24 @@ const replyController = {
       })
       .catch((err) => next(err));
   },
-  postTweetReply: (req, res, next) => {},
+  postTweetReply: (req, res, next) => {
+    const getTweetId = req.params.id;
+    const userId = getUser(req).id;
+    const { comment } = req.body;
+
+    return Tweet.findByPk(getTweetId)
+      .then((tweet) => {
+        if (!tweet) throw new Error("Tweet not exist!");
+        return Reply.create({
+          comment,
+          tweetId: getTweetId,
+          userId,
+        });
+      })
+      .then((newReply) => {
+        res.status(200).json(newReply);
+      })
+      .catch((err) => next(err));
+  },
 };
 module.exports = replyController;
