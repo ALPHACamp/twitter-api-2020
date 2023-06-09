@@ -41,6 +41,7 @@ describe('# admin requests', () => {
           .end(function (err, res) {
             if (err) {
               console.log('the error:', err)
+              console.log('response body:', res.body) // Log the response body
               return done(err)
             }
             // 檢查回傳資料是否是陣列類型
