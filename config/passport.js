@@ -10,10 +10,11 @@ passport.use(new LocalStrategy(
   // customize user field
   {
     usernameField: 'account',
-    passwordField: 'password'
+    passwordField: 'password',
+    passReqToCallback: true
   },
   // authenticate user
-  async (req, account, password, cb) => {
+  async (account, password, cb) => {
     try {
       const user = await User.findOne({ where: { account } })
       if (!user) throw new Error('帳號不存在!')
@@ -54,8 +55,9 @@ passport.deserializeUser(async (id, cb) => {
   try {
     const user = await User.findByPk(id, {
       include: [
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
+        { model: Tweet, as: 'Tweets' },
+        { model: Followship, as: 'Followers' },
+        { model: Followship, as: 'Followings' }
       ]
     })
     return cb(null, user.toJSON())
