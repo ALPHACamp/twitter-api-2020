@@ -13,7 +13,7 @@ module.exports = {
     const replies = []
     tweets.forEach(tweet => {
       replies.push(
-        ...Array.from({ length: 3 }, (_, i) => ({
+        ...Array.from({ length: 5 }, (_, i) => ({
           UserId: users[Math.floor(Math.random() * users.length)].id,
           TweetId: tweet.id,
           comment: faker.lorem.paragraph(1),
