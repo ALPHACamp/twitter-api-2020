@@ -7,6 +7,7 @@ const { isUser } = require('../helpers/isUser-helper')
 const { relativeTimeFromNow } = require('../helpers/dayFix-helper')
 const { imgurFileHandler } = require('../helpers/file-helper')
 const USERS_WORD_LIMIT = 50
+const USERS_INTRODUCTION_WORD_LIMIT = 160
 
 const userController = {
   // 使用者註冊
@@ -193,9 +194,9 @@ const userController = {
       const { files } = req
       if (account ? await User.findOne({ attributes: ['id'], where: { account: account.trim() } }) : false) newErrorGenerate('account 已重複註冊', 404)
       if (email ? await User.findOne({ attributes: ['id'], where: { email: email.trim() } }) : false) newErrorGenerate('email 已重複註冊', 404)
-      if (name?.length > 50) newErrorGenerate('字數超出上限', 404)
+      if (name?.length > USERS_WORD_LIMIT) newErrorGenerate('字數超出上限', 404)
       if (password && password !== checkPassword) newErrorGenerate('密碼與確認密碼不相符', 404)
-      if (introduction?.length > 160) newErrorGenerate('字數超出上限', 404)
+      if (introduction?.length > USERS_INTRODUCTION_WORD_LIMIT) newErrorGenerate('字數超出上限', 404)
       const hash = password ? await bcrypt.hash(password, 10) : null
       const [fixedFile, selfUser] = await Promise.all([
         imgurFileHandler(files),
@@ -203,7 +204,7 @@ const userController = {
       ])
       const avatar = fixedFile ? fixedFile[0] : null
       const backgroundImage = fixedFile ? fixedFile[1] : null
-      let updatedUser = await selfUser.update({
+      const updatedUser = await selfUser.update({
         name: name?.trim() || selfUser.name,
         account: account?.trim() || selfUser.account,
         email: email?.trim() || selfUser.email,
@@ -212,9 +213,9 @@ const userController = {
         avatar: avatar || user.avatar,
         backgroundImage: backgroundImage || user.backgroundImage
       })
-      updatedUser = updatedUser.toJSON()
-      delete updatedUser.password
-      res.json(updatedUser)
+      const updatedUserJSON = updatedUser.toJSON()
+      delete updatedUserJSON.password
+      res.json(updatedUserJSON)
     } catch (err) {
       next(err)
     }
