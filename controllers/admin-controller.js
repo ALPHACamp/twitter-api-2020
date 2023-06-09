@@ -76,7 +76,7 @@ const adminController = {
   deleteTweet: async (req, res, next) => {
     try {
       // 確認是否為admin身分
-      const isCurrentUserAdim = helpers.getUser(req).dataValues.role === 'admin'
+      const isCurrentUserAdim = helpers.getUser(req).role === 'admin'
       if (!isCurrentUserAdim) throw new Error('您沒有權限刪除推文')
 
       const tweet = await Tweet.findByPk(req.params.id)
