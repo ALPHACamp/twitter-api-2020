@@ -8,6 +8,7 @@ const {
   authenticatedUser,
   authenticatedAdmin,
 } = require("../middleware/api-auth");
+const replyController = require("../controllers/reply-controller");
 
 // admin
 router.use("/api/admin", admin);
@@ -15,7 +16,20 @@ router.use("/api/admin", admin);
 //users
 router.post("/api/users/signin", userController.signIn);
 router.post("/api/users", userController.signUp);
-// user tweets
+
+router.get(
+  "/api/users/:id/followings",
+  authenticated,
+  authenticatedUser,
+  userController.getFollowings
+);
+router.get(
+  "/api/users/:id/followers",
+  authenticated,
+  authenticatedUser,
+  userController.getFollowers
+);
+
 router.get(
   "/api/users/:id/tweets",
   authenticated,
@@ -28,12 +42,28 @@ router.get(
   authenticatedUser,
   userController.getUserRepliedTweets
 );
+
 router.get(
   "/api/users/:id/likes",
   authenticated,
   authenticatedUser,
   userController.getUserLikes
 );
+
+router.get(
+  "/api/users/:id",
+  authenticated,
+  authenticatedUser,
+  userController.getUserProfile
+);
+router.put(
+  "/api/users/:id",
+  authenticated,
+  authenticatedUser,
+  userController.putUserProfile
+);
+
+//like
 router.post(
   "/api/tweets/:id/like",
   authenticated,
@@ -46,23 +76,26 @@ router.post(
   authenticatedUser,
   userController.postTweetUnlike
 );
+//replies
+router.get(
+  "/api/tweets/:id/replies",
+  authenticated,
+  authenticatedUser,
+  replyController.getTweetReply
+);
+router.post(
+  "/api/tweets/:id/replies",
+  authenticated,
+  authenticatedUser,
+  replyController.postTweetReply
+);
+
+//tweets
 router.get(
   "/api/tweets/:tweet_id",
   authenticated,
   authenticatedUser,
   userController.getTweet
-);
-router.get(
-  "/api/users/:id/followings",
-  authenticated,
-  authenticatedUser,
-  userController.getFollowings
-);
-router.get(
-  "/api/users/:id/followers",
-  authenticated,
-  authenticatedUser,
-  userController.getFollowers
 );
 router.get(
   "/api/tweets",
@@ -76,16 +109,7 @@ router.post(
   authenticatedUser,
   userController.postTweets
 );
-router.get(
-  "/api/users/:id",
-  authenticated,
-  authenticatedUser,
-  userController.getUserProfile
-);
-router.put(
-  "/api/users/:id",
-  authenticated,
-  authenticatedUser,
-  userController.putUserProfile
-);
+
+//followships
+
 module.exports = router;
