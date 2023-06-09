@@ -4,7 +4,7 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const id = Number(req.params.id) || ''
-      let tweets = await Tweet.findAll({
+      const tweets = await Tweet.findAll({
         where: {
           ...id ? { id } : {} // 檢查 id 是否為空值
         },
@@ -16,7 +16,7 @@ const tweetController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (!tweets) {
+      if (tweets.length === 0) {
         return res.status(404).json({ status: 'error', message: "Tweets didn't exist!" })
       }
       data = tweets.map(tweet => {
@@ -38,40 +38,6 @@ const tweetController = {
       next(err)
     }
   },
-  // getTweet: async (req, res, next) => {
-  //   try {
-  //     const id = req.params.id
-  //     console.log(req.params)
-  //     const tweet = await Tweet.findByPk(id,
-  //       {
-  //         include: [
-  //           User,
-  //           Like,
-  //           Reply,
-  //           { model: User, as: 'LikedUsers' }]
-  //       })
-  //     if (!tweet) {
-  //       return res.status(404).json({ status: 'error', message: "Tweet didn't exist!" })
-  //     }
-  //     return res.status(200).json({
-  //       status: 'success',
-  //       data: {
-  //       id: tweet.id,
-  //       UserId: tweet.UserId,
-  //       description: tweet.description,
-  //       createdAt: tweet.createdAt,
-  //       account: tweet.User.account,
-  //       name: tweet.User.name,
-  //       avatar: tweet.User.avatar,
-  //       likedCount: tweet.Likes.length,
-  //       repliedCount: tweet.Replies.length,
-  //       isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
-  //       }
-  //     })
-  //   } catch (err) {
-  //     next(err)
-  //   }
-  // },
   postTweet: async (req, res, next) => {
     try {
       const { description } = req.body
@@ -162,7 +128,7 @@ const tweetController = {
   },
   getReply: async (req, res, next) => {
     try {
-      let replies = await Reply.findAll({
+      const replies = await Reply.findAll({
         where: { tweetId: req.params.tweet_id },
         include: [
           { model: User, attributes: ['name', 'avatar', 'account'] }, 
@@ -170,7 +136,7 @@ const tweetController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (!replies) {
+      if (replies.length === 0) {
         return res.status(404).json({ status: 'error', message: "Replies didn't exist." })
       }
       data = replies.map(reply => {
