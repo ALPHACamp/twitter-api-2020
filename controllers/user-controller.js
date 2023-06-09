@@ -177,7 +177,21 @@ const userController = {
               {
                 model: User,
                 attributes: ['id', 'account', 'name', 'avatar']
-              }]
+              }],
+            attributes: [
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'
+                ),
+                'repliesCount'
+              ],
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id)'
+                ),
+                'likesCount'
+              ]
+            ]
           }]
       })
 
