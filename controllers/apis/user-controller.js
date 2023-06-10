@@ -67,11 +67,11 @@ const userController = {
     userServices.getFollowings(req, (err, data) => err
       ? next(err)
       : res.json(data))
+  },
+  getTopTenUsers: (req, res, next) => {
+    userServices.getTopTenUsers(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
   }
-  // for JWT test purpose
-  /* getUser: (req, res, next) => {
-    console.log('get user')
-  } */
-
 }
 module.exports = userController

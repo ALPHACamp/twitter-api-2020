@@ -275,6 +275,47 @@ const userServices = {
         return cb(null, followings)
       })
       .catch(err => cb(err))
+  },
+  getTopTenUsers: (req, cb) => {
+    Promise.all([
+      User.findAll({
+        include: [
+          Tweet,
+          Like,
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      }),
+      Followship.findAll({
+        where: { followerId: getUser(req).dataValues.id },
+        raw: true
+      })
+    ])
+      .then(([users, userFollowings]) => {
+        const currentFollowings = userFollowings.map(f => f.followingId)
+        const userData = users.map(user => {
+          const data = {
+            ...user.toJSON(),
+            followerCounts: user.Followers.length,
+            followingCounts: user.Followings.length,
+            tweetCounts: user.Tweets.length,
+            likeCounts: user.Likes.length,
+            isFollowed: currentFollowings.some(id => id === user.id)
+          }
+          delete data.password
+          delete data.role
+          delete data.introduction
+          delete data.Tweets
+          delete data.Likes
+          delete data.Followers
+          delete data.Followings
+          return data
+        })
+          .sort((a, b) => b.followerCounts - a.followerCounts)
+          .slice(0, 10)
+        return cb(null, userData)
+      })
+      .catch(err => cb(err))
   }
 }
 
