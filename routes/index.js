@@ -3,12 +3,16 @@ const router = express.Router()
 const passport = require('../config/passport')
 const userController = require('../controller/user-controller')
 const tweetController = require('../controller/tweet-controller')
+const likeController = require('../controller/like-controller')
+
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/api-auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 // Replies
 router.post('/api/tweets/:tweet_id/replies', authenticated, tweetController.postReply)
 router.get('/api/tweets/:tweet_id/replies', authenticated, tweetController.getReplies)
+router.post('/api/tweets/:id/like', authenticated, likeController.likeTweet)
+router.post('/api/tweets/:id/unlike', authenticated, likeController.unlikeTweet)
 
 // Users
 router.get('/api/users/:id/tweets', authenticated, userController.getUserTweets)
