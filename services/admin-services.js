@@ -33,6 +33,29 @@ const adminServices = {
       })
       .catch(err => cb(err))
   },
+  getTweets: (req, cb) => {
+    Tweet.findAll({
+      order: [['createdAt', 'DESC']],
+      include: User
+    })
+      .then(tweets => {
+        tweets = tweets.map(tweet => {
+          tweet = {
+            ...tweet.toJSON(),
+            description: tweet.description.substring(0, 50)
+          }
+          delete tweet.User.password
+          delete tweet.User.coverPhoto
+          delete tweet.User.introduction
+          delete tweet.User.role
+          delete tweet.User.createdAt
+          delete tweet.User.updatedAt
+          return tweet
+        })
+        return cb(null, tweets)
+      })
+      .catch(err => cb(err))
+  },
   deleteTweet: (req, cb) => {
     return Tweet.findByPk(req.params.id)
       .then(tweet => {
