@@ -7,8 +7,9 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../mid
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 // Tweets
+router.post('/api/tweets', authenticatedUser, tweetController.createTweet)
 router.get('/api/tweets', tweetController.getTweets)
-router.post('/api/tweets', authenticated, tweetController.createTweet)
+// router.get('/api/tweets/:tweet_id', tweetController.getTweetById)
 
 // Users
 router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)

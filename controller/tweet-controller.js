@@ -1,20 +1,6 @@
-const { Tweet, User } = require('../models')
+const { Tweet, User, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 const tweetController = {
-  getTweets: async (req, res, next) => {
-    try {
-      const tweets = await Tweet.findAll({
-        raw: true,
-        nest: true,
-        order: [['createdAt', 'DESC']],
-        // 將相關使用者資料一併包含在回傳結果中
-        include: [{ model: User, attributes: ['name', 'email'] }]
-      })
-      return res.json({ status: 'success', data: tweets })
-    } catch (err) {
-      next(err)
-    }
-  },
   createTweet: async (req, res, next) => {
     try {
       const reqUserId = helpers.getUser(req).id
@@ -31,6 +17,33 @@ const tweetController = {
       })
 
       return res.json({ status: 'success', data: tweet })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const reqUserId = helpers.getUser(req).id
+      let tweets = await Tweet.findAll({
+        raw: true,
+        nest: true,
+        include: [User, Reply, Like],
+        order: [['createdAt', 'DESC']]
+      })
+
+      tweets = tweets.map(tweet => ({
+        UserId: reqUserId,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.Likes.length,
+        user: {
+          avatar: tweet.User.avatar,
+          name: tweet.User.name,
+          account: tweet.User.account
+        }
+      }))
+      return res.json([{ status: 'success', data: tweets }])
     } catch (err) {
       next(err)
     }

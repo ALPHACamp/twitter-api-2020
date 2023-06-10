@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const userController = {
@@ -53,6 +53,7 @@ const userController = {
       const user = await User.findByPk(userId, {
         attributes: { exclude: ['password'] },
         include: [
+          Tweet,
           { model: User, as: 'Followers', attributes: { exclude: ['password'] } },
           { model: User, as: 'Followings', attributes: { exclude: ['password'] } }
         ]
@@ -62,8 +63,37 @@ const userController = {
       return res.status(200).json(user)
     } catch (err) { next(err) }
   },
+  // const reqUserId = helpers.getUser(req).id
   getUserTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      // Make sure user exists or is not admin
+      const user = await User.findByPk(userId, {
+        raw: true,
+        nest: true,
+        include: [
+          {
+            model: Tweet,
+            include: [Reply, Like]
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      if (!user || user.role === 'admin') throw new Error('user does not exist')
+
+      const tweets = user.dataValues.Tweets.map(tweet => ({
+        id: tweet.id,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.Likes.length
+      }))
+      return res.status(200).json(tweets)
+    } catch (error) {
+      next(error)
+    }
   }
+
 }
 
 module.exports = userController
