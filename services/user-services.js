@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
+const { Op } = require('sequelize')
 const {
     User,
     Tweet,
@@ -153,20 +154,38 @@ const userServices = {
     },
     putUser: (req, cb) => {
         const { id } = req.params
-        const { name, introduction } = req.body
+        const { name, account, email, password, checkPassword, introduction } = req.body
         const { files } = req
+        if (password !== checkPassword) throw new Error('密碼與確認密碼不一致！')
         if (!name) throw new Error('請填入名稱！')
         if (name.length >= 50) throw new Error('名稱不可超過50字！')
+        if (introduction.length >= 160) throw new Error('自我介紹不可超過160字！')
+
         return Promise.all([
-            User.findByPk(req.user.id),
+            User.findAll({
+                raw: true,
+                where: { id: { [Op.ne]: id } } // 找出除了使用者本人以外的所有使用者
+            }),
+            User.findByPk(id),
             imgurFileHandler(files)
         ])
-            .then(([user, filePath]) => {
+            .then(([allUsers, user, filePath]) => {
+                if (allUsers.length > 0) {
+                    const existingAccount = allUsers.find(user => user.account === account)
+                    const existingEmail = allUsers.find(user => user.email === email)
+                    if (existingAccount) {
+                        throw new Error('帳號已存在！')
+                    } else if (existingEmail) {
+                        throw new Error('信箱已存在！')
+                    }
+                }
                 if (!user) throw new Error("使用者不存在！")
                 if (user.id !== Number(id)) throw new Error('只能編輯自己的使用者資料！')
                 user.update({
-                    name: name.trim(),
-                    introduction: introduction.trim(),
+                    name,
+                    account,
+                    email,
+                    introduction,
                     avatar: filePath[0] || user.avatar,
                     banner: filePath[1] || user.banner
                 })
