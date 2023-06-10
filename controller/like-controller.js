@@ -1,5 +1,5 @@
 const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like } = require('../models')
+const { Like } = require('../models')
 
 const likeController = {
   likeTweet: async (req, res, next) => {
