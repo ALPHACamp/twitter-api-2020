@@ -9,29 +9,8 @@ const tweetController = {
   getTweet: async(req, res, next) => {
     tweetServices.getTweet(req, (err, data) => err ? next(err) : res.json(data))
   },
-  postTweets: async (req, res, next) => {
-    try {
-      const { description } = req.body;
-      const UserId = helpers.getUser(req).id
-
-      if (!description) {
-        throw new Error('Tweet不能為空!')
-      }
-
-      if (description.length > 140) {
-        throw new Error('輸入不得超過140字!')
-      }
-
-      const tweet = await Tweet.create({
-        description,
-        UserId,
-      })
-      const tweetData = tweet.toJSON()
-        tweetData.createdAt = relativeTimeFromNow(tweetData)
-      res.status(200).json(tweetData)
-    } catch (err) {
-          next(err)
-    }
+  postTweets: async(req, res, next) => {
+    tweetServices.postTweets(req, (err, data) => err ? next(err) : res.json(data))
   },
   addLike: async(req, res, next) => {
     try{
@@ -63,7 +42,7 @@ const tweetController = {
         UserId: helpers.getUser(req).id,
         tweetId: id
       }
-    });
+    })
 
     if (!like) {
       throw new Error('這篇Tweet沒被like');

@@ -4,6 +4,11 @@ const adminController = {
   signIn: (req, res, next) => {
     adminServices.signIn(req, (err, data) => err ? next(err) : res.json(data))
   },
+  getUsers: (req, res, next) => {
+    adminServices.getUsers(req, (err, data) => err ? next(err) : res.json(data))
+  },
+
+
   delTweet: async(req, res, next) => {
     const { id } = req.params
     try{
@@ -14,7 +19,7 @@ const adminController = {
       await Like.destroy({ where: { TweetId: id } })
       return res.json({ status: 'success', message: '刪除成功' })
     } catch (err) {
-    next(err);
+    next(err)
     }
   }
 }

@@ -44,6 +44,7 @@ router.post('/api/tweets/:id/unlike', cors, authenticated, authenticatedUser, tw
 
 //admin
 router.delete('/api/admin/tweets/:id', cors, authenticated, authenticatedAdmin, adminController.delTweet)
+router.get('/api/admin/users', cors, authenticated, authenticatedAdmin, adminController.getUsers)
 
 //reply
 router.post('/api/tweets/:id/replies', cors, authenticated, authenticatedUser, replyController.postReplies)
