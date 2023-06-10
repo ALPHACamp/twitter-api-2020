@@ -38,6 +38,11 @@ const userController = {
       ? next(err)
       : res.json(data))
   },
+  getUserRepliedTweets: (req, res, next) => {
+    userServices.getUserRepliedTweets(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
+  },
   putUser: (req, res, next) => {
     userServices.putUser(req, (err, data) => err
       ? next(err)

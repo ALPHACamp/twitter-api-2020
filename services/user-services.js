@@ -70,14 +70,40 @@ const userServices = {
             ...tweet.toJSON(),
             isLiked: tweet.Likes.map(like => like.UserId).includes(req.user.id),
             replyCount: tweet.Replies.length,
-            likedCount: tweet.Likes.length
+            likedCount: tweet.Likes.length,
+            name: tweet.User.name,
+            avatar: tweet.User.avatar,
+            account: tweet.User.account,
           }
-          delete tweet.User.password
           delete tweet.Replies
           delete tweet.Likes
+          delete tweet.User
           return tweet
         })
         return cb(null, tweets)
+      })
+      .catch(err => cb(err))
+  },
+  getUserRepliedTweets: (req, cb) => {
+    return Reply.findAll({
+      where: { UserId: req.params.id },
+      order: [['createdAt', 'DESC']],
+      include: [User, Tweet]
+    })
+      .then(replies => {
+        replies = replies.map(reply => {
+          reply = {
+            ...reply.toJSON(),
+            name: reply.User.name,
+            avatar: reply.User.avatar,
+            account: reply.User.account,
+          }
+          delete reply.User
+          delete reply.Replies
+          delete reply.Likes
+          return reply
+        })
+        return cb(null, replies)
       })
       .catch(err => cb(err))
   },
