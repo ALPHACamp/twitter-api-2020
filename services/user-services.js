@@ -274,6 +274,58 @@ const userServices = {
         } catch (err) {
             cb(err)
         }
+    },
+    getUserFollowings: async (req, cb) => {
+        try {
+            const { id } = req.params
+            let followings = await Followship.findAll({
+                include: [
+                    {
+                        model: User,
+                        attributes: ['avatar', 'name', 'introduction'],
+                        as: 'Followings'
+                    }
+                ],
+                where: { followerId: id }
+            })
+            if (followings.length === 0) throw new Error("該名使用者沒有追蹤過任何人！")
+            const userFollowingsId = getUserData(req.user.Followings)
+
+            followings = followings.map(following => ({
+                ...following.dataValues,
+                isFollowed: userFollowingsId.length ? userFollowingsId.includes(following.id) : false,
+            }))
+
+            cb(null, followings)
+        } catch (err) {
+            cb(err)
+        }
+    },
+    getUserFollowers: async (req, cb) => {
+        try {
+            const { id } = req.params
+            let followers = await Followship.findAll({
+                include: [
+                    {
+                        model: User,
+                        attributes: ['avatar', 'name', 'introduction'],
+                        as: 'Followers'
+                    }
+                ],
+                where: { followingId: id }
+            })
+            if (followers.length === 0) throw new Error("該名使用者沒有任何人追蹤過！")
+            const userFollowersId = getUserData(req.user.Followers)
+
+            followers = followers.map(follower => ({
+                ...follower.dataValues,
+                isFollowed: userFollowersId.length ? userFollowersId.includes(follower.id) : false,
+            }))
+
+            cb(null, followers)
+        } catch (err) {
+            cb(err)
+        }
     }
 }
 

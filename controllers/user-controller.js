@@ -21,6 +21,12 @@ const userController = {
   },
   getUserLikedTweets: (req, res, next) => {
     userServices.getUserLikedTweets(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getUserFollowings: (req, res, next) => {
+    userServices.getUserFollowings(req, (err, data) => err ? next(err) : res.json(data))
+  },
+  getUserFollowers: (req, res, next) => {
+    userServices.getUserFollowers(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 module.exports = userController
