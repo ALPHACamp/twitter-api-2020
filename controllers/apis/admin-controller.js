@@ -17,7 +17,7 @@ const adminController = {
       const userData = user
       delete userData.password
       userData.token = token
-      return res.json({ status: 'success', data: userData })
+      return res.status(200).json(userData)
     } catch (error) {
       next(error)
     }
@@ -27,15 +27,18 @@ const adminController = {
       const users = await User.findAll({
         raw: true
       })
-      return res.json(users)
+      return res.status(200).json(users)
     } catch (error) {
       next(error)
     }
   },
   getTweets: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll()
-      return res.json({ status: 'success', data: tweets })
+      const tweets = await Tweet.findAll({
+        raw: true,
+        order: [['createdAt', 'DESC']]
+      })
+      return res.status(200).json(tweets)
     } catch (error) {
       next(error)
     }
@@ -46,7 +49,7 @@ const adminController = {
       const tweet = await Tweet.findByPk(id)
       if (!tweet) throw new Error('The tweet does not exist')
       await tweet.destroy()
-      return res.json({ status: 'success', data: {} })
+      return res.status(200).json({ status: 'success', message: 'The tweet was successfully deleted' })
     } catch (error) {
       next(error)
     }

@@ -10,7 +10,7 @@ const userController = {
       const userData = getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.json({
+      res.status(200).json({
         status: 'success',
         data: {
           token, user: userData
@@ -48,7 +48,7 @@ const userController = {
       })
       const userData = user.toJSON()
       delete userData.password
-      return res.json({ status: 'success', data: userData })
+      return res.status(200).json({ status: 'success', data: userData })
     } catch (error) {
       next(error)
     }
@@ -69,7 +69,7 @@ const userController = {
       ])
       if (!user) throw new Error('The user does not exist')
       if (!userTweets.length) throw new Error("The user have'nt post any tweet yet")
-      return res.json(userTweets)
+      return res.status(200).json(userTweets)
     } catch (error) {
       next(error)
     }
@@ -82,7 +82,7 @@ const userController = {
       // 確認使用者是否存在
       const user = await User.findByPk(id)
       if (!user) throw new Error('The user does not exist')
-      res.json(user)
+      res.status(200).json(user)
     } catch (error) {
       next(error)
     }
@@ -109,7 +109,7 @@ const userController = {
       for (const i of repliedTweets) {
         data.push(i.Tweet)
       }
-      return res.json(repliedTweets)
+      return res.status(200).json(repliedTweets)
     } catch (error) {
       next(error)
     }
@@ -135,7 +135,7 @@ const userController = {
       for (const i of userLiked) {
         data.push(i.Tweet)
       }
-      return res.json(userLiked)
+      return res.status(200).json(userLiked)
     } catch (error) {
       next(error)
     }
@@ -161,7 +161,7 @@ const userController = {
       //   data.push(i.dataValues)
       // }
       console.log(data)
-      return res.json(userFollows)
+      return res.status(200).json(userFollows)
     } catch (error) {
       next(error)
     }
@@ -181,11 +181,11 @@ const userController = {
       if (!user) throw new Error('The user does not exist')
       if (!userFollowers.length) throw new Error('He is lonely')
 
-      const data = []
+      // const data = []
       // for (const i of req.user.Followers) {
       //   data.push(i.dataValues)
       // }
-      return res.json(userFollowers)
+      return res.status(200).json(userFollowers)
     } catch (error) {
       next(error)
     }
