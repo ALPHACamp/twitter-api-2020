@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
-const sequelize = require('sequelize')
 const { Op } = require('sequelize')
+const { getUserData } = require('../helpers/getUserData')
+
 const {
     User,
     Tweet,
@@ -10,7 +11,7 @@ const {
     Reply
 } = require('../models')
 
-const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
+// const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
@@ -112,42 +113,30 @@ const userServices = {
     getUserTweets: async (req, cb) => {
         try {
             const { id } = req.params
-            const tweets = await Tweet.findAll({
-                raw: true,
-                nest: true,
-                where: {
-                    UserId: id
-                },
-                order: [['createdAt', 'DESC']],
+            let tweets = await Tweet.findAll({
+                where: { UserId: id },
                 include: [
                     {
-                        model: User
-                    },
-                    {
-                        model: Reply,
-                        as: 'replied',
-                        attributes: []
-                    },
-                    {
-                        model: Like,
-                        as: 'liked',
-                        attributes: []
-                    },
-                ],
-                attributes: {
-                    include: [
-                        [sequelize.fn('COUNT', sequelize.col('replied.id')), 'replyCount'],
-                        [sequelize.fn('COUNT', sequelize.col('liked.id')), 'likeCount']
-                    ],
-                },
-                group: ['Tweet.id', 'User.id']
+                        model: User,
+                        attributes: ['name', 'avatar', 'account']
+                    }, {
+                        model: Like
+                    }, {
+                        model: Reply
+                    }],
+                order: [['createdAt', 'DESC']]
             })
-            const newData = tweets.map(tweet => {
-                tweet.createdAt = relativeTimeFromNow(tweet.createdAt)
-                delete tweet.User.password
-                return tweet
-            })
-            cb(null, newData)
+
+            if (!tweets) throw new Error("目前沒有任何推文！")
+            const userLikedTweetsId = getUserData(req.user.LikedTweets)
+
+            tweets = tweets.map(tweet => ({
+                ...tweet.dataValues,
+                isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(tweet.id) : false,
+                replyCount: tweet.Replies.length,
+                likeCount: tweet.Likes.length
+            }))
+            cb(null, tweets)
         } catch (err) {
             cb(err)
         }
