@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet, Followship } = require('../models')
 const { Op } = require('sequelize')
 const { getUser } = require('../_helpers')
 const userController = {
@@ -53,6 +53,34 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const currentUserId = getUser(req).dataValues.id
+      const [user, tweetCount, followerCount, followingCount] = await Promise.all([
+        User.findByPk(id, { raw: true, nest: true }),
+        Tweet.count({ where: { UserId: id } }),
+        Followship.count({ where: { followingId: id } }),
+        Followship.count({ where: { followerId: id } })
+      ])
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      delete user.password
+      user.tweetCount = tweetCount
+      user.followerCount = followerCount
+      user.followingCount = followingCount
+
+      // 查看其他使用者是否有追蹤自己
+      if (Number(id) !== currentUserId) {
+        const currentUserFollowing = await Followship.findAll({
+          where: { followerId: id },
+          raw: true
+        })
+        user.followed = currentUserFollowing.some(f => f.followingId === currentUserId)
+      }
+
+      res.status(200).json(user)
+    } catch (err) { next(err) }
   }
 }
 module.exports = userController
