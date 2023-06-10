@@ -33,7 +33,7 @@ router.get('/users/:id/replied_tweets', authenticated, userController.getUserRep
 router.get('/users/:id', authenticated, userController.getUser)
 
 // 新的 從這裡開始做
-router.get('/users/:id/likes', authenticated, userController.getUserLiked) // 看見某使用者點過的 Like 
+router.get('/users/:id/likes', authenticated, userController.getUserLiked) // 看見某使用者點過的 Like
 router.get('/users/:id/followings', authenticated, userController.getUserFollows) // 看見某使用者跟隨中的人
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers) // 看見某使用者的跟隨者
 router.put('/users/:id', authenticated, upload.single('image'), userController.editUser) // 編輯自己所有的資料

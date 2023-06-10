@@ -27,7 +27,7 @@ const adminController = {
       const users = await User.findAll({
         raw: true
       })
-      return res.json({ status: 'success', data: users })
+      return res.json(users)
     } catch (error) {
       next(error)
     }
