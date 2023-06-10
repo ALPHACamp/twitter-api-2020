@@ -1,5 +1,5 @@
 const { User, Followship } = require('../models')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const sequelize = require('sequelize')
 const { Op } = sequelize
 
@@ -42,16 +42,13 @@ const followshipController = {
       .catch((err) => next(err))
   },
   addFollowship: (req, res, next) => {
-    const followerId = getUser(req).id
-    console.log('getUser:', getUser(req).id)
     const followingId = req.body.id
-    console.log('followingId:', req.body.id)
+    const followerId = helpers.getUser(req).id
+    if (followerId == followingId) throw new Error('不可追蹤自己')
     User.findByPk(followingId)
       .then((user) => {
-        console.log('user:', user)
         if (!user) throw new Error('該使用者不存在')
         if (user.dataValues.role === 'admin') throw new Error('不可追蹤管理者')
-        if (followerId == followingId) throw new Error('不可追蹤自己')
         Followship.findOrCreate({
           where: {
             followerId,
@@ -69,7 +66,7 @@ const followshipController = {
   },
   removeFollowship: (req, res, next) => {
     const followingId = req.params.followingId
-    const followerId = getUser(req).dataValues.id
+    const followerId = helpers.getUser(req).id
     if (!followingId) throw new Error('請輸入有效的id')
     Followship.findOne({
       where: {

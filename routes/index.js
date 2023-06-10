@@ -7,9 +7,9 @@ const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const likeController = require('../controllers/like-controller')
+const followshipController = require('../controllers/followship-controller')
 // import auth
 const { authenticated, authenticatedUser } = require('../middleware/api-auth')
-const followshipController = require('../controllers/followship-controller')
 
 // admin
 router.use('/api/admin', admin)
