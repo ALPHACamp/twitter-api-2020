@@ -14,7 +14,7 @@ const userController = {
   // token 驗證
   getTokenCheck: (req, res, next) => {
     try {
-      res.json({ success: true, error: null })
+      return res.json({ success: true, error: null })
     } catch (err) {
       next(err)
     }
@@ -231,7 +231,6 @@ const userController = {
       const [user, follows] = await Promise.all([
         User.findByPk(userId, {
           raw: true,
-          nest: true,
           attributes: ['id', 'name',
             [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount']]
         }),
