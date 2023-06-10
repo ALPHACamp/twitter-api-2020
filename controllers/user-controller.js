@@ -2,7 +2,7 @@ const { User } = require('../models')
 const { getUser } = require('../helpers/auth-helpers.js')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-// const { imgurFileHandler } = require('../../helpers/file-helpers.js')
+const { imgurFileHandler } = require('../helpers/file-helpers.js')
 
 const userController = {
   register: async (req, res, next) => {
@@ -55,24 +55,24 @@ const userController = {
   },
   getUserInfo: async (req, res, next) => { // 元件之一, 提供自己/其他使用者頁的介紹資訊
     try {
-      console.log(req.body)
       // if (req.user.dataValues.id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可取得該用戶基本資料!')
       // 上面不需要, 因為每個人都可以互相瀏覽對方的資訊
       const userInfo = await User.findOne({
         where: { id: req.params.id },
-        attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction', 'role'],
+        attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction', 'role', 'email'],
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
         ]
       })
-      // if (!userInfo || userInfo.role !== 'user') throw new Error('該用戶不存在')
+      if (!userInfo || userInfo.role !== 'user') throw new Error('該用戶不存在')
       const follower = userInfo.Followings.length
       const following = userInfo.Followers.length
       return res.json({
         id: userInfo.id,
         account: userInfo.account,
         name: userInfo.name,
+        email: userInfo.email,
         avatar: userInfo.avatar,
         cover: userInfo.cover,
         introduction: userInfo.introduction,
@@ -85,13 +85,30 @@ const userController = {
   },
   editUserInfo: async (req, res, next) => {
     try {
-      const { name, account, email, password, checkPassword, avatar, cover, introduction } = req.body
+      let { id, name, account, email, password, checkPassword, introduction, avatar, cover } = req.body
       if (req.user.dataValues.id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可編輯該用戶基本資料!')
-      const userInfo = await User.findOne({
-        where: { id: req.params.id },
+      let userInfo = await User.findOne({
+        where: { id },
         attributes: ['id', 'account', 'email', 'password', 'name', 'avatar', 'cover', 'introduction']
       })
-      return res.json({ data: { userInfo } })
+      if (!userInfo) throw new Error('該用戶不存在!')
+      if (!password) throw new Error('密碼與確認密碼不相符!')
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
+      avatar = avatar ? await imgurFileHandler(avatar) : null
+      cover = cover ? await imgurFileHandler(cover) : null
+      userInfo = await userInfo.update({
+        account,
+        email,
+        password, // 為了不讓有心人拿到密碼, 所以並沒有將使用者原本的password傳到前端, 這也造成只要是進入到edit頁面都需要重新輸入password, 但此舉只是因為password不可空白, 並無身分認證功能
+        name,
+        avatar: avatar || userInfo.avarat,
+        cover: cover || userInfo.cover,
+        introduction
+      })
+      return res.json({
+        status: 'success',
+        data: { userInfo }
+      })
     } catch (err) {
       next(err)
     }

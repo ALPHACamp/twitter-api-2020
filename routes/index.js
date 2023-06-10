@@ -6,7 +6,7 @@ const admin = require('./modules/admin')
 const users = require('./modules/users')
 const tweets = require('./modules/tweets')
 const followships = require('./modules/followships')
-const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/api-auth')
+const { authenticated, authenticatedUser } = require('../middleware/api-auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
 // use router
 router.use('/api/admin', admin)

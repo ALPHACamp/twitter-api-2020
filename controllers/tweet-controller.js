@@ -71,7 +71,7 @@ const tweetController = {
       const tweetId = req.params.id
       const userId = req.user.id
       const tweet = await Tweet.findByPk(
-        tweetId, 
+        tweetId,
         { include: User }
       )
       if (!tweet) {
@@ -85,14 +85,15 @@ const tweetController = {
         return res.status(400).json({ status: 'error', message: 'You have liked this tweet.' })
       }
       const createdLike = await Like.create({ userId, tweetId })
-      return res.status(200).json({ 
-        status: 'success', 
-        data:{
+      return res.status(200).json({
+        status: 'success',
+        data: {
           id: createdLike.id,
           userId: createdLike.userId,
           tweetId: createdLike.tweetId,
           likedTweetAuthor
-        } })
+        }
+      })
     } catch (err) {
       next(err)
     }
@@ -113,14 +114,14 @@ const tweetController = {
       })
       if (!isliked) { return res.status(400).json({ status: 'error', message: "You haven't liked this tweet" }) }
       const deletedLike = await isliked.destroy()
-      return res.status(200).json({ 
+      return res.status(200).json({
         status: 'success',
         data: {
           id: deletedLike.id,
           userid: deletedLike.userId,
           tweetid: deletedLike.tweetId,
           unlikedTweetAuthor
-        }  
+        }
       })
     } catch (err) {
       next(err)
@@ -131,7 +132,7 @@ const tweetController = {
       const replies = await Reply.findAll({
         where: { tweetId: req.params.tweet_id },
         include: [
-          { model: User, attributes: ['name', 'avatar', 'account'] }, 
+          { model: User, attributes: ['name', 'avatar', 'account'] },
           { model: Tweet, include: User }
         ],
         order: [['createdAt', 'DESC']]
@@ -152,7 +153,7 @@ const tweetController = {
           avatar: reply.User.avatar
         }
       })
-      return res.status(200).json({status: 'success', data})
+      return res.status(200).json({ status: 'success', data })
     } catch (err) {
       next(err)
     }
@@ -177,19 +178,20 @@ const tweetController = {
         tweetId,
         comment
       })
-      return res.status(200).json({ 
-        status: 'success', 
+      return res.status(200).json({
+        status: 'success',
         data: {
           id: createdReply.id,
           userId: createdReply.userId,
           tweetId: createdReply.tweetId,
           comment: createdReply.comment,
           repliedTweetAuthor
-        }})
+        }
+      })
     } catch (err) {
       next(err)
     }
-  },
+  }
 }
 
 module.exports = tweetController
