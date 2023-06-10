@@ -30,6 +30,16 @@ router.post('/api/tweets', cors, authenticated, authenticatedUser, tweetControll
 router.post('/api/tweets/:id/like', cors, authenticated, authenticatedUser, tweetController.addLike)
 router.post('/api/tweets/:id/unlike', cors, authenticated, authenticatedUser, tweetController.removeLike)
 
+
+
+
+
+
+
+//admin
+router.delete('/api/admin/tweets/:id', cors, authenticated, authenticatedAdmin, adminController.delTweet)
+
+
 router.use('/', cors, generalErrorHandler)
 
 module.exports = router
