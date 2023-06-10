@@ -15,7 +15,6 @@ const tweetController = {
         description,
         UserId: reqUserId
       })
-
       return res.json({ status: 'success', data: tweet })
     } catch (err) {
       next(err)
@@ -43,7 +42,7 @@ const tweetController = {
           account: tweet.User.account
         }
       }))
-      return res.json([{ status: 'success', data: tweets }])
+      return res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
