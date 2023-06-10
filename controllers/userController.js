@@ -9,10 +9,11 @@ const userController = {
         throw new Error(req.authInfo.message)
       }
       const userData = getUser(req).toJSON()
-      if(!userData) throw new Error('account or password incorrect!')
+      if (!userData) throw new Error('account or password incorrect!')
       delete userData.password
-      
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '7d' })
+      const token = jwt.sign(userData, process.env.JWT_SECRET, {
+        expiresIn: '7d'
+      })
       res.json({
         status: 'success',
         token,
@@ -25,29 +26,31 @@ const userController = {
     }
   },
   signUp: (req, res, next) => {
-    if (req.body.password !== req.body.passwordCheck) throw new Error('Password do not match!')
+    if (req.body.password !== req.body.passwordCheck) { throw new Error('Password do not match!') }
     if (req.body.name.length > 50) throw new Error('Max length 50')
     return Promise.all([
       User.findOne({ where: { email: req.body.email } }),
       User.findOne({ where: { account: req.body.account } })
     ])
-    .then(([emailCheck, accountCheck]) => {
-      if(emailCheck) throw new Error('Email already exists!')
-      if(accountCheck) throw new Error('Account already exists!')
-      return bcrypt.hash(req.body.password, 10)
-    })
-    .then(hash => User.create({
-        account: req.body.account,
-        name: req.body.name,
-        email: req.body.email,
-        password: hash
-    }))
-      .then(data => {
+      .then(([emailCheck, accountCheck]) => {
+        if (emailCheck) throw new Error('Email already exists!')
+        if (accountCheck) throw new Error('Account already exists!')
+        return bcrypt.hash(req.body.password, 10)
+      })
+      .then((hash) =>
+        User.create({
+          account: req.body.account,
+          name: req.body.name,
+          email: req.body.email,
+          password: hash
+        })
+      )
+      .then((data) => {
         const userData = data.toJSON()
         delete userData.password
         res.json({ status: 'success', message: 'Create success' })
       })
-      .catch(err => next(err))
+      .catch((err) => next(err))
   },
   getUser: (req, res, next) => {
     const userId = req.params.id
@@ -67,64 +70,89 @@ const userController = {
         data.tweetsCounts = tweets.length
         res.json({ status: 'success', data })
       })
-      .catch(err => next(err))
+      .catch((err) => next(err))
   },
   putUser: (req, res, next) => {
-    const userId = req.params.id
-    // const iAmUser = req.user.id
-    // if(userId !== iAmUser) throw new Error('Can not edit others profile')
-    const { account, name, email, password, passwordCheck, introduction } = req.body
+    // 為了做到可以&只能更新自己的資料，且如果自己的資料重複也能更新，且不能跟別人重複account、email
+    // 下一階段再考慮優化它
+    const paramsUserId = Number(req.params.id)
+    const userId = Number(req.user.id)
+    if (paramsUserId !== userId) throw new Error('Can not change others data')
+    const userAccount = req.user.account
+    const userEmail = req.user.email
+    const { account, name, email, password, passwordCheck, introduction } =
+      req.body
     if (password !== passwordCheck) throw new Error('Password do not match!')
-    User.findByPk(userId)
-      .then(data => {
-        return data.update({
-          account,
-          name,
-          email,
-          password,
-          introduction
+    Promise.all([
+      User.findAll({
+        attributes: ['account', 'email']
+      }),
+      User.findByPk(userId)
+    ])
+      .then(([users, userdata]) => {
+        const accountList = []
+        const emailList = []
+        users.map((user) => {
+          accountList.push(user.account)
+          emailList.push(user.email)
+          return users
+        })
+        accountList.splice(accountList.indexOf(userAccount), 1)
+        emailList.splice(emailList.indexOf(userEmail), 1)
+        if (accountList.includes(account)) { throw new Error('This account has been used!') }
+        if (emailList.includes(email)) { throw new Error('This email has been used!') }
+        return bcrypt.hash(password, 10).then((hash) => {
+          userdata.update({
+            account,
+            name,
+            email,
+            password: hash,
+            introduction
+          })
         })
       })
-      .then(data => {
-        data = data.toJSON()
-        delete data.password
-        res.json({ status: 'success', data })
+      .then(() => {
+        return res.json({ status: 'success', message: 'update success' })
       })
-      .catch(err => next(err))
+      .catch((err) => next(err))
   },
   deleteUser: (req, res, next) => {
     const userId = req.params.id
     // 別人也能刪除自己 需更動passport
     User.findByPk(userId)
-      .then(user => {
+      .then((user) => {
         if (!user) throw new Error('User not found')
         user.destroy()
       })
       .then(() => {
         res.json({ status: 'success', data: 'Delete success' })
       })
-      .catch(err => next(err))
+      .catch((err) => next(err))
   },
   getTopUsers: (req, res, next) => {
     // 研究如何把followers從res中移除，否則回傳資料太大包
     User.findAll({
-      include: [{
-        model: User,
-        as: 'Followers'
-      }]
+      include: [
+        {
+          model: User,
+          as: 'Followers'
+        }
+      ]
     })
-      .then(users => {
+      .then((users) => {
         const newUsers = users
-          .map(user => ({
+          .map((user) => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowing: req.user.Followings ? req.user.Followings.some(f => f.id === user.id) : false
+            isFollowing: req.user.Followings
+              ? req.user.Followings.some((f) => f.id === user.id)
+              : false
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
 
         res.json({ status: 'success', data: newUsers })
       })
-      .catch(err => next(err))
+      .catch((err) => next(err))
   }
 }
 
