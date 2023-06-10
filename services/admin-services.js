@@ -1,11 +1,12 @@
 const bcrypt = require('bcrypt-nodejs')
+const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const {
   User,
-  // Tweet,
-  // Followship,
-  // Like,
-  // Reply
+  Tweet,
+  Followship,
+  Like,
+  Reply
 } = require('../models')
 
 const adminServices = {
@@ -33,6 +34,53 @@ const adminServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  getUsers: (req, cb) => {
+    User.findAll({
+      raw: true,
+      nest: true,
+      attributes: [
+        'account',
+        'name',
+        'avatar',
+        'banner',
+        [sequelize.fn('COUNT', sequelize.col('Followers.id')), 'followersCount'],
+        [sequelize.fn('COUNT', sequelize.col('Followings.id')), 'followingsCount'],
+        // [sequelize.fn('COUNT', sequelize.col('LikedTweets.id')), 'likeCount'],
+        // [sequelize.fn('COUNT', sequelize.col('Replies.id')), 'replyCount']
+      ],
+      include: [
+        {
+          model: User,
+          as: 'Followers',
+          attributes: [],
+          through: { attributes: [] }
+        },
+        {
+          model: User,
+          as: 'Followings',
+          attributes: [],
+          through: { attributes: [] }
+        },
+        // {
+        //   model: Tweet,
+        //   as: 'LikedTweets',
+        //   attributes: [],
+        //   through: { attributes: [] }
+        // },
+        // {
+        //   model: User,
+        //   as: 'Replies',
+        //   attributes: [],
+        //   through: { attributes: [] }
+        // }
+      ],
+      group: ['User.id']
+    })
+      .then((users) => {
+        cb(null, users)
+      })
+      .catch((error) => cb(error))
   },
 }
 
