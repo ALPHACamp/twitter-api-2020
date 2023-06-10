@@ -9,6 +9,11 @@ const followshipController = {
       // request the ID of the user to be followed
       const followingId = req.body.id
 
+      // user cannot follow themselves
+      if (user.id === followingId) {
+        return res.status(400).json({ error: 'You cannot follow yourself!' })
+      }
+
       // check if a followship already exists
       const follow = await Followship.findOne({
         where: { followerId: user.id, followingId: followingId }
