@@ -224,6 +224,37 @@ const userController = {
       next(err)
     }
   },
+  // 獲取追蹤該使用者的所有人
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const [user, follows] = await Promise.all([
+        User.findByPk(userId, {
+          raw: true,
+          nest: true,
+          attributes: ['id', 'name',
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount']]
+        }),
+        Followship.findAll({
+          raw: true,
+          nest: true,
+          where: { followingId: userId },
+          attributes: ['id', 'followerId', 'followingId', 'createdAt'],
+          order: [['createdAt', 'DESC']]
+        })
+      ])
+      if (!user) newErrorGenerate('使用者不存在', 404)
+      const followsData = await Promise.all(follows?.map(async follow => ({
+        ...follow,
+        User: await User.findByPk(follow.followerId, { raw: true, attributes: ['id', 'name', 'avatar', 'introduction'] }),
+        isSelfUserFollow: helpers?.getUser(req)?.Followings?.some(s => s.id === follow.followerId)
+      })))
+      const doneFollowsData = [...followsData, user]
+      return res.json(doneFollowsData)
+    } catch (err) {
+      next(err)
+    }
+  },
   // 使用者能編輯自己的資料
   putUser: async (req, res, next) => {
     try {

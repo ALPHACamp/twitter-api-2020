@@ -13,6 +13,8 @@ router.get('/:id/replied_tweets', userController.getUserReplies)
 router.get('/:id/likes', userController.getUserLikes)
 // 獲取使用者所追蹤的所有人
 router.get('/:id/followings', userController.getUserFollowings)
+// 獲取追蹤該使用者的所有人
+router.get('/:id/followers', userController.getUserFollowers)
 // 查看使用者資料
 router.get('/:id', userController.getUser)
 // 查看推薦跟隨
