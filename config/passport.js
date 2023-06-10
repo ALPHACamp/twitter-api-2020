@@ -12,6 +12,7 @@ const jwtOptions = {
 const strategy = new JwtStrategy(jwtOptions, function (jwtPayload, next) {
   User.findByPk(jwtPayload.id, {
     include: [
+      { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]

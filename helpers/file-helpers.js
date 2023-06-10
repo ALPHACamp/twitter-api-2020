@@ -2,7 +2,7 @@ const fs = require('fs')
 const imgur = require('imgur')
 imgur.setClientId(process.env.IMGUR_CLIENT_ID)
 const imgurFileHandler = (files) => {
-  const images = [files.avatar[0].path, files.banner[0].path]
+  const images = [files?.avatar?.[0]?.path, files?.banner?.[0]?.path]
   const uploadPromises = images.map(file => {
     return new Promise((resolve, reject) => {
       if (!file) return resolve(null)

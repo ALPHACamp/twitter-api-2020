@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
-const sequelize = require('sequelize')
+const { Op } = require('sequelize')
+const { getUserData } = require('../helpers/getUserData')
+
 const {
     User,
     Tweet,
@@ -9,7 +11,7 @@ const {
     Reply
 } = require('../models')
 
-const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
+// const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
@@ -111,62 +113,68 @@ const userServices = {
     getUserTweets: async (req, cb) => {
         try {
             const { id } = req.params
-            const tweets = await Tweet.findAll({
-                raw: true,
-                nest: true,
-                where: {
-                    UserId: id
-                },
-                order: [['createdAt', 'DESC']],
+            let tweets = await Tweet.findAll({
+                where: { UserId: id },
                 include: [
                     {
-                        model: User
-                    },
-                    {
-                        model: Reply,
-                        as: 'replied',
-                        attributes: []
-                    },
-                    {
-                        model: Like,
-                        as: 'liked',
-                        attributes: []
-                    },
-                ],
-                attributes: {
-                    include: [
-                        [sequelize.fn('COUNT', sequelize.col('replied.id')), 'replyCount'],
-                        [sequelize.fn('COUNT', sequelize.col('liked.id')), 'likeCount']
-                    ],
-                },
-                group: ['Tweet.id', 'User.id']
+                        model: User,
+                        attributes: ['name', 'avatar', 'account']
+                    }, {
+                        model: Like
+                    }, {
+                        model: Reply
+                    }],
+                order: [['createdAt', 'DESC']]
             })
-            const newData = tweets.map(tweet => {
-                tweet.createdAt = relativeTimeFromNow(tweet.createdAt)
-                delete tweet.User.password
-                return tweet
-            })
-            cb(null, newData)
+
+            if (!tweets) throw new Error("目前沒有任何推文！")
+            const userLikedTweetsId = getUserData(req.user.LikedTweets)
+
+            tweets = tweets.map(tweet => ({
+                ...tweet.dataValues,
+                isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(tweet.id) : false,
+                replyCount: tweet.Replies.length,
+                likeCount: tweet.Likes.length
+            }))
+            cb(null, tweets)
         } catch (err) {
             cb(err)
         }
     },
     putUser: (req, cb) => {
         const { id } = req.params
-        const { name, introduction } = req.body
+        const { name, account, email, password, checkPassword, introduction } = req.body
         const { files } = req
+        if (password !== checkPassword) throw new Error('密碼與確認密碼不一致！')
         if (!name) throw new Error('請填入名稱！')
         if (name.length >= 50) throw new Error('名稱不可超過50字！')
+        if (introduction.length >= 160) throw new Error('自我介紹不可超過160字！')
+
         return Promise.all([
-            User.findByPk(req.user.id),
+            User.findAll({
+                raw: true,
+                where: { id: { [Op.ne]: id } } // 找出除了使用者本人以外的所有使用者
+            }),
+            User.findByPk(id),
             imgurFileHandler(files)
         ])
-            .then(([user, filePath]) => {
+            .then(([allUsers, user, filePath]) => {
+                if (allUsers.length > 0) {
+                    const existingAccount = allUsers.find(user => user.account === account)
+                    const existingEmail = allUsers.find(user => user.email === email)
+                    if (existingAccount) {
+                        throw new Error('帳號已存在！')
+                    } else if (existingEmail) {
+                        throw new Error('信箱已存在！')
+                    }
+                }
                 if (!user) throw new Error("使用者不存在！")
                 if (user.id !== Number(id)) throw new Error('只能編輯自己的使用者資料！')
                 user.update({
-                    name: name.trim(),
-                    introduction: introduction.trim(),
+                    name,
+                    account,
+                    email,
+                    introduction,
                     avatar: filePath[0] || user.avatar,
                     banner: filePath[1] || user.banner
                 })
