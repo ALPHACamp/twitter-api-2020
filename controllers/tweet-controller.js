@@ -19,7 +19,7 @@ const tweetController = {
       if (tweets.length === 0) {
         return res.status(404).json({ status: 'error', message: "Tweets didn't exist!" })
       }
-      data = tweets.map(tweet => {
+      const data = tweets.map(tweet => {
         return {
           id: tweet.id,
           userId: tweet.UserId,
@@ -140,7 +140,7 @@ const tweetController = {
       if (replies.length === 0) {
         return res.status(404).json({ status: 'error', message: "Replies didn't exist." })
       }
-      data = replies.map(reply => {
+      const data = replies.map(reply => {
         return {
           id: reply.id,
           userId: reply.UserId,
