@@ -20,6 +20,7 @@
     "express-session": "^1.15.6",
     "faker": "^4.1.0",
     "imgur": "^1.0.2",
+    "install": "^0.13.0",
     "jsonwebtoken": "^8.5.1",
     "mocha": "^6.0.2",
     "multer": "^1.4.3",

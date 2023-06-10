@@ -37,9 +37,18 @@ router.post('/api/tweets/:id/unlike', cors, authenticated, authenticatedUser, tw
 
 
 
+
+
+
+
+
+//admin
+router.delete('/api/admin/tweets/:id', cors, authenticated, authenticatedAdmin, adminController.delTweet)
+
 //reply
 router.post('/api/tweets/:id/replies', cors, authenticated, authenticatedUser, replyController.postReplies)
 router.get('/api/tweets/:id/replies', cors, authenticated, authenticatedUser, replyController.getReplies)
+
 
 
 router.use('/', cors, generalErrorHandler)
