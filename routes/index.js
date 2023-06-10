@@ -8,7 +8,6 @@ const upload = require('../middleware/multer') // 載入 multer
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const admin = require('./modules/admin')
-const likeController = require('../controllers/like-controller')
 
 router.use('/admin', admin)
 
@@ -19,8 +18,8 @@ router.get('/users/:user_id/replied_tweets', authenticated, userController.getUs
 
 // ! branch api/admin
 // router.post('/followships/:user_id', authenticated, likeController.addFollowing)
-router.post('/tweets/:id/like', authenticated, likeController.addLike)
-router.post('/tweets/:id/unlike', authenticated, likeController.unLike)
+router.post('/tweets/:id/like', authenticated, userController.addLike)
+router.post('/tweets/:id/unlike', authenticated, userController.unLike)
 
 router.post('/tweets/:tweet_id/replies', authenticated,replyController.postComment)
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getComment) 
@@ -40,9 +39,6 @@ router.post('/users', userController.signUp)
 
 router.post('/followships/:user_id', authenticated, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
-
-router.post('/users/like/:tweet_id', authenticated, userController.addLike)
-router.delete('/users/like/:tweet_id', authenticated, userController.removeLike)
 
 router.post('/signup', userController.signUp)
 router.use('/', apiErrorHandler)
