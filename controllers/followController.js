@@ -151,15 +151,24 @@ const followController = {
     const UserId = req.user.id
     const TweetId = req.params.id
     if (!TweetId) { return res.status(400).json({ status: 'error', message: '缺少推文id' }) }
-
-    return Like.findOne({
-      where: {
-        UserId,
-        TweetId
-      }
-    })
-      .then((like) => {
-        if (like) return res.json({ status: 'error', message: '已經按過讚' })
+    // 檢查是否有推文
+    return Tweet.findByPk(TweetId)
+      .then((tweet) => {
+        if (!tweet) {
+          return res.json({ status: 'error', message: '推文不存在' })
+        }
+      })
+      .then(() => {
+        return Like.findOne({
+          where: {
+            UserId,
+            TweetId
+          },
+          raw: true
+        })
+      })
+      .then(like => {
+        if (like) return res.json({ status: 'error', message: '已按過讚' })
         return Like.create({
           UserId,
           TweetId
@@ -180,7 +189,8 @@ const followController = {
       }
     })
       .then((like) => {
-        if (!like) return res.json({ status: 'error', message: '未按過讚' })
+        if (!like) return res.json({ status: "error", message: "未按過讚" })
+        if (like.toJSON().UserId !== UserId) return res.json({ status: 'error', message: '非本人按讚' })
         return like.destroy()
       })
       .then(() => res.json({ status: 'success', message: '成功取消讚' }))
