@@ -5,16 +5,14 @@ const userController = require('../../controllers/apis/user-controller')
 const adminController = require('../../controllers/apis/admin-controller')
 const tweetController = require('../../controllers/apis/tweet-controller')
 const followshipController = require('../../controllers/apis/followship-controller')
+const upload = require('../../middleware/multer')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const { authenticated, roleChecker, authenticatedAdmin } = require('../../middleware/api-auth')
 
 // 有關admin的routes
+// admin登入
 router.post('/admin/users', passport.authenticate('local', { session: false }), roleChecker, adminController.adminLogin)
 router.use('/admin', authenticatedAdmin, roleChecker, admin)
-
-// 使用者登入註冊
-router.post('/signup', userController.signUp)
-router.post('/login', passport.authenticate('local', { session: false }), userController.login)
 
 // 有關tweet的routes
 router.post('/tweets', authenticated, tweetController.postTweet)
@@ -30,9 +28,20 @@ router.post('/followships', authenticated, followshipController.postFollowship)
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship)
 
 // 有關user的routes
-router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserRepliedTweet)
+router.get('/users/:id', authenticated, userController.getUser)
+
+// 新的 從這裡開始做
+router.get('/users/:id/likes', authenticated, userController.getUserLiked) // 看見某使用者點過的 Like 
+router.get('/users/:id/followings', authenticated, userController.getUserFollows) // 看見某使用者跟隨中的人
+router.get('/users/:id/followers', authenticated, userController.getUserFollowers) // 看見某使用者的跟隨者
+router.put('/users/:id', authenticated, upload.single('image'), userController.editUser) // 編輯自己所有的資料
+
+// 使用者登入
+router.post('/users/login', passport.authenticate('local', { session: false }), userController.login)
+// 使用者註冊
+router.post('/users', userController.signUp)
 
 router.use('/', apiErrorHandler)
 

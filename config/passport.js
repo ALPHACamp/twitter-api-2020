@@ -14,14 +14,16 @@ passport.use(new LocalStrategy(
       const errorMessage = '帳號或密碼輸入錯誤！'
       const user = await User.findOne({ where: { account } })
 
-      // 帳號或密碼輸入錯誤 暫時的錯誤處理
+      // 帳號或密碼輸入錯誤 暫時的錯誤處理 status code 200
       if (!user) {
+        // return cb(null, false)
         return cb(errorMessage, false)
       }
       const isMatch = await bcrypt.compare(password, user.password)
 
-      // 帳號或密碼輸入錯誤 暫時的錯誤處理
+      // 帳號或密碼輸入錯誤 暫時的錯誤處理 status code 200
       if (!isMatch) {
+        // return cb(null, false)
         return cb(errorMessage, false)
       }
       return cb(null, user)
@@ -42,17 +44,11 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
     const errorMessage = 'unAuthenticated'
     const user = await User.findByPk(jwtPayload.id
       , {
-        // include: [
-        // // join table Like
-        //   { model: Tweet, as: 'LikedUsers' },
-        //   { model: User, as: 'LikedTweets' },
-        //   // join table Reply
-        //   { model: Tweet, as: 'RepliedUsers' },
-        //   { model: User, as: 'RepliedTweets' },
-        //   // join table FollowShip
-        //   { model: User, as: 'Followers' },
-        //   { model: User, as: 'Followings' }
-        // ]
+        include: [
+          // join table FollowShip
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
       }
     )
     if (!user) return cb(errorMessage, false, { message: errorMessage })
