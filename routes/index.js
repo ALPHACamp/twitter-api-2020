@@ -21,6 +21,7 @@ router.post('/api/users', cors, userController.signUp)
 router.put('/api/users/:id', cors, authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), userController.putUser)
 router.get('/api/users/:id/tweets', cors, authenticated, authenticatedUser, userController.getUserTweets)
 router.get('/api/users/:id/replied_tweets', cors, authenticated, authenticatedUser, userController.getUserRepliedTweets)
+router.get('/api/users/:id/likes', cors, authenticated, authenticatedUser, userController.getUserLikedTweets)
 router.get('/api/users/:id', cors, authenticated, authenticatedUser, userController.getUser)
 
 // tweet

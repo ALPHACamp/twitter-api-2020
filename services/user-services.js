@@ -219,7 +219,7 @@ const userServices = {
                 where: { UserId: id },
                 order: [['createdAt', 'DESC']]
             })
-            if (!repliedTweets) throw new Error("該名使用者沒有回覆過任何推文！")
+            if (repliedTweets.length === 0) throw new Error("該名使用者沒有回覆過任何推文！")
             const userLikedTweetsId = getUserData(req.user.LikedTweets)
 
             repliedTweets = repliedTweets.map(repliedTweet => ({
@@ -230,6 +230,47 @@ const userServices = {
             }))
 
             cb(null, repliedTweets)
+        } catch (err) {
+            cb(err)
+        }
+    },
+    getUserLikedTweets: async (req, cb) => {
+        try {
+            const { id } = req.params
+            let likedTweets = await Like.findAll({
+                include: [
+                    {
+                        model: Tweet,
+                        include: [
+                            {
+                                model: User,
+                                attributes: ['name', 'avatar', 'account']
+                            },
+                            {
+                                model: Like,
+                                attributes: ['id']
+                            },
+                            {
+                                model: Reply,
+                                attributes: ['id']
+                            }
+                        ]
+                    },
+                ],
+                where: { UserId: id },
+                order: [['createdAt', 'DESC']]
+            })
+            if (likedTweets.length === 0) throw new Error("該名使用者沒有喜歡過任何推文！")
+            const userLikedTweetsId = getUserData(req.user.LikedTweets)
+
+            likedTweets = likedTweets.map(likedTweet => ({
+                ...likedTweet.dataValues,
+                isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(likedTweet.Tweet.id) : false,
+                replyCount: likedTweet.Tweet.Replies.length,
+                likeCount: likedTweet.Tweet.Likes.length
+            }))
+
+            cb(null, likedTweets)
         } catch (err) {
             cb(err)
         }
