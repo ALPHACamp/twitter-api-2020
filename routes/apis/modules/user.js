@@ -8,6 +8,7 @@ const { authenticated } = require('../../../middleware/api-auth')
 router.post('/', userController.signUp)
 router.put('/:id/account', authenticated, userController.putAccount)
 router.get('/:id/followers', authenticated, userController.getFollowers)
+router.get('/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/:id', authenticated, userController.getUser)
 router.put('/:id', authenticated, profileUpload, userController.putUser)
 // for JWT test purpose

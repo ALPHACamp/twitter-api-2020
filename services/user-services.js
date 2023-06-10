@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
 const { imgurFileHandler } = require('../helpers/file-helpers')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const userServices = {
   signUp: (req, cb) => {
     const { name, account, email, password, checkPassword } = req.body
@@ -55,6 +55,29 @@ const userServices = {
         delete data.Followers
         delete data.Followings
         return cb(null, data)
+      })
+      .catch(err => cb(err))
+  },
+  getUserTweets: (req, cb) => {
+    return Tweet.findAll({
+      where: { UserId: req.params.id },
+      order: [['createdAt', 'DESC']],
+      include: [User, Reply, Like],
+    })
+      .then(tweets => {
+        tweets = tweets.map(tweet => {
+          tweet = {
+            ...tweet.toJSON(),
+            isLiked: tweet.Likes.map(like => like.UserId).includes(req.user.id),
+            replyCount: tweet.Replies.length,
+            likedCount: tweet.Likes.length
+          }
+          delete tweet.User.password
+          delete tweet.Replies
+          delete tweet.Likes
+          return tweet
+        })
+        return cb(null, tweets)
       })
       .catch(err => cb(err))
   },
