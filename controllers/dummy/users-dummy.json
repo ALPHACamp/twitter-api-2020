@@ -9,7 +9,7 @@
                 "email": "test1@example.com",
                 "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
                 "name": "test-1",
-                "avatr": "https://i.imgur.com/YcP0tik.jpeg",
+                "avatar": "https://i.imgur.com/YcP0tik.jpeg",
                 "introduction": "Hi I am test No.1",
                 "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
                 "role": "user",
@@ -22,7 +22,7 @@
                 "email": "test2@example.com",
                 "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
                 "name": "test-2",
-                "avatr": "https://i.imgur.com/D5wcicT.jpeg",
+                "avatar": "https://i.imgur.com/D5wcicT.jpeg",
                 "introduction": "Hi I am test No.2",
                 "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
                 "role": "user",
@@ -35,7 +35,7 @@
                 "email": "test1@example.com",
                 "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
                 "name": "test-3",
-                "avatr": "https://i.imgur.com/iM1zUJP.gif",
+                "avatar": "https://i.imgur.com/iM1zUJP.gif",
                 "introduction": "Hi I am test No.3",
                 "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
                 "role": "user",
@@ -48,7 +48,7 @@
                 "email": "test1@example.com",
                 "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
                 "name": "test-4",
-                "avatr": "https://i.imgur.com/eTxzk46.jpeg",
+                "avatar": "https://i.imgur.com/eTxzk46.jpeg",
                 "introduction": "Hi I am test No.4",
                 "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
                 "role": "user",
@@ -61,7 +61,7 @@
                 "email": "test1@example.com",
                 "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
                 "name": "test-5",
-                "avatr": "https://i.imgur.com/Uschheg.jpeg",
+                "avatar": "https://i.imgur.com/Uschheg.jpeg",
                 "introduction": "Hi I am test No.5",
                 "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
                 "role": "user",
@@ -81,7 +81,7 @@
             "email": "test1@example.com",
             "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
             "name": "test-1",
-            "avatr": "https://i.imgur.com/YcP0tik.jpeg",
+            "avatar": "https://i.imgur.com/YcP0tik.jpeg",
             "introduction": "Hi I am test No.1",
             "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
             "role": "user",
@@ -144,13 +144,13 @@
                     "email": "test1@example.com",
                     "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
                     "name": "test-1",
-                    "avatr": "https://i.imgur.com/YcP0tik.jpeg",
+                    "avatar": "https://i.imgur.com/YcP0tik.jpeg",
                     "introduction": "Hi I am test No.1",
                     "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
                     "role": "user",
                     "createdAt": "2023-05-25T11:09:42.000Z",
                     "updatedAt": "2023-05-25T11:09:42.000Z",
-                    "isfollowging": true
+                    "isFollowing": true
                 },
                 {
                     "id": 2,
@@ -158,13 +158,13 @@
                     "email": "test2@example.com",
                     "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
                     "name": "test-2",
-                    "avatr": "https://i.imgur.com/D5wcicT.jpeg",
+                    "avatar": "https://i.imgur.com/D5wcicT.jpeg",
                     "introduction": "Hi I am test No.2",
                     "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
                     "role": "user",
                     "createdAt": "2023-05-25T11:09:42.000Z",
                     "updatedAt": "2023-05-25T11:09:42.000Z",
-                    "isfollowging": true
+                    "isFollowing": true
                 },
                 {
                     "id": 3,
@@ -172,13 +172,13 @@
                     "email": "test1@example.com",
                     "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
                     "name": "test-3",
-                    "avatr": "https://i.imgur.com/iM1zUJP.gif",
+                    "avatar": "https://i.imgur.com/iM1zUJP.gif",
                     "introduction": "Hi I am test No.3",
                     "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
                     "role": "user",
                     "createdAt": "2023-05-25T11:09:42.000Z",
                     "updatedAt": "2023-05-25T11:09:42.000Z",
-                    "isfollowging": true
+                    "isFollowing": true
                 },
                 {
                     "id": 4,
@@ -186,13 +186,13 @@
                     "email": "test1@example.com",
                     "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
                     "name": "test-4",
-                    "avatr": "https://i.imgur.com/eTxzk46.jpeg",
+                    "avatar": "https://i.imgur.com/eTxzk46.jpeg",
                     "introduction": "Hi I am test No.4",
                     "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
                     "role": "user",
                     "createdAt": "2023-05-25T11:09:42.000Z",
                     "updatedAt": "2023-05-25T11:09:42.000Z",
-                    "isfollowging": false
+                    "isFollowing": false
                 },
                 {
                     "id": 5,
@@ -200,13 +200,13 @@
                     "email": "test1@example.com",
                     "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
                     "name": "test-5",
-                    "avatr": "https://i.imgur.com/Uschheg.jpeg",
+                    "avatar": "https://i.imgur.com/Uschheg.jpeg",
                     "introduction": "Hi I am test No.5",
                     "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
                     "role": "user",
                     "createdAt": "2023-05-25T11:09:42.000Z",
                     "updatedAt": "2023-05-25T11:09:42.000Z",
-                    "isfollowging": false
+                    "isFollowing": false
                 }
     
             ]
