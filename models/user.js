@@ -16,6 +16,13 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'followerId',
         as: 'Followings'
       })
+      // 這裡開始，
+      User.belongsToMany(models.Tweet, {
+        through: models.Like,
+        foreignKey: 'UserId',
+        as: 'LikedTweets'
+      })
+      // 到這邊結束需拿掉，否則測試會不通過
     }
   };
   User.init({
