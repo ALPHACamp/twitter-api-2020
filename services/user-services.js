@@ -120,18 +120,18 @@ const userServices = {
         const tweets = likes.map(l => {
           l = {
             TweetId: l.TweetId,
-            UserId: l.UserId,
             description: l.Tweet.description,
-            name: l.Tweet.User.name,
-            avatar: l.Tweet.User.avatar,
-            account: l.Tweet.User.account,
-            tweet_created_at: l.Tweet.createdAt,
             isLiked: true,
-            replyCount: l.Tweet.Replies.length,
-            likedCount: l.Tweet.Likes.length,
+            reply_count: l.Tweet.Replies.length,
+            like_count: l.Tweet.Likes.length,
+            tweet_user_data: {
+              name: l.Tweet.User.name,
+              avatar: l.Tweet.User.avatar,
+              account: l.Tweet.User.account,
+            }
           }
           delete l.User
-          delete l.Tweet
+          delete l.twitter
           return l
         })
         return cb(null, tweets)
@@ -230,7 +230,6 @@ const userServices = {
       nest: true
     })
       .then(users => {
-        console.log(users)
       })
   }
 }
