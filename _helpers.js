@@ -16,14 +16,5 @@ module.exports = {
 // 察看環境
 // echo $env:NODE_ENV
 
-// [1 ~ 50]  //  tweet全部
-// [1, 2 ,3 ,4 ,5] // 留言人
-
-// tweet全部.map( 等下要被reply的tweet_id) {
-//   留言群 3  = [1, 2 , 3 , 4 , 5]
-//   留言群.map( 人 =>  {
-//     Reply.create
-//     tweetId = 等下要被reply的tweet_id,
-//     userId = 人
-//   }
-// }
+// mysql:
+// bc5c2f008640ed : ea186cd0 @ us-cdbr-east-06.cleardb.net / heroku_b017a6c5ca6ac62 ? reconnect=true

@@ -67,20 +67,19 @@ const userController = {
     }
   },
   // userRequest #3
-  getUserTweets: (req, res, next) => {
+  getUserTweets: async (req, res, next) => {
     const userId = Number(req.params.id)
-    return Promise.all([
+    Promise.all([
       User.findByPk(userId, { raw: true }),
       Tweet.findAll({
-        where: { userId },
+        where: { UserId: userId },
         include: [
           { model: User },
           { model: Reply },
           { model: Like }
         ],
         order: [['createdAt', 'DESC']]
-      })
-    ])
+      })])
       .then(([user, tweetsData]) => {
         if (!user) throw new Error('getUserTweets說沒這人')
         const tweets = tweetsData.map(t => ({
@@ -88,7 +87,7 @@ const userController = {
           repliesCount: t.Replies.length,
           likesCount: t.Likes.length
         }))
-        res.json(tweets)
+        res.status(200).json(tweets)
       })
       .catch(err => next(err))
   },
