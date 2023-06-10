@@ -39,8 +39,8 @@ const followController = {
       if (!followship) newErrorGenerate('使用者未追蹤此對象', 400)
       if (Number(followingId) === Number(followerId)) newErrorGenerate('使用者不能對自己進行追蹤相關功能', 400)
 
-      await followship.destroy()
-      return res.json(followship)
+      const deletedFollowship = await followship.destroy()
+      return res.json(deletedFollowship)
     } catch (err) {
       next(err)
     }
