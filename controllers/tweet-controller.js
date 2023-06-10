@@ -93,6 +93,80 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  // 按讚推文
+  addTweetLike: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweet_id
+      const userId = helpers.getUser(req).id
+      const [tweet, user, like] = await Promise.all([
+        Tweet.findByPk(tweetId, { raw: true, attributes: ['id'] }),
+        User.findByPk(userId, { raw: true, attributes: ['id'] }),
+        Like.findOne({ where: { tweetId, userId }, raw: true })
+      ])
+      if (!tweet) newErrorGenerate('推文不存在', 404)
+      if (!user) newErrorGenerate('使用者不存在', 404)
+      if (like) newErrorGenerate('已按過喜歡', 400)
+      const addLike = await Like.create({ TweetId: tweetId, UserId: userId })
+      return res.json(addLike)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取消按讚推文
+  removeTweetLike: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweet_id
+      const userId = helpers.getUser(req).id
+      const [tweet, user, like] = await Promise.all([
+        Tweet.findByPk(tweetId, { raw: true, attributes: ['id'] }),
+        User.findByPk(userId, { raw: true, attributes: ['id'] }),
+        Like.findOne({ where: { tweetId, userId } })
+      ])
+      if (!tweet) newErrorGenerate('推文不存在', 404)
+      if (!user) newErrorGenerate('使用者不存在', 404)
+      if (!like) newErrorGenerate('未按過喜歡', 400)
+      const removeLike = await like.destroy()
+      return res.json(removeLike)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 瀏覽推文的所有回應
+  tweetReplies: async (req, res, next) => {
+    try {
+      const id = req.params.tweet_id
+      const [tweet, replies] = await Promise.all([
+        Tweet.findByPk(id, {
+          attributes: ['id'],
+          include: [
+            { model: User, attributes: ['id', 'account'] }
+          ],
+          raw: true,
+          nest: true
+        }),
+        Reply.findAll({
+          attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
+          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+          where: { TweetId: id },
+          order: [['createdAt', 'DESC']],
+          raw: true,
+          nest: true
+        })
+      ])
+
+      if (!tweet) newErrorGenerate('推文不存在', 404)
+      if (!replies) newErrorGenerate('找不到回應訊息', 404)
+      const repliesData = replies.map(reply => ({
+        tweet,
+        ...reply,
+        relativeTimeFromNow: relativeTimeFromNow(reply.createdAt)
+      }))
+
+      return res.json(repliesData)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = tweetController
