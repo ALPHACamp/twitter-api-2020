@@ -120,9 +120,11 @@ const userServices = {
                         model: User,
                         attributes: ['name', 'avatar', 'account']
                     }, {
-                        model: Like
+                        model: Like,
+                        attributes: ['id']
                     }, {
-                        model: Reply
+                        model: Reply,
+                        attributes: ['id']
                     }],
                 order: [['createdAt', 'DESC']]
             })
@@ -190,6 +192,140 @@ const userServices = {
             .catch(err => {
                 cb(err)
             })
+    },
+    getUserRepliedTweets: async (req, cb) => {
+        try {
+            const { id } = req.params
+            let repliedTweets = await Reply.findAll({
+                include: [
+                    {
+                        model: Tweet,
+                        include: [
+                            {
+                                model: User,
+                                attributes: ['name', 'avatar', 'account']
+                            },
+                            {
+                                model: Like,
+                                attributes: ['id']
+                            },
+                            {
+                                model: Reply,
+                                attributes: ['id']
+                            }
+                        ]
+                    },
+                ],
+                where: { UserId: id },
+                order: [['createdAt', 'DESC']]
+            })
+            if (repliedTweets.length === 0) throw new Error("該名使用者沒有回覆過任何推文！")
+            const userLikedTweetsId = getUserData(req.user.LikedTweets)
+
+            repliedTweets = repliedTweets.map(repliedTweet => ({
+                ...repliedTweet.dataValues,
+                isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(repliedTweet.Tweet.id) : false,
+                replyCount: repliedTweet.Tweet.Replies.length,
+                likeCount: repliedTweet.Tweet.Likes.length
+            }))
+
+            cb(null, repliedTweets)
+        } catch (err) {
+            cb(err)
+        }
+    },
+    getUserLikedTweets: async (req, cb) => {
+        try {
+            const { id } = req.params
+            let likedTweets = await Like.findAll({
+                include: [
+                    {
+                        model: Tweet,
+                        include: [
+                            {
+                                model: User,
+                                attributes: ['name', 'avatar', 'account']
+                            },
+                            {
+                                model: Like,
+                                attributes: ['id']
+                            },
+                            {
+                                model: Reply,
+                                attributes: ['id']
+                            }
+                        ]
+                    },
+                ],
+                where: { UserId: id },
+                order: [['createdAt', 'DESC']]
+            })
+            if (likedTweets.length === 0) throw new Error("該名使用者沒有喜歡過任何推文！")
+            const userLikedTweetsId = getUserData(req.user.LikedTweets)
+
+            likedTweets = likedTweets.map(likedTweet => ({
+                ...likedTweet.dataValues,
+                isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(likedTweet.Tweet.id) : false,
+                replyCount: likedTweet.Tweet.Replies.length,
+                likeCount: likedTweet.Tweet.Likes.length
+            }))
+
+            cb(null, likedTweets)
+        } catch (err) {
+            cb(err)
+        }
+    },
+    getUserFollowings: async (req, cb) => {
+        try {
+            const { id } = req.params
+            let followings = await Followship.findAll({
+                include: [
+                    {
+                        model: User,
+                        attributes: ['avatar', 'name', 'introduction'],
+                        as: 'Followings'
+                    }
+                ],
+                where: { followerId: id }
+            })
+            if (followings.length === 0) throw new Error("該名使用者沒有追蹤過任何人！")
+            const userFollowingsId = getUserData(req.user.Followings)
+
+            followings = followings.map(following => ({
+                ...following.dataValues,
+                isFollowed: userFollowingsId.length ? userFollowingsId.includes(following.id) : false,
+            }))
+
+            cb(null, followings)
+        } catch (err) {
+            cb(err)
+        }
+    },
+    getUserFollowers: async (req, cb) => {
+        try {
+            const { id } = req.params
+            let followers = await Followship.findAll({
+                include: [
+                    {
+                        model: User,
+                        attributes: ['avatar', 'name', 'introduction'],
+                        as: 'Followers'
+                    }
+                ],
+                where: { followingId: id }
+            })
+            if (followers.length === 0) throw new Error("該名使用者沒有任何人追蹤過！")
+            const userFollowersId = getUserData(req.user.Followers)
+
+            followers = followers.map(follower => ({
+                ...follower.dataValues,
+                isFollowed: userFollowersId.length ? userFollowersId.includes(follower.id) : false,
+            }))
+
+            cb(null, followers)
+        } catch (err) {
+            cb(err)
+        }
     }
 }
 

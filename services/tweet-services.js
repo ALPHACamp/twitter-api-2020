@@ -12,9 +12,11 @@ const tweetServices = {
             model: User,
             attributes: ['name', 'avatar', 'account']
           }, {
-            model: Like
+            model: Like,
+            attributes: ['id']
           }, {
-            model: Reply
+            model: Reply,
+            attributes: ['id']
           }],
         order: [['createdAt', 'DESC']]
       })
