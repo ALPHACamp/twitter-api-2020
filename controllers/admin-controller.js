@@ -36,7 +36,7 @@ const adminController = {
       })
       users = await Promise.all(users.map(async user => ({
         ...user.toJSON(),
-        Likes: user.Tweets.LikedUsers?.length,
+        likes: user.Tweets.LikedUsers?.length,
         postNum: user.Tweets.length,
         follower: user.Followings.length, // 跟隨者人數(被多少人跟隨)
         following: user.Followers.length // 跟隨人數(主動跟隨多少人)
@@ -55,15 +55,15 @@ const adminController = {
 
       // 將Likes加入JSON
       users = await Promise.all(users.map(async (user, like) => ({
-        Id: user.id,
-        Name: user.name,
-        Account: user.account,
-        Avatar: user.avatar,
-        Cover: user.cover,
-        Likes: Likes[like],
-        PostNum: user.postNum,
-        Follower: user.follower,
-        Following: user.following
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        avatar: user.avatar,
+        cover: user.cover,
+        likes: Likes[like],
+        postNum: user.postNum,
+        follower: user.follower,
+        following: user.following
       })))
 
       // 排序
