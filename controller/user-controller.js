@@ -8,7 +8,7 @@ const userController = {
       const userJSON = req.user.toJSON()
       delete userJSON.password
       const token = jwt.sign(userJSON, process.env.JWT_SECRET, { expiresIn: '30d' })// 簽證效期30天
-      return res.status(200).json({ token, userJSON })
+      return res.status(200).json({ token, message: '登入成功' })
     } catch (err) { next(err) }
   },
   signUp: async (req, res, next) => {
