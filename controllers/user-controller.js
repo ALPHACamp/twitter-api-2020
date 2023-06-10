@@ -37,6 +37,7 @@ const userController = {
   },
   login: async (req, res, next) => {
     try {
+      console.log(req.user)
       const userData = await getUser(req)?.toJSON()
       delete userData.password
       const token = await jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -48,6 +49,49 @@ const userController = {
           user: userData
         }
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserInfo: async (req, res, next) => { // 元件之一, 提供自己/其他使用者頁的介紹資訊
+    try {
+      console.log(req.body)
+      // if (req.user.dataValues.id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可取得該用戶基本資料!')
+      // 上面不需要, 因為每個人都可以互相瀏覽對方的資訊
+      const userInfo = await User.findOne({
+        where: { id: req.params.id },
+        attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction', 'role'],
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      })
+      // if (!userInfo || userInfo.role !== 'user') throw new Error('該用戶不存在')
+      const follower = userInfo.Followings.length
+      const following = userInfo.Followers.length
+      return res.json({
+        id: userInfo.id,
+        account: userInfo.account,
+        name: userInfo.name,
+        avatar: userInfo.avatar,
+        cover: userInfo.cover,
+        introduction: userInfo.introduction,
+        follower,
+        following
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  editUserInfo: async (req, res, next) => {
+    try {
+      const { name, account, email, password, checkPassword, avatar, cover, introduction } = req.body
+      if (req.user.dataValues.id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可編輯該用戶基本資料!')
+      const userInfo = await User.findOne({
+        where: { id: req.params.id },
+        attributes: ['id', 'account', 'email', 'password', 'name', 'avatar', 'cover', 'introduction']
+      })
+      return res.json({ data: { userInfo } })
     } catch (err) {
       next(err)
     }
