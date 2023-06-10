@@ -12,7 +12,7 @@ module.exports = {
       for (let i = 1; i <= 10; i++) {
         tweets.push({
           user_id: user.id,
-          description: faker.lorem.text(),
+          description: faker.lorem.text().slice(0, 140),
           created_at: new Date(),
           updated_at: new Date(),
         })
