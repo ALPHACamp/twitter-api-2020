@@ -211,5 +211,31 @@
     
             ]
         }
-    }
+},
+    "getUserTweet": [
+        {
+            "description": "PopuLady出身的宇珊8日驚喜宣布自己被交往4年的男友Josh求婚成功，經紀人證實喜訊，宇珊也笑說，其實男友是一天照三餐在問「願意當我老婆嗎？」直到去露營第五次時，男友這回直接單膝下跪，把戒指拿出來正式求婚，讓她感動到直接飆淚：「這一切他居然都沒有用任何的器材或設備記錄下來，我才發現原來求婚就是3分鐘這樣子的事情而已呀！」",
+            "user": {
+                "name": "apple-name",
+                "account": "apple-account",
+                "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+            }
+        },
+        {
+            "description": "環球科技大學經教育部審議財務狀況未改善，將於明年退場，今天舉辦畢業典禮，創辦人許文志的兒子、全國商業總會理事長許舒博現身致詞，指民進黨總統參選人賴清德曾尋求他的支持，他反問賴清德，把環球科大毀了，要怎麼支持？",
+            "user": {
+                "name": "apple-name",
+                "account": "apple-account",
+                "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+            }
+        },
+        {
+            "description": "許舒博說，為了環球科大，他也曾跟台塑總裁談過，但教育政策所趨，環球終究是退場了，他對此感到抱歉，他希望環球的畢業生要在社會創造自我的價值，如果學生出社會有困難，他願意以商總身份親自拜託你的老闆，環球是個大家庭培育許多優秀人才，大家要讓環球精神永續。",
+            "user": {
+                "name": "apple-name",
+                "account": "apple-account",
+                "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+            }
+        }
+    ]
 }

@@ -26,6 +26,9 @@ const dummyController = {
   },
   getTweetsDummy: (req, res, next) => {
     res.json(tweetDummy.getTweets)
+  },
+  getUserTweet: (req, res, next) => {
+    res.json(userDummy.getUserTweet)
   }
 }
 

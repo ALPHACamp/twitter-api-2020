@@ -10,9 +10,9 @@ const { authenticated, authenticatedAdmin, isUser } = require('../../middleware/
 // 以下是Dummy DATA
 router.get('/admin/users', dummyController.adminGetUsersDummy)
 router.get('/admin/tweets', dummyController.adminGetTweetsDummy)
-// router.delete('/admin/tweets/1', dummyController.adminDeleteTweetDummy)
 
 router.get('/users/top', dummyController.getTopUsersDummy) // for dummyData
+router.get('/users/1/tweets', dummyController.getUserTweet)
 router.get('/users/1', dummyController.getUserDummy)
 router.get('/users', dummyController.getUsersDummy)
 
