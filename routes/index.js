@@ -13,7 +13,12 @@ const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 // if  req.user.role = admin 才能登入
 router.post('/api/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn)
 // if  req.user.role = admin 不能登入
-router.post('/api/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn)
+router.post('/api/signin', (req, res, next) => {
+  if (!req.body.account || !req.body.password) res.status(400).json({ status: 'error', message: "Account and Password is required" })
+  next()
+},
+  passport.authenticate('local', { session: false }), userController.signIn,
+)
 router.post('/api/signup', userController.signUp)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 
