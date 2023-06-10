@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
 const { imgurFileHandler } = require('../helpers/file-helpers')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { getUser } = require('../_helpers.js')
 const userServices = {
   signUp: (req, cb) => {
     const { name, account, email, password, checkPassword } = req.body
@@ -220,17 +221,32 @@ const userServices = {
       .catch(err => cb(err))
   },
   getFollowers: (req, cb) => {
-    return User.findByPk(req.params.id, {
-      include: [{
-        model: User,
-        as: 'Followers',
-        attributes: ['id', 'name', 'avatar', 'introduction']
-      }],
-      raw: true,
-      nest: true
-    })
-      .then(users => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: [{
+          model: User,
+          as: 'Followers',
+          attributes: ['id', 'name', 'avatar', 'introduction']
+        }]
+      }),
+      Followship.findAll({
+        where: { followerId: getUser(req).dataValues.id },
+        raw: true
       })
+    ])
+      .then(([user, followings]) => {
+        if (!user.Followers.length) return cb(null, [])
+        const currentFollowings = followings.map(f => f.followingId)
+        const followers = user.Followers.map(f => ({
+          followerId: f.id,
+          account: f.account,
+          name: f.name,
+          introduction: f.introduction,
+          isFollowed: currentFollowings.some(id => id === f.id)
+        }))
+        return cb(null, followers)
+      })
+      .catch(err => cb(err))
   }
 }
 
