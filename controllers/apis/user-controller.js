@@ -82,7 +82,7 @@ const userController = {
       // 確認使用者是否存在
       const user = await User.findByPk(id)
       if (!user) throw new Error('The user does not exist')
-      res.json({ status: 'success', data: user })
+      res.json(user)
     } catch (error) {
       next(error)
     }
@@ -109,7 +109,7 @@ const userController = {
       for (const i of repliedTweets) {
         data.push(i.Tweet)
       }
-      return res.json({ status: 'success', data })
+      return res.json(repliedTweets)
     } catch (error) {
       next(error)
     }
@@ -135,7 +135,7 @@ const userController = {
       for (const i of userLiked) {
         data.push(i.Tweet)
       }
-      return res.json({ status: 'success', data })
+      return res.json(userLiked)
     } catch (error) {
       next(error)
     }
@@ -157,10 +157,11 @@ const userController = {
       if (!user) throw new Error('The user does not exist')
       if (!userFollows.length) throw new Error("He haven't followed anyone")
       const data = []
-      for (const i of req.user.Followings) {
-        data.push(i.dataValues)
-      }
-      return res.json({ status: 'success', data })
+      // for (const i of req.user.Followings) {
+      //   data.push(i.dataValues)
+      // }
+      console.log(data)
+      return res.json(userFollows)
     } catch (error) {
       next(error)
     }
@@ -181,53 +182,39 @@ const userController = {
       if (!userFollowers.length) throw new Error('He is lonely')
 
       const data = []
-      for (const i of req.user.Followers) {
-        data.push(i.dataValues)
-      }
-      return res.json({ status: 'success', data })
+      // for (const i of req.user.Followers) {
+      //   data.push(i.dataValues)
+      // }
+      return res.json(userFollowers)
     } catch (error) {
       next(error)
     }
   },
   editUser: async (req, res, next) => {
     try {
-      const { email, password, name, introduction, account } = req.body
+      const { name, introduction } = req.body
       let { id } = req.params
       id = Number(id)
 
       // introduction與name的字數限制
-      if (introduction.length < 160) throw new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
-      if (name.length < 50) throw new Error('Your self-introduction is a little too long for me to handle! ! Please less than 50.')
+      if (introduction.length > 160) throw new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
+      if (name.length > 50) throw new Error('Your self-introduction is a little too long for me to handle! ! Please less than 50.')
 
-      // 確認使用者是否存在 與 email & account是否重複
-      const [user, checkEmail, checkAccount] = await Promise.all([
-        User.findByPk(id),
-        User.findOne({ where: { email } }),
-        User.findOne({ where: { account } })
-      ])
-
+      const user = await User.findByPk(id)
       // 錯誤處理
       if (!user) throw new Error('The user does not exist')
-      if (checkEmail) throw new Error('Oops! Your email already exist')
-      if (checkAccount) throw new Error('Oops! Your account already exist')
-
-      // 取得 avatar、background圖片
-      const { file } = req
       const { avatar, background } = req
       const [avatarFilePath, backgroundFilePath] = await Promise.all([
         imgurFileHandler(avatar),
         imgurFileHandler(background)
       ])
-      const updatedUser = User.update({
-        email,
-        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+      const updatedUser = await user.update({
         name,
-        avatar: avatarFilePath || null,
-        introduction,
-        background: backgroundFilePath || null,
-        account
+        avatar: avatarFilePath || user.avatar,
+        background: backgroundFilePath || user.background,
+        introduction
       })
-      res.status(200).json(updatedUser)
+      return res.status(200).json(updatedUser)
     } catch (error) {
       next(error)
     }
