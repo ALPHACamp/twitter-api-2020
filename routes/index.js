@@ -23,7 +23,7 @@ router.post('/api/signup', userController.signUp)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 
 router.get('/api/users/:id', authenticated, userController.getUser)
-
+router.get('/api/users/:id/edit', authenticated, userController.editUser)
 router.use('/', apiErrorHandler)
 
 module.exports = router

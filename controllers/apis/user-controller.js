@@ -111,6 +111,18 @@ const userController = {
       .catch(err => {
         res.status(500).json({ status: 'error', error: err.message })
       })
+  },
+  editUser: (req, res) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) throw new Error(`User didn't exist`)
+        user = user.toJSON()
+        delete user.password
+        res.status(500).json({ status: 'success', user })
+      })
+      .catch(err => {
+        res.status(500).json({ status: 'error', error: err.message })
+      })
   }
 }
 
