@@ -46,6 +46,37 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweet: async (req, res, next) => {
+    try {
+      const reqUserId = helpers.getUser(req).id
+      const tweetId = req.params.tweet_id
+      let tweet = await Tweet.findByPk(tweetId, {
+        include: [User, Like, Reply]
+      })
+
+      if (!tweet) throw new Error('Tweet not found')
+
+      tweet = {
+        id: tweet.id,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        updatedAt: tweet.updatedAt,
+        likeCount: tweet.Likes.length,
+        replyCount: tweet.Replies.length,
+        user: {
+          UserId: reqUserId,
+          name: tweet.User.name,
+          account: tweet.User.account,
+          avatar: tweet.User.avatar
+        }
+
+      }
+
+      return res.status(200).json(tweet)
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
