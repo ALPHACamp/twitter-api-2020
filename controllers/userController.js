@@ -118,6 +118,44 @@ const userController = {
       }))
       res.status(200).json(data)
     } catch (err) { next(err) }
+  },
+  getUserReply: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const [user, replies] = await Promise.all([
+        User.findByPk(id, { raw: true, nest: true }),
+        Reply.findAll({
+          where: { UserId: id },
+          include: [
+            {
+              model: Tweet,
+              attributes: ['id'],
+              include: [
+                { model: User, attributes: ['id', 'account', 'name'] }
+              ]
+            }
+          ],
+          order: [['createdAt', 'DESC']],
+          raw: true,
+          nest: true
+        })
+      ])
+      if (!replies.length) return res.status(404).json({ status: 'error', message: '無回覆資料' })
+
+      const data = replies.map(r => ({
+        reaplyId: r.id,
+        comment: r.comment,
+        replyerId: user.id,
+        replyerAccount: user.account,
+        replyerName: user.name,
+        replyerAvatar: user.avatar,
+        tweetId: r.Tweet.id,
+        tweetOwnerAccount: r.Tweet.User.account,
+        tweetOwnerName: r.Tweet.User.name,
+        createdAt: r.createdAt
+      }))
+      res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 module.exports = userController
