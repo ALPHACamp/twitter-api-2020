@@ -278,6 +278,7 @@ const userController = {
         }))
         ?.sort((a, b) => b.followersCount - a.followersCount)
         ?.slice(0, TOP_USER_COUNT)
+        ?.sort((a, b) => (a.isUserFollowed === b.isUserFollowed) ? 0 : a.isUserFollowed ? -1 : 1)
       return res.json(usersData)
     } catch (err) {
       next(err)
