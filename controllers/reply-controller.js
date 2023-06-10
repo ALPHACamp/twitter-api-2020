@@ -56,6 +56,8 @@ const replyController = {
     return Tweet.findByPk(tweetId)
       .then((tweet) => {
         if (!tweet) throw new Error("Tweet not exist!");
+        if (comment.trim() === 0) throw new Error("Reply content is required!");
+        if (comment.length > 140) throw new Error("Reply content limit within 140 words");
         return Reply.create({
           comment,
           tweetId,

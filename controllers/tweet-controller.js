@@ -107,6 +107,9 @@ const tweetController = {
     if (!description) {
       throw new Error("Tweet content is required!")
     }
+    if (description.length > 140) {
+      throw new Error("Tweet content limit within 140 words")
+    }
     // get current user id
     const userId = getUser(req).id
 
