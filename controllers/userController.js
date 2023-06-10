@@ -1,12 +1,17 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
-const bcrypt = require('bcrypt-nodejs')
+const bcrypt = require('bcryptjs')
 const userController = {
   signIn: (req, res, next) => {
     try {
+      if (req.authInfo && req.authInfo.message) {
+        throw new Error(req.authInfo.message)
+      }
       const userData = getUser(req).toJSON()
+      if(!userData) throw new Error('account or password incorrect!')
       delete userData.password
+      
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '7d' })
       res.json({
         status: 'success',

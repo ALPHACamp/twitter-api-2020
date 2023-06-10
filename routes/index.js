@@ -12,7 +12,7 @@ const followController = require('../controllers/followController')
 router.use('/admin', authenticatedAdmin, admin)
 
 // 告訴passport不用session了 改用token驗證
-router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
+router.post('/signin', passport.authenticate('local', { session: false, failureMessage: true }), userController.signIn)
 
 // like
 router.post('/tweets/:id/like', authenticated, followController.addLike)

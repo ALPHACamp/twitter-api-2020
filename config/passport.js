@@ -1,7 +1,7 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
-const bcrypt = require('bcrypt-nodejs')
+const bcrypt = require('bcryptjs')
 const { User } = require('../models')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWWT = passportJWT.ExtractJwt
@@ -16,13 +16,15 @@ passport.use(new LocalStrategy(
   (req, account, password, cb) => {
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) return cb(null, false)
-        bcrypt.compare(password, user.password)
+        if (!user) throw new Error('Account or Password incorrect')
+          bcrypt.compare(password, user.password)
           .then(res => {
-            if (!res) return cb(null, false)
+            if (!res) throw new Error('Account or Password incorrect')
+            return cb(null, user)
           })
-        return cb(null, user)
+          .catch(err => cb(err))
       })
+      .catch(err => cb(err))
   }
 ))
 // 註冊
