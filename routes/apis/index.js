@@ -5,6 +5,8 @@ const { apiErrorHandler } = require('../../middleware/error-handler')
 const passport = require('../../config/passport')
 const { authenticated, authenticatedAdmin, isUser } = require('../../middleware/api-auth')
 
+router.get('/users/top', userController.getTopUsers) // for dummyData
+
 // import modules
 const admin = require('./modules/admin')
 const followships = require('./modules/followships')
@@ -13,6 +15,7 @@ const tweets = require('./modules/tweets')
 const users = require('./modules/users')
 
 // sign signup單獨拉出來
+
 router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), isUser, userController.signIn)
 
