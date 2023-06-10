@@ -14,9 +14,9 @@ module.exports = {
               password: bcrypt.hashSync('12345678', 10), // 直接使用hashSync同步生成hash
               role: 'admin',
               name: 'root',
-              avatar: `https://i.pravatar.cc/300?img=${Math.floor(Math.random() * 100)}`,
+              avatar: `https://i.pravatar.cc/300?img=${Math.floor(Math.random() * 70)}`,
               introduction: faker.lorem.words(5),
-              cover: `https://loremflickr.com/640/480/city?lock=${Math.floor(Math.random() * 100)}`,
+              cover: `https://picsum.photos/id/${Math.floor(Math.random() * 100)}/640/480`,
               createdAt: new Date(),
               updatedAt: new Date()
             }
@@ -27,9 +27,9 @@ module.exports = {
               password: bcrypt.hashSync('12345678', 10),
               role: 'user',
               name: `user${i}`,
-              avatar: `https://i.pravatar.cc/300?img=${Math.floor(Math.random() * 100)}`,
+              avatar: `https://i.pravatar.cc/300?img=${Math.floor(Math.random() * 70)}`,
               introduction: faker.lorem.words(5),
-              cover: `https://loremflickr.com/640/480/city?lock=${Math.floor(Math.random() * 100)}`,
+              cover: `https://picsum.photos/id/${Math.floor(Math.random() * 100)}/640/480`,
               createdAt: new Date(),
               updatedAt: new Date()
             }
