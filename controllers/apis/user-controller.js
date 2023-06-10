@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../../models')
+const { User, Reply, Tweet } = require('../../models')
 const jwt = require('jsonwebtoken')
 
 const userController = {
@@ -59,6 +59,26 @@ const userController = {
         res.status(500).json({ status: 'error', error: err.message })
       })
   },
+  getUser: (req, res) => {
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Tweet.findAll({
+        where: {
+          userId: req.params.id
+        },
+        include: [Reply]
+      })
+    ])
+      .then(([user, tweets]) => {
+        if (!user) throw new Error(`User didn't exist`)
+        user = user.toJSON()
+        delete user.password
+        res.status(500).json({ status: 'success', user, tweets })
+      })
+      .catch(err => {
+        res.status(500).json({ status: 'error', error: err.message })
+      })
+  }
 }
 
 module.exports = userController

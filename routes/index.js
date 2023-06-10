@@ -15,6 +15,8 @@ router.post('/api/signup', userController.signUp)
 // if  req.user.role = admin 才能登入
 router.post('/api/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn)
 
+router.get('/api/users/:id', authenticated, userController.getUser)
+
 router.use('/', apiErrorHandler)
 
 module.exports = router
