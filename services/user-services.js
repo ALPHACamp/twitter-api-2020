@@ -120,9 +120,11 @@ const userServices = {
                         model: User,
                         attributes: ['name', 'avatar', 'account']
                     }, {
-                        model: Like
+                        model: Like,
+                        attributes: ['id']
                     }, {
-                        model: Reply
+                        model: Reply,
+                        attributes: ['id']
                     }],
                 order: [['createdAt', 'DESC']]
             })
@@ -190,6 +192,47 @@ const userServices = {
             .catch(err => {
                 cb(err)
             })
+    },
+    getUserRepliedTweets: async (req, cb) => {
+        try {
+            const { id } = req.params
+            let repliedTweets = await Reply.findAll({
+                include: [
+                    {
+                        model: Tweet,
+                        include: [
+                            {
+                                model: User,
+                                attributes: ['name', 'avatar', 'account']
+                            },
+                            {
+                                model: Like,
+                                attributes: ['id']
+                            },
+                            {
+                                model: Reply,
+                                attributes: ['id']
+                            }
+                        ]
+                    },
+                ],
+                where: { UserId: id },
+                order: [['createdAt', 'DESC']]
+            })
+            if (!repliedTweets) throw new Error("該名使用者沒有回覆過任何推文！")
+            const userLikedTweetsId = getUserData(req.user.LikedTweets)
+
+            repliedTweets = repliedTweets.map(repliedTweet => ({
+                ...repliedTweet.dataValues,
+                isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(repliedTweet.Tweet.id) : false,
+                replyCount: repliedTweet.Tweet.Replies.length,
+                likeCount: repliedTweet.Tweet.Likes.length
+            }))
+
+            cb(null, repliedTweets)
+        } catch (err) {
+            cb(err)
+        }
     }
 }
 
