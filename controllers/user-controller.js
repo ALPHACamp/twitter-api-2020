@@ -255,6 +255,28 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  // 查看推薦跟隨
+  getTopUser: async (req, res, next) => {
+    try {
+      const TOP_USER_COUNT = req.query?.top || 10
+      const users = await User.findAll({
+        raw: true,
+        attributes: ['id', 'name', 'account', 'avatar',
+          [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount']],
+        where: { role: { [Sequelize.Op.ne]: 'admin' } }
+      })
+      const usersData = users
+        ?.map(user => ({
+          ...user,
+          isUserFollowed: helpers.getUser(req)?.Followings?.some(f => f.id === user.id)
+        }))
+        ?.sort((a, b) => b.followersCount - a.followersCount)
+        ?.slice(0, TOP_USER_COUNT)
+      res.json(usersData)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = userController
