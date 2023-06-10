@@ -251,7 +251,7 @@ const userController = {
       })
       const updatedUserJSON = updatedUser.toJSON()
       delete updatedUserJSON.password
-      res.json(updatedUserJSON)
+      return res.json(updatedUserJSON)
     } catch (err) {
       next(err)
     }
@@ -273,7 +273,7 @@ const userController = {
         }))
         ?.sort((a, b) => b.followersCount - a.followersCount)
         ?.slice(0, TOP_USER_COUNT)
-      res.json(usersData)
+      return res.json(usersData)
     } catch (err) {
       next(err)
     }
