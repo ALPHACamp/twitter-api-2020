@@ -11,6 +11,14 @@ const { Sequelize } = require('sequelize')
 const USERS_INTRODUCTION_WORD_LIMIT = 160
 
 const userController = {
+  // token 驗證
+  getTokenCheck: (req, res, next) => {
+    try {
+      res.json({ success: true, error: null })
+    } catch (err) {
+      next(err)
+    }
+  },
   // 使用者註冊
   signup: async (req, res, next) => {
     try {
@@ -188,30 +196,27 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const user = await User.findByPk(userId, {
-        raw: true,
-        nest: true,
-        attributes: ['id', 'name',
-          [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount']]
-      })
+      const [user, follows] = await Promise.all([
+        User.findByPk(userId, {
+          raw: true,
+          attributes: ['id', 'name',
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount']]
+        }),
+        Followship.findAll({
+          raw: true,
+          nest: true,
+          where: { followerId: userId },
+          order: [['createdAt', 'DESC']],
+          include: [{
+            model: User,
+            attributes: ['id', 'name', 'avatar', 'introduction']
+          }]
+        })
+      ])
       if (!user) newErrorGenerate('使用者不存在', 404)
-      const selfUser = await User.findByPk(helpers.getUser(req).id, {
-        include: [{ model: User, as: 'Followings', attributes: ['id'] }],
-        attributes: []
-      })
-      const follows = await Followship.findAll({
-        raw: true,
-        nest: true,
-        where: { followerId: userId },
-        order: [['createdAt', 'DESC']],
-        include: [{
-          model: User,
-          attributes: ['id', 'name', 'avatar', 'introduction']
-        }]
-      })
       const followsData = follows?.map(follow => ({
         ...follow,
-        isSelfUserFollow: selfUser?.toJSON().Followings.some(s => s.id === follow.followingId)
+        isSelfUserFollow: helpers?.getUser(req).Followings?.some(s => s.id === follow.followingId)
       }))
       const doneFollowsData = [...followsData, user]
       return res.json(doneFollowsData)

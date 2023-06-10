@@ -15,6 +15,8 @@ router.post('/users', userController.signup)
 router.post('/adminSignin', passport.authenticate('local', { session: false }), adminController.signIn)
 // 前台登入
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
+// token 驗證
+router.get('/tokenCheck', authenticated, userController.getTokenCheck)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/users', authenticated, users)
