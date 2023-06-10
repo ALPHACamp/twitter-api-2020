@@ -192,7 +192,7 @@ const userController = {
   },
   editUser: async (req, res, next) => {
     try {
-      const { email, password, name, introduction, account } = req.body
+      const { name, introduction } = req.body
       let { id } = req.params
       id = Number(id)
 
@@ -200,35 +200,15 @@ const userController = {
       if (introduction.length > 160) throw new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
       if (name.length > 50) throw new Error('Your self-introduction is a little too long for me to handle! ! Please less than 50.')
 
-      // 確認使用者是否存在 與 email & account是否重複
-      const [user, checkEmail, checkAccount] = await Promise.all([
-        User.findByPk(id),
-        User.findOne({ where: { email } }),
-        User.findOne({ where: { account } })
-      ])
-
+      const user = await User.findByPk(id)
       // 錯誤處理
       if (!user) throw new Error('The user does not exist')
-      if (checkEmail) throw new Error('Oops! Your email already exist')
-      if (checkAccount) throw new Error('Oops! Your account already exist')
 
-      // 取得 avatar、background圖片
-      const { file } = req
-      const { avatar, background } = req
-      const [avatarFilePath, backgroundFilePath] = await Promise.all([
-        imgurFileHandler(avatar),
-        imgurFileHandler(background)
-      ])
-      const updatedUser = User.update({
-        email,
-        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+      const updatedUser = await user.update({
         name,
-        avatar: avatarFilePath || null,
-        introduction,
-        background: backgroundFilePath || null,
-        account
+        introduction
       })
-      res.status(200).json(updatedUser)
+      return res.status(200).json(updatedUser)
     } catch (error) {
       next(error)
     }
