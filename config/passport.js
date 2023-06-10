@@ -1,15 +1,11 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
-
 const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
-
 const bcrypt = require('bcryptjs')
-require('dotenv').config()
 
 const { User } = require('../models')
-
 
 // set up local Passport strategy
 passport.use(new LocalStrategy({
@@ -47,8 +43,8 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, { //拿payload裡面的id
   })
     .then(user => {
-      if (!user) return done(null, false)
-      return done(null, user)
+      if (!user) return cb(null, false)
+      return cb(null, user)
     })
     .catch(err => cb(err))
 })
