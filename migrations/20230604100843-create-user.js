@@ -12,20 +12,23 @@ module.exports = {
         type: Sequelize.STRING(50)
       },
       email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
       account: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
       password: {
         type: Sequelize.STRING
       },
       avatar: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'https://i.imgur.com/BMxWxE8.jpeg'
       },
       backgroundImage: {
         type: Sequelize.STRING,
-        defaultValue: 'https://img.onl/Ass09D'
+        defaultValue: 'https://i.imgur.com/5ZDLPuU.jpeg'
       },
       introduction: {
         type: Sequelize.TEXT
