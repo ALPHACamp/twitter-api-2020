@@ -5,15 +5,10 @@ const helpers = require('../_helpers')
 const userController = {
   signIn: async (req, res, next) => {
     try {
-      const { account, password } = req.body
-      if (!account || !password) throw new Error('account & password are required!')
-      const user = await User.findOne({ where: { account } })
-      if (!user) throw new Error('帳號不存在!')
-      if (!bcrypt.compareSync(password, user.password)) throw new Error('password incorrect!')
-      const userJSON = user.toJSON()
+      const userJSON = req.user.toJSON()
       delete userJSON.password
       const token = jwt.sign(userJSON, process.env.JWT_SECRET, { expiresIn: '30d' })// 簽證效期30天
-      return res.status(200).json({ token, user: userJSON })
+      return res.status(200).json({ token, userJSON })
     } catch (err) { next(err) }
   },
   signUp: async (req, res, next) => {
