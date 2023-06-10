@@ -16,9 +16,7 @@ router.post('/signin', passport.authenticate('local', { session: false, failureM
 
 // like
 router.post('/tweets/:id/like', authenticated, followController.addLike)
-router.delete('/tweets/:id/unlike', authenticated, followController.removeLike)
-router.get('/users/:id/likes', authenticated, followController.getLikes)
-// follow
+router.post('/tweets/:id/unlike', authenticated, followController.removeLike)
 router.post('/followships', authenticated, followController.addFollowing)
 router.delete('/followships/:id', authenticated, followController.removeFollowing)
 router.get('/users/:id/followers', authenticated, followController.getFollowers)

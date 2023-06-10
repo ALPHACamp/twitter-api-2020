@@ -11,9 +11,8 @@ const userController = {
       const userData = getUser(req).toJSON()
       if (!userData) throw new Error('account or password incorrect!')
       delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, {
-        expiresIn: '7d'
-      })
+
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '7d' })
       res.json({
         status: 'success',
         token,
