@@ -12,29 +12,29 @@ module.exports = {
         type: Sequelize.STRING(50)
       },
       email: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(254),
         unique: true
       },
       account: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(254),
         unique: true
       },
       password: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(254)
       },
       avatar: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(254),
         defaultValue: 'https://i.imgur.com/BMxWxE8.jpeg'
       },
       backgroundImage: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(254),
         defaultValue: 'https://i.imgur.com/5ZDLPuU.jpeg'
       },
       introduction: {
         type: Sequelize.TEXT
       },
       role: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(254)
       },
       createdAt: {
         allowNull: false,
