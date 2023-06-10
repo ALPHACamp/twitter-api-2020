@@ -224,28 +224,26 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const user = await User.findByPk(userId, {
-        raw: true,
-        nest: true,
-        attributes: ['id', 'name',
-          [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount']]
-      })
+      const [user, follows] = await Promise.all([
+        User.findByPk(userId, {
+          raw: true,
+          nest: true,
+          attributes: ['id', 'name',
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount']]
+        }),
+        Followship.findAll({
+          raw: true,
+          nest: true,
+          where: { followingId: userId },
+          attributes: ['id', 'followerId', 'followingId', 'createdAt'],
+          order: [['createdAt', 'DESC']]
+        })
+      ])
       if (!user) newErrorGenerate('使用者不存在', 404)
-      const selfUser = await User.findByPk(helpers.getUser(req).id, {
-        include: [{ model: User, as: 'Followings', attributes: ['id'] }],
-        attributes: []
-      })
-      const follows = await Followship.findAll({
-        raw: true,
-        nest: true,
-        where: { followingId: userId },
-        attributes: ['id', 'followerId', 'followingId', 'createdAt'],
-        order: [['createdAt', 'DESC']]
-      })
       const followsData = await Promise.all(follows?.map(async follow => ({
         ...follow,
         User: await User.findByPk(follow.followerId, { raw: true, attributes: ['id', 'name', 'avatar', 'introduction'] }),
-        isSelfUserFollow: selfUser?.toJSON().Followings.some(s => s.id === follow.followerId)
+        isSelfUserFollow: helpers?.getUser(req)?.Followings?.some(s => s.id === follow.followerId)
       })))
       const doneFollowsData = [...followsData, user]
       return res.json(doneFollowsData)
