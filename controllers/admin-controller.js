@@ -23,6 +23,7 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
+      console.log(req.user)
       let users = await User.findAll({
         where: { role: 'user' },
         attributes: ['id', 'name', 'account', 'avatar', 'cover'],
