@@ -1,7 +1,7 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like, Followship } = require('../models') // 之後要改成{ User } = require('../models')
+const { User, Tweet, Followship } = require('../models') // 之後要改成{ User } = require('../models')
 const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
@@ -11,10 +11,11 @@ passport.use(new LocalStrategy(
   {
     usernameField: 'account',
     passwordField: 'password',
-    passReqToCallback: true
+    passReqToCallback: true // 如果需要在 verify callback 中取得 req
   },
   // authenticate user
-  async (account, password, cb) => {
+  // 因為上面有註明 passReqToCallback: true，所以第一個參數會是 req
+  async (req, account, password, cb) => {
     try {
       const user = await User.findOne({ where: { account } })
       if (!user) throw new Error('帳號不存在!')
