@@ -39,10 +39,23 @@ const tweetController = {
           nest: true
         })
       } else if (liked) {
+        // 先從like找到喜歡的編號
+        // 再從編號找該貼文
+        const likes = await Like.findAll({
+          where: [{ User_Id: userId }],
+          attributes: ['TweetId'],
+          raw: true,
+          nest: true
+        })
+        const tweetIds = likes.map(row => row.TweetId)
         tweets = await Tweet.findAll({
-          where: { UserId: userId },
+          where: [{ id: tweetIds }],
           include: [
-            { model: User, attributes: ['account', 'name', 'avatar'] },
+            {
+              model: User,
+              as: 'User',
+              attributes: ['account', 'name', 'avatar']
+            },
             { model: Like, attributes: ['UserId'] },
             { model: Reply, attributes: ['UserId'] }
           ],
@@ -66,7 +79,6 @@ const tweetController = {
           ],
           nest: true
         })
-        console.log(tweets)
       }
       if (tweets.length === 0) throw new Error('Tweets not found')
       const counts = tweets.map((tweet) => ({

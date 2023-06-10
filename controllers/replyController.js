@@ -15,7 +15,6 @@ const replyController = {
         replies.forEach((reply) => {
           getLastUpdated(reply)
         })
-        console.log(replies)
         return res.json({ status: 'success', data: replies })
       })
       .catch((error) => next(error))
