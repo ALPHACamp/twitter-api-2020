@@ -1,21 +1,18 @@
 'use strict'
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Replies', {
+    await queryInterface.createTable('Followships', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      user_id: {
+      follower_id: {
         type: Sequelize.INTEGER
       },
-      tweet_id: {
+      following_id: {
         type: Sequelize.INTEGER
-      },
-      comment: {
-        type: Sequelize.TEXT
       },
       created_at: {
         allowNull: false,
@@ -28,6 +25,6 @@ module.exports = {
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Replies')
+    await queryInterface.dropTable('Followships')
   }
 }
