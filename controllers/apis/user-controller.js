@@ -203,9 +203,15 @@ const userController = {
       const user = await User.findByPk(id)
       // 錯誤處理
       if (!user) throw new Error('The user does not exist')
-
+      const { avatar, background } = req
+      const [avatarFilePath, backgroundFilePath] = await Promise.all([
+        imgurFileHandler(avatar),
+        imgurFileHandler(background)
+      ])
       const updatedUser = await user.update({
         name,
+        avatar: avatarFilePath || user.avatar,
+        background: backgroundFilePath || user.background,
         introduction
       })
       return res.status(200).json(updatedUser)
