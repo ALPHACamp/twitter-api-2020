@@ -3,21 +3,28 @@
 ![screenshot](public/images/placeholder1.png)
 
 ## About - 介紹
+---
 這是一個前後端分離的小組專案，前端使用React，後端使用Express跟MySQL關連式資料庫。
 Simple Twitter 提供註冊，登入，推文，回覆推文，喜歡跟追蹤使用者等功能。
 <br><br>
+## Website - 前端網站連結
+--- 
+（這裡放入前端網頁連結）
+<br><br>
 
 ## API - 接口文件
+---
 文件內提供每個街口的的使用方式，回傳，成功跟失敗的回傳資訊：<br>
 https://www.notion.so/API-c1a90264a00848d2af202689ae0148be 
 <br><br>
 
 ## Environment - 開發環境
+---
 * node v14.16.0
 * nodemon
 <br><br>
-## Installation and execution - 安裝與執行步驟
-
+## Installation and Execution - 安裝與執行步驟
+---
 ### 1. 開啟Terminal, Clone此專案至本機:
 ```
  https://github.com/klu0926/twitter-api-2023
@@ -25,12 +32,10 @@ https://www.notion.so/API-c1a90264a00848d2af202689ae0148be
 ### 2. 進入存放此專案的資料夾
 ```
 cd twitter-api-2023
-
 ```
 ### 3. 安裝所需要的NPM Packages
 ```
 npm install
-
 ```
 
 ### 4. 在SQL WorkBench 建立資料庫 (在workBench內輸入) 
@@ -64,6 +69,7 @@ Example app listening on port 3000!
 <br>
 
 ## Seed Accounts - 測試帳號
+---
 專案提供 1 個後台管理者帳號與跟 9 位使用者帳號<br>
 管理者帳號只可以使用後台功能，使用者帳號只能使用前台功能
 ### # 管理者帳號 - 後台
@@ -76,6 +82,7 @@ email: user1@example.com <br>
 password: 12345678 <br>
 <br>
 ## Development Tools - 開發工具
+---
 * MongoDB
 * nodemon
 * bcrypt-nodejs: "0.0.3",
@@ -106,10 +113,10 @@ password: 12345678 <br>
 ## Team - 團隊成員
 --- 
 ### 前端
-[1111](https://github.com/11111)
-[1111](https://github.com/11111)
+[zebrrrra](https://github.com/zebrrrra)<br>
+[Jena Lin](https://github.com/J6127)
 ### 後端
-[1111](https://github.com/11111)
-[1111](https://github.com/11111)
+[kim1037](https://github.com/kim1037)<br>
+[klu0926](https://github.com/klu0926)
 
 
