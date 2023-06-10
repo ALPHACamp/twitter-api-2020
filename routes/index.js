@@ -17,6 +17,8 @@ router.post('/api/signin', passport.authenticate('local', { session: false, fail
 router.post('/api/signup', userController.signUp)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 
+router.get('/api/users/:id', authenticated, userController.getUser)
+
 router.use('/', apiErrorHandler)
 
 module.exports = router
