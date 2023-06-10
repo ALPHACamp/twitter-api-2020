@@ -7,6 +7,7 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 const admin = require('./modules/admin')
 const tweets = require('./modules/tweet')
 const users = require('./modules/user')
+const followships = require('./modules/followships')
 const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
 // 註冊
@@ -20,6 +21,7 @@ router.get('/tokenCheck', authenticated, userController.getTokenCheck)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/users', authenticated, users)
+router.use('/followships', authenticated, followships)
 router.use('/tweets', authenticated, tweets)
 router.use('/', apiErrorHandler)
 module.exports = router
