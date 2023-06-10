@@ -2,7 +2,7 @@ const { User, Tweet } = require('../models')
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const Sequelize = require("sequelize")
-const { literal } = Sequelize
+const moment = require('moment')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -13,18 +13,22 @@ const adminController = {
       where: { account }
     })
       .then((user) => {
-        if (!user) throw new Error("Admin 權限不存在")
-        if (user.role === "user") throw new Error("Admin 權限不存在")
+        if (!user) throw new Error("Admin not exists")
+        if (user.role === "user") throw new Error("Admin not exists")
         if (!bcrypt.compareSync(password, user.password))
-          throw new Error("密碼不相符")
-        const userData = user.toJSON()
-        delete userData.password
-        const token = jwt.sign(userData, process.env.JWT_SECRET, {
+          throw new Error("Password incorrect")
+        const adminData = user.toJSON()
+        delete adminData.password
+        const token = jwt.sign(adminData, process.env.JWT_SECRET, {
           expiresIn: "30d",
         })
         return res.status(200).json({
-          token,
-          user: userData,
+          status: "success",
+          message: "Login successful",
+          data: {
+            token,
+            admin: adminData,
+          }
         })
       })
       .catch((err) => next(err));
@@ -78,14 +82,19 @@ const adminController = {
 
   getTweets: (req, res, next) => {
     return Tweet.findAll({
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: User,
-          attributes: { exclude: ["password", "createdAt", "updatedAt", "role"] }
+          attributes: { exclude: ["password", "createdAt", "updatedAt", "role", "introduction"] }
         },
       ],
       attributes: {
         include: [
+          [
+            Sequelize.literal(`TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())`),
+            "diffCreatedAt",
+          ],
           [
             Sequelize.literal(
               "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = tweet.id)"
@@ -97,21 +106,27 @@ const adminController = {
               "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = tweet.id)"
             ),
             "likeCount",
-          ],
+          ]
         ],
+        exclude: ["UserId"]
       },
       nest: true,
       raw: true,
     })
       .then((tweets) => {
-        if (!tweets) { return res.status(404).json({ status: 'error', message: 'No tweets found' }) }
-        const result = tweets
-        // sort by date
-        .sort(
-          (a, b) =>
-            b.createdAt.getTime() - a.createdAt.getTime()
-        )
-        return res.status(200).json(tweets)
+        if (!tweets) throw new Error("No tweets found")
+        const processedTweets = tweets.map((tweet) => {
+          const createdAt = moment(tweet.createdAt).format('YYYY-MM-DD HH:mm:ss')
+          const updatedAt = moment(tweet.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+          const diffCreatedAt = moment().subtract(tweet.diffCreatedAt, 'seconds').fromNow()
+          return {
+            ...tweet,
+            createdAt,
+            updatedAt,
+            diffCreatedAt
+          }
+        })
+        return res.status(200).json(processedTweets)
       })
       .catch((err) => next(err))
   },
@@ -120,9 +135,7 @@ const adminController = {
     return Tweet.findByPk(req.params.id)
       .then(tweet => {
         // Error: tweet doesn't exist
-        if (!tweet) {
-          return res.status(404).json({ status: 'error', message: 'No tweets found' })
-        }
+        if (!tweet) throw new Error("No tweet found")
         // keep the deleted data
         const deletedTweet = tweet.toJSON()
         return tweet.destroy()
