@@ -178,20 +178,22 @@ const userController = {
                 model: User,
                 attributes: ['id', 'account', 'name', 'avatar']
               }],
-            attributes: [
-              [
-                sequelize.literal(
-                  '(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'
-                ),
-                'repliesCount'
-              ],
-              [
-                sequelize.literal(
-                  '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id)'
-                ),
-                'likesCount'
+            attributes: {
+              include: [
+                [
+                  sequelize.literal(
+                    '(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'
+                  ),
+                  'repliesCount'
+                ],
+                [
+                  sequelize.literal(
+                    '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id)'
+                  ),
+                  'likesCount'
+                ]
               ]
-            ]
+            }
           }]
       })
 
@@ -269,6 +271,7 @@ const userController = {
   putUserSetting: async (req, res, next) => {
     try {
       // 使用者僅能編輯自己的資料
+      const currentUser = helpers.getUser(req)
       const currentUserId = helpers.getUser(req).id
       if (currentUserId.toString() !== req.params.id) { throw new Error('你沒有權限可以編輯他人資料') }
 
@@ -291,8 +294,8 @@ const userController = {
             [Op.or]: [email ? { email } : {}, account ? { account } : {}]
           }
         })
-        if (checkUser?.email === email) throw new Error('email 已重複註冊！')
-        if (checkUser?.account === account) throw new Error('account 已重複註冊！')
+        if (email !== currentUser.email && checkUser?.email === email) throw new Error('email 已重複註冊！')
+        if (account !== currentUser.account && checkUser?.account === account) throw new Error('account 已重複註冊！')
       }
 
       const user = await User.findByPk(req.params.id)
