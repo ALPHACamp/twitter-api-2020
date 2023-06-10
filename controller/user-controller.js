@@ -30,7 +30,7 @@ const userController = {
       })
       const userJSON = newUser.toJSON()
       delete userJSON.password
-      return res.status(200).json(userJSON)
+      return res.status(200).json({ message: 'Signup successfully!' })
     } catch (err) { next(err) }
   },
   getUser: async (req, res, next) => {
@@ -46,8 +46,7 @@ const userController = {
       })
       if (!user || user.role === 'admin') throw new Error('帳號不存在!')
       user.dataValues.isFollowed = user.Followers.map(u => u.id).includes(reqUserId)
-      const userJSON = user.toJSON()
-      return res.status(200).json(userJSON)
+      return res.status(200).json(user)
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
@@ -64,8 +63,7 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
       if (tweets.length === 0) throw new Error('此用戶尚未發布推文')
-      const tweetsJSON = tweets.map(t => t.toJSON())
-      return res.status(200).json(tweetsJSON)
+      return res.status(200).json(tweets)
     } catch (err) { next(err) }
   },
   getUserReplies: async (req, res, next) => {
@@ -130,12 +128,15 @@ const userController = {
     try {
       const { name, password, introduction } = req.body
       const userId = helpers.getUser(req).id
-      const user = await User.findByPk(userId, { attributes: { exclude: ['password'] } })
+      const user = await User.findByPk(userId)
       if (!user) throw new Error('User not found!')
-      const hash = await bcrypt.hash(password, 10)
+      let hash = user.password
+      if (password) {
+        hash = await bcrypt.hash(password, 10)
+      }
       await user.update({
         name: name || user.name,
-        password: hash || user.password,
+        password: hash,
         introduction: introduction || user.introduction
       })
       return res.status(200).json({ message: '修改成功' })
