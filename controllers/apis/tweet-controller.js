@@ -18,7 +18,7 @@ const tweetController = {
       const tweets = await Tweet.findAll()
       if (!tweets) throw new Error('There is no tweet')
 
-      return res.json({ status: 'success', data: tweets })
+      return res.json(tweets)
     } catch (error) {
       next(error)
     }
@@ -29,7 +29,7 @@ const tweetController = {
       const tweet = await Tweet.findByPk(tweet_id)
       if (!tweet) throw new Error('The tweet does not exist')
 
-      return res.json({ status: 'success', data: tweet })
+      return res.json(tweet)
     } catch (error) {
       next(error)
     }
@@ -62,7 +62,7 @@ const tweetController = {
         raw: true,
         nest: true
       })
-      return res.json({ status: 'success', data: replies })
+      return res.status(200).json(replies)
     } catch (error) {
       next(error)
     }

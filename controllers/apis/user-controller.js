@@ -69,7 +69,7 @@ const userController = {
       ])
       if (!user) throw new Error('The user does not exist')
       if (!userTweets.length) throw new Error("The user have'nt post any tweet yet")
-      return res.json({ status: 'success', data: userTweets })
+      return res.json(userTweets)
     } catch (error) {
       next(error)
     }
