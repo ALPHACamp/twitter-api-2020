@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet, Followship, Like, Reply } = require('../models')
 const { Op } = require('sequelize')
 const { getUser } = require('../_helpers')
 const userController = {
@@ -53,6 +53,109 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const currentUserId = getUser(req).dataValues.id
+      const [user, tweetCount, followerCount, followingCount] = await Promise.all([
+        User.findByPk(id, { raw: true, nest: true }),
+        Tweet.count({ where: { UserId: id } }),
+        Followship.count({ where: { followingId: id } }),
+        Followship.count({ where: { followerId: id } })
+      ])
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      delete user.password
+      user.tweetCount = tweetCount
+      user.followerCount = followerCount
+      user.followingCount = followingCount
+
+      // 查看其他使用者是否有追蹤自己
+      if (Number(id) !== currentUserId) {
+        const currentUserFollowing = await Followship.findAll({
+          where: { followerId: id },
+          raw: true
+        })
+        user.followed = currentUserFollowing.some(f => f.followingId === currentUserId)
+      }
+
+      res.status(200).json(user)
+    } catch (err) { next(err) }
+  },
+  getUserTweet: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const currentUserId = getUser(req).dataValues.id
+      const [user, tweets, likes] = await Promise.all([
+        User.findByPk(id, { raw: true }),
+        Tweet.findAll({
+          where: { UserId: id },
+          include: [
+            { model: Reply },
+            { model: Like }
+          ],
+          order: [['createdAt', 'DESC']],
+          attributes: ['id', 'description', 'createdAt']
+        }),
+        Like.findAll({ where: { UserId: currentUserId }, raw: true })
+      ])
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      if (!tweets.length) return res.status(404).json({ status: 'error', message: '無推文資料' })
+
+      // 目前登入者的Likes
+      const currentUserLikes = likes.map(l => l.TweetId)
+      const data = tweets.map(tweet => ({
+        tweetId: tweet.dataValues.id,
+        tweetOwnerId: user.id,
+        tweetOwnerAccount: user.accout,
+        tweetOwnerName: user.name,
+        tweetOwnerAvatar: user.avatar,
+        description: tweet.dataValues.description,
+        createdAt: tweet.dataValues.createdAt,
+        replyCount: tweet.dataValues.Replies.length,
+        likeCount: tweet.dataValues.Likes.length,
+        isLiked: currentUserLikes.includes(tweet.dataValues.id)
+      }))
+      res.status(200).json(data)
+    } catch (err) { next(err) }
+  },
+  getUserReply: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const [user, replies] = await Promise.all([
+        User.findByPk(id, { raw: true, nest: true }),
+        Reply.findAll({
+          where: { UserId: id },
+          include: [
+            {
+              model: Tweet,
+              attributes: ['id'],
+              include: [
+                { model: User, attributes: ['id', 'account', 'name'] }
+              ]
+            }
+          ],
+          order: [['createdAt', 'DESC']],
+          raw: true,
+          nest: true
+        })
+      ])
+      if (!replies.length) return res.status(404).json({ status: 'error', message: '無回覆資料' })
+
+      const data = replies.map(r => ({
+        reaplyId: r.id,
+        comment: r.comment,
+        replyerId: user.id,
+        replyerAccount: user.account,
+        replyerName: user.name,
+        replyerAvatar: user.avatar,
+        tweetId: r.Tweet.id,
+        tweetOwnerAccount: r.Tweet.User.account,
+        tweetOwnerName: r.Tweet.User.name,
+        createdAt: r.createdAt
+      }))
+      res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 module.exports = userController
