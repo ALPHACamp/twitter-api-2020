@@ -156,6 +156,41 @@ const userController = {
       }))
       res.status(200).json(data)
     } catch (err) { next(err) }
+  },
+  getUserLike: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const likes = await Like.findAll({
+        where: { UserId: id },
+        include: {
+          model: Tweet,
+          include: [
+            { model: Like },
+            { model: Reply, attributes: ['id'] },
+            { model: User, attributes: ['id', 'name', 'account'] }
+          ],
+          attributes: ['id', 'description', 'createdAt']
+        },
+        order: [['createdAt', 'DESC']]
+      })
+
+      if (!likes.length) return res.status(404).json({ status: 'error', message: '無Like資料' })
+
+      const data = likes.map(l => ({
+        TweetId: l.TweetId,
+        description: l.Tweet.description,
+        tweetOwnerId: l.Tweet.User.id,
+        tweetOwnerName: l.Tweet.User.name,
+        tweetOwnerAccount: l.Tweet.User.account,
+        tweetOwnerAvatar: l.Tweet.User.avatar,
+        tweetcreatedAt: l.Tweet.createdAt,
+        replyCount: l.Tweet.Replies.length,
+        likeCount: l.Tweet.Likes.length,
+        isLiked: l.isLiked
+
+      }))
+      res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 module.exports = userController
