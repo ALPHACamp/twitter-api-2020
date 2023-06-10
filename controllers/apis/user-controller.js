@@ -62,6 +62,11 @@ const userController = {
     userServices.getFollowers(req, (err, data) => err
       ? next(err)
       : res.json(data))
+  },
+  getFollowings: (req, res, next) => {
+    userServices.getFollowings(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
   }
   // for JWT test purpose
   /* getUser: (req, res, next) => {

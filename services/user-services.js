@@ -247,6 +247,34 @@ const userServices = {
         return cb(null, followers)
       })
       .catch(err => cb(err))
+  },
+  getFollowings: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: [{
+          model: User,
+          as: 'Followings',
+          attributes: ['id', 'name', 'avatar', 'introduction']
+        }]
+      }),
+      Followship.findAll({
+        where: { followerId: getUser(req).dataValues.id },
+        raw: true
+      })
+    ])
+      .then(([user, userFollowings]) => {
+        if (!user.Followings.length) return cb(null, [])
+        const currentFollowings = userFollowings.map(f => f.followingId)
+        const followings = user.Followings.map(f => ({
+          followingId: f.id,
+          account: f.account,
+          name: f.name,
+          introduction: f.introduction,
+          isFollowed: currentFollowings.some(id => id === f.id)
+        }))
+        return cb(null, followings)
+      })
+      .catch(err => cb(err))
   }
 }
 
