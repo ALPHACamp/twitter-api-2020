@@ -132,12 +132,13 @@ const userController = {
       const userId = helpers.getUser(req).id
       const user = await User.findByPk(userId, { attributes: { exclude: ['password'] } })
       if (!user) throw new Error('User not found!')
+      const hash = await bcrypt.hash(password, 10)
       await user.update({
         name: name || user.name,
-        password: password || user.password,
+        password: hash || user.password,
         introduction: introduction || user.introduction
       })
-      return res.status(200).json(user)
+      return res.status(200).json({ message: '修改成功' })
     } catch (err) { next(err) }
   }
 }
