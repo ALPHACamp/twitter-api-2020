@@ -73,7 +73,7 @@ const userServices = {
             likedCount: tweet.Likes.length,
             name: tweet.User.name,
             avatar: tweet.User.avatar,
-            account: tweet.User.account,
+            account: tweet.User.account
           }
           delete tweet.Replies
           delete tweet.Likes
@@ -96,7 +96,7 @@ const userServices = {
             ...reply.toJSON(),
             name: reply.User.name,
             avatar: reply.User.avatar,
-            account: reply.User.account,
+            account: reply.User.account
           }
           delete reply.User
           delete reply.Replies
@@ -104,6 +104,37 @@ const userServices = {
           return reply
         })
         return cb(null, replies)
+      })
+      .catch(err => cb(err))
+  },
+  getUserLikesTweets: (req, cb) => {
+    return Like.findAll({
+      where: { UserId: req.params.id },
+      include: [User,
+        { model: Tweet, include: [Reply, Like, User] }
+      ],
+      order: [['createdAt', 'DESC']],
+      nest: true
+    })
+      .then(likes => {
+        const tweets = likes.map(l => {
+          l = {
+            TweetId: l.TweetId,
+            UserId: l.UserId,
+            description: l.Tweet.description,
+            name: l.Tweet.User.name,
+            avatar: l.Tweet.User.avatar,
+            account: l.Tweet.User.account,
+            tweet_created_at: l.Tweet.createdAt,
+            isLiked: true,
+            replyCount: l.Tweet.Replies.length,
+            likedCount: l.Tweet.Likes.length,
+          }
+          delete l.User
+          delete l.Tweet
+          return l
+        })
+        return cb(null, tweets)
       })
       .catch(err => cb(err))
   },
