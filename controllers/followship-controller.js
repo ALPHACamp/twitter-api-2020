@@ -83,7 +83,7 @@ const followController = {
       })
 
       if (!followship) {
-        return res.status(409).json({ status: 'error', message: `You didn't followed @${unfollowingUser.account}.` })
+        return res.status(409).json({ status: 'error', message: `You didn't followed @${followingUser.account}.` })
       }
 
       const data = await followship.destroy()

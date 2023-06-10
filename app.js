@@ -1,6 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+const path = require('path')
 const express = require('express')
 const session = require('express-session')
 const SESSION_SECRET = 'secret'
@@ -16,6 +17,7 @@ const methodOverride = require('method-override')
 const app = express()
 const port = 3000
 
+app.use('upload', express.static(path.join(__dirname, 'upload')))
 app.use(express.urlencoded({ extened: true }))
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
