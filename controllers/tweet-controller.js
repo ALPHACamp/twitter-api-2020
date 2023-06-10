@@ -2,75 +2,113 @@ const { User, Tweet } = require("../models")
 const { getUser } = require("../_helpers")
 const Sequelize = require("sequelize")
 const { literal } = Sequelize
+const moment = require('moment')
 
 const tweetController = {
-getTweets: (req, res, next) => {
-    Tweet.findAll({
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      order: [["createdAt", "DESC"]],
       include: [
-        { model: User, attributes: ["id", "name", "account", "avatar"] },
+        {
+          model: User,
+          attributes: { exclude: ["password", "createdAt", "updatedAt", "role", "introduction"] }
+        },
       ],
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(`TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())`),
+            "diffCreatedAt",
+          ],
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = tweet.id)"
+            ),
+            "replyCount",
+          ],
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = tweet.id)"
+            ),
+            "likeCount",
+          ]
+        ],
+        exclude: ["UserId"]
+      },
       nest: true,
       raw: true,
     })
       .then((tweets) => {
-        if (!tweets) {
-          return res
-            .status(404)
-            .json({ status: "error", message: "No tweets found" });
-        }
-        return res.status(200).json(tweets);
-      })
-      .catch((err) => next(err));
-  },
-
-  getTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.tweet_id, {
-      attributes: {
-        include: [
-          [
-            literal(`(
-              SELECT COUNT(*) 
-              FROM replies AS reply
-              WHERE 
-                  reply.tweet_id = tweet.id
-              )`),
-            "replyCount",
-          ],
-          [
-            literal(`(
-              SELECT COUNT(*) 
-              FROM likes AS liked
-              WHERE 
-                  liked.tweet_id = tweet.id
-              )`),
-            "likeCount",
-          ],
-        ],
-      },
-      include: [
-        { model: User, attributes: ["id", "name", "account", "avatar"] },
-      ],
-    })
-      .then((tweet) => {
-        if (!tweet) {
-          // Error: tweet not found
-          return res
-            .status(404)
-            .json({ status: "error", message: "No tweet found" })
-        }
-        return res.status(200).json(tweet)
+        if (!tweets) throw new Error("No tweets found")
+        const processedTweets = tweets.map((tweet) => {
+          const createdAt = moment(tweet.createdAt).format('YYYY-MM-DD HH:mm:ss')
+          const updatedAt = moment(tweet.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+          const diffCreatedAt = moment().subtract(tweet.diffCreatedAt, 'seconds').fromNow()
+          return {
+            ...tweet,
+            createdAt,
+            updatedAt,
+            diffCreatedAt
+          }
+        })
+        return res.status(200).json(processedTweets)
       })
       .catch((err) => next(err))
   },
 
+  getTweet: (req, res, next) => {
+    return Tweet.findByPk(req.params.tweet_id, {
+      include: [
+        {
+          model: User,
+          attributes: { exclude: ["password", "createdAt", "updatedAt", "role", "introduction"] }
+        },
+      ],
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(`TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())`),
+            "diffCreatedAt",
+          ],
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = tweet.id)"
+            ),
+            "replyCount",
+          ],
+          [
+            Sequelize.literal(
+              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = tweet.id)"
+            ),
+            "likeCount",
+          ]
+        ],
+        exclude: ["UserId"]
+    }})
+      .then((tweet) => {
+        // Error: tweet not found
+        if (!tweet) throw new Error("No tweet found")
+        const createdAt = moment(tweet.createdAt).format('YYYY-MM-DD HH:mm:ss')
+        const updatedAt = moment(tweet.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+        const diffCreatedAt = moment().subtract(tweet.diffCreatedAt, 'seconds').fromNow()
+        const processedTweet = {
+          ...tweet.toJSON(),
+          createdAt,
+          updatedAt,
+          diffCreatedAt
+        }
+        return res.status(200).json(processedTweet)
+      })
+      .catch((err) => next(err))
+},
+
   postTweets: (req, res, next) => {
-    const { description } = req.body;
+    const { description } = req.body
     if (!description) {
       throw new Error("Tweet content is required!")
     }
     // get current user id
-    const user = getUser(req)
-    const userId = user.id
+    const userId = getUser(req).id
 
     return Tweet.create({
       userId,

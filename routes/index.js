@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const admin = require("./modules/admin");
+const { apiErrorHandler } = require('../middleware/error-handler')
 // import controllers
 const userController = require("../controllers/user-controller");
 const tweetController = require("../controllers/tweet-controller");
@@ -115,5 +116,7 @@ router.post(
 
 // followships
 
+// error handler
+router.use('/', apiErrorHandler)
 
 module.exports = router;

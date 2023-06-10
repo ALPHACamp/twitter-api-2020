@@ -9,7 +9,7 @@ const {
   authenticatedAdmin,
 } = require("../../middleware/api-auth");
 
-router.delete('/signin', adminController.signIn)
+router.post('/signin', adminController.signIn)
 router.delete('/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 router.get('/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.get('/tweets', authenticated, authenticatedAdmin, adminController.getTweets)

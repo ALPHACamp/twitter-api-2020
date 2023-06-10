@@ -4,14 +4,13 @@ const { getUser } = require("../_helpers")
 const likeController = {
 
 postTweetLike: (req, res, next) => {
+    const UserId = getUser(req).id
     const TweetId = req.params.id
-    const user = getUser(req)
-    const userId = user.id
     return Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({
         where: {
-          userId,
+          UserId,
           TweetId,
         }
       })
@@ -21,7 +20,7 @@ postTweetLike: (req, res, next) => {
         if (like) throw new Error("You have liked this tweet!")
 
         return Like.create({
-          userId,
+          UserId,
           TweetId,
         })
       })
@@ -54,8 +53,8 @@ postTweetLike: (req, res, next) => {
             status: "success",
             message: "Unlike succeed",
             deletedLike,
-          });
-        });
+          })
+        })
       })
       .catch((err) => next(err))
   }

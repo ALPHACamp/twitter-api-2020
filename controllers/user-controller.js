@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { getUser } = require("../_helpers");
 const Sequelize = require("sequelize");
 const { Op, literal } = Sequelize;
+const moment = require('moment');
 
 const userController = {
   signUp: (req, res, next) => {
@@ -126,6 +127,7 @@ const userController = {
       User.findByPk(req.params.id),
       Tweet.findAll({
         where: { userId: req.params.id },
+        order: [["createdAt", "DESC"]],
         attributes: {
           include: [
             [
@@ -155,103 +157,128 @@ const userController = {
     ])
       .then(([user, tweets]) => {
         // Error: user not found
-        if (!user) {
-          return res
-            .status(404)
-            .json({ status: "error", message: "No user found" });
-        }
+        if (!user) throw new Error("No user found")
         // Error: tweets not found
-        if (!tweets || tweets.length === 0) {
-          return res
-            .status(404)
-            .json({ status: "error", message: "No tweets found" });
-        }
-        // sort tweets descending
-        const result = tweets.sort(
-          (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-        );
-        return res.status(200).json(result);
+        if (!tweets || tweets.length === 0) throw new Error("No tweets found")
+        const processedTweets = tweets.map((tweet) => {
+          const createdAt = moment(tweet.createdAt).format('YYYY-MM-DD HH:mm:ss')
+          const updatedAt = moment(tweet.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+          const diffCreatedAt = moment().subtract(tweet.diffCreatedAt, 'seconds').fromNow()
+          return {
+            ...tweet,
+            createdAt,
+            updatedAt,
+            diffCreatedAt
+          }
+        })
+        return res.status(200).json(processedTweets);
       })
 
       .catch((err) => next(err));
   },
 
-  getUserRepliedTweets: (req, res, next) => {
-    return Promise.all([
-      User.findByPk(req.params.id),
-      Reply.findAll({
-        where: { userId: req.params.id },
+getUserRepliedTweets: (req, res, next) => {
+  return Promise.all([
+    User.findByPk(req.params.id),
+    Reply.findAll({
+      where: { userId: req.params.id },
+      order: [["createdAt", "DESC"]],
+      attributes: {
         include: [
-          {
-            model: Tweet,
-            include: [
-              { model: User, attributes: ["id", "name", "account", "avatar"] },
-            ],
-          },
+          [
+            Sequelize.literal(`TIMESTAMPDIFF(SECOND, Reply.created_at, NOW())`),
+            "diffCreatedAt",
+          ],
         ],
-        raw: true,
-        nest: true,
-      }),
-    ])
-      .then(([user, replies]) => {
-        // Error: user not found
-        if (!user) {
-          return res
-            .status(404)
-            .json({ status: "error", message: "No user found" });
-        }
-        // Error: replies not found
-        if (!replies || replies.length === 0) {
-          return res
-            .status(404)
-            .json({ status: "error", message: "No replies found" });
-        }
-        return res.status(200).json(replies);
-      })
+        exclude: ["UserId", "TweetId"],
+      },
+      include: [
+        {
+          model: Tweet,
+          include: [
+            { model: User, attributes: ["id", "name", "account", "avatar"] },
+          ],
+        },
+      ],
+      raw: true,
+      nest: true,
+    }),
+  ])
+    .then(([user, replies]) => {
+      // Error: user not found
+      if (!user) throw new Error("No user found");
+      // Error: replies not found
+      if (!replies || replies.length === 0) throw new Error("No replies found");
 
-      .catch((err) => next(err));
-  },
+      const processedRepliedTweets = replies.map((reply) => {
+        const createdAt = moment(reply.createdAt).format("YYYY-MM-DD HH:mm:ss");
+        const updatedAt = moment(reply.updatedAt).format("YYYY-MM-DD HH:mm:ss");
+        const diffCreatedAt = moment().subtract(reply.diffCreatedAt, "seconds").fromNow();
+        return {
+          ...reply,
+          createdAt,
+          updatedAt,
+          diffCreatedAt,
+        };
+      });
 
-  getUserLikes: (req, res, next) => {
-    // unable to pass test request
-    return Promise.all([
-      User.findByPk(req.params.id),
-      Like.findAll({
-        where: { UserId: req.params.id },
-        include: [
-          {
-            model: Tweet,
+      return res.status(200).json(processedRepliedTweets);
+    })
+    .catch((err) => next(err));
+},
+
+getUserLikes: (req, res, next) => {
+  return Promise.all([
+    User.findByPk(req.params.id),
+    Like.findAll({
+      where: { UserId: req.params.id },
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: Tweet,
+          attributes: {
             include: [
-              { model: User, attributes: ["id", "name", "account", "avatar"] },
+              [
+                Sequelize.literal(`TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())`),
+                "diffCreatedAt",
+              ],
             ],
+            exclude: ["UserId"],
           },
-        ],
-        raw: true,
-        nest: true,
-      }),
-    ])
-      .then(([user, likes]) => {
-        // Error: user not found
-        if (!user) {
-          return res
-            .status(404)
-            .json({ status: "error", message: "No user found" });
-        }
-        // Error: likes not found
-        if (!likes || likes.length === 0) {
-          return res
-            .status(404)
-            .json({ status: "error", message: "No likes found" });
-        }
-        // sort likes descending
-        const result = likes.sort(
-          (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-        );
-        return res.status(200).json(result);
-      })
+          include: [
+            { model: User, attributes: ["id", "name", "account", "avatar"] },
+          ],
+        },
+      ],
+      raw: true,
+      nest: true
+    }),
+  ])
+    .then(([user, likes]) => {
+      // Error: user not found
+      if (!user) throw new Error("No user found")
+      // Error: likes not found
+      if (!likes || likes.length === 0) throw new Error("No likes found")
 
-      .catch((err) => next(err));
-  },
+      const processedUserLikes = likes.map((like) => {
+        const createdAt = moment(like.Tweet.createdAt).format("YYYY-MM-DD HH:mm:ss")
+        const updatedAt = moment(like.Tweet.updatedAt).format("YYYY-MM-DD HH:mm:ss")
+        const diffCreatedAt = moment().subtract(like.Tweet.diffCreatedAt, "seconds").fromNow()
+
+        return {
+          ...like,
+          Tweet: {
+            ...like.Tweet,
+            createdAt,
+            updatedAt,
+            diffCreatedAt,
+          }
+        }
+      })
+      return res.status(200).json(processedUserLikes)
+    })
+    .catch((err) => next(err))
+},
   getFollowings: (req, res, next) => {
     return User.findByPk(req.params.id, {
       include: [
