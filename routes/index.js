@@ -5,6 +5,7 @@ const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
+const followshipController = require('../controllers/followship-controller')
 
 const cors = require('../middleware/cors')
 const upload = require('../middleware/multer')
@@ -36,7 +37,9 @@ router.post('/api/tweets/:id/like', cors, authenticated, authenticatedUser, twee
 router.post('/api/tweets/:id/unlike', cors, authenticated, authenticatedUser, tweetController.removeLike)
 
 
-
+//followship
+router.post('/api/followships', cors, authenticated, authenticatedUser, followshipController.addFollowing)
+router.delete('/api/followships/:id', cors, authenticated, authenticatedUser, followshipController.removeFollowing)
 
 
 
