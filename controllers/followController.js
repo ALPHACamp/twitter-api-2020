@@ -1,4 +1,4 @@
-const { Followship, User, Like, Tweet } = require('../models')
+const { Followship, User, Like, Tweet, Sequelize } = require('../models')
 
 const followController = {
   addFollowing: (req, res, next) => {
@@ -189,7 +189,7 @@ const followController = {
       }
     })
       .then((like) => {
-        if (!like) return res.json({ status: "error", message: "未按過讚" })
+        if (!like) return res.json({ status: 'error', message: '未按過讚' })
         if (like.toJSON().UserId !== UserId) return res.json({ status: 'error', message: '非本人按讚' })
         return like.destroy()
       })
@@ -199,28 +199,27 @@ const followController = {
   getLikes: (req, res, next) => {
     const UserId = req.params.id
     if (!UserId) { return res.status(400).json({ status: 'error', message: '缺少用戶id' }) }
+    let likeCounts = 0
 
-    User.findByPk(UserId)
+    return User.findByPk(UserId, {
+      include: [
+        {
+          model: Tweet,
+          include: { model: Like, attributes: [] },
+          attributes: [
+            [Sequelize.fn('COUNT', Sequelize.col('Tweets.Likes.id')), 'likeCount']
+          ]
+        }
+      ],
+      group: ['Tweets.id']
+    })
       .then((user) => {
-        if (!user) return res.status(404).json({ status: 'error', message: '用戶不存在' })
-
-        return Like.findAll({
-          where: { UserId },
-          include: [
-            { model: Tweet, include: [{ model: User, as: 'likedUsers' }] }
-          ],
-          order: [['createdAt', 'DESC']]
-        })
+        if (!user) return res.status(400).json({ status: 'error', message: '找不到' })
+        user.Tweets.forEach(tweet => (
+          likeCounts += tweet.dataValues.likeCount
+        ))
       })
-      .then((likes) => {
-        let totalLikes = 0
-        likes.forEach((like) => {
-          const tweet = like.Tweet
-          tweet.likeCount = tweet.likedUsers.length
-          totalLikes += tweet.likeCount // 计算总赞数
-        })
-        return res.json({ status: 'success', data: totalLikes }) // 返回总赞数和帖子列表
-      })
+      .then(() => res.json({ status: 'success', data: { likeCounts } }))
       .catch((error) => next(error))
   }
 }
