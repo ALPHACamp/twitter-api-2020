@@ -64,6 +64,56 @@ module.exports = {
       role: 'user',
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
+    }, {
+      name: 'user6',
+      email: 'user6@example.com',
+      account: 'user6',
+      password: await bcrypt.hash('12345678', 10),
+      avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
+      role: 'user',
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    }, {
+      name: 'user7',
+      email: 'user7@example.com',
+      account: 'user7',
+      password: await bcrypt.hash('12345678', 10),
+      avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
+      role: 'user',
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    }, {
+      name: 'user8',
+      email: 'user8@example.com',
+      account: 'user8',
+      password: await bcrypt.hash('12345678', 10),
+      avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
+      role: 'user',
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    }, {
+      name: 'user9',
+      email: 'user9@example.com',
+      account: 'user9',
+      password: await bcrypt.hash('12345678', 10),
+      avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
+      role: 'user',
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    }, {
+      name: 'user10',
+      email: 'user10@example.com',
+      account: 'user10',
+      password: await bcrypt.hash('12345678', 10),
+      avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
+      role: 'user',
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
     }], {})
   },
 
