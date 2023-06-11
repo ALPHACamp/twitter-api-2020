@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../../models')
+const { User, Tweet, Reply, Like } = require('../../models')
 const jwt = require('jsonwebtoken')
 
 const userController = {
@@ -19,6 +19,27 @@ const userController = {
     } catch (err) {
       res.status(500).json({ status: 'error', error: err.message })
     }
+  },
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      include: [
+        { model: Reply },
+        { model: Like }
+      ],
+      order: [['createdAt', 'DESC']],
+    })
+      .then(ts => {
+        const tweets = ts.map(tweet => ({
+          ...tweet.toJSON(),
+          description: tweet.description.substring(0, 50),
+          RepliesCount: tweet.Replies.length,
+          LikesCount: tweet.Likes.length
+        }))
+        res.status(200).json({ status: 'success', tweets })
+      })
+      .catch(err => {
+        res.status(500).json({ status: 'error', error: err.message })
+      })
   }
 }
 

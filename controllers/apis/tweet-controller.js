@@ -9,14 +9,14 @@ const tweetController = {
       ],
       order: [['createdAt', 'DESC']],
     })
-      .then(tweets => {
-        const formattedTweets = tweets.map(tweet => {
+      .then(ts => {
+        const tweets = ts.map(tweet => {
           const tweetData = tweet.toJSON()
           tweetData.RepliesCount = tweet.Replies.length
           tweetData.LikesCount = tweet.Likes.length
           return tweetData
         })
-        res.status(200).json({ status: 'success', formattedTweets })
+        res.status(200).json({ status: 'success', tweets })
       })
       .catch(err => {
         res.status(500).json({ status: 'error', error: err.message })
