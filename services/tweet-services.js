@@ -1,22 +1,30 @@
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers.js')
 
 const tweetServices = {
-
   getTweet: (req, cb) => {
     Tweet.findByPk(req.params.tweet_id, {
-      include: [User, Reply, Like]
+      include: [
+        {
+          model: User,
+          attributes: {
+            exclude: ['passwords']
+          }
+        },
+        Like
+      ],
+      attributes: [
+        'id', 'description', 'createdAt', 'updatedAt', 'UserId',
+        [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCount']
+      ]
     })
       .then(tweet => {
         if (!tweet) throw new Error('tweet not found')
         const data = {
           ...tweet.toJSON(),
-          isLiked: tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id),
-          replyCount: tweet.Replies.length,
-          likedCount: tweet.Likes.length
+          isLiked: tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
         }
-        delete data.User.password
-        delete data.Replies
         delete data.Likes
         return cb(null, data)
       })
