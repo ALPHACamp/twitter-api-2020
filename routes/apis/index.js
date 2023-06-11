@@ -7,19 +7,19 @@ const { apiErrorHandler } = require('../../middleware/error-handler')
 const passport = require('../../config/passport')
 const { authenticated, authenticatedAdmin, isUser } = require('../../middleware/api-auth')
 
-// // 以下是Dummy DATA
-// router.get('/admin/users', dummyController.adminGetUsersDummy)
-// router.get('/admin/tweets', dummyController.adminGetTweetsDummy)
+// 以下是Dummy DATA
+router.get('/admin/users', dummyController.adminGetUsersDummy)
+router.get('/admin/tweets', dummyController.adminGetTweetsDummy)
 
-// router.get('/users/top', dummyController.getTopUsersDummy) // for dummyData
-// // router.get('/users/1/tweets', dummyController.getUserTweet)
-// router.get('/users/1', dummyController.getUserDummy)
-// // router.get('/users', dummyController.getUsersDummy)
+router.get('/users/top', dummyController.getTopUsersDummy) // for dummyData
+// router.get('/users/1/tweets', dummyController.getUserTweet)
+router.get('/users/1', dummyController.getUserDummy)
+// router.get('/users', dummyController.getUsersDummy)
 
-// router.get('/tweets/1', dummyController.getTweetDummy)
-// router.get('/tweets/', dummyController.getTweetsDummy)
+router.get('/tweets/1', dummyController.getTweetDummy)
+router.get('/tweets/', dummyController.getTweetsDummy)
 
-// // 以上是Dummy DATA
+// 以上是Dummy DATA
 
 // import modules
 const admin = require('./modules/admin')

@@ -1,6 +1,7 @@
 const express = require('express')
 // const helpers = require('./_helpers')
 const app = express()
+const cors = require('cors')
 const port = process.env.PORT || 3000
 const apis = require('./routes/apis')
 const methodOverride = require('method-override')
@@ -9,10 +10,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // 我來打頭陣
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*')
-  next()
-})
+app.use(cors())
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', '*')
+//   next()
+// })
 
 app.use(methodOverride('_method'))
 app.use(express.urlencoded({ extended: true }))
