@@ -6,6 +6,16 @@ module.exports = (sequelize, DataTypes) => {
     Tweet.hasMany(models.Reply, { foreignKey: 'TweetId' })
     Tweet.hasMany(models.Like, { foreignKey: 'TweetId' })
     Tweet.belongsTo(models.User, { foreignKey: 'UserId' })
+    Tweet.belongsToMany(models.User, {
+      through: models.Like,
+      foreignKey: 'TweetId',
+      as: 'LikedUsers'
+    })
+    Tweet.belongsToMany(models.User, {
+      through: models.Reply,
+      foreignKey: 'TweetId',
+      as: 'RepliedUsers'
+    })
   }
   Tweet.init({
     UserId: DataTypes.INTEGER,
