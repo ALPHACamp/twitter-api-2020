@@ -14,7 +14,7 @@ const followshipController = {
         followerId: getUser(req).id,
         followingId: id
       })
-      return res.json({ status: 'success', data: newFollow })
+      return res.status(200).json(newFollow.toJSON())
     } catch (error) {
       next(error)
     }
@@ -30,7 +30,7 @@ const followshipController = {
       if (!follow) throw new Error("You have'nt followed this user.")
 
       const deleteFollow = await follow.destroy()
-      return res.json({ status: 'success', data: deleteFollow.toJSON() })
+      return res.status(200).json(deleteFollow.toJSON())
     } catch (error) {
       next(error)
     }

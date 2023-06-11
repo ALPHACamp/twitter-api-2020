@@ -8,17 +8,20 @@ const tweetController = {
         UserId: res.locals.userId,
         description
       })
-      return res.json({ status: 'success', data: tweet })
+      return res.status(200).json(tweet)
     } catch (error) {
       next(error)
     }
   },
   getTweets: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll()
+      const tweets = await Tweet.findAll({
+        raw: true,
+        order: [['createdAt', 'DESC']]
+      })
       if (!tweets) throw new Error('There is no tweet')
 
-      return res.json(tweets)
+      return res.status(200).json(tweets)
     } catch (error) {
       next(error)
     }
@@ -29,7 +32,7 @@ const tweetController = {
       const tweet = await Tweet.findByPk(tweet_id)
       if (!tweet) throw new Error('The tweet does not exist')
 
-      return res.json(tweet)
+      return res.status(200).json(tweet)
     } catch (error) {
       next(error)
     }
@@ -46,7 +49,7 @@ const tweetController = {
         TweetId: tweet_id,
         comment
       })
-      return res.json({ status: 'success', data: reply })
+      return res.status(200).json(reply)
     } catch (error) {
       next(error)
     }
@@ -87,7 +90,7 @@ const tweetController = {
         UserId: res.locals.userId,
         TweetId: id
       })
-      return res.json({ status: 'success', data: like })
+      return res.status(200).json(like)
     } catch (error) {
       next(error)
     }
@@ -105,7 +108,7 @@ const tweetController = {
       })
       if (!like) throw new Error('The like does not exist')
       await like.destroy()
-      return res.json({ status: 'success', data: like })
+      return res.status(200).json(like)
     } catch (err) {
       next(err)
     }
