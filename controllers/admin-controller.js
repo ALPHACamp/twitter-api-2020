@@ -41,25 +41,25 @@ const adminController = {
           // user data
           [
             Sequelize.literal(
-              "(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = user.id)"
+              "(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)"
             ),
             "tweetCount"
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = user.id)"
+              "(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = User.id)"
             ),
             "likeCount"
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = user.id)"
+              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = User.id)"
             ),
             "followerCount"
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = user.id)"
+              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = User.id)"
             ),
             "followingCount"
           ]
@@ -97,13 +97,13 @@ const adminController = {
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = tweet.id)"
+              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)"
             ),
             "replyCount"
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = tweet.id)"
+              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = Tweet.id)"
             ),
             "likeCount"
           ]

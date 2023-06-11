@@ -22,13 +22,13 @@ const tweetController = {
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = tweet.id)"
+              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)"
             ),
             "replyCount",
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = tweet.id)"
+              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = Tweet.id)"
             ),
             "likeCount",
           ]
@@ -72,13 +72,13 @@ const tweetController = {
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = tweet.id)"
+              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)"
             ),
             "replyCount",
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = tweet.id)"
+              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = Tweet.id)"
             ),
             "likeCount",
           ]
