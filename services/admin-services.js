@@ -4,12 +4,12 @@ const adminServices = {
   getUsers: (req, cb) => {
     User.findAll({
       attributes: ['id', 'name', 'account', 'avatar', 'coverPhoto',
-        [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetCounts'],
-        [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.User_id = User.id)'), 'likeCounts'],
-        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id)'), 'followingCounts'],
-        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followerCounts']
+        [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.User_id = User.id)'), 'likedCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id)'), 'followingCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followerCount']
       ],
-      order: [[sequelize.literal('tweetCounts'), 'DESC']],
+      order: [[sequelize.literal('tweetCount'), 'DESC']],
       raw: true,
       nest: true
     })
