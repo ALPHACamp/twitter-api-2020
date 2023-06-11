@@ -70,6 +70,61 @@ module.exports = {
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
+      },
+      {
+        email: 'user6@example.com',
+        account: 'user6',
+        password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+        name: 'user6',
+        avatar: `https://loremflickr.com/320/240/people`,
+        introduction: faker.lorem.text(),
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        email: 'user7@example.com',
+        account: 'user7',
+        password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+        name: 'user7',
+        avatar: `https://loremflickr.com/320/240/people`,
+        introduction: faker.lorem.text(),
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        email: 'user8@example.com',
+        account: 'user8',
+        password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+        name: 'user8',
+        avatar: `https://loremflickr.com/320/240/people`,
+        introduction: faker.lorem.text(),
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        email: 'user9@example.com',
+        account: 'user9',
+        password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+        name: 'user9',
+        avatar: `https://loremflickr.com/320/240/people`,
+        introduction: faker.lorem.text(),
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        email: 'user10@example.com',
+        account: 'user10',
+        password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+        name: 'user10',
+        avatar: `https://loremflickr.com/320/240/people`,
+        introduction: faker.lorem.text(),
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     ]);
   },
