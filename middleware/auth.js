@@ -13,7 +13,6 @@ const authenticated = (req, res, next) => {
 
 // 確認user是否存在
 const ensureAccountExists = (req, res, next) => {
-  const user = helpers.getUser(req)
   if (!user || !user.id) {
     return res.status(400).json({ error: 'User not found' })
   }
