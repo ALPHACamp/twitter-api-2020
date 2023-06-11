@@ -230,7 +230,7 @@ const userController = {
       }
     })
       .then(like => {
-        if (!like) throw new Error("You haven't liked this restaurant")
+        if (!like) throw new Error("You haven't liked this tweet")
         return like.destroy()
       })
       .then(removedLike => cb(null, removedLike))

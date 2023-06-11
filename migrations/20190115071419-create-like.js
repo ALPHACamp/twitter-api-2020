@@ -8,10 +8,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      UserId: {
+      user_id: {
         type: Sequelize.INTEGER
       },
-      TweetId: {
+      tweet_id: {
         type: Sequelize.INTEGER
       },
       created_at: {
@@ -20,7 +20,8 @@ module.exports = {
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        underscored: true
       }
     });
   },
