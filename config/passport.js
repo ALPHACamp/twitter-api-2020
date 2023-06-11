@@ -9,12 +9,12 @@ const { User } = require('../models')
 
 // set up local Passport strategy
 passport.use(new LocalStrategy({
-  usernameField: 'email',
+  usernameField: 'account',
   passwordField: 'password'
-}, async (email, password, done) => {
+}, async (account, password, done) => {
   try {
     const user = await User.findOne({
-      where: { email } // user checking by email
+      where: { account } // user checking by account
       // include: [
       //   { model: Tweet, as: 'Tweets', order: [['createdAt', 'DESC']] }
       // ]
