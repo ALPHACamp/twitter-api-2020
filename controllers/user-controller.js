@@ -2,7 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const userDummy = require('./dummy/users-dummy.json')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
@@ -65,6 +65,33 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  // userRequest #3
+  getUserTweets: async (req, res, next) => {
+    const userId = Number(req.params.id)
+    Promise.all([
+      User.findByPk(userId, { raw: true }),
+      Tweet.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: User },
+          { model: Reply },
+          { model: Like }
+        ],
+        order: [['createdAt', 'DESC']]
+      })])
+      .then(([user, tweetsData]) => {
+        if (!user) throw new Error('getUserTweets說沒這人')
+        const tweets = tweetsData.map(t => ({
+          ...t.toJSON(),
+          repliesCount: t.Replies.length,
+          likesCount: t.Likes.length
+        }))
+        res.status(200).json(tweets)
+      })
+      .catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
   }
 }
 
