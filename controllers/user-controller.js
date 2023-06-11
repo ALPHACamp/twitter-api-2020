@@ -14,6 +14,7 @@ const userController = {
       const userAccount = await User.findOne({ where: { account } })
       if (userEmail) throw new Error('email 已重複註冊！')
       if (userAccount) throw new Error('account 已重複註冊！')
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
       const hash = await bcrypt.hash(password, 10)
       let userData = await User.create({
         account,
@@ -115,14 +116,13 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (!req.params.id) throw new Error('該用戶不存在')
       tweets = await tweets.map(tweet => {
         return {
           id: tweet.id,
           userId: tweet.userId,
           description: tweet.description,
-          createAt: tweet.createAt,
-          updateAt: tweet.updateAt,
+          createdAt: tweet.createdAt,
+          updatedAt: tweet.updatedAt,
           userName: tweet.User.name,
           userAvatar: tweet.User.avatar,
           userAccount: tweet.User.account,
@@ -130,8 +130,139 @@ const userController = {
           likes: tweet.Likes.length
         }
       })
-      console.log(tweets)
       return res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          { model: Tweet, include: [{ model: User, attributes: ['account'] }] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      return res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      let likedTweets = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['name', 'avatar', 'account'] },
+              Reply,
+              Like
+            ]
+          }
+        ]
+      })
+      likedTweets = await Promise.all(likedTweets.map(async likedTweet => {
+        return {
+          TweetId: likedTweet.Tweet.id,
+          userId: likedTweet.Tweet.userId,
+          description: likedTweet.Tweet.description,
+          createdAt: likedTweet.Tweet.createdAt,
+          updatedAt: likedTweet.Tweet.updatedAt,
+          userName: likedTweet.Tweet.User.name,
+          userAvatar: likedTweet.Tweet.User.avatar,
+          userAccount: likedTweet.Tweet.User.account,
+          repliesNum: likedTweet.Tweet.Replies.length,
+          likes: likedTweet.Tweet.Likes.length,
+          likeCreatedAt: likedTweet.createdAt
+        }
+      }))
+      likedTweets = likedTweets.sort((a, b) => b.createAt - a.createAt)
+      return res.status(200).json(likedTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      let followings = await User.findAll({
+        where: { id: req.params.id },
+        attributes: ['id', 'account', 'name'],
+        include: [
+          { model: User, as: 'Followings', attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction'] }
+        ]
+      })
+      followings = followings[0].Followings
+      followings = await Promise.all(followings.map(async following => {
+        return {
+          followshipId: following.Followship.id,
+          followingId: following.id,
+          followingAccount: following.account,
+          followingName: following.name,
+          followingAvatar: following.avatar,
+          followingIntroduction: following.introduction,
+          followshipCreatedAt: following.Followship.createdAt
+        }
+      }))
+      followings = followings.sort((a, b) => b.createAt - a.createAt)
+      return res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      let followers = await User.findAll({
+        where: { id: req.params.id },
+        attributes: ['id', 'account', 'name'],
+        include: [
+          { model: User, as: 'Followers', attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction'], order: [['createdAt', 'DESC']] }
+        ]
+      })
+      followers = followers[0].Followers
+      followers = await Promise.all(followers.map(async follower => {
+        return {
+          followshipId: follower.Followship.id,
+          followerId: follower.id,
+          followerAccount: follower.account,
+          followerName: follower.name,
+          followerAvatar: follower.avatar,
+          followerIntroduction: follower.introduction,
+          followshipCreatedAt: follower.Followship.createdAt
+        }
+      }))
+      followers = followers.sort((a, b) => b.createAt - a.createAt)
+      return res.status(200).json(followers)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTopUsers: async (req, res, next) => {
+    try {
+      let users = await User.findAll({
+        attributes: ['id', 'name', 'account', 'avatar'],
+        include: [
+          { model: User, as: 'Followers' }
+        ]
+      })
+      users = await Promise.all(users.map(async user => {
+        return {
+          userName: user.name,
+          userId: user.id,
+          userAccount: user.account,
+          userAvatar: user.avatar,
+          followerCount: user.Followers.length
+        }
+      }))
+      users = users.sort((a, b) => b.followerCount - a.followerCount)
+      let topUsers = []
+      for (let i = 0; i < 10; i++) {
+        if (!users[i]) break // 避免少於10位用戶時還要回傳null
+        topUsers = topUsers.concat(users[i])
+      }
+      return res.status(200).json(topUsers)
     } catch (err) {
       next(err)
     }
