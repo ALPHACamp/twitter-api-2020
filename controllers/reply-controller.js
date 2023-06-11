@@ -28,7 +28,7 @@ const replyController = {
       })
       res.status(200).json(newComment)
     } catch (err) {
-        next(err)
+        next(err).json({message: "錯誤訊息"})
     }
   },
   postReplies: async(req, res, next) => {
@@ -39,15 +39,15 @@ const replyController = {
           const user = await User.findByPk(helpers.getUser(req).id)
           const tweet = Tweet.findByPk(id)
           if (!user) throw new Error('查無此人！')
-          if (!tweet) throw new Error('查無此篇貼文')
+          if (tweet.id !== Number(id)) throw new Error('查無此篇貼文')
           await Reply.create({
             comment,
             TweetId: id,
             UserId: helpers.getUser(req).id
           })
-          res.status(200).json(comment)
+          res.status(200).json({message:"回覆留言成功！", comment})
           } catch (err) {
-            next(err)
+            next(err).json({message: "錯誤訊息"})
         }
     },
   }

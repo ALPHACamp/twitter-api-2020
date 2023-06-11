@@ -4,13 +4,13 @@ const { Tweet, Like } = require('../models')
 const helpers = require('../_helpers')
 const tweetController = {
   getTweets: async(req, res, next) => {
-    tweetServices.getTweets(req, (err, data) => err ? next(err) : res.json(data))
+    tweetServices.getTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   getTweet: async(req, res, next) => {
-    tweetServices.getTweet(req, (err, data) => err ? next(err) : res.json(data))
+    tweetServices.getTweet(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
-postTweets: async(req, res, next) => {
-    tweetServices.postTweets(req, (err, data) => err ? next(err) : res.json(data))
+  postTweets: async(req, res, next) => {
+    tweetServices.postTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   addLike: async(req, res, next) => {
     try{
@@ -22,7 +22,7 @@ postTweets: async(req, res, next) => {
                 TweetId: id
               }
             })
-      if (!tweet) throw new Error("Tweet不存在!")
+      if (tweet.id !== Number(id)) throw new Error("Tweet不存在!")
       if (like) throw new Error('你已經like過這篇Tweet了')
 
       const likeCreate = await Like.create({
@@ -43,7 +43,6 @@ postTweets: async(req, res, next) => {
         tweetId: id
       }
     })
-
     if (!like) {
       throw new Error('這篇Tweet沒被like')
     }

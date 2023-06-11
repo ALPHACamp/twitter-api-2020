@@ -31,7 +31,6 @@ const followshipController = {
       })
       .catch(err => next(err))
   },
-
   removeFollowing: (req, res, next) => {
     const { id } = req.params
     Followship.findOne({
