@@ -148,7 +148,7 @@ const userController = {
             [
               literal(`(
                 SELECT COUNT(*) 
-                FROM replies AS reply
+                FROM Replies AS reply
                 WHERE 
                     reply.tweet_id = Tweet.id
                 )`),
@@ -157,7 +157,7 @@ const userController = {
             [
               literal(`(
                 SELECT COUNT(*) 
-                FROM likes AS liked
+                FROM Likes AS liked
                 WHERE 
                     liked.tweet_id = Tweet.id
                 )`),
