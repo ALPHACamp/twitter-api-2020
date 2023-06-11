@@ -4,6 +4,11 @@ const adminController = {
   signIn: (req, res, next) => {
     adminServices.signIn(req, (err, data) => err ? next(err) : res.json(data))
   },
+  getUsers: (req, res, next) => {
+    adminServices.getUsers(req, (err, data) => err ? next(err) : res.json(data))
+  },
+
+
   delTweet: async(req, res, next) => {
     const { id } = req.params
     try{

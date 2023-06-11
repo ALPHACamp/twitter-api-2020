@@ -1,8 +1,11 @@
 {
-  "name": "test",
+  "name": "twitter",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "this is a simple twitter api server",
+  "main": "app.js",
+  "engines": {
+    "node": "14.16.0"
+  },
   "scripts": {
     "start": "set \"NODE_ENV=development\" && node app.js",
     "dev": "set \"NODE_ENV=development\" && nodemon app.js",
@@ -15,6 +18,7 @@
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
+    "cors": "^2.8.5",
     "dayjs": "^1.10.6",
     "express": "^4.16.4",
     "express-session": "^1.15.6",

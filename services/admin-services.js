@@ -1,11 +1,10 @@
 const bcrypt = require('bcrypt-nodejs')
+const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const {
   User,
-  // Tweet,
-  // Followship,
-  // Like,
-  // Reply
+  Tweet,
+  Like,
 } = require('../models')
 
 const adminServices = {
@@ -34,6 +33,86 @@ const adminServices = {
       cb(err)
     }
   },
+
+  getUsers: async (req, cb) => {
+    try {
+      const getLikesCount = async (userId) => {
+      const likesCount = await Tweet.findAll({
+        include: {
+          model: Like,
+          attributes: [],
+          where: {
+            UserId: userId
+          }
+        },
+        attributes: [[sequelize.fn('COUNT', sequelize.col('Likes.id')), 'likesCount']],
+        group: ['Tweet.id']
+      })
+
+      return likesCount
+    }
+
+    const getUsersData = async () => {
+      const users = await User.findAll({
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'avatar',
+          'banner',
+          [sequelize.fn('COUNT', sequelize.col('Followers.id')), 'followersCount'],
+          [sequelize.fn('COUNT', sequelize.col('Followings.id')), 'followingsCount']
+        ],
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: [],
+            through: { attributes: [] }
+          },
+          {
+            model: User,
+            as: 'Followings',
+            attributes: [],
+            through: { attributes: [] }
+          },
+          {
+            model: Tweet,
+            attributes: []
+          }
+        ],
+        group: ['User.id'],
+        raw: true,
+        nest: true
+      })
+
+      const likesCountPromises = users.map(async (user) => {
+        if (user.id) {
+          const likesCount = await getLikesCount(user.id)
+          user.likesCount = likesCount.length > 0 ? likesCount[0].dataValues.likesCount : 0
+        }
+        return user
+      })
+
+      const usersWithLikesCount = await Promise.all(likesCountPromises)
+
+      const tweetsCountPromises = usersWithLikesCount.map(async (user) => {
+        const tweetData = await Tweet.count({ where: { UserId: user.id } })
+        user.tweetsCount = tweetData
+        return user
+      })
+
+      const usersWithCounts = await Promise.all(tweetsCountPromises)
+      return usersWithCounts
+    }
+
+    const usersWithCounts = await getUsersData()
+    cb(null, usersWithCounts)
+  } catch (err) {
+    cb(err)
+  }
+}
+
 }
 
 module.exports = adminServices
