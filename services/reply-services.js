@@ -20,7 +20,7 @@ const replyServices = {
               },
           ],
       })
-      const newComment = replies.map(comment => {
+      const newComment = await replies.map(comment => {
         comment.createdAt = relativeTimeFromNow(comment.createdAt)
         delete comment.User.password  
         return comment
@@ -38,13 +38,13 @@ const replyServices = {
           const user = await User.findByPk(helpers.getUser(req).id)
           const tweet = Tweet.findByPk(id)
           if (!user) throw new Error('查無此人！')
-          if (tweet.id !== Number(id)) throw new Error('查無此篇貼文')
+          if (!tweet) throw new Error('查無此篇貼文')
           await Reply.create({
             comment,
             TweetId: id,
             UserId: helpers.getUser(req).id
           })
-          cb (null, {message:"回覆留言成功！", ...comment})
+          cb (null, comment)
           } catch (err) {
             cb (err, {message: "錯誤訊息"})
         }
