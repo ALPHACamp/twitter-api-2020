@@ -32,12 +32,12 @@ router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.
 router.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweets)
 
-//like
+// like
 router.post('/api/tweets/:id/like', authenticated, authenticatedUser, tweetController.addLike)
 router.post('/api/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.removeLike)
 
 
-//followship
+// followship
 router.post('/api/followships', authenticated, authenticatedUser, followshipController.addFollowing)
 router.delete('/api/followships/:id', authenticated, authenticatedUser, followshipController.removeFollowing)
 
@@ -45,10 +45,12 @@ router.delete('/api/followships/:id', authenticated, authenticatedUser, followsh
 
 
 
-//admin
+// admin
 router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.delTweet)
 
-//reply
+router.get('/api/admin/tweets', authenticated, authenticatedUser, tweetController.getTweets)
+
+// reply
 router.post('/api/tweets/:id/replies', authenticated, authenticatedUser, replyController.postReplies)
 router.get('/api/tweets/:id/replies', authenticated, authenticatedUser, replyController.getReplies)
 
