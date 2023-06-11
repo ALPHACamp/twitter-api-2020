@@ -199,7 +199,7 @@ const userController = {
   },
   editUser: async (req, res, next) => {
     try {
-      const { name, introduction } = req.body
+      const { name, introduction, account, email } = req.body
       let { id } = req.params
       id = Number(id)
 
@@ -207,9 +207,28 @@ const userController = {
       if (introduction.length > 160) throw new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
       if (name.length > 50) throw new Error('Your self-introduction is a little too long for me to handle! ! Please less than 50.')
 
+      // 確認user是否存在，account與email是否與資料庫重複
       const user = await User.findByPk(id)
-      // 錯誤處理
       if (!user) throw new Error('The user does not exist')
+
+      if (account && email) {
+        const [userAccount, userEmail] = await Promise.all([
+          User.findOne({ where: { account } }),
+          User.findOne({ where: { email } })
+        ])
+        // 錯誤處理
+        if (userAccount.id !== id) throw new Error('account已存在')
+        if (userEmail.id !== id) throw new Error('email已存在')
+      } else if (account) {
+        const userAccount = await User.findOne({ where: { account } })
+        // 錯誤處理
+        if (userAccount.id !== id) throw new Error('account已存在')
+      } else if (email) {
+        const userEmail = await User.findOne({ where: { email } })
+        // 錯誤處理
+        if (userEmail.id !== id) throw new Error('email已存在')
+      }
+
       const { avatar, background } = req
       const [avatarFilePath, backgroundFilePath] = await Promise.all([
         imgurFileHandler(avatar),
