@@ -1,7 +1,7 @@
 const { Followship, User } = require('../models')
 const helpers = require('../_helpers')
 
-const followshipService = {
+const followshipServices = {
   addFollowing: (req, cb) => {
     const followingId = req.body.id
     const followerId = helpers.getUser(req).id
@@ -55,4 +55,4 @@ const followshipService = {
   }
 }
 
-module.exports = followshipService
+module.exports = followshipServices

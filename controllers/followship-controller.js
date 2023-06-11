@@ -1,4 +1,4 @@
-const followshipService = require('../services/followship-service')
+const followshipServices = require('../services/followship-services')
 
 const followshipController = {
   addFollowing: (req, res, next) => {
