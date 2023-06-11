@@ -63,6 +63,7 @@ const userController = {
         User.findByPk(id),
         Tweet.findAll({
           where: { UserId: id },
+          include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] }],
           raw: true,
           nest: true
         })
@@ -104,7 +105,7 @@ const userController = {
         User.findByPk(id),
         Reply.findAll({
           where: { UserId: id },
-          include: [Tweet],
+          include: [Tweet, { model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
           raw: true,
           nest: true
         })
@@ -131,7 +132,7 @@ const userController = {
         User.findByPk(id),
         Like.findAll({
           where: { UserId: Number(id) },
-          include: [Tweet],
+          include: [Tweet, { model: User, as: 'LikedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
           raw: true,
           nest: true
         })
@@ -157,6 +158,7 @@ const userController = {
         User.findByPk(id),
         Followship.findAll({
           where: { followerId: Number(id) },
+          include: [{ model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar'] }],
           raw: true,
           nest: true
         })
@@ -182,7 +184,8 @@ const userController = {
       const [user, userFollowers] = await Promise.all([
         User.findByPk(id),
         Followship.findAll({
-          where: { followingId: Number(id) }
+          where: { followingId: Number(id) },
+          include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'avatar'] }]
         })
       ])
       if (!user) throw new Error('The user does not exist')
