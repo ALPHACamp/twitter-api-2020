@@ -63,6 +63,14 @@ const userController = {
       })
       .catch((err) => next(err))
   },
+  getCurrentUser: (req, res, next) => {
+    const result = getUser(req).toJSON()
+    delete result.password
+    delete result.Followers
+    delete result.Followings
+
+    return res.status(200).json(result)
+  },
   getUserProfile: (req, res, next) => {
     const id = req.params.id || getUser(req).dataValues.id
     return User.findByPk(id, {

@@ -17,6 +17,7 @@ router.use('/api/admin', admin)
 // user
 router.post('/api/users/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
+router.get('/api/user', authenticated, authenticatedUser, userController.getCurrentUser)
 
 // user profile
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUserProfile)
