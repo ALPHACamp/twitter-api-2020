@@ -2,6 +2,8 @@ const express = require('express')
 const passport = require('../../config/passport')
 const router = express.Router()
 const userController = require('../../controllers/userController')
+const upload = require('../../middleware/multer')
+const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 const { userRole, authenticated, authenticatedUser } = require('../../middleware/auth')
 const { signInValidator, signUpValidator } = require('../../middleware/validator')
 
@@ -16,4 +18,5 @@ router.get('/:id/likes', authenticated, authenticatedUser, userController.getUse
 router.get('/:id/followings', authenticated, authenticatedUser, userController.getUserfollowing)
 router.get('/:id/followers', authenticated, authenticatedUser, userController.getUserFollower)
 router.get('/:id', authenticated, authenticatedUser, userController.getUser)
+router.put('/:id', authenticated, authenticatedUser, cpUpload, userController.putUserProfile)
 module.exports = router
