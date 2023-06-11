@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const { User, Reply, Tweet, Followship, Like } = require('../../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
+const followship = require('../../models/followship')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -182,6 +183,29 @@ const userController = {
         return like.destroy()
       })
       .then(() => res.status(200).json({ status: 'success' }))
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  addFollowing: (req, res) => {
+    const { userId } = req.params
+    console.log('userId', userId)
+    Promise.all([
+      User.findByPk(userId),
+      Followship.findOne({
+        where: {
+          followerId: req.user.id,
+          followingId: userId
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (followship) throw new Error('You are already following this user!')
+        return Followship.create({
+          followerId: req.user.id,
+          followingId: userId
+        })
+      })
+      .then(updateFollowship => res.status(200).json({ status: 'success', updateFollowship }))
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   }
 }
