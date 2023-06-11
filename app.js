@@ -24,6 +24,7 @@ app.use(cors({
   origin: 'https://leemengyun.github.io',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: '*',
+  preflightContinue: true,
   credentials: true
 }))
 
