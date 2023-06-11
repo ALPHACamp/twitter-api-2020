@@ -130,7 +130,6 @@ const userController = {
           likes: tweet.Likes.length
         }
       })
-      console.log(tweets)
       return res.status(200).json(tweets)
     } catch (err) {
       next(err)
@@ -184,7 +183,7 @@ const userController = {
         where: { id: req.params.id },
         attributes: ['id', 'account', 'name'],
         include: [
-          { model: User, as: 'Followings', attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction'] }
+          { model: User, as: 'Followings', attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction'], order: [['createdAt', 'DESC']] }
         ]
       })
       followings = followings[0].Followings
@@ -209,7 +208,7 @@ const userController = {
         where: { id: req.params.id },
         attributes: ['id', 'account', 'name'],
         include: [
-          { model: User, as: 'Followers', attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction'] }
+          { model: User, as: 'Followers', attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction'], order: [['createdAt', 'DESC']] }
         ]
       })
       followers = followers[0].Followers
@@ -224,6 +223,34 @@ const userController = {
         }
       }))
       return res.status(200).json(followers)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTopUsers: async (req, res, next) => {
+    try {
+      let users = await User.findAll({
+        attributes: ['id', 'name', 'account', 'avatar'],
+        include: [
+          { model: User, as: 'Followers' }
+        ]
+      })
+      users = await Promise.all(users.map(async user => {
+        return {
+          userName: user.name,
+          userId: user.id,
+          userAccount: user.account,
+          userAvatar: user.avatar,
+          followerCount: user.Followers.length
+        }
+      }))
+      users = users.sort((a, b) => b.followerCount - a.followerCount)
+      let topUsers = []
+      for (let i = 0; i < 10; i++) {
+        if (!users[i]) break // 避免少於10位用戶時還要回傳null
+        topUsers = topUsers.concat(users[i])
+      }
+      return res.status(200).json(topUsers)
     } catch (err) {
       next(err)
     }

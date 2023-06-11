@@ -17,6 +17,7 @@ router.get('/:id/followings', authenticated, authenticatedUser, userController.g
 router.get('/:id/followers', authenticated, authenticatedUser, userController.getUserFollowers)
 router.get('/:id', authenticated, authenticatedUser, userController.getUserInfo)
 router.put('/:id', authenticated, authenticatedUser, multiUpload, userController.editUserInfo)
+router.get('/', authenticated, authenticatedUser, userController.getTopUsers)
 router.post('/', userController.register)
 
 module.exports = router
