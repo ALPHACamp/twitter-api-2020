@@ -14,7 +14,7 @@ const adminController = {
       await Like.destroy({ where: { TweetId: id } })
       return res.json({ status: 'success', message: '刪除成功' })
     } catch (err) {
-    next(err);
+    next(err)
     }
   }
 }

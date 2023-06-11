@@ -11,7 +11,7 @@ const tweetController = {
   },
   postTweets: async (req, res, next) => {
     try {
-      const { description } = req.body;
+      const { description } = req.body
       const UserId = helpers.getUser(req).id
 
       if (!description) {
@@ -57,22 +57,22 @@ const tweetController = {
   },
   removeLike: async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
     const like = await Like.findOne({
       where: {
         UserId: helpers.getUser(req).id,
         tweetId: id
       }
-    });
+    })
 
     if (!like) {
-      throw new Error('這篇Tweet沒被like');
+      throw new Error('這篇Tweet沒被like')
     }
 
-    await like.destroy();
-    res.status(200).json({ message: 'Like 取消成功' });
+    await like.destroy()
+    res.status(200).json({ message: 'Like 取消成功' })
   } catch (err) {
-    next(err);
+    next(err)
   }
 }
 }

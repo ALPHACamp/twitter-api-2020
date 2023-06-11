@@ -24,7 +24,9 @@ router.get('/api/users/:id/replied_tweets', cors, authenticated, authenticatedUs
 router.get('/api/users/:id/likes', cors, authenticated, authenticatedUser, userController.getUserLikedTweets)
 router.get('/api/users/:id/followings', cors, authenticated, authenticatedUser, userController.getUserFollowings)
 router.get('/api/users/:id/followers', cors, authenticated, authenticatedUser, userController.getUserFollowers)
+router.get('/api/users/topUsers', cors, authenticated, authenticatedUser, userController.topUsers)
 router.get('/api/users/:id', cors, authenticated, authenticatedUser, userController.getUser)
+
 
 // tweet
 router.get('/api/tweets/:id', cors, authenticated, authenticatedUser, tweetController.getTweet)
