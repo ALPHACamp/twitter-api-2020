@@ -1,7 +1,7 @@
 const { Tweet, User, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
-const { relativeTimeFromNow } = require('../helpers/dayFix-helper')
+const { relativeTimeFromNow, switchTime } = require('../helpers/dayFix-helper')
 const TWEETS_WORD_LIMIT = 140
 
 const tweetController = {
@@ -62,6 +62,7 @@ const tweetController = {
       const tweetData = data?.toJSON()
       const tweet = {
         ...tweetData,
+        switchTime: switchTime(tweetData.createdAt),
         relativeTimeFromNow: relativeTimeFromNow(tweetData.createdAt),
         repliesCount: tweetData.Replies?.length,
         likesCount: tweetData.Likes?.length

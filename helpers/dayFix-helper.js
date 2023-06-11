@@ -6,5 +6,6 @@ dayjs.locale('zh-tw')
 
 module.exports = {
   currentYear: () => dayjs().year(),
-  relativeTimeFromNow: a => dayjs(a).fromNow()
+  relativeTimeFromNow: a => dayjs(a).fromNow(),
+  switchTime: a => dayjs(a).format('A hh:mm ． YYYY年MM月DD日')
 }
