@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const admin = require('./modules/admin')
+const { multiUpload } = require('../middleware/multer')
 const { apiErrorHandler } = require('../middleware/error-handler')
 // import controllers
 const userController = require('../controllers/user-controller')
@@ -17,10 +18,11 @@ router.use('/api/admin', admin)
 // user
 router.post('/api/users/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
+router.get('/api/user', authenticated, authenticatedUser, userController.getCurrentUser)
 
 // user profile
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUserProfile)
-router.put('/api/users/:id', authenticated, authenticatedUser, userController.putUserProfile)
+router.put('/api/users/:id', authenticated, authenticatedUser, multiUpload, userController.putUserProfile)
 
 // user data
 router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)

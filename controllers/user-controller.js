@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
 const Sequelize = require('sequelize')
 const { Op, literal } = Sequelize
+const { imgurFileHandler, localFileHandler } = require('../helpers/file-helpers')
 const moment = require('moment')
 
 const userController = {
@@ -66,6 +67,14 @@ const userController = {
       })
       .catch((err) => next(err))
   },
+  getCurrentUser: (req, res, next) => {
+    const result = getUser(req).toJSON()
+    delete result.password
+    delete result.Followers
+    delete result.Followings
+
+    return res.status(200).json(result)
+  },
   getUserProfile: (req, res, next) => {
     const id = req.params.id || getUser(req).dataValues.id
     return User.findByPk(id, {
@@ -93,22 +102,41 @@ const userController = {
       })
       .catch((err) => next(err))
   },
-  putUserProfile: (req, res, next) => {
-    const userId = Number(req.params.id)
-    const { name, introduction, avatar, cover } = req.body
-    if (!name) throw new Error('name is required!')
-    if (getUser(req).id !== userId) throw new Error('permission denied')
-    return User.findByPk(userId)
+  putUserProfile: async (req, res, next) => {
+    const fileHandler = process.env.NODE_ENV !== 'production' ? localFileHandler : imgurFileHandler
+    if (getUser(req).id !== Number(req.params.id)) throw new Error('permission denied')
+    return User.findByPk(req.params.id)
       .then((user) => {
+        const { files } = req
+        const { name, introduction } = req.body
         if (!user) throw new Error('帳號不存在！')
-        return user.update({
-          name,
-          introduction,
-          avatar: avatar ? avatar : user.avatar,
-          cover: cover ? cover : user.cover,
+        // 判斷有沒有上傳東西
+        if (JSON.stringify(files) !== '{}' && files !== undefined) {
+          return Promise.all([fileHandler(files.cover), fileHandler(files.avatar)]).then(
+            ([coverFilePath, avatarFilePath]) => {
+              return user.update({
+                name: name !== undefined ? req.body.name : user.toJSON().name,
+                introduction: introduction !== undefined ? introduction : user.toJSON().introduction,
+                cover: coverFilePath || user.toJSON().cover,
+                avatar: avatarFilePath || user.toJSON().avatar,
+              })
+            }
+          )
+        } else {
+          return user.update({
+            name: name !== undefined ? name : user.toJSON().name,
+            introduction: introduction !== undefined ? introduction : user.toJSON().introduction,
+          })
+        }
+      })
+      .then((updatedUser) => {
+        delete updatedUser.dataValues.password
+        res.status(200).json({
+          status: 'success',
+          message: '成功修改',
+          updatedUser,
         })
       })
-      .then((updatedUser) => res.status(200).json({ user: updatedUser }))
       .catch((err) => next(err))
   },
 

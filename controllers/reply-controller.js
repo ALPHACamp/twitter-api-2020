@@ -1,5 +1,6 @@
 const { User, Reply, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
+const moment = require('moment')
 
 const replyController = {
   getTweetReply: (req, res, next) => {
@@ -35,13 +36,15 @@ const replyController = {
             account: reply['User.account'],
             name: reply['User.name'],
             avatar: reply['User.avatar'],
+            createdAt: moment(reply.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+            diffCreatedAt: moment(reply.createdAt).fromNow(),
+            updatedAt: moment(reply.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
           },
           // tweets
           tweetData: {
             tweetId: reply.TweetId,
             tweetOwnerId: reply['Tweet.User.id'],
             tweetOwnerAccount: reply['Tweet.User.account'],
-            createdAt: new Date(reply.createdAt).toLocaleString(),
           },
         }))
         res.status(200).json(processedReplies)
