@@ -25,7 +25,7 @@ const tweetController = {
        const currentUserLikes = likes.map((l) => l.TweetId);
        const data = tweets.map((tweet) => {
          return {
-           tweetId: tweet.id,
+           TweetId: tweet.id,
            description: tweet.description,
            tweetOwnerId: tweet.User.id,
            tweetOwnerName: tweet.User.name,
@@ -99,7 +99,7 @@ const tweetController = {
 
      const currentUserLikes = likes.map((l) => l.TweetId);
      const data = {
-         tweetId: tweet.id,
+         TweetId: tweet.id,
          description: tweet.description,
          tweetOwnerId: tweet.User.id,
          tweetOwnerName: tweet.User.name,
