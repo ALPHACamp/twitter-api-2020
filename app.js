@@ -13,8 +13,8 @@ app.use(methodOverride('_method'))
 app.use(express.json())
 
 app.use(cors({
-  origin: '*',
-  methods: '*',
+  origin: 'https://leemengyun.github.io',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: '*',
   credentials: true
 }))
