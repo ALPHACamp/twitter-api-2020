@@ -1,8 +1,9 @@
-const { User } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { getUser } = require('../helpers/auth-helpers.js')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-// const { imgurFileHandler } = require('../../helpers/file-helpers.js')
+// const sequelize = require('sequelize')
+const { imgurFileHandler } = require('../helpers/file-helpers.js')
 
 const userController = {
   register: async (req, res, next) => {
@@ -55,47 +56,122 @@ const userController = {
   },
   getUserInfo: async (req, res, next) => { // 元件之一, 提供自己/其他使用者頁的介紹資訊
     try {
-      console.log(req.body)
       // if (req.user.dataValues.id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可取得該用戶基本資料!')
       // 上面不需要, 因為每個人都可以互相瀏覽對方的資訊
-      const userInfo = await User.findOne({
+      let userInfo = await User.findOne({
         where: { id: req.params.id },
-        attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction', 'role'],
+        attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction', 'role', 'email'],
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
         ]
       })
-      // if (!userInfo || userInfo.role !== 'user') throw new Error('該用戶不存在')
+      if (!userInfo || userInfo.role !== 'user') throw new Error('該用戶不存在')
       const follower = userInfo.Followings.length
       const following = userInfo.Followers.length
-      return res.json({
-        id: userInfo.id,
-        account: userInfo.account,
-        name: userInfo.name,
-        avatar: userInfo.avatar,
-        cover: userInfo.cover,
-        introduction: userInfo.introduction,
-        follower,
-        following
-      })
+      userInfo = { ...userInfo.toJSON(), follower, following }
+      delete userInfo.Followers
+      delete userInfo.Followings
+      return res.status(200).json(userInfo)
     } catch (err) {
       next(err)
     }
   },
   editUserInfo: async (req, res, next) => {
     try {
-      const { name, account, email, password, checkPassword, avatar, cover, introduction } = req.body
+      let { id, name, account, email, password, checkPassword, introduction, avatar, cover } = req.body
       if (req.user.dataValues.id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可編輯該用戶基本資料!')
-      const userInfo = await User.findOne({
-        where: { id: req.params.id },
+      let userInfo = await User.findOne({
+        where: { id },
         attributes: ['id', 'account', 'email', 'password', 'name', 'avatar', 'cover', 'introduction']
       })
-      return res.json({ data: { userInfo } })
+      if (!userInfo) throw new Error('該用戶不存在!')
+      if (!password) throw new Error('密碼與確認密碼不相符!')
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
+      const hash = await bcrypt.hash(password, 10)
+      avatar = avatar ? await imgurFileHandler(avatar) : null
+      cover = cover ? await imgurFileHandler(cover) : null
+      userInfo = await userInfo.update({
+        account,
+        email,
+        password: hash, // 為了不讓有心人拿到密碼, 所以並沒有將使用者原本的password傳到前端, 這也造成只要是進入到edit頁面都需要重新輸入password, 但此舉只是因為password不可空白, 並無身分認證功能
+        name,
+        avatar: avatar || userInfo.avarat,
+        cover: cover || userInfo.cover,
+        introduction
+      })
+      return res.status(200).json(userInfo)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => { // 元件之一, 提供自己/其他使用者頁的介紹資訊
+    try {
+      let tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          { model: User, attributes: ['name', 'avatar', 'account'] },
+          Reply,
+          Like
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      if (!req.params.id) throw new Error('該用戶不存在')
+      tweets = await tweets.map(tweet => {
+        return {
+          id: tweet.id,
+          userId: tweet.userId,
+          description: tweet.description,
+          createAt: tweet.createAt,
+          updateAt: tweet.updateAt,
+          userName: tweet.User.name,
+          userAvatar: tweet.User.avatar,
+          userAccount: tweet.User.account,
+          repliesNum: tweet.Replies.length,
+          likes: tweet.Likes.length
+        }
+      })
+      console.log(tweets)
+      return res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
   }
+  // getTopUsers: async (req, res, next) => {
+  //   try {
+  //     const users = await User.findAll({
+  //       where: { role: 'user'},
+  //       include: [
+  //         { model: User, as: 'Fallowings' },
+  //         { model: User, as: 'Fallowers' }
+  //       ],
+  //       attributes: {
+  //         include: [
+  //           [ sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followCount' ]
+  //         ]
+  //       },
+  //       order: [[sequelize.literal('followcount'), 'DESC']],
+  //       limit: 10
+  //     })
+  //     if (users.length === 0) {
+  //       return res.status(404).json({ status: 'error', message: "User didn't exist!" })
+  //     }
+  //     const data = users.map(user => {
+  //       return {
+  //         id: user.id,
+  //         name: user.name,
+  //         avatar: user.avatar,
+  //         account: user.account,
+  //         followerCount: user.Followers.length,
+  //         isFollowed: req.user.Followings.map(f => f.id).includes(user.id)
+  //       }
+  //     })
+  //     return res.status(200).json({ status: 'success', data })
+  //   } catch (err) {
+  //     next(err)
+  //   }
+  // }
 }
 
 module.exports = userController
+
