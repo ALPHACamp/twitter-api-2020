@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
 const Sequelize = require('sequelize')
 const { Op, literal } = Sequelize
+const { imgurFileHandler, localFileHandler } = require('../helpers/file-helpers')
 const moment = require('moment')
 
 const userController = {
@@ -98,23 +99,35 @@ const userController = {
       })
       .catch((err) => next(err))
   },
-  putUserProfile: (req, res, next) => {
-    const userId = Number(req.params.id)
-    const { name, introduction, avatar, cover } = req.body
-    if (!name) throw new Error('name is required!')
-    if (getUser(req).id !== userId) throw new Error('permission denied')
-    return User.findByPk(userId)
-      .then((user) => {
-        if (!user) throw new Error('帳號不存在！')
-        return user.update({
-          name,
-          introduction,
-          avatar: avatar ? avatar : user.avatar,
-          cover: cover ? cover : user.cover,
-        })
+  putUserProfile: async (req, res, next) => {
+    try {
+      const userId = Number(req.params.id)
+      if (getUser(req).id !== userId) throw new Error('permission denied')
+      const { name, introduction } = req.body
+      const { files } = req
+
+      const user = await User.findByPk(req.params.id)
+      if (!user) throw new Error('帳號不存在！')
+      const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
+      const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
+
+      await user.update({
+        name: name || user.name,
+        introduction: introduction || user.introduction,
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover,
       })
-      .then((updatedUser) => res.status(200).json({ user: updatedUser }))
-      .catch((err) => next(err))
+      const updatedUser = await User.findByPk(req.params.id, {
+        attributes: { exclude: ['password'] },
+      })
+      res.status(200).json({
+        status: 'success',
+        message: '成功修改',
+        user: updatedUser,
+      })
+    } catch (err) {
+      next(err)
+    }
   },
 
   getUserTweets: (req, res, next) => {
