@@ -16,10 +16,10 @@ app.use(express.json())
 // function authenticated(req, res, next){
 //   // passport.authenticate('jwt', { ses...
 // }
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*')
-  next()
-})
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', '*')
+//   next()
+// })
 app.use(cors())
 app.use('/api', apis)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
