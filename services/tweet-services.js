@@ -1,8 +1,7 @@
 const { Tweet, User, Like, Reply } = require('../models')
-const sequelize = require('sequelize')
 const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 const { getUserData } = require('../helpers/getUserData')
-
+const helpers = require('../_helpers')
 const tweetServices = {
   getTweets: async (req, cb) => {
     try {
@@ -31,8 +30,8 @@ const tweetServices = {
       }))
 
       cb(null, tweets)
-    } catch (error) {
-      cb(error)
+    } catch (err) {
+      cb(err)
     }
   },
   getTweet: async (req, cb) => {
@@ -66,6 +65,34 @@ const tweetServices = {
         })
       })
       .catch(err => cb(err))
+  },
+  postTweets: async (req, cb) => {
+    try {
+      const { description } = req.body;
+      const UserId = helpers.getUser(req).id
+
+      if (!description) {
+        throw new Error('Tweet不能為空!')
+      }
+
+      if (description.length > 140) {
+        throw new Error('輸入不得超過140字!')
+      }
+
+      const tweet = await Tweet.create({
+        description,
+        UserId,
+      })
+      const tweetData = tweet.toJSON()
+        tweetData.createdAt = relativeTimeFromNow(tweetData)
+      return cb(null, {
+        status: 'success',
+        message: '登入成功！',
+        tweetData
+      })
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 
