@@ -280,6 +280,41 @@ const userController = {
     })
     delete data.dataValues.password
     return res.status(200).json(data)
+  },
+  updateUserAccount: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      // 反查accout 與email 是否有被註冊過
+      const foundUser = await User.findOne({
+        where: {
+          [Op.or]: [{ account: req.body.account }, { email: req.body.email }]
+        },
+        raw: true,
+        nest: true
+      })
+
+      if (foundUser.id !== user.id) {
+        if (foundUser.account === req.body.account) throw new Error('account已重複註冊!')
+        if (foundUser.email === req.body.email) throw new Error('email已重複註冊!')
+      }
+
+      const hash = await bcrypt.hash(req.body.password, 10)
+
+      await user.update({
+        name: req.body.name,
+        account: req.body.account,
+        email: req.body.email,
+        password: hash
+      })
+      await user.save()
+      return res.status(200).json({
+        status: 'success',
+        message: '更新成功'
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = userController
