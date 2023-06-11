@@ -42,7 +42,7 @@ const tweetController = {
         UserId: helpers.getUser(req).id,
         tweetId: id
       }
-    });
+    })
 
     if (!like) {
       throw new Error('這篇Tweet沒被like');
