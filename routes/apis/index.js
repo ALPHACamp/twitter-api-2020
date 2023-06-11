@@ -35,9 +35,9 @@ router.post('/signin', passport.authenticate('local', { session: false }), isUse
 
 // use modules
 router.use('/admin', authenticatedAdmin, admin)
-router.use('/followships', followships)
-router.use('/likes', likes)
-router.use('/tweets', tweets)
+router.use('/followships', authenticated, isUser, followships)
+router.use('/likes', authenticated, isUser, likes)
+router.use('/tweets', authenticated, isUser, tweets)
 router.use('/users', authenticated, isUser, users)
 
 // Error Handler
