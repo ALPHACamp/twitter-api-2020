@@ -80,14 +80,14 @@ const userController = {
       attributes: {
         include: [
           [
-            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = user.id)'),
+            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = User.id)'),
             'follower',
           ],
           [
-            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = user.id)'),
+            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = User.id)'),
             'following',
           ],
-          [Sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = user.id)'), 'tweetAmount'],
+          [Sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)'), 'tweetAmount'],
         ],
         exclude: ['password', 'createdAt', 'updatedAt'],
       },
@@ -150,7 +150,7 @@ const userController = {
                 SELECT COUNT(*) 
                 FROM replies AS reply
                 WHERE 
-                    reply.tweet_id = tweet.id
+                    reply.tweet_id = Tweet.id
                 )`),
               'replyCount',
             ],
@@ -159,7 +159,7 @@ const userController = {
                 SELECT COUNT(*) 
                 FROM likes AS liked
                 WHERE 
-                    liked.tweet_id = tweet.id
+                    liked.tweet_id = Tweet.id
                 )`),
               'likeCount',
             ],
