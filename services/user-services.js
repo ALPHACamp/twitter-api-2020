@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
-const { getUser } = require('../_helpers.js')
+const helpers = require('../_helpers.js')
 const jwt = require('jsonwebtoken')
 const userServices = {
   signUp: (req, cb) => {
@@ -63,8 +63,8 @@ const userServices = {
         if (!user) throw new Error('使用者不存在')
         const data = {
           ...user.toJSON(),
-          Follower_count: user.Followers.length,
-          Following_count: user.Followers.length,
+          followerCount: user.Followers.length,
+          followingCount: user.Followers.length,
           isFollowed: user.Followers.some(f => f.id === req.user.id)
         }
         delete data.password
@@ -81,7 +81,9 @@ const userServices = {
     return Tweet.findAll({
       where: { UserId: req.params.id },
       order: [['createdAt', 'DESC']],
-      include: [User, Reply, Like]
+      include: [Reply, Like,
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ]
     })
       .then(tweets => {
         tweets = tweets.map(tweet => {
@@ -89,14 +91,11 @@ const userServices = {
             ...tweet.toJSON(),
             isLiked: tweet.Likes.map(like => like.UserId).includes(req.user.id),
             replyCount: tweet.Replies.length,
-            likedCount: tweet.Likes.length,
-            name: tweet.User.name,
-            avatar: tweet.User.avatar,
-            account: tweet.User.account
+            likedCount: tweet.Likes.length
           }
+          // delete tweet.User
           delete tweet.Replies
           delete tweet.Likes
-          delete tweet.User
           return tweet
         })
         return cb(null, tweets)
@@ -107,17 +106,15 @@ const userServices = {
     return Reply.findAll({
       where: { UserId: req.params.id },
       order: [['createdAt', 'DESC']],
-      include: [User, Tweet]
+      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account'] }] }
+      ]
     })
       .then(replies => {
         replies = replies.map(reply => {
           reply = {
-            ...reply.toJSON(),
-            name: reply.User.name,
-            avatar: reply.User.avatar,
-            account: reply.User.account
+            ...reply.toJSON()
           }
-          delete reply.User
           delete reply.Replies
           delete reply.Likes
           return reply
@@ -130,7 +127,12 @@ const userServices = {
     return Like.findAll({
       where: { UserId: req.params.id },
       include: [User,
-        { model: Tweet, include: [Reply, Like, User] }
+        {
+          model: Tweet,
+          include: [Reply, Like,
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          ]
+        }
       ],
       order: [['createdAt', 'DESC']],
       nest: true
@@ -139,17 +141,14 @@ const userServices = {
         const tweets = likes.map(l => {
           l = {
             TweetId: l.TweetId,
-            description: l.Tweet.description,
+            createdAt: l.createdAt,
+            ...l.Tweet.toJSON(),
             isLiked: true,
-            reply_count: l.Tweet.Replies.length,
-            like_count: l.Tweet.Likes.length,
-            tweet_user_data: {
-              name: l.Tweet.User.name,
-              avatar: l.Tweet.User.avatar,
-              account: l.Tweet.User.account
-            }
+            replyCount: l.Tweet.Replies.length,
+            likeCount: l.Tweet.Likes.length
           }
-          delete l.User
+          delete l.Replies
+          delete l.Likes
           delete l.twitter
           return l
         })
@@ -187,14 +186,10 @@ const userServices = {
         })
         .then(updatedUser => {
           cb(null, {
-            status: 'success',
-            message: '操作成功',
-            data: {
-              avatar: updatedUser.avatar,
-              coverPhoto: updatedUser.coverPhoto,
-              name: updatedUser.name,
-              introduction: updatedUser.introduction
-            }
+            avatar: updatedUser.avatar,
+            coverPhoto: updatedUser.coverPhoto,
+            name: updatedUser.name,
+            introduction: updatedUser.introduction
           })
         })
     } catch (err) {
@@ -231,10 +226,7 @@ const userServices = {
         })
       })
       .then(() => {
-        cb(null, {
-          status: 'success',
-          message: '操作成功'
-        })
+        cb(null, '操作成功')
       })
       .catch(err => cb(err))
   },
@@ -248,7 +240,7 @@ const userServices = {
         }]
       }),
       Followship.findAll({
-        where: { followerId: getUser(req).dataValues.id },
+        where: { followerId: helpers.getUser(req).id },
         raw: true
       })
     ])
@@ -276,7 +268,7 @@ const userServices = {
         }]
       }),
       Followship.findAll({
-        where: { followerId: getUser(req).dataValues.id },
+        where: { followerId: helpers.getUser(req).id },
         raw: true
       })
     ])
@@ -305,7 +297,7 @@ const userServices = {
         ]
       }),
       Followship.findAll({
-        where: { followerId: getUser(req).dataValues.id },
+        where: { followerId: helpers.getUser(req).id },
         raw: true
       })
     ])
