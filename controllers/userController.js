@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
 const userController = {
   signIn: (req, res, next) => {
@@ -79,16 +80,17 @@ const userController = {
     if (paramsUserId !== userId) throw new Error('Can not change others data')
     const userAccount = req.user.account
     const userEmail = req.user.email
-    const { account, name, email, password, passwordCheck, introduction } =
-      req.body
+    const { account, name, email, password, passwordCheck, introduction } = req.body
+    const { file } = req
     if (password !== passwordCheck) throw new Error('Password do not match!')
     Promise.all([
       User.findAll({
         attributes: ['account', 'email']
       }),
-      User.findByPk(userId)
+      User.findByPk(userId),
+      imgurFileHandler(file)
     ])
-      .then(([users, userdata]) => {
+      .then(([users, userdata, filePath]) => {
         const accountList = []
         const emailList = []
         users.map((user) => {
@@ -105,6 +107,7 @@ const userController = {
             account,
             name,
             email,
+            avatar: filePath || null,
             password: hash,
             introduction
           })
