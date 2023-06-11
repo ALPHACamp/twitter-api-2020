@@ -3,74 +3,45 @@ const { User, Tweet, Reply, Like,sequelize } = require('../models')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
-    try {
-      const user = helpers.getUser(req)
-      const tweets = await Tweet.findAll({
-        // define output attributes
-        attributes: [
-          "id",
-          "description",
-          "createdAt",
-          // use Sequelize's count
-          [
-            sequelize.fn("COUNT", sequelize.col("Replies.TweetId")),
-            "replyCount",
-          ],
-          [sequelize.fn("COUNT", sequelize.col("Likes.TweetId")), "likeCount"],
+     try {
+       const currentUserId = helpers.getUser(req).id;
 
-          // check the liked status
-          [
-            sequelize.literal(`(
-              SELECT COUNT(*)
-              FROM Likes
-              WHERE
-              Likes.TweetId = Tweet.id AND
-              Likes.UserId = ${user.id}
-      )`),
-            "isLiked",
-          ],
-        ],
-        // include related models
-        include: [
-          {
-            model: User,
-            attributes: ["id", "name", "account", "avatar"],
-          },
-          {
-            model: Reply,
-            attributes: [],
-          },
-          {
-            model: Like,
-            attributes: [],
-            // attributes: ["UserId"],
-          },
-        ],
-        // Group by tweetID and userID
-        group: ["Tweet.id", "User.id"],
-        // sort time
-        order: [["createdAt", "DESC"]],
-        raw: true,
-      });
-      const data = tweets.map((tweet) => {
-        return {
-          tweetId: tweet.id,
-          description: tweet.description,
-          tweetOwnerId: tweet["User.id"],
-          tweetOwnerName: tweet["User.name"],
-          tweetOwnerAccount: tweet["User.account"],
-          tweetOwnerAvatar: tweet["User.avatar"],
-          tweetTime: tweet.createdAt,
-          replyCount: tweet.replyCount || 0,
-          likeCount: tweet.likeCount || 0,
-          isLiked: Boolean(tweet.isLiked),
-        };
-      });
+       const [tweets, likes] = await Promise.all([
+         Tweet.findAll({
+           attributes: ["id", "description", "createdAt"],
+           include: [
+             {
+               model: User,
+               attributes: ["id", "name", "account", "avatar"],
+             },
+             { model: Reply },
+             { model: Like },
+           ],
+           order: [["createdAt", "DESC"]],
+         }),
+         Like.findAll({ where: { UserId: currentUserId }, raw: true }),
+       ]);
 
-      return res.status(200).json(data);
-    } catch (err) {
-      next(err)
-    }
+       const currentUserLikes = likes.map((l) => l.TweetId);
+       const data = tweets.map((tweet) => {
+         return {
+           tweetId: tweet.id,
+           description: tweet.description,
+           tweetOwnerId: tweet.User.id,
+           tweetOwnerName: tweet.User.name,
+           tweetOwnerAccount: tweet.User.account,
+           tweetOwnerAvatar: tweet.User.avatar,
+           tweetTime: tweet.createdAt,
+           replyCount: tweet.dataValues.Replies.length,
+           likeCount: tweet.dataValues.Likes.length,
+           isLiked: currentUserLikes.includes(tweet.dataValues.id),
+         };
+       });
+
+       return res.status(200).json(data);
+     } catch (err) {
+       next(err);
+     }
   },
   postTweet: async (req, res, next) => {
     try {
@@ -104,50 +75,39 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.tweet_id, {
-        attributes: ["id", "description", "createdAt"],
-        include: [
-          {
-            model: User,
-            attributes: ["id", "name", "account", "avatar"],
-          },
-          {
-            model: Reply,
-            attributes: ["id", "comment", "createdAt"],
-            include: [
-              {
-                model: User,
-                attributes: ["id", "account", "name", "avatar"],
-              },
-            ],
-          },
-          {
-            model: Like,
-          },
-        ],
-      });
-      if (!tweet) {
-        return res.status(404).json({ error: 'Tweet not found!' })
-      }
-      tweet.get({ plain: true });
+     const currentUserId = helpers.getUser(req).id;
+     const tweetId = req.params.tweet_id;
 
-      const data = {
-        tweetId: tweet.id,
-        description: tweet.description,
-        tweetTime: tweet.createdAt,
-        tweetOwner: tweet.User,
-        // Replies: tweet.Replies.map((reply) => {
-        //   return {
-        //     replyId: reply.id,
-        //     replyComment: reply.comment,
-        //     replyTime: reply.createdAt,
-        //     replyO: reply.User,
-        //   };
-        // }),
-        replyCount: tweet.Replies ? tweet.Replies.length : 0,
-        likeCount: tweet.Likes ? tweet.Likes.length : 0,
-        isLiked: Boolean(tweet.isLiked),
-      };
+     const [tweet, likes] = await Promise.all([
+       Tweet.findByPk(tweetId,{
+         attributes: ["id", "description", "createdAt"],
+         include: [
+           {
+             model: User,
+             attributes: ["id", "name", "account", "avatar"],
+           },
+           { model: Reply },
+           { model: Like },
+         ],
+         order: [["createdAt", "DESC"]],
+         raw:true,
+         nest:true
+       }),
+       Like.findAll({ where: { UserId: currentUserId }, raw: true }),
+     ]);
+     console.log(tweet);
+
+     const currentUserLikes = likes.map((l) => l.TweetId);
+     const data = {
+         tweetId: tweet.id,
+         description: tweet.description,
+         tweetOwnerId: tweet.User.id,
+         tweetOwnerName: tweet.User.name,
+         tweetOwnerAccount: tweet.User.account,
+         tweetOwnerAvatar: tweet.User.avatar,
+         tweetTime: tweet.createdAt,
+        //  isLiked: currentUserLikes.includes(tweet.id),
+       };
 
       return res.status(200).json(data)
     } catch (err) {
@@ -199,7 +159,6 @@ const tweetController = {
       });
       replies = replies.map((reply) => ({
         ...reply,
-        tweet: tweet,
       }));
       return res.status(200).json(replies);
       // return res.status(200).json({ tweet, replies });
