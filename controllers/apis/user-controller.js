@@ -78,11 +78,18 @@ const userController = {
     try {
       let id = req.params.id
       id = Number(id)
-
+      const [followingCount, followerCount, user] = await Promise.all([
+        Followship.findAndCountAll({ where: { followerId: id } }),
+        Followship.findAndCountAll({ where: { followingId: id } }),
+        User.findByPk(id)
+      ])
       // 確認使用者是否存在
-      const user = await User.findByPk(id)
       if (!user) throw new Error('The user does not exist')
-      res.status(200).json(user)
+
+      const data = user.toJSON()
+      data.followingCount = followingCount.count
+      data.followerCount = followerCount.count
+      return res.status(200).json(data)
     } catch (error) {
       next(error)
     }
