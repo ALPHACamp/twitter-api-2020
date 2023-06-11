@@ -100,34 +100,41 @@ const userController = {
       .catch((err) => next(err))
   },
   putUserProfile: async (req, res, next) => {
-    try {
-      const userId = Number(req.params.id)
-      if (getUser(req).id !== userId) throw new Error('permission denied')
-      const { name, introduction } = req.body
-      const { files } = req
-
-      const user = await User.findByPk(req.params.id)
-      if (!user) throw new Error('帳號不存在！')
-      const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
-      const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
-
-      await user.update({
-        name: name || user.name,
-        introduction: introduction || user.introduction,
-        avatar: avatar || user.avatar,
-        cover: cover || user.cover,
+    const fileHandler = process.env.NODE_ENV !== 'production' ? localFileHandler : imgurFileHandler
+    if (getUser(req).id !== Number(req.params.id)) throw new Error('permission denied')
+    return User.findByPk(req.params.id)
+      .then((user) => {
+        const { files } = req
+        const { name, introduction } = req.body
+        if (!user) throw new Error('帳號不存在！')
+        // 判斷有沒有上傳東西
+        if (JSON.stringify(files) !== '{}' && files !== undefined) {
+          return Promise.all([fileHandler(files.cover), fileHandler(files.avatar)]).then(
+            ([coverFilePath, avatarFilePath]) => {
+              return user.update({
+                name: name !== undefined ? req.body.name : user.toJSON().name,
+                introduction: introduction !== undefined ? introduction : user.toJSON().introduction,
+                cover: coverFilePath || user.toJSON().cover,
+                avatar: avatarFilePath || user.toJSON().avatar,
+              })
+            }
+          )
+        } else {
+          return user.update({
+            name: name !== undefined ? name : user.toJSON().name,
+            introduction: introduction !== undefined ? introduction : user.toJSON().introduction,
+          })
+        }
       })
-      const updatedUser = await User.findByPk(req.params.id, {
-        attributes: { exclude: ['password'] },
+      .then((updatedUser) => {
+        delete updatedUser.dataValues.password
+        res.status(200).json({
+          status: 'success',
+          message: '成功修改',
+          updatedUser,
+        })
       })
-      res.status(200).json({
-        status: 'success',
-        message: '成功修改',
-        user: updatedUser,
-      })
-    } catch (err) {
-      next(err)
-    }
+      .catch((err) => next(err))
   },
 
   getUserTweets: (req, res, next) => {
