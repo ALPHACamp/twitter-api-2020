@@ -44,7 +44,7 @@ const followshipServices = {
         if (!followship) throw new Error("你已追蹤過此人！")
         followship.destroy()
           .then(deletedFollowship => {
-            cb ({
+            cb (null, {
               status: '取消追蹤！',
               ...deletedFollowship.toJSON()
             })

@@ -58,7 +58,7 @@ const tweetServices = {
       ,order: [['createdAt', 'DESC']]
       })
     ])
-      .then((tweet) => {if(tweet.id !== id) throw new Error("推文不存在！")})
+      //.then((tweet) => {if(tweet.id !== id) throw new Error("推文不存在！")})
       .then(([tweet, likes, replies]) => {
         cb(null, {
           ...tweet,
@@ -90,8 +90,8 @@ const tweetServices = {
         tweetData.createdAt = relativeTimeFromNow(tweetData)
       return cb (null, {
         status: 'success',
-        message: '登入成功！',
-        tweetData
+        message: '推文成功！',
+        ...tweetData
       })
     } catch (err) {
       cb (err)
@@ -107,7 +107,7 @@ const tweetServices = {
                 TweetId: id
               }
             })
-      if (tweet.id !== Number(id)) throw new Error("Tweet不存在!")
+      if (tweet.id !== Number(id)) throw new Error("推文不存在!")
       if (like) throw new Error('你已經like過這篇Tweet了')
 
       const likeCreate = await Like.create({

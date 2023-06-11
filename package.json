@@ -7,9 +7,9 @@
     "node": "14.16.0"
   },
   "scripts": {
-    "start": "set \"NODE_ENV=development\" && node app.js",
-    "dev": "set \"NODE_ENV=development\" && nodemon app.js",
-    "test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000"
+    "start": "NODE_ENV=development node app.js",
+    "dev": "NODE_ENV=development nodemon app.js",
+    "test": "mocha test --exit --recursive --timeout 5000"
   },
   "author": "",
   "license": "ISC",
