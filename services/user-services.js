@@ -3,6 +3,7 @@ const { Op } = require('sequelize')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { getUser } = require('../_helpers.js')
+const jwt = require('jsonwebtoken')
 const userServices = {
   signUp: (req, cb) => {
     const { name, account, email, password, checkPassword } = req.body
@@ -30,8 +31,25 @@ const userServices = {
           role: 'user'
         })
       })
-      .then(() => cb(null))
+      .then(() => {
+        return cb(null, '登入成功')
+      })
       .catch(err => cb(err))
+  },
+  signIn: (req, cb) => {
+    try {
+      const userData = req.user.toJSON()
+      delete userData.password
+      // sign JWT with 30 days validation
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const data = {
+        token,
+        role: userData.role
+      }
+      cb(null, data)
+    } catch (err) {
+      cb(err)
+    }
   },
   getUser: (req, cb) => {
     return User.findByPk(req.params.id, {
