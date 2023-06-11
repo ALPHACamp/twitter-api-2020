@@ -1,6 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+const path = require('path')
 const express = require('express')
 const helpers = require('./_helpers');
 const cors = require('cors')
@@ -21,7 +22,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
 app.use(passport.session())
-
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 // router
 app.use(routes)
 
