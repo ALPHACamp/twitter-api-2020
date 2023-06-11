@@ -16,6 +16,9 @@ const userController = {
     if (!account || account.trim() === '') throw new Error('帳號為必填項目')
     if (!email || email.trim() === '') throw new Error('Email為必填項目')
     if (!password || password.trim() === '') throw new Error('密碼為必填項目')
+    // Error: 字數限制
+    if (account.length > 20) throw new Error('Account 欄位上限 20 字')
+    if (name.length > 50) throw new Error('Name 欄位上限 50 字')
 
     // 待設定password, name, account
     return User.findAll({
