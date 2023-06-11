@@ -2,10 +2,11 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const userDummy = require('./dummy/users-dummy.json')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+const followship = require('../models/followship')
 
 const userController = {
   getUsers: (req, res, next) => {
@@ -158,20 +159,13 @@ const userController = {
     const userId = req.params.id
     return Promise.all([
       User.findByPk(userId),
-      User.findByPk(userId, {
-        include: [
-          { model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'introduction'] }
-        ],
-        order: [['createdAt', 'DESC']]
+      Followship.findAll({
+        where: { followerId: userId }
       })
     ])
       .then(([user, followingsData]) => {
         if (!user) throw new Error('getUserFollowings說: 沒這人')
-        // const followings = followingsData.Followings.map(f => ({
-        //   ...f.toJSON()
-        //   // isFollowing: req.user && req.user.Followings.some(uf => uf.id === f.Followings.id)
-        // }))
-        res.status(200).json(followingsData.toJSON())
+        res.status(200).json(followingsData)
       })
       .catch(err => next(err))
   }

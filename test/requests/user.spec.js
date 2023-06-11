@@ -271,8 +271,6 @@ describe('# user requests', () => {
         await db.User.create({account: 'User2', name: 'User2', email: 'User2', password: 'User2'})        
         await db.Followship.create({followerId: 1, followingId: 2})
       })
-      // ############################################################################################
-      // ############################################################################################
       // GET /users/:id/followings - 看見某使用者跟隨中的人
       it(' - successfully', (done) => {
         request(app)
@@ -284,7 +282,6 @@ describe('# user requests', () => {
 
             expect(res.body).to.be.an('array');
             //回傳資料中是否有跟隨中的人的 id = 2
-            console.log(res.body)
             res.body[0].followingId.should.equal(2);
 
             return done();
@@ -380,7 +377,8 @@ describe('# user requests', () => {
         // 在測試資料庫中，新增 mock 資料
         await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1', introduction: 'User1'})
       })
-
+      // ############################################################################################
+      // ############################################################################################
       // 編輯自己所有的資料 PUT /users/:id
       it(' - successfully', (done) => {
         request(app)
