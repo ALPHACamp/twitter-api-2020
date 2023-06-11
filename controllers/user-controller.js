@@ -14,6 +14,7 @@ const userController = {
       const userAccount = await User.findOne({ where: { account } })
       if (userEmail) throw new Error('email 已重複註冊！')
       if (userAccount) throw new Error('account 已重複註冊！')
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
       const hash = await bcrypt.hash(password, 10)
       let userData = await User.create({
         account,
@@ -115,7 +116,6 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (!req.params.id) throw new Error('該用戶不存在')
       tweets = await tweets.map(tweet => {
         return {
           id: tweet.id,
@@ -132,6 +132,48 @@ const userController = {
       })
       console.log(tweets)
       return res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          { model: Tweet, include: [{ model: User, attributes: ['account'] }] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      return res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      let likedTweets = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          { model: Tweet, include: [{ model: User, attributes: ['name', 'avatar', 'account'] }, Reply, Like] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      likedTweets = await Promise.all(likedTweets.map(async likedTweet => {
+        return {
+          TweetId: likedTweet.Tweet.id,
+          userId: likedTweet.Tweet.userId,
+          description: likedTweet.Tweet.description,
+          createAt: likedTweet.Tweet.createAt,
+          updateAt: likedTweet.Tweet.updateAt,
+          userName: likedTweet.Tweet.User.name,
+          userAvatar: likedTweet.Tweet.User.avatar,
+          userAccount: likedTweet.Tweet.User.account,
+          repliesNum: likedTweet.Tweet.Replies.length,
+          likes: likedTweet.Tweet.Likes.length
+        }
+      }))
+      return res.status(200).json(likedTweets)
     } catch (err) {
       next(err)
     }
