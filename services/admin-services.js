@@ -1,11 +1,7 @@
 const bcrypt = require('bcrypt-nodejs')
 const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
-const {
-  User,
-  Tweet,
-  Like,
-} = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 
 const adminServices = {
   signIn: async (req, cb) => {
@@ -23,17 +19,16 @@ const adminServices = {
       const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' })
       const adminData = admin.toJSON()
       delete adminData.password
-      return cb(null, {
+      return cb (null, {
         status: 'success',
         message: '登入成功！',
         token,
         admin: adminData
       })
     } catch (err) {
-      cb(err)
+      cb (err)
     }
   },
-
   getUsers: async (req, cb) => {
     try {
       const getLikesCount = async (userId) => {
@@ -52,7 +47,7 @@ const adminServices = {
       return likesCount
     }
 
-    const getUsersData = async () => {
+      const getUsersData = async () => {
       const users = await User.findAll({
         attributes: [
           'id',
@@ -106,13 +101,25 @@ const adminServices = {
       return usersWithCounts
     }
 
-    const usersWithCounts = await getUsersData()
-    cb(null, usersWithCounts)
-  } catch (err) {
-    cb(err)
+      const usersWithCounts = await getUsersData()
+    cb (null, usersWithCounts)
+    } catch (err) {
+    cb (err)
+    }
+  },
+  delTweet: async(req, cb) => {
+    const { id } = req.params
+    try{
+      const tweet = await Tweet.findByPk(id)
+      if (!tweet) throw new Error("推文不存在！")
+      await tweet.destroy()
+      await Reply.destroy({ where: { TweetId: id } })
+      await Like.destroy({ where: { TweetId: id } })
+      return cb(null,{ status: 'success', message: '刪除成功' })
+    } catch (err) {
+    cb (err)
+    }
   }
-}
-
 }
 
 module.exports = adminServices
