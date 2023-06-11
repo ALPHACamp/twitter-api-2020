@@ -117,50 +117,45 @@ const tweetController = {
   getReplies: async (req, res, next) => {
     try {
       const { tweet_id: tweetId } = req.params;
-      // const tweet = await Tweet.findByPk(tweetId);
-      // if (!tweet) {
-      //   return res.status(404).json({ error: "Tweet not found!" });
-      // }
-
-      // const replies = await Reply.findAll({
-      //   where: { TweetId: tweetId },
-      //   order: [["createdAt", "DESC"]],
-      //   raw: true,
-      //   nest: true,
-      // });
-
-      // return res.status(200).json(replies);
-
       const tweet = await Tweet.findByPk(tweetId, {
         attributes: ["id", "description", "createdAt"],
-        include: [
-          {
-            model: User,
-            attributes: ["id", "name", "account", "avatar"],
-          },
-        ],
         raw: true,
         nest: true,
       });
       if (!tweet) {
         return res.status(404).json({ error: "Tweet not found!" });
       }
-      let replies = await Reply.findAll({
+      const replies = await Reply.findAll({
         where: { TweetId: tweetId },
         order: [["createdAt", "DESC"]],
         attributes: [
-          ["id", "replyId"],
-          ["comment", "comment"],
-          ["UserId", "replyUserId"],
-          ["createdAt", "replyCreatedAt"],
+          "id",
+          "comment",
+          "createdAt",
+          [sequelize.col("User.name"), "name"],
+          [sequelize.col("User.account"), "account"],
+          [sequelize.col("User.avatar"), "avatar"],
+        ],
+        include: [
+          {
+            model: User,
+            attributes: [],
+          },
         ],
         raw: true,
         nest: true,
       });
-      replies = replies.map((reply) => ({
-        ...reply,
+
+      const data = replies.map((reply) => ({
+        replyId: reply.id,
+        comment: reply.comment,
+        replyOwnerName: reply.name,
+        replyOwnerAccount: reply.account,
+        replyOwnerAvatar: reply.avatar,
+        replyCreatedAt: reply.createdAt,
       }));
-      return res.status(200).json(replies);
+
+      return res.status(200).json(data);
       // return res.status(200).json({ tweet, replies });
 
     } catch (err) {
