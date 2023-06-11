@@ -15,8 +15,8 @@ module.exports = {
       Array.from({ length: 50 }, () => ({
         created_at: new Date(),
         updated_at: new Date(),
-        user_id: users[Math.floor(Math.random() * users.length)].id,
-        tweet_id: tweets[Math.floor(Math.random() * tweets.length)].id
+        UserId: users[Math.floor(Math.random() * users.length)].id,
+        TweetId: tweets[Math.floor(Math.random() * tweets.length)].id
       }))
     )
   },

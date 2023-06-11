@@ -3,14 +3,16 @@ module.exports = (sequelize, DataTypes) => {
   const Like = sequelize.define('Like', {
   }, {});
   Like.associate = function(models) {
+    Like.belongsTo(models.User, { foreignKey: 'userId' })
+    Like.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
   };
   Like.init({
-    userId: DataTypes.INTEGER, 
-    tweetId: DataTypes.INTEGER 
+    UserId: DataTypes.INTEGER, 
+    TweetId: DataTypes.INTEGER 
   }, {
     sequelize,
     modelName: 'Like',
-    tableName: 'Likes', // 新增這裡
+    tableName: 'Likes', 
     underscored: true
   })
   return Like;

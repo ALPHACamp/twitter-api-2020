@@ -7,7 +7,7 @@ const flash = require('connect-flash')
 const passport = require('./config/passport')
 const methodOverride = require('method-override')
 const routes = require('./routes')
-const { getUser } = require('./helpers/auth-helpers')
+const { getUser } = require('./_helpers')
 
 
 const app = express()

@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
 const { User, Tweet, Reply, Followship, Like } = require('../models')
-const { imgurFileHandler } = require('../helpers/file-helpers')
+const { imgurFileHandler } = require('../_helpers')
 
 const userController = {
   signUp: (req, cb) => {
@@ -88,7 +88,7 @@ const userController = {
     const userId = Number(req.params.user_id) || ''
     User.findByPk(userId, {
       include: [
-        { model: Tweet, as: 'LikedTweets' }
+        { model: Tweet }
       ],
       attributes: { exclude: ['password'] },
       nest: true,
