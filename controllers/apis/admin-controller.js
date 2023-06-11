@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet } = require('../../models')
+const { User, Tweet, Reply, Like } = require('../../models')
 const { getUser } = require('../../_helpers')
 
 const adminController = {
@@ -27,18 +27,23 @@ const adminController = {
       const users = await User.findAll({
         include: [
           { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
+          { model: User, as: 'Followings' },
+          { model: Tweet, as: 'UserTweets' }
         ]
       })
 
       const data = users.map(user => {
-        const { Followers, Followings, ...userData } = user.dataValues
+        const { Followers, Followings, UserTweets, ...userData } = user.toJSON()
+        let likedCount = 0
+        for (const i of UserTweets) {
+          likedCount += i.likedCount
+        }
         userData.followerCount = Followers.length
         userData.followingCount = Followings.length
+        userData.userTweetCount = UserTweets.length
+        userData.likedCount = likedCount
         return userData
       })
-
-      console.log(data)
       return res.json(data)
     } catch (error) {
       next(error)
