@@ -19,7 +19,10 @@ const adminServices = {
   getTweets: (req, cb) => {
     Tweet.findAll({
       order: [['createdAt', 'DESC']],
-      include: User
+      include: {
+        model: User,
+        attributes: ['id', 'name', 'account', 'avatar']
+      }
     })
       .then(tweets => {
         tweets = tweets.map(tweet => {
@@ -27,12 +30,6 @@ const adminServices = {
             ...tweet.toJSON(),
             description: tweet.description.substring(0, 50)
           }
-          delete tweet.User.password
-          delete tweet.User.coverPhoto
-          delete tweet.User.introduction
-          delete tweet.User.role
-          delete tweet.User.createdAt
-          delete tweet.User.updatedAt
           return tweet
         })
         return cb(null, tweets)
