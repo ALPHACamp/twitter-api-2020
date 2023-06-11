@@ -2,7 +2,7 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
 const bcrypt = require('bcryptjs')
-const { User, Like, Tweet } = require('../models')
+const { User, Like, Tweet, Reply } = require('../models')
 
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
@@ -33,6 +33,8 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     include: [
+      { model: Tweet, as: 'Tweets', include: [Like] },
+      { model: Tweet, as: 'Tweets', include: [Reply] },
       //包含user的所有like及這些like所對應的tweet
       { model: Like, as: 'likedTweets', include: [Tweet] },
       { model: User, as: 'Followers' },
