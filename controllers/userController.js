@@ -228,6 +228,38 @@ const userController = {
       }))
       res.status(200).json(data)
     } catch (err) { next(err) }
+  },
+  getUserFollower: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const currentUserId = getUser(req).dataValues.id
+      const [user, following] = await Promise.all([
+        User.findByPk(id, {
+          include: { model: User, as: 'Followers', include: Tweet }
+        }),
+        Followship.findAll({
+          where: { followerId: currentUserId },
+          raw: true
+        })
+      ])
+
+      if (!user.Followers.length) return res.status(404).json({ status: 'error', message: '無跟隨者資料' })
+
+      const currentUserFollowing = following.map(f => f.followingId)
+      const data = user.Followers.map(f => ({
+        followerId: f.id,
+        account: f.account,
+        name: f.name,
+        avatar: f.avatar,
+        introduction: f.introduction,
+        Tweets: f.Tweets.map(tweet => ({
+          TweetId: tweet.id,
+          description: tweet.description
+        })),
+        isFollowed: currentUserFollowing.includes(f.id)
+      })).sort((a, b) => b.isFollowed - a.isFollowed)
+      res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 module.exports = userController

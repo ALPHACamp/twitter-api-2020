@@ -14,5 +14,6 @@ router.get('/:id/tweets', authenticated, authenticatedUser, userController.getUs
 router.get('/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserReply)
 router.get('/:id/likes', authenticated, authenticatedUser, userController.getUserLike)
 router.get('/:id/followings', authenticated, authenticatedUser, userController.getUserfollowing)
+router.get('/:id/followers', authenticated, authenticatedUser, userController.getUserFollower)
 router.get('/:id', authenticated, authenticatedUser, userController.getUser)
 module.exports = router
