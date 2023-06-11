@@ -4,13 +4,13 @@ const { Tweet, Like } = require('../models')
 const helpers = require('../_helpers')
 const tweetController = {
   getTweets: async(req, res, next) => {
-    tweetServices.getTweets(req, (err, data) => err ? next(err) : res.json(data))
+    tweetServices.getTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   getTweet: async(req, res, next) => {
-    tweetServices.getTweet(req, (err, data) => err ? next(err) : res.json(data))
+    tweetServices.getTweet(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   postTweets: async(req, res, next) => {
-    tweetServices.postTweets(req, (err, data) => err ? next(err) : res.json(data))
+    tweetServices.postTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   addLike: async(req, res, next) => {
     try{
@@ -22,7 +22,7 @@ const tweetController = {
                 TweetId: id
               }
             })
-      if (!tweet) throw new Error("Tweet不存在!")
+      if (tweet.id !== Number(id)) throw new Error("Tweet不存在!")
       if (like) throw new Error('你已經like過這篇Tweet了')
 
       const likeCreate = await Like.create({
@@ -36,22 +36,21 @@ const tweetController = {
   },
   removeLike: async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
     const like = await Like.findOne({
       where: {
         UserId: helpers.getUser(req).id,
         tweetId: id
       }
     })
-
     if (!like) {
-      throw new Error('這篇Tweet沒被like');
+      throw new Error('這篇Tweet沒被like')
     }
 
-    await like.destroy();
-    res.status(200).json({ message: 'Like 取消成功' });
+    await like.destroy()
+    res.status(200).json({ message: 'Like 取消成功' })
   } catch (err) {
-    next(err);
+    next(err)
   }
 }
 }

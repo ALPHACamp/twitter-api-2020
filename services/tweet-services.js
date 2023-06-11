@@ -53,10 +53,11 @@ const tweetServices = {
         where: {
           TweetId: id
         }
+      ,order: [['createdAt', 'DESC']]
       })
     ])
+      .then((tweet) => {if(tweet.id !== id) throw new Error("推文不存在！")})
       .then(([tweet, likes, replies]) => {
-        if (!tweet) throw new Error("Tweet不存在!")
         cb(null, {
           ...tweet,
           likeCount: likes,
@@ -68,7 +69,7 @@ const tweetServices = {
   },
   postTweets: async (req, cb) => {
     try {
-      const { description } = req.body;
+      const { description } = req.body
       const UserId = helpers.getUser(req).id
 
       if (!description) {
