@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Tweet.associate = function(models) {
     Tweet.belongsTo(models.User, { foreignKey: 'userId' })
+    Tweet.hasMany(models.Like, { foreignKey: 'tweetId' })
     Tweet.hasMany(models.Reply, { foreignKey: 'tweetId' })
     Tweet.belongsToMany(models.User, {
       through: models.Like, // 透過 Favorite 表來建立關聯

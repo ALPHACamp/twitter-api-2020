@@ -3,12 +3,14 @@ module.exports = (sequelize, DataTypes) => {
   const Like = sequelize.define('Like', {
   }, {});
   Like.associate = function(models) {
-    Like.belongsTo(models.User, {
-      foreignKey: 'UserId'
-    })
-    Like.belongsTo(models.Tweet, {
-      foreignKey: 'TweetId'
-    })
+    // Like.belongsTo(models.User, {
+    //   foreignKey: 'UserId'
+    // })
+    // Like.belongsTo(models.Tweet, {
+    //   foreignKey: 'TweetId'
+    // })
+    Like.belongsTo(models.User, { foreignKey: 'userId' })
+    Like.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
   };
   Like.init({
     UserId: DataTypes.INTEGER, 
@@ -16,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Like',
-    tableName: 'Likes',
+    tableName: 'Likes', 
     underscored: true
   })
   return Like;

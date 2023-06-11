@@ -12,7 +12,7 @@ const admin = require('./modules/admin')
 router.use('/admin', admin)
 
 
-router.post('/signin', passport.authenticate('local', { session: false }), userController.signin)
+router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.get('/users/:user_id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:user_id/replied_tweets', authenticated, userController.getUserRepliedTweets)
 
@@ -31,12 +31,17 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 // ! branch api/admin
 
 router.get('/users/tops', authenticated, userController.getTopUsers)
+
+router.post('/followships/:user_id', authenticated, userController.addFollowing)
+router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
+
 router.get('/users/:user_id/likes', authenticated, userController.getUserLikes)
 router.get('/users/:user_id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:user_id/followers', authenticated, userController.getUserFollowers)
 router.get('/users/:user_id/edit', authenticated, userController.editUser)
 router.put('/users/:user_id', authenticated, upload.single('image'), userController.putUser)
 router.get('/users/:user_id', authenticated, userController.getUser)
+
 router.post('/users', userController.signUp)
 
 router.post('/followships/:user_id', authenticated, userController.addFollowing)
