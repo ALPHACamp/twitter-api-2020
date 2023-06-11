@@ -22,7 +22,10 @@ const followshipController = {
           followingId
         })
           .then(followship => {
-            res.json(followship.toJSON())
+            res.json({
+              status: '追蹤成功！',
+              ...followship.toJSON()
+            })
           })
           .catch(err => next(err))
       })
@@ -41,7 +44,10 @@ const followshipController = {
         if (!followship) throw new Error("你已追蹤過此人！")
         followship.destroy()
           .then(deletedFollowship => {
-            res.json(deletedFollowship)
+            res.json({
+              status: '取消追蹤！',
+              ...deletedFollowship.toJSON()
+            })
           })
           .catch(err => next(err))
       })
