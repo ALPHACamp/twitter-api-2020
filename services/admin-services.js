@@ -4,9 +4,7 @@ const jwt = require('jsonwebtoken')
 const {
   User,
   Tweet,
-  Followship,
   Like,
-  Reply
 } = require('../models')
 
 const adminServices = {
@@ -35,19 +33,35 @@ const adminServices = {
       cb(err)
     }
   },
-  getUsers: (req, cb) => {
-    User.findAll({
-      raw: true,
-      nest: true,
+
+  getUsers: async (req, cb) => {
+    try {
+  const getLikesCount = async (userId) => {
+    const likesCount = await Tweet.findAll({
+      include: {
+        model: Like,
+        attributes: [],
+        where: {
+          UserId: userId
+        }
+      },
+      attributes: [[sequelize.fn('COUNT', sequelize.col('Likes.id')), 'likesCount']],
+      group: ['Tweet.id']
+    })
+
+    return likesCount
+  }
+
+  const getUsersData = async () => {
+    const users = await User.findAll({
       attributes: [
+        'id',
         'account',
         'name',
         'avatar',
         'banner',
         [sequelize.fn('COUNT', sequelize.col('Followers.id')), 'followersCount'],
-        [sequelize.fn('COUNT', sequelize.col('Followings.id')), 'followingsCount'],
-        // [sequelize.fn('COUNT', sequelize.col('LikedTweets.id')), 'likeCount'],
-        // [sequelize.fn('COUNT', sequelize.col('Replies.id')), 'replyCount']
+        [sequelize.fn('COUNT', sequelize.col('Followings.id')), 'followingsCount']
       ],
       include: [
         {
@@ -62,26 +76,43 @@ const adminServices = {
           attributes: [],
           through: { attributes: [] }
         },
-        // {
-        //   model: Tweet,
-        //   as: 'LikedTweets',
-        //   attributes: [],
-        //   through: { attributes: [] }
-        // },
-        // {
-        //   model: User,
-        //   as: 'Replies',
-        //   attributes: [],
-        //   through: { attributes: [] }
-        // }
+        {
+          model: Tweet,
+          attributes: []
+        }
       ],
-      group: ['User.id']
+      group: ['User.id'],
+      raw: true,
+      nest: true
     })
-      .then((users) => {
-        cb(null, users)
-      })
-      .catch((error) => cb(error))
-  },
+
+    const likesCountPromises = users.map(async (user) => {
+      if (user.id) {
+        const likesCount = await getLikesCount(user.id)
+        user.likesCount = likesCount.length > 0 ? likesCount[0].dataValues.likesCount : 0
+      }
+      return user
+    })
+
+    const usersWithLikesCount = await Promise.all(likesCountPromises)
+
+    const tweetsCountPromises = usersWithLikesCount.map(async (user) => {
+      const tweetData = await Tweet.count({ where: { UserId: user.id } })
+      user.tweetsCount = tweetData
+      return user
+    })
+
+    const usersWithCounts = await Promise.all(tweetsCountPromises)
+    return usersWithCounts
+  }
+
+  const usersWithCounts = await getUsersData()
+  cb(null, usersWithCounts)
+} catch (err) {
+  cb(err)
+}
+}
+
 }
 
 module.exports = adminServices
