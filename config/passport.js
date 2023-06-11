@@ -9,19 +9,20 @@ const ExtractJWT = passportJWT.ExtractJwt
 
 passport.use(new LocalStrategy(
   {
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
   },
-  (req, email, password, cb) => {
-    User.findOne({ where: { email } })
+  (req, account, password, cb) => {
+    User.findOne({ where: { account } })
       .then(user => {
-        if (!user) cb(new Error('That email is not registered!'))
+        if (!user) cb('That account is not registered!')
         bcrypt.compare(password, user.password).then(res => {
-          if (!res) cb(new Error('Email or Password incorrect.'))
-          cb(null, user)
+          if (!res) cb('Email or Password incorrect.')
+          return cb(null, user)
         })
       })
+      .catch(err => cb(err))
   }
 ))
 
@@ -32,10 +33,10 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     include: [
-      //包含user的所有like及這些like所對應的tweet
       { model: Tweet, as: 'Tweets', include: [Like] },
       { model: Tweet, as: 'Tweets', include: [Reply] },
-      { model: Like, as: 'Likes', include: [Tweet] },
+      //包含user的所有like及這些like所對應的tweet
+      { model: Like, as: 'likedTweets', include: [Tweet] },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
@@ -50,7 +51,7 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser((id, cb) => {
   return User.findByPk(id, {
     include: [
-      { model: Like, as: 'Likes', include: [Tweet] },
+      { model: Like, as: 'likedTweets', include: [Tweet] },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]

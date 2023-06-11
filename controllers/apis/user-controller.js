@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Reply, Tweet } = require('../../models')
+const { User, Reply, Tweet, Followship, Like } = require('../../models')
 const jwt = require('jsonwebtoken')
 
 const userController = {
@@ -23,8 +23,13 @@ const userController = {
   signUp: (req, res) => {
     const { name, email, password, avatar, introduction, role, account, passwordCheck } = req.body
     new Promise((resolve, reject) => {
-      if (name.length > 50) reject(new Error(`Name too long`))
-      if (introduction.length > 160) reject(new Error('Introduction too long'))
+      if (!account) {
+        reject(new Error('Account is required'))
+      } else if (account.length > 50) {
+        reject(new Error(`Account too long`))
+      }
+      if (name && name.length > 50) { reject(new Error(`Name too long`)) }
+      if (introduction && introduction.length > 160) reject(new Error('Introduction too long'))
       if (password != passwordCheck) reject(new Error('Password do not match'))
       resolve()
     })
@@ -63,17 +68,57 @@ const userController = {
     return Promise.all([
       User.findByPk(req.params.id),
       Tweet.findAll({
+        //取得req.params.id的所有tweets
         where: {
           userId: req.params.id
         },
-        include: [Reply]
+        //額外取得兩個屬性
+        include: [
+          { model: Reply },
+          { model: Like, }
+        ],
+      }),
+      Followship.findOne({
+        where: {
+          followingId: req.user.id,
+          followerId: req.params.id
+        }
+      }),
+      User.findOne({
+        where: { id: req.params.id },
+        include: [{ model: User, as: 'Followings' }]
+      }),
+      User.findOne({
+        where: { id: req.params.id },
+        include: [{ model: User, as: 'Followers' }]
       })
     ])
-      .then(([user, tweets]) => {
+      .then(([user, tweets, followship, followings, followers]) => {
+        if (!user) throw new Error(`User didn't exist`)
+        tweets = tweets.map(tweet => {
+          const tweetData = tweet.toJSON()
+          tweetData.RepliesCount = tweet.Replies.length
+          tweetData.LikesCount = tweet.Likes.length
+          return tweetData
+        })
+        const isFollowing = followship ? true : false
+        const followingsCount = followings.Followings.length
+        const followersCount = followers.Followers.length
+        user = user.toJSON()
+        delete user.password
+        res.status(500).json({ status: 'success', user, tweets, isFollowing, followingsCount, followersCount })
+      })
+      .catch(err => {
+        res.status(500).json({ status: 'error', error: err.message })
+      })
+  },
+  editUser: (req, res) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
         if (!user) throw new Error(`User didn't exist`)
         user = user.toJSON()
         delete user.password
-        res.status(500).json({ status: 'success', user, tweets })
+        res.status(500).json({ status: 'success', user })
       })
       .catch(err => {
         res.status(500).json({ status: 'error', error: err.message })
