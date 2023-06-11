@@ -1,7 +1,5 @@
-// const { getUser, ensureAuthenticated } = require('../_helpers')
 const helpers = require('../_helpers')
-const { Op } = require('sequelize')
-const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const { User, Tweet, Reply, Like,sequelize } = require('../models')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -54,21 +52,18 @@ const tweetController = {
         order: [["createdAt", "DESC"]],
         raw: true,
       });
-
       const data = tweets.map((tweet) => {
         return {
           tweetId: tweet.id,
           description: tweet.description,
-          userId: {
-            id: tweet["User.id"],
-            name: tweet["User.name"],
-            avatar: tweet["User.avatar"],
-            account: tweet["User.account"],
-          },
+          tweetOwnerId: tweet["User.id"],
+          tweetOwnerName: tweet["User.name"],
+          tweetOwnerAccount: tweet["User.account"],
+          tweetOwnerAvatar: tweet["User.avatar"],
           tweetTime: tweet.createdAt,
           replyCount: tweet.replyCount || 0,
           likeCount: tweet.likeCount || 0,
-          isLiked: tweet.isLiked,
+          isLiked: Boolean(tweet.isLiked),
         };
       });
 
@@ -110,46 +105,49 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     try {
       const tweet = await Tweet.findByPk(req.params.tweet_id, {
-        attributes: ['id', 'description', 'createdAt'],
+        attributes: ["id", "description", "createdAt"],
         include: [
           {
             model: User,
-            attributes: ['id', 'name', 'account', 'avatar']
+            attributes: ["id", "name", "account", "avatar"],
           },
           {
             model: Reply,
-            attributes: ['id', 'comment', 'createdAt'],
+            attributes: ["id", "comment", "createdAt"],
             include: [
               {
                 model: User,
-                attributes: ['id', 'account', 'name', 'avatar']
-              }
-            ]
+                attributes: ["id", "account", "name", "avatar"],
+              },
+            ],
           },
           {
-            model: Like
-          }
-        ]
-      })
+            model: Like,
+          },
+        ],
+      });
       if (!tweet) {
         return res.status(404).json({ error: 'Tweet not found!' })
       }
-      console.log(tweet)
+      tweet.get({ plain: true });
 
-      const data = tweet.get({ plain: true })
-
-      data.replyCount = tweet.Replies ? tweet.Replies.length : 0
-      data.likeCount = tweet.Likes ? tweet.Likes.length : 0
-
-      data.Replies = tweet.Replies.map(reply => {
-        const { id, comment, createdAt, User } = reply
-        return {
-          replyId: id,
-          replyComment: comment,
-          replyTime: createdAt,
-          User: User
-        }
-      })
+      const data = {
+        tweetId: tweet.id,
+        description: tweet.description,
+        tweetTime: tweet.createdAt,
+        tweetOwner: tweet.User,
+        // Replies: tweet.Replies.map((reply) => {
+        //   return {
+        //     replyId: reply.id,
+        //     replyComment: reply.comment,
+        //     replyTime: reply.createdAt,
+        //     replyO: reply.User,
+        //   };
+        // }),
+        replyCount: tweet.Replies ? tweet.Replies.length : 0,
+        likeCount: tweet.Likes ? tweet.Likes.length : 0,
+        isLiked: Boolean(tweet.isLiked),
+      };
 
       return res.status(200).json(data)
     } catch (err) {
@@ -167,8 +165,9 @@ const tweetController = {
       const replies = await Reply.findAll({
         where: { TweetId: tweetId },
         order: [['createdAt', 'DESC']],
+        attributes: [['id','replyID'], ['comment'], ['UserId', 'replyUserId'], ['createdAt', 'replyCreatedAt']],
         raw: true,
-        nest: true
+        // nest: true
       })
 
       return res.status(200).json(replies)
@@ -203,11 +202,9 @@ const tweetController = {
         TweetId: tweetId
       })
 
-      return (
-        res
-          .status(200)
-          .json(newReply)
-      )
+      return res.status(200).json({
+        status: "success",
+      });
     } catch (err) {
       next(err)
     }
