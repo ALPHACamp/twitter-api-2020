@@ -24,7 +24,7 @@ router.post('/tweets/:id/unlike', authenticated, tweetController.unlikeTweet)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 
 // 有關followship的routes
-router.post('/followships', authenticated, followshipController.postFollowship)
+router.post('/followships/:followingId', authenticated, followshipController.postFollowship)
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship)
 
 // 有關user的routes

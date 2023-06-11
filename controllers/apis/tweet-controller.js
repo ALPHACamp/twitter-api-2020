@@ -1,4 +1,4 @@
-const { Tweet, Reply, Like } = require('../../models')
+const { User, Tweet, Reply, Like } = require('../../models')
 
 const tweetController = {
   postTweet: async (req, res, next) => {
@@ -16,11 +16,10 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
-        raw: true,
+        include: [{ model: User, as: 'TweetUser' }],
         order: [['createdAt', 'DESC']]
       })
       if (!tweets) throw new Error('There is no tweet')
-
       return res.status(200).json(tweets)
     } catch (error) {
       next(error)
@@ -29,8 +28,14 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     try {
       const { tweet_id } = req.params
-      const tweet = await Tweet.findByPk(tweet_id)
-      if (!tweet) throw new Error('The tweet does not exist')
+      const tweet = await Tweet.findByPk(tweet_id, {
+        include: [{ model: User, as: 'TweetUser' }]
+      })
+      if (!tweet) {
+        const error = new Error('The tweet does not exist')
+        error.status = 404
+        throw error
+      }
 
       return res.status(200).json(tweet)
     } catch (error) {
@@ -42,7 +47,13 @@ const tweetController = {
       const { tweet_id } = req.params
       const { comment } = req.body
       const tweet = await Tweet.findByPk(tweet_id)
-      if (!tweet) throw new Error('The tweet does not exist')
+
+      // 錯誤處理
+      if (!tweet) {
+        const error = new Error('The tweet does not exist')
+        error.status = 404
+        throw error
+      }
 
       const reply = await Reply.create({
         UserId: res.locals.userId,
@@ -58,7 +69,13 @@ const tweetController = {
     try {
       const { tweet_id } = req.params
       const tweet = await Tweet.findByPk(tweet_id)
-      if (!tweet) throw new Error('The tweet does not exist')
+
+      // 錯誤處理
+      if (!tweet) {
+        const error = new Error('The tweet does not exist')
+        error.status = 404
+        throw error
+      }
 
       const replies = await Reply.findAll({
         where: { TweetId: tweet_id },
@@ -83,8 +100,18 @@ const tweetController = {
             }
           })
         ])
-      if (!PromiseArr[0]) throw new Error('The tweet does not exist')
-      if (PromiseArr[1]) throw new Error('The like already exists')
+
+      // 錯誤處理
+      if (!PromiseArr[0]) {
+        const error = new Error('The tweet does not exist')
+        error.status = 404
+        throw error
+      }
+      if (PromiseArr[1]) {
+        const error = new Error('The tweet does not exist')
+        error.status = 409
+        throw error
+      }
 
       const like = await Like.create({
         UserId: res.locals.userId,
@@ -99,14 +126,27 @@ const tweetController = {
     try {
       const { id } = req.params
       const tweet = await Tweet.findByPk(id)
-      if (!tweet) throw new Error('The tweet does not exist')
+
+      // 錯誤處理
+      if (!tweet) {
+        const error = new Error('The tweet does not exist')
+        error.status = 404
+        throw error
+      }
       const like = await Like.findOne({
         where: {
           UserId: res.locals.userId,
           TweetId: id
         }
       })
-      if (!like) throw new Error('The like does not exist')
+
+      // 錯誤處理
+      if (!like) {
+        const error = new Error('The like does not exist')
+        error.status = 404
+        throw error
+      }
+
       await like.destroy()
       return res.status(200).json(like)
     } catch (err) {

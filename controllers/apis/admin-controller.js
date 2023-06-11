@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like } = require('../../models')
+const { User, Tweet } = require('../../models')
 const { getUser } = require('../../_helpers')
 
 const adminController = {
@@ -53,7 +53,7 @@ const adminController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
-        raw: true,
+        include: [{ model: User, as: 'TweetUser' }],
         order: [['createdAt', 'DESC']]
       })
       return res.status(200).json(tweets)

@@ -78,13 +78,20 @@ const userController = {
     try {
       let id = req.params.id
       id = Number(id)
+
+      // 缺少 推文喜歡數量、推文數量
       const [followingCount, followerCount, user] = await Promise.all([
         Followship.findAndCountAll({ where: { followerId: id } }),
         Followship.findAndCountAll({ where: { followingId: id } }),
         User.findByPk(id)
       ])
+
       // 確認使用者是否存在
-      if (!user) throw new Error('The user does not exist')
+      if (!user) {
+        const error = new Error('The tweet does not exist')
+        error.status = 404
+        throw error
+      }
 
       const data = user.toJSON()
       data.followingCount = followingCount.count
@@ -163,11 +170,7 @@ const userController = {
       ])
       if (!user) throw new Error('The user does not exist')
       if (!userFollows.length) throw new Error("He haven't followed anyone")
-      const data = []
-      // for (const i of req.user.Followings) {
-      //   data.push(i.dataValues)
-      // }
-      console.log(data)
+
       return res.status(200).json(userFollows)
     } catch (error) {
       next(error)
@@ -188,10 +191,6 @@ const userController = {
       if (!user) throw new Error('The user does not exist')
       if (!userFollowers.length) throw new Error('He is lonely')
 
-      // const data = []
-      // for (const i of req.user.Followers) {
-      //   data.push(i.dataValues)
-      // }
       return res.status(200).json(userFollowers)
     } catch (error) {
       next(error)
