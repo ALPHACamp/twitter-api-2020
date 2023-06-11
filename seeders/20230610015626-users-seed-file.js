@@ -9,6 +9,8 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       name: 'root name',
       role: 'admin',
+      avatar: 'https://i.imgur.com/6MjaOQm.jpeg',
+      banner: 'https://i.imgur.com/3ZH4ZZ8.jpeg',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -17,6 +19,8 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       name: 'user1 name',
       role: 'user',
+      avatar: 'https://i.imgur.com/0z0x5EK_d.webp?maxwidth=1520&fidelity=grand',
+      banner: 'https://i.imgur.com/3ZH4ZZ8.jpeg',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -25,6 +29,8 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       name: 'user2 name',
       role: 'user',
+      avatar: 'https://i.imgur.com/mwR4POb.jpeg',
+      banner: 'https://i.imgur.com/3ZH4ZZ8.jpeg',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -33,6 +39,8 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       name: 'user3 name',
       role: 'user',
+      avatar: 'https://i.imgur.com/Ghu3yvGb.jpg',
+      banner: 'https://i.imgur.com/3ZH4ZZ8.jpeg',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -41,6 +49,8 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       name: 'user4 name',
       role: 'user',
+      avatar: 'https://i.imgur.com/fbkd1seb.jpg',
+      banner: 'https://i.imgur.com/3ZH4ZZ8.jpeg',
       created_at: new Date(),
       updated_at: new Date()
     }, {
@@ -49,6 +59,8 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       name: 'user5 name',
       role: 'user',
+      avatar: 'https://i.imgur.com/JpxtkDsb.jpg',
+      banner: 'https://i.imgur.com/3ZH4ZZ8.jpeg',
       created_at: new Date(),
       updated_at: new Date()
     }])
