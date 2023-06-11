@@ -52,7 +52,7 @@ const tweetServices = {
         tweets = tweets.map(tweet => {
           tweet = {
             ...tweet.toJSON(),
-            isLiked: tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id),
+            isLiked: tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
           }
           delete tweet.Likes
           return tweet
