@@ -13,6 +13,8 @@ router.post('/login', passport.authenticate('local', { session: false }), userCo
 router.get('/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 router.get('/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserReplies)
 router.get('/:id/likes', authenticated, authenticatedUser, userController.getUserLikes)
+router.get('/:id/followings', authenticated, authenticatedUser, userController.getUserFollowings)
+router.get('/:id/followers', authenticated, authenticatedUser, userController.getUserFollowers)
 router.get('/:id', authenticated, authenticatedUser, userController.getUserInfo)
 router.put('/:id', authenticated, authenticatedUser, multiUpload, userController.editUserInfo)
 router.post('/', userController.register)

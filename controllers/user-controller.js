@@ -177,6 +177,56 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      let followings = await User.findAll({
+        where: { id: req.params.id },
+        attributes: ['id', 'account', 'name'],
+        include: [
+          { model: User, as: 'Followings', attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction'] }
+        ]
+      })
+      followings = followings[0].Followings
+      followings = await Promise.all(followings.map(async following => {
+        return {
+          followshipId: following.Followship.id,
+          followingId: following.id,
+          followingAccount: following.account,
+          followingName: following.name,
+          followingAvatar: following.avatar,
+          followingIntroduction: following.introduction
+        }
+      }))
+      return res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      let followers = await User.findAll({
+        where: { id: req.params.id },
+        attributes: ['id', 'account', 'name'],
+        include: [
+          { model: User, as: 'Followers', attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction'] }
+        ]
+      })
+      followers = followers[0].Followers
+      followers = await Promise.all(followers.map(async follower => {
+        return {
+          followshipId: follower.Followship.id,
+          followerId: follower.id,
+          followerAccount: follower.account,
+          followerName: follower.name,
+          followerAvatar: follower.avatar,
+          followerIntroduction: follower.introduction
+        }
+      }))
+      return res.status(200).json(followers)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
