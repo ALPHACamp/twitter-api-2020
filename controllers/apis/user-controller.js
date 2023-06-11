@@ -147,6 +147,42 @@ const userController = {
         return res.status(200).json({ status: 'success', updatedUser })
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  addLike: (req, res) => {
+    const { tweetId } = req.params
+    return Promise.all([
+      Tweet.findByPk(tweetId),
+      Like.findOne({
+        where: {
+          userId: req.user.id,
+          tweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error(`tweet didn't exist!`)
+        if (like) throw new Error(`You have liked this tweet!`)
+        return Like.create({
+          userId: req.user.id,
+          tweetId
+        })
+      })
+      .then((likedTweet) => res.status(200).json({ status: 'success', likedTweet }))
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  removeLike: (req, res) => {
+    Like.findOne({
+      where: {
+        userId: req.user.id,
+        tweetId: req.params.tweetId
+      }
+    })
+      .then(like => {
+        if (!like) throw new Error(`You haven't liked this tweet`)
+        return like.destroy()
+      })
+      .then(() => res.status(200).json({ status: 'success' }))
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   }
 }
 
