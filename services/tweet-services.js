@@ -33,18 +33,27 @@ const tweetServices = {
   getTweets: (req, cb) => {
     Tweet.findAll({
       order: [['createdAt', 'DESC']],
-      include: [User, Reply, Like]
+      include: [
+        {
+          model: User,
+          attributes: {
+            exclude: ['passwords']
+          }
+        },
+        Like
+      ],
+      attributes: [
+        'id', 'description', 'createdAt', 'updatedAt', 'UserId',
+        [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCount']
+      ]
     })
       .then(tweets => {
         tweets = tweets.map(tweet => {
           tweet = {
             ...tweet.toJSON(),
             isLiked: tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id),
-            replyCount: tweet.Replies.length,
-            likedCount: tweet.Likes.length
           }
-          delete tweet.User.password
-          delete tweet.Replies
           delete tweet.Likes
           return tweet
         })
