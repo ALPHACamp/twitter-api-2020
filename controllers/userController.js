@@ -9,9 +9,9 @@ const userController = {
         throw new Error(req.authInfo.message)
       }
       const userData = getUser(req).toJSON()
-      if(!userData) throw new Error('account or password incorrect!')
+      if (!userData) throw new Error('account or password incorrect!')
       delete userData.password
-      
+
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '7d' })
       res.json({
         status: 'success',
@@ -31,17 +31,17 @@ const userController = {
       User.findOne({ where: { email: req.body.email } }),
       User.findOne({ where: { account: req.body.account } })
     ])
-    .then(([emailCheck, accountCheck]) => {
-      if(emailCheck) throw new Error('Email already exists!')
-      if(accountCheck) throw new Error('Account already exists!')
-      return bcrypt.hash(req.body.password, 10)
-    })
-    .then(hash => User.create({
+      .then(([emailCheck, accountCheck]) => {
+        if (emailCheck) throw new Error('Email already exists!')
+        if (accountCheck) throw new Error('Account already exists!')
+        return bcrypt.hash(req.body.password, 10)
+      })
+      .then(hash => User.create({
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
         password: hash
-    }))
+      }))
       .then(data => {
         const userData = data.toJSON()
         delete userData.password
