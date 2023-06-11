@@ -63,7 +63,7 @@ const userServices = {
     return Tweet.findAll({
       where: { UserId: req.params.id },
       order: [['createdAt', 'DESC']],
-      include: [User, Reply, Like],
+      include: [User, Reply, Like]
     })
       .then(tweets => {
         tweets = tweets.map(tweet => {
@@ -128,7 +128,7 @@ const userServices = {
             tweet_user_data: {
               name: l.Tweet.User.name,
               avatar: l.Tweet.User.avatar,
-              account: l.Tweet.User.account,
+              account: l.Tweet.User.account
             }
           }
           delete l.User

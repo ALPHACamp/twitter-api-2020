@@ -1,6 +1,5 @@
 const userServices = require('../../services/user-services')
 const jwt = require('jsonwebtoken')
-const passport = require('../../config/passport')
 
 const userController = {
   signUp: (req, res, next) => {
