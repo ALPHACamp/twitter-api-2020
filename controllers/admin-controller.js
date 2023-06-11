@@ -1,26 +1,14 @@
 const adminServices = require('../services/admin-services')
-const { Tweet, User, Like, Reply } = require('../models')
+
 const adminController = {
   signIn: (req, res, next) => {
-    adminServices.signIn(req, (err, data) => err ? next(err) : res.json(data))
+    adminServices.signIn(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   getUsers: (req, res, next) => {
-    adminServices.getUsers(req, (err, data) => err ? next(err) : res.json(data))
+    adminServices.getUsers(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
-
-
-  delTweet: async(req, res, next) => {
-    const { id } = req.params
-    try{
-      const tweet = await Tweet.findByPk(id)
-      if (!tweet) throw new Error("推文不存在！")
-      await tweet.destroy()
-      await Reply.destroy({ where: { TweetId: id } })
-      await Like.destroy({ where: { TweetId: id } })
-      return res.json({ status: 'success', message: '刪除成功' })
-    } catch (err) {
-    next(err)
-    }
-  }
+  delTweet: (req, res, next) => {
+    adminServices.delTweet(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
 }
 module.exports = adminController

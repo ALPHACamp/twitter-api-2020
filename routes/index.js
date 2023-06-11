@@ -20,14 +20,14 @@ router.post('/api/users', userController.signUp)
 
 // user
 
-router.put('/api/users/:id', cors, authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), userController.putUser)
-router.get('/api/users/:id/tweets', cors, authenticated, authenticatedUser, userController.getUserTweets)
-router.get('/api/users/:id/replied_tweets', cors, authenticated, authenticatedUser, userController.getUserRepliedTweets)
-router.get('/api/users/:id/likes', cors, authenticated, authenticatedUser, userController.getUserLikedTweets)
-router.get('/api/users/:id/followings', cors, authenticated, authenticatedUser, userController.getUserFollowings)
-router.get('/api/users/:id/followers', cors, authenticated, authenticatedUser, userController.getUserFollowers)
-router.get('/api/users/topUsers', cors, authenticated, authenticatedUser, userController.topUsers)
-router.get('/api/users/:id', cors, authenticated, authenticatedUser, userController.getUser)
+router.put('/api/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), userController.putUser)
+router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
+router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserRepliedTweets)
+router.get('/api/users/:id/likes', authenticated, authenticatedUser, userController.getUserLikedTweets)
+router.get('/api/users/:id/followings', authenticated, authenticatedUser, userController.getUserFollowings)
+router.get('/api/users/:id/followers', authenticated, authenticatedUser, userController.getUserFollowers)
+router.get('/api/users/topUsers', authenticated, authenticatedUser, userController.topUsers)
+router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // tweet
 router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet)
