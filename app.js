@@ -3,7 +3,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
-const helpers = require('./_helpers')
+// const helpers = require('./_helpers')
+const path = require('path')
 // 先關 需要再開
 // const methodOverride = require('method-override')
 const passport = require('passport')
@@ -22,10 +23,10 @@ app.use(passport.initialize())
 // 先關 需要再開
 // app.use(methodOverride('_method'))
 // use helpers.getUser(req) to replace req.user
-function authenticated (req, res, next) {
-  // passport.authenticate('jwt', { ses...
-};
-
+// function authenticated (req, res, next) {
+//    passport.authenticate('jwt', { ses...
+// };
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use('/api', router)
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.info(`Example app listening on port ${port}!`))
