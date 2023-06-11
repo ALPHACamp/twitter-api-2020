@@ -9,6 +9,11 @@ const helpers = require('../_helpers')
 
 const userController = {
   getUsers: (req, res, next) => {
+    return User.findAll({
+      raw: true,
+      nest: true
+    })
+      .then(users => { res.json(users) })
   },
   getUser: (req, res, next) => {
     helpers.getUser(req)
