@@ -38,8 +38,8 @@ router.post('/api/tweets/:id/unlike', authenticated, authenticatedUser, tweetCon
 
 
 //followship
-router.post('/api/followships', cors, authenticated, authenticatedUser, followshipController.addFollowing)
-router.delete('/api/followships/:id', cors, authenticated, authenticatedUser, followshipController.removeFollowing)
+router.post('/api/followships', authenticated, authenticatedUser, followshipController.addFollowing)
+router.delete('/api/followships/:id', authenticated, authenticatedUser, followshipController.removeFollowing)
 
 
 
