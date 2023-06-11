@@ -14,7 +14,8 @@ app.use(methodOverride('_method'))
 
 app.use(
   cors({
-    origin: 'https://leemengyun.github.io'
+    origin: '*',
+    method: [GET, POST, PUT, DELETE, PATCH]
   })
 )
 
