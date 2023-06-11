@@ -9,13 +9,14 @@ const app = express()
 const port = process.env.PORT || 3000
 
 app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
 app.use(methodOverride('_method'))
-
+app.use(express.json())
+// cors
 app.use(
   cors({
     origin: '*',
-    method: [GET, POST, PUT, DELETE, PATCH]
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
   })
 )
 
