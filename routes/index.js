@@ -7,7 +7,8 @@ const adminController = require('../controllers/apis/admin-controller')
 const tweetController = require('../controllers/apis/tweet-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
-
+const upload = require('../middleware/multer')
+const fields = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }])
 // router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 // if  req.user.role = admin 才能登入
@@ -22,8 +23,9 @@ router.post('/api/signin', (req, res, next) => {
 router.post('/api/signup', userController.signUp)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 
-router.get('/api/users/:id', authenticated, userController.getUser)
 router.get('/api/users/:id/edit', authenticated, userController.editUser)
+router.get('/api/users/:id', authenticated, userController.getUser)
+router.put('/api/users/:id', fields, authenticated, userController.putUser)
 router.use('/', apiErrorHandler)
 
 module.exports = router
