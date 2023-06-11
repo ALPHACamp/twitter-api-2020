@@ -25,9 +25,21 @@ const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
-        raw: true
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
       })
-      return res.json(users)
+
+      const data = users.map(user => {
+        const { Followers, Followings, ...userData } = user.dataValues
+        userData.followerCount = Followers.length
+        userData.followingCount = Followings.length
+        return userData
+      })
+
+      console.log(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }
