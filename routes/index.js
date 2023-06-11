@@ -9,8 +9,9 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 const upload = require('../middleware/multer')
 const fields = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }])
-// router.use('/admin', authenticated, authenticatedAdmin, admin)
 
+
+router.use('/admin', authenticated, authenticatedAdmin, admin)
 // if  req.user.role = admin 才能登入
 router.post('/api/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn)
 // if  req.user.role = admin 不能登入
