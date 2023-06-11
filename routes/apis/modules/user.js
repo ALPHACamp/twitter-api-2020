@@ -7,8 +7,13 @@ const { authenticated } = require('../../../middleware/api-auth')
 
 router.post('/', userController.signUp)
 router.put('/:id/account', authenticated, userController.putAccount)
+router.get('/:id/followers', authenticated, userController.getFollowers)
+router.get('/:id/followings', authenticated, userController.getFollowings)
+router.get('/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/:id/replied_tweets', authenticated, userController.getUserRepliedTweets)
+router.get('/:id/likes', authenticated, userController.getUserLikesTweets)
+router.get('/topTen', authenticated, userController.getTopTenUsers)
+router.get('/:id', authenticated, userController.getUser)
 router.put('/:id', authenticated, profileUpload, userController.putUser)
-// for JWT test purpose
-// router.get('/getuser', authenticated, userController.getUser)
 
 module.exports = router

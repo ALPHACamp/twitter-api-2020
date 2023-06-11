@@ -1,6 +1,5 @@
 const userServices = require('../../services/user-services')
 const jwt = require('jsonwebtoken')
-const passport = require('../../config/passport')
 
 const userController = {
   signUp: (req, res, next) => {
@@ -28,6 +27,26 @@ const userController = {
       next(err)
     }
   },
+  getUser: (req, res, next) => {
+    userServices.getUser(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
+  },
+  getUserTweets: (req, res, next) => {
+    userServices.getUserTweets(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
+  },
+  getUserRepliedTweets: (req, res, next) => {
+    userServices.getUserRepliedTweets(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
+  },
+  getUserLikesTweets: (req, res, next) => {
+    userServices.getUserLikesTweets(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
+  },
   putUser: (req, res, next) => {
     userServices.putUser(req, (err, data) => err
       ? next(err)
@@ -37,12 +56,21 @@ const userController = {
     userServices.putAccount(req, (err, data) => err
       ? next(err)
       : res.json(data))
+  },
+  getFollowers: (req, res, next) => {
+    userServices.getFollowers(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
+  },
+  getFollowings: (req, res, next) => {
+    userServices.getFollowings(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
+  },
+  getTopTenUsers: (req, res, next) => {
+    userServices.getTopTenUsers(req, (err, data) => err
+      ? next(err)
+      : res.json(data))
   }
-
-  // for JWT test purpose
-  /* getUser: (req, res, next) => {
-    console.log('get user')
-  } */
-
 }
 module.exports = userController
