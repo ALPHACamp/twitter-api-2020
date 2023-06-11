@@ -13,12 +13,11 @@ app.use(express.json())
 app.use(methodOverride('_method'))
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://leemengyun.github.io/ac_twitter_frontend/')
+  res.header('Access-Control-Allow-Origin', 'https://leemengyun.github.io/')
   next()
-  app.use('/api', apis)
 })
 // app.use(cors())
-// app.use('/api', apis)
+app.use('/api', apis)
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
