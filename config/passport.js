@@ -28,7 +28,7 @@ passport.use(new LocalStrategy(
   }))
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET || null
+  secretOrKey: process.env.JWT_SECRET
 }
 // 每次req都驗證token
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
