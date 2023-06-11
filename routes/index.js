@@ -18,12 +18,14 @@ router.get('/users/:user_id/replied_tweets', authenticated, userController.getUs
 
 // ! branch api/admin
 // router.post('/followships/:user_id', authenticated, likeController.addFollowing)
-router.post('/tweets/:id/like', authenticated, userController.addLike)
-router.post('/tweets/:id/unlike', authenticated, userController.unLike)
 
 router.post('/tweets/:tweet_id/replies', authenticated,replyController.postComment)
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getComment) 
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
+
+router.post('/tweets/:id/like', authenticated, userController.addLike)
+router.post('/tweets/:id/unlike', authenticated, userController.unLike)
+
 router.post('/tweets', authenticated, tweetController.createTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 // ! branch api/admin
