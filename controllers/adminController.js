@@ -43,6 +43,7 @@ const adminController = {
         raw: true,
         nest: true
       })
+      console.log(users)
       res.status(200).json(users)
     } catch (err) {
       next(err)
