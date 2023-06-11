@@ -63,7 +63,30 @@ const tweetController = {
           message: 'Tweet deleted successfully'
         })
       })
-  }
+      .catch(err => next(err))
+  },
+  postReplies: (req, res, next) => {
+    const { comment } = req.body
+    const tweetId = req.params.tweetId
+    const getUser = helpers.getUser(req)
+    const userId = getUser.id
+    return Tweet.findByPk(tweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        return Reply.create({
+          comment,
+          userId,
+          tweetId,
+        })
+      })
+      .then(reply => {
+        res.json({
+          status: 'success',
+          data: reply
+        })
+      })
+      .catch(err => next(err))
+  },
 }
 
 module.exports = tweetController
