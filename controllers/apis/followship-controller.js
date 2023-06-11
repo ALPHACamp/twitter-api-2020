@@ -2,13 +2,19 @@ const { getUser } = require('../../_helpers')
 const { Followship } = require('../../models')
 
 const followshipController = {
+  // 更改路由新增:followshipId?
   postFollowship: async (req, res, next) => {
     try {
-      const { id } = req.body
+      let { id } = req.params
+      id = Number(id)
       // 確認使用者是否已經追蹤該用戶
       const followship = await Followship.findOne({ where: { followingId: id, followerId: getUser(req).id } })
       // 如果有 => 不用新增
-      if (followship) throw new Error('You have followed this user.')
+      if (followship) {
+        const error = new Error('You have followed this user.')
+        error.status = 409
+        throw error
+      }
 
       const newFollow = await Followship.create({
         followerId: getUser(req).id,
