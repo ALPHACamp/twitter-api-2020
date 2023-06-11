@@ -156,6 +156,110 @@ const userController = {
       }))
       res.status(200).json(data)
     } catch (err) { next(err) }
+  },
+  getUserLike: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const likes = await Like.findAll({
+        where: { UserId: id },
+        include: {
+          model: Tweet,
+          include: [
+            { model: Like },
+            { model: Reply, attributes: ['id'] },
+            { model: User, attributes: ['id', 'name', 'account'] }
+          ],
+          attributes: ['id', 'description', 'createdAt']
+        },
+        order: [['createdAt', 'DESC']]
+      })
+
+      if (!likes.length) return res.status(404).json({ status: 'error', message: '無Like資料' })
+
+      const data = likes.map(l => ({
+        TweetId: l.TweetId,
+        description: l.Tweet.description,
+        tweetOwnerId: l.Tweet.User.id,
+        tweetOwnerName: l.Tweet.User.name,
+        tweetOwnerAccount: l.Tweet.User.account,
+        tweetOwnerAvatar: l.Tweet.User.avatar,
+        tweetcreatedAt: l.Tweet.createdAt,
+        replyCount: l.Tweet.Replies.length,
+        likeCount: l.Tweet.Likes.length,
+        isLiked: l.isLiked
+
+      }))
+      res.status(200).json(data)
+    } catch (err) { next(err) }
+  },
+  getUserfollowing: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const currentUserId = getUser(req).dataValues.id
+      const [user, following] = await Promise.all([
+        User.findByPk(id, {
+          include: {
+            model: User,
+            as: 'Followings',
+            include: Tweet
+          }
+        }),
+        // 目前登入者的追蹤資料
+        Followship.findAll({
+          where: { followerId: currentUserId },
+          raw: true
+        })
+      ])
+
+      if (!user.Followings.length) return res.status(404).json({ status: 'error', message: '無追蹤其他使用者' })
+
+      const currentUserFollowing = following.map(f => f.followingId)
+      const data = user.Followings.map(f => ({
+        followingId: f.id,
+        account: f.account,
+        name: f.name,
+        avatar: f.avatar,
+        introduction: f.introduction,
+        Tweets: f.Tweets.map(tweet => ({
+          TweetId: tweet.id,
+          description: tweet.description
+        })),
+        isFollowed: currentUserFollowing.includes(f.id)
+      }))
+      res.status(200).json(data)
+    } catch (err) { next(err) }
+  },
+  getUserFollower: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const currentUserId = getUser(req).dataValues.id
+      const [user, following] = await Promise.all([
+        User.findByPk(id, {
+          include: { model: User, as: 'Followers', include: Tweet }
+        }),
+        Followship.findAll({
+          where: { followerId: currentUserId },
+          raw: true
+        })
+      ])
+
+      if (!user.Followers.length) return res.status(404).json({ status: 'error', message: '無跟隨者資料' })
+
+      const currentUserFollowing = following.map(f => f.followingId)
+      const data = user.Followers.map(f => ({
+        followerId: f.id,
+        account: f.account,
+        name: f.name,
+        avatar: f.avatar,
+        introduction: f.introduction,
+        Tweets: f.Tweets.map(tweet => ({
+          TweetId: tweet.id,
+          description: tweet.description
+        })),
+        isFollowed: currentUserFollowing.includes(f.id)
+      })).sort((a, b) => b.isFollowed - a.isFollowed)
+      res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 module.exports = userController
