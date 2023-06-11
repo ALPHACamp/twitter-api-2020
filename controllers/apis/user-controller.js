@@ -182,7 +182,7 @@ const userController = {
         if (!like) throw new Error(`You haven't liked this tweet`)
         return like.destroy()
       })
-      .then(() => res.status(200).json({ status: 'success' }))
+      .then(removedLike => res.status(200).json({ status: 'success', removedLike }))
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
   addFollowing: (req, res) => {
@@ -206,6 +206,21 @@ const userController = {
         })
       })
       .then(updateFollowship => res.status(200).json({ status: 'success', updateFollowship }))
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  removeFollowing: (req, res) => {
+    const { userId } = req.params
+    return Followship.findOne({
+      where: {
+        followerId: req.user.id,
+        followingId: userId
+      }
+    })
+      .then(followship => {
+        if (!followship) throw new Error(`You haven't followed this user!`)
+        return followship.destroy()
+      })
+      .then(removedFollowship => res.status(200).json({ status: 'success', removedFollowship }))
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   }
 }
