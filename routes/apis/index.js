@@ -9,7 +9,10 @@ const admin = require('./modules/admin')
 const followship = require('./modules/followship')
 const tweet = require('./modules/tweet')
 
+// for user login
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
+// for admin login
+router.post('/admin/signin', passport.authenticate('local', { session: false }), authenticatedAdmin, userController.signIn)
 router.use('/users', user)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/followships', authenticated, authenticatedUser, followship)
