@@ -4,18 +4,19 @@ const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       include: [
-        Reply,
-        Like
+        { model: Reply },
+        { model: Like }
       ],
       order: [['createdAt', 'DESC']],
     })
       .then(tweets => {
         const formattedTweets = tweets.map(tweet => {
-          return {
-            ...tweet.get({ plain: true }),
-          }
+          const tweetData = tweet.toJSON()
+          tweetData.RepliesCount = tweet.Replies.length
+          tweetData.LikesCount = tweet.Likes.length
+          return tweetData
         })
-        res.json(formattedTweets)
+        res.status(200).json({ status: 'success', formattedTweets })
       })
       .catch(err => {
         res.status(500).json({ status: 'error', error: err.message })
