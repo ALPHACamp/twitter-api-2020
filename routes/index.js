@@ -12,8 +12,25 @@ const userController = require('../controllers/user-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated, isUser, isAdmin, authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
 
-router.post('/api/admin/signin', passport.authenticate('local', { session: false }), isAdmin, adminController.signIn)
-router.post('/api/users/signin', passport.authenticate('local', { session: false }), isUser, userController.signIn)
+router.post('/api/admin/signin', (req, res, next) => {
+  passport.authenticate('local', { session: false }, (err, user, info) => {
+    if (info) {
+      return res.status(401).json(info);
+    }
+    req.user = user
+    next();
+  })(req, res, next);
+}, isAdmin, adminController.signIn)
+
+router.post('/api/users/signin', (req, res, next) => {
+  passport.authenticate('local', { session: false }, (err, user, info) => {
+    if (info) {
+      return res.status(401).json(info);
+    }
+    req.user = user
+    next();
+  })(req, res, next);
+}, isUser, userController.signIn)
 
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 router.use('/api/users', authenticated, authenticatedUser, users)

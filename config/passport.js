@@ -20,11 +20,11 @@ passport.use(new LocalStrategy({
       // ]
     })
     if (!user) {
-      return done(null, false, { message: '使用者不存在', status: 401 });
+      return done(null, false, { status: 401, message: '帳號不存在'});
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return done(null, false, { message: '信箱或是密碼錯誤', status: 401 });
+      return done(null, false, { status: 401, message: '密碼錯誤' });
     }
     return done(null, user.get());
   } catch (err) {
