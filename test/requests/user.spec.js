@@ -220,8 +220,7 @@ describe('# user requests', () => {
         await db.Tweet.create({UserId: 2, description: 'User2 的 Tweet1'})
         await db.Like.create({UserId: 1, TweetId: 1})
       })
-      // ############################################################################################
-      // ############################################################################################
+      
       // GET /users/:id/likes - 看見某使用者點過的 Like 
       it(' - successfully', (done) => {
         request(app)
@@ -285,6 +284,7 @@ describe('# user requests', () => {
 
             expect(res.body).to.be.an('array');
             //回傳資料中是否有跟隨中的人的 id = 2
+            console.log(res.body)
             res.body[0].followingId.should.equal(2);
 
             return done();
@@ -325,7 +325,8 @@ describe('# user requests', () => {
         await db.User.create({account: 'User2', name: 'User2', email: 'User2', password: 'User2'})        
         await db.Followship.create({followerId: 1, followingId: 2})
       })
-
+      // ############################################################################################
+      // ############################################################################################
       // GET /users/:id/followers - 看見某使用者的跟隨者
       it(' - successfully', (done) => {
         request(app)

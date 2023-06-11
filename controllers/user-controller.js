@@ -16,7 +16,7 @@ const userController = {
       .then(user => {
         if (!user) throw new Error('getUser查無此人')
         // res.json({ status: 'success', user: user.toJSON() })
-        res.json(user.toJSON())
+        res.status(200).json(user.toJSON())
       })
   },
   getTopUsers: (req, res, next) => {
@@ -43,6 +43,7 @@ const userController = {
         })
       })
       .then(signUpUser => {
+        delete signUpUser.password
         res.json({ status: 'success', signUpUser })
       })
       .catch(err => next(err))
@@ -74,7 +75,9 @@ const userController = {
       Tweet.findAll({
         where: { UserId: userId },
         include: [
-          { model: User },
+          // 遇到 model User, 都要小心, 最好使用attributes: ['指定要傳那些資料出去']
+          // 或是 使用 attributes: { exclude: ['不要傳出去的'] } }, 但是你不知道會不會傳出去些什麼
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
           { model: Reply },
           { model: Like }
         ],
@@ -99,10 +102,10 @@ const userController = {
       Reply.findAll({
         where: { UserId: userId },
         include: [
-          { model: User },
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
           {
             model: Tweet,
-            include: [{ model: User }]
+            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
           }
         ],
         raw: true,
@@ -123,24 +126,49 @@ const userController = {
       Like.findAll({
         where: { UserId: userId },
         include: [
-          { model: User },
-          { model: Reply },
-          { model: Like }
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Tweet,
+            include: [
+              { model: Reply },
+              { model: Like }
+            ]
+          }
         ],
-        raw: true,
-        nest: true,
         order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, likesData]) => {
         if (!user) throw new Error('getUserLikes說: 沒這人')
         const likes = likesData.map(l => ({
-          ...l,
-          repliesCount: l.Replies.length,
-          likesCount: l.Likes.length
+          ...l.toJSON(),
+          repliesCount: l.Tweet.Replies.length,
+          likesCount: l.Tweet.Likes.length
         }))
         res.status(200).json(likes)
       })
+      .catch(err => next(err))
+  },
+  getUserFollowings: (req, res, next) => {
+    const userId = req.params.id
+    return Promise.all([
+      User.findByPk(userId),
+      User.findByPk(userId, {
+        include: [
+          { model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'introduction'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, followingsData]) => {
+        if (!user) throw new Error('getUserFollowings說: 沒這人')
+        // const followings = followingsData.Followings.map(f => ({
+        //   ...f.toJSON()
+        //   // isFollowing: req.user && req.user.Followings.some(uf => uf.id === f.Followings.id)
+        // }))
+        res.status(200).json(followingsData.toJSON())
+      })
+      .catch(err => next(err))
   }
 }
 
