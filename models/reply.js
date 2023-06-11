@@ -8,6 +8,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Reply.init({
+    id: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.INTEGER
+    },
     UserId: DataTypes.INTEGER,
     TweetId: DataTypes.INTEGER,
     comment: DataTypes.TEXT

@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize')
+const sequelize = require('sequelize')
 const { getUserData } = require('../helpers/getUserData')
 
 const {
@@ -323,6 +324,24 @@ const userServices = {
             }))
 
             cb(null, followers)
+        } catch (err) {
+            cb(err)
+        }
+    },
+    topUsers: async (req, cb) => {
+        try{
+            const users = await User.findAll({
+                include: [{ model: User, as: 'Followers' }]
+            })
+        const result = await users
+        .map(user => ({
+            ...user.dataValues,
+            followerCount: user.Followers.length,
+            isFollowed: req.user.Followings.some(f => f.id === user.id)
+        }))
+        .sort((a, b) => b.followerCount - a.followerCount)
+        const newResult = result.slice(0, 10)    
+        cb(null, newResult)
         } catch (err) {
             cb(err)
         }
