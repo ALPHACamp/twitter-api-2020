@@ -1,36 +1,19 @@
-const { User, Tweet, Like, Reply } = require('../models')
+const { User, Tweet, Like, Reply, sequelize } = require('../models')
 
 const adminServices = {
   getUsers: (req, cb) => {
     User.findAll({
-      include: [
-        Tweet,
-        Like,
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ]
+      attributes: ['id', 'name', 'account', 'avatar', 'coverPhoto',
+        [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetCounts'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.User_id = User.id)'), 'likeCounts'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount']
+      ],
+      order: [[sequelize.literal('tweetCounts'), 'DESC']],
+      raw: true,
+      nest: true
     })
-      .then(users => {
-        const userData = users.map(user => {
-          const data = {
-            ...user.toJSON(),
-            followerCounts: user.Followers.length,
-            followingCounts: user.Followings.length,
-            tweetCounts: user.Tweets.length,
-            likeCounts: user.Likes.length
-          }
-          delete data.password
-          delete data.role
-          delete data.introduction
-          delete data.Tweets
-          delete data.Likes
-          delete data.Followers
-          delete data.Followings
-          return data
-        })
-          .sort((a, b) => b.tweetCounts - a.tweetCounts)
-        return cb(null, userData)
-      })
+      .then(users => cb(null, users))
       .catch(err => cb(err))
   },
   getTweets: (req, cb) => {
