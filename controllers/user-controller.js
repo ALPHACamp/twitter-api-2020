@@ -79,9 +79,10 @@ const userController = {
           { model: Like }
         ],
         order: [['createdAt', 'DESC']]
-      })])
+      })
+    ])
       .then(([user, tweetsData]) => {
-        if (!user) throw new Error('getUserTweets說沒這人')
+        if (!user) throw new Error('getUserTweets說: 沒這人')
         const tweets = tweetsData.map(t => ({
           ...t.toJSON(),
           repliesCount: t.Replies.length,
@@ -92,6 +93,54 @@ const userController = {
       .catch(err => next(err))
   },
   getUserReplies: (req, res, next) => {
+    const userId = req.params.id
+    return Promise.all([
+      User.findByPk(userId),
+      Reply.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: User },
+          {
+            model: Tweet,
+            include: [{ model: User }]
+          }
+        ],
+        raw: true,
+        nest: true,
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, repliesData]) => {
+        if (!user) throw new Error('getUserReplies說: 沒這人')
+        res.status(200).json(repliesData)
+      })
+      .catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+    const userId = req.params.id
+    return Promise.all([
+      User.findByPk(userId),
+      Like.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: User },
+          { model: Reply },
+          { model: Like }
+        ],
+        raw: true,
+        nest: true,
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, likesData]) => {
+        if (!user) throw new Error('getUserLikes說: 沒這人')
+        const likes = likesData.map(l => ({
+          ...l,
+          repliesCount: l.Replies.length,
+          likesCount: l.Likes.length
+        }))
+        res.status(200).json(likes)
+      })
   }
 }
 
