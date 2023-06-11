@@ -121,8 +121,8 @@ const userController = {
           id: tweet.id,
           userId: tweet.userId,
           description: tweet.description,
-          createAt: tweet.createAt,
-          updateAt: tweet.updateAt,
+          createdAt: tweet.createdAt,
+          updatedAt: tweet.updatedAt,
           userName: tweet.User.name,
           userAvatar: tweet.User.avatar,
           userAccount: tweet.User.account,
@@ -154,24 +154,32 @@ const userController = {
       let likedTweets = await Like.findAll({
         where: { UserId: req.params.id },
         include: [
-          { model: Tweet, include: [{ model: User, attributes: ['name', 'avatar', 'account'] }, Reply, Like] }
-        ],
-        order: [['createdAt', 'DESC']]
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['name', 'avatar', 'account'] },
+              Reply,
+              Like
+            ]
+          }
+        ]
       })
       likedTweets = await Promise.all(likedTweets.map(async likedTweet => {
         return {
           TweetId: likedTweet.Tweet.id,
           userId: likedTweet.Tweet.userId,
           description: likedTweet.Tweet.description,
-          createAt: likedTweet.Tweet.createAt,
-          updateAt: likedTweet.Tweet.updateAt,
+          createdAt: likedTweet.Tweet.createdAt,
+          updatedAt: likedTweet.Tweet.updatedAt,
           userName: likedTweet.Tweet.User.name,
           userAvatar: likedTweet.Tweet.User.avatar,
           userAccount: likedTweet.Tweet.User.account,
           repliesNum: likedTweet.Tweet.Replies.length,
-          likes: likedTweet.Tweet.Likes.length
+          likes: likedTweet.Tweet.Likes.length,
+          likeCreatedAt: likedTweet.createdAt
         }
       }))
+      likedTweets = likedTweets.sort((a, b) => b.createAt - a.createAt)
       return res.status(200).json(likedTweets)
     } catch (err) {
       next(err)
@@ -183,7 +191,7 @@ const userController = {
         where: { id: req.params.id },
         attributes: ['id', 'account', 'name'],
         include: [
-          { model: User, as: 'Followings', attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction'], order: [['createdAt', 'DESC']] }
+          { model: User, as: 'Followings', attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction'] }
         ]
       })
       followings = followings[0].Followings
@@ -194,9 +202,11 @@ const userController = {
           followingAccount: following.account,
           followingName: following.name,
           followingAvatar: following.avatar,
-          followingIntroduction: following.introduction
+          followingIntroduction: following.introduction,
+          followshipCreatedAt: following.Followship.createdAt
         }
       }))
+      followings = followings.sort((a, b) => b.createAt - a.createAt)
       return res.status(200).json(followings)
     } catch (err) {
       next(err)
@@ -219,9 +229,11 @@ const userController = {
           followerAccount: follower.account,
           followerName: follower.name,
           followerAvatar: follower.avatar,
-          followerIntroduction: follower.introduction
+          followerIntroduction: follower.introduction,
+          followshipCreatedAt: follower.Followship.createdAt
         }
       }))
+      followers = followers.sort((a, b) => b.createAt - a.createAt)
       return res.status(200).json(followers)
     } catch (err) {
       next(err)
