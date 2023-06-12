@@ -42,11 +42,22 @@ const authenticatedAdmin = (req, res, next) => {
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 
+const signInAuth = (req, res, next) => {
+  passport.authenticate('local', { session: false }, (err, user, info) => {
+    if (info) {
+      return res.status(401).json(info);
+    }
+    req.user = user
+    next();
+  })(req, res, next);
+}
+
 module.exports = {
   authenticated,
   ensureAccountExists,
   isUser,
   isAdmin,
   authenticatedUser,
-  authenticatedAdmin
+  authenticatedAdmin,
+  signInAuth
 }
