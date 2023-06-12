@@ -23,20 +23,23 @@ const userController = {
       // Check if email matches the required format
       if (!validator.validate(email)) throw new Error('Email格式不正確!')
       // check if user with given email or account already exists
-      const existingAccount = await User.findOne({ where: { account: req.body.account } })
-      const existingEmail = await User.findOne({ where: { email: req.body.email } })
+      const existingAccount = await User.findOne({ where: { account: account } })
+      const existingEmail = await User.findOne({ where: { email: email } })
       if (existingAccount) { throw new Error('account已重複註冊!') }
       if (existingEmail) { throw new Error('email已重複註冊!') }
       // If user does not exist, hash password and create new user
-      const hash = await bcrypt.hash(req.body.password, 10)
-      await User.create({
+      const hash = await bcrypt.hash(password, 10)
+      const newUser = await User.create({
         name,
         email,
         password: hash,
         account,
         role: 'user'
       })
-      return res.status(200).json({ message: 'Signup successfully!' })
+      const userJSON = newUser.toJSON()
+      delete userJSON.password
+      const token = jwt.sign(userJSON, process.env.JWT_SECRET, { expiresIn: '30d' })
+      return res.status(200).json({ message: '註冊成功', token })
     } catch (err) { next(err) }
   },
   getUser: async (req, res, next) => {
