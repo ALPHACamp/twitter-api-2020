@@ -15,6 +15,7 @@ const userController = {
       nest: true
     })
       .then(users => { res.json(users) })
+      .catch(err => next(err))
   },
   getUser: (req, res, next) => {
     helpers.getUser(req)
@@ -29,6 +30,7 @@ const userController = {
   getTopUsers: (req, res, next) => {
     console.log('users_getTopUser')
     res.json(userDummy.getTopUsers)
+      .catch(err => next(err))
   },
   signUp: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
@@ -182,24 +184,35 @@ const userController = {
     ])
       .then(([user, followersData]) => {
         if (!user) throw new Error('getUserFollowers說: 沒這人')
-        res.status(200).json(followersData)
+        let followers = followersData
+        if (req.user.Followings) {
+          followers = followersData.map(follower => ({
+            ...follower,
+            isFollowing: req.user && req.user.Followings.some(following => following.id === follower.id)
+          }))
+        }
+        res.status(200).json(followers)
       })
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
-    // const userId = req.params.id
-    // const { name } = req.body
-    // const { file } = req
-    // return User.findByPk(userId)
-    //   .then(user => {
-    //     if (!user) throw new Error('putUser說: 沒這人')
-    //     return res.redirect('back')
-    //   })
-    //   .then(user => {
-    //     return User.update({
-
-    //     })
-    //   })
+    const userId = helpers.getUser(req).id
+    const { name, introduction, avatar, banner } = req.body
+    return User.findByPk(userId)
+      .then(userData => {
+        if (!userData) throw new Error('putUser說: 沒這人')
+        return userData.update({
+          name: name || userData.name,
+          introduction: introduction || userData.introduction,
+          avatar: avatar || userData.avatar,
+          banner: banner || userData.banner
+        })
+      })
+      .then(updatedUser => {
+        delete updatedUser.password
+        res.status(200).json(updatedUser)
+      })
+      .catch(err => next(err))
   }
 }
 
