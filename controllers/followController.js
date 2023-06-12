@@ -1,8 +1,8 @@
 const { Followship, User, Like, Tweet, Sequelize } = require('../models')
-
+const { getUser } = require('../_helpers')
 const followController = {
   addFollowing: (req, res, next) => {
-    const followerId = req.user.id
+    const followerId = getUser.id
     const followingId = req.body.id
     if (!followingId) {
       return res
@@ -10,7 +10,11 @@ const followController = {
         .json('缺少追蹤的用戶id')
     }
     if (followerId === followingId) {
+<<<<<<< HEAD
       return res.status(400).json('無法追蹤自己')
+=======
+      return res.json('無法追蹤自己')
+>>>>>>> b9e00d87c61785e651c410ba729c4de3b5d3a15c
     }
     Followship.findOne({
       where: {
@@ -31,7 +35,7 @@ const followController = {
       .catch((error) => next(error));
   },
   removeFollowing: (req, res, next) => {
-    const followerId = req.user.id
+    const followerId = getUser.id
     const followingId = req.params.id
     if (!followingId) {
       return res
@@ -46,7 +50,11 @@ const followController = {
       }
     })
       .then((followship) => {
+<<<<<<< HEAD
         if (!followship) return res.status(400).json('未追蹤過')
+=======
+        if (!followship) { return res.status(401).json('未追蹤過') }
+>>>>>>> b9e00d87c61785e651c410ba729c4de3b5d3a15c
         return followship.destroy()
       })
       .then(() => res.status(200).json('unfollow success'))
