@@ -78,7 +78,6 @@ const followController = {
 
       const followers = followships.map((followship) => {
         const follower = followship.Follower
-        console.log(follower)
         follower.introduction = follower.introduction ? follower.introduction.substring(0, 50) : ''
         return follower
       })
