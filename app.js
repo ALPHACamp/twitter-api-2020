@@ -18,7 +18,6 @@ const corsOptions = {
 }
 app.use(cors(corsOptions))
 app.use(router)
-
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app

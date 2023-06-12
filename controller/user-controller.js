@@ -15,7 +15,10 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const { name, email, password, account, checkPassword } = req.body
+      if (!name || !email || !password || !account || !checkPassword) throw new Error('請填寫所有必填欄位')
+      // Check password and check Password must be the same
       if (password !== checkPassword) throw new Error('Passwords do not match')
+      // Check name.length must < 50
       if (name.length > 51) throw new Error('使用者註冊名稱(name)上限為50字')
       // Check if email matches the required format
       if (!validator.validate(email)) throw new Error('Email格式不正確!')
@@ -43,6 +46,7 @@ const userController = {
       const user = await User.findByPk(userId, {
         attributes: { exclude: ['password'] },
         include: [
+          Tweet,
           { model: User, as: 'Followers', attributes: { exclude: ['password'] } },
           { model: User, as: 'Followings', attributes: { exclude: ['password'] } }
         ]
@@ -52,6 +56,7 @@ const userController = {
       return res.status(200).json(user)
     } catch (err) { next(err) }
   },
+  // const reqUserId = helpers.getUser(req).id
   getUserTweets: async (req, res, next) => {
     try {
       const userId = Number(req.params.id)
@@ -145,6 +150,7 @@ const userController = {
       return res.status(200).json({ message: '修改成功' })
     } catch (err) { next(err) }
   }
+
 }
 
 module.exports = userController
