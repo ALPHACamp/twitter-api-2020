@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const { User, Reply, Tweet, Followship, Like } = require('../../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
+const followship = require('../../models/followship')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -181,7 +182,45 @@ const userController = {
         if (!like) throw new Error(`You haven't liked this tweet`)
         return like.destroy()
       })
-      .then(() => res.status(200).json({ status: 'success' }))
+      .then(removedLike => res.status(200).json({ status: 'success', removedLike }))
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  addFollowing: (req, res) => {
+    const { userId } = req.params
+    console.log('userId', userId)
+    Promise.all([
+      User.findByPk(userId),
+      Followship.findOne({
+        where: {
+          followerId: req.user.id,
+          followingId: userId
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (followship) throw new Error('You are already following this user!')
+        return Followship.create({
+          followerId: req.user.id,
+          followingId: userId
+        })
+      })
+      .then(updateFollowship => res.status(200).json({ status: 'success', updateFollowship }))
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  removeFollowing: (req, res) => {
+    const { userId } = req.params
+    return Followship.findOne({
+      where: {
+        followerId: req.user.id,
+        followingId: userId
+      }
+    })
+      .then(followship => {
+        if (!followship) throw new Error(`You haven't followed this user!`)
+        return followship.destroy()
+      })
+      .then(removedFollowship => res.status(200).json({ status: 'success', removedFollowship }))
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   }
 }
