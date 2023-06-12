@@ -15,7 +15,10 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const { name, email, password, account, checkPassword } = req.body
+      if (!name || !email || !password || !account || !checkPassword) throw new Error('請填寫所有必填欄位')
+      // Check password and check Password must be the same
       if (password !== checkPassword) throw new Error('Passwords do not match')
+      // Check name.length must < 50
       if (name.length > 51) throw new Error('使用者註冊名稱(name)上限為50字')
       // Check if email matches the required format
       if (!validator.validate(email)) throw new Error('Email格式不正確!')
