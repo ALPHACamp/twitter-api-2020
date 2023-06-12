@@ -1,17 +1,37 @@
 const helpers = require('../_helpers')
 const { User, Followship, sequelize } = require('../models')
+const { Op } = require('sequelize')
 
 const followshipController = {
   addFollowing: async (req, res, next) => {
     try {
       // get the current user
       const user = helpers.getUser(req)
-      // request the ID of the user to be followed
+      const followerId = user.id
       const followingId = req.body.id
+
+      // following use cannoot be admin
+      const followingUser = await User.findOne({
+        where: {
+          id: followingId,
+          role: {
+            [Op.ne]: 'admin'
+          }
+        }
+      })
+      // check the user exist
+      if (!followingUser) {
+        return res.status(400).json({
+          status: 'error',
+          message: "This user doesn't exist"
+        })
+      }
 
       // user cannot follow themselves
       if (user.id === followingId) {
-        return res.status(400).json({ error: 'You cannot follow yourself!' })
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'You cannot follow yourself!' })
       }
 
       // check if a followship already exists
@@ -20,17 +40,17 @@ const followshipController = {
       })
       // if a followship exists
       if (follow) {
-        return res.status(400).json({ error: 'You have followed this user!' })
+        return res.status(400).json({status: 'error', message: 'You have followed this user!' })
       }
-      console.log(follow)
 
       // if no followship exists
       await Followship.create({
-        followerId: user.id,
-        followingId: followingId
+        followerId,
+        followingId
       })
       return res.status(200).json({
-        status: 'success'
+        status: 'success',
+        message: 'Followed'
       })
     } catch (err) {
       next(err)
@@ -41,24 +61,52 @@ const followshipController = {
     try {
       // get the current user
       const user = helpers.getUser(req)
-      // get the following id
-      const { followingId } = req.params
+      const followerId = user.id
+      const followingId = req.params.followingId;
+
+      // following use cannoot be admin
+      const unfollowingUser = await User.findOne({
+        where: {
+          id: followingId,
+          role: {
+            [Op.ne]: 'admin'
+          }
+        }
+      })
+      // check the user exist
+      if (!unfollowingUser) {
+        return res.status(400).json({
+          status: 'error',
+          message: "This user doesn't exist"
+        })
+      }
+
+      // user cannot follow themselves
+      if (user.id === followingId) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'You cannot unfollow yourself!' })
+      }
 
       // check if a followship already exists
       const follow = await Followship.findOne({
-        where: { followerId: user.id, followingId: followingId }
+        where: {
+          followingId,
+          followerId
+        }
       })
       // if a followship exists
       if (!follow) {
         return res
           .status(400)
-          .json({ error: "You haven't followed this user!" })
+          .json({ status: 'error', message: "You haven't followed this user before" })
       }
       // delete the following
       await follow.destroy()
 
       return res.status(200).json({
-        status: 'success'
+        status: 'success',
+        message: 'Unfollowed'
       })
     } catch (err) {
       next(err)
@@ -84,7 +132,7 @@ const followshipController = {
             'FollowingCount'
           ]
         ],
-        where: sequelize.literal(`account != 'root' AND account != '${currentUser.account}'`),
+        where: sequelize.literal(`role != 'admin' AND id != '${currentUser.id}'`),
         order: [[sequelize.literal('FollowingCount'), 'DESC'], ['createdAt']],
         limit: 10,
         raw: true,
