@@ -80,14 +80,17 @@ const tweetController = {
           nest: true
         })
       }
-      if (tweets.length === 0) return res.status(400).json('Tweets not found')
+      if (tweets.length === 0) return res.status(404).json('Tweets not found')
       const counts = tweets.map((tweet) => ({
         ...tweet.toJSON(),
         likesCount: tweet.Likes.length,
         repliesCount: tweet.Replies.length,
-        lastUpdated: getLastUpd(tweet)
+        lastUpdated: getLastUpd(tweet),
+        account: tweet.User.account,
+        name: tweet.User.name,
+        avatar: tweet.User.avatar
       }))
-      const data = counts.map(({ Likes, Replies, ...rest }) => rest)
+      const data = counts.map(({ Likes, Replies, User, ...rest }) => rest)
       return res.status(200).json(data)
     } catch (err) {
       next(err)
@@ -104,10 +107,14 @@ const tweetController = {
       nest: true
     })
       .then((data) => {
-        if (!data) return res.status(400).json('Tweet not found')
+        if (!data) return res.status(404).json('Tweets not found')
         const tweet = data.dataValues
         tweet.likesCount = tweet.Likes.length
         tweet.repliesCount = tweet.Replies.length
+        tweet.account = tweet.User.account
+        tweet.name = tweet.User.name
+        tweet.avatar = tweet.User.avatar
+        delete tweet.User
         delete tweet.Likes
         delete tweet.Replies
         getLastUpdated(tweet)
@@ -137,10 +144,13 @@ const tweetController = {
         const beforeData = tweets.map((tweet) => ({
           ...tweet.toJSON(),
           tweetUser: tweet.Tweet.User.name,
-          lastUpdated: getLastUpd(tweet)
+          lastUpdated: getLastUpd(tweet),
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar
         }))
-        const data = beforeData.map(({ Tweet, ...rest }) => rest)
-        return res.status(200).json(data)
+        const data = beforeData.map(({ Tweet, User, ...rest }) => rest)
+        res.status(200).json(data)
       })
       .catch((err) => next(err))
   },
@@ -156,9 +166,9 @@ const tweetController = {
       commendable: commendable || '1'
     })
       .then((data) => {
-        if (!data) return res.status(400).json('Tweet not found!')
+        if (!data) return res.status(404).json('Tweet not found')
         getLastUpdated(data)
-        return res.status(200).json(data)
+        return res.status(200).json('post success')
       })
       .catch((err) => next(err))
   },
@@ -169,7 +179,7 @@ const tweetController = {
     if (description.length > 140) return res.status(400).json('Max length 140.')
     Tweet.findByPk(id)
       .then((tweet) => {
-        if (!tweet) return res.status(400).json('Tweet not found!')
+        if (!tweet) return res.status(404).json('Tweet not found!')
         return tweet.update({
           description,
           likable: likable || '1',
@@ -179,7 +189,7 @@ const tweetController = {
       .then((data) => {
         if (!data) return res.status(400).json('Update failed!')
         getLastUpdated(data)
-        res.status(200).json(data)
+        return res.status(200).json('update success')
       })
       .catch((err) => next(err))
   },
@@ -187,7 +197,7 @@ const tweetController = {
     const id = req.params.id
     Tweet.findByPk(id)
       .then((tweet) => {
-        if (!tweet) return res.status(400).json('Tweet not found')
+        if (!tweet) return res.status(404).json('Tweet not found')
         tweet.destroy()
       })
       .then(() => {
@@ -198,57 +208,3 @@ const tweetController = {
 }
 
 module.exports = tweetController
-
-// const { Tweet, User, Like } = require('../models'); // 假设你的模型文件中包含了 Tweet, User 和 Like 模型的定义
-
-// getTweet: (req, res, next) => {
-//   const id = req.params.id;
-
-//   Tweet.findByPk(id, {
-//     include: [
-//       {
-//         model: User,
-//         attributes: ['account', 'name', 'avatar']
-//       },
-//       {
-//         model: Like,
-//         attributes: [[Sequelize.fn('COUNT', Sequelize.col('TweetId')), 'likeCount']]
-//       }
-//     ]
-//   })
-//     .then(data => {
-//       if (!data) throw new Error('Can not find this tweet!');
-
-//       const tweetData = data.toJSON();
-//       tweetData.likeCount = data.Likes[0].get('likeCount'); // 获取聚合函数计算的 like 总数
-
-//       res.json({ status: 'success', data: tweetData });
-//     })
-//     .catch(err => next(err));
-// }
-
-// tweets = await Tweet.findAll({
-//           include: [
-//             {
-//               model: User,
-//               as: 'User',
-//               attributes: ['account', 'name', 'avatar'],
-//               through: Followship,
-//               include: [
-//                 {
-//                   model: User,
-//                   as: 'Followings',
-//                   attributes: ['followerId']
-//                 }
-//               ],
-//               where: { followerId: userId }
-//             },
-//             { model: Like, attributes: ['UserId'] },
-//             { model: Reply, attributes: ['UserId'] }
-//           ],
-//           order: [
-//             ['createdAt', 'DESC'],
-//             ['id', 'DESC']
-//           ],
-//           nest: true
-//         })
