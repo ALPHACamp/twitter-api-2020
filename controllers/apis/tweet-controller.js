@@ -4,6 +4,7 @@ const tweetController = {
   postTweet: async (req, res, next) => {
     try {
       const { description } = req.body
+
       const tweet = await Tweet.create({
         UserId: res.locals.userId,
         description
@@ -67,6 +68,8 @@ const tweetController = {
         TweetId: tweet_id,
         comment
       })
+      await tweet.increment('repliedCount', { by: 1 })
+
       return res.status(200).json(reply)
     } catch (error) {
       next(error)

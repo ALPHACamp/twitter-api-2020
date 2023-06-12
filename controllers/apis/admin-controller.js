@@ -49,8 +49,8 @@ const adminController = {
         userData.likedCount = likedCount
         return userData
       })
-
-      return res.status(200).json(data)
+      const dataSorted = data.sort((a, b) => b.userTweetCount - a.userTweetCount)
+      return res.status(200).json(dataSorted)
     } catch (error) {
       next(error)
     }

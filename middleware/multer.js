@@ -1,4 +1,10 @@
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 
-module.exports = upload
+const uploadFiles = upload.fields([
+  { name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
+
+module.exports = {
+  upload,
+  uploadFiles
+}

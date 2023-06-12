@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../../_helpers')
-const { imgurFileHandler } = require('../../helpers/file-helper')
+const { imgurFileHandler, localFileHandler } = require('../../helpers/file-helper')
 const { User, Tweet, Reply, Like, Followship } = require('../../models')
 
 const userController = {
@@ -63,12 +63,13 @@ const userController = {
         User.findByPk(id),
         Tweet.findAll({
           where: { UserId: id },
-          include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] }],
-          raw: true,
+          include: [
+            { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] },
+            { model: Reply, as: 'TweetReply', attributes: ['id'] }
+          ],
           nest: true
         })
       ])
-
       // 錯誤處理
       if (!user) {
         const error = new Error('The user does not exist')
@@ -79,6 +80,10 @@ const userController = {
         const error = new Error("The user have'nt post any tweet yet")
         error.status = 404
         throw error
+      }
+      for (const i of userTweets) {
+        i.dataValues.tweetReplyCount = i.dataValues.TweetReply.length
+        delete i.dataValues.TweetReply
       }
       return res.status(200).json(userTweets)
     } catch (error) {
@@ -94,7 +99,9 @@ const userController = {
       const [followingCount, followerCount, user] = await Promise.all([
         Followship.findAndCountAll({ where: { followerId: id } }),
         Followship.findAndCountAll({ where: { followingId: id } }),
-        User.findByPk(id)
+        User.findByPk(id, {
+          include: [{ model: Tweet, as: 'UserTweets' }]
+        })
       ])
 
       // 確認使用者是否存在
@@ -105,8 +112,10 @@ const userController = {
       }
 
       const data = user.toJSON()
+      data.userTweetCount = data.UserTweets.length
       data.followingCount = followingCount.count
       data.followerCount = followerCount.count
+      delete data.UserTweets
       return res.status(200).json(data)
     } catch (error) {
       next(error)
@@ -164,7 +173,6 @@ const userController = {
           nest: true
         })
       ])
-
       // 錯誤處理
       if (!user) {
         const error = new Error('The user does not exist')
@@ -176,6 +184,7 @@ const userController = {
         error.status = 404
         throw error
       }
+      console.log(userLiked)
       const data = []
       for (const i of userLiked) {
         data.push(i.Tweet)
@@ -195,7 +204,7 @@ const userController = {
         User.findByPk(id),
         Followship.findAll({
           where: { followerId: Number(id) },
-          include: [{ model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar'] }],
+          include: [{ model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'introduction'] }],
           raw: true,
           nest: true
         })
@@ -228,7 +237,7 @@ const userController = {
         User.findByPk(id),
         Followship.findAll({
           where: { followingId: Number(id) },
-          include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'avatar'] }]
+          include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'avatar', 'introduction'] }]
         })
       ])
 
@@ -249,19 +258,25 @@ const userController = {
       next(error)
     }
   },
-  editUser: async (req, res, next) => {
+  editUserProfile: async (req, res, next) => {
     try {
-      const { name, introduction, account, email } = req.body
+      const { name, introduction } = req.body
       let { id } = req.params
       id = Number(id)
 
       // introduction與name的字數限制
-      if (introduction.length > 160) throw new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
-      if (name.length > 50) throw new Error('Your self-introduction is a little too long for me to handle! ! Please less than 50.')
+      if (introduction.length > 160) {
+        const error = new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
+        error.status = 400
+        throw error
+      }
+      if (name.length > 50) {
+        const error = new Error('Your self-introduction is a little too long for me to handle! ! Please less than 50.')
+        error.status = 400
+        throw error
+      }
 
-      // 確認user是否存在，account與email是否與資料庫重複
       const user = await User.findByPk(id)
-
       // 錯誤處理
       if (!user) {
         const error = new Error('The user does not exist')
@@ -269,38 +284,77 @@ const userController = {
         throw error
       }
 
-      if (account && email) {
-        const [userAccount, userEmail] = await Promise.all([
-          User.findOne({ where: { account } }),
-          User.findOne({ where: { email } })
-        ])
-        // 錯誤處理
-        if (userAccount.id !== id) throw new Error('account已存在')
-        if (userEmail.id !== id) throw new Error('email已存在')
-      } else if (account) {
-        const userAccount = await User.findOne({ where: { account } })
-        // 錯誤處理
-        if (userAccount.id !== id) throw new Error('account已存在')
-      } else if (email) {
-        const userEmail = await User.findOne({ where: { email } })
-        // 錯誤處理
-        if (userEmail.id !== id) throw new Error('email已存在')
-      }
+      // 檔案承接
+      const { files } = req
 
-      const { avatar, background } = req
-      const [avatarFilePath, backgroundFilePath] = await Promise.all([
-        imgurFileHandler(avatar),
-        imgurFileHandler(background)
+      const [avatar, background] = await Promise.all([
+        files.avatar ? await localFileHandler(files.avatar[0]) : null,
+        files.background ? await localFileHandler(files.background[0]) : null
       ])
+
       const updatedUser = await user.update({
         name,
-        avatar: avatarFilePath || user.avatar,
-        background: backgroundFilePath || user.background,
-        introduction
+        introduction,
+        avatar: avatar || user.avatar,
+        background: background || user.background
       })
       return res.status(200).json(updatedUser)
     } catch (error) {
       next(error)
+    }
+  },
+  putUserSetting: async (req, res, next) => {
+    try {
+      const { account, name, email, introduction, password, checkPassword } = req.body
+      console.log('-------------------------------------req.body')
+      console.log(req.body)
+      // introduction與name的字數限制
+      if (introduction.length > 160) {
+        const error = new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
+        error.status = 400
+        throw error
+      }
+      if (name.length > 50) {
+        const error = new Error('Your self-introduction is a little too long for me to handle! ! Please less than 50.')
+        error.status = 400
+        throw error
+      }
+
+      // check password
+      if (password !== checkPassword) {
+        const error = new Error('Password does not match the confirmation password.')
+        error.status = 400
+        throw error
+      }
+
+      // 檢查account, email 是否重複
+      const [userAccount, userEmail] = await Promise.all([
+        User.findOne({ where: { account } }),
+        User.findOne({ where: { email } })
+      ])
+      if (userAccount) {
+        const error = new Error('Account already exist')
+        error.status = 400
+        throw error
+      }
+      if (userEmail) {
+        const error = new Error('Email already exist')
+        error.status = 400
+        throw error
+      }
+
+      const user = await User.findByPk(req.params.id)
+      const updatedUser = await user.update({
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        password: password ? bcrypt.hashSync(password) : user.password,
+        introduction: introduction || user.introduction
+      })
+
+      return res.status(200).json(updatedUser)
+    } catch (err) {
+      next(err)
     }
   }
 }
