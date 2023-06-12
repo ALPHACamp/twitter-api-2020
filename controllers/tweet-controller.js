@@ -6,6 +6,7 @@ const helpers = require('../_helpers')
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const tweets = await Tweet.findAll({
         attributes: {
           include: [
@@ -25,19 +26,29 @@ const tweetController = {
           {
             model: User,
             attributes: { exclude: ['password'] }
+          },
+          {
+            model: Like,
+            attributes: ['UserId']
           }
         ],
         order: [['createdAt', 'DESC']]
       })
       if (!tweets) throw new Error('找不到tweets資料！')
       // 回傳全部tweet，最新的在前面
-      res.json(tweets)
+      const tweetsData = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        isCurrentUserLiked: tweet.Likes.some(like => like.UserId === currentUserId)
+      }))
+
+      res.json(tweetsData)
     } catch (err) {
       next(err)
     }
   },
   getTweet: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const tweetId = req.params.tweetId
       const tweet = await Tweet.findByPk(tweetId, {
         attributes: {
@@ -45,12 +56,14 @@ const tweetController = {
             [
               sequelize.literal(
                 '(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'
-              ), 'repliesCount'
+              ),
+              'repliesCount'
             ],
             [
               sequelize.literal(
                 '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id )'
-              ), 'likesCount'
+              ),
+              'likesCount'
             ]
           ]
         },
@@ -62,13 +75,22 @@ const tweetController = {
           {
             model: Reply,
             order: [['createdAt', 'DESC']]
+          },
+          {
+            model: Like,
+            attributes: ['UserId']
           }
         ],
         nest: true
       })
       if (!tweet) throw new Error('找不到tweet資料！')
       // 回傳一則tweet
-      res.json(tweet)
+      const tweetData = {
+        ...tweet.toJSON(),
+        isCurrentUserLiked: tweet.Likes.some(like => like.UserId === currentUserId)
+      }
+
+      res.json(tweetData)
     } catch (err) {
       next(err)
     }
