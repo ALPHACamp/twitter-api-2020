@@ -20,7 +20,8 @@ module.exports = {
         password: await bcrypt.hash('12345678', 10),
         role: 'user',
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
+        introduction: `user${index} introduction`
       }
       usersData.push(userData)
     }

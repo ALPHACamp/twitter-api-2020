@@ -104,7 +104,7 @@ const tweetController = {
       nest: true
     })
       .then((data) => {
-        if (!data) return res.status(400).json("Tweet not found");
+        if (!data) return res.status(400).json('Tweet not found')
         const tweet = data.dataValues
         tweet.likesCount = tweet.Likes.length
         tweet.repliesCount = tweet.Replies.length
@@ -146,8 +146,8 @@ const tweetController = {
   },
   postTweet: (req, res, next) => {
     const { description, likable, commendable } = req.body
-    if (!description) return res.status(400).json("Description can not be empty!");
-    if (description.length > 140) return res.status(400).json("Max length 140.");
+    if (!description) return res.status(400).json('Description can not be empty!')
+    if (description.length > 140) return res.status(400).json('Max length 140.')
     const id = req.user.id
     Tweet.create({
       UserId: id,
@@ -156,7 +156,7 @@ const tweetController = {
       commendable: commendable || '1'
     })
       .then((data) => {
-        if (!data) return res.status(400).json("Tweet not found!");
+        if (!data) return res.status(400).json('Tweet not found!')
         getLastUpdated(data)
         return res.status(200).json(data)
       })
@@ -165,11 +165,11 @@ const tweetController = {
   putTweet: (req, res, next) => {
     const { description, likable, commendable } = req.body
     const id = req.params.id
-    if (!description) return res.status(400).json("Description can not be empty!");
-    if (description.length > 140) return res.status(400).json("Max length 140.");
+    if (!description) return res.status(400).json('Description can not be empty!')
+    if (description.length > 140) return res.status(400).json('Max length 140.')
     Tweet.findByPk(id)
       .then((tweet) => {
-        if (!tweet) return res.status(400).json("Tweet not found!");
+        if (!tweet) return res.status(400).json('Tweet not found!')
         return tweet.update({
           description,
           likable: likable || '1',
@@ -177,7 +177,7 @@ const tweetController = {
         })
       })
       .then((data) => {
-        if (!data) return res.status(400).json("Update failed!");
+        if (!data) return res.status(400).json('Update failed!')
         getLastUpdated(data)
         res.status(200).json(data)
       })
@@ -187,7 +187,7 @@ const tweetController = {
     const id = req.params.id
     Tweet.findByPk(id)
       .then((tweet) => {
-        if (!tweet) return res.status(400).json("Tweet not found");
+        if (!tweet) return res.status(400).json('Tweet not found')
         tweet.destroy()
       })
       .then(() => {

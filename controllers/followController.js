@@ -10,29 +10,25 @@ const followController = {
         .json('缺少追蹤的用戶id')
     }
     if (followerId === followingId) {
-<<<<<<< HEAD
       return res.status(400).json('無法追蹤自己')
-=======
-      return res.json('無法追蹤自己')
->>>>>>> b9e00d87c61785e651c410ba729c4de3b5d3a15c
     }
     Followship.findOne({
       where: {
         followerId,
-        followingId,
-      },
+        followingId
+      }
     })
       .then((followship) => {
         if (followship) {
-          return res.status(400).json("已經追蹤過");
+          return res.status(400).json('已經追蹤過')
         }
         return Followship.create({
           followerId,
-          followingId,
-        });
+          followingId
+        })
       })
-      .then(() => res.status(200).json("Add success"))
-      .catch((error) => next(error));
+      .then(() => res.status(200).json('Add success'))
+      .catch((error) => next(error))
   },
   removeFollowing: (req, res, next) => {
     const followerId = getUser.id
@@ -50,11 +46,7 @@ const followController = {
       }
     })
       .then((followship) => {
-<<<<<<< HEAD
-        if (!followship) return res.status(400).json('未追蹤過')
-=======
         if (!followship) { return res.status(401).json('未追蹤過') }
->>>>>>> b9e00d87c61785e651c410ba729c4de3b5d3a15c
         return followship.destroy()
       })
       .then(() => res.status(200).json('unfollow success'))
@@ -77,7 +69,7 @@ const followController = {
         include: [
           {
             model: User,
-            as: 'follower',
+            as: 'Follower',
             attributes: ['id', 'name', 'account', 'avatar', 'introduction']
           }
         ],
@@ -85,8 +77,9 @@ const followController = {
       })
 
       const followers = followships.map((followship) => {
-        const follower = followship.follower
-        follower.introduction = follower.introduction.substring(0, 50)
+        const follower = followship.Follower
+        console.log(follower)
+        follower.introduction = follower.introduction ? follower.introduction.substring(0, 50) : ''
         return follower
       })
       return res.status(200).json(followers)
@@ -114,7 +107,7 @@ const followController = {
           include: [
             {
               model: User,
-              as: 'following',
+              as: 'Following',
               attributes: ['id', 'name', 'account', 'avatar', 'introduction']
             }
           ],
@@ -123,10 +116,8 @@ const followController = {
       })
       .then((followships) => {
         const followings = followships.map((followship) => {
-          const following = followship.following
-          following.introduction = following.introduction
-            ? following.introduction.substring(0, 50)
-            : ''
+          const following = followship.Following
+          following.introduction = following.introduction ? following.introduction.substring(0, 50) : ''
           return following
         })
         return res.status(200).json(followings)
