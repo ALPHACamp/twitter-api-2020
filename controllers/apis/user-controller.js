@@ -240,7 +240,8 @@ const userController = {
           }
         })
         users = users.sort((a, b) => b.followersCount - a.followersCount)
-        res.status(200).json({ status: 'success', users })
+        users = users.slice(0, 10)
+        return res.status(200).json({ status: 'success', users })
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   }
