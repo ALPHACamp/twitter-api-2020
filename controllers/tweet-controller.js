@@ -116,6 +116,38 @@ const tweetController = {
       })
       .catch(err => next(err))
   },
+  postUnlike: (req, res, next) => {
+    const tweetId = req.params.tweetId
+    const getUser = helpers.getUser(req)
+    const userId = getUser.id
+    return Promise.all([
+      Tweet.findByPk(tweetId),
+      Like.findOne({
+        where: {
+          userId,
+          tweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        if (!like) throw new Error("You haven't liked this tweet!")
+        return Like.destroy({
+          where: {
+            userId,
+            tweetId
+          }
+        })
+      })
+      .then(unlike => {
+        console.log(unlike)
+        res.json({
+          status: 'success',
+          data: unlike
+        })
+      })
+      .catch(err => next(err))
+  }
 }
 
 module.exports = tweetController
