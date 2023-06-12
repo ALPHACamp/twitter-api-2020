@@ -42,6 +42,10 @@ const userController = {
       // get user data
       const userData = getUser(req)?.toJSON()
       delete userData.password
+      delete userData.avatar
+      delete userData.cover
+      delete userData.email
+      delete userData.introduction
       // sign token
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
@@ -106,7 +110,7 @@ const userController = {
       // 目前登入者的Likes
       const currentUserLikes = likes.map(l => l.TweetId)
       const data = tweets.map(tweet => ({
-        tweetId: tweet.dataValues.id,
+        TweetId: tweet.dataValues.id,
         tweetOwnerId: user.id,
         tweetOwnerAccount: user.accout,
         tweetOwnerName: user.name,
@@ -141,6 +145,7 @@ const userController = {
           nest: true
         })
       ])
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
       if (!replies.length) return res.status(404).json({ status: 'error', message: '無回覆資料' })
 
       const data = replies.map(r => ({
@@ -150,7 +155,7 @@ const userController = {
         replyerAccount: user.account,
         replyerName: user.name,
         replyerAvatar: user.avatar,
-        tweetId: r.Tweet.id,
+        TweetId: r.Tweet.id,
         tweetOwnerAccount: r.Tweet.User.account,
         tweetOwnerName: r.Tweet.User.name,
         createdAt: r.createdAt
@@ -201,8 +206,7 @@ const userController = {
         User.findByPk(id, {
           include: {
             model: User,
-            as: 'Followings',
-            include: Tweet
+            as: 'Followings'
           }
         }),
         // 目前登入者的追蹤資料
@@ -221,10 +225,6 @@ const userController = {
         name: f.name,
         avatar: f.avatar,
         introduction: f.introduction,
-        Tweets: f.Tweets.map(tweet => ({
-          TweetId: tweet.id,
-          description: tweet.description
-        })),
         isFollowed: currentUserFollowing.includes(f.id)
       }))
       res.status(200).json(data)
@@ -236,7 +236,7 @@ const userController = {
       const currentUserId = getUser(req).dataValues.id
       const [user, following] = await Promise.all([
         User.findByPk(id, {
-          include: { model: User, as: 'Followers', include: Tweet }
+          include: { model: User, as: 'Followers' }
         }),
         Followship.findAll({
           where: { followerId: currentUserId },
@@ -253,10 +253,6 @@ const userController = {
         name: f.name,
         avatar: f.avatar,
         introduction: f.introduction,
-        Tweets: f.Tweets.map(tweet => ({
-          TweetId: tweet.id,
-          description: tweet.description
-        })),
         isFollowed: currentUserFollowing.includes(f.id)
       })).sort((a, b) => b.isFollowed - a.isFollowed)
       res.status(200).json(data)
