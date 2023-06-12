@@ -131,7 +131,7 @@ const tweetController = {
         {
           model: Tweet,
           attributes: ['UserId'],
-          include: [{ model: User, attributes: ['name'] }]
+          include: [{ model: User, attributes: ['avatar', 'name', 'account'] }]
         }
       ],
       order: [
@@ -143,11 +143,13 @@ const tweetController = {
       .then((tweets) => {
         const beforeData = tweets.map((tweet) => ({
           ...tweet.toJSON(),
-          tweetUser: tweet.Tweet.User.name,
-          lastUpdated: getLastUpd(tweet),
-          account: tweet.User.account,
-          name: tweet.User.name,
-          avatar: tweet.User.avatar
+          tweetUserName: tweet.Tweet.User.name,
+          tweetUserAccount: tweet.Tweet.User.account,
+          tweetUserAvatar: tweet.Tweet.User.avatar,
+          repliedUserName: tweet.User.name,
+          repliedUserAccount: tweet.User.account,
+          repliedUserAvatar: tweet.User.avatar,
+          lastUpdated: getLastUpd(tweet)
         }))
         const data = beforeData.map(({ Tweet, User, ...rest }) => rest)
         res.status(200).json(data)
