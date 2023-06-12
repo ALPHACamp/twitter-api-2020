@@ -6,7 +6,7 @@ const { User } = require('../models')
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET || 'password' // for travis
+  secretOrKey: process.env.JWT_SECRET || 'password', // for travis
 }
 
 passport.use(
