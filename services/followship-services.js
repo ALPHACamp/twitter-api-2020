@@ -32,26 +32,31 @@ const followshipServices = {
       })
       .catch(err => cb (err))
   },
-  removeFollowing: (req, cb) => {
-    const { id } = req.params
-    Followship.findOne({
-      where: {
-        followerId: helpers.getUser(req).id,
-        followingId: id
-      }
-    })
-      .then(followship => {
-        if (!followship) throw new Error("你已追蹤過此人！")
-        followship.destroy()
-          .then(deletedFollowship => {
-            cb (null, {
-              status: '取消追蹤！',
-              ...deletedFollowship.toJSON()
-            })
-          })
-          .catch(err => cb (err))
+  removeFollowing: async (req, cb) => {
+    try {
+      const followingId = req.params.id
+      const followerId = helpers.getUser(req).id
+
+      const followship = await Followship.findOne({
+        where: {
+          followerId,
+          followingId
+        }
       })
-      .catch(err => cb (err))
+
+      if (!followship) {
+        throw new Error("你尚未追蹤此人！")
+      }
+
+      const deletedFollowship = await followship.destroy()
+
+      cb(null, {
+        status: '取消追蹤！',
+        ...deletedFollowship.toJSON()
+      })
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 

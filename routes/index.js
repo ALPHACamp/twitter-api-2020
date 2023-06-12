@@ -46,7 +46,7 @@ router.delete('/api/followships/:id', authenticated, authenticatedUser, followsh
 router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.delTweet)
 router.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 
-router.get('/api/admin/tweets', authenticated, authenticatedUser, tweetController.getTweets)
+router.get('/api/admin/tweets', authenticated, authenticatedAdmin, tweetController.getTweets)
 
 // reply
 router.post('/api/tweets/:id/replies', authenticated, authenticatedUser, replyController.postReplies)

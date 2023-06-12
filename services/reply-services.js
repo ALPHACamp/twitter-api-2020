@@ -44,7 +44,7 @@ const replyServices = {
             TweetId: id,
             UserId: helpers.getUser(req).id
           })
-          cb (null, comment)
+          cb (null, { comment })
           } catch (err) {
             cb (err, {message: "錯誤訊息"})
         }
