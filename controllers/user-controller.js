@@ -146,6 +146,9 @@ const userController = {
       Tweet.findAll({
         where: { userId: req.params.id },
         order: [['createdAt', 'DESC']],
+        include: {
+          model: User, attributes: ['id', 'name', 'account', 'avatar']
+        },
         attributes: {
           include: [
             [

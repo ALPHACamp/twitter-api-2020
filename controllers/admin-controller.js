@@ -2,6 +2,7 @@ const { User, Tweet } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Sequelize = require('sequelize')
+const { literal } = Sequelize
 const moment = require('moment')
 
 const adminController = {
@@ -38,25 +39,25 @@ const adminController = {
         include: [
           // user data
           [
-            Sequelize.literal(
+            literal(
               '(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)'
             ),
             'tweetCount'
           ],
           [
-            Sequelize.literal(
+            literal(
               '(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = User.id)'
             ),
             'likeCount'
           ],
           [
-            Sequelize.literal(
+            literal(
               '(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = User.id)'
             ),
             'followerCount'
           ],
           [
-            Sequelize.literal(
+            literal(
               '(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = User.id)'
             ),
             'followingCount'
@@ -64,24 +65,20 @@ const adminController = {
         ],
         exclude: ['password', 'createdAt', 'updatedAt', 'role']
       },
+      // sort user data by tweetCount
+      order: [[literal('tweetCount'), 'DESC']],
       raw: true,
       nest: true
     })
       .then((users) => {
-        const result = users
-        // sort by tweets count
-          .sort(
-            (a, b) =>
-              b.tweetCount - a.tweetCount
-          )
-        return res.status(200).json(result)
+        if (!users) throw new Error('No users found')
+        return res.status(200).json(users)
       })
       .catch((err) => next(err))
   },
 
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      order: [['createdAt', 'DESC']],
       include: [
         {
           model: User,
@@ -107,6 +104,7 @@ const adminController = {
             'likeCount'
           ]
         ],
+        order: [['createdAt', 'DESC']],
         exclude: ['UserId']
       },
       nest: true,
