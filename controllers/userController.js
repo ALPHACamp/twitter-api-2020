@@ -112,7 +112,7 @@ const userController = {
       const data = tweets.map(tweet => ({
         TweetId: tweet.dataValues.id,
         tweetOwnerId: user.id,
-        tweetOwnerAccount: user.accout,
+        tweetOwnerAccount: user.account,
         tweetOwnerName: user.name,
         tweetOwnerAvatar: user.avatar,
         description: tweet.dataValues.description,
@@ -186,10 +186,10 @@ const userController = {
         TweetId: l.TweetId,
         description: l.Tweet.description,
         tweetOwnerId: l.Tweet.User.id,
-        tweetOwnerName: l.Tweet.User.name,
         tweetOwnerAccount: l.Tweet.User.account,
+        tweetOwnerName: l.Tweet.User.name,
         tweetOwnerAvatar: l.Tweet.User.avatar,
-        tweetcreatedAt: l.Tweet.createdAt,
+        createdAt: l.Tweet.createdAt,
         replyCount: l.Tweet.Replies.length,
         likeCount: l.Tweet.Likes.length,
         isLiked: l.isLiked
