@@ -22,7 +22,7 @@ const userController = {
 
     // 待設定password, name, account
     return User.findAll({
-      [Op.or]: [{ where: { account } }, { where: { email } }]
+      [Op.or]: [{ where: { account } }, { where: { email } }],
     })
       .then((users) => {
         if (users.some((u) => u.email === email)) throw new Error('email已重複註冊')
@@ -35,7 +35,7 @@ const userController = {
           account,
           email,
           password: hash,
-          role: 'user'
+          role: 'user',
         })
       })
       .then((newUser) => {
@@ -49,7 +49,7 @@ const userController = {
     const { account, password } = req.body
     if (!account || !password) throw new Error('Account and password is required')
     return User.findOne({
-      where: { account }
+      where: { account },
     })
       .then((user) => {
         if (!user) throw new Error('使用者不存在')
@@ -58,11 +58,11 @@ const userController = {
         const userData = user.toJSON()
         delete userData.password
         const token = jwt.sign(userData, process.env.JWT_SECRET, {
-          expiresIn: '30d'
+          expiresIn: '30d',
         })
         return res.status(200).json({
           token,
-          user: userData
+          user: userData,
         })
       })
       .catch((err) => next(err))
@@ -84,16 +84,16 @@ const userController = {
         include: [
           [
             Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = User.id)'),
-            'follower'
+            'follower',
           ],
           [
             Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = User.id)'),
-            'following'
+            'following',
           ],
-          [Sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)'), 'tweetAmount']
+          [Sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)'), 'tweetAmount'],
         ],
-        exclude: ['password', 'createdAt', 'updatedAt']
-      }
+        exclude: ['password', 'createdAt', 'updatedAt'],
+      },
     })
       .then((user) => {
         if (!user) throw new Error('帳號不存在！')
@@ -118,14 +118,14 @@ const userController = {
                 name: name !== undefined ? req.body.name : user.toJSON().name,
                 introduction: introduction !== undefined ? introduction : user.toJSON().introduction,
                 cover: coverFilePath || user.toJSON().cover,
-                avatar: avatarFilePath || user.toJSON().avatar
+                avatar: avatarFilePath || user.toJSON().avatar,
               })
             }
           )
         } else {
           return user.update({
             name: name !== undefined ? name : user.toJSON().name,
-            introduction: introduction !== undefined ? introduction : user.toJSON().introduction
+            introduction: introduction !== undefined ? introduction : user.toJSON().introduction,
           })
         }
       })
@@ -134,7 +134,7 @@ const userController = {
         res.status(200).json({
           status: 'success',
           message: '成功修改',
-          updatedUser
+          updatedUser,
         })
       })
       .catch((err) => next(err))
@@ -158,7 +158,7 @@ const userController = {
                 WHERE 
                     reply.tweet_id = Tweet.id
                 )`),
-              'replyCount'
+              'replyCount',
             ],
             [
               literal(`(
@@ -167,14 +167,14 @@ const userController = {
                 WHERE 
                     liked.tweet_id = Tweet.id
                 )`),
-              'likeCount'
-            ]
+              'likeCount',
+            ],
           ],
-          exclude: ['UserId']
+          exclude: ['UserId'],
         },
         raw: true,
-        nest: true
-      })
+        nest: true,
+      }),
     ])
       .then(([user, tweets]) => {
         // Error: user not found
@@ -189,7 +189,7 @@ const userController = {
             ...tweet,
             createdAt,
             updatedAt,
-            diffCreatedAt
+            diffCreatedAt,
           }
         })
         return res.status(200).json(processedTweets)
@@ -205,18 +205,18 @@ const userController = {
         where: { userId: req.params.id },
         order: [['createdAt', 'DESC']],
         attributes: {
-          include: [[Sequelize.literal('TIMESTAMPDIFF(SECOND, Reply.created_at, NOW())'), 'diffCreatedAt']],
-          exclude: ['UserId', 'TweetId']
+          include: [[Sequelize.literal(`TIMESTAMPDIFF(SECOND, Reply.created_at, NOW())`), 'diffCreatedAt']],
+          exclude: ['UserId', 'TweetId'],
         },
         include: [
           {
             model: Tweet,
-            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
-          }
+            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+          },
         ],
         raw: true,
-        nest: true
-      })
+        nest: true,
+      }),
     ])
       .then(([user, replies]) => {
         // Error: user not found
@@ -232,7 +232,7 @@ const userController = {
             ...reply,
             createdAt,
             updatedAt,
-            diffCreatedAt
+            diffCreatedAt,
           }
         })
 
@@ -251,15 +251,15 @@ const userController = {
           {
             model: Tweet,
             attributes: {
-              include: [[Sequelize.literal('TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())'), 'diffCreatedAt']],
-              exclude: ['UserId']
+              include: [[Sequelize.literal(`TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())`), 'diffCreatedAt']],
+              exclude: ['UserId'],
             },
-            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
-          }
+            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+          },
         ],
         raw: true,
-        nest: true
-      })
+        nest: true,
+      }),
     ])
       .then(([user, likes]) => {
         // Error: user not found
@@ -278,8 +278,8 @@ const userController = {
               ...like.Tweet,
               createdAt,
               updatedAt,
-              diffCreatedAt
-            }
+              diffCreatedAt,
+            },
           }
         })
         return res.status(200).json(processedUserLikes)
@@ -292,17 +292,18 @@ const userController = {
         {
           model: User,
           as: 'Followings',
-          attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'cover', 'introduction']
-        }
+          attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'cover', 'introduction'],
+        },
       ],
-      attributes: [['id', 'userId'], 'name', 'account', 'avatar', 'cover']
+      attributes: [['id', 'userId'], 'name', 'account', 'avatar', 'cover'],
     })
       .then((followings) => {
         if (followings.Followings.length === 0) return res.status(200).json({ isEmpty: true })
         const followingId = getUser(req).Followings.map((user) => user.id)
+        console.log(getUser(req).Followings)
         const result = followings.Followings.map((f) => ({
           ...f.toJSON(),
-          isFollowed: followingId.includes(f.toJSON().followingId) || false
+          isFollowed: followingId.includes(f.toJSON().followingId) || false,
         })).sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
         result.forEach((i) => delete i.Followship)
         return res.json(result)
@@ -315,22 +316,22 @@ const userController = {
         {
           model: User,
           as: 'Followers',
-          attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'cover', 'introduction']
-        }
+          attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'cover', 'introduction'],
+        },
       ],
-      attributes: [['id', 'userId'], 'name', 'account', 'avatar', 'cover']
+      attributes: [['id', 'userId'], 'name', 'account', 'avatar', 'cover'],
     })
       .then((followers) => {
         if (followers.Followers.length === 0) return res.status(200).json({ isEmpty: true })
         const followingId = getUser(req).Followings.map((user) => user.id)
         const result = followers.Followers.map((f) => ({
           ...f.toJSON(),
-          isFollowed: followingId.includes(f.toJSON().followerId) || false
+          isFollowed: followingId.includes(f.toJSON().followerId) || false,
         })).sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
         result.forEach((i) => delete i.Followship)
         return res.json(result)
       })
       .catch((err) => next(err))
-  }
+  },
 }
 module.exports = userController

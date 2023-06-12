@@ -6,12 +6,17 @@ const { User } = require('../models')
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET || 'password' // for travis
+  secretOrKey: process.env.JWT_SECRET || 'password', // for travis
 }
 
 passport.use(
   new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-    User.findByPk(jwtPayload.id, {})
+    User.findByPk(jwtPayload.id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' },
+      ],
+    })
       .then((user) => cb(null, user))
       .catch((err) => cb(err))
   })
