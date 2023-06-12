@@ -137,20 +137,23 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      const { name, password, introduction } = req.body
+      const { name, introduction, avatar, cover } = req.body
       const userId = helpers.getUser(req).id
       const user = await User.findByPk(userId)
       if (!user) throw new Error('User not found!')
-      let hash = user.password
-      if (password) {
-        hash = await bcrypt.hash(password, 10)
-      }
-      await user.update({
+      const updatedUser = await user.update({
         name: name || user.name,
-        password: hash,
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover,
         introduction: introduction || user.introduction
       })
-      return res.status(200).json({ message: '修改成功' })
+      const responseData = {
+        name: updatedUser.name,
+        avatar: updatedUser.avatar,
+        cover: updatedUser.cover,
+        introduction: updatedUser.introduction
+      }
+      return res.status(200).json({ responseData, message: '修改成功' })
     } catch (err) { next(err) }
   }
 
