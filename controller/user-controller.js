@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+const validator = require('email-validator')
 const userController = {
   signIn: async (req, res, next) => {
     try {
@@ -12,24 +13,26 @@ const userController = {
     } catch (err) { next(err) }
   },
   signUp: async (req, res, next) => {
-    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match')
     try {
+      const { name, email, password, account, checkPassword } = req.body
+      if (password !== checkPassword) throw new Error('Passwords do not match')
+      if (name.length > 51) throw new Error('使用者註冊名稱(name)上限為50字')
+      // Check if email matches the required format
+      if (!validator.validate(email)) throw new Error('Email格式不正確!')
       // check if user with given email or account already exists
       const existingAccount = await User.findOne({ where: { account: req.body.account } })
       const existingEmail = await User.findOne({ where: { email: req.body.email } })
-      if (existingAccount) { throw new Error('Account already exists!') }
-      if (existingEmail) { throw new Error('Email already exists!') }
+      if (existingAccount) { throw new Error('account已重複註冊!') }
+      if (existingEmail) { throw new Error('email已重複註冊!') }
       // If user does not exist, hash password and create new user
       const hash = await bcrypt.hash(req.body.password, 10)
-      const newUser = await User.create({
-        name: req.body.name,
-        email: req.body.email,
+      await User.create({
+        name,
+        email,
         password: hash,
-        account: req.body.account,
+        account,
         role: 'user'
       })
-      const userJSON = newUser.toJSON()
-      delete userJSON.password
       return res.status(200).json({ message: 'Signup successfully!' })
     } catch (err) { next(err) }
   },
