@@ -282,7 +282,7 @@ const userController = {
       if (name && name.length > 50) throw new Error('name 超過字數限制50字元!')
 
       // 自我介紹上限 160字
-      if (introduction && introduction.length > 160) { throw new Error(' introduction 超過字數限制160字元!') }
+      if (introduction && introduction.length > 160) { throw new Error('introduction 超過字數限制160字元!') }
 
       // check password
       if (password !== checkPassword) throw new Error('密碼不相同')
@@ -294,8 +294,8 @@ const userController = {
             [Op.or]: [email ? { email } : {}, account ? { account } : {}]
           }
         })
-        if (email !== currentUser.email && checkUser?.email === email) throw new Error('email 已重複註冊！')
         if (account !== currentUser.account && checkUser?.account === account) throw new Error('account 已重複註冊！')
+        if (email !== currentUser.email && checkUser?.email === email) throw new Error('email 已重複註冊！')
       }
 
       const user = await User.findByPk(req.params.id)
