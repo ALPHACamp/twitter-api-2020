@@ -1,47 +1,50 @@
 const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like,sequelize } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
-     try {
-       const currentUserId = helpers.getUser(req).id;
+    try {
+      const currentUserId = helpers.getUser(req).id
 
-       const [tweets, likes] = await Promise.all([
-         Tweet.findAll({
-           attributes: ["id", "description", "createdAt"],
-           include: [
-             {
-               model: User,
-               attributes: ["id", "name", "account", "avatar"],
-             },
-             { model: Reply },
-             { model: Like },
-           ],
-           order: [["createdAt", "DESC"]],
-         }),
-         Like.findAll({ where: { UserId: currentUserId }, raw: true }),
-       ]);
+      const [tweets, likes] = await Promise.all([
+        Tweet.findAll({
+          attributes: ['id', 'description', 'createdAt'],
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'name', 'account', 'avatar']
+            },
+            { model: Reply },
+            { model: Like }
+          ],
+          order: [['createdAt', 'DESC']]
+        }),
+        Like.findAll({ where: { UserId: currentUserId }, raw: true })
+      ])
+      if (!tweets) {
+        return res.status(404).json({ status: 'error', message: 'Tweets not found' })
+      }
 
-       const currentUserLikes = likes.map((l) => l.TweetId);
-       const data = tweets.map((tweet) => {
-         return {
-           TweetId: tweet.id,
-           description: tweet.description,
-           tweetOwnerId: tweet.User.id,
-           tweetOwnerName: tweet.User.name,
-           tweetOwnerAccount: tweet.User.account,
-           tweetOwnerAvatar: tweet.User.avatar,
-           tweetTime: tweet.createdAt,
-           replyCount: tweet.dataValues.Replies.length,
-           likeCount: tweet.dataValues.Likes.length,
-           isLiked: currentUserLikes.includes(tweet.dataValues.id),
-         };
-       });
+      const currentUserLikes = likes.map(l => l.TweetId)
+      const data = tweets.map(tweet => {
+        return {
+          TweetId: tweet.id,
+          description: tweet.description,
+          tweetOwnerId: tweet.User.id,
+          tweetOwnerName: tweet.User.name,
+          tweetOwnerAccount: tweet.User.account,
+          tweetOwnerAvatar: tweet.User.avatar,
+          tweetTime: tweet.createdAt,
+          replyCount: tweet.dataValues.Replies.length,
+          likeCount: tweet.dataValues.Likes.length,
+          isLiked: currentUserLikes.includes(tweet.dataValues.id)
+        }
+      })
 
-       return res.status(200).json(data);
-     } catch (err) {
-       next(err);
-     }
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   },
   postTweet: async (req, res, next) => {
     try {
@@ -51,14 +54,14 @@ const tweetController = {
       // check if description is more than 160 characters
       if (description.trim().length > 140) {
         return res
-          .status(400)
-          .json({ error: 'Description should be within 160 characters!' })
+          .status(401)
+          .json({ status: 'error', message: 'Description should be within 160 characters!' })
       }
       // check if description is whitespace
       if (!description.trim().length) {
         return res
-          .status(400)
-          .json({ error: 'Description cannot be only whitespace!' })
+          .status(401)
+          .json({ status: 'error', message: 'Description cannot be whitespace' })
       }
 
       // create a new tweet
@@ -68,46 +71,50 @@ const tweetController = {
         UserId
       })
 
-      return res.status(200).json(newTweet)
+      return res.status(200).json({
+        status: 'success'
+      })
     } catch (err) {
       next(err)
     }
   },
   getTweet: async (req, res, next) => {
     try {
-     const currentUserId = helpers.getUser(req).id;
-     const tweetId = req.params.tweet_id;
+      const currentUserId = helpers.getUser(req).id
+      const tweetId = req.params.tweet_id
 
-     const [tweet, likes] = await Promise.all([
-       Tweet.findByPk(tweetId,{
-         attributes: ["id", "description", "createdAt"],
-         include: [
-           {
-             model: User,
-             attributes: ["id", "name", "account", "avatar"],
-           },
-           { model: Reply },
-           { model: Like },
-         ],
-         order: [["createdAt", "DESC"]],
-         raw:true,
-         nest:true
-       }),
-       Like.findAll({ where: { UserId: currentUserId }, raw: true }),
-     ]);
-     console.log(tweet);
+      const [tweet, likes] = await Promise.all([
+        Tweet.findByPk(tweetId, {
+          attributes: ['id', 'description', 'createdAt'],
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'name', 'account', 'avatar']
+            },
+            { model: Reply },
+            { model: Like }
+          ],
+          order: [['createdAt', 'DESC']],
+          raw: true,
+          nest: true
+        }),
+        Like.findAll({ where: { UserId: currentUserId }, raw: true })
+      ])
+      if (!tweet) {
+        return res.status(404).json({ status: 'error', message: 'Tweet not found' })
+      }
 
-     const currentUserLikes = likes.map((l) => l.TweetId);
-     const data = {
-         TweetId: tweet.id,
-         description: tweet.description,
-         tweetOwnerId: tweet.User.id,
-         tweetOwnerName: tweet.User.name,
-         tweetOwnerAccount: tweet.User.account,
-         tweetOwnerAvatar: tweet.User.avatar,
-         tweetTime: tweet.createdAt,
+      const currentUserLikes = likes.map(l => l.TweetId)
+      const data = {
+        TweetId: tweet.id,
+        description: tweet.description,
+        tweetOwnerId: tweet.User.id,
+        tweetOwnerName: tweet.User.name,
+        tweetOwnerAccount: tweet.User.account,
+        tweetOwnerAvatar: tweet.User.avatar,
+        tweetTime: tweet.createdAt
         //  isLiked: currentUserLikes.includes(tweet.id),
-       };
+      }
 
       return res.status(200).json(data)
     } catch (err) {
@@ -116,48 +123,50 @@ const tweetController = {
   },
   getReplies: async (req, res, next) => {
     try {
-      const { tweet_id: tweetId } = req.params;
+      const { tweet_id: tweetId } = req.params
       const tweet = await Tweet.findByPk(tweetId, {
-        attributes: ["id", "description", "createdAt"],
+        attributes: ['id', 'description', 'createdAt'],
         raw: true,
-        nest: true,
-      });
+        nest: true
+      })
+
       if (!tweet) {
-        return res.status(404).json({ error: "Tweet not found!" });
+        return res.status(404).json({ status: 'error', message: 'Tweet not found' })
       }
+
       const replies = await Reply.findAll({
         where: { TweetId: tweetId },
-        order: [["createdAt", "DESC"]],
+        order: [['createdAt', 'DESC']],
         attributes: [
-          "id",
-          "comment",
-          "createdAt",
-          [sequelize.col("User.name"), "name"],
-          [sequelize.col("User.account"), "account"],
-          [sequelize.col("User.avatar"), "avatar"],
+          'id',
+          'comment',
+          'createdAt',
+          [sequelize.col('User.id'), 'userId'],
+          [sequelize.col('User.name'), 'name'],
+          [sequelize.col('User.account'), 'account'],
+          [sequelize.col('User.avatar'), 'avatar']
         ],
         include: [
           {
             model: User,
-            attributes: [],
-          },
+            attributes: []
+          }
         ],
         raw: true,
-        nest: true,
-      });
+        nest: true
+      })
 
       const data = replies.map((reply) => ({
         replyId: reply.id,
         comment: reply.comment,
+        replyOwnerId: reply.userId,
         replyOwnerName: reply.name,
         replyOwnerAccount: reply.account,
         replyOwnerAvatar: reply.avatar,
         replyCreatedAt: reply.createdAt,
       }));
 
-      return res.status(200).json(data);
-      // return res.status(200).json({ tweet, replies });
-
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
@@ -175,7 +184,7 @@ const tweetController = {
       if (comment.trim().length === 0) {
         return res
           .status(400)
-          .json({ error: "Comment cannot be only whitespace!" });
+          .json({ error: 'Comment cannot be only whitespace!' })
       }
 
       // get user id
@@ -190,15 +199,14 @@ const tweetController = {
       })
 
       return res.status(200).json({
-        status: "success",
-      });
+        status: 'success'
+      })
     } catch (err) {
       next(err)
     }
   },
   addLike: async (req, res, next) => {
     try {
-      console.log(req.body)
       const { tweet_id: tweetId } = req.params
       const tweet = await Tweet.findByPk(tweetId)
 

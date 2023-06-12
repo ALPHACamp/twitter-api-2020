@@ -36,7 +36,7 @@ const authenticatedAdmin = (req, res, next) => {
 function validateUser (req, res, next) {
   const user = helpers.getUser(req)
   if (!user || !user.id) {
-    return res.status(400).json({ error: 'User not found' })
+    return res.status(400).json({ status: 'error', message: 'User not found' })
   }
   next()
 }
