@@ -134,7 +134,6 @@ const userController = {
       ]
     })
       .then((users) => {
-
         const data = users
           .map((user) => ({
             ...user.toJSON(),
