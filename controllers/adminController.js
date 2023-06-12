@@ -30,7 +30,9 @@ const adminController = {
       group: ['User.id']
     })
       .then((users) => {
-        res.json({ status: 'success', data: users })
+        return res
+          .status(200)
+          .json(users)
       })
       .catch((error) => next(error))
   },
