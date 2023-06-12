@@ -130,7 +130,7 @@ const userController = {
   getUserReplies: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const user = await User.findByPk(userId, { raw: true, attributes: ['name', 'account', 'avatar'] })
+      const user = await User.findByPk(userId, { raw: true, attributes: ['id', 'name', 'account', 'avatar'] })
       if (!user) newErrorGenerate('使用者不存在', 404)
       const replies = await Reply.findAll({
         where: { UserId: userId },
@@ -148,11 +148,13 @@ const userController = {
         raw: true,
         nest: true
       })
-      const repliesData = replies?.map(reply => ({
-        ...reply,
-        relativeTimeFromNow: relativeTimeFromNow(reply.createdAt)
-      }))
-      repliesData.push(user)
+      const repliesData = replies?.map(reply => {
+        reply.tweetUser = reply.Tweet.User
+        reply.User = user
+        reply.relativeTimeFromNow = relativeTimeFromNow(reply.createdAt)
+        delete reply.Tweet
+        return reply
+      })
       return res.json(repliesData)
     } catch (err) {
       next(err)
