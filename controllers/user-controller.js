@@ -24,6 +24,7 @@ const userController = {
         // res.json({ status: 'success', user: user.toJSON() })
         res.status(200).json(user.toJSON())
       })
+      .catch(err => next(err))
   },
   getTopUsers: (req, res, next) => {
     console.log('users_getTopUser')
