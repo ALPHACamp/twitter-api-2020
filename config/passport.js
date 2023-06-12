@@ -16,11 +16,11 @@ passport.use(new LocalStrategy(
     User.findOne({ where: { account } })
       .then(user => {
         if (!user) {
-          return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
+          return cb(null, false, { 'message': '帳號或密碼輸入錯誤！' })
         }
         bcrypt.compare(password, user.password)
           .then(result => {
-            if (!result) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
+            if (!result) return cb(null, false, { 'message': '帳號或密碼輸入錯誤！' })
             return cb(null, user)
           })
       })
@@ -34,7 +34,6 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   return User.findByPk(jwtPayload.id, {
     include: [
-      // { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]

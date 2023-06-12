@@ -19,8 +19,9 @@ router.get('/users/:user_id/replied_tweets', authenticated, userController.getUs
 // ! branch api/admin
 // router.post('/followships/:user_id', authenticated, likeController.addFollowing)
 
-router.post('/tweets/:tweet_id/replies', authenticated,replyController.postComment)
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getComment) 
+router.post('/tweets/:tweet_id/replies', authenticated, replyController.postComment)
+
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 
 router.post('/tweets/:id/like', authenticated, userController.addLike)

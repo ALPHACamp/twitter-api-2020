@@ -57,7 +57,7 @@ const userController = {
       raw: true
     })
       .then(tweets => {
-        if (!tweets.length) throw new Error("Tweets didn't exist!")
+        if (!tweets.length) throw new Error("User's tweets didn't exist!")
         cb(null, tweets)
       })
       .catch(err => cb(err))
@@ -79,23 +79,27 @@ const userController = {
       raw: true
     })
       .then(replies => {
-        if (!replies.length) throw new Error("Replies didn't exist!")
+        if (!replies.length) throw new Error("User's replies didn't exist!")
         cb(null, replies)
       })
       .catch(err => cb(err))
   },
   getUserLikes: (req, cb) => {
     const userId = Number(req.params.user_id) || ''
-    User.findByPk(userId, {
+    Like.findAll({
       include: [
+        { model: User },
         { model: Tweet }
       ],
+      where: {
+        ...userId ? { userId } : {}
+      },
       attributes: { exclude: ['password'] },
       nest: true,
       raw: true
     })
       .then(likedtweets => {
-        if (!likedtweets) throw new Error("Likedtweets didn't exist!")
+        if (!likedtweets) throw new Error("User's likedtweets didn't exist!")
         cb(null, likedtweets)
       })
       .catch(err => cb(err))
@@ -114,7 +118,7 @@ const userController = {
       raw: true
     })
       .then(followings => {
-        if (!followings) throw new Error("Followings didn't exist!")
+        if (!followings) throw new Error("User's following didn't exist!")
         cb(null, followings)
       })
       .catch(err => cb(err))
@@ -132,7 +136,7 @@ const userController = {
       raw: true
     })
       .then(followers => {
-        if (!followers) throw new Error("Followers didn't exist!")
+        if (!followers) throw new Error("User's followers didn't exist!")
         cb(null, followers)
       })
       .catch(err => cb(err))
@@ -199,41 +203,6 @@ const userController = {
       })
       .catch(err => cb(err))
   },
-  addLike: (req, cb) => {
-    const tweetId = req.params.id
-    return Promise.all([
-      Tweet.findByPk(tweetId), 
-      Like.findOne({
-      where: {
-        userId: req.user.id,
-        tweetId
-      }
-    })
-  ])
-    .then(([tweet, like])=>{
-      if (!tweet) throw new Error("Tweet didn't exist!")
-      if (like) throw new Error('You have Liked this restaurant!')
-      return Like.create({
-        userId: req.user.id,
-        tweetId
-      })
-    })
-    .then(like => cb(null, {like})) //要不要加花括弧?
-    .catch(err => cb(err))
-  },
-  // POST /tweets/:id/unlike
-  unLike: (req, cb) => {
-    return Like.findOne({
-      where: {
-        userId: req.user.id,
-        tweetId: req.params.id
-      }
-    }).then(like => {
-      if (!like) throw new Error("You haven't liked this tweet!")
-      return like.destroy()
-    }).then(reply => cb(null, { reply }))
-      .catch(err => cb(err))
-  },
   addFollowing: (req, cb) => {
     const userId = req.params.user_id
     Promise.all([
@@ -260,7 +229,7 @@ const userController = {
     Followship.findOne({
       where: {
         followerId: req.user.id,
-        followingId: req.params.follwingId
+        followingId: req.params.user_id
       }
     })
       .then(followship => {
@@ -268,6 +237,41 @@ const userController = {
         return followship.destroy()
       })
       .then(deletedFollowship => cb(null, deletedFollowship))
+      .catch(err => cb(err))
+  },
+  addLike: (req, cb) => {
+    const tweetId = req.params.id
+    return Promise.all([
+      Tweet.findByPk(tweetId), 
+      Like.findOne({
+      where: {
+        userId: req.user.id,
+        tweetId
+      }
+    })
+  ])
+    .then(([tweet, like])=>{
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      if (like) throw new Error('You have Liked this restaurant!')
+      return Like.create({
+        userId: req.user.id,
+        tweetId
+      })
+    })
+    .then(like => cb(null, {like})) //要不要加花括弧?
+    .catch(err => cb(err))
+  },
+  // POST /tweets/:id/unlike
+  removeLike: (req, cb) => {
+    return Like.findOne({
+      where: {
+        userId: req.user.id,
+        tweetId: req.params.id
+      }
+    }).then(like => {
+      if (!like) throw new Error("You haven't liked this tweet!")
+      return like.destroy()
+    }).then(reply => cb(null, { reply }))
       .catch(err => cb(err))
   }
 }
