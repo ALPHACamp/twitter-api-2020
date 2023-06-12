@@ -95,6 +95,34 @@ const tweetController = {
       .catch(err => {
         res.status(500).json({ statue: 'err', error: err.message })
       })
+  },
+  getTweet: (req, res, next) => {
+    const tweetId = req.params.id
+    return Tweet.findByPk(tweetId, {
+      include: [
+        { model: User },
+        { model: Like },
+        {
+          model: Reply,
+          include: [{ model: User }],
+          order: [['createdAt', 'DESC']]
+        },
+      ]
+    })
+      .then(tweet => {
+        if (!tweet) throw new Error('The tweet does not exist.')
+        const tweetData = tweet.toJSON()
+        delete tweetData.User.password
+        tweetData.Replies.forEach(reply => {
+          delete reply.User.password
+        })
+        tweetData.replyCount = tweetData.Replies.length
+        tweetData.LikesCount = tweetData.Likes.length
+        res.status(200).json({ statue: 'success', tweetData })
+      })
+      .catch(err => {
+        res.status(500).json({ statue: 'err', error: err.message })
+      })
   }
 }
 
