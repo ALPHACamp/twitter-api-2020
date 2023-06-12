@@ -1,17 +1,13 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+const path = require('path')
 const express = require('express')
 const routes = require('./routes')
 const methodOverride = require('method-override')
 const app = express()
 const port = process.env.PORT || 3000
 const cors = require('cors')
-
-app.use(express.urlencoded({ extended: true }))
-app.use(methodOverride('_method'))
-app.use(express.json())
-
 // const corsOptions = {
 //   origin: [
 //     process.env.GITHUB_PAGE,
@@ -20,6 +16,11 @@ app.use(express.json())
 //   methods: 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS',
 //   allowedHeaders: ['Content-Type', 'Authorization']
 // }
+
+app.use(express.urlencoded({ extended: true }))
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
+app.use(methodOverride('_method'))
+app.use(express.json())
 
 // 也試過直接打 app.use(cors()) 使用他的default這定
 // app.use(cors({
