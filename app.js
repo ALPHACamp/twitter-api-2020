@@ -33,6 +33,8 @@ app.use(express.json())
 //   optionsSuccessStatus: 204
 // }))
 
+
+
 // app.use(cors({
 //   origin: 'https://leemengyun.github.io',
 //   allowedHeaders: ['Content-Type'],
@@ -41,7 +43,8 @@ app.use(express.json())
 
 // app.use(cors(corsOptions))
 
-app.use(cors()) // 使用default設定
+// app.use(cors()) // 使用default設定
+app.use(cors({ allowedHeaders: ['Content-Type', 'Authorization'] }))
 app.use(routes)
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

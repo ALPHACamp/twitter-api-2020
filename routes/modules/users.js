@@ -10,6 +10,6 @@ router.get('/:id/followings', userController.getUserFollowings)
 router.get('/:id/followers', userController.getUserFollowers)
 router.get('/:id', userController.getUser)
 router.get('/', userController.getUsers)
-router.put('/:id', upload.single('image'), userController.putUser)
+router.put('/', upload.single('image'), userController.putUser)
 
 module.exports = router

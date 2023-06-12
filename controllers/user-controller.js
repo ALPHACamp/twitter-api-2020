@@ -6,6 +6,7 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-felpers')
 // const { imgurFileHandler } = require('../helpers')
 
 const userController = {
@@ -186,19 +187,28 @@ const userController = {
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
-    // const userId = req.params.id
-    // const { name } = req.body
-    // const { file } = req
-    // return User.findByPk(userId)
-    //   .then(user => {
-    //     if (!user) throw new Error('putUser說: 沒這人')
-    //     return res.redirect('back')
-    //   })
-    //   .then(user => {
-    //     return User.update({
-
-    //     })
-    //   })
+    const userId = helpers.getUser(req).id
+    const { name, introduction } = req.body
+    const { file } = req
+    return User.findByPk(userId)
+      .then(user => {
+        if (!user) throw new Error('putUser說: 沒這人')
+        return res.redirect('back')
+      })
+      .then(user => {
+        return Promise.all([
+          imgurFileHandler(file),
+          User.findByPk({ UserId: userId, raw: true })
+        ])
+          .then(([filePath, userData]) => {
+            return user.update({
+              name: name || userData.name,
+              introduction: introduction || userData.introduction,
+              avatar: filePath || userData.avatar
+            })
+          })
+      })
+      .catch(err => next(err))
   }
 }
 
