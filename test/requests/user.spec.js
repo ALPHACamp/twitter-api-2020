@@ -337,6 +337,7 @@ describe('# user requests', () => {
 
             expect(res.body).to.be.an('array');
             // 有跟隨者的 followerId = 1
+
             res.body[0].followerId.should.equal(1);
 
             return done();

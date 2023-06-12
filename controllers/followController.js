@@ -71,11 +71,14 @@ const followController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      followers.forEach((follower) => {
-        follower.introduction?.substring(0, 50)
+      const data = followers[0].Followers.map(follower => {
+        const introduction = follower.introduction?.substring(0, 50)
+        return {
+          ...follower.get(),
+          introduction,
+          followerId: follower.Followship.followerId
+        }
       })
-      const data = followers[0]
-      delete data.Followship
       return res.status(200).json(data)
     } catch (error) {
       return next(error)
@@ -102,11 +105,14 @@ const followController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      followings.forEach((following) => {
-        following.introduction?.substring(0, 50)
+      const data = followings[0].Followings.map(following => {
+        const introduction = following.introduction?.substring(0, 50)
+        return {
+          ...following.get(),
+          introduction,
+          followingId: following.Followship.followingId
+        }
       })
-      const data = followings[0]
-      delete data.Followship
       return res.status(200).json(data)
     } catch (error) {
       return next(error)
