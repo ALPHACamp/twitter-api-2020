@@ -41,7 +41,7 @@ app.use(express.json())
 
 // app.use(cors(corsOptions))
 
-app.use(cors())
+app.use(cors()) // 使用default設定
 app.use(routes)
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
