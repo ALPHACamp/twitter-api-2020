@@ -25,7 +25,7 @@ const tweetController = {
   getPostTweet: (req, res, next) => {
     User.findOne({ where: { id: req.user.id } })
       .then(user => {
-        if (!user) throw new Error(`Not logged in`)
+        if (!user) throw new Error('Not logged in')
         const userAvatar = user.avatar
         res.status(200).json({ status: 'success', userAvatar })
       })
@@ -35,6 +35,7 @@ const tweetController = {
   },
   postTweet: (req, res, next) => {
     const { description } = req.body
+    if (Number(description.length) > 140) throw new Error('The character count cannot exceed 140.')
     return Tweet.create({
       description,
       userId: req.user.id
