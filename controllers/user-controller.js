@@ -375,6 +375,8 @@ const userController = {
           as: 'Followers',
           attributes: ['id']
         },
+        // 排除目前的使用者
+        where: { id: { [sequelize.Op.not]: currentUserId } },
         order: [
           [sequelize.literal('followersCount'), 'DESC']
         ],
@@ -386,7 +388,6 @@ const userController = {
         ...user.toJSON(),
         isCurrentUserFollowed: user.Followers.map(follower => follower.id).some(id => id.toString() === currentUserId.toString())
       }))
-
       res.status(200).json(topUsersData)
     } catch (err) {
       next(err)

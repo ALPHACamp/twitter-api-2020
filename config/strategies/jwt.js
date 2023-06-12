@@ -20,4 +20,3 @@ module.exports = passport => {
       .catch(err => done(err))
   }))
 }
-
