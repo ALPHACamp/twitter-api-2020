@@ -23,9 +23,9 @@ app.use(passport.initialize())
 // 先關 需要再開
 // app.use(methodOverride('_method'))
 // use helpers.getUser(req) to replace req.user
-// function authenticated (req, res, next) {
+function authenticated (req, res, next) {
 //    passport.authenticate('jwt', { ses...
-// };
+};
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use('/api', router)
 app.get('/', (req, res) => res.send('Hello World!'))
