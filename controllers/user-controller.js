@@ -100,27 +100,27 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const user = await User.findByPk(userId, { raw: true, attributes: ['name', 'account', 'avatar'] })
+      const user = await User.findByPk(userId, { raw: true, attributes: ['id'] })
       if (!user) newErrorGenerate('使用者不存在', 404)
       const tweets = await Tweet.findAll({
+        raw: true,
+        nest: true,
         where: { UserId: userId },
+        attributes: [
+          'id',
+          'description',
+          'createdAt',
+          'updatedAt',
+          [Sequelize.literal('(SELECT COUNT(*) FROM `Replys` WHERE `Replys`.`TweetId` = `Tweet`.`id`)'), 'repliesCount'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'), 'likesCount']
+        ],
         order: [['createdAt', 'DESC']],
-        include: [
-          { model: Reply, include: User },
-          { model: Like, include: User }
-        ]
+        include: [{ raw: true, model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
       })
-      const tweetsData = tweets?.map(tweet => {
-        tweet = tweet.toJSON()
-        const { Replies, Likes, ...tweetData } = tweet
-        return {
-          ...tweetData,
-          relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt),
-          repliesCount: tweet.Replies?.length,
-          likesCount: tweet.Likes?.length
-        }
-      })
-      tweetsData.push(user)
+      const tweetsData = tweets?.map(tweet => ({
+        ...tweet,
+        relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt)
+      }))
       return res.json(tweetsData)
     } catch (err) {
       next(err)
