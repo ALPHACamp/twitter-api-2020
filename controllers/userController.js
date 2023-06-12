@@ -10,31 +10,30 @@ const userController = {
         throw new Error(req.authInfo.message)
       }
       const userData = getUser(req).toJSON()
-      if (!userData) throw new Error('account or password incorrect!')
+      if (!userData) return res.status(400).json("account or password incorrect!");
       delete userData.password
 
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '7d' })
-      res.json({
-        status: 'success',
-        token,
-        data: {
-          user: userData
-        }
-      })
+      return res
+        .status(200)
+        .json([
+          token,
+          userData
+        ])
     } catch (err) {
       next(err)
     }
   },
   signUp: (req, res, next) => {
-    if (req.body.password !== req.body.passwordCheck) { throw new Error('Password do not match!') }
-    if (req.body.name.length > 50) throw new Error('Max length 50')
+    if (req.body.password !== req.body.passwordCheck) { return res.status(400).json('Password do not match!') }
+    if (req.body.name.length > 50) return res.status(400).json("Max length 50");
     return Promise.all([
       User.findOne({ where: { email: req.body.email } }),
       User.findOne({ where: { account: req.body.account } })
     ])
       .then(([emailCheck, accountCheck]) => {
-        if (emailCheck) throw new Error('Email already exists!')
-        if (accountCheck) throw new Error('Account already exists!')
+        if (emailCheck) return res.status(400).json("Email already exists!");
+        if (accountCheck) return res.status(400).json("Account already exists!");
         return bcrypt.hash(req.body.password, 10)
       })
       .then((hash) =>
@@ -48,7 +47,7 @@ const userController = {
       .then((data) => {
         const userData = data.toJSON()
         delete userData.password
-        res.json({ status: 'success', message: 'Create success' })
+        return res.status(200).json('Create success')
       })
       .catch((err) => next(err))
   },
@@ -65,10 +64,10 @@ const userController = {
       })
     ])
       .then(([data, tweets]) => {
-        if (!data) throw new Error('User not found!')
+        if (!data) return res.status(400).json("User not found!");
         delete data.password
         data.tweetsCounts = tweets.length
-        res.json({ status: 'success', data })
+        return res.status(200).json(data)
       })
       .catch((err) => next(err))
   },
@@ -77,12 +76,12 @@ const userController = {
     // 下一階段再考慮優化它
     const paramsUserId = Number(req.params.id)
     const userId = Number(req.user.id)
-    if (paramsUserId !== userId) throw new Error('Can not change others data')
+    if (paramsUserId !== userId) return res.status(400).json("Can not change others data");
     const userAccount = req.user.account
     const userEmail = req.user.email
     const { account, name, email, password, passwordCheck, introduction } = req.body
     const { file } = req
-    if (password !== passwordCheck) throw new Error('Password do not match!')
+    if (password !== passwordCheck) return res.status(400).json("Password do not match!");
     Promise.all([
       User.findAll({
         attributes: ['account', 'email']
@@ -100,8 +99,8 @@ const userController = {
         })
         accountList.splice(accountList.indexOf(userAccount), 1)
         emailList.splice(emailList.indexOf(userEmail), 1)
-        if (accountList.includes(account)) { throw new Error('This account has been used!') }
-        if (emailList.includes(email)) { throw new Error('This email has been used!') }
+        if (accountList.includes(account)) { return res.status(400).json("This account has been used!"); }
+        if (emailList.includes(email)) { return res.status(400).json("This email has been used!"); }
         return bcrypt.hash(password, 10).then((hash) => {
           userdata.update({
             account,
@@ -114,7 +113,7 @@ const userController = {
         })
       })
       .then(() => {
-        return res.json({ status: 'success', message: 'update success' })
+        return res.status(200).json('update success')
       })
       .catch((err) => next(err))
   },
@@ -123,11 +122,11 @@ const userController = {
     // 別人也能刪除自己 需更動passport
     User.findByPk(userId)
       .then((user) => {
-        if (!user) throw new Error('User not found')
+        if (!user) return res.status(400).json("User not found");
         user.destroy()
       })
       .then(() => {
-        res.json({ status: 'success', data: 'Delete success' })
+        res.status(200).json('Delete success')
       })
       .catch((err) => next(err))
   },
@@ -152,7 +151,7 @@ const userController = {
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
 
-        res.json({ status: 'success', data: newUsers })
+        return res.status(200).json(newUsers)
       })
       .catch((err) => next(err))
   }

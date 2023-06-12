@@ -15,19 +15,16 @@ const replyController = {
         replies.forEach((reply) => {
           getLastUpdated(reply)
         })
-        return res.json({ status: 'success', data: replies })
+        return res.status(200).json(replies)
       })
       .catch((error) => next(error))
   },
   postReply: (req, res, next) => {
     const TweetId = req.params.id
     const { comment } = req.body
-    if (!comment) { return res.json({ status: 'error', message: 'Comment is required' }) }
+    if (!comment) return res.status(400).json('留言不得空白')
     if (comment.length > 140) {
-      return res.json({
-        status: 'error',
-        message: 'Comment should not be more than 140 characters'
-      })
+      return res.status(400).json('Comment should not be more than 140 characters')
     }
 
     return Reply.create({
@@ -35,66 +32,42 @@ const replyController = {
       TweetId,
       comment
     })
-      .then((user) =>
-        res.json({
-          status: 'success',
-          message: 'Reply was successfully created'
-        })
-      )
+      .then(() => res.status(200).json('Create success'))
       .catch((error) => next(error))
   },
   putReply: (req, res, next) => {
     const { id } = req.params
     const { comment } = req.body
-    if (!id) { return res.json({ status: 'error', message: 'reply_id are required' }) }
-    if (!comment) { return res.json({ status: 'error', message: 'Comment is required' }) }
+    if (!id) return res.status(400).json('reply_id 不能為空白')
+    if (!comment) return res.status(400).json("Comment 不能為空白");
     if (comment.length > 140) {
-      return res.json({
-        status: 'error',
-        message: 'Comment should not be more than 140 characters'
-      })
+      return res.status(400).json('Comment should not be more than 140 characters')
     }
 
     return Reply.findOne({ where: { id } })
       .then((reply) => {
         if (req.user.id !== reply.UserId) {
-          return res.json({
-            status: 'error',
-            message: 'You can only edit your own reply'
-          })
+          return res.status(400).json("You can only edit your own reply");
         }
-        reply.comment = comment
-        return reply.save()
+        reply.comment = comment;
+        return reply.save();
       })
-      .then((reply) =>
-        res.json({
-          status: 'success',
-          message: 'Reply was successfully updated'
-        })
-      )
-      .catch((error) => next(error))
+      .then((reply) => res.status(200).json("update success"))
+      .catch((error) => next(error));
   },
   deleteReply: (req, res, next) => {
     const { id } = req.params
-    if (!id) { return res.json({ status: 'error', message: 'reply_id are required' }) }
+    if (!id) return res.status(400).json('reply_id 不能為空白')
 
     return Reply.findOne({ where: { id } })
       .then((reply) => {
         if (req.user.id !== reply.UserId) {
-          return res.json({
-            status: 'error',
-            message: 'You can only delete your own reply'
-          })
+          return res.status(400).json("You can only delete your own reply");
         }
-        reply.destroy()
+        return reply.destroy();
       })
-      .then((reply) =>
-        res.json({
-          status: 'success',
-          message: 'Reply was successfully deleted'
-        })
-      )
-      .catch((error) => next(error))
+      .then(() => res.status(200).json("delete successfully"))
+      .catch((error) => next(error));
   }
 }
 

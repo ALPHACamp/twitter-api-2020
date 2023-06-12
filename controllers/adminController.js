@@ -30,7 +30,9 @@ const adminController = {
       group: ['User.id']
     })
       .then((users) => {
-        res.json({ status: 'success', data: users })
+        return res
+          .status(200)
+          .json(users)
       })
       .catch((error) => next(error))
   },
@@ -38,10 +40,9 @@ const adminController = {
     const userId = req.params.id
     User.findByPk(userId).then((user) => {
       user.destroy().then(() => {
-        res.json({
-          status: 'success',
-          message: `admin success delete user ${userId}`
-        })
+        return res
+          .status(200)
+          .json('Delete success')
       })
         .catch(error => next(error))
     })
@@ -63,7 +64,7 @@ const adminController = {
           // 取得現在的時間 - 更新時間
           getLastUpdated(tweet)
         })
-        return res.json({ status: 'success', data: tweets })
+        return res.status(200).json(tweets)
       })
       .catch(error => next(error))
   },
@@ -71,10 +72,7 @@ const adminController = {
     const tweetId = req.params.id
     Tweet.findByPk(tweetId).then((tweet) => {
       tweet.destroy().then(() => {
-        res.json({
-          status: 'success',
-          message: `admin success delete tweet ${tweetId}`
-        })
+        return res.status(200).json("Delete success")
       })
         .catch(error => next(error))
     })
@@ -94,7 +92,7 @@ const adminController = {
           // 取得現在的時間 - 更新時間
           getLastUpdated(reply)
         })
-        return res.json({ status: 'success', data: replies })
+        return res.status(200).json(replies)
       })
       .catch(error => next(error))
   },
@@ -102,10 +100,7 @@ const adminController = {
     const replyId = req.params.id
     Reply.findByPk(replyId).then((reply) => {
       reply.destroy().then(() => {
-        res.json({
-          status: 'success',
-          message: `admin success delete reply ${replyId}`
-        })
+        return res.status(200).json("Delete success");
       })
         .catch(error => next(error))
     })
