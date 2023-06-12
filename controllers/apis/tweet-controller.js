@@ -36,6 +36,7 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const { description } = req.body
     if (Number(description.length) > 140) throw new Error('The character count cannot exceed 140.')
+    if (Number(description.length) < 1) throw new Error('Content cannot be blank.')
     return Tweet.create({
       description,
       userId: req.user.id
