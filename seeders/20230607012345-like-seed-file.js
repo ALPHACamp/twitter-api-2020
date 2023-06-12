@@ -12,14 +12,14 @@ module.exports = {
     )
 
     await queryInterface.bulkInsert(
-      "Likes",
+      'Likes',
       Array.from({ length: 50 }, (d, i) => ({
         User_Id: users[Math.floor(Math.random() * users.length)].id,
         Tweet_Id: tweets[Math.floor(Math.random() * tweets.length)].id,
         created_at: new Date(),
         updated_at: new Date()
       }))
-    );
+    )
   },
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Likes', {})
