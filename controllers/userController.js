@@ -15,8 +15,8 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (user?.account === req.body.account) throw new Error('account已重複註冊!')
-      if (user?.email === req.body.email) throw new Error('email已重複註冊!')
+      if (user?.account === req.body.account) return res.status(400).json({ status: 'error', message: 'account已重複註冊!' })
+      if (user?.email === req.body.email) return res.status(400).json({ status: 'error', message: 'email已重複註冊!' })
 
       const hash = await bcrypt.hash(req.body.password, 10)
       await User.create({
@@ -105,7 +105,7 @@ const userController = {
         Like.findAll({ where: { UserId: currentUserId }, raw: true })
       ])
       if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
-      if (!tweets.length) return res.status(404).json({ status: 'error', message: '無推文資料' })
+      if (!tweets.length) return res.status(200).json({ status: 'success', message: '無推文資料' })
 
       // 目前登入者的Likes
       const currentUserLikes = likes.map(l => l.TweetId)
@@ -146,7 +146,7 @@ const userController = {
         })
       ])
       if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
-      if (!replies.length) return res.status(404).json({ status: 'error', message: '無回覆資料' })
+      if (!replies.length) return res.status(200).json({ status: 'success', message: '無回覆資料' })
 
       const data = replies.map(r => ({
         reaplyId: r.id,
@@ -180,7 +180,7 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
 
-      if (!likes.length) return res.status(404).json({ status: 'error', message: '無Like資料' })
+      if (!likes.length) return res.status(200).json({ status: 'success', message: '無Like資料' })
 
       const data = likes.map(l => ({
         TweetId: l.TweetId,
@@ -216,7 +216,7 @@ const userController = {
         })
       ])
 
-      if (!user.Followings.length) return res.status(404).json({ status: 'error', message: '無追蹤其他使用者' })
+      if (!user.Followings.length) return res.status(200).json({ status: 'success', message: '無追蹤其他使用者' })
 
       const currentUserFollowing = following.map(f => f.followingId)
       const data = user.Followings.map(f => ({
@@ -244,7 +244,7 @@ const userController = {
         })
       ])
 
-      if (!user.Followers.length) return res.status(404).json({ status: 'error', message: '無跟隨者資料' })
+      if (!user.Followers.length) return res.status(200).json({ status: 'success', message: '無跟隨者資料' })
 
       const currentUserFollowing = following.map(f => f.followingId)
       const data = user.Followers.map(f => ({
@@ -291,8 +291,8 @@ const userController = {
       })
 
       if (foundUser.id !== user.id) {
-        if (foundUser.account === req.body.account) throw new Error('account已重複註冊!')
-        if (foundUser.email === req.body.email) throw new Error('email已重複註冊!')
+        if (foundUser.account === req.body.account) return res.status(400).json({ status: 'error', message: 'account已重複註冊!' })
+        if (foundUser.email === req.body.email) return res.status(400).json({ status: 'error', message: 'email已重複註冊!' })
       }
 
       const hash = await bcrypt.hash(req.body.password, 10)
