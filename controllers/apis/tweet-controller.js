@@ -63,7 +63,9 @@ const tweetController = {
         if (!user) throw new Error('Account is not exist!')
         const tweetData = tweet.toJSON()
         delete tweetData.User.password
-        res.status(200).json({ statue: 'success', tweetData })
+        loginUser = user.toJSON()
+        delete loginUser.password
+        res.status(200).json({ statue: 'success', tweetData, loginUser })
       })
       .catch(err => {
         res.status(500).json({ statue: 'err', error: err.message })
