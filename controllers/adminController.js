@@ -72,7 +72,7 @@ const adminController = {
     const tweetId = req.params.id
     Tweet.findByPk(tweetId).then((tweet) => {
       tweet.destroy().then(() => {
-        return res.status(200).json("Delete success")
+        return res.status(200).json('Delete success')
       })
         .catch(error => next(error))
     })
@@ -100,7 +100,7 @@ const adminController = {
     const replyId = req.params.id
     Reply.findByPk(replyId).then((reply) => {
       reply.destroy().then(() => {
-        return res.status(200).json("Delete success");
+        return res.status(200).json('Delete success')
       })
         .catch(error => next(error))
     })

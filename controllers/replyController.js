@@ -39,7 +39,7 @@ const replyController = {
     const { id } = req.params
     const { comment } = req.body
     if (!id) return res.status(400).json('reply_id 不能為空白')
-    if (!comment) return res.status(400).json("Comment 不能為空白");
+    if (!comment) return res.status(400).json('Comment 不能為空白')
     if (comment.length > 140) {
       return res.status(400).json('Comment should not be more than 140 characters')
     }
@@ -47,13 +47,13 @@ const replyController = {
     return Reply.findOne({ where: { id } })
       .then((reply) => {
         if (req.user.id !== reply.UserId) {
-          return res.status(400).json("You can only edit your own reply");
+          return res.status(400).json('You can only edit your own reply')
         }
-        reply.comment = comment;
-        return reply.save();
+        reply.comment = comment
+        return reply.save()
       })
-      .then((reply) => res.status(200).json("update success"))
-      .catch((error) => next(error));
+      .then((reply) => res.status(200).json('update success'))
+      .catch((error) => next(error))
   },
   deleteReply: (req, res, next) => {
     const { id } = req.params
@@ -62,12 +62,12 @@ const replyController = {
     return Reply.findOne({ where: { id } })
       .then((reply) => {
         if (req.user.id !== reply.UserId) {
-          return res.status(400).json("You can only delete your own reply");
+          return res.status(400).json('You can only delete your own reply')
         }
-        return reply.destroy();
+        return reply.destroy()
       })
-      .then(() => res.status(200).json("delete successfully"))
-      .catch((error) => next(error));
+      .then(() => res.status(200).json('delete successfully'))
+      .catch((error) => next(error))
   }
 }
 

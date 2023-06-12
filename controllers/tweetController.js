@@ -80,7 +80,7 @@ const tweetController = {
           nest: true
         })
       }
-      if (tweets.length === 0) throw new Error('Tweets not found')
+      if (tweets.length === 0) return res.status(404).json('Tweets not found')
       const counts = tweets.map((tweet) => ({
         ...tweet.toJSON(),
         likesCount: tweet.Likes.length,
@@ -88,7 +88,7 @@ const tweetController = {
         lastUpdated: getLastUpd(tweet)
       }))
       const data = counts.map(({ Likes, Replies, ...rest }) => rest)
-      return res.json({ status: 'success', data })
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
@@ -104,14 +104,14 @@ const tweetController = {
       nest: true
     })
       .then((data) => {
-        if (!data) throw new Error('Tweet not found')
+        if (!data) return res.status(404).json('Tweets not found')
         const tweet = data.dataValues
         tweet.likesCount = tweet.Likes.length
         tweet.repliesCount = tweet.Replies.length
         delete tweet.Likes
         delete tweet.Replies
         getLastUpdated(tweet)
-        return res.status(200).json(data)
+        return res.status(200).json([data])
       })
       .catch((err) => next(err))
   },
@@ -140,7 +140,7 @@ const tweetController = {
           lastUpdated: getLastUpd(tweet)
         }))
         const data = beforeData.map(({ Tweet, ...rest }) => rest)
-        res.json({ status: 'success', data })
+        res.status(200).json(data)
       })
       .catch((err) => next(err))
   },

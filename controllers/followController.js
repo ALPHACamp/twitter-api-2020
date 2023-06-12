@@ -2,7 +2,7 @@ const { Followship, User, Like, Tweet, Sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 const followController = {
   addFollowing: (req, res, next) => {
-    const followerId = getUser.id
+    const followerId = getUser(req).id
     const followingId = req.body.id
     if (!followingId) {
       return res
@@ -10,37 +10,31 @@ const followController = {
         .json('缺少追蹤的用戶id')
     }
     if (followerId === followingId) {
-<<<<<<< HEAD
       return res.status(400).json('無法追蹤自己')
-=======
-      return res.json('無法追蹤自己')
->>>>>>> b9e00d87c61785e651c410ba729c4de3b5d3a15c
     }
     Followship.findOne({
       where: {
         followerId,
-        followingId,
-      },
+        followingId
+      }
     })
       .then((followship) => {
         if (followship) {
-          return res.status(400).json("已經追蹤過");
+          return res.status(400).json('已經追蹤過')
         }
         return Followship.create({
           followerId,
-          followingId,
-        });
+          followingId
+        })
       })
-      .then(() => res.status(200).json("Add success"))
-      .catch((error) => next(error));
+      .then(() => res.status(200).json('Add success'))
+      .catch((error) => next(error))
   },
   removeFollowing: (req, res, next) => {
-    const followerId = getUser.id
+    const followerId = getUser(req).id
     const followingId = req.params.id
     if (!followingId) {
-      return res
-        .status(400)
-        .json('缺少追蹤的用戶id')
+      return res.status(400).json('缺少追蹤的用戶id')
     }
 
     return Followship.findOne({
@@ -50,11 +44,7 @@ const followController = {
       }
     })
       .then((followship) => {
-<<<<<<< HEAD
         if (!followship) return res.status(400).json('未追蹤過')
-=======
-        if (!followship) { return res.status(401).json('未追蹤過') }
->>>>>>> b9e00d87c61785e651c410ba729c4de3b5d3a15c
         return followship.destroy()
       })
       .then(() => res.status(200).json('unfollow success'))
@@ -63,14 +53,12 @@ const followController = {
   getFollowers: async (req, res, next) => {
     const followingId = req.params.id
     if (!followingId) {
-      return res
-        .status(400)
-        .json('缺少追蹤的用戶id')
+      return res.status(400).json('缺少追蹤的用戶id')
     }
 
     const user = await User.findByPk(followingId)
     if (!user) return res.status(400).json('用戶不存在')
-
+    // error "SequelizeEagerLoadingError: User is not associated to Followship!"
     try {
       const followships = await Followship.findAll({
         where: { followingId },
@@ -101,7 +89,7 @@ const followController = {
         .status(400)
         .json('缺少追蹤的用戶id')
     }
-
+    // error "SequelizeEagerLoadingError: User is not associated to Followship!"
     User.findByPk(followerId)
       .then((user) => {
         if (!user) {
@@ -136,13 +124,10 @@ const followController = {
   getFollowCounts: (req, res, next) => {
     const userId = req.params.id
     if (!userId) return res.status(400).json('缺少用戶id')
-
     User.findByPk(userId)
       .then((user) => {
         if (!user) {
-          return res
-            .status(404)
-            .json('用戶不存在')
+          return res.status(404).json('用戶不存在')
         }
         return Promise.all([
           Followship.count({ where: { followerId: userId } }),
@@ -192,7 +177,6 @@ const followController = {
     const UserId = req.user.id
     const TweetId = req.params.id
     if (!TweetId) return res.status(400).json('缺少推文id')
-
     return Like.findOne({
       where: {
         UserId,
@@ -211,7 +195,6 @@ const followController = {
     const UserId = req.params.id
     if (!UserId) return res.status(400).json('缺少用戶id')
     let likeCounts = 0
-
     return User.findByPk(UserId, {
       include: [
         {
