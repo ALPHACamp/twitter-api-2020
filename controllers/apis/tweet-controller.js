@@ -19,7 +19,14 @@ const tweetController = {
         include: [{ model: User, as: 'TweetUser' }],
         order: [['createdAt', 'DESC']]
       })
-      if (!tweets) throw new Error('There is no tweet')
+
+      // 錯誤處理
+      if (!tweets) {
+        const error = new Error('There is no tweet')
+        error.status = 404
+        throw error
+      }
+
       return res.status(200).json(tweets)
     } catch (error) {
       next(error)
