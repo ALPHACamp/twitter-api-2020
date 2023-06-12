@@ -12,12 +12,8 @@ module.exports = {
           account: 'root',
           email: 'root@example.com',
           password: await bcrypt.hash('12345678', 10),
-          avatar: `https://loremflickr.com/320/240/people/?random=${
-            Math.random() * 10
-          }`,
-          cover: `https://loremflickr.com/320/240/mountain/?random=${
-            Math.random() * 100
-          }`,
+          avatar: 'https://loremflickr.com/320/240/kid?lock=1',
+          cover: 'https://loremflickr.com/320/240/mountain?lock=30',
           role: 'admin',
           introduction: faker.lorem.text().substring(0, 160),
           createdAt: new Date(),
@@ -29,9 +25,7 @@ module.exports = {
           email: 'user1@example.com',
           password: await bcrypt.hash('12345678', 10),
           avatar: 'https://loremflickr.com/320/240/icon?lock=3',
-          cover: `https://loremflickr.com/320/240/mountain/?random=${
-            Math.random() * 100
-          }`,
+          cover: 'https://loremflickr.com/320/240/mountain?lock=3',
           role: 'user',
           introduction: faker.lorem.text().substring(0, 160),
           createdAt: new Date(),
