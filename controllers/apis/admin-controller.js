@@ -45,6 +45,15 @@ const userController = {
       .catch(err => {
         res.status(500).json({ status: 'error', error: err.message })
       })
+  },
+  deleteTweet: (req, res) => {
+    return Tweet.findByPk(req.params.tweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error(`Tweet didn't exist`)
+        return tweet.destroy()
+      })
+      .then(deletedTweet => res.status(200).json({ status: 'success', deletedTweet }))
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   }
 }
 
