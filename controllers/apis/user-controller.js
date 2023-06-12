@@ -2,10 +2,9 @@ const bcrypt = require('bcryptjs')
 const { User, Reply, Tweet, Followship, Like } = require('../../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
-const followship = require('../../models/followship')
 
 const userController = {
-  signIn: (req, res, next) => {
+  signIn: (req, res,) => {
     try {
       const userData = req.user.toJSON()
       if (userData.role === 'admin') throw new Error('Account does not exist!')
@@ -187,7 +186,6 @@ const userController = {
   },
   addFollowing: (req, res) => {
     const { userId } = req.params
-    console.log('userId', userId)
     Promise.all([
       User.findByPk(userId),
       Followship.findOne({
@@ -221,6 +219,29 @@ const userController = {
         return followship.destroy()
       })
       .then(removedFollowship => res.status(200).json({ status: 'success', removedFollowship }))
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  getTopUsers: (req, res) => {
+    return User.findAll({
+      include: [{ model: User, as: 'Followers' }]
+    })
+      .then(users => {
+        users = users.map(user => {
+          let userData = user.toJSON()
+          delete userData.password
+          userData.Followers = userData.Followers.map(follower => {
+            delete follower.password
+            return follower
+          })
+          return {
+            ...userData,
+            followersCount: user.Followers.length,
+            isFollowed: req.user.Followings.some(f => f.id === user.id)
+          }
+        })
+        users = users.sort((a, b) => b.followersCount - a.followersCount)
+        res.status(200).json({ status: 'success', users })
+      })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   }
 }
