@@ -54,12 +54,6 @@ const userController = {
   },
   removeFollowing: async (req, res, next) => {
    await userServices.removeFollowing(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  addLike: async (req, res, next) => {
-    await userServices.addLike(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  removeLike: async (req, res, next) => {
-    await userServices.removeLike(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 module.exports = userController

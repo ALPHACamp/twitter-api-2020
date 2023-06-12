@@ -16,9 +16,6 @@ router.get('/users/tops', authenticated, userController.getTopUsers)
 router.post('/users/following/:user_id', authenticated, userController.addFollowing)
 router.delete('/users/following/:user_id', authenticated, userController.removeFollowing)
 
-router.post('/users/like/:tweet_id', authenticated, userController.addLike)
-router.delete('/users/like/:tweet_id', authenticated, userController.removeLike)
-
 router.get('/users/:user_id/likes', authenticated, userController.getUserLikes)
 router.get('/users/:user_id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:user_id/followers', authenticated, userController.getUserFollowers)
