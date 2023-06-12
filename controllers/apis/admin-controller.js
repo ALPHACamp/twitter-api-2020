@@ -23,6 +23,7 @@ const userController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       include: [
+        { model: User },
         { model: Reply },
         { model: Like }
       ],

@@ -26,6 +26,9 @@ router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.get('/api/postTweet', authenticated, tweetController.getPostTweet)
 router.post('/api/postTweet', authenticated, tweetController.postTweet)
 
+router.get('/api/reply/:tweetId', authenticated, tweetController.getReply)
+router.post('/api/reply/:tweetId', authenticated, tweetController.postReply)
+
 router.get('/api/users/:id/edit', authenticated, userController.editUser)
 router.get('/api/users/:id', authenticated, userController.getUser)
 router.put('/api/users/:id', fields, authenticated, userController.putUser)
