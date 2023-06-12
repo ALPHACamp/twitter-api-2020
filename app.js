@@ -2,10 +2,12 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
+const path = require('path')
 const express = require('express')
 const passport = require('./config/passport')
 const flash = require('connect-flash')
 const { apis, pages } = require('./routes')
+const methodOverride = require('method-override')
 const session = require('express-session')
 const cors = require('cors')
 
@@ -15,6 +17,8 @@ const port = process.env.PORT || 3000
 // 解析request主體
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+app.use(methodOverride('_method'))
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 // session設定
 app.use(session({
