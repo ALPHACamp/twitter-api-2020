@@ -22,7 +22,7 @@ const tweetController = {
         Like.findAll({ where: { UserId: currentUserId }, raw: true })
       ])
       if (!tweets) {
-        return res.status(404).json({ status: 'error', message: 'Tweets not found' })
+        return res.status(200).json({ status: 'success', message: 'No tweet data available.' })
       }
 
       const currentUserLikes = likes.map(l => l.TweetId)
@@ -54,13 +54,13 @@ const tweetController = {
       // check if description is more than 160 characters
       if (description.trim().length > 140) {
         return res
-          .status(401)
+          .status(404)
           .json({ status: 'error', message: 'Description should be within 160 characters!' })
       }
       // check if description is whitespace
       if (!description.trim().length) {
         return res
-          .status(401)
+          .status(404)
           .json({ status: 'error', message: 'Description cannot be whitespace' })
       }
 
@@ -101,7 +101,7 @@ const tweetController = {
         Like.findAll({ where: { UserId: currentUserId }, raw: true })
       ])
       if (!tweet) {
-        return res.status(404).json({ status: 'error', message: 'Tweet not found' })
+        return res.status(200).json({ status: 'success', message: 'No tweet data available.' })
       }
 
       const currentUserLikes = likes.map(l => l.TweetId)
@@ -156,15 +156,15 @@ const tweetController = {
         nest: true
       })
 
-      const data = replies.map((reply) => ({
+      const data = replies.map(reply => ({
         replyId: reply.id,
         comment: reply.comment,
         replyOwnerId: reply.userId,
         replyOwnerName: reply.name,
         replyOwnerAccount: reply.account,
         replyOwnerAvatar: reply.avatar,
-        replyCreatedAt: reply.createdAt,
-      }));
+        replyCreatedAt: reply.createdAt
+      }))
 
       return res.status(200).json(data)
     } catch (err) {
@@ -183,7 +183,7 @@ const tweetController = {
       const { comment } = req.body
       if (comment.trim().length === 0) {
         return res
-          .status(400)
+          .status(404)
           .json({ error: 'Comment cannot be only whitespace!' })
       }
 
@@ -210,9 +210,8 @@ const tweetController = {
       const { tweet_id: tweetId } = req.params
       const tweet = await Tweet.findByPk(tweetId)
 
-      if (!tweet) {
-        return res.status(404).json({ error: 'Tweet not found!' })
-      }
+      if (!tweet) { return res.status(404).json({ status: 'error', message: 'Tweet not found!' }) }
+
       // get user id
       const user = helpers.getUser(req)
       const UserId = user.id
@@ -225,7 +224,7 @@ const tweetController = {
       })
 
       if (like) {
-        return res.status(200).json({ error: 'You have liked this tweet!' })
+        return res.status(404).json({ status: 'error', message: 'You have liked this tweet!' })
       }
 
       await Like.create({
@@ -233,9 +232,7 @@ const tweetController = {
         TweetId: tweetId,
         isLiked: true
       })
-      return res.status(200).json({
-        status: 'success'
-      })
+      return res.status(200).json({ status: 'success', message: 'You liked this tweet!' })
     } catch (err) {
       next(err)
     }
@@ -246,7 +243,7 @@ const tweetController = {
       const tweet = await Tweet.findByPk(tweetId)
 
       if (!tweet) {
-        return res.status(404).json({ error: 'Tweet not found!' })
+        return res.status(404).json({ status: 'error', message: 'Tweet not found!' })
       }
       // get user id
       const user = helpers.getUser(req)
@@ -261,12 +258,12 @@ const tweetController = {
 
       // if the user hasn't liked the tweet
       if (!like) {
-        return res.status(404).json({ error: "You haven't liked this tweet!" })
+        return res.status(404).json({ status: 'error', message: "You haven't liked this tweet!" })
       }
 
       await like.destroy()
 
-      return res.status(200).json({ message: 'Like removed successfully' })
+      return res.status(200).json({ status: 'success', message: 'Like removed successfully' })
     } catch (err) {
       next(err)
     }
