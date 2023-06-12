@@ -14,6 +14,10 @@ const replyController = {
       .then((replies) => {
         replies.forEach((reply) => {
           getLastUpdated(reply)
+          reply.account = reply.User.account
+          reply.name = reply.User.name
+          reply.avatar = reply.User.avatar
+          delete reply.User
         })
         return res.status(200).json(replies)
       })

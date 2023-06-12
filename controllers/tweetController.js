@@ -85,9 +85,12 @@ const tweetController = {
         ...tweet.toJSON(),
         likesCount: tweet.Likes.length,
         repliesCount: tweet.Replies.length,
-        lastUpdated: getLastUpd(tweet)
+        lastUpdated: getLastUpd(tweet),
+        account: tweet.User.account,
+        name: tweet.User.name,
+        avatar: tweet.User.avatar
       }))
-      const data = counts.map(({ Likes, Replies, ...rest }) => rest)
+      const data = counts.map(({ Likes, Replies, User, ...rest }) => rest)
       return res.status(200).json(data)
     } catch (err) {
       next(err)
@@ -108,6 +111,10 @@ const tweetController = {
         const tweet = data.dataValues
         tweet.likesCount = tweet.Likes.length
         tweet.repliesCount = tweet.Replies.length
+        tweet.account = tweet.User.account
+        tweet.name = tweet.User.name
+        tweet.avatar = tweet.User.avatar
+        delete tweet.User
         delete tweet.Likes
         delete tweet.Replies
         getLastUpdated(tweet)
@@ -137,9 +144,12 @@ const tweetController = {
         const beforeData = tweets.map((tweet) => ({
           ...tweet.toJSON(),
           tweetUser: tweet.Tweet.User.name,
-          lastUpdated: getLastUpd(tweet)
+          lastUpdated: getLastUpd(tweet),
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar
         }))
-        const data = beforeData.map(({ Tweet, ...rest }) => rest)
+        const data = beforeData.map(({ Tweet, User, ...rest }) => rest)
         res.status(200).json(data)
       })
       .catch((err) => next(err))

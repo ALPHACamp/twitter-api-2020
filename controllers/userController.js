@@ -12,12 +12,7 @@ const userController = {
       delete userData.password
 
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '7d' })
-      return res
-        .status(200)
-        .json([
-          token,
-          userData
-        ])
+      return res.status(200).json({ token, userData })
     } catch (err) {
       next(err)
     }
@@ -139,6 +134,7 @@ const userController = {
       ]
     })
       .then((users) => {
+
         const data = users
           .map((user) => ({
             ...user.toJSON(),
@@ -148,8 +144,8 @@ const userController = {
               : false
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
-
-        res.status(200).json(data)
+        const final = data.map(({ Followers, ...rest }) => rest)
+        res.status(200).json(final)
       })
       .catch((err) => next(err))
   }

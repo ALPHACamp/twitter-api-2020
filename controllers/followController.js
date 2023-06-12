@@ -55,71 +55,62 @@ const followController = {
     if (!followingId) {
       return res.status(400).json('缺少追蹤的用戶id')
     }
-
     const user = await User.findByPk(followingId)
     if (!user) return res.status(400).json('用戶不存在')
     // error "SequelizeEagerLoadingError: User is not associated to Followship!"
     try {
-      const followships = await Followship.findAll({
-        where: { followingId },
+      const followers = await User.findAll({
+        where: { id: followingId },
+        attributes: [],
         include: [
           {
             model: User,
-            as: 'follower',
+            as: 'Followers',
             attributes: ['id', 'name', 'account', 'avatar', 'introduction']
           }
         ],
         order: [['createdAt', 'DESC']]
       })
-
-      const followers = followships.map((followship) => {
-        const follower = followship.follower
-        follower.introduction = follower.introduction.substring(0, 50)
-        return follower
+      followers.forEach((follower) => {
+        follower.introduction?.substring(0, 50)
       })
-      return res.status(200).json(followers)
+      const data = followers[0]
+      delete data.Followship
+      return res.status(200).json(data)
     } catch (error) {
       return next(error)
     }
   },
-  getFollowings: (req, res, next) => {
+  getFollowings: async (req, res, next) => {
     const followerId = req.params.id
     if (!followerId) {
-      return res
-        .status(400)
-        .json('缺少追蹤的用戶id')
+      return res.status(400).json('缺少追蹤的用戶id')
     }
+    const user = await User.findByPk(followerId)
+    if (!user) return res.status(400).json('用戶不存在')
     // error "SequelizeEagerLoadingError: User is not associated to Followship!"
-    User.findByPk(followerId)
-      .then((user) => {
-        if (!user) {
-          return res
-            .status(404)
-            .json('用戶不存在')
-        }
-        return Followship.findAll({
-          where: { followerId },
-          include: [
-            {
-              model: User,
-              as: 'following',
-              attributes: ['id', 'name', 'account', 'avatar', 'introduction']
-            }
-          ],
-          order: [['createdAt', 'DESC']]
-        })
+    try {
+      const followings = await User.findAll({
+        where: { id: followerId },
+        attributes: [],
+        include: [
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+          }
+        ],
+        order: [['createdAt', 'DESC']]
       })
-      .then((followships) => {
-        const followings = followships.map((followship) => {
-          const following = followship.following
-          following.introduction = following.introduction
-            ? following.introduction.substring(0, 50)
-            : ''
-          return following
-        })
-        return res.status(200).json(followings)
+      followings.forEach((following) => {
+        following.introduction?.substring(0, 50)
       })
-      .catch((error) => next(error))
+      const data = followings[0]
+      delete data.Followship
+      return res.status(200).json(data)
+    } catch (error) {
+      return next(error)
+    }
   },
   getFollowCounts: (req, res, next) => {
     const userId = req.params.id
@@ -135,11 +126,11 @@ const followController = {
         ])
       })
       .then(([followingCount, followerCount]) => {
-        return res
-          .status(200)
-          .json(
-            [followingCount, followerCount]
-          )
+        const data = {
+          followingCount,
+          followerCount
+        }
+        return res.status(200).json(data)
       })
       .catch((error) => next(error))
   },
