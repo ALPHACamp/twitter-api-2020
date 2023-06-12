@@ -7,9 +7,7 @@ const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const followshipController = require('../controllers/followship-controller')
 
-// const cors = require('../middleware/cors')
 const upload = require('../middleware/multer')
-
 const { authenticatedAdmin, authenticatedUser, authenticated } = require('../middleware/auth')
 const { generalErrorHandler } = require('../middleware/error-handler')
 
@@ -19,7 +17,6 @@ router.post('/api/users/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
 
 // user
-
 router.put('/api/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), userController.putUser)
 router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserRepliedTweets)

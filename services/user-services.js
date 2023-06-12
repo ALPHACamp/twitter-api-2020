@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize')
 const sequelize = require('sequelize')
 const { getUserData } = require('../helpers/getUserData')
+const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const {
     User,
@@ -11,9 +13,6 @@ const {
     Like,
     Reply
 } = require('../models')
-
-// const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
-const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
     signIn: async (req, cb) => {
@@ -145,6 +144,7 @@ const userServices = {
 
             tweets = tweets.map(tweet => ({
                 ...tweet.dataValues,
+                createdAt: relativeTimeFromNow(tweet.dataValues.createdAt),
                 isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(tweet.id) : false,
                 replyCount: tweet.Replies.length,
                 likeCount: tweet.Likes.length
@@ -237,6 +237,7 @@ const userServices = {
 
             repliedTweets = repliedTweets.map(repliedTweet => ({
                 ...repliedTweet.dataValues,
+                createdAt: relativeTimeFromNow(repliedTweet.dataValues.createdAt),
                 isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(repliedTweet.Tweet.id) : false,
                 replyCount: repliedTweet.Tweet.Replies.length,
                 likeCount: repliedTweet.Tweet.Likes.length
@@ -280,6 +281,7 @@ const userServices = {
 
             likedTweets = likedTweets.map(likedTweet => ({
                 ...likedTweet.dataValues,
+                createdAt: relativeTimeFromNow(likedTweet.dataValues.createdAt),
                 isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(likedTweet.Tweet.id) : false,
                 replyCount: likedTweet.Tweet.Replies.length,
                 likeCount: likedTweet.Tweet.Likes.length
@@ -310,7 +312,7 @@ const userServices = {
 
             followings = followings.map(following => ({
                 ...following.dataValues,
-                isFollowed: userFollowingsId.length ? userFollowingsId.includes(following.id) : false,
+                isFollowed: userFollowingsId.length ? userFollowingsId.includes(following.dataValues.followingId) : false
             }))
 
             cb(null, followings)
@@ -334,11 +336,11 @@ const userServices = {
                 where: { followingId: id }
             })
             if (followers.length === 0) throw new Error("該名使用者沒有任何人追蹤過！")
-            const userFollowersId = getUserData(req.user.Followers)
+            const userFollowingsId = getUserData(req.user.Followings)
 
             followers = followers.map(follower => ({
                 ...follower.dataValues,
-                isFollowed: userFollowersId.length ? userFollowersId.includes(follower.id) : false,
+                isFollowed: userFollowingsId.length ? userFollowingsId.includes(follower.dataValues.followerId) : false
             }))
 
             cb(null, followers)

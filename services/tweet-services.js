@@ -26,6 +26,7 @@ const tweetServices = {
       const userLikedTweetsId = getUserData(req.user.LikedTweets)
       tweets = tweets.map(tweet => ({
         ...tweet.dataValues,
+        createdAt: relativeTimeFromNow(tweet.dataValues.createdAt),
         isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(tweet.id) : false,
         replyCount: tweet.Replies.length,
         likeCount: tweet.Likes.length
@@ -55,7 +56,7 @@ const tweetServices = {
         where: {
           TweetId: id
         }
-      ,order: [['createdAt', 'DESC']]
+        , order: [['createdAt', 'DESC']]
       })
     ])
       //.then((tweet) => {if(tweet.id !== id) throw new Error("推文不存在！")})
@@ -67,7 +68,7 @@ const tweetServices = {
           createdAt: relativeTimeFromNow(tweet.createdAt)
         })
       })
-      .catch(err => cb (err))
+      .catch(err => cb(err))
   },
   postTweets: async (req, cb) => {
     try {
@@ -86,27 +87,26 @@ const tweetServices = {
         description,
         UserId,
       })
-      const tweetData = tweet.toJSON()
-        tweetData.createdAt = relativeTimeFromNow(tweetData)
-      return cb (null, {
+      return cb(null, {
         status: 'success',
         message: '推文成功！',
-        ...tweetData
+        ...tweet.dataValues,
+        createdAt: relativeTimeFromNow(tweet.dataValues.createdAt)
       })
     } catch (err) {
-      cb (err)
+      cb(err)
     }
   },
-  addLike: async(req, cb) => {
-    try{
+  addLike: async (req, cb) => {
+    try {
       const { id } = req.params
       const tweet = await Tweet.findByPk(id)
       const like = await Like.findOne({
-              where: {
-                UserId: helpers.getUser(req).id,
-                TweetId: id
-              }
-            })
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId: id
+        }
+      })
       if (tweet.id !== Number(id)) throw new Error("推文不存在!")
       if (like) throw new Error('你已經like過這篇Tweet了')
 
@@ -114,9 +114,9 @@ const tweetServices = {
         UserId: helpers.getUser(req).id,
         TweetId: Number(id)
       })
-      cb (null, likeCreate)
+      cb(null, likeCreate)
     } catch (err) {
-          cb (err)
+      cb(err)
     }
   },
   removeLike: async (req, cb) => {
@@ -133,9 +133,9 @@ const tweetServices = {
       }
 
       await like.destroy()
-      cb (null,{ message: 'Like 取消成功' })
+      cb(null, { message: 'Like 取消成功' })
     } catch (err) {
-      cb (err)
+      cb(err)
     }
   }
 }
