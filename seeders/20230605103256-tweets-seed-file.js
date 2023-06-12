@@ -14,7 +14,7 @@ module.exports = {
           user_id: user.id,
           description: faker.lorem.text().slice(0, 140),
           created_at: new Date(),
-          updated_at: new Date(),
+          updated_at: new Date()
         })
       }
     }

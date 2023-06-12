@@ -11,19 +11,19 @@ const replyController = {
       include: [
         {
           model: User,
-          attributes: ['id', 'account', 'name', 'avatar'],
+          attributes: ['id', 'account', 'name', 'avatar']
         },
         {
           model: Tweet,
           include: [
             {
               model: User,
-              attributes: ['id', 'account', 'name', 'avatar'],
-            },
-          ],
-        },
+              attributes: ['id', 'account', 'name', 'avatar']
+            }
+          ]
+        }
       ],
-      raw: true,
+      raw: true
     })
       .then((replies) => {
         const processedReplies = replies.map((reply) => ({
@@ -38,14 +38,14 @@ const replyController = {
             avatar: reply['User.avatar'],
             createdAt: moment(reply.createdAt).format('YYYY-MM-DD HH:mm:ss'),
             diffCreatedAt: moment(reply.createdAt).fromNow(),
-            updatedAt: moment(reply.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+            updatedAt: moment(reply.updatedAt).format('YYYY-MM-DD HH:mm:ss')
           },
           // tweets
           tweetData: {
             tweetId: reply.TweetId,
             tweetOwnerId: reply['Tweet.User.id'],
-            tweetOwnerAccount: reply['Tweet.User.account'],
-          },
+            tweetOwnerAccount: reply['Tweet.User.account']
+          }
         }))
         res.status(200).json(processedReplies)
       })
@@ -59,18 +59,18 @@ const replyController = {
     return Tweet.findByPk(tweetId)
       .then((tweet) => {
         if (!tweet) throw new Error('Tweet not exist!')
-        if (comment.trim() === 0) throw new Error("Reply content is required!")
-        if (comment.length > 140) throw new Error("Reply content limit within 140 words")
+        if (comment.trim() === 0) throw new Error('Reply content is required!')
+        if (comment.length > 140) throw new Error('Reply content limit within 140 words')
         return Reply.create({
           comment,
           tweetId,
-          userId,
+          userId
         })
       })
       .then((newReply) => {
         res.status(200).json(newReply)
       })
       .catch((err) => next(err))
-  },
+  }
 }
 module.exports = replyController

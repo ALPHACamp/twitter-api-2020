@@ -1,45 +1,45 @@
-const { User, Tweet } = require("../models")
-const { getUser } = require("../_helpers")
-const Sequelize = require("sequelize")
+const { User, Tweet } = require('../models')
+const { getUser } = require('../_helpers')
+const Sequelize = require('sequelize')
 const { literal } = Sequelize
 const moment = require('moment')
 
 const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      order: [["createdAt", "DESC"]],
+      order: [['createdAt', 'DESC']],
       include: [
         {
           model: User,
-          attributes: { exclude: ["password", "createdAt", "updatedAt", "role", "introduction"] }
-        },
+          attributes: { exclude: ['password', 'createdAt', 'updatedAt', 'role', 'introduction'] }
+        }
       ],
       attributes: {
         include: [
           [
-            Sequelize.literal(`TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())`),
-            "diffCreatedAt",
+            literal('TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())'),
+            'diffCreatedAt'
           ],
           [
-            Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)"
+            literal(
+              '(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'
             ),
-            "replyCount",
+            'replyCount'
           ],
           [
-            Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = Tweet.id)"
+            literal(
+              '(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'
             ),
-            "likeCount",
+            'likeCount'
           ]
         ],
-        exclude: ["UserId"]
+        exclude: ['UserId']
       },
       nest: true,
-      raw: true,
+      raw: true
     })
       .then((tweets) => {
-        if (!tweets) throw new Error("No tweets found")
+        if (!tweets) throw new Error('No tweets found')
         const processedTweets = tweets.map((tweet) => {
           const createdAt = moment(tweet.createdAt).format('YYYY-MM-DD HH:mm:ss')
           const updatedAt = moment(tweet.updatedAt).format('YYYY-MM-DD HH:mm:ss')
@@ -61,33 +61,34 @@ const tweetController = {
       include: [
         {
           model: User,
-          attributes: { exclude: ["password", "createdAt", "updatedAt", "role", "introduction"] }
-        },
+          attributes: { exclude: ['password', 'createdAt', 'updatedAt', 'role', 'introduction'] }
+        }
       ],
       attributes: {
         include: [
           [
-            Sequelize.literal(`TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())`),
-            "diffCreatedAt",
+            literal('TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())'),
+            'diffCreatedAt'
           ],
           [
-            Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)"
+            literal(
+              '(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'
             ),
-            "replyCount",
+            'replyCount'
           ],
           [
-            Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = Tweet.id)"
+            literal(
+              '(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'
             ),
-            "likeCount",
+            'likeCount'
           ]
         ],
-        exclude: ["UserId"]
-    }})
+        exclude: ['UserId']
+      }
+    })
       .then((tweet) => {
         // Error: tweet not found
-        if (!tweet) throw new Error("No tweet found")
+        if (!tweet) throw new Error('No tweet found')
         const createdAt = moment(tweet.createdAt).format('YYYY-MM-DD HH:mm:ss')
         const updatedAt = moment(tweet.updatedAt).format('YYYY-MM-DD HH:mm:ss')
         const diffCreatedAt = moment().subtract(tweet.diffCreatedAt, 'seconds').fromNow()
@@ -100,22 +101,22 @@ const tweetController = {
         return res.status(200).json(processedTweet)
       })
       .catch((err) => next(err))
-},
+  },
 
   postTweets: (req, res, next) => {
     const { description } = req.body
     if (!description) {
-      throw new Error("Tweet content is required!")
+      throw new Error('Tweet content is required!')
     }
     if (description.length > 140) {
-      throw new Error("Tweet content limit within 140 words")
+      throw new Error('Tweet content limit within 140 words')
     }
     // get current user id
     const userId = getUser(req).id
 
     return Tweet.create({
       userId,
-      description,
+      description
     })
       .then((newTweet) => {
         return res.status(200).json(newTweet)

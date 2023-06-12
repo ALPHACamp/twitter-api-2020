@@ -27,5 +27,5 @@ const imgurFileHandler = (file) => {
 }
 module.exports = {
   localFileHandler,
-  imgurFileHandler,
+  imgurFileHandler
 }

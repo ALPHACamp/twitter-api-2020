@@ -7,16 +7,14 @@ const moment = require('moment')
 const adminController = {
   signIn: (req, res, next) => {
     const { account, password } = req.body
-    if (!account || !password)
-      throw new Error('Account and password are required')
+    if (!account || !password) { throw new Error('Account and password are required') }
     return User.findOne({
       where: { account }
     })
       .then((user) => {
         if (!user) throw new Error('Admin not exists')
         if (user.role === 'user') throw new Error('Admin not exists')
-        if (!bcrypt.compareSync(password, user.password))
-          throw new Error('Password incorrect')
+        if (!bcrypt.compareSync(password, user.password)) { throw new Error('Password incorrect') }
         const adminData = user.toJSON()
         delete adminData.password
         const token = jwt.sign(adminData, process.env.JWT_SECRET, {
@@ -27,7 +25,7 @@ const adminController = {
           message: 'Login successful',
           data: {
             token,
-            admin: adminData,
+            admin: adminData
           }
         })
       })
@@ -41,40 +39,41 @@ const adminController = {
           // user data
           [
             Sequelize.literal(
-              "(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)"
+              '(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)'
             ),
-            "tweetCount"
+            'tweetCount'
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = User.id)"
+              '(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = User.id)'
             ),
-            "likeCount"
+            'likeCount'
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = User.id)"
+              '(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = User.id)'
             ),
-            "followerCount"
+            'followerCount'
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = User.id)"
+              '(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = User.id)'
             ),
-            "followingCount"
+            'followingCount'
           ]
         ],
-        exclude: ["password", "createdAt", "updatedAt", "role"]},
+        exclude: ['password', 'createdAt', 'updatedAt', 'role']
+      },
       raw: true,
-      nest: true,
+      nest: true
     })
       .then((users) => {
         const result = users
         // sort by tweets count
-        .sort(
-          (a, b) =>
-            b.tweetCount - a.tweetCount
-        )
+          .sort(
+            (a, b) =>
+              b.tweetCount - a.tweetCount
+          )
         return res.status(200).json(result)
       })
       .catch((err) => next(err))
@@ -82,33 +81,33 @@ const adminController = {
 
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      order: [["createdAt", "DESC"]],
+      order: [['createdAt', 'DESC']],
       include: [
         {
           model: User,
-          attributes: { exclude: ["password", "createdAt", "updatedAt", "role", "introduction"] }
+          attributes: { exclude: ['password', 'createdAt', 'updatedAt', 'role', 'introduction'] }
         }
       ],
       attributes: {
         include: [
           [
-            Sequelize.literal(`TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())`),
-            "diffCreatedAt"
+            Sequelize.literal('TIMESTAMPDIFF(SECOND, Tweet.created_at, NOW())'),
+            'diffCreatedAt'
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)"
+              '(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'
             ),
-            "replyCount"
+            'replyCount'
           ],
           [
             Sequelize.literal(
-              "(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = Tweet.id)"
+              '(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'
             ),
-            "likeCount"
+            'likeCount'
           ]
         ],
-        exclude: ["UserId"]
+        exclude: ['UserId']
       },
       nest: true,
       raw: true
