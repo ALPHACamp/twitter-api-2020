@@ -139,6 +139,23 @@ const userController = {
     }
   },
   getUserReplies: async (req, res, next) => {
+    try {
+      const userId = req.params.userId
+      const replies = await Reply.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: User, attributes: { exclude: ['password'] } },
+          { model: Tweet }
+        ],
+        order: [['createdAt', 'DESC']],
+        nest: true
+      })
+
+      const userRepliesData = replies.map(reply => reply.toJSON())
+      res.status(200).json(userRepliesData)
+    } catch (err) {
+      next(err)
+    }
   },
   getUserLikes: async (req, res, next) => {
   },
