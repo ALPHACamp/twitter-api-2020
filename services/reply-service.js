@@ -22,8 +22,11 @@ const replyServices = {
   },
   getComment: (req, cb) => {
     const tweetId = req.params.tweet_id
-    return Tweet.findByPk(tweetId, { include: [Reply] }).then(tweet => cb(null, { tweet }))
-      .catch(err => cb(err))
+    return Reply.findAll({
+    where: { tweetId },
+  })
+  .then(reply => cb(null, { reply }))
+  .catch(err => cb(err))
   }
 }
 

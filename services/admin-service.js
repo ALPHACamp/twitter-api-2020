@@ -12,10 +12,10 @@ const adminServices = {
   },
   getUsers:(req, cb) => {
     return User.findAll({
-      raw: true,
-      nest: true,
       include: [Tweet]
-    }).then(users => cb(null, {users})).catch(err=>cb(err))
+    })
+    .then(users => cb(null, { users }))
+    .catch(err => cb(err))
   },
   getTweet:(req, cb) => {
     return Tweet.findByPk(req.params.id, { include: [Reply] }).then(tweet => {
