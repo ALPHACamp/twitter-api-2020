@@ -13,4 +13,7 @@ module.exports = {
     }
     next(err)
   }
+<<<<<<< HEAD
+}
+=======
 }
