@@ -27,7 +27,7 @@ const adminController = {
         attributes: ['id', 'name', 'account', 'avatar', 'cover',
           // 推文數量
           [
-            sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.UserId = user.id)'), 'tweetCount'
+            sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'
           ],
           // 關注人數(跟隨user的人數)
           [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.followingId = User.id)'),
