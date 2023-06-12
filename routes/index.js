@@ -26,6 +26,7 @@ router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.get('/api/postTweet', authenticated, tweetController.getPostTweet)
 router.post('/api/postTweet', authenticated, tweetController.postTweet)
 
+router.get('/api/users/top', authenticated, userController.getTopUsers)
 router.get('/api/users/:id/edit', authenticated, userController.editUser)
 router.get('/api/users/:id', authenticated, userController.getUser)
 router.put('/api/users/:id', fields, authenticated, userController.putUser)
@@ -35,6 +36,8 @@ router.delete('/api/like/:tweetId', authenticated, userController.removeLike)
 
 router.post('/api/following/:userId', authenticated, userController.addFollowing)
 router.delete('/api/following/:userId', authenticated, userController.removeFollowing)
+
+
 router.use('/', apiErrorHandler)
 
 module.exports = router
