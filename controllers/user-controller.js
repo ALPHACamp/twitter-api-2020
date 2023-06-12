@@ -295,11 +295,12 @@ const userController = {
   getTopUser: async (req, res, next) => {
     try {
       const TOP_USER_COUNT = req.query?.top || 10
+      const selfUser = helpers.getUser(req).id
       const users = await User.findAll({
         raw: true,
         attributes: ['id', 'name', 'account', 'avatar',
           [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount']],
-        where: { role: { [Sequelize.Op.ne]: 'admin' } }
+        where: { role: { [Sequelize.Op.ne]: 'admin' }, id: { [Sequelize.Op.ne]: selfUser } }
       })
       const usersData = users
         ?.map(user => ({

@@ -114,6 +114,16 @@ module.exports = {
       role: 'user',
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
+    }, {
+      name: 'user11',
+      email: 'user11@example.com',
+      account: 'user11',
+      password: await bcrypt.hash('12345678', 10),
+      avatar: `https://loremflickr.com/320/240/marvel/?random=${Math.random() * 100}&lock=${Math.random() * 100}`,
+      introduction: faker.lorem.text().substring(0, USERS_INTRO_LIMIT),
+      role: 'user',
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
     }], {})
   },
 
