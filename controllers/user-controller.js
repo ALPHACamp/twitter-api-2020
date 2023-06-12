@@ -6,6 +6,7 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+// const { imgurFileHandler } = require('../helpers')
 
 const userController = {
   getUsers: (req, res, next) => {
@@ -159,7 +160,8 @@ const userController = {
     return Promise.all([
       User.findByPk(userId),
       Followship.findAll({
-        where: { followerId: userId }
+        where: { followerId: userId },
+        raw: true
       })
     ])
       .then(([user, followingsData]) => {
@@ -169,16 +171,31 @@ const userController = {
       .catch(err => next(err))
   },
   getUserFollowers: (req, res, next) => {
+    const userId = req.params.id
+    return Promise.all([
+      User.findByPk(userId),
+      Followship.findAll({
+        where: { followingId: userId },
+        raw: true
+      })
+    ])
+      .then(([user, followersData]) => {
+        if (!user) throw new Error('getUserFollowers說: 沒這人')
+        res.status(200).json(followersData)
+      })
+      .catch(err => next(err))
+  },
+  putUser: (req, res, next) => {
     // const userId = req.params.id
-    // reutrn Promise.all([
-    //   User.findByPk(userId),
-    //   Followship.findAll({
-    //     where: { followingId: userId }
+    // return User.findByPk(userId)
+    //   .then(user => {
+    //     if (!user) throw new Error('putUser說: 沒這人')
+    //     return res.redirect('back')
     //   })
-    // ])
-    //   .then(([user, followersData]) => {
-    //     if (!user) throw new Error('getUserFollowers說: 沒這人')
-    //     res.status(200).json()
+    //   .then(user => {
+    //     return User.update({
+
+    //     })
     //   })
   }
 }
