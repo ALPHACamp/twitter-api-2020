@@ -24,11 +24,11 @@ passport.use(new LocalStrategy(
     try {
       const user = await User.findOne({ where: { account } })
       if (!user) {
-        return req.res.status(200).json({ message: '帳號不存在!' })
+        throw new Error('帳號不存在')
       }
       const isMath = await bcrypt.compare(password, user.password)
       if (!isMath) {
-        return req.res.status(200).json({ message: '帳號/密碼錯誤!' })
+        throw new Error('帳號|密碼錯誤!')
       }
       return cb(null, user)
     } catch (err) { cb(err) }
