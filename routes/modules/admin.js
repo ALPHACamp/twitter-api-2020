@@ -6,8 +6,8 @@ const adminController = require('../../controllers/admin-controller')
 // import auth
 const {
   authenticated,
-  authenticatedAdmin,
-} = require("../../middleware/api-auth");
+  authenticatedAdmin
+} = require('../../middleware/api-auth')
 
 router.post('/signin', adminController.signIn)
 router.delete('/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)

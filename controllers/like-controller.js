@@ -1,9 +1,9 @@
-const { Tweet, Like } = require("../models")
-const { getUser } = require("../_helpers")
+const { Tweet, Like } = require('../models')
+const { getUser } = require('../_helpers')
 
 const likeController = {
 
-postTweetLike: (req, res, next) => {
+  postTweetLike: (req, res, next) => {
     const UserId = getUser(req).id
     const TweetId = req.params.id
     return Promise.all([
@@ -11,23 +11,23 @@ postTweetLike: (req, res, next) => {
       Like.findOne({
         where: {
           UserId,
-          TweetId,
+          TweetId
         }
       })
     ])
       .then(([tweet, like]) => {
         if (!tweet) throw new Error("Tweet doesn't exist!")
-        if (like) throw new Error("You have liked this tweet!")
+        if (like) throw new Error('You have liked this tweet!')
 
         return Like.create({
           UserId,
-          TweetId,
+          TweetId
         })
       })
       .then((newLike) => {
         return res
           .status(200)
-          .json({ status: "success", message: "Like succeed", newLike })
+          .json({ status: 'success', message: 'Like succeed', newLike })
       })
       .catch((err) => next(err))
   },
@@ -38,9 +38,9 @@ postTweetLike: (req, res, next) => {
       Tweet.findByPk(TweetId),
       Like.findOne({
         where: {
-          TweetId,
-        },
-      }),
+          TweetId
+        }
+      })
     ])
       .then(([tweet, like]) => {
         if (!tweet) throw new Error("Tweet doesn't exist!")
@@ -50,9 +50,9 @@ postTweetLike: (req, res, next) => {
         const deletedLike = like.toJSON()
         return like.destroy().then(() => {
           return res.status(200).json({
-            status: "success",
-            message: "Unlike succeed",
-            deletedLike,
+            status: 'success',
+            message: 'Unlike succeed',
+            deletedLike
           })
         })
       })

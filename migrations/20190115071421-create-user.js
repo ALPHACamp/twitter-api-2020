@@ -6,43 +6,43 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER
       },
       email: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING
       },
       password: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING
       },
       name: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING
       },
       avatar: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING
       },
       introduction: {
-        type: Sequelize.TEXT,
+        type: Sequelize.TEXT
       },
       role: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING
       },
       account: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING
       },
       cover: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE,
-      },
+        type: Sequelize.DATE
+      }
     })
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('Users')
-  },
+  }
 }

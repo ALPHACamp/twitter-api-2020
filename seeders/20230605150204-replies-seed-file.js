@@ -20,7 +20,7 @@ module.exports = {
           tweet_id: tweet.id,
           comment: faker.lorem.text(),
           created_at: new Date(),
-          updated_at: new Date(),
+          updated_at: new Date()
         })
       }
     }
