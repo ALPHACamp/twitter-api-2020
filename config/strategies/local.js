@@ -19,7 +19,7 @@ module.exports = passport => {
         // compare password
         bcrypt.compare(password, user.password).then(isMatch => {
           if (!isMatch) {
-            const error = new Error('信箱或是密碼錯誤！')
+            const error = new Error('帳號或是密碼錯誤！')
             error.status = 401
             return done(error, false)
           }

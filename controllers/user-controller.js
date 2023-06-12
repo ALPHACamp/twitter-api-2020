@@ -32,13 +32,13 @@ const userController = {
     try {
       // 註冊時，使用者可以設定 account、name、email 和 password
       const { account, name, email, password, checkPassword } = req.body
-      if (!account || !name || !email || !password || !checkPassword) throw new Error('請輸入完整資訊!')
-
-      // check password
-      if (password !== checkPassword) throw new Error('密碼不相同!')
+      if (!account.trim() || !name.trim() || !email.trim() || !password.trim() || !checkPassword.trim()) throw new Error('請輸入完整資訊!')
 
       // check name 不能超過50字
       if (name.length > 50) throw new Error('name 超過字數限制50字元！')
+
+      // check password
+      if (password !== checkPassword) throw new Error('密碼不相同!')
 
       // 檢查account, email 是否重複
       const user = await User.findOne({
@@ -49,8 +49,8 @@ const userController = {
           ]
         }
       })
-      if (user?.email === email) throw new Error('email 已重複註冊！')
       if (user?.account === account) throw new Error('account 已重複註冊！')
+      if (user?.email === email) throw new Error('email 已重複註冊！')
       // 創立新使用者
       await User.create({
         account,
@@ -282,7 +282,7 @@ const userController = {
       if (name && name.length > 50) throw new Error('name 超過字數限制50字元!')
 
       // 自我介紹上限 160字
-      if (introduction && introduction.length > 160) { throw new Error(' introduction 超過字數限制160字元!') }
+      if (introduction && introduction.length > 160) { throw new Error('introduction 超過字數限制160字元!') }
 
       // check password
       if (password !== checkPassword) throw new Error('密碼不相同')
@@ -294,8 +294,8 @@ const userController = {
             [Op.or]: [email ? { email } : {}, account ? { account } : {}]
           }
         })
-        if (email !== currentUser.email && checkUser?.email === email) throw new Error('email 已重複註冊！')
         if (account !== currentUser.account && checkUser?.account === account) throw new Error('account 已重複註冊！')
+        if (email !== currentUser.email && checkUser?.email === email) throw new Error('email 已重複註冊！')
       }
 
       const user = await User.findByPk(req.params.id)
