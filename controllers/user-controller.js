@@ -187,6 +187,8 @@ const userController = {
   },
   putUser: (req, res, next) => {
     // const userId = req.params.id
+    // const { name } = req.body
+    // const { file } = req
     // return User.findByPk(userId)
     //   .then(user => {
     //     if (!user) throw new Error('putUser說: 沒這人')
