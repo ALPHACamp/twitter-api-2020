@@ -1,8 +1,10 @@
 const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
+const sequelize = require('sequelize')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
-const { getUser } = require('../_helpers.js')
+const helpers = require('../_helpers.js')
+const jwt = require('jsonwebtoken')
 const userServices = {
   signUp: (req, cb) => {
     const { name, account, email, password, checkPassword } = req.body
@@ -27,17 +29,39 @@ const userServices = {
           account,
           email,
           password: hash,
+          avatar: 'https://imgur.com/5OL5wJt.png',
+          coverPhoto: 'https://imgur.com/hJ4J9gn.png',
           role: 'user'
         })
       })
-      .then(() => cb(null))
+      .then(() => {
+        return cb(null, '註冊成功')
+      })
       .catch(err => cb(err))
+  },
+  signIn: (req, cb) => {
+    try {
+      const userData = req.user.toJSON()
+      delete userData.password
+      // sign JWT with 30 days validation
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const data = {
+        token,
+        role: userData.role
+      }
+      cb(null, data)
+    } catch (err) {
+      cb(err)
+    }
   },
   getUser: (req, cb) => {
     return User.findByPk(req.params.id, {
       include: [
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
+        { model: User, as: 'Followers' }
+      ],
+      attributes: ['id', 'name', 'account', 'email', 'avatar', 'coverPhoto', 'introduction',
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id )'), 'followerCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id )'), 'followingCount']
       ],
       nest: true
     })
@@ -45,16 +69,9 @@ const userServices = {
         if (!user) throw new Error('使用者不存在')
         const data = {
           ...user.toJSON(),
-          Follower_count: user.Followers.length,
-          Following_count: user.Followers.length,
           isFollowed: user.Followers.some(f => f.id === req.user.id)
         }
-        delete data.password
-        delete data.role
-        delete data.createdAt
-        delete data.updatedAt
         delete data.Followers
-        delete data.Followings
         return cb(null, data)
       })
       .catch(err => cb(err))
@@ -63,22 +80,23 @@ const userServices = {
     return Tweet.findAll({
       where: { UserId: req.params.id },
       order: [['createdAt', 'DESC']],
-      include: [User, Reply, Like]
+      include: [Like,
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweet_id = Tweet.id )'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id )'), 'likeCount']
+        ]
+      }
     })
       .then(tweets => {
         tweets = tweets.map(tweet => {
           tweet = {
             ...tweet.toJSON(),
-            isLiked: tweet.Likes.map(like => like.UserId).includes(req.user.id),
-            replyCount: tweet.Replies.length,
-            likedCount: tweet.Likes.length,
-            name: tweet.User.name,
-            avatar: tweet.User.avatar,
-            account: tweet.User.account
+            isLiked: tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req))
           }
-          delete tweet.Replies
           delete tweet.Likes
-          delete tweet.User
           return tweet
         })
         return cb(null, tweets)
@@ -89,19 +107,15 @@ const userServices = {
     return Reply.findAll({
       where: { UserId: req.params.id },
       order: [['createdAt', 'DESC']],
-      include: [User, Tweet]
+      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account'] }] }
+      ]
     })
       .then(replies => {
         replies = replies.map(reply => {
           reply = {
-            ...reply.toJSON(),
-            name: reply.User.name,
-            avatar: reply.User.avatar,
-            account: reply.User.account
+            ...reply.toJSON()
           }
-          delete reply.User
-          delete reply.Replies
-          delete reply.Likes
           return reply
         })
         return cb(null, replies)
@@ -112,7 +126,18 @@ const userServices = {
     return Like.findAll({
       where: { UserId: req.params.id },
       include: [User,
-        { model: Tweet, include: [Reply, Like, User] }
+        {
+          model: Tweet,
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          ],
+          attributes: {
+            include: [
+              [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweet_id = Tweet.id )'), 'replyCount'],
+              [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id )'), 'likeCount']
+            ]
+          }
+        }
       ],
       order: [['createdAt', 'DESC']],
       nest: true
@@ -121,18 +146,10 @@ const userServices = {
         const tweets = likes.map(l => {
           l = {
             TweetId: l.TweetId,
-            description: l.Tweet.description,
-            isLiked: true,
-            reply_count: l.Tweet.Replies.length,
-            like_count: l.Tweet.Likes.length,
-            tweet_user_data: {
-              name: l.Tweet.User.name,
-              avatar: l.Tweet.User.avatar,
-              account: l.Tweet.User.account
-            }
+            createdAt: l.createdAt,
+            Tweet: l.Tweet.toJSON(),
+            isLiked: true
           }
-          delete l.User
-          delete l.twitter
           return l
         })
         return cb(null, tweets)
@@ -169,14 +186,10 @@ const userServices = {
         })
         .then(updatedUser => {
           cb(null, {
-            status: 'success',
-            message: '操作成功',
-            data: {
-              avatar: updatedUser.avatar,
-              coverPhoto: updatedUser.coverPhoto,
-              name: updatedUser.name,
-              introduction: updatedUser.introduction
-            }
+            avatar: updatedUser.avatar,
+            coverPhoto: updatedUser.coverPhoto,
+            name: updatedUser.name,
+            introduction: updatedUser.introduction
           })
         })
     } catch (err) {
@@ -213,10 +226,7 @@ const userServices = {
         })
       })
       .then(() => {
-        cb(null, {
-          status: 'success',
-          message: '操作成功'
-        })
+        cb(null, '操作成功')
       })
       .catch(err => cb(err))
   },
@@ -226,24 +236,27 @@ const userServices = {
         include: [{
           model: User,
           as: 'Followers',
-          attributes: ['id', 'name', 'avatar', 'introduction']
+          attributes: ['id', 'name', 'avatar', 'introduction', 'account']
         }]
       }),
       Followship.findAll({
-        where: { followerId: getUser(req).dataValues.id },
+        where: { followerId: helpers.getUser(req).id },
         raw: true
       })
     ])
       .then(([user, followings]) => {
         if (!user.Followers.length) return cb(null, [])
         const currentFollowings = followings.map(f => f.followingId)
-        const followers = user.Followers.map(f => ({
-          followerId: f.id,
-          account: f.account,
-          name: f.name,
-          introduction: f.introduction,
-          isFollowed: currentFollowings.some(id => id === f.id)
-        }))
+        const followers = user.Followers.map(f => {
+          f = {
+            followerId: f.id,
+            ...f.toJSON(),
+            isFollowed: currentFollowings.some(id => id === f.id)
+          }
+          delete f.Followship
+          delete f.id
+          return f
+        })
         return cb(null, followers)
       })
       .catch(err => cb(err))
@@ -254,24 +267,27 @@ const userServices = {
         include: [{
           model: User,
           as: 'Followings',
-          attributes: ['id', 'name', 'avatar', 'introduction']
+          attributes: ['id', 'name', 'avatar', 'introduction', 'account']
         }]
       }),
       Followship.findAll({
-        where: { followerId: getUser(req).dataValues.id },
+        where: { followerId: helpers.getUser(req).id },
         raw: true
       })
     ])
       .then(([user, userFollowings]) => {
         if (!user.Followings.length) return cb(null, [])
         const currentFollowings = userFollowings.map(f => f.followingId)
-        const followings = user.Followings.map(f => ({
-          followingId: f.id,
-          account: f.account,
-          name: f.name,
-          introduction: f.introduction,
-          isFollowed: currentFollowings.some(id => id === f.id)
-        }))
+        const followings = user.Followings.map(f => {
+          f = {
+            followingId: f.id,
+            ...f.toJSON(),
+            isFollowed: currentFollowings.some(id => id === f.id)
+          }
+          delete f.Followship
+          delete f.id
+          return f
+        })
         return cb(null, followings)
       })
       .catch(err => cb(err))
@@ -279,15 +295,15 @@ const userServices = {
   getTopTenUsers: (req, cb) => {
     Promise.all([
       User.findAll({
-        include: [
-          Tweet,
-          Like,
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
+        attributes: ['id', 'name', 'account', 'email', 'avatar', 'coverPhoto', 'createdAt', 'updatedAt',
+          [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id )'), 'followerCount'],
+          [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id )'), 'followingCount'],
+          [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.user_id = User.id )'), 'tweetCount'],
+          [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.user_id = User.id )'), 'likeCount']
         ]
       }),
       Followship.findAll({
-        where: { followerId: getUser(req).dataValues.id },
+        where: { followerId: helpers.getUser(req).id },
         raw: true
       })
     ])
@@ -296,22 +312,11 @@ const userServices = {
         const userData = users.map(user => {
           const data = {
             ...user.toJSON(),
-            followerCounts: user.Followers.length,
-            followingCounts: user.Followings.length,
-            tweetCounts: user.Tweets.length,
-            likeCounts: user.Likes.length,
             isFollowed: currentFollowings.some(id => id === user.id)
           }
-          delete data.password
-          delete data.role
-          delete data.introduction
-          delete data.Tweets
-          delete data.Likes
-          delete data.Followers
-          delete data.Followings
           return data
         })
-          .sort((a, b) => b.followerCounts - a.followerCounts)
+          .sort((a, b) => b.followerCount - a.followerCount)
           .slice(0, 10)
         return cb(null, userData)
       })

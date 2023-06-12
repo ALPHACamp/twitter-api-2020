@@ -1,76 +1,38 @@
 const userServices = require('../../services/user-services')
-const jwt = require('jsonwebtoken')
 
 const userController = {
   signUp: (req, res, next) => {
-    userServices.signUp(req, (err, data) => err
-      ? next(err)
-      : res.json({
-        status: 'success',
-        message: 'success'
-      }))
+    userServices.signUp(req, (err, data) => err ? next(err) : res.json(data))
   },
   signIn: (req, res, next) => {
-    try {
-      const userData = req.user.toJSON()
-      delete userData.password
-      // sign JWT with 30 days validation
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.json({
-        status: 'success',
-        data: {
-          token,
-          role: userData.role
-        }
-      })
-    } catch (err) {
-      next(err)
-    }
+    userServices.signIn(req, (err, data) => err ? next(err) : res.json(data))
   },
   getUser: (req, res, next) => {
-    userServices.getUser(req, (err, data) => err
-      ? next(err)
-      : res.json(data))
+    userServices.getUser(req, (err, data) => err ? next(err) : res.json(data))
   },
   getUserTweets: (req, res, next) => {
-    userServices.getUserTweets(req, (err, data) => err
-      ? next(err)
-      : res.json(data))
+    userServices.getUserTweets(req, (err, data) => err ? next(err) : res.json(data))
   },
   getUserRepliedTweets: (req, res, next) => {
-    userServices.getUserRepliedTweets(req, (err, data) => err
-      ? next(err)
-      : res.json(data))
+    userServices.getUserRepliedTweets(req, (err, data) => err ? next(err) : res.json(data))
   },
   getUserLikesTweets: (req, res, next) => {
-    userServices.getUserLikesTweets(req, (err, data) => err
-      ? next(err)
-      : res.json(data))
+    userServices.getUserLikesTweets(req, (err, data) => err ? next(err) : res.json(data))
   },
   putUser: (req, res, next) => {
-    userServices.putUser(req, (err, data) => err
-      ? next(err)
-      : res.json(data))
+    userServices.putUser(req, (err, data) => err ? next(err) : res.json(data))
   },
   putAccount: (req, res, next) => {
-    userServices.putAccount(req, (err, data) => err
-      ? next(err)
-      : res.json(data))
+    userServices.putAccount(req, (err, data) => err ? next(err) : res.json(data))
   },
   getFollowers: (req, res, next) => {
-    userServices.getFollowers(req, (err, data) => err
-      ? next(err)
-      : res.json(data))
+    userServices.getFollowers(req, (err, data) => err ? next(err) : res.json(data))
   },
   getFollowings: (req, res, next) => {
-    userServices.getFollowings(req, (err, data) => err
-      ? next(err)
-      : res.json(data))
+    userServices.getFollowings(req, (err, data) => err ? next(err) : res.json(data))
   },
   getTopTenUsers: (req, res, next) => {
-    userServices.getTopTenUsers(req, (err, data) => err
-      ? next(err)
-      : res.json(data))
+    userServices.getTopTenUsers(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 module.exports = userController

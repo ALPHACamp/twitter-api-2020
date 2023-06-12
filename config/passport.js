@@ -25,10 +25,6 @@ passport.use(new LocalStrategy(
       .catch(err => cb(err))
   }
 ))
-// serialize user
-passport.serializeUser((user, cb) => {
-  cb(null, user.id)
-})
 // set up passport JWT strategy
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
