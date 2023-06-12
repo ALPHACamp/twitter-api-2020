@@ -99,6 +99,7 @@ const userController = {
   // 獲取使用者所寫過的推文資料
   getUserTweets: async (req, res, next) => {
     try {
+      const selfUser = helpers.getUser(req).id
       const userId = req.params.id
       const user = await User.findByPk(userId, { raw: true, attributes: ['id'] })
       if (!user) newErrorGenerate('使用者不存在', 404)
@@ -117,9 +118,11 @@ const userController = {
         order: [['createdAt', 'DESC']],
         include: [{ raw: true, model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
       })
+      const selfUserLike = await Like.findAll({ raw: true, attributes: ['TweetId'], where: { UserId: selfUser } })
       const tweetsData = tweets?.map(tweet => ({
         ...tweet,
-        relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt)
+        relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt),
+        isSelfUserLike: selfUserLike.some(s => s.TweetId === tweet.id)
       }))
       return res.json(tweetsData)
     } catch (err) {
@@ -163,30 +166,36 @@ const userController = {
   // 獲取使用者的like資料
   getUserLikes: async (req, res, next) => {
     try {
+      const selfUser = helpers.getUser(req).id
       const userId = req.params.id
       const user = await User.findByPk(userId, { raw: true, attributes: ['id'] })
       if (!user) newErrorGenerate('使用者不存在', 404)
       const likes = await Like.findAll({
+        raw: true,
+        nest: true,
         where: { UserId: userId },
         order: [['createdAt', 'DESC'], ['Tweet', 'createdAt', 'DESC']],
         include: {
           model: Tweet,
-          distinct: true,
+          attributes: [
+            'id',
+            'description',
+            'createdAt',
+            'updatedAt',
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Replys` WHERE `Replys`.`TweetId` = `Tweet`.`id`)'), 'repliesCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'), 'likesCount']
+          ],
           include: [
-            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-            { model: Like, attributes: ['id'] },
-            { model: Reply, attributes: ['id'] }
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
           ]
         }
       })
+      const selfUserLike = await Like.findAll({ raw: true, attributes: ['TweetId'], where: { UserId: selfUser } })
       const likesData = likes?.map(like => {
-        like = like?.toJSON()
         like.User = like?.Tweet.User
-        like.likesCount = like?.Tweet?.Likes?.length
-        like.repliesCount = like?.Tweet?.Replies?.length
         like.Tweet.relativeTimeFromNow = relativeTimeFromNow(like?.Tweet?.createdAt)
-        const { User, Likes, Replies, ...cleanLike } = like?.Tweet
-        like.Tweet = cleanLike
+        like.isSelfUserLike = selfUserLike.some(s => s.TweetId === like.TweetId)
+        delete like.Tweet.User
         return like
       })
       return res.json(likesData)
