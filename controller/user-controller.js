@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+const validator = require('email-validator')
 const userController = {
   signIn: async (req, res, next) => {
     try {
@@ -12,25 +13,30 @@ const userController = {
     } catch (err) { next(err) }
   },
   signUp: async (req, res, next) => {
-    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match')
     try {
+      const { name, email, password, account, checkPassword } = req.body
+      if (!name || !email || !password || !account || !checkPassword) throw new Error('請填寫所有必填欄位')
+      // Check password and check Password must be the same
+      if (password !== checkPassword) throw new Error('Passwords do not match')
+      // Check name.length must < 50
+      if (name.length > 51) throw new Error('使用者註冊名稱(name)上限為50字')
+      // Check if email matches the required format
+      if (!validator.validate(email)) throw new Error('Email格式不正確!')
       // check if user with given email or account already exists
-      const existingAccount = await User.findOne({ where: { account: req.body.account } })
-      const existingEmail = await User.findOne({ where: { email: req.body.email } })
-      if (existingAccount) { throw new Error('Account already exists!') }
-      if (existingEmail) { throw new Error('Email already exists!') }
+      const existingAccount = await User.findOne({ where: { account: account } })
+      const existingEmail = await User.findOne({ where: { email: email } })
+      if (existingAccount) { throw new Error('account已重複註冊!') }
+      if (existingEmail) { throw new Error('email已重複註冊!') }
       // If user does not exist, hash password and create new user
-      const hash = await bcrypt.hash(req.body.password, 10)
-      const newUser = await User.create({
-        name: req.body.name,
-        email: req.body.email,
+      const hash = await bcrypt.hash(password, 10)
+      await User.create({
+        name,
+        email,
         password: hash,
-        account: req.body.account,
+        account,
         role: 'user'
       })
-      const userJSON = newUser.toJSON()
-      delete userJSON.password
-      return res.status(200).json({ message: 'Signup successfully!' })
+      return res.status(200).json({ message: '註冊成功' })
     } catch (err) { next(err) }
   },
   getUser: async (req, res, next) => {
@@ -128,20 +134,23 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      const { name, password, introduction } = req.body
+      const { name, introduction, avatar, cover } = req.body
       const userId = helpers.getUser(req).id
       const user = await User.findByPk(userId)
       if (!user) throw new Error('User not found!')
-      let hash = user.password
-      if (password) {
-        hash = await bcrypt.hash(password, 10)
-      }
-      await user.update({
+      const updatedUser = await user.update({
         name: name || user.name,
-        password: hash,
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover,
         introduction: introduction || user.introduction
       })
-      return res.status(200).json({ message: '修改成功' })
+      const responseData = {
+        name: updatedUser.name,
+        avatar: updatedUser.avatar,
+        cover: updatedUser.cover,
+        introduction: updatedUser.introduction
+      }
+      return res.status(200).json({ responseData, message: '修改成功' })
     } catch (err) { next(err) }
   }
 

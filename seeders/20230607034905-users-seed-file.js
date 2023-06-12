@@ -21,6 +21,7 @@ module.exports = {
         name: 'root',
         account: 'root',
         avatar: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
+        cover: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
         introduction: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date()
@@ -32,6 +33,7 @@ module.exports = {
         name: 'user1',
         account: 'user1',
         avatar: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
+        cover: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
         introduction: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date()
@@ -43,6 +45,7 @@ module.exports = {
         name: 'user2',
         account: 'user2',
         avatar: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
+        cover: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
         introduction: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date()
@@ -54,6 +57,7 @@ module.exports = {
         name: 'user3',
         account: 'user3',
         avatar: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
+        cover: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
         introduction: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date()
@@ -65,6 +69,7 @@ module.exports = {
         name: 'user4',
         account: 'user4',
         avatar: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
+        cover: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
         introduction: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date()
@@ -76,6 +81,7 @@ module.exports = {
         name: 'user5',
         account: 'user5',
         avatar: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
+        cover: 'https://t.kfs.io/upload_images/56611/alpha-logo-square-3592_original.png',
         introduction: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date()
