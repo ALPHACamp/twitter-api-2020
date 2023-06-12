@@ -16,6 +16,8 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     include: [
       // 看要include那些
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
     ]
   })
     .then(user => cb(null, user.toJSON()))
@@ -34,6 +36,9 @@ passport.use(new LocalStrategy(
   (req, account, password, cb) => {
     return User.findOne({ where: { account } })
       .then(user => {
+        // 這邊應該有更好的寫法
+        const adminError = '帳號不存在'
+        if (user.role === 'admin') cb(adminError, user, 'error_messages', '帳號不存在')
         if (!user) return cb(null, false, 'error_messages', '帳號不存在')
         bcrypt.compare(password, user.password).then(res => {
           if (!res) return cb(null, 'error_messages', '帳號或密碼輸入錯誤！')

@@ -168,7 +168,6 @@ describe('# user requests', () => {
         await db.Tweet.create({UserId: 1, description: 'User1 的 Tweet1'})
         await db.Reply.create({UserId: 1, TweetId: 1, comment: 'Tweet1 的 comment'})
       })
-
       // GET /users/:id/replied_tweets - 看見某使用者發過回覆的推文
       it(' - successfully', (done) => {
         request(app)
@@ -221,7 +220,7 @@ describe('# user requests', () => {
         await db.Tweet.create({UserId: 2, description: 'User2 的 Tweet1'})
         await db.Like.create({UserId: 1, TweetId: 1})
       })
-
+      
       // GET /users/:id/likes - 看見某使用者點過的 Like 
       it(' - successfully', (done) => {
         request(app)
@@ -272,7 +271,6 @@ describe('# user requests', () => {
         await db.User.create({account: 'User2', name: 'User2', email: 'User2', password: 'User2'})        
         await db.Followship.create({followerId: 1, followingId: 2})
       })
-
       // GET /users/:id/followings - 看見某使用者跟隨中的人
       it(' - successfully', (done) => {
         request(app)
@@ -324,7 +322,8 @@ describe('# user requests', () => {
         await db.User.create({account: 'User2', name: 'User2', email: 'User2', password: 'User2'})        
         await db.Followship.create({followerId: 1, followingId: 2})
       })
-
+      // ############################################################################################
+      // ############################################################################################
       // GET /users/:id/followers - 看見某使用者的跟隨者
       it(' - successfully', (done) => {
         request(app)
@@ -378,7 +377,8 @@ describe('# user requests', () => {
         // 在測試資料庫中，新增 mock 資料
         await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1', introduction: 'User1'})
       })
-
+      // ############################################################################################
+      // ############################################################################################
       // 編輯自己所有的資料 PUT /users/:id
       it(' - successfully', (done) => {
         request(app)

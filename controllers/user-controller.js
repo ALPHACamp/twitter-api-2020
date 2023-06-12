@@ -2,13 +2,19 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const userDummy = require('./dummy/users-dummy.json')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+// const { imgurFileHandler } = require('../helpers')
 
 const userController = {
   getUsers: (req, res, next) => {
+    return User.findAll({
+      raw: true,
+      nest: true
+    })
+      .then(users => { res.json(users) })
   },
   getUser: (req, res, next) => {
     helpers.getUser(req)
@@ -16,7 +22,7 @@ const userController = {
       .then(user => {
         if (!user) throw new Error('getUser查無此人')
         // res.json({ status: 'success', user: user.toJSON() })
-        res.json(user.toJSON())
+        res.status(200).json(user.toJSON())
       })
   },
   getTopUsers: (req, res, next) => {
@@ -43,6 +49,7 @@ const userController = {
         })
       })
       .then(signUpUser => {
+        delete signUpUser.password
         res.json({ status: 'success', signUpUser })
       })
       .catch(err => next(err))
@@ -74,14 +81,17 @@ const userController = {
       Tweet.findAll({
         where: { UserId: userId },
         include: [
-          { model: User },
+          // 遇到 model User, 都要小心, 最好使用attributes: ['指定要傳那些資料出去']
+          // 或是 使用 attributes: { exclude: ['不要傳出去的'] } }, 但是你不知道會不會傳出去些什麼
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
           { model: Reply },
           { model: Like }
         ],
         order: [['createdAt', 'DESC']]
-      })])
+      })
+    ])
       .then(([user, tweetsData]) => {
-        if (!user) throw new Error('getUserTweets說沒這人')
+        if (!user) throw new Error('getUserTweets說: 沒這人')
         const tweets = tweetsData.map(t => ({
           ...t.toJSON(),
           repliesCount: t.Replies.length,
@@ -92,6 +102,103 @@ const userController = {
       .catch(err => next(err))
   },
   getUserReplies: (req, res, next) => {
+    const userId = req.params.id
+    return Promise.all([
+      User.findByPk(userId),
+      Reply.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Tweet,
+            include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+          }
+        ],
+        raw: true,
+        nest: true,
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, repliesData]) => {
+        if (!user) throw new Error('getUserReplies說: 沒這人')
+        res.status(200).json(repliesData)
+      })
+      .catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+    const userId = req.params.id
+    return Promise.all([
+      User.findByPk(userId),
+      Like.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Tweet,
+            include: [
+              { model: Reply },
+              { model: Like }
+            ]
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+      .then(([user, likesData]) => {
+        if (!user) throw new Error('getUserLikes說: 沒這人')
+        const likes = likesData.map(l => ({
+          ...l.toJSON(),
+          repliesCount: l.Tweet.Replies.length,
+          likesCount: l.Tweet.Likes.length
+        }))
+        res.status(200).json(likes)
+      })
+      .catch(err => next(err))
+  },
+  getUserFollowings: (req, res, next) => {
+    const userId = req.params.id
+    return Promise.all([
+      User.findByPk(userId),
+      Followship.findAll({
+        where: { followerId: userId },
+        raw: true
+      })
+    ])
+      .then(([user, followingsData]) => {
+        if (!user) throw new Error('getUserFollowings說: 沒這人')
+        res.status(200).json(followingsData)
+      })
+      .catch(err => next(err))
+  },
+  getUserFollowers: (req, res, next) => {
+    const userId = req.params.id
+    return Promise.all([
+      User.findByPk(userId),
+      Followship.findAll({
+        where: { followingId: userId },
+        raw: true
+      })
+    ])
+      .then(([user, followersData]) => {
+        if (!user) throw new Error('getUserFollowers說: 沒這人')
+        res.status(200).json(followersData)
+      })
+      .catch(err => next(err))
+  },
+  putUser: (req, res, next) => {
+    // const userId = req.params.id
+    // const { name } = req.body
+    // const { file } = req
+    // return User.findByPk(userId)
+    //   .then(user => {
+    //     if (!user) throw new Error('putUser說: 沒這人')
+    //     return res.redirect('back')
+    //   })
+    //   .then(user => {
+    //     return User.update({
+
+    //     })
+    //   })
   }
 }
 
