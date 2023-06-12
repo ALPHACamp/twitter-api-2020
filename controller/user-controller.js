@@ -7,6 +7,7 @@ const userController = {
   signIn: async (req, res, next) => {
     try {
       const userJSON = helpers.getUser(req).toJSON()
+      delete userJSON.password
       if (userJSON.role !== 'user') throw new Error('你無法登入此帳號')
       const token = jwt.sign(userJSON, process.env.JWT_SECRET, { expiresIn: '30d' })// 簽證效期30天
       return res.status(200).json({ token, message: '登入成功' })
@@ -150,10 +151,9 @@ const userController = {
         cover: updatedUser.cover,
         introduction: updatedUser.introduction
       }
-      return res.status(200).json({ responseData, message: '修改成功' })
+      return res.status(200).json({ data: responseData, message: '修改成功' })
     } catch (err) { next(err) }
   }
-
 }
 
 module.exports = userController
