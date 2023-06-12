@@ -7,7 +7,7 @@ module.exports = {
             })
         const tweets = []
         for (const user of users) {
-          for (let i = 0; i < 3; i++) {
+          for (let i = 0; i < 10; i++) {
             tweets.push ({
               UserId: user.id,
               description: faker.lorem.text(),
