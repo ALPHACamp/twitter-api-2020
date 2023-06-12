@@ -67,52 +67,50 @@ const followshipController = {
   getTopFollowing: async (req, res, next) => {
     try {
       // get the current user
-      const user = helpers.getUser(req)
-
+      const currentUser = helpers.getUser(req)
+      // change
       // get the top 10 most followed users
-      const follows = await sequelize.query(
-        `SELECT followingId AS id, COUNT(*) AS followerCount
-        FROM Followships
-        GROUP BY followingId
-        ORDER BY followerCount DESC
-        LIMIT 10 `,
-        { type: sequelize.QueryTypes.SELECT }
-      )
+      const users = await User.findAll({
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          'cover',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+            ),
+            'FollowingCount'
+          ]
+        ],
+        where: sequelize.literal(`account != 'root' AND account != '${currentUser.account}'`),
+        order: [[sequelize.literal('FollowingCount'), 'DESC'], ['createdAt']],
+        limit: 10,
+        raw: true,
+        nest: true
+      })
 
-      // get the data for each follow
       const data = await Promise.all(
-        follows.map(async follow => {
-          // if the user is themselves, return null
-          if (follow.id === user.id) return null
-          //  get user data
-          const followingUser = await User.findByPk(follow.id, {
-            attributes: ['id', 'name', 'account', 'avatar']
-          })
-          // if no followingUser is found, return null
-          if (!followingUser) {
-            return null
-          }
-          // check if the current user is following this user
+        users.map(async user => {
           const isFollowed = await Followship.findOne({
             where: {
-              followingId: followingUser.id,
-              followerId: user.id
+              followingId: user.id,
+              followerId: currentUser.id
             }
           })
 
           return {
-            FollowingId: followingUser.id,
-            FollowingName: followingUser.name,
-            FollowingAccount: followingUser.account,
-            FollowingAvatar: followingUser.avatar,
+            FollowingId: user.id,
+            FollowingName: user.name,
+            FollowingAccount: user.account,
+            FollowingAvatar: user.avatar,
+            FollowingCount: user.FollowingCount,
             isFollowed: !!isFollowed
           }
         })
       )
-      // filter out any null entries
-      const filteredData = data.filter(item => item !== null)
-
-      return res.status(200).json(filteredData)
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
