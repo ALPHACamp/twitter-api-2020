@@ -24,8 +24,8 @@ router.post('/api/users', userController.signUp)
 
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 router.use('/api/users', authenticated, authenticatedUser, users)
-router.use('/api/tweets', authenticated, tweets)
-router.use('/api/followships', followships)
+router.use('/api/tweets', authenticated, authenticatedUser, tweets)
+router.use('/api/followships', authenticated, authenticatedUser, followships)
 router.use('/api/auth', auth)
 
 router.use('/', apiErrorHandler)
