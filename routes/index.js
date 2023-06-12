@@ -10,7 +10,6 @@ const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 const upload = require('../middleware/multer')
 const fields = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }])
 
-
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 // if  req.user.role = admin 才能登入
 router.post('/api/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn)
@@ -23,6 +22,9 @@ router.post('/api/signin', (req, res, next) => {
 )
 router.post('/api/signup', userController.signUp)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
+
+router.get('/api/postTweet', authenticated, tweetController.getPostTweet)
+router.post('/api/postTweet', authenticated, tweetController.postTweet)
 
 router.get('/api/users/:id/edit', authenticated, userController.editUser)
 router.get('/api/users/:id', authenticated, userController.getUser)
