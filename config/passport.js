@@ -11,7 +11,12 @@ const jwtOptions = {
 
 passport.use(
   new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-    User.findByPk(jwtPayload.id, {})
+    User.findByPk(jwtPayload.id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' },
+      ],
+    })
       .then((user) => cb(null, user))
       .catch((err) => cb(err))
   })

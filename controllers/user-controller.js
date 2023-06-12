@@ -297,6 +297,7 @@ const userController = {
       .then((followings) => {
         if (followings.Followings.length === 0) return res.status(200).json({ isEmpty: true })
         const followingId = getUser(req).Followings.map((user) => user.id)
+        console.log(getUser(req).Followings)
         const result = followings.Followings.map((f) => ({
           ...f.toJSON(),
           isFollowed: followingId.includes(f.toJSON().followingId) || false,
