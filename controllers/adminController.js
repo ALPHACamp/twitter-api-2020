@@ -8,6 +8,10 @@ const adminController = {
       // get user data
       const userData = getUser(req)?.toJSON()
       delete userData.password
+      delete userData.avatar
+      delete userData.cover
+      delete userData.email
+      delete userData.introduction
       // sign token
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
