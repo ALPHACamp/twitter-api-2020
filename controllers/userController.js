@@ -189,7 +189,7 @@ const userController = {
         tweetOwnerAccount: l.Tweet.User.account,
         tweetOwnerName: l.Tweet.User.name,
         tweetOwnerAvatar: l.Tweet.User.avatar,
-        tweetcreatedAt: l.Tweet.createdAt,
+        createdAt: l.Tweet.createdAt,
         replyCount: l.Tweet.Replies.length,
         likeCount: l.Tweet.Likes.length,
         isLiked: l.isLiked
