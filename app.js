@@ -4,11 +4,18 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const routes = require('./routes')
 const cors = require('cors')
+const corsOptions = {
+  origin: [
+    process.env.GUTHUB_PAGE,
+    'http://localhost:3000/'
+  ],
+  methods: 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS',
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
 const methodOverride = require('method-override')
 const app = express()
 const port = process.env.PORT || 3000
 
-app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 app.use(express.json())
@@ -24,7 +31,7 @@ app.use(express.json())
 //   optionsSuccessStatus: 204
 // }))
 
-app.use(cors())
+// app.use(cors())
 
 // app.use(cors({
 //   origin: 'https://leemengyun.github.io',
@@ -32,6 +39,7 @@ app.use(cors())
 //   preflightContinue: true
 // }))
 
+app.use(cors(corsOptions))
 app.use(routes)
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
