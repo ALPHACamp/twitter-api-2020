@@ -1,4 +1,4 @@
-const { Followship, User, Like, Tweet, Sequelize } = require('../models')
+const { Followship, User, Like, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
 const followController = {
   addFollowing: (req, res, next) => {
@@ -193,27 +193,22 @@ const followController = {
   },
   getLikes: (req, res, next) => {
     const UserId = req.params.id
-    if (!UserId) return res.status(400).json('缺少用戶id')
-    let likeCounts = 0
-    return User.findByPk(UserId, {
-      include: [
-        {
-          model: Tweet,
-          include: { model: Like, attributes: [] },
-          attributes: [
-            [Sequelize.fn('COUNT', Sequelize.col('Tweets.Likes.id')), 'likeCount']
-          ]
-        }
-      ],
-      group: ['Tweets.id']
+    if (!UserId) {
+      return res.status(400).json('缺少用戶id')
+    }
+    // 這個api除了給likecounts外也要給出like的關係，所以不能只回likecounts否則測試會失敗
+    Like.findAll({
+      where: { UserId },
+      attributes: ['TweetId', 'UserId'],
+      raw: true,
+      nest: true
     })
       .then((user) => {
         if (!user) return res.status(400).json('找不到')
-        user.Tweets.forEach(tweet => (
-          likeCounts += tweet.dataValues.likeCount
-        ))
+        const likeCounts = user.length
+        user.push({ likeCounts })
+        return res.status(200).json(user)
       })
-      .then(() => res.status(200).json(likeCounts))
       .catch((error) => next(error))
   }
 }

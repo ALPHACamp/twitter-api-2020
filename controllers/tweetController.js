@@ -111,7 +111,7 @@ const tweetController = {
         delete tweet.Likes
         delete tweet.Replies
         getLastUpdated(tweet)
-        return res.status(200).json([data])
+        return res.status(200).json(data)
       })
       .catch((err) => next(err))
   },

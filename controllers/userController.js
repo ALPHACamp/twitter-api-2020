@@ -65,7 +65,7 @@ const userController = {
         if (!data) return res.status(404).json('User not found!')
         delete data.password
         data.tweetsCounts = tweets.length
-        res.status(200).json([data])
+        res.status(200).json(data)
       })
       .catch((err) => next(err))
   },
