@@ -44,7 +44,7 @@ const adminServices = {
           group: ['Tweet.id']
         })
 
-        return likesCount.length > 0 ? likesCount[0].dataValues.likesCount : 0;
+        return likesCount.length > 0 ? likesCount[0].dataValues.likesCount : 0
       }
 
       const getUsersData = async () => {
@@ -84,8 +84,8 @@ const adminServices = {
         const usersWithLikesCount = await Promise.all(
           users.map(async (user) => {
             if (user.id) {
-              const likesCount = await getLikesCount(user.id);
-              user.likesCount = likesCount;
+              const likesCount = await getLikesCount(user.id)
+              user.likesCount = likesCount
             }
             return user
           })
@@ -93,18 +93,18 @@ const adminServices = {
 
         const usersWithCounts = await Promise.all(
           usersWithLikesCount.map(async (user) => {
-            const tweetData = await Tweet.count({ where: { UserId: user.id } });
+            const tweetData = await Tweet.count({ where: { UserId: user.id } })
             user.tweetsCount = tweetData
             return user
           })
-        );
+        )
 
         const sortedUsers = usersWithCounts.sort((a, b) => b.tweetsCount - a.tweetsCount)
 
         return sortedUsers
       }
 
-      const usersWithCounts = await getUsersData();
+      const usersWithCounts = await getUsersData()
       cb(null, usersWithCounts)
     } catch (err) {
       cb(err)
