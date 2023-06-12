@@ -46,7 +46,7 @@ app.use(express.json())
 // app.use(cors()) // 使用default設定
 app.use(cors({ allowedHeaders: ['Content-Type', 'Authorization'] }))
 app.use(routes)
-app.get('/', (req, res) => res.send('Hello World!'))
+app.get('/', (req, res) => res.send('Hello Kitty'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
