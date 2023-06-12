@@ -1,7 +1,6 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
-const userDummy = require('./dummy/users-dummy.json')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -27,9 +26,21 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  getTopUsers: (req, res, next) => {
-    console.log('users_getTopUser')
-    res.json(userDummy.getTopUsers)
+  getUsersTop: (req, res, next) => {
+    return User.findAll({
+      attributes: { exclude: ['password'] },
+      include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }]
+    })
+      .then(usersData => {
+        usersData = usersData.map(user => ({
+          ...user.toJSON(),
+          followersCount: user.Followers.length,
+          isFollowing: req.user && req.user.Followings.some(following => following.id === user.id)
+        }))
+          .sort((a, b) => b.followersCount - a.followersCount)
+        usersData = usersData.slice(0, 10)
+        res.json(usersData)
+      })
       .catch(err => next(err))
   },
   signUp: (req, res, next) => {
@@ -184,19 +195,20 @@ const userController = {
     ])
       .then(([user, followersData]) => {
         if (!user) throw new Error('getUserFollowers說: 沒這人')
-        let followers = followersData
         if (req.user.Followings) {
-          followers = followersData.map(follower => ({
+          followersData = followersData.map(follower => ({
             ...follower,
             isFollowing: req.user && req.user.Followings.some(following => following.id === follower.id)
           }))
         }
-        res.status(200).json(followers)
+        res.status(200).json(followersData)
       })
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
-    const userId = helpers.getUser(req).id
+    const userId = Number(req.params.id)
+    // 沒有這條, 有了token之後, 就可以亂改他人資料了
+    if (userId !== helpers.getUser(req).id) throw new Error('只能改自己的啦')
     const { name, introduction, avatar, banner } = req.body
     return User.findByPk(userId)
       .then(userData => {
