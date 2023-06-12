@@ -6,22 +6,18 @@ module.exports = {
       'SELECT id FROM Users;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-    const tweets = await queryInterface.sequelize.query(
-      'SELECT id FROM Tweets;',
-      { type: queryInterface.sequelize.QueryTypes.SELECT }
-    )
-    
-    await queryInterface.bulkInsert('Likes',
-      Array.from({ length: 50 }, () => ({
-        created_at: new Date(),
-        updated_at: new Date(),
-        user_id: users[Math.floor(Math.random() * users.length)].id,
-        tweet_id: tweets[Math.floor(Math.random() * tweets.length)].id
+
+    await queryInterface.bulkInsert('Followships',
+      Array.from({ length: 6 }, (v, i) => ({
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        followerId: users[i].id,
+        followingId: users[5 - i].id
       }))
     )
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Likes', {})
+    await queryInterface.bulkDelete('Followships', {})
   }
-};
+}

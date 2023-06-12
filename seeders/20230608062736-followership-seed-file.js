@@ -9,10 +9,10 @@ module.exports = {
 
     await queryInterface.bulkInsert('Followships',
       Array.from({ length: 6 }, (v, i) => ({
-        created_at: new Date(),
-        updated_at: new Date(),
-        follower_id: users[i].id,
-        following_id: users[5 - i].id
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        followerId: users[i].id,
+        followingId: users[5 - i].id
       }))
     )
   },

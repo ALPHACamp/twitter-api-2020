@@ -1,7 +1,7 @@
 module.exports = {
   apiErrorHandler(err, req, res, next) {
     const isStatusCodeValid = Number.isInteger(err.status) && err.status >= 100 && err.status < 600
-    const statusCode = isStatusCodeValid ? err.status : 500;
+    const statusCode = isStatusCodeValid ? err.status : 500
     return new Promise((resolve, reject) => {
       if (err instanceof Error) {
         resolve(

@@ -1,4 +1,5 @@
-const { Tweet, User, Reply } = require('../models')
+const { Tweet, Reply } = require('../models')
+const { getUser } = require('../_helpers')
 
 const replyServices = {
   postComment: (req, cb) => {
@@ -7,9 +8,7 @@ const replyServices = {
       include: [Reply]
     }).then(tweet => {
       const { comment } = req.body
-      const userId = req.user.user_id
-      console.log('userId', userId)
-      console.log('user.id', req.user.user_id)
+      const userId = getUser(req).id
       if (!comment) throw new Error('Comment text is required!')
       if (!tweet) throw new Error("Tweet didn't exist!")
       return Reply.create({

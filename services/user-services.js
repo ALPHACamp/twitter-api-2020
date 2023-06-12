@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
 const { User, Tweet, Reply, Followship, Like } = require('../models')
 const { imgurFileHandler } = require('../_helpers')
+const { getUser } = require('../_helpers')
 
 const userController = {
   signUp: (req, cb) => {
@@ -42,7 +43,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
+    const UserId = Number(req.params.user_id) || ''
     Tweet.findAll({
       include: [
         {
@@ -51,7 +52,7 @@ const userController = {
         }
       ],
       where: {
-        ...userId ? { userId } : {}
+        ...UserId ? { UserId } : {}
       },
       nest: true,
       raw: true
@@ -63,7 +64,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserRepliedTweets: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
+    const UserId = Number(req.params.user_id) || ''
     Reply.findAll({
       include: [
         {
@@ -73,7 +74,7 @@ const userController = {
         Tweet
       ],
       where: {
-        ...userId ? { userId } : {}
+        ...UserId ? { UserId } : {}
       },
       nest: true,
       raw: true
@@ -85,14 +86,14 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserLikes: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
+    const UserId = Number(req.params.user_id) || ''
     Like.findAll({
       include: [
         { model: User },
         { model: Tweet }
       ],
       where: {
-        ...userId ? { userId } : {}
+        ...UserId ? { UserId } : {}
       },
       attributes: { exclude: ['password'] },
       nest: true,
@@ -204,26 +205,25 @@ const userController = {
       .catch(err => cb(err))
   },
   addFollowing: (req, cb) => {
-    const userId = req.params.user_id
-    Promise.all([
-      User.findByPk(userId),
-      Followship.findOne({
+    const followingId = req.body.id
+    const followerId = getUser(req).id
+    if (followerId === followerId) throw new Error('不可追蹤自己')
+    User.findByPk(followingId).then((user)=>{
+      if (!user) throw new Error('該使用者不存在')
+      if (user.dataValues.role === 'admin') throw new Error('不可追蹤管理者')
+      Followship.findOrCreate({
         where: {
-          followerId: req.user.id,
-          followingId: userId
+          followerId,
+          followingId
         }
       })
-    ])
-      .then(([user, followship]) => {
-        if (!user) throw new Error("User didn't exist!")
-        if (followship) throw new Error('You are already following this user!')
-        return Followship.create({
-          followerId: req.user.id,
-          followingId: userId
-        })
+      .then((followship) => {
+        if (!followship) throw new Error("You have followed this user!")
+        return cb(null, { followship })
       })
-      .then(followship => cb(null, followship))
-      .catch(err => cb(err))
+       .catch((err) => next(err))
+    })
+    .catch((err) => next(err))
   },
   removeFollowing: (req, cb) => {
     Followship.findOne({

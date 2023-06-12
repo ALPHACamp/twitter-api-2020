@@ -1,27 +1,25 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define('User', {
-  }, {});
-  User.associate = function(models) {
-    User.hasMany(models.Tweet, { foreignKey: 'userId' })
-    User.hasMany(models.Reply, { foreignKey: 'userId' })
-    User.hasMany(models.Like, { foreignKey: 'userId' })
+'use strict'
 
-    // User.belongsToMany(models.Tweet, {
-    //   through: models.Like,
-    //   foreignKey: 'userId',
-    //   as: 'LikedTweets'
-    // })
-    User.belongsToMany(User, {
-      through: models.Followship,
-      foreignKey: 'followingId',
-      as: 'Followers'
-    })
-    User.belongsToMany(User, {
-      through: models.Followship,
-      foreignKey: 'followerId',
-      as: 'Followings'
-    })
+const {
+  Model
+} = require('sequelize')
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    static associate(models) {
+      User.hasMany(models.Tweet, { foreignKey: 'userId' })
+      User.hasMany(models.Reply, { foreignKey: 'userId' })
+      User.hasMany(models.Like, { foreignKey: 'userId' })
+      User.belongsToMany(User, {
+        through: models.Followship,
+        foreignKey: 'followingId',
+        as: 'Followers'
+      })
+      User.belongsToMany(User, {
+        through: models.Followship,
+        foreignKey: 'followerId',
+        as: 'Followings'
+      })
+    }
   };
   User.init({
     account: DataTypes.STRING,
@@ -30,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     avatar: DataTypes.STRING,
     introduction: DataTypes.TEXT,
-    role: DataTypes.STRING,
+    role: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',
@@ -38,4 +36,4 @@ module.exports = (sequelize, DataTypes) => {
     underscored: true
   })
   return User
-};
+}

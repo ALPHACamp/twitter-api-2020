@@ -16,13 +16,16 @@ passport.use(new LocalStrategy(
     User.findOne({ where: { account } })
       .then(user => {
         if (!user) {
-          return cb(null, false, { 'message': '帳號或密碼輸入錯誤！' })
+          return cb(null, false, ('error_messages', '帳號或密碼輸入錯誤！'))
         }
         bcrypt.compare(password, user.password)
           .then(result => {
-            if (!result) return cb(null, false, { 'message': '帳號或密碼輸入錯誤！' })
+            if (!result) return cb(null, false, ('error_messages', '帳號或密碼輸入錯誤！'))
             return cb(null, user)
           })
+      })
+      .catch(err => {
+        cb(err)
       })
   }
 ))

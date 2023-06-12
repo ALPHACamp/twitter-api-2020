@@ -16,26 +16,25 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 router.get('/users/:user_id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:user_id/replied_tweets', authenticated, userController.getUserRepliedTweets)
 
-// ! branch api/admin
-// router.post('/followships/:user_id', authenticated, likeController.addFollowing)
-
-router.get('/tweets/:tweet_id/replies', authenticated, replyController.getComment) 
+// replies
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postComment)
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getComment) 
 
-router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
-
+//like
 router.post('/tweets/:id/like', authenticated, userController.addLike)
 router.post('/tweets/:id/unlike', authenticated, userController.removeLike)
 
+// tweets
+router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets', authenticated, tweetController.createTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
-// ! branch api/admin
 
-router.get('/users/tops', authenticated, userController.getTopUsers)
-
+//followships
 router.post('/followships/:user_id', authenticated, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 
+//user data
+router.get('/users/tops', authenticated, userController.getTopUsers)
 router.get('/users/:user_id/likes', authenticated, userController.getUserLikes)
 router.get('/users/:user_id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:user_id/followers', authenticated, userController.getUserFollowers)
@@ -45,10 +44,6 @@ router.get('/users/:user_id', authenticated, userController.getUser)
 
 router.post('/users', userController.signUp)
 
-router.post('/followships/:user_id', authenticated, userController.addFollowing)
-router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
-
-router.post('/signup', userController.signUp)
 router.use('/', apiErrorHandler)
 
 module.exports = router
