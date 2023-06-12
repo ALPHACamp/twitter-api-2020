@@ -42,7 +42,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
+    const UserId = Number(req.params.user_id) || ''
     Tweet.findAll({
       include: [
         {
@@ -51,7 +51,7 @@ const userController = {
         }
       ],
       where: {
-        ...userId ? { userId } : {}
+        ...UserId ? { UserId } : {}
       },
       nest: true,
       raw: true
@@ -63,7 +63,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserRepliedTweets: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
+    const UserId = Number(req.params.user_id) || ''
     Reply.findAll({
       include: [
         {
@@ -73,7 +73,7 @@ const userController = {
         Tweet
       ],
       where: {
-        ...userId ? { userId } : {}
+        ...UserId ? { UserId } : {}
       },
       nest: true,
       raw: true
@@ -85,14 +85,14 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserLikes: (req, cb) => {
-    const userId = Number(req.params.user_id) || ''
+    const UserId = Number(req.params.user_id) || ''
     Like.findAll({
       include: [
         { model: User },
         { model: Tweet }
       ],
       where: {
-        ...userId ? { userId } : {}
+        ...UserId ? { UserId } : {}
       },
       attributes: { exclude: ['password'] },
       nest: true,

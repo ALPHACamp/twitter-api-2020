@@ -7,14 +7,14 @@ module.exports = (sequelize, DataTypes) => {
   class Tweet extends Model {
     
     static associate(models) {
-      Tweet.belongsTo(models.User, { foreignKey: 'userId' })
-      Tweet.hasMany(models.Like, { foreignKey: 'tweetId' })
-      Tweet.hasMany(models.Reply, { foreignKey: 'tweetId' })
-      Tweet.belongsToMany(models.User, {
-        through: models.Like, 
-        foreignKey: 'tweetId', 
-        as: 'LikedUsers' 
-      })
+      Tweet.belongsTo(models.User, { foreignKey: 'UserId' })
+      Tweet.hasMany(models.Like, { foreignKey: 'TweetId' })
+      Tweet.hasMany(models.Reply, { foreignKey: 'TweetId' })
+      // Tweet.belongsToMany(models.User, {
+      //   through: models.Like, 
+      //   foreignKey: 'tweetId', 
+      //   as: 'LikedUsers' 
+      // })
     }
   };
   Tweet.init({
@@ -24,8 +24,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Tweet',
-    tableName: 'Tweets',
-    underscored: true
+    tableName: 'Tweets'
   })
   return Tweet
 }

@@ -7,8 +7,8 @@ module.exports = (sequelize, DataTypes) => {
   class Reply extends Model {
    
     static associate(models) {
-      Reply.belongsTo(models.User, { foreignKey: 'userId' })
-      Reply.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
+      Reply.belongsTo(models.User, { foreignKey: 'UserId' })
+      Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
     }
   };
   Reply.init({
@@ -16,8 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Reply',
-    tableName: 'Replies',
-    underscored: true
+    tableName: 'Replies'
   })
   return Reply
 }
