@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize')
-const sequelize = require('sequelize')
 const { getUserData } = require('../helpers/getUserData')
 const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -43,6 +42,7 @@ const userServices = {
     signUp: async (req, cb) => {
         try {
             const { name, account, email, password, checkPassword } = req.body
+            if (!name || !account || !email || !password || !checkPassword) throw new Error('所有欄位皆為必填！')
             const users = await User.findAll()
             if (users.length > 0) {
                 const existingAccount = users.find(user => user.account === account)
@@ -158,8 +158,8 @@ const userServices = {
         const { id } = req.params
         const { name, account, email, password, checkPassword, introduction } = req.body
         const { files } = req
-        if (password !== checkPassword) throw new Error('密碼與確認密碼不一致！')
         if (!name) throw new Error('請填入名稱！')
+        if (password !== checkPassword) throw new Error('密碼與確認密碼不一致！')
         if (name.length >= 50) throw new Error('名稱不可超過50字！')
         if (introduction.length >= 160) throw new Error('自我介紹不可超過160字！')
 
@@ -305,7 +305,8 @@ const userServices = {
                         as: 'Followings'
                     }
                 ],
-                where: { followerId: id }
+                where: { followerId: id },
+                order: [['createdAt', 'DESC']]
             })
             if (followings.length === 0) throw new Error("該名使用者沒有追蹤過任何人！")
             const userFollowingsId = getUserData(req.user.Followings)
@@ -333,7 +334,8 @@ const userServices = {
                         as: 'Followers'
                     }
                 ],
-                where: { followingId: id }
+                where: { followingId: id },
+                order: [['createdAt', 'DESC']]
             })
             if (followers.length === 0) throw new Error("該名使用者沒有任何人追蹤過！")
             const userFollowingsId = getUserData(req.user.Followings)
