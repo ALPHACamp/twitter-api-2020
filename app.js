@@ -3,7 +3,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
-// const helpers = require('./_helpers')
+const helpers = require('./_helpers')
+const cors = require('cors')
 const path = require('path')
 // 先關 需要再開
 // const methodOverride = require('method-override')
@@ -11,15 +12,18 @@ const passport = require('passport')
 const router = require('./routes')
 const app = express()
 const port = process.env.PORT || 3000
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type')
-  next()
-})
+// 先用cors的 module試試
+// app.use((req, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', '*')
+//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+//   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type')
+//   next()
+// })
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
+app.use(cors())
+app.options('*', cors())
 // 先關 需要再開
 // app.use(methodOverride('_method'))
 // use helpers.getUser(req) to replace req.user
