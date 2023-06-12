@@ -11,7 +11,12 @@ const port = process.env.PORT || 3000
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use(cors())
+const corsOptions = {
+  origin: 'http://localhost:3000', // 允許的網域
+  methods: 'GET, POST, PUT, DELETE', // 允許的 HTTP 方法
+  allowedHeaders: 'Content-Type, Authorization' // 允許的請求標頭
+}
+app.use(cors(corsOptions))
 app.use(router)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
