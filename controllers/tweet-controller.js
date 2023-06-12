@@ -68,10 +68,10 @@ const tweetController = {
   },
   postLike: async (req, res, next) => {
     try {
-      const tweetId = req.params.id
-      const userId = req.user.id
+      const TweetId = req.params.id
+      const UserId = req.user.id
       const tweet = await Tweet.findByPk(
-        tweetId,
+        TweetId,
         { include: User }
       )
       if (!tweet) {
@@ -79,18 +79,18 @@ const tweetController = {
       }
       const likedTweetAuthor = tweet.dataValues.User.dataValues.account
       const isLiked = await Like.findOne({
-        where: { userId, tweetId }
+        where: { UserId, TweetId }
       })
       if (isLiked) {
         return res.status(400).json({ status: 'error', message: 'You have liked this tweet.' })
       }
-      const createdLike = await Like.create({ userId, tweetId })
+      const createdLike = await Like.create({ UserId, TweetId })
       return res.status(200).json({
         status: 'success',
         data: {
           id: createdLike.id,
-          userId: createdLike.userId,
-          tweetId: createdLike.tweetId,
+          userId: createdLike.UserId,
+          tweetId: createdLike.TweetId,
           likedTweetAuthor
         }
       })
@@ -118,8 +118,8 @@ const tweetController = {
         status: 'success',
         data: {
           id: deletedLike.id,
-          userid: deletedLike.userId,
-          tweetid: deletedLike.tweetId,
+          userid: deletedLike.UserId,
+          tweetid: deletedLike.TweetId,
           unlikedTweetAuthor
         }
       })
