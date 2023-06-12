@@ -17,11 +17,11 @@ router.post('/api/users', userController.signUp)
 router.post('/api/signin', passport.authenticate('local', { session: false }), isUser, userController.signIn)
 
 // use modules
-router.use('/api/admin', authenticatedAdmin, admin)
-router.use('/api/followships', authenticated, isUser, followships)
-router.use('/api/likes', authenticated, isUser, likes)
-router.use('/api/tweets', authenticated, isUser, tweets)
-router.use('/api/users', authenticated, isUser, users)
+router.use('/admin', authenticatedAdmin, admin)
+router.use('/followships', authenticated, isUser, followships)
+router.use('/likes', authenticated, isUser, likes)
+router.use('/tweets', authenticated, isUser, tweets)
+router.use('/users', authenticated, isUser, users)
 
 // Error Handler
 router.use('/', apiErrorHandler)
