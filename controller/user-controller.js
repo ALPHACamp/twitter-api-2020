@@ -6,8 +6,8 @@ const validator = require('email-validator')
 const userController = {
   signIn: async (req, res, next) => {
     try {
-      const userJSON = req.user.toJSON()
-      delete userJSON.password
+      const userJSON = helpers.getUser(req).toJSON()
+      if (userJSON.role !== 'user') throw new Error('你無法登入此帳號')
       const token = jwt.sign(userJSON, process.env.JWT_SECRET, { expiresIn: '30d' })// 簽證效期30天
       return res.status(200).json({ token, message: '登入成功' })
     } catch (err) { next(err) }
@@ -29,17 +29,14 @@ const userController = {
       if (existingEmail) { throw new Error('email已重複註冊!') }
       // If user does not exist, hash password and create new user
       const hash = await bcrypt.hash(password, 10)
-      const newUser = await User.create({
+      await User.create({
         name,
         email,
         password: hash,
         account,
         role: 'user'
       })
-      const userJSON = newUser.toJSON()
-      delete userJSON.password
-      const token = jwt.sign(userJSON, process.env.JWT_SECRET, { expiresIn: '30d' })
-      return res.status(200).json({ message: '註冊成功', token })
+      return res.status(200).json({ message: '註冊成功' })
     } catch (err) { next(err) }
   },
   getUser: async (req, res, next) => {
