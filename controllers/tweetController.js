@@ -34,7 +34,7 @@ const tweetController = {
           tweetOwnerName: tweet.User.name,
           tweetOwnerAccount: tweet.User.account,
           tweetOwnerAvatar: tweet.User.avatar,
-          tweetTime: tweet.createdAt,
+          createdAt: tweet.createdAt,
           replyCount: tweet.dataValues.Replies.length,
           likeCount: tweet.dataValues.Likes.length,
           isLiked: currentUserLikes.includes(tweet.dataValues.id)
@@ -112,7 +112,7 @@ const tweetController = {
         tweetOwnerName: tweet.User.name,
         tweetOwnerAccount: tweet.User.account,
         tweetOwnerAvatar: tweet.User.avatar,
-        tweetTime: tweet.createdAt
+        createdAt: tweet.createdAt
         //  isLiked: currentUserLikes.includes(tweet.id),
       }
 
@@ -163,7 +163,7 @@ const tweetController = {
         replyOwnerName: reply.name,
         replyOwnerAccount: reply.account,
         replyOwnerAvatar: reply.avatar,
-        replyCreatedAt: reply.createdAt
+        createdAt: reply.createdAt
       }))
 
       return res.status(200).json(data)

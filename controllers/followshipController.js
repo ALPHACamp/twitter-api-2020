@@ -68,7 +68,7 @@ const followshipController = {
     try {
       // get the current user
       const currentUser = helpers.getUser(req)
-      // change
+
       // get the top 10 most followed users
       const users = await User.findAll({
         attributes: [
