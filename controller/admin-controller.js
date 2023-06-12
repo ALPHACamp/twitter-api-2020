@@ -6,7 +6,7 @@ const adminController = {
   signIn: async (req, res, next) => {
     try {
       const userJSON = helpers.getUser(req).toJSON()
-      if (userJSON.role !== 'admin') throw new Error('您的權限不足無法登入')
+      if (userJSON.role !== 'admin') throw new Error('帳號不存在')
       const token = jwt.sign(userJSON, process.env.JWT_SECRET, { expiresIn: '30d' })// 簽證效期30天
       return res.status(200).json({ token, message: '登入成功!' })
     } catch (err) { next(err) }
