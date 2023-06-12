@@ -18,16 +18,17 @@ const tweetServices = {
           }, {
             model: Reply,
             attributes: ['id']
-          }],
+          }
+        ],
         order: [['createdAt', 'DESC']]
       })
 
       if (!tweets) throw new Error("目前沒有任何推文！")
-      const userLikedTweetsId = getUserData(req.user.LikedTweets)
+
       tweets = tweets.map(tweet => ({
         ...tweet.dataValues,
         createdAt: relativeTimeFromNow(tweet.dataValues.createdAt),
-        isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(tweet.id) : false,
+        isLiked: tweet.Likes.some(like => like.UserId === User.id),
         replyCount: tweet.Replies.length,
         likeCount: tweet.Likes.length
       }))
@@ -37,9 +38,9 @@ const tweetServices = {
       cb(err)
     }
   },
-  getTweet: async (req, cb) => {
+  getTweet: (req, cb) => {
     const { id } = req.params
-    return Promise.all([
+      return Promise.all([
       Tweet.findByPk(id, {
         include: [
           User,
@@ -55,20 +56,28 @@ const tweetServices = {
       Reply.count({
         where: {
           TweetId: id
-        }
-        , order: [['createdAt', 'DESC']]
+        },
+        order: [['createdAt', 'DESC']]
       })
     ])
-      //.then((tweet) => {if(tweet.id !== id) throw new Error("推文不存在！")})
-      .then(([tweet, likes, replies]) => {
+    .then(([tweet, likes, replies]) => {
+      return Like.findOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId: id
+        }
+      })
+      .then((like) => {
         cb(null, {
           ...tweet,
           likeCount: likes,
           replyCount: replies,
-          createdAt: relativeTimeFromNow(tweet.createdAt)
+          createdAt: relativeTimeFromNow(tweet.createdAt),
+          isLiked: !!like
         })
       })
-      .catch(err => cb(err))
+    })
+    .catch(err => cb(err))
   },
   postTweets: async (req, cb) => {
     try {
@@ -114,7 +123,11 @@ const tweetServices = {
         UserId: helpers.getUser(req).id,
         TweetId: Number(id)
       })
-      cb(null, likeCreate)
+      cb( null, {
+        status: '已加入喜歡！',
+        ...likeCreate.toJSON(),
+        isLiked: !!like
+        })
     } catch (err) {
       cb(err)
     }
@@ -131,9 +144,12 @@ const tweetServices = {
       if (!like) {
         throw new Error('這篇Tweet沒被like')
       }
-
       await like.destroy()
-      cb(null, { message: 'Like 取消成功' })
+      
+      cb(null, { 
+          message: 'Like 取消成功',
+          isLiked: !!like
+        })
     } catch (err) {
       cb(err)
     }
