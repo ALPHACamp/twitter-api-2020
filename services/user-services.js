@@ -101,12 +101,20 @@ const userServices = {
         ])
             .then(([user, tweets, followings, followers]) => {
                 if (!user) throw new Error("使用者不存在！")
+                const userfollowings = getUserData(req.user.Followings)
+                let isFollowed = false
+                if (user.id !== req.user.id) {
+                    isFollowed = userfollowings.some(uF => uF === user.id)
+                } else {
+                    isFollowed = '使用者無法追蹤自己！'
+                }
                 delete user.password
                 cb(null, {
                     ...user,
                     followingCount: followings,
                     followerCount: followers,
-                    tweetCount: tweets
+                    tweetCount: tweets,
+                    isFollowed
                 })
             })
             .catch(err => cb(err))
@@ -114,6 +122,8 @@ const userServices = {
     getUserTweets: async (req, cb) => {
         try {
             const { id } = req.params
+            const user = await User.findByPk(id)
+            if (!user) throw new Error("使用者不存在！")
             let tweets = await Tweet.findAll({
                 where: { UserId: id },
                 include: [
@@ -130,7 +140,7 @@ const userServices = {
                 order: [['createdAt', 'DESC']]
             })
 
-            if (!tweets) throw new Error("目前沒有任何推文！")
+            if (!tweets) throw new Error("該名使用者目前沒有發佈任何推文！")
             const userLikedTweetsId = getUserData(req.user.LikedTweets)
 
             tweets = tweets.map(tweet => ({
@@ -197,6 +207,8 @@ const userServices = {
     getUserRepliedTweets: async (req, cb) => {
         try {
             const { id } = req.params
+            const user = await User.findByPk(id)
+            if (!user) throw new Error("使用者不存在！")
             let repliedTweets = await Reply.findAll({
                 include: [
                     {
@@ -238,6 +250,8 @@ const userServices = {
     getUserLikedTweets: async (req, cb) => {
         try {
             const { id } = req.params
+            const user = await User.findByPk(id)
+            if (!user) throw new Error("使用者不存在！")
             let likedTweets = await Like.findAll({
                 include: [
                     {
@@ -279,6 +293,8 @@ const userServices = {
     getUserFollowings: async (req, cb) => {
         try {
             const { id } = req.params
+            const user = await User.findByPk(id)
+            if (!user) throw new Error("使用者不存在！")
             let followings = await Followship.findAll({
                 include: [
                     {
@@ -305,6 +321,8 @@ const userServices = {
     getUserFollowers: async (req, cb) => {
         try {
             const { id } = req.params
+            const user = await User.findByPk(id)
+            if (!user) throw new Error("使用者不存在！")
             let followers = await Followship.findAll({
                 include: [
                     {
@@ -329,19 +347,19 @@ const userServices = {
         }
     },
     topUsers: async (req, cb) => {
-        try{
+        try {
             const users = await User.findAll({
                 include: [{ model: User, as: 'Followers' }]
             })
-        const result = await users
-        .map(user => ({
-            ...user.dataValues,
-            followerCount: user.Followers.length,
-            isFollowed: req.user.Followings.some(f => f.id === user.id)
-        }))
-        .sort((a, b) => b.followerCount - a.followerCount)
-        const newResult = result.slice(0, 10)    
-        cb(null, newResult)
+            const result = await users
+                .map(user => ({
+                    ...user.dataValues,
+                    followerCount: user.Followers.length,
+                    isFollowed: req.user.Followings.some(f => f.id === user.id)
+                }))
+                .sort((a, b) => b.followerCount - a.followerCount)
+            const newResult = result.slice(0, 10)
+            cb(null, newResult)
         } catch (err) {
             cb(err)
         }
