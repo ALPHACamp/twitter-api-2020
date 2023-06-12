@@ -14,6 +14,12 @@ module.exports = {
       description: {
         type: Sequelize.TEXT
       },
+      number_like: {
+        type: Sequelize.INTEGER
+      },
+      number_unlike: {
+        type: Sequelize.INTEGER
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE
