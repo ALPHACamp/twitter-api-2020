@@ -4,12 +4,12 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const routes = require('./routes')
 
-const methodOverride = require('method-override')
+// const methodOverride = require('method-override')
 const app = express()
 const port = process.env.PORT || 3000
 
 app.use(express.urlencoded({ extended: true }))
-app.use(methodOverride('_method'))
+// app.use(methodOverride('_method'))
 app.use(express.json())
 const cors = require('cors')
 const corsOptions = {
