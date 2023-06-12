@@ -12,8 +12,13 @@ const adminController = {
         where: { account },
         raw: true
       })
-      if (!user) throw new Error('You are not admin')
-      if (user.role !== 'admin') throw new Error('You are not admin')
+
+      // 錯誤處理
+      if (!user || user.role !== 'admin') {
+        const error = new Error('You are not admin')
+        error.status = 404
+        throw error
+      }
       const userData = user
       delete userData.password
       userData.token = token

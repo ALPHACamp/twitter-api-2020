@@ -68,8 +68,18 @@ const userController = {
           nest: true
         })
       ])
-      if (!user) throw new Error('The user does not exist')
-      if (!userTweets.length) throw new Error("The user have'nt post any tweet yet")
+
+      // 錯誤處理
+      if (!user) {
+        const error = new Error('The user does not exist')
+        error.status = 404
+        throw error
+      }
+      if (!userTweets.length) {
+        const error = new Error("The user have'nt post any tweet yet")
+        error.status = 404
+        throw error
+      }
       return res.status(200).json(userTweets)
     } catch (error) {
       next(error)
@@ -117,8 +127,18 @@ const userController = {
           nest: true
         })
       ])
-      if (!user) throw new Error('The user does not exist')
-      if (!repliedTweets.length) throw new Error("The user have'nt replied any tweets yet.")
+
+      // 錯誤處理
+      if (!user) {
+        const error = new Error('The user does not exist')
+        error.status = 404
+        throw error
+      }
+      if (!repliedTweets.length) {
+        const error = new Error("The user have'nt replied any tweets yet.")
+        error.status = 404
+        throw error
+      }
 
       const data = []
       for (const i of repliedTweets) {
@@ -144,8 +164,18 @@ const userController = {
           nest: true
         })
       ])
-      if (!user) throw new Error('The user does not exist')
-      if (!userLiked.length) throw new Error('He does not like anyone.')
+
+      // 錯誤處理
+      if (!user) {
+        const error = new Error('The user does not exist')
+        error.status = 404
+        throw error
+      }
+      if (!userLiked.length) {
+        const error = new Error('He does not like tweet.')
+        error.status = 404
+        throw error
+      }
       const data = []
       for (const i of userLiked) {
         data.push(i.Tweet)
@@ -170,8 +200,18 @@ const userController = {
           nest: true
         })
       ])
-      if (!user) throw new Error('The user does not exist')
-      if (!userFollows.length) throw new Error("He haven't followed anyone")
+
+      // 錯誤處理
+      if (!user) {
+        const error = new Error('The user does not exist')
+        error.status = 404
+        throw error
+      }
+      if (!userFollows.length) {
+        const error = new Error("He haven't followed anyone")
+        error.status = 404
+        throw error
+      }
 
       return res.status(200).json(userFollows)
     } catch (error) {
@@ -191,8 +231,18 @@ const userController = {
           include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'avatar'] }]
         })
       ])
-      if (!user) throw new Error('The user does not exist')
-      if (!userFollowers.length) throw new Error('He is lonely')
+
+      // 錯誤處理
+      if (!user) {
+        const error = new Error('The user does not exist')
+        error.status = 404
+        throw error
+      }
+      if (!userFollowers.length) {
+        const error = new Error('He is lonely')
+        error.status = 404
+        throw error
+      }
 
       return res.status(200).json(userFollowers)
     } catch (error) {
@@ -211,7 +261,13 @@ const userController = {
 
       // 確認user是否存在，account與email是否與資料庫重複
       const user = await User.findByPk(id)
-      if (!user) throw new Error('The user does not exist')
+
+      // 錯誤處理
+      if (!user) {
+        const error = new Error('The user does not exist')
+        error.status = 404
+        throw error
+      }
 
       if (account && email) {
         const [userAccount, userEmail] = await Promise.all([

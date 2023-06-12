@@ -5,7 +5,7 @@ const followshipController = {
   // 更改路由新增:followshipId?
   postFollowship: async (req, res, next) => {
     try {
-      let { id } = req.params
+      let { id } = req.body
       id = Number(id)
       // 確認使用者是否已經追蹤該用戶
       const followship = await Followship.findOne({ where: { followingId: id, followerId: getUser(req).id } })
@@ -32,9 +32,13 @@ const followshipController = {
       const follow = await Followship.findOne({
         where: { followerId: getUser(req).id, followingId }
       })
-      // 如果沒有 => 不用刪除
-      if (!follow) throw new Error("You have'nt followed this user.")
 
+      // 如果沒有 => 不用刪除
+      if (!follow) {
+        const error = new Error("You have'nt followed this user.")
+        error.status = 404
+        throw error
+      }
       const deleteFollow = await follow.destroy()
       return res.status(200).json(deleteFollow.toJSON())
     } catch (error) {
