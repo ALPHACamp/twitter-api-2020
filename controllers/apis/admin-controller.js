@@ -30,12 +30,16 @@ const userController = {
       order: [['createdAt', 'DESC']],
     })
       .then(ts => {
-        const tweets = ts.map(tweet => ({
-          ...tweet.toJSON(),
-          description: tweet.description.substring(0, 50),
-          RepliesCount: tweet.Replies.length,
-          LikesCount: tweet.Likes.length
-        }))
+        const tweets = ts.map(tweet => {
+          const tweetJSON = tweet.toJSON()
+          delete tweetJSON.User.password
+          return {
+            ...tweetJSON,
+            description: tweet.description.substring(0, 50),
+            RepliesCount: tweet.Replies.length,
+            LikesCount: tweet.Likes.length
+          }
+        })
         res.status(200).json({ status: 'success', tweets })
       })
       .catch(err => {

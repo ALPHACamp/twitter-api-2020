@@ -13,6 +13,7 @@ const tweetController = {
       .then(ts => {
         const tweets = ts.map(tweet => {
           const tweetData = tweet.toJSON()
+          delete tweetData.User.password
           tweetData.RepliesCount = tweet.Replies.length
           tweetData.LikesCount = tweet.Likes.length
           return tweetData
@@ -60,7 +61,9 @@ const tweetController = {
     ])
       .then(([user, tweet]) => {
         if (!user) throw new Error('Account is not exist!')
-        res.status(200).json({ statue: 'success', tweet })
+        const tweetData = tweet.toJSON()
+        delete tweetData.User.password
+        res.status(200).json({ statue: 'success', tweetData })
       })
       .catch(err => {
         res.status(500).json({ statue: 'err', error: err.message })
