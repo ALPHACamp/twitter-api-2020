@@ -5,14 +5,21 @@ const { imgurFileHandler } = require('../helpers/file-helpers')
 const bcrypt = require('bcryptjs')
 const userController = {
   signIn: (req, res, next) => {
+    const { from } = req.query
+    if (!from) res.status(403).json('Pls insert ?from=back or ?from=front at urls to let me know which way you want to sign!')
     try {
+      // if(from === 'back')
       if (req.authInfo && req.authInfo.message) return res.status(400).json(req.authInfo.message)
       const userData = getUser(req).toJSON()
-      if (!userData) return res.status(400).json('account or password incorrect!')
-      delete userData.password
+      if ((userData.role === 'user' && from === 'front') || (userData.role === 'admin' && from === 'back')) {
+        if (!userData) return res.status(400).json('account or password incorrect!')
+        delete userData.password
 
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '7d' })
-      return res.status(200).json({ token, userData })
+        const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '7d' })
+        return res.status(200).json({ token, userData })
+      } else {
+        res.status(401).json(`I'm sorry, but access to the ${from}stage area is restricted.`)
+      }
     } catch (err) {
       next(err)
     }
