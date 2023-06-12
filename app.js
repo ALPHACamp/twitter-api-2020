@@ -12,18 +12,19 @@ const passport = require('passport')
 const router = require('./routes')
 const app = express()
 const port = process.env.PORT || 3000
-// 先用cors的 module試試
-// app.use((req, res, next) => {
-//   res.setHeader('Access-Control-Allow-Origin', '*')
-//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-//   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type')
-//   next()
-// })
+const corsOptions = {
+  origin: [
+    process.env.GITHUB_PAGE,
+    'http://localhost:3000'
+  ],
+  method: 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS',
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
+app.use(cors(corsOptions))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
-app.use(cors())
-app.options('*', cors())
+
 // 先關 需要再開
 // app.use(methodOverride('_method'))
 // use helpers.getUser(req) to replace req.user
