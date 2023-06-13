@@ -11,25 +11,24 @@ const likeController = require('../controllers/like-controller')
 const followController = require('../controllers/follow-controller')
 const admin = require('./modules/admin')
 
-router.use('/admin', admin)
-
+router.use('/api/admin', admin)
 
 // replies
-router.post('/tweets/:tweet_id/replies', authenticated, replyController.postComment)
-router.get('/tweets/:tweet_id/replies', authenticated, replyController.getComment) 
+router.post('api/tweets/:tweet_id/replies', authenticated, replyController.postComment)
+router.get('api/tweets/:tweet_id/replies', authenticated, replyController.getComment) 
 
 //like
-router.post('/tweets/:id/like', authenticated, likeController.addLike)
-router.post('/tweets/:id/unlike', authenticated, likeController.removeLike)
+router.post('api/tweets/:id/like', authenticated, likeController.addLike)
+router.post('api/tweets/:id/unlike', authenticated, likeController.removeLike)
 
 // tweets
-router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
-router.post('/tweets', authenticated, authenticatedUser, tweetController.createTweet)
-router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
+router.get('api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
+router.post('api/tweets', authenticated, authenticatedUser, tweetController.createTweet)
+router.get('api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 
 //followships
-router.post('/followships', authenticated, authenticatedUser, followController.addFollowing)
-router.delete('/followships/:followingId', authenticated, authenticatedUser, followController.removeFollowing)
+router.post('api/followships', authenticated, authenticatedUser, followController.addFollowing)
+router.delete('api/followships/:followingId', authenticated, authenticatedUser, followController.removeFollowing)
 
 // router.get('/followships', authenticated, authenticatedUser, userController.getTop)
 
