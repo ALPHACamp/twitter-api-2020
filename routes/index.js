@@ -20,8 +20,8 @@ router.post('/api/tweets/:id/like', authenticated, likeController.addLike)
 router.post('/api/tweets/:id/unlike', authenticated, likeController.removeLike)
 
 // tweets
-router.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.createTweet)
+router.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 router.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 
 //followships
