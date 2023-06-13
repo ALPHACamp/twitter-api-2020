@@ -23,9 +23,7 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      console.log(req.user)
       let users = await User.findAll({
-        where: { role: 'user' },
         attributes: ['id', 'name', 'account', 'avatar', 'cover'],
         include: [
           Tweet,
@@ -69,10 +67,7 @@ const adminController = {
       // 排序
       users = users.sort((a, b) => b.PostNum - a.PostNum)
 
-      return res.json({
-        data: { userList: users }
-      }
-      )
+      return res.status(200).json(users)
     } catch (err) {
       next(err)
     }
