@@ -116,6 +116,7 @@ const userController = {
       data.followingCount = followingCount.count
       data.followerCount = followerCount.count
       delete data.UserTweets
+      delete data.password
       return res.status(200).json(data)
     } catch (error) {
       next(error)

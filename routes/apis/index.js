@@ -41,7 +41,7 @@ router.put('/users/:id', authenticated, uploadFiles, userController.editUserProf
 router.post('/users/login', passport.authenticate('local', { session: false }), userController.login)
 // 使用者註冊
 router.post('/users', userController.signUp)
-
+// 錯誤處理
 router.use('/', apiErrorHandler)
 
 module.exports = router
