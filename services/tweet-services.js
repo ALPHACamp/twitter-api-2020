@@ -63,6 +63,7 @@ const tweetServices = {
       })
     ])
     .then(([tweet, likes, replies]) => {
+      if (!tweet) throw new Error('推文不存在！')
       return Like.findOne({
         where: {
           UserId: helpers.getUser(req).id,
@@ -85,14 +86,11 @@ const tweetServices = {
     try {
       const { description } = req.body
       const UserId = helpers.getUser(req).id
-
-      if (!description) {
-        throw new Error('Tweet不能為空!')
-      }
-
-      if (description.length > 140) {
-        throw new Error('輸入不得超過140字!')
-      }
+      if (!UserId) throw new Error('查無此人!')
+      if (!description) throw new Error('Tweet不能為空!')
+  
+      if (description.length > 140) throw new Error('輸入不得超過140字!')
+      
 
       const tweet = await Tweet.create({
         description,
@@ -118,7 +116,7 @@ const tweetServices = {
           TweetId: id
         }
       })
-      if (tweet.id !== Number(id)) throw new Error("推文不存在!")
+      if (!tweet) throw new Error("推文不存在!")
       if (like) throw new Error('你已經like過這篇Tweet了')
 
       const likeCreate = await Like.create({
@@ -137,18 +135,18 @@ const tweetServices = {
   removeLike: async (req, cb) => {
     try {
       const { id } = req.params
+      const tweet = await Tweet.findByPk(id)
       const like = await Like.findOne({
         where: {
           UserId: helpers.getUser(req).id,
           tweetId: id
         }
       })
+      if (!tweet) throw new Error("推文不存在!")
       if (!like) {
         throw new Error('這篇Tweet沒被like')
       }
-      const removelike = like.destroy()
-      console.log(removelike)
-
+      const removelike =await like.destroy()
       cb(null, { 
           message: 'Like 取消成功',
           isLiked: (removelike === helpers.getUser(req).id)

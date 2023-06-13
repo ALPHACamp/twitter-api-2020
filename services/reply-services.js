@@ -20,6 +20,8 @@ const replyServices = {
           },
         ],
       })
+      const tweet = await Tweet.findByPk(id)
+      if (!tweet) throw new Error('推文不存在！')
       const newComment = await replies.map(comment => {
         comment.createdAt = relativeTimeFromNow(comment.createdAt)
         delete comment.User.password
@@ -34,11 +36,11 @@ const replyServices = {
     try {
       const { id } = req.params
       const { comment } = req.body
-      if (!comment) throw new Error('回覆不能為空！')
       const user = await User.findByPk(helpers.getUser(req).id)
       const tweet = Tweet.findByPk(id)
       if (!user) throw new Error('查無此人！')
-      if (!tweet) throw new Error('查無此篇貼文！')
+      if (!tweet) throw new Error('推文不存在！')
+      if (!comment) throw new Error('回覆不能為空！')
       if (comment.length > 140) throw new Error('回覆留言必須在140字內！') 
       const reply = await Reply.create({
         comment,

@@ -45,7 +45,8 @@ const followshipServices = {
           followingId
         }
       })
-
+      const user = await User.findByPk(followingId)
+      if (!user) throw new Error("該名使用者不存在，你無法追蹤！")
       if (!followship) throw new Error ("你尚未追蹤此人！")
       const deletedFollowship = await followship.destroy()
       cb(null, {
