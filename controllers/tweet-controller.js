@@ -38,7 +38,6 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     try {
       const id = req.params.tweet_id
-      console.log(req.params)
       const tweet = await Tweet.findByPk(id,
         {
           include: [

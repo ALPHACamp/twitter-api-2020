@@ -38,7 +38,6 @@ const userController = {
   },
   login: async (req, res, next) => {
     try {
-      console.log(req.user)
       const userData = await getUser(req)?.toJSON()
       delete userData.password
       const token = await jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -87,7 +86,6 @@ const userController = {
   editUserInfo: async (req, res, next) => {
     try {
       const { name, account, email, password, checkPassword, introduction } = req.body
-      console.log(req.body)
       const id = getUser(req).id
       const files = req.files
       const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
