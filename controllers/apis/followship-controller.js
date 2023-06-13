@@ -1,5 +1,5 @@
 const { getUser } = require('../../_helpers')
-const { Followship } = require('../../models')
+const { Followship, User } = require('../../models')
 
 const followshipController = {
   // 更改路由新增:followshipId?
@@ -7,6 +7,20 @@ const followshipController = {
     try {
       let { id } = req.body
       id = Number(id)
+
+      // 使用者無法追蹤自己
+      if (id === getUser(req).id) {
+        const error = "You can't follow yourself"
+        error.status = 400
+      }
+      // 使用者無法追蹤admin
+      const admin = await User.findByPk(id)
+      if (admin.role === 'admin') {
+        const error = new Error("The user doesn't exist")
+        error.status = 404
+        throw error
+      }
+
       // 確認使用者是否已經追蹤該用戶
       const followship = await Followship.findOne({ where: { followingId: id, followerId: getUser(req).id } })
       // 如果有 => 不用新增
@@ -28,6 +42,13 @@ const followshipController = {
   deleteFollowship: async (req, res, next) => {
     try {
       const { followingId } = req.params
+
+      // 使用者無法取消追蹤自己
+      if (Number(followingId) === getUser(req).id) {
+        const error = "You can't follow yourself"
+        error.status = 400
+      }
+
       // 確認使用者是否已經追蹤該用戶
       const follow = await Followship.findOne({
         where: { followerId: getUser(req).id, followingId }

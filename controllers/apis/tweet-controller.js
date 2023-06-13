@@ -5,6 +5,8 @@ const tweetController = {
     try {
       const { description } = req.body
 
+      // 使用者無法幫別人po文
+
       const tweet = await Tweet.create({
         UserId: res.locals.userId,
         description
