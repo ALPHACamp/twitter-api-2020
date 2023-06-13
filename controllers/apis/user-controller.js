@@ -131,7 +131,13 @@ const userController = {
         User.findByPk(id),
         Reply.findAll({
           where: { UserId: id },
-          include: [Tweet, { model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
+          include: [
+            {
+              model: Tweet,
+              attributes: ['id', 'UserId'],
+              include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }]
+            },
+            { model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
           raw: true,
           nest: true
         })

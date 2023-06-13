@@ -17,7 +17,7 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
-        include: [{ model: User, as: 'TweetUser' }],
+        include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }],
         order: [['createdAt', 'DESC']]
       })
 
@@ -37,7 +37,7 @@ const tweetController = {
     try {
       const { tweet_id } = req.params
       const tweet = await Tweet.findByPk(tweet_id, {
-        include: [{ model: User, as: 'TweetUser' }]
+        include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }]
       })
       if (!tweet) {
         const error = new Error('The tweet does not exist')
@@ -89,6 +89,7 @@ const tweetController = {
 
       const replies = await Reply.findAll({
         where: { TweetId: tweet_id },
+        include: [{ model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account'] }],
         raw: true,
         nest: true
       })
