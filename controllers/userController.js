@@ -90,35 +90,37 @@ const userController = {
     try {
       const id = req.params.id
       const currentUserId = getUser(req).dataValues.id
-      const [user, tweets, likes] = await Promise.all([
+      const [user, tweets] = await Promise.all([
         User.findByPk(id, { raw: true }),
         Tweet.findAll({
           where: { UserId: id },
-          include: [
-            { model: Reply },
-            { model: Like }
-          ],
           order: [['createdAt', 'DESC']],
-          attributes: ['id', 'description', 'createdAt']
-        }),
-        Like.findAll({ where: { UserId: currentUserId }, raw: true })
+          attributes: {
+            include: [
+              [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+              [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+                'replyCount'],
+              [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${currentUserId} AND TweetId = Tweet.id)`), 'isLiked']
+            ]
+          },
+          raw: true,
+          nest: true
+        })
       ])
       if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
       if (!tweets.length) return res.status(200).json({ status: 'success', message: '無推文資料' })
 
-      // 目前登入者的Likes
-      const currentUserLikes = likes.map(l => l.TweetId)
       const data = tweets.map(tweet => ({
-        TweetId: tweet.dataValues.id,
+        TweetId: tweet.id,
         tweetOwnerId: user.id,
-        tweetOwnerAccount: user.account,
+        tweetOwnerAccount: user.accout,
         tweetOwnerName: user.name,
         tweetOwnerAvatar: user.avatar,
-        description: tweet.dataValues.description,
-        createdAt: tweet.dataValues.createdAt,
-        replyCount: tweet.dataValues.Replies.length,
-        likeCount: tweet.dataValues.Likes.length,
-        isLiked: currentUserLikes.includes(tweet.dataValues.id)
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        replyCount: tweet.replyCount,
+        likeCount: tweet.likeCount,
+        isLiked: Boolean(tweet.isLiked)
       }))
       res.status(200).json(data)
     } catch (err) { next(err) }
