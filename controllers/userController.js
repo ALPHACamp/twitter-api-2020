@@ -41,18 +41,22 @@ const userController = {
     try {
       // get user data
       const userData = getUser(req)?.toJSON()
+      const copyUserData = Object.assign({}, userData)
+
       delete userData.password
       delete userData.avatar
       delete userData.cover
       delete userData.email
       delete userData.introduction
+
+      delete copyUserData.password
       // sign token
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
         status: 'success',
         data: {
           token,
-          user: userData
+          user: copyUserData
         }
       })
     } catch (err) {
