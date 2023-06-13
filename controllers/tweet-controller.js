@@ -1,13 +1,10 @@
 const { Tweet, User, Like, Reply } = require('../models')
+const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
-      const id = Number(req.params.id) || ''
       const tweets = await Tweet.findAll({
-        where: {
-          ...id ? { id } : {} // 檢查 id 是否為空值
-        },
         include: [
           { model: User, attributes: ['name', 'avatar', 'account'] },
           Reply,
@@ -22,7 +19,7 @@ const tweetController = {
       const data = tweets.map(tweet => {
         return {
           id: tweet.id,
-          userId: tweet.UserId,
+          UserId: tweet.UserId,
           description: tweet.description,
           createdAt: tweet.createdAt,
           account: tweet.User.account,
@@ -33,7 +30,39 @@ const tweetController = {
           isLiked: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
         }
       })
-      return res.status(200).json({ status: 'success', data })
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTweet: async (req, res, next) => {
+    try {
+      const id = req.params.tweet_id
+      console.log(req.params)
+      const tweet = await Tweet.findByPk(id,
+        {
+          include: [
+            { model: User, attributes: ['name', 'avatar', 'account'] },
+            Like,
+            Reply,
+            { model: User, as: 'LikedUsers' }]
+        })
+      if (!tweet) {
+        return res.status(404).json({ status: 'error', message: "Tweet didn't exist!" })
+      }
+      const data = {
+        id: tweet.id,
+        UserId: tweet.UserId,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        account: tweet.User.account,
+        name: tweet.User.name,
+        avatar: tweet.User.avatar,
+        likedCount: tweet.Likes.length,
+        repliedCount: tweet.Replies.length,
+        isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
+      }
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
@@ -48,7 +77,7 @@ const tweetController = {
         return res.status(409).json({ status: 'error', message: "Tweet can't be more than 140 words." })
       }
       const data = await Tweet.create({
-        userId: req.user.id,
+        UserId: helpers.getUser(req).id,
         description
       })
       return res.status(200).json({ status: 'success', data })
@@ -69,7 +98,7 @@ const tweetController = {
   postLike: async (req, res, next) => {
     try {
       const TweetId = req.params.id
-      const UserId = req.user.id
+      const UserId = helpers.getUser(req).id
       const tweet = await Tweet.findByPk(
         TweetId,
         { include: User }
@@ -89,8 +118,8 @@ const tweetController = {
         status: 'success',
         data: {
           id: createdLike.id,
-          userId: createdLike.UserId,
-          tweetId: createdLike.TweetId,
+          UserId: createdLike.UserId,
+          TweetId: createdLike.TweetId,
           likedTweetAuthor
         }
       })
@@ -101,7 +130,7 @@ const tweetController = {
   postUnlike: async (req, res, next) => {
     try {
       const TweetId = req.params.id
-      const UserId = req.user.id
+      const UserId = helpers.getUser(req).id
       const tweet = await Tweet.findByPk(
         TweetId, { include: User }
       )
@@ -118,8 +147,8 @@ const tweetController = {
         status: 'success',
         data: {
           id: deletedLike.id,
-          userid: deletedLike.UserId,
-          tweetid: deletedLike.TweetId,
+          Userid: deletedLike.UserId,
+          Tweetid: deletedLike.TweetId,
           unlikedTweetAuthor
         }
       })
@@ -153,15 +182,15 @@ const tweetController = {
           avatar: reply.User.avatar
         }
       })
-      return res.status(200).json({ status: 'success', data })
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
   },
   postReply: async (req, res, next) => {
     try {
-      const tweetId = req.params.tweet_id
-      const tweet = await Tweet.findByPk(tweetId, { include: User })
+      const TweetId = req.params.tweet_id
+      const tweet = await Tweet.findByPk(TweetId, { include: User })
       if (!tweet) {
         return res.status(404).json({ status: 'error', message: "Tweet didn't exist." })
       }
@@ -174,16 +203,16 @@ const tweetController = {
         return res.status(409).json({ status: 'error', message: "Comment can't be more than 50 words." })
       }
       const createdReply = await Reply.create({
-        userId: req.user.id,
-        tweetId,
+        UserId: helpers.getUser(req).id,
+        TweetId,
         comment
       })
       return res.status(200).json({
         status: 'success',
         data: {
           id: createdReply.id,
-          userId: createdReply.userId,
-          tweetId: createdReply.tweetId,
+          UserId: createdReply.UserId,
+          TweetId: createdReply.TweetId,
           comment: createdReply.comment,
           repliedTweetAuthor
         }
