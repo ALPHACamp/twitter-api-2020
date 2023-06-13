@@ -210,8 +210,7 @@ const userController = {
       const [user, follows] = await Promise.all([
         User.findByPk(userId, {
           raw: true,
-          attributes: ['id', 'name',
-            [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount']]
+          attributes: ['id']
         }),
         Followship.findAll({
           raw: true,
@@ -229,8 +228,7 @@ const userController = {
         ...follow,
         isSelfUserFollow: helpers?.getUser(req).Followings?.some(s => s.id === follow.followingId)
       }))
-      const doneFollowsData = [...followsData, user]
-      return res.json(doneFollowsData)
+      return res.json(followsData)
     } catch (err) {
       next(err)
     }
@@ -242,8 +240,7 @@ const userController = {
       const [user, follows] = await Promise.all([
         User.findByPk(userId, {
           raw: true,
-          attributes: ['id', 'name',
-            [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount']]
+          attributes: ['id']
         }),
         Followship.findAll({
           raw: true,
@@ -259,8 +256,7 @@ const userController = {
         User: await User.findByPk(follow.followerId, { raw: true, attributes: ['id', 'name', 'avatar', 'account', 'introduction'] }),
         isSelfUserFollow: helpers?.getUser(req)?.Followings?.some(s => s.id === follow.followerId)
       })))
-      const doneFollowsData = [...followsData, user]
-      return res.json(doneFollowsData)
+      return res.json(followsData)
     } catch (err) {
       next(err)
     }
