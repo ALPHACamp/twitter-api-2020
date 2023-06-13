@@ -91,6 +91,18 @@ const userController = {
       const hash = await bcrypt.hash(password, 10)
       avatar = avatar ? await imgurFileHandler(avatar) : null
       cover = cover ? await imgurFileHandler(cover) : null
+      // 把所有資訊(除了該使用者)拿出來與userInfo比對,看是否有重複account/email
+      const allUsersInfo = await User.findAll({
+        where: { role: 'user' },
+        attributes: ['id', 'email', 'account']
+      })
+      for (let i = 0; i < allUsersInfo.length; i++) {
+        if (allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.account.toString() === account.toString()) {
+          throw new Error('account 已重複註冊！')
+        } else if (allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.email.toString() === email.toString()) {
+          throw new Error('email 已重複註冊！')
+        }
+      }
       userInfo = await userInfo.update({
         account,
         email,
@@ -100,20 +112,6 @@ const userController = {
         cover: cover || userInfo.cover,
         introduction
       })
-
-      // 把所有資訊(除了該使用者)拿出來與userInfo比對,看是否有重複account/email
-      const allUsersInfo = await User.findAll({
-        where: { role: 'user' },
-        attributes: ['id', 'email', 'account']
-      })
-      console.log(allUsersInfo[1].dataValues)
-      for (let i = 0; i < allUsersInfo.length; i++) {
-        if (allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.account.toString() === account.toString()) {
-          throw new Error('account 已重複註冊！')
-        } else if (allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.email.toString() === email.toString()) {
-          throw new Error('email 已重複註冊！')
-        }
-      }
       return res.status(200).json(userInfo)
     } catch (err) {
       next(err)
