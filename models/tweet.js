@@ -16,12 +16,12 @@ module.exports = (sequelize, DataTypes) => {
     userId: DataTypes.INTEGER,
     description: DataTypes.TEXT,
     numberLike: DataTypes.INTEGER,
-    numberUnlike: DataTypes.INTEGER,
-    underscored: true
+    numberUnlike: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Tweet',
-    tableName: 'Tweets'
+    tableName: 'Tweets',
+    underscored: true
   })
   return Tweet
 }
