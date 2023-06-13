@@ -12,18 +12,6 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET
 }
 
-passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
-    include: [
-      // 看要include那些
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
-    ]
-  })
-    .then(user => cb(null, user.toJSON()))
-    .catch(err => cb(err))
-}))
-
 // LocalStrategy
 passport.use(new LocalStrategy(
   // set Field, use email and password
@@ -36,17 +24,31 @@ passport.use(new LocalStrategy(
   (req, account, password, cb) => {
     return User.findOne({ where: { account } })
       .then(user => {
-        // 這邊應該有更好的寫法
-        const adminError = '帳號不存在'
-        if (user.role === 'admin') cb(adminError, user, 'error_messages', '帳號不存在')
-        if (!user) return cb(null, false, 'error_messages', '帳號不存在')
-        bcrypt.compare(password, user.password).then(res => {
-          if (!res) return cb(null, 'error_messages', '帳號或密碼輸入錯誤！')
-          return cb(null, user)
-        })
+        if (!user) throw new Error('帳號不存在!')
+        bcrypt.compare(password, user.password)
+          .then(res => {
+            if (!res) throw new Error('密碼不正確!')
+            return cb(null, user)
+          })
+          .catch(err => cb(err))
       })
+      .catch(err => cb(err))
   }
 ))
+
+// JWT auth
+passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
+  User.findByPk(jwtPayload.id, {
+    include: [
+      // 看要include那些
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ]
+  })
+    .then(user => cb(null, user.toJSON()))
+    .catch(err => cb(err))
+}))
+
 // serialize and deserialize user
 passport.serializeUser((user, cb) => {
   cb(null, user.id)

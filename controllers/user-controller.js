@@ -1,12 +1,11 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
-const userDummy = require('./dummy/users-dummy.json')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
-// const { imgurFileHandler } = require('../helpers')
+// const { imgurFileHandler } = require('../helpers/file-felpers')
 
 const userController = {
   getUsers: (req, res, next) => {
@@ -15,19 +14,49 @@ const userController = {
       nest: true
     })
       .then(users => { res.json(users) })
+      .catch(err => next(err))
   },
   getUser: (req, res, next) => {
     helpers.getUser(req)
-    return User.findByPk(req.params.id)
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ],
+      raw: true,
+      nest: true
+    })
       .then(user => {
         if (!user) throw new Error('getUser查無此人')
+        req.user.Followings = req.user.Followings || []
+        req.user.Followers = req.user.Followers || []
+        user = {
+          ...user,
+          isFollowing: req.user && req.user.Followings.some(following => following.id === user.id),
+          isFollower: req.user && req.user.Followers.some(follower => follower.id === user.id)
+        }
         // res.json({ status: 'success', user: user.toJSON() })
-        res.status(200).json(user.toJSON())
+        delete user.password
+        res.status(200).json(user)
       })
+      .catch(err => next(err))
   },
-  getTopUsers: (req, res, next) => {
-    console.log('users_getTopUser')
-    res.json(userDummy.getTopUsers)
+  getUsersTop: (req, res, next) => {
+    return User.findAll({
+      attributes: { exclude: ['password'] },
+      include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }]
+    })
+      .then(usersData => {
+        usersData = usersData.map(user => ({
+          ...user.toJSON(),
+          followersCount: user.Followers.length,
+          isFollowing: req.user && req.user.Followings.some(following => following.id === user.id)
+        }))
+          .sort((a, b) => b.followersCount - a.followersCount)
+        usersData = usersData.slice(0, 10)
+        res.json(usersData)
+      })
+      .catch(err => next(err))
   },
   signUp: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
@@ -161,7 +190,8 @@ const userController = {
       User.findByPk(userId),
       Followship.findAll({
         where: { followerId: userId },
-        raw: true
+        raw: true,
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, followingsData]) => {
@@ -176,29 +206,76 @@ const userController = {
       User.findByPk(userId),
       Followship.findAll({
         where: { followingId: userId },
-        raw: true
+        raw: true,
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, followersData]) => {
         if (!user) throw new Error('getUserFollowers說: 沒這人')
+        if (req.user.Followings) {
+          followersData = followersData.map(follower => ({
+            ...follower,
+            isFollowing: req.user && req.user.Followings.some(following => following.id === follower.id)
+          }))
+        }
         res.status(200).json(followersData)
       })
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
-    // const userId = req.params.id
-    // const { name } = req.body
-    // const { file } = req
-    // return User.findByPk(userId)
-    //   .then(user => {
-    //     if (!user) throw new Error('putUser說: 沒這人')
-    //     return res.redirect('back')
-    //   })
-    //   .then(user => {
-    //     return User.update({
-
-    //     })
-    //   })
+    const userId = Number(req.params.id)
+    // 沒有這條, 有了token之後, 就可以亂改他人資料了
+    if (userId !== helpers.getUser(req).id) throw new Error('只能改自己的啦')
+    const { name, introduction, avatar, banner } = req.body
+    return User.findByPk(userId)
+      .then(userData => {
+        if (!userData) throw new Error('putUser說: 沒這人')
+        return userData.update({
+          name: name || userData.name,
+          introduction: introduction || userData.introduction,
+          avatar: avatar || userData.avatar,
+          banner: banner || userData.banner
+        })
+      })
+      .then(updatedUser => {
+        delete updatedUser.password
+        res.status(200).json(updatedUser)
+      })
+      .catch(err => next(err))
+  },
+  patchUser: (req, res, next) => {
+    const userId = Number(req.params.id)
+    // 沒有這條, 有了token之後, 就可以亂改他人資料了
+    if (userId !== helpers.getUser(req).id) throw new Error('只能改自己的啦')
+    const { name, account, email, password, checkPassword } = req.body
+    const passwordLength = password ? password.length : ''
+    if (passwordLength > 1) {
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不符')
+    }
+    return User.findAll({
+      where: { account },
+      raw: true
+    })
+      .then(user => {
+        if (user.account === account) throw new Error('帳號已存在')
+      })
+      .then(() => {
+        return User.findByPk(userId)
+          .then(userData => {
+            if (!userData) throw new Error('putUser說: 沒這人')
+            return userData.update({
+              name: name || userData.name,
+              account: account || userData.account,
+              email: email || userData.email,
+              password: password || userData.password
+            })
+          })
+      })
+      .then(updatedUser => {
+        delete updatedUser.password
+        res.status(200).json(updatedUser)
+      })
+      .catch(err => next(err))
   }
 }
 

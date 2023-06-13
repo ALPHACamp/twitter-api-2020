@@ -1,8 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../controllers/user-controller')
-// const dummyController = require('../controllers/dummy-controller')
-
 const { apiErrorHandler } = require('../middleware/error-handler')
 const passport = require('../config/passport')
 const { authenticated, authenticatedAdmin, isUser } = require('../middleware/api-auth')
@@ -11,13 +9,15 @@ const followships = require('./modules/followships')
 const likes = require('./modules/likes')
 const tweets = require('./modules/tweets')
 const users = require('./modules/users')
-// sign signup單獨拉出來
+const adminController = require('../controllers/admin-controller')
 
+// sign signup單獨拉出來
 router.post('/api/users', userController.signUp)
 router.post('/api/signin', passport.authenticate('local', { session: false }), isUser, userController.signIn)
+router.post('/api/admin/users', passport.authenticate('local', { session: false }), authenticatedAdmin, adminController.signin)
 
 // use modules
-router.use('/api/admin', authenticatedAdmin, admin)
+router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 router.use('/api/followships', authenticated, isUser, followships)
 router.use('/api/likes', authenticated, isUser, likes)
 router.use('/api/tweets', authenticated, isUser, tweets)
