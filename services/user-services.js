@@ -213,8 +213,8 @@ const userServices = {
     })
       .then(user => {
         // check if email or account already used by user other than login user
-        if (user.some(u => u.email === email && u.id !== req.user.id)) throw new Error('信箱已被註冊')
-        if (user.some(u => u.account === account && u.id !== req.user.id)) throw new Error('帳號已被註冊')
+        if (user.some(u => u.email === email && u.id !== helpers.getUser(req).id)) throw new Error('信箱已被註冊')
+        if (user.some(u => u.account === account && u.id !== helpers.getUser(req).id)) throw new Error('帳號已被註冊')
         return User.findByPk(req.params.id)
       })
       .then(user => {
@@ -222,7 +222,7 @@ const userServices = {
           name,
           account,
           email,
-          password: bcrypt.hashSync(password, 10)
+          password: password ? bcrypt.hashSync(password, 10) : user.password
         })
       })
       .then(() => {
