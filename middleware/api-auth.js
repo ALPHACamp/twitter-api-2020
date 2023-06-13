@@ -4,9 +4,13 @@ const { getUser } = require('../_helpers')
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized!' })
-    res.locals.userId = user.dataValues.id
-    req.user = user.dataValues
-    next()
+    if (user.role === 'admin') {
+      return res.status(403).json({ status: 'error', message: 'Admin cannot use these function' })
+    } else {
+      res.locals.userId = user.dataValues.id
+      req.user = user.dataValues
+      next()
+    }
   })(req, res, next)
 }
 
