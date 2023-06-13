@@ -220,7 +220,7 @@ const userController = {
           order: [['createdAt', 'DESC']],
           include: [{
             model: User,
-            attributes: ['id', 'name', 'avatar', 'introduction']
+            attributes: ['id', 'name', 'avatar', 'account', 'introduction']
           }]
         })
       ])
@@ -256,7 +256,7 @@ const userController = {
       if (!user) newErrorGenerate('使用者不存在', 404)
       const followsData = await Promise.all(follows?.map(async follow => ({
         ...follow,
-        User: await User.findByPk(follow.followerId, { raw: true, attributes: ['id', 'name', 'avatar', 'introduction'] }),
+        User: await User.findByPk(follow.followerId, { raw: true, attributes: ['id', 'name', 'avatar', 'account', 'introduction'] }),
         isSelfUserFollow: helpers?.getUser(req)?.Followings?.some(s => s.id === follow.followerId)
       })))
       const doneFollowsData = [...followsData, user]
