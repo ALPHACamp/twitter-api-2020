@@ -150,6 +150,9 @@ const userController = {
               : false
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
+        data.forEach((user, index) => {
+          if (user.account === 'root') data.splice(index, 1)
+        })
         const final = data.map(({ Followers, ...rest }) => rest)
         res.status(200).json(final)
       })
