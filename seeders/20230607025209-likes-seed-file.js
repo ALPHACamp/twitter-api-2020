@@ -1,5 +1,5 @@
 'use strict'
-const DEFAULT_EACH_USER_LIKES = 10
+const DEFAULT_EACH_USER_LIKES = 2
 const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -15,9 +15,9 @@ module.exports = {
 
     await queryInterface.bulkInsert('Likes',
       Array.from({ length: totalLikes }, (_, index) => ({
-        // 預設每個user有10個 likes
+        // 預設每個user有3個 likes
         UserId: users[Math.floor(index / DEFAULT_EACH_USER_LIKES)].id,
-        TweetId: tweets[Math.floor(Math.random() * tweets.length)].id,
+        TweetId: tweets[index].id,
         createdAt: faker.date.past(),
         updatedAt: faker.date.recent()
       })))

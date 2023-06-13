@@ -128,7 +128,9 @@ const tweetController = {
       if (!user) newErrorGenerate('使用者不存在', 404)
       if (like) newErrorGenerate('已按過喜歡', 400)
       const addLike = await Like.create({ TweetId: tweetId, UserId: userId })
-      return res.json(addLike)
+      const addLikeJson = addLike.toJSON()
+      addLikeJson.TweetId = Number(addLikeJson.TweetId)
+      return res.json(addLikeJson)
     } catch (err) {
       next(err)
     }
