@@ -1,5 +1,4 @@
 const { use } = require('chai')
-const jwt = require('jsonwebtoken')
 const userServices = require('../services/user-services')
 
 const userController = {
@@ -7,20 +6,7 @@ const userController = {
     await userServices.signUp(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   signIn: async (req, res, next) => {
-    const userData = req.user.toJSON()
-    delete userData.password
-    try {
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
-      await res.json({
-        status: 'success',
-        data: {
-          token,
-          user: userData
-        }
-      })
-    } catch (err) {
-      next(err)
-    }
+    await userServices.signIn(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getUser: async (req, res, next) => {
     await userServices.getUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
