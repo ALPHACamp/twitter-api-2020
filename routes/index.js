@@ -1,10 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport') // 引入 Passport，需要它幫忙做驗證
-const userController = require('../controllers/user-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/api-auth')
-const upload = require('../middleware/multer') // 載入 multer
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const likeController = require('../controllers/like-controller')
