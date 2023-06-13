@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt-nodejs')
 const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const { Tweet, User, Like, Reply } = require('../models')
+const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 
 const adminServices = {
   signIn: async (req, cb) => {
@@ -106,6 +107,42 @@ const adminServices = {
 
       const usersWithCounts = await getUsersData()
       cb(null, usersWithCounts)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getAdminTweets: async (req, cb) => {
+    try {
+      let tweets = await Tweet.findAll({
+        include: [
+          {
+            model: User,
+            attributes: ['name', 'avatar', 'account']
+          }, {
+            model: Like,
+            attributes: ['id']
+          }, {
+            model: Reply,
+            attributes: ['id']
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      if (!tweets) throw new Error("目前沒有任何推文！")
+      tweets = tweets.map(tweet => {
+      const subDescription = tweet.description ? tweet.description.substring(0, 50) : ''
+
+      return {
+        ...tweet.dataValues,
+        description: subDescription,
+        createdAt: relativeTimeFromNow(tweet.dataValues.createdAt),
+        isLiked: tweet.Likes.some(like => like.UserId === req.userId),
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.Likes.length
+      }
+    })
+      cb(null, tweets)
     } catch (err) {
       cb(err)
     }
