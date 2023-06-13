@@ -19,9 +19,9 @@ describe('# user requests', () => {
         await db.User.destroy({where: {},truncate: true, force: true})
         await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
-
       // 註冊自己的帳號 POST /users
       it(' - successfully', (done) => {
+
         request(app)
           .post('/api/users')
           .send('account=User1&name=User1&email=User1@example.com&password=User1&checkPassword=User1')
@@ -337,6 +337,7 @@ describe('# user requests', () => {
 
             expect(res.body).to.be.an('array');
             // 有跟隨者的 followerId = 1
+
             res.body[0].followerId.should.equal(1);
 
             return done();

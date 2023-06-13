@@ -63,6 +63,10 @@ const adminController = {
           if (tweet.description.length > 50) tweet.description = tweet.description.substring(0, 50) + '...'
           // 取得現在的時間 - 更新時間
           getLastUpdated(tweet)
+          tweet.account = tweet.User.account
+          tweet.name = tweet.User.name
+          tweet.avatar = tweet.User.avatar
+          delete tweet.User
         })
         return res.status(200).json(tweets)
       })
@@ -88,9 +92,11 @@ const adminController = {
         replies.forEach((reply) => {
           // 只顯示前50個字
           if (reply.comment.length > 50) reply.comment = reply.comment.substring(0, 50) + '...'
-          // 取得現在的時間
-          // 取得現在的時間 - 更新時間
           getLastUpdated(reply)
+          reply.account = reply.User.account
+          reply.name = reply.User.name
+          reply.avatar = reply.User.avatar
+          delete reply.User
         })
         return res.status(200).json(replies)
       })

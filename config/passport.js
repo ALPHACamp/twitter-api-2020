@@ -30,7 +30,7 @@ passport.use(new LocalStrategy(
 // 註冊
 const jwtOptions = {
   jwtFromRequest: ExtractJWWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: process.env.JWT_SECRET || 'KINGSMAN'
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {

@@ -1,8 +1,8 @@
-const { Followship, User, Like, Tweet, Sequelize } = require('../models')
+const { Followship, User, Like, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
 const followController = {
   addFollowing: (req, res, next) => {
-    const followerId = getUser.id
+    const followerId = getUser(req).id
     const followingId = req.body.id
     if (!followingId) {
       return res
@@ -31,12 +31,10 @@ const followController = {
       .catch((error) => next(error))
   },
   removeFollowing: (req, res, next) => {
-    const followerId = getUser.id
+    const followerId = getUser(req).id
     const followingId = req.params.id
     if (!followingId) {
-      return res
-        .status(400)
-        .json('缺少追蹤的用戶id')
+      return res.status(400).json('缺少追蹤的用戶id')
     }
 
     return Followship.findOne({
@@ -55,84 +53,86 @@ const followController = {
   getFollowers: async (req, res, next) => {
     const followingId = req.params.id
     if (!followingId) {
-      return res
-        .status(400)
-        .json('缺少追蹤的用戶id')
+      return res.status(400).json('缺少追蹤的用戶id')
     }
-
     const user = await User.findByPk(followingId)
     if (!user) return res.status(400).json('用戶不存在')
-
+    // error "SequelizeEagerLoadingError: User is not associated to Followship!"
     try {
-      const followships = await Followship.findAll({
-        where: { followingId },
+      const followers = await User.findAll({
+        where: { id: followingId },
+        attributes: [],
         include: [
           {
             model: User,
-            as: 'Follower',
+            as: 'Followers',
             attributes: ['id', 'name', 'account', 'avatar', 'introduction']
           }
         ],
         order: [['createdAt', 'DESC']]
       })
+<<<<<<< HEAD
 
       const followers = followships.map((followship) => {
         const follower = followship.Follower
         follower.introduction = follower.introduction ? follower.introduction.substring(0, 50) : ''
         return follower
+=======
+      const data = followers[0].Followers.map(follower => {
+        const introduction = follower.introduction?.substring(0, 50)
+        return {
+          ...follower.get(),
+          introduction,
+          followerId: follower.Followship.followerId
+        }
+>>>>>>> master
       })
-      return res.status(200).json(followers)
+      return res.status(200).json(data)
     } catch (error) {
       return next(error)
     }
   },
-  getFollowings: (req, res, next) => {
+  getFollowings: async (req, res, next) => {
     const followerId = req.params.id
     if (!followerId) {
-      return res
-        .status(400)
-        .json('缺少追蹤的用戶id')
+      return res.status(400).json('缺少追蹤的用戶id')
     }
-
-    User.findByPk(followerId)
-      .then((user) => {
-        if (!user) {
-          return res
-            .status(404)
-            .json('用戶不存在')
+    const user = await User.findByPk(followerId)
+    if (!user) return res.status(400).json('用戶不存在')
+    // error "SequelizeEagerLoadingError: User is not associated to Followship!"
+    try {
+      const followings = await User.findAll({
+        where: { id: followerId },
+        attributes: [],
+        include: [
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      const data = followings[0].Followings.map(following => {
+        const introduction = following.introduction?.substring(0, 50)
+        return {
+          ...following.get(),
+          introduction,
+          followingId: following.Followship.followingId
         }
-        return Followship.findAll({
-          where: { followerId },
-          include: [
-            {
-              model: User,
-              as: 'Following',
-              attributes: ['id', 'name', 'account', 'avatar', 'introduction']
-            }
-          ],
-          order: [['createdAt', 'DESC']]
-        })
       })
-      .then((followships) => {
-        const followings = followships.map((followship) => {
-          const following = followship.Following
-          following.introduction = following.introduction ? following.introduction.substring(0, 50) : ''
-          return following
-        })
-        return res.status(200).json(followings)
-      })
-      .catch((error) => next(error))
+      return res.status(200).json(data)
+    } catch (error) {
+      return next(error)
+    }
   },
   getFollowCounts: (req, res, next) => {
     const userId = req.params.id
     if (!userId) return res.status(400).json('缺少用戶id')
-
     User.findByPk(userId)
       .then((user) => {
         if (!user) {
-          return res
-            .status(404)
-            .json('用戶不存在')
+          return res.status(404).json('用戶不存在')
         }
         return Promise.all([
           Followship.count({ where: { followerId: userId } }),
@@ -140,11 +140,11 @@ const followController = {
         ])
       })
       .then(([followingCount, followerCount]) => {
-        return res
-          .status(200)
-          .json(
-            [followingCount, followerCount]
-          )
+        const data = {
+          followingCount,
+          followerCount
+        }
+        return res.status(200).json(data)
       })
       .catch((error) => next(error))
   },
@@ -182,7 +182,6 @@ const followController = {
     const UserId = req.user.id
     const TweetId = req.params.id
     if (!TweetId) return res.status(400).json('缺少推文id')
-
     return Like.findOne({
       where: {
         UserId,
@@ -199,28 +198,22 @@ const followController = {
   },
   getLikes: (req, res, next) => {
     const UserId = req.params.id
-    if (!UserId) return res.status(400).json('缺少用戶id')
-    let likeCounts = 0
-
-    return User.findByPk(UserId, {
-      include: [
-        {
-          model: Tweet,
-          include: { model: Like, attributes: [] },
-          attributes: [
-            [Sequelize.fn('COUNT', Sequelize.col('Tweets.Likes.id')), 'likeCount']
-          ]
-        }
-      ],
-      group: ['Tweets.id']
+    if (!UserId) {
+      return res.status(400).json('缺少用戶id')
+    }
+    // 這個api除了給likecounts外也要給出like的關係，所以不能只回likecounts否則測試會失敗
+    Like.findAll({
+      where: { UserId },
+      attributes: ['TweetId', 'UserId'],
+      raw: true,
+      nest: true
     })
       .then((user) => {
         if (!user) return res.status(400).json('找不到')
-        user.Tweets.forEach(tweet => (
-          likeCounts += tweet.dataValues.likeCount
-        ))
+        const likeCounts = user.length
+        user.push({ likeCounts })
+        return res.status(200).json(user)
       })
-      .then(() => res.status(200).json(likeCounts))
       .catch((error) => next(error))
   }
 }
