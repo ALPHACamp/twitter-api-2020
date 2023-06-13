@@ -62,7 +62,7 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id);
       if (!user) throw new Error('This user does not exist')
-    
+
       const userData = {
         ...user.toJSON()
       }
@@ -170,15 +170,75 @@ const userController = {
         nest: true
       })
 
-      const userLikesData = likes.map(reply => reply.toJSON())
+      const userLikesData = likes.map(like => like.toJSON())
       res.status(200).json(userLikesData)
     } catch (err) {
       next(err)
     }
   },
   getUserFollowings: async (req, res, next) => {
+    try {
+      const userId = req.params.userId;
+      const user = await User.findByPk(userId, {
+        attributes: { exclude: ['password'] }
+      });
+      if (!user) throw new Error('User does not exist');
+
+      const followings = await Followship.findAll({
+        where: { followerId: userId },
+        include: [
+          {
+            model: User,
+            as: 'Following',
+            attributes: { exclude: ['password'] }
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        // nest: true
+      });
+
+      const ThisUserId = helpers.getUser(req).id
+      const userFollowingsData = followings.map(following => ({
+        ...following.toJSON(),
+        isCurrentUserFollowed:
+          following.followerId.toString() === ThisUserId.toString()
+      }))
+      res.status(200).json(userFollowingsData)
+    } catch (err) {
+      next(err)
+    }
   },
   getUserFollowers: async (req, res, next) => {
+    try {
+      const userId = req.params.userId;
+      const user = await User.findByPk(userId, {
+        attributes: { exclude: ['password'] }
+      });
+      if (!user) throw new Error('User does not exist');
+
+      const followers = await Followship.findAll({
+        where: { followingId: userId },
+        include: [
+          {
+            model: User,
+            as: 'Follower',
+            attributes: { exclude: ['password'] }
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        // nest: true
+      });
+
+      const ThisUserId = helpers.getUser(req).id
+      const userFollowersData = followers.map(follower => ({
+        ...follower.toJSON(),
+        isCurrentUserFollowed:
+          follower.followerId.toString() === ThisUserId.toString()
+      }))
+      res.status(200).json(userFollowersData)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
