@@ -85,3 +85,7 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# 上傳圖片資料夾
+temp/
+upload/
