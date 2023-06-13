@@ -145,6 +145,12 @@ const tweetController = {
       const { tweet_id: tweetId } = req.params
       const tweet = await Tweet.findByPk(tweetId, {
         attributes: ['id', 'description', 'createdAt'],
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'name', 'account']
+          }
+        ],
         raw: true,
         nest: true
       })
@@ -176,6 +182,7 @@ const tweetController = {
         raw: true,
         nest: true
       })
+      console.log(replies)
 
       const data = replies.map(reply => ({
         replyId: reply.id,
@@ -184,7 +191,10 @@ const tweetController = {
         replyOwnerName: reply.name,
         replyOwnerAccount: reply.account,
         replyOwnerAvatar: reply.avatar,
-        createdAt: reply.createdAt
+        createdAt: reply.createdAt,
+        tweetOwnerId: tweet.User.id,
+        tweetOwnerName: tweet.User.name,
+        tweetOwnerAccount: tweet.User.account
       }))
 
       return res.status(200).json(data)
