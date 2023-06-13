@@ -6,26 +6,41 @@ const bcrypt = require('bcryptjs')
 const userController = {
   signIn: (req, res, next) => {
     const { from } = req.query
-    if (!from) res.status(403).json('Pls insert ?from=back or ?from=front at urls to let me know which way you want to sign!')
+    if (!from) {
+      res
+        .status(403)
+        .json(
+          'Pls insert ?from=back or ?from=front at urls to let me know which way you want to sign!'
+        )
+    }
     try {
       // if(from === 'back')
-      if (req.authInfo && req.authInfo.message) return res.status(400).json(req.authInfo.message)
+      if (req.authInfo && req.authInfo.message) { return res.status(400).json(req.authInfo.message) }
       const userData = getUser(req).toJSON()
-      if ((userData.role === 'user' && from === 'front') || (userData.role === 'admin' && from === 'back')) {
-        if (!userData) return res.status(400).json('account or password incorrect!')
+      if (
+        (userData.role === 'user' && from === 'front') ||
+        (userData.role === 'admin' && from === 'back')
+      ) {
+        if (!userData) { return res.status(400).json('account or password incorrect!') }
         delete userData.password
 
-        const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '7d' })
+        const token = jwt.sign(userData, process.env.JWT_SECRET, {
+          expiresIn: '7d'
+        })
         return res.status(200).json({ token, userData })
       } else {
-        res.status(401).json(`I'm sorry, but access to the ${from}stage area is restricted.`)
+        res
+          .status(401)
+          .json(
+            `I'm sorry, but access to the ${from}stage area is restricted.`
+          )
       }
     } catch (err) {
       next(err)
     }
   },
   signUp: (req, res, next) => {
-    if (req.body.password !== req.body.passwordCheck) return res.status(400).json('Password do not match!')
+    if (req.body.password !== req.body.passwordCheck) { return res.status(400).json('Password do not match!') }
     if (req.body.name.length > 50) return res.status(400).json('Max length 50')
     return Promise.all([
       User.findOne({ where: { email: req.body.email } }),
@@ -33,7 +48,7 @@ const userController = {
     ])
       .then(([emailCheck, accountCheck]) => {
         if (emailCheck) return res.status(400).json('Email already exists!')
-        if (accountCheck) return res.status(400).json('Account already exists!')
+        if (accountCheck) { return res.status(400).json('Account already exists!') }
         return bcrypt.hash(req.body.password, 10)
       })
       .then((hash) =>
@@ -45,8 +60,8 @@ const userController = {
         })
       )
       .then((data) => {
-        const userData = data.toJSON()
-        delete userData.password
+        const userData = data.toJSON() // 需修改?
+        delete userData.password // 需修改?
         res.status(200).json('Create success')
       })
       .catch((err) => next(err))
@@ -74,57 +89,62 @@ const userController = {
   putUser: async (req, res, next) => {
     // 為了做到可以&只能更新自己的資料，且如果自己的資料重複也能更新，且不能跟別人重複account、email
     // 下一階段再考慮優化它
-    const { setting } = req.query
-    const paramsUserId = Number(req.params.id)
-    const userId = Number(req.user?.id)
-    const userAccount = req.user?.account
-    const userEmail = req.user?.email
-    const { file } = req
-    console.log(file)
-    const { account, name, email, password, passwordCheck, introduction } = req.body
-
     try {
-      if (setting) {
-        if (!password) return res.status(401).json('You may into wrong place.')
-        if (paramsUserId !== userId) return res.status(403).json('Can not change others data')
-        if (password !== passwordCheck) return res.status(400).json('Password do not match!')
-        const users = await User.findAll({ attributes: ['account', 'email'] })
-        const user = await User.findByPk(userId)
-        const accountList = []
-        const emailList = []
-        users.map((user) => {
-          accountList.push(user.account)
-          emailList.push(user.email)
-          return users
-        })
-        accountList.splice(accountList.indexOf(userAccount), 1)
-        emailList.splice(emailList.indexOf(userEmail), 1)
-        if (accountList.includes(account)) return res.status(400).json('This account has been used!')
-        if (emailList.includes(email)) return res.status(400).json('This email has been used!')
-        const hash = await bcrypt.hash(password, 10)
-        await user.update({
-          account,
-          name,
-          email,
-          password: hash
-        })
-        return res.status(200).json('update success')
-      } else if (!setting) {
-        if (!introduction) return res.status(401).json('You may into wrong place.')
-        const user = await User.findByPk(userId)
-        const filePath = await imgurFileHandler(file)
-        await user.update({
-          name,
-          avatar: filePath || null,
-          coverPhoto: filePath || null,
-          introduction
-        })
-        return res.status(200).json('update success')
+      const userId = Number(getUser(req).dataValues.id)
+      const paramsUserId = Number(req.params.id)
+      if (paramsUserId !== userId) {
+        return res.status(403).json('Can not change others data')
       }
+
+      const userAccount = req.user.account
+      const userEmail = req.user.email
+      const { account, name, email, password, passwordCheck, introduction } =
+        req.body
+      const { file } = req
+
+      if (password !== passwordCheck) {
+        return res.status(400).json('Password do not match!')
+      }
+
+      const [users, userdata, filePath] = await Promise.all([
+        User.findAll({ attributes: ['account', 'email'] }),
+        User.findByPk(userId),
+        imgurFileHandler(file)
+      ])
+
+      const accountList = users.map((user) => user.account)
+      const emailList = users.map((user) => user.email)
+      accountList.splice(accountList.indexOf(userAccount), 1)
+      emailList.splice(emailList.indexOf(userEmail), 1)
+
+      if (accountList.includes(account)) {
+        return res.status(400).json('This account has been used!')
+      }
+      if (emailList.includes(email)) {
+        return res.status(400).json('This email has been used!')
+      }
+
+      let hash
+      if (password) {
+        hash = await bcrypt.hash(password, 10)
+      }
+      const data = {
+        account,
+        name,
+        email,
+        avatar: filePath || null,
+        password: hash || userdata.password,
+        introduction
+      }
+      await userdata.update(data)
+
+      return res.status(200).json('update success')
     } catch (err) {
+      console.log(err)
       next(err)
     }
   },
+
   deleteUser: (req, res, next) => {
     const userId = req.params.id
     // 別人也能刪除自己 需更動passport
