@@ -7,6 +7,7 @@ const routes = require('./routes')
 const methodOverride = require('method-override')
 const passport = require('./config/passport')
 const cors = require('cors')
+const swagger = require('./swagger')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -25,6 +26,9 @@ app.use(
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
   })
 )
+
+// swagger
+swagger(app)
 
 // routes
 app.get('/', (req, res) => { res.send('Welcome to the real world!') })

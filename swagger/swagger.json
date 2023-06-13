@@ -1,0 +1,125 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Twitter App API",
+    "description": "Find out how this Twitter API works"
+  },
+  "host": "localhost:3000",
+  "basePath": "/api",
+  "tags": [
+    {
+      "name": "Admin"
+    },
+    {
+      "name": "User"
+    },
+    {
+      "name": "Tweet"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "Enter the bearer token as 'Bearer <token>'"
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "首頁",
+        "description": "Admin login to get token",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {}
+      }
+    },
+    "/admin/login": {
+      "post": {
+        "summary": "管理者登入",
+        "tags": [
+          "Admin"
+        ],
+        "description": "Admin login to get token",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "loginRequest",
+            "schema": {
+              "$ref": "#/definitions/LoginRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {}
+      }
+    },
+    "/users/login": {
+      "post": {
+        "summary": "使用者登入",
+        "tags": [
+          "User"
+        ],
+        "description": "Login user in system",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "formData",
+            "description": "Username of the user",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "formData",
+            "description": "Password of the user",
+            "required": true,
+            "type": "string",
+            "format": "password"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "definitions": {
+    "LoginRequest": {
+      "type": "object",
+      "required": [
+        "account",
+        "password"
+      ],
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "x-internal": true
+    },
+    "loginSuccess": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
