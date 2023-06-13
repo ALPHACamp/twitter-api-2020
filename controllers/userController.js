@@ -177,7 +177,7 @@ const userController = {
           include: [
             { model: Like },
             { model: Reply, attributes: ['id'] },
-            { model: User, attributes: ['id', 'name', 'account'] }
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
           ],
           attributes: ['id', 'description', 'createdAt']
         },
@@ -288,16 +288,15 @@ const userController = {
       // 反查accout 與email 是否有被註冊過
       const foundUser = await User.findOne({
         where: {
+          id: { [Op.ne]: [req.params.id] },
           [Op.or]: [{ account: req.body.account }, { email: req.body.email }]
         },
         raw: true,
         nest: true
       })
 
-      if (foundUser.id !== user.id) {
-        if (foundUser.account === req.body.account) return res.status(400).json({ status: 'error', message: 'account已重複註冊!' })
-        if (foundUser.email === req.body.email) return res.status(400).json({ status: 'error', message: 'email已重複註冊!' })
-      }
+      if (foundUser?.account === req.body.account) return res.status(400).json({ status: 'error', message: 'account已重複註冊!' })
+      if (foundUser?.email === req.body.email) return res.status(400).json({ status: 'error', message: 'email已重複註冊!' })
 
       const hash = await bcrypt.hash(req.body.password, 10)
 
