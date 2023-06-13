@@ -16,11 +16,8 @@ app.use(express.json())
 
 app.use(
   cors({
-    origin: [
-      process.env.GITHUB_PAGE,
-      'http://localhost:3000/'
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     preflightContinue: false
