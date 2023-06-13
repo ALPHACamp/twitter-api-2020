@@ -18,22 +18,24 @@ const tweetController = {
         attributes: ['id']
       }]
     })
-      .then(tweets => {
-        // const a = tweets.get({ plain: true })
-        // console.log(a)
-        res.json(tweets)
-      })
+      .then(tweets => res.json(tweets))
       .catch(err => next(err))
   },
   // GET /tweets/:tweet_id - 一筆推文
   getTweet: (req, res, next) => {
     return Tweet.findByPk(req.params.id, {
-      include: {
+      include: [{
         model: User,
         attributes: [
           'id', 'account', 'name', 'avatar'
         ]
-      }
+      }, {
+        model: Reply,
+        attributes: ['id']
+      }, {
+        model: Like,
+        attributes: ['id']
+      }]
     })
       .then(tweet => {
         if (!tweet) throw new Error('此推文不存在')
