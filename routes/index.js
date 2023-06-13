@@ -14,7 +14,6 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 router.post('/api/tweets', authenticated, tweetController.postTweet)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.get('/api/tweets/:tweet_id', authenticated, tweetController.getTweet)
-router.get('/api/tweets/:id', authenticated, tweetController.getTweetById)
 router.get('/api/tweets/:id/likes', authenticated, tweetController.getTweetLikes)
 
 // Replies

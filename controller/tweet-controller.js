@@ -75,22 +75,6 @@ const tweetController = {
       next(error)
     }
   },
-  getTweetById: async (req, res, next) => {
-    try {
-      const tweetId = req.params.id
-
-      // 根據 tweetId 獲取指定貼文資料的邏輯處理
-      const tweet = await Tweet.findByPk(tweetId)
-
-      if (!tweet) {
-        return res.status(404).json({ message: 'Tweet not found' })
-      }
-
-      return res.status(200).json(tweet)
-    } catch (err) {
-      next(err)
-    }
-  },
 
   getTweetLikes: async (req, res, next) => {
     try {
