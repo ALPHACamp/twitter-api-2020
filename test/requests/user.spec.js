@@ -19,9 +19,9 @@ describe('# user requests', () => {
         await db.User.destroy({where: {},truncate: true, force: true})
         await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
-
       // 註冊自己的帳號 POST /users
       it(' - successfully', (done) => {
+
         request(app)
           .post('/api/users')
           .send('account=User1&name=User1&email=User1@example.com&password=User1&checkPassword=User1')
