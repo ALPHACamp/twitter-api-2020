@@ -21,6 +21,7 @@ router.post('/api/users', userController.signUp)
 router.get('/api/user', authenticated, authenticatedUser, userController.getCurrentUser)
 
 // user profile
+router.put('/api/users/:id', authenticated, authenticatedUser, userController.putUser)
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUserProfile)
 router.put('/api/users/:id/profile', authenticated, authenticatedUser, multiUpload, userController.putUserProfile)
 
