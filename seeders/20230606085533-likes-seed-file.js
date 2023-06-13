@@ -11,7 +11,7 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     await queryInterface.bulkInsert('Likes',
-      Array.from({ length: 30 }, () => ({
+      Array.from({ length: 50 }, () => ({
         user_id: users[Math.floor(Math.random() * users.length)].id,
         tweet_id: tweets[Math.floor(Math.random() * tweets.length)].id,
         created_at: new Date(),

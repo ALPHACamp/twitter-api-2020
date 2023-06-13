@@ -1,4 +1,4 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Sequelize = require('sequelize')
@@ -133,6 +133,11 @@ const adminController = {
       .then(tweet => {
         // Error: tweet doesn't exist
         if (!tweet) throw new Error('No tweet found')
+        // delete related data
+        Promise.all(
+          Reply.destroy({ where: { TweetId: req.params.id } }),
+          Like.destroy({ where: { TweetId: req.params.id } })
+        )
         // keep the deleted data
         const deletedTweet = tweet.toJSON()
         return tweet.destroy()
