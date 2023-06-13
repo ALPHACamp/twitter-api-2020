@@ -7,16 +7,8 @@
     "start": "NODE_ENV=development node app.js",
     "dev": "NODE_ENV=development nodemon app.js",
     "lint": "eslint \"**/*.js\" --fix",
-    "test": "mocha test --exit --recursive --timeout 5000",
-    "echo": "echo $NODE_ENV",
-    "test-models": "NODE_ENV=test mocha test/models --exit --recursive --timeout 5000",
-    "test-requests": "NODE_ENV=test mocha test/requests --exit --recursive --timeout 5000",
-    "test-admin": "NODE_ENV=test mocha test/requests/admin.spec.js --exit --timeout 5000",
-    "test-followship": "NODE_ENV=test mocha test/requests/followship.spec.js --exit --timeout 5000",
-    "test-like": "NODE_ENV=test mocha test/requests/like.spec.js --exit --timeout 5000",
-    "test-reply": "NODE_ENV=test mocha test/requests/reply.spec.js --exit --timeout 5000",
-    "test-tweet": "NODE_ENV=test mocha test/requests/tweet.spec.js --exit --timeout 5000",
-    "test-user": "NODE_ENV=test mocha test/requests/user.spec.js --exit --timeout 5000"
+    "test": "NODE_ENV=test mocha test --exit --recursive --timeout 5000",
+    "echo": "echo $NODE_ENV"
   },
   "author": "",
   "license": "ISC",
