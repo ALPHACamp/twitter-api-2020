@@ -41,6 +41,10 @@ const jwtOptions = {
 // jwtStrategy
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, { //拿payload裡面的id
+    include: [
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' },
+    ]
   })
     .then(user => {
       if (!user) return cb(null, false)
@@ -56,6 +60,10 @@ passport.serializeUser((user, cb) => {
 })
 passport.deserializeUser((id, cb) => {
   return User.findByPk(id, { // 使以下可透過req.user查詢
+    include: [
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' },
+    ]
   })
     .then(user => cb(null, user.toJSON()))
     .catch(err => cb(err))

@@ -7,6 +7,7 @@ const followshipController = {
     if (!followingId) throw new Error('Following id is required!')
     const getUser = helpers.getUser(req)
     const userId = getUser.id
+    if (userId.toString() === followingId) throw new Error("Can't follow yourself!")
     return Promise.all([
       Followship.findOne({
         where: {
@@ -53,7 +54,24 @@ const followshipController = {
         })
       })
       .catch(err => next(err))
-  }
+  },
+  getTopUser: (req, res, next) => {
+    return User.findAll({
+      include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
+      attributes: { exclude: ['password'] }
+    })
+      .then(users => {
+        const result = users
+          .map(user => ({
+            ...user.toJSON(),
+            followerCount: user.Followers.length,
+            isFollowed: req.user.Followings.some(f => f.id === user.id)
+          }))
+          .sort((a, b) => b.followerCount - a.followerCount)
+        return res.json({ users: result })
+      })
+      .catch(err => next(err))
+  },
 }
 
 module.exports = followshipController
