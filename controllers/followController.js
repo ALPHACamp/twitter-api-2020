@@ -71,13 +71,6 @@ const followController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-<<<<<<< HEAD
-
-      const followers = followships.map((followship) => {
-        const follower = followship.Follower
-        follower.introduction = follower.introduction ? follower.introduction.substring(0, 50) : ''
-        return follower
-=======
       const data = followers[0].Followers.map(follower => {
         const introduction = follower.introduction?.substring(0, 50)
         return {
@@ -85,7 +78,6 @@ const followController = {
           introduction,
           followerId: follower.Followship.followerId
         }
->>>>>>> master
       })
       return res.status(200).json(data)
     } catch (error) {
