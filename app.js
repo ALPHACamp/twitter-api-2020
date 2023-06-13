@@ -20,7 +20,7 @@ app.use(methodOverride('_method'))
 // cors
 app.use(
   cors({
-    origin: '*',
+    origin: 'https://zebrrrra.github.io',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
   })
