@@ -293,18 +293,29 @@ const userController = {
       // 檔案承接
       const { files } = req
 
-      const [avatar, background] = await Promise.all([
-        files.avatar ? await imgurFileHandler(files.avatar[0]) : null,
-        files.background ? await imgurFileHandler(files.background[0]) : null
-      ])
+      if (files) {
+        const [avatar, background] = await Promise.all([
+          files.avatar ? await imgurFileHandler(files.avatar[0]) : null,
+          files.background ? await imgurFileHandler(files.background[0]) : null
+        ])
 
-      const updatedUser = await user.update({
-        name,
-        introduction,
-        avatar: avatar || user.avatar,
-        background: background || user.background
-      })
-      return res.status(200).json(updatedUser)
+        const updatedUser = await user.update({
+          name,
+          introduction,
+          avatar: avatar || user.avatar,
+          background: background || user.background
+        })
+
+        return res.status(200).json(updatedUser)
+      } else {
+        const updatedUser = await user.update({
+          name,
+          introduction,
+          avatar: user.avatar,
+          background: user.background
+        })
+        return res.status(200).json(updatedUser)
+      }
     } catch (error) {
       next(error)
     }
