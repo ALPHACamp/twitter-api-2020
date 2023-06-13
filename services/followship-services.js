@@ -18,7 +18,7 @@ const followshipServices = {
             }
         })])
             .then(([user, isFollowing]) => {
-            if (!user) throw new Error("該名使用者不存在，你無法追蹤！")
+            if (!user) throw new Error("該名使用者不存在!")
             if (isFollowing) throw new Error('你已經追蹤過這名使用者了！')
             return Followship.create({
                 followerId,
@@ -47,7 +47,7 @@ const followshipServices = {
                 }
             })
             const user = await User.findByPk(followingId)
-            if (!user) throw new Error("該名使用者不存在，你無法追蹤！")
+            if (!user) throw new Error("該名使用者不存在")
             if (!followship) throw new Error("你尚未追蹤此人！")
             const deletedFollowship = await followship.destroy()
             cb(null, {
