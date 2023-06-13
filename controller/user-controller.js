@@ -3,6 +3,7 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const validator = require('email-validator')
+const { Op } = require('sequelize')
 const userController = {
   signIn: async (req, res, next) => {
     try {
@@ -20,7 +21,7 @@ const userController = {
       // Check password and check Password must be the same
       if (password !== checkPassword) throw new Error('Passwords do not match')
       // Check name.length must < 50
-      if (name.length > 51) throw new Error('使用者註冊名稱(name)上限為50字')
+      if (name.length > 50) throw new Error('使用者註冊名稱(name)上限為50字')
       // Check if email matches the required format
       if (!validator.validate(email)) throw new Error('Email格式不正確!')
       // check if user with given email or account already exists
@@ -139,6 +140,7 @@ const userController = {
       const userId = helpers.getUser(req).id
       const user = await User.findByPk(userId)
       if (!user) throw new Error('User not found!')
+      if (introduction.length > 160 || name.length > 50) throw new Error('字數超出上限')
       const updatedUser = await user.update({
         name: name || user.name,
         avatar: avatar || user.avatar,
@@ -150,6 +152,32 @@ const userController = {
         avatar: updatedUser.avatar,
         cover: updatedUser.cover,
         introduction: updatedUser.introduction
+      }
+      return res.status(200).json({ data: responseData, message: '修改成功' })
+    } catch (err) { next(err) }
+  },
+  putUserSetting: async (req, res, next) => {
+    try {
+      const { name, password, account, email } = req.body
+      const userId = helpers.getUser(req).id
+      if (name.length > 51) throw new Error('使用者註冊名稱(name)上限為50字')
+      if (!validator.validate(email)) throw new Error('Email格式不正確!')
+      const existingAccount = await User.findAll({ where: { [Op.or]: [{ account }, { email }] } })
+      if (existingAccount.some(user => user.account === account && user.id !== userId)) throw new Error('account已重複註冊!')
+      if (existingAccount.some(user => user.email === email && user.id !== userId)) throw new Error('email已重複註冊!')
+      const user = await User.findByPk(userId)
+      if (!user) throw new Error('User not found!')
+      const hash = await bcrypt.hash(password, 10)
+      const updatedUser = await user.update({
+        name: name || user.name,
+        password: hash || user.password,
+        account: account || user.account,
+        email: email || user.email
+      })
+      const responseData = {
+        name: updatedUser.name,
+        account: updatedUser.account,
+        email: updatedUser.email
       }
       return res.status(200).json({ data: responseData, message: '修改成功' })
     } catch (err) { next(err) }
