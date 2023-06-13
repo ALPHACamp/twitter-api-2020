@@ -334,9 +334,9 @@ const userController = {
       const user = await User.findByPk(req.params.id)
       if (!user) throw new Error('使用者不存在!')
 
-      const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
+      const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
 
-      const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
+      const cover = files?.cover ? await imgurFileHandler(files.cover[0]) : null
 
       await user.update({
         name: name || user.name,
