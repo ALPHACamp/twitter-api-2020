@@ -12,8 +12,8 @@ module.exports = {
       name: 'root',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }, {
       email: 'user1@example.com',
       account: 'user1',
@@ -22,8 +22,8 @@ module.exports = {
       name: 'user1',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }, {
       email: 'user2@example.com',
       account: 'user2',
@@ -32,8 +32,8 @@ module.exports = {
       name: 'user2',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }, {
       email: 'user3@example.com',
       account: 'user3',
@@ -42,8 +42,8 @@ module.exports = {
       name: 'user3',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }, {
       email: 'user4@example.com',
       account: 'user4',
@@ -52,8 +52,8 @@ module.exports = {
       name: 'user4',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     },
     {
       email: 'user5@example.com',
@@ -63,8 +63,8 @@ module.exports = {
       name: 'user5',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }], {})
   },
 

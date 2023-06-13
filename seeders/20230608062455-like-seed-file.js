@@ -13,10 +13,10 @@ module.exports = {
     
     await queryInterface.bulkInsert('Likes',
       Array.from({ length: 50 }, () => ({
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        UserId: users[Math.floor(Math.random() * users.length)].id,
-        TweetId: tweets[Math.floor(Math.random() * tweets.length)].id
+        user_id: users[Math.floor(Math.random() * users.length)].id,
+        tweet_id: tweets[Math.floor(Math.random() * tweets.length)].id,
+        created_at: new Date(),
+        updated_at: new Date()
       }))
     )
   },
