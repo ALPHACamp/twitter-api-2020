@@ -57,7 +57,8 @@ const followshipController = {
   },
   getTopUser: (req, res, next) => {
     return User.findAll({
-      include: [{ model: User, as: 'Followers' }]
+      include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
+      attributes: { exclude: ['password'] }
     })
       .then(users => {
         const result = users
