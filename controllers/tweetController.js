@@ -1,33 +1,42 @@
 const helpers = require('../_helpers')
 const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const { Op } = require('sequelize')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
 
-      const [tweets, likes] = await Promise.all([
-        Tweet.findAll({
-          attributes: ['id', 'description', 'createdAt'],
-          include: [
-            {
-              model: User,
-              attributes: ['id', 'name', 'account', 'avatar']
-            },
-            { model: Reply },
-            { model: Like }
-          ],
-          order: [['createdAt', 'DESC']]
-        }),
-        Like.findAll({ where: { UserId: currentUserId }, raw: true })
-      ])
-      if (!tweets) {
-        return res
-          .status(200)
-          .json({ status: 'success', message: 'No tweet data available.' })
-      }
+      const tweets = await Tweet.findAll({
+        attributes: ['id', 'description', 'createdAt'],
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          },
+          { model: Reply },
+          { model: Like }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
 
+      // get tweet ID
+      const tweetIds = tweets.map(tweet => tweet.id)
+      // get likes for tweets liked by the current user
+      const likes = await Like.findAll({
+        where: {
+          TweetId: {
+            [Op.in]: tweetIds
+          },
+          UserId: currentUserId
+        },
+        raw: true
+      })
+
+      // get tweetId(array) liked by the current user
       const currentUserLikes = likes.map(l => l.TweetId)
+      console.log(currentUserLikes)
+
       const data = tweets.map(tweet => {
         return {
           TweetId: tweet.id,
