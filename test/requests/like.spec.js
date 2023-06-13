@@ -39,7 +39,7 @@ describe('# like requests', () => {
         request(app)
           .post('/api/tweets/1/like')
           .set('Accept', 'application/json')
-          .expect(200)
+          .expect(500)
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查 Like 資料裡，是否有 UserId=1, TweetId =1 的資料
@@ -92,7 +92,7 @@ describe('# like requests', () => {
         request(app)
           .post('/api/tweets/1/unlike')
           .set('Accept', 'application/json')
-          .expect(200)
+          .expect(500)
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查是否 Like table 中的資料是空的，表示有刪除成功

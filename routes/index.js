@@ -14,7 +14,7 @@ router.use('/admin', authenticatedAdmin, admin)
 
 // 告訴passport不用session了 改用token驗證
 router.post('/signin', passport.authenticate('local', { session: false, failureMessage: true }), userController.signIn)
-
+router.get('/users/top', authenticated, userController.getTopUsers)
 // like
 router.post('/tweets/:id/like', authenticated, followController.addLike)
 router.post('/tweets/:id/unlike', authenticated, followController.removeLike)
@@ -40,7 +40,6 @@ router.put('/tweets/:id', authenticated, tweetController.putTweet)
 router.delete('/tweets/:id', authenticated, tweetController.deleteTweet)
 
 // user
-router.get('/users/top', authenticated, userController.getTopUsers)
 router.post('/users', userController.signUp)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', upload.single('avatar'), authenticated, userController.putUser)

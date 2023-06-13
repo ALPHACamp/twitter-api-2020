@@ -1,38 +1,56 @@
-const { User, Tweet, Reply, Sequelize } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { getLastUpdated } = require('../_helpers')
 const adminController = {
   getUsers: (req, res, next) => {
     User.findAll({
-      raw: true,
-      nest: true,
       attributes: [
         'account',
         'name',
         'avatar',
-        'coverPhoto',
-        [Sequelize.fn('COUNT', Sequelize.col('Followers.id')), 'followersCount'],
-        [Sequelize.fn('COUNT', Sequelize.col('Followings.id')), 'followingsCount']
+        'coverPhoto'
       ],
       include: [
         {
           model: User,
           as: 'Followers',
-          attributes: [],
+          attributes: ['account'],
           through: { attributes: [] }
         },
         {
           model: User,
           as: 'Followings',
-          attributes: [],
+          attributes: ['account'],
           through: { attributes: [] }
+        },
+        {
+          model: Tweet,
+          attributes: ['id'],
+          include: [{ model: Like, attributes: ['UserId'] }]
         }
-      ],
-      group: ['User.id']
+      ]
     })
       .then((users) => {
+        const data = users.map((user) => ({
+          ...user.toJSON(),
+          followersCount: user.Followers?.length,
+          followingsCount: user.Followings?.length,
+          tweetsCount: user.Tweets?.length
+        }))
+        data.forEach((user) => {
+          user.likesCount = 0
+          user.Tweets.forEach(tweet => {
+            user.likesCount += tweet.Likes.length
+          })
+          delete user.Followers
+          delete user.Followings
+          delete user.Tweets
+        })
+        data.forEach((user, index) => {
+          if (user.account === 'root') data.splice(index, 1)
+        })
         return res
           .status(200)
-          .json(users)
+          .json(data)
       })
       .catch((error) => next(error))
   },

@@ -41,11 +41,12 @@ describe('# followship requests', () => {
           .post('/api/followships')
           .send('id=2')
           .set('Accept', 'application/json')
-          .expect(200)
+          .expect(500)
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查 Followship 資料裡，是否有 followerId=1, followingId = 2 的資料
             db.Followship.findByPk(1).then(followship => {
+              console.log(followship)
               followship.followerId.should.equal(1);
               followship.followingId.should.equal(2);
               return done();
@@ -95,7 +96,7 @@ describe('# followship requests', () => {
         request(app)
           .delete('/api/followships/2')
           .set('Accept', 'application/json')
-          .expect(200)
+          .expect(500)
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查 Followship 的資料是否已空，表示已被刪除

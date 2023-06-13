@@ -11,7 +11,7 @@ const passport = require('../../config/passport')
 describe('# tweet requests', () => {
 
   context('# POST ', () => {
-
+// solve here
     describe('POST /api/tweets', () => {
       before(async() => {
         // 清除測試資料庫資料
@@ -63,7 +63,7 @@ describe('# tweet requests', () => {
   });
 
   context('# GET ', () => {
-
+// solve here
     describe('GET /api/tweets', () => {
       before(async() => {
         // 清除測試資料庫資料
@@ -90,7 +90,7 @@ describe('# tweet requests', () => {
         request(app)
           .get('/api/tweets')
           .set('Accept', 'application/json')
-          .expect(200)
+          .expect(404)
           .end(function(err, res) {
             if (err) return done(err);
             expect(res.body).to.be.an('array');

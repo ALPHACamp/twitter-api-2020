@@ -88,7 +88,8 @@ const tweetController = {
         lastUpdated: getLastUpd(tweet),
         account: tweet.User.account,
         name: tweet.User.name,
-        avatar: tweet.User.avatar
+        avatar: tweet.User.avatar,
+        isLiked: tweet.Likes?.some((l) => l.UserId === Number(userId))
       }))
       const data = counts.map(({ Likes, Replies, User, ...rest }) => rest)
       return res.status(200).json(data)
