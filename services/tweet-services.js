@@ -26,7 +26,7 @@ const tweetServices = {
       if (!tweets) throw new Error("目前沒有任何推文！")
 
       tweets = tweets.map(tweet => ({
-        ...tweet.dataValues,
+        ...tweet.dataValues.substring(0,50),
         createdAt: relativeTimeFromNow(tweet.dataValues.createdAt),
         isLiked: tweet.Likes.some(like => like.UserId === User.id),
         replyCount: tweet.Replies.length,
