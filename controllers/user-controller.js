@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { getUser } = require('../helpers/auth-helpers.js')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -67,9 +67,16 @@ const userController = {
         ]
       })
       if (!userInfo || userInfo.role !== 'user') throw new Error('該用戶不存在')
-      const follower = userInfo.Followings.length
-      const following = userInfo.Followers.length
-      userInfo = { ...userInfo.toJSON(), follower, following }
+      const following = userInfo.Followings.length
+      const follower = userInfo.Followers.length
+      let isFollowed = false
+      for (let i = 0; i < follower; i++) {
+        if (userInfo.Followers[i].id.toString() === getUser(req).id.toString()) {
+          isFollowed = true
+          break
+        }
+      }
+      userInfo = { ...userInfo.toJSON(), follower, following, isFollowed }
       delete userInfo.Followers
       delete userInfo.Followings
       return res.status(200).json(userInfo)
@@ -79,8 +86,9 @@ const userController = {
   },
   editUserInfo: async (req, res, next) => {
     try {
-      let { id, name, account, email, password, checkPassword, introduction, avatar, cover } = req.body
-      if (req.user.dataValues.id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可編輯該用戶基本資料!')
+      let { name, account, email, password, checkPassword, introduction, avatar, cover } = req.body
+      const id = getUser(req).id
+      if (id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可編輯該用戶基本資料!')
       let userInfo = await User.findOne({
         where: { id },
         attributes: ['id', 'account', 'email', 'password', 'name', 'avatar', 'cover', 'introduction']
@@ -103,6 +111,7 @@ const userController = {
           throw new Error('email 已重複註冊！')
         }
       }
+
       userInfo = await userInfo.update({
         account,
         email,
