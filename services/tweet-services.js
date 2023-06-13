@@ -25,7 +25,6 @@ const tweetServices = {
                     ['createdAt', 'DESC']
                 ]
             })
-
             if (!tweets) throw new Error("目前沒有任何推文！")
             tweets = tweets.map(tweet => {
                 const subDescription = tweet.description ? tweet.description.substring(0, 100) : ''
@@ -95,7 +94,6 @@ const tweetServices = {
             const UserId = helpers.getUser(req).id
             if (!UserId) throw new Error('查無此人!')
             if (!description) throw new Error('Tweet不能為空!')
-
             if (description.length > 140) throw new Error('輸入不得超過140字!')
 
 
@@ -125,7 +123,6 @@ const tweetServices = {
             })
             if (!tweet) throw new Error("推文不存在!")
             if (like) throw new Error('你已經like過這篇Tweet了')
-
             const likeCreate = await Like.create({
                 UserId: helpers.getUser(req).id,
                 TweetId: Number(id)
