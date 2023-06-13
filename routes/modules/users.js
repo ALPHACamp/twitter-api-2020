@@ -11,6 +11,7 @@ router.get('/:id/followings', userController.getUserFollowings)
 router.get('/:id/followers', userController.getUserFollowers)
 router.get('/:id', userController.getUser)
 router.put('/:id', userController.putUser)
+router.patch('/:id', userController.patchUser)
 router.get('/', userController.getUsers)
 
 module.exports = router
