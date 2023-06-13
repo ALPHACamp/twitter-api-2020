@@ -327,54 +327,61 @@ const userController = {
       }),
       Followship.findAll({
         where: { followerId: getUser(req).id },
+        raw: true,
       }),
     ])
       .then(([user, following]) => {
-        if (!user.Followers.length) return res.status(200).json({ isEmpty: 'true' })
+        if (!user.Followers.length) return res.status(200).json({ isEmpty: true })
+
         const currentUserFollowing = following.map((f) => f.followingId)
         const data = user.Followers.map((f) => ({
-          followingId: f.id,
+          followerId: f.id,
           account: f.account,
           name: f.name,
           avatar: f.avatar,
-          cover: f.cover,
           introduction: f.introduction,
-          createdAt: f.createdAt,
-          updatedAt: f.updatedAt,
-          isfollowed: currentUserFollowing.includes(f.toJSON().id),
-        })).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-
+          followed: currentUserFollowing.some((id) => id === f.id),
+        }))
         return res.status(200).json(data)
       })
       .catch((err) => next(err))
   },
   putUser: (req, res, next) => {
-    const { name, account, email, password } = req.body
-    return User.findAll({
-      where: {
-        [Op.or]: [{ email: req.body.email }, { account: req.body.account }],
-      },
-      attributes: ['account', 'email', 'id'],
-      raw: true,
-      nest: true,
-    })
+    if (getUser(req).id !== Number(req.params.id)) throw new Error('permission denied')
+    return User.findByPk(req.params.id)
       .then((user) => {
-        if (user.some((u) => u.email === req.body.email && u.id !== getUser(req).id)) throw new Error('信箱已被註冊過')
-        if (user.some((u) => u.account === req.body.account && u.id !== getUser(req).id))
-          throw new Error('帳號已被註冊過')
-        return User.findByPk(req.params.id)
-      })
-      .then((user) => {
-        return user.update({
-          name: name !== undefined ? name : user.name,
-          account,
-          email,
-          password: bcrypt.hashSync(password, 10),
+        const { name, account, email, password } = req.body
+
+        // 檢查 email 和 account 是否已被其他用戶註冊
+        return User.findOne({
+          where: {
+            [Op.or]: [
+              { email: req.body.email, id: { [Op.ne]: user.id } }, // 檢查 email
+              { account: req.body.account, id: { [Op.ne]: user.id } }, // 檢查 account
+            ],
+          },
+        }).then((existingUser) => {
+          if (existingUser) {
+            if (existingUser.email === req.body.email) throw new Error('信箱已被註冊過')
+            if (existingUser.account === req.body.account) throw new Error('帳號已被註冊過')
+          }
+
+          // 更新用戶信息
+          return user.update({
+            name: name !== undefined ? name : user.name,
+            account,
+            email,
+            password: bcrypt.hashSync(req.body.password, 10),
+          })
         })
       })
       .then((updatedUser) => {
-        delete updatedUser.password
-        return res.status(200).json(updatedUser)
+        delete updatedUser.dataValues.password
+        res.status(200).json({
+          status: 'success',
+          message: '成功修改',
+          updatedUser,
+        })
       })
       .catch((err) => next(err))
   },
