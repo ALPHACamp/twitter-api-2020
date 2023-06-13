@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
 const Sequelize = require('sequelize')
@@ -147,7 +147,8 @@ const userController = {
         where: { userId: req.params.id },
         order: [['createdAt', 'DESC']],
         include: {
-          model: User, attributes: ['id', 'name', 'account', 'avatar']
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar'],
         },
         attributes: {
           include: [
@@ -287,49 +288,59 @@ const userController = {
       .catch((err) => next(err))
   },
   getFollowings: (req, res, next) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        {
-          model: User,
-          as: 'Followings',
-          attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'cover', 'introduction'],
-        },
-      ],
-      attributes: [['id', 'userId'], 'name', 'account', 'avatar', 'cover'],
-    })
-      .then((followings) => {
-        if (followings.Followings.length === 0) return res.status(200).json({ isEmpty: true })
-        const followingId = getUser(req).Followings.map((user) => user.id)
-        console.log(getUser(req).Followings)
-        const result = followings.Followings.map((f) => ({
-          ...f.toJSON(),
-          isFollowed: followingId.includes(f.toJSON().followingId) || false,
-        })).sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
-        result.forEach((i) => delete i.Followship)
-        return res.json(result)
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: { model: User, as: 'Followings' },
+      }),
+      Followship.findAll({
+        where: { followerId: getUser(req).id },
+        raw: true,
+      }),
+    ])
+      .then(([user, following]) => {
+        if (!user.Followings.length) return res.status(200).json({ isEmpty: 'true' })
+        const currentUserFollowing = following.map((f) => f.followingId)
+        const data = user.Followings.map((f) => ({
+          followingId: f.id,
+          account: f.account,
+          name: f.name,
+          avatar: f.avatar,
+          cover: f.cover,
+          introduction: f.introduction,
+          createdAt: f.createdAt,
+          updatedAt: f.updatedAt,
+          isfollowed: currentUserFollowing.some((id) => id === f.id),
+        })).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+
+        return res.status(200).json(data)
       })
       .catch((err) => next(err))
   },
   getFollowers: (req, res, next) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        {
-          model: User,
-          as: 'Followers',
-          attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'cover', 'introduction'],
-        },
-      ],
-      attributes: [['id', 'userId'], 'name', 'account', 'avatar', 'cover'],
-    })
-      .then((followers) => {
-        if (followers.Followers.length === 0) return res.status(200).json({ isEmpty: true })
-        const followingId = getUser(req).Followings.map((user) => user.id)
-        const result = followers.Followers.map((f) => ({
-          ...f.toJSON(),
-          isFollowed: followingId.includes(f.toJSON().followerId) || false,
-        })).sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
-        result.forEach((i) => delete i.Followship)
-        return res.json(result)
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: { model: User, as: 'Followers' },
+      }),
+      Followship.findAll({
+        where: { followerId: getUser(req).id },
+      }),
+    ])
+      .then(([user, following]) => {
+        if (!user.Followers.length) return res.status(200).json({ isEmpty: 'true' })
+        const currentUserFollowing = following.map((f) => f.followingId)
+        const data = user.Followers.map((f) => ({
+          followingId: f.id,
+          account: f.account,
+          name: f.name,
+          avatar: f.avatar,
+          cover: f.cover,
+          introduction: f.introduction,
+          createdAt: f.createdAt,
+          updatedAt: f.updatedAt,
+          isfollowed: currentUserFollowing.includes(f.toJSON().id),
+        })).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+
+        return res.status(200).json(data)
       })
       .catch((err) => next(err))
   },
