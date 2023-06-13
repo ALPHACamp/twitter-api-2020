@@ -21,7 +21,7 @@ const userController = {
       .catch(err => cb(err))
   },
   signUp: (req, cb) => {
-    if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match!')
+    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
     Promise.all([
       User.findOne({ where: { email: req.body.email } }),
       User.findOne({ where: { account: req.body.account } })
@@ -51,10 +51,7 @@ const userController = {
     )
       .then((user) => {
         if (!user) throw new Error("User didn't exist!")
-        cb(null, {
-          user,
-          accountUser: req.user
-        })
+        cb(null, user)
       })
       .catch(err => cb(err))
   },
@@ -123,38 +120,45 @@ const userController = {
   },
   getUserFollowings: (req, cb) => {
     const userId = Number(req.params.user_id) || ''
-    User.findByPk(userId, {
-      include: [
-        {
+    return Promise.all([
+      User.findByPk(userId, {
+        include: {
           model: User, as: 'Followings',
           attributes: { exclude: ['password'] }
-        }
-      ],
-      attributes: { exclude: ['password'] },
-      nest: true,
-      raw: true
-    })
-      .then(followings => {
+        },
+        attributes: { exclude: ['password'] },
+        nest: true,
+        raw: true
+      }),
+      Followship.findAll({
+        where: { followerId: userId }
+      })
+    ])
+      .then(([user, followings]) => {
         if (!followings) throw new Error("User's following didn't exist!")
-        cb(null, followings)
+        cb(null, { user, followings })
       })
       .catch(err => cb(err))
   },
   getUserFollowers: (req, cb) => {
     const userId = Number(req.params.user_id) || ''
-    User.findByPk(userId, {
-      include: [
-        {
+    Promise.all([
+      User.findByPk(userId, {
+        include: {
           model: User, as: 'Followers',
           attributes: { exclude: ['password'] }
-        }
-      ],
-      nest: true,
-      raw: true
-    })
-      .then(followers => {
+        },
+        attributes: { exclude: ['password'] },
+        nest: true,
+        raw: true
+      }),
+      Followship.findAll({
+        where: { followingId: userId }
+      })
+    ])
+      .then(([user, followers]) => {
         if (!followers) throw new Error("User's followers didn't exist!")
-        cb(null, followers)
+        cb(null, { user, followers })
       })
       .catch(err => cb(err))
   },
@@ -173,7 +177,6 @@ const userController = {
   putUser: (req, cb) => {
     const { name, email, introduction, password } = req.body
     if (!name) throw new Error('User name is required!')
-    if (!email) throw new Error('User email is required!')
 
     const { file } = req
     return Promise.all([

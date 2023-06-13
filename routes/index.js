@@ -6,25 +6,30 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/api-auth')
 const upload = require('../middleware/multer') // 載入 multer
 
+// user login
+router.post('/api/users/signin', userController.signIn)
+router.get('/api/users/tops', authenticated, authenticatedUser, userController.getTopUsers)
+router.post('/api/users', userController.signUp)
 
-router.post('/users/signin', userController.signIn)
-router.get('/users/:user_id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
-router.get('/users/:user_id/replied_tweets', authenticated, authenticatedUser, userController.getUserRepliedTweets)
+// user profile
+router.get('/api/users/:user_id/edit', authenticated, authenticatedUser, userController.editUser)
+router.put('/api/users/:user_id', authenticated, authenticatedUser, upload.single('image'), userController.putUser)
+router.get('/api/users/:user_id', authenticated, authenticatedUser, userController.getUser)
 
-router.get('/users/tops', authenticated, authenticatedUser, userController.getTopUsers)
+// user tweets
+router.get('/api/users/:user_id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
+router.get('/api/users/:user_id/replied_tweets', authenticated, authenticatedUser, userController.getUserRepliedTweets)
 
-router.post('/users/following/:user_id', authenticated, authenticatedUser, userController.addFollowing)
-router.delete('/users/following/:user_id', authenticated, authenticatedUser, userController.removeFollowing)
+// user followships
+router.post('/api/users/following/:user_id', authenticated, authenticatedUser, userController.addFollowing)
+router.delete('/api/users/following/:user_id', authenticated, authenticatedUser, userController.removeFollowing)
+router.get('/api/users/:user_id/followings', authenticated, authenticatedUser, userController.getUserFollowings)
+router.get('/api/users/:user_id/followers', authenticated, authenticatedUser, userController.getUserFollowers)
 
-router.get('/users/:user_id/likes', authenticated, authenticatedUser, userController.getUserLikes)
-router.get('/users/:user_id/followings', authenticated, authenticatedUser, userController.getUserFollowings)
-router.get('/users/:user_id/followers', authenticated, authenticatedUser, userController.getUserFollowers)
-router.get('/users/:user_id/edit', authenticated, authenticatedUser, userController.editUser)
-router.put('/users/:user_id', authenticated, authenticatedUser, upload.single('image'), userController.putUser)
-router.get('/users/:user_id', authenticated, authenticatedUser, userController.getUser)
+// user likes
+router.get('/api/users/:user_id/likes', authenticated, authenticatedUser, userController.getUserLikes)
 
-router.post('/users', userController.signUp)
-
+// error handler
 router.use('/', apiErrorHandler)
 
 module.exports = router

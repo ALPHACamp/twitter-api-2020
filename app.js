@@ -48,7 +48,7 @@ app.use((err, req, res, next) => {
   if (err) console.error(err)
   next()
 })
-app.use('/api', routes)
+app.use(routes)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
