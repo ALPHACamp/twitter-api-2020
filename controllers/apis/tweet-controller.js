@@ -19,7 +19,17 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
-        include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }],
+        include: [
+          { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Reply,
+            as: 'TweetReply',
+            attributes: ['id'],
+            include: [{ model: User, as: 'RepliedUser', attributes: ['name', 'account', 'avatar'] }]
+          },
+          { model: Like, as: 'TweetLike', attributes: ['id'] }
+        ],
+        nest: true,
         order: [['createdAt', 'DESC']]
       })
 
@@ -30,6 +40,11 @@ const tweetController = {
         throw error
       }
 
+      tweets.forEach(tweet => {
+        tweet.likedCount = tweet.TweetLike.length
+        tweet.repliedCount = tweet.TweetReply.length
+      })
+
       return res.status(200).json(tweets)
     } catch (error) {
       next(error)
@@ -39,8 +54,21 @@ const tweetController = {
     try {
       const { tweet_id } = req.params
       const tweet = await Tweet.findByPk(tweet_id, {
-        include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }]
-      })
+        include: [
+          { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Reply,
+            as: 'TweetReply',
+            attributes: ['id'],
+            include: [{ model: User, as: 'RepliedUser', attributes: ['name', 'account', 'avatar'] }]
+          },
+          { model: Like, as: 'TweetLike', attributes: ['id'] }
+        ],
+        nest: true
+      }
+      )
+      tweet.likedCount = tweet.TweetLike.length
+      tweet.repliedCount = tweet.TweetReply.length
       if (!tweet) {
         const error = new Error('The tweet does not exist')
         error.status = 404
