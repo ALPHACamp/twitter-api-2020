@@ -32,11 +32,10 @@ const adminController = {
       .then((users) => {
         const data = users.map((user) => ({
           ...user.toJSON(),
-          followersCount: user.Followers.length,
-          followingsCount: user.Followings.length,
-          tweetsCount: user.Tweets.length
+          followersCount: user.Followers?.length,
+          followingsCount: user.Followings?.length,
+          tweetsCount: user.Tweets?.length
         }))
-        console.log(data[0].Tweets[0].Likes.length)
         data.forEach((user) => {
           user.likesCount = 0
           user.Tweets.forEach(tweet => {

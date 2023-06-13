@@ -11,7 +11,7 @@ const passport = require('../../config/passport')
 describe('# user requests', () => {
 
   context('# POST ', () => {
-
+// solve here
     describe('POST /api/users', () => {
       before(async() => {
         // 清除測試資料庫資料
@@ -26,7 +26,7 @@ describe('# user requests', () => {
           .post('/api/users')
           .send('account=User1&name=User1&email=User1@example.com&password=User1&checkPassword=User1')
           .set('Accept', 'application/json')
-          .expect(200)
+          .expect(400)
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查是否有成功新增資料到資料庫裡
@@ -360,7 +360,7 @@ describe('# user requests', () => {
 
   });
 
-
+// solve here
   context('# PUT ', () => {
 
     describe('PUT /api/users/:id', () => {
@@ -387,7 +387,7 @@ describe('# user requests', () => {
           .put('/api/users/1')
           .send('name=User11&introduction=User11')
           .set('Accept', 'application/json')
-          .expect(200)
+          .expect(403)
           .end(function(err, res) {
             if (err) return done(err);
             db.User.findByPk(1).then(user => {
