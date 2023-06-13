@@ -23,7 +23,7 @@ const tweetController = {
     try {
       const reqUserId = helpers.getUser(req).id
       let tweets = await Tweet.findAll({
-        raw: true,
+        // raw: true,  使用這個就不能sequelize相關功能
         nest: true,
         include: [User, Reply, Like],
         order: [['createdAt', 'DESC']]
@@ -47,7 +47,7 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
-      const reqUserId = helpers.getUser(req).id
+      // const reqUserId = helpers.getUser(req).id
       const tweetId = req.params.tweet_id
       let tweet = await Tweet.findByPk(tweetId, {
         include: [User, Like, Reply]
@@ -63,7 +63,6 @@ const tweetController = {
         likeCount: tweet.Likes.length,
         replyCount: tweet.Replies.length,
         user: {
-          UserId: reqUserId,
           name: tweet.User.name,
           account: tweet.User.account,
           avatar: tweet.User.avatar
