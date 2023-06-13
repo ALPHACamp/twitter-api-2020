@@ -2,7 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const express = require('express')
-const { initWebSocket } = require('./websocket')
+// const { initWebSocket } = require('./websocket')
 
 const routes = require('./routes')
 const methodOverride = require('method-override')
@@ -21,10 +21,10 @@ app.use(passport.initialize())
 app.use(methodOverride('_method'))
 
 // web socket
-app.get('/chat', (req, res) => {
-  res.sendFile(__dirname + '/index.html')
-})
-initWebSocket(server)
+// app.get('/chat', (req, res) => {
+//   res.sendFile(__dirname + '/index.html')
+// })
+// initWebSocket(server)
 
 app.use(routes)
 app.get('', (req, res) => {
