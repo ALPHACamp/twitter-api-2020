@@ -166,8 +166,8 @@ const userServices = {
         .then(user => {
           if (JSON.stringify(files) !== '{}' && files !== undefined) {
             return Promise.all([
-              imgurFileHandler(files.coverPhoto[0]),
-              imgurFileHandler(files.avatar[0])
+              imgurFileHandler(files.coverPhoto),
+              imgurFileHandler(files.avatar)
             ])
               .then(([coverFilePath, avatarFilePath]) => {
                 return user.update({
