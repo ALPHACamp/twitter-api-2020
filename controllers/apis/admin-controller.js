@@ -54,6 +54,45 @@ const userController = {
       })
       .then(deletedTweet => res.status(200).json({ status: 'success', deletedTweet }))
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  getUsers: (req, res) => {
+    return User.findAll({
+      include: [
+        { model: Tweet, include: [Like] },
+        // through: { attributes: [] }=>不含中間表
+        { model: User, as: 'Followers', through: { attributes: [] } },
+        { model: User, as: 'Followings', through: { attributes: [] } },
+      ]
+    })
+      .then(users => {
+        const userData = users.map(user => {
+          let userJson = user.toJSON()
+          delete userJson.password
+          let likedTweetsCount = 0
+          for (let i = 0; i < userJson.Tweets.length; i++) {
+            likedTweetsCount += userJson.Tweets[i].Likes.length
+          }
+          userJson.Followers = userJson.Followers.map(follower => {
+            delete follower.password
+            return follower
+          })
+          userJson.Followings = userJson.Followings.map(following => {
+            delete following.password
+            return following
+          })
+
+          return {
+            ...userJson,
+            tweetsCount: userJson.Tweets.length,
+            followersCount: userJson.Followers.length,
+            followingsCount: userJson.Followings.length,
+            likedTweetsCount
+          }
+        })
+        userData.sort((a, b) => b.tweetsCount - a.tweetsCount)
+        res.status(200).json({ status: 'success', userData })
+      })
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   }
 }
 
