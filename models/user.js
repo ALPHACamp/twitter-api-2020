@@ -36,4 +36,8 @@ module.exports = (sequelize, DataTypes) => {
     underscored: true 
   })
   return User
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> e08c474e301b8a9cea3aef7e53ba83f7fc7f8acd
