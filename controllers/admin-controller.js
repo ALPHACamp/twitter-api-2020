@@ -1,5 +1,7 @@
 const adminServices = require('../services/admin-service')
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
+const { User } = require('../models')
 
 const adminController = {
   signIn: async (req, res, next) => {

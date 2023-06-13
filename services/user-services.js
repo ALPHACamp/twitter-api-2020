@@ -1,7 +1,7 @@
-const bcrypt = require('bcryptjs') // 載入 bcrypt
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Followship, Like } = require('../models')
 const { imgurFileHandler } = require('../_helpers')
-const { getUser } = require('../_helpers')
 
 const userController = {
   signIn: (req, cb) => {
