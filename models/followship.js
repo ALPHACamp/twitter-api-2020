@@ -10,8 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     followerId: DataTypes.INTEGER,
     followingId: DataTypes.INTEGER
   }, {})
-  Followship.associate = function (models) {
-  }
+  Followship.associate = function (models) {}
   Followship.init({
     followerId: DataTypes.INTEGER,
     followingId: DataTypes.INTEGER

@@ -112,12 +112,33 @@ const userController = {
         include: {
           model: User,
           as: 'Followings',
-          attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'cover', 'introduction'],
-          order: [[{ model: User, as: 'Followship' }, 'createdAt', 'DESC']]
+          attributes: [
+            ['id', 'followingId'],
+            'name',
+            'account',
+            'avatar',
+            'cover',
+            'introduction'
+          ]
         },
-        attributes: []
+        attributes: [
+          ['id', 'userId'],
+          'name',
+          'account',
+          'avatar',
+          'cover'
+        ]
       })
-      return res.status(200).json(followings)
+      if (followings.Followings.length === 0) throw new Error('該用戶沒有追蹤對象')
+      const followingId = helpers.getUser(req).Followings.map(user => user.id)
+      const result = followings.Followings
+        .map(f => ({
+          ...f.toJSON(),
+          isFollowed: followingId.includes(f.toJSON().followingId) || false
+        }))
+        .sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
+      result.forEach(i => delete i.Followship)
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   },
   getFollowers: async (req, res, next) => {
@@ -127,12 +148,33 @@ const userController = {
         include: {
           model: User,
           as: 'Followers',
-          attributes: { exclude: ['password'] },
-          order: [[{ model: User, as: 'Followship' }, 'createdAt', 'DESC']]
+          attributes: [
+            ['id', 'followerId'],
+            'name',
+            'account',
+            'avatar',
+            'cover',
+            'introduction'
+          ]
         },
-        attributes: []
+        attributes: [
+          ['id', 'userId'],
+          'name',
+          'account',
+          'avatar',
+          'cover'
+        ]
       })
-      return res.status(200).json(followers)
+      if (followers.Followers.length === 0) throw new Error('該用戶沒有追蹤者')
+      const followingId = helpers.getUser(req).Followings.map(user => user.id)
+      const result = followers.Followers
+        .map(f => ({
+          ...f.toJSON(),
+          isFollowed: followingId.includes(f.toJSON().followerId) || false
+        }))
+        .sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
+      result.forEach(i => delete i.Followship)
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   },
   putUser: async (req, res, next) => {
