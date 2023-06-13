@@ -169,18 +169,27 @@ const userController = {
   getUserLike: async (req, res, next) => {
     try {
       const id = req.params.id
+      const currentUserId = getUser(req).dataValues.id
       const likes = await Like.findAll({
         where: { UserId: id },
         include: {
           model: Tweet,
-          include: [
-            { model: Like },
-            { model: Reply, attributes: ['id'] },
-            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-          ],
-          attributes: ['id', 'description', 'createdAt']
+          attributes: {
+            include: [
+              [sequelize.literal('(SELECT account FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerAccount'],
+              [sequelize.literal('(SELECT name FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerName'],
+              [sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerAvatar'],
+              [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+              [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+                'replyCount'],
+              [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${currentUserId} AND TweetId = Tweet.id)`), 'isLiked']
+            ]
+          }
         },
-        order: [['createdAt', 'DESC']]
+        group: ['id'],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
 
       if (!likes.length) return res.status(200).json({ status: 'success', message: '無Like資料' })
@@ -188,15 +197,14 @@ const userController = {
       const data = likes.map(l => ({
         TweetId: l.TweetId,
         description: l.Tweet.description,
-        tweetOwnerId: l.Tweet.User.id,
-        tweetOwnerAccount: l.Tweet.User.account,
-        tweetOwnerName: l.Tweet.User.name,
-        tweetOwnerAvatar: l.Tweet.User.avatar,
+        tweetOwnerId: l.Tweet.UserId,
+        tweetOwnerName: l.Tweet.tweetOwnerName,
+        tweetOwnerAccount: l.Tweet.tweetOwnerAccount,
+        tweetOwnerAvatar: l.Tweet.tweetOwnerAvatar,
         createdAt: l.Tweet.createdAt,
-        replyCount: l.Tweet.Replies.length,
-        likeCount: l.Tweet.Likes.length,
-        isLiked: l.isLiked
-
+        replyCount: l.Tweet.replyCount,
+        likeCount: l.Tweet.likeCount,
+        isLiked: Boolean(l.Tweet.isLiked)
       }))
       res.status(200).json(data)
     } catch (err) { next(err) }
