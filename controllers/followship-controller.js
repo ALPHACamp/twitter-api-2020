@@ -1,9 +1,10 @@
 const { Followship, User } = require('../models')
+const helpers = require('../_helpers')
 
 const followController = {
   postFollow: async (req, res, next) => {
     try {
-      const followerId = req.user.id
+      const followerId = helpers.getUser(req).id
       const followingId = req.body.id
 
       // 確認追蹤對象存在並且為user
@@ -54,7 +55,7 @@ const followController = {
   },
   deleteFollow: async (req, res, next) => {
     try {
-      const followerId = req.user.id
+      const followerId = helpers.getUser(req).id
       const followingId = req.params.followingId
 
       const followingUser = await User.findOne({
