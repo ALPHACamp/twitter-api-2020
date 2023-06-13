@@ -36,6 +36,7 @@ const userController = {
           isFollower: req.user && req.user.Followers.some(follower => follower.id === user.id)
         }
         // res.json({ status: 'success', user: user.toJSON() })
+        delete user.password
         res.status(200).json(user)
       })
       .catch(err => next(err))
@@ -189,7 +190,8 @@ const userController = {
       User.findByPk(userId),
       Followship.findAll({
         where: { followerId: userId },
-        raw: true
+        raw: true,
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, followingsData]) => {
@@ -204,7 +206,8 @@ const userController = {
       User.findByPk(userId),
       Followship.findAll({
         where: { followingId: userId },
-        raw: true
+        raw: true,
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, followersData]) => {

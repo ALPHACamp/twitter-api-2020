@@ -41,6 +41,7 @@ describe('# admin requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function(err, res) {
+            console.log('=======AA======')
             if (err) return done(err);
             // 檢查回傳資料是否是陣列類型
             expect(res.body).to.be.an('array');

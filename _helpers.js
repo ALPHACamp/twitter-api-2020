@@ -8,6 +8,7 @@ module.exports = {
 
 // 單項測試
 // npx mocha test/requests/user.spec.js --exit
+// npx mocha test/requests/admin.spec.js --exit
 
 // 切換環境
 // $env:NODE_ENV = "test"
