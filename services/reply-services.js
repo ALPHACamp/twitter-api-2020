@@ -39,7 +39,7 @@ const replyServices = {
       const tweet = Tweet.findByPk(id)
       if (!user) throw new Error('查無此人！')
       if (!tweet) throw new Error('查無此篇貼文！')
-      if (!reply > 140) throw new Error('回覆留言必須在140字內！') 
+      if (comment.length > 140) throw new Error('回覆留言必須在140字內！') 
       const reply = await Reply.create({
         comment,
         TweetId: id,

@@ -24,10 +24,11 @@ const followshipServices = {
         followingId
       })
         .then(followship => {
+          const Newfollowship = followship.dataValues.followingId
           cb(null, {
             status: '追蹤成功！',
             ...followship.toJSON(),
-            isFollowed: (followingId === req.body.id)
+            isFollowed: (Newfollowship === followingId)
           })
         })
         .catch(err => cb(err))
@@ -50,7 +51,7 @@ const followshipServices = {
       cb(null, {
         status: '取消追蹤！',
         ...deletedFollowship.toJSON(),
-        isFollowed: (followingId === req.params.id)
+        isFollowed: (deletedFollowship.dataValues.followingId === followingId)
       })
     } catch (err) {
       cb(err)
