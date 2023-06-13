@@ -72,6 +72,49 @@ const adminController = {
       next(err)
     }
   },
+  getTweets: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const tweets = await Tweet.findAll({
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'
+              ), 'repliesCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id)'
+              ), 'likesCount'
+            ]
+          ]
+        },
+        include: [
+          {
+            model: User,
+            attributes: { exclude: ['password'] }
+          },
+          {
+            model: Like,
+            attributes: ['UserId']
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      if (!tweets) throw new Error('找不到tweets資料！')
+      // 回傳全部tweet，最新的在前面
+      const tweetsData = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        isCurrentUserLiked: tweet.Likes.some(like => like.UserId === currentUserId)
+      }))
+
+      res.json(tweetsData)
+    } catch (err) {
+      next(err)
+    }
+
+  },
   deleteTweet: async (req, res, next) => {
     try {
       // 確認是否為admin身分
