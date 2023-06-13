@@ -60,25 +60,35 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     try {
       const id = req.params.tweet_id
-      const data = await Tweet.findByPk(id, {
+      const selfUser = helpers.getUser(req).id
+      const tweet = await Tweet.findByPk(id, {
+        raw: true,
+        nest: true,
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          'updatedAt',
+          [Sequelize.literal('(SELECT COUNT(*) FROM `Replys` WHERE `Replys`.`TweetId` = `Tweet`.`id`)'), 'repliesCount'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'), 'likesCount']
+        ],
         include: [
-          { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
-          { model: Reply, attributes: ['id'] },
-          { model: Like, attributes: ['id'] }
+          {
+            model: User,
+            attributes: ['id', 'name', 'avatar', 'account']
+          }
         ]
       })
-      if (!data) newErrorGenerate('推文不存在', 404)
-      const tweetData = data?.toJSON()
-      const tweet = {
-        ...tweetData,
-        switchTime: switchTime(tweetData.createdAt),
-        relativeTimeFromNow: relativeTimeFromNow(tweetData.createdAt),
-        repliesCount: tweetData.Replies?.length,
-        likesCount: tweetData.Likes?.length
+      const selfUserLike = await Like.findAll({ raw: true, attributes: ['TweetId'], where: { UserId: selfUser } })
+      if (!tweet) newErrorGenerate('推文不存在', 404)
+      const tweetData = {
+        ...tweet,
+        switchTime: switchTime(tweet.createdAt),
+        relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt),
+        isSelfUserLike: selfUserLike.some(s => s.TweetId === tweet.id)
       }
-      delete tweet.Replies
-      delete tweet.Likes
-      return res.json(tweet)
+      return res.json(tweetData)
     } catch (err) {
       next(err)
     }
@@ -145,16 +155,11 @@ const tweetController = {
   // 瀏覽推文的所有回應
   tweetReplies: async (req, res, next) => {
     try {
-      const selfUser = helpers.getUser(req).id
       const id = req.params.tweet_id
       const tweet = await Tweet.findByPk(id, {
         raw: true,
         nest: true,
-        attributes: [
-          'id',
-          [Sequelize.literal('(SELECT COUNT(*) FROM `Replys` WHERE `Replys`.`TweetId` = `Tweet`.`id`)'), 'repliesCount'],
-          [Sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'), 'likesCount']
-        ],
+        attributes: ['id'],
         include: [{ model: User, attributes: ['id', 'account'] }]
       })
       const replies = await Reply.findAll({
@@ -170,18 +175,15 @@ const tweetController = {
         raw: true,
         nest: true
       })
-      const selfUserLike = await Like.findAll({ raw: true, attributes: ['TweetId'], where: { UserId: selfUser } })
       if (!tweet) newErrorGenerate('推文不存在', 404)
       if (!replies) newErrorGenerate('找不到回應訊息', 404)
-      const repliesData = replies.map(reply => ({
-        ...reply,
-        tweetUser: tweet.User,
-        relativeTimeFromNow: relativeTimeFromNow(reply.createdAt)
-      }))
-      tweet.isSelfUserLike = selfUserLike.some(s => Number(s.TweetId) === Number(id))
-      delete tweet.User
-      repliesData.push(tweet)
-
+      const repliesData = replies.map(reply => {
+        reply.replyUser = reply.User
+        reply.tweetUser = tweet.User
+        reply.relativeTimeFromNow = relativeTimeFromNow(reply.createdAt)
+        delete reply.User
+        return reply
+      })
       return res.json(repliesData)
     } catch (err) {
       next(err)
