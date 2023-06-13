@@ -11,33 +11,37 @@ const followshipController = {
       return res.status(400).json({ status: 'error', message: '請提供有效的 top 參數' })
     }
 
-    User.findAll({
-      where: {
-        role: {
-          [Op.not]: 'admin' // 排除 'admin' 角色
-        }
-      },
-      attributes: [
-        'id',
-        'name',
-        'account',
-        'avatar',
-        'introduction',
-        [
-          literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE following_id = User.id)'),
-          'totalFollowers'
-        ]
-      ],
-      include: { model: User, as: 'Followers', attributes: [] },
-      order: [[sequelize.literal('totalFollowers'), 'DESC']], // 根據追蹤者進行降序
-      limit: topCount // 限制前十位
-    })
-      .then((users) => {
+    const userId = helpers.getUser(req).id
+
+    return Promise.all([
+      User.findAll({
+        where: {
+          role: {
+            [Op.not]: 'admin', // 排除 'admin' 角色
+          },
+        },
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          'introduction',
+          [literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE following_id = User.id)'), 'totalFollowers'],
+        ],
+        include: { model: User, as: 'Followers', attributes: [] },
+        order: [[sequelize.literal('totalFollowers'), 'DESC']], // 根據追蹤者進行降序
+        limit: topCount, // 限制前十位
+      }),
+      Followship.findAll({
+        where: { followerId: userId },
+      }),
+    ])
+      .then(([users, following]) => {
         users = users.map((user) => ({
           ...user.dataValues,
-          isFollowed: req.user.Followings.map((f) => f.id).includes(user.id)
+          isFollowed: following.some((f) => f.followingId === user.id),
         }))
-        res.status(200).json({ users: users.filter((user) => user.id !== req.user.id) })
+        res.status(200).json({ users: users.filter((user) => user.id !== userId) })
       })
       .catch((err) => next(err))
   },
@@ -52,8 +56,8 @@ const followshipController = {
         Followship.findOrCreate({
           where: {
             followerId,
-            followingId
-          }
+            followingId,
+          },
         })
           .then((followship) => {
             // followship[1]為boolean，建立成功回傳true
@@ -71,19 +75,17 @@ const followshipController = {
     Followship.findOne({
       where: {
         followerId,
-        followingId
-      }
+        followingId,
+      },
     })
       .then((followship) => {
         if (!followship) throw new Error('並未追蹤該使用者')
-        followship
-          .destroy()
-          .then(() => {
-            return res.status(200).json({ message: '成功移除追蹤' })
-          })
+        followship.destroy().then(() => {
+          return res.status(200).json({ message: '成功移除追蹤' })
+        })
       })
       .catch((err) => next(err))
-  }
+  },
 }
 
 module.exports = followshipController
