@@ -177,7 +177,7 @@ const userController = {
           include: [
             { model: Like },
             { model: Reply, attributes: ['id'] },
-            { model: User, attributes: ['id', 'name', 'account'] }
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
           ],
           attributes: ['id', 'description', 'createdAt']
         },
