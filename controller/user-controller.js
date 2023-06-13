@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const validator = require('email-validator')
@@ -58,7 +58,6 @@ const userController = {
       return res.status(200).json(user)
     } catch (err) { next(err) }
   },
-  // const reqUserId = helpers.getUser(req).id
   getUserTweets: async (req, res, next) => {
     try {
       const userId = Number(req.params.id)
@@ -109,29 +108,31 @@ const userController = {
   getFollowings: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const followships = await Followship.findAll({
-        where: { followerId: userId },
-        include: [
-          { model: User, as: 'Followings', attributes: { exclude: ['password'] } }
-        ]
+      const followings = await User.findByPk(userId, {
+        include: {
+          model: User,
+          as: 'Followings',
+          attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'cover', 'introduction'],
+          order: [[{ model: User, as: 'Followship' }, 'createdAt', 'DESC']]
+        },
+        attributes: []
       })
-
-      if (followships.length === 0) throw new Error('該用戶無正在追蹤對象')
-      return res.status(200).json(followships)
+      return res.status(200).json(followings)
     } catch (err) { next(err) }
   },
   getFollowers: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const followships = await Followship.findAll({
-        where: { followingId: userId },
-        include: [
-          { model: User, as: 'Followers', attributes: { exclude: ['password'] } }
-        ]
+      const followers = await User.findByPk(userId, {
+        include: {
+          model: User,
+          as: 'Followers',
+          attributes: { exclude: ['password'] },
+          order: [[{ model: User, as: 'Followship' }, 'createdAt', 'DESC']]
+        },
+        attributes: []
       })
-      // delete followships.Followers.password
-      if (followships.length === 0) throw new Error('該用戶無正在追蹤對象')
-      return res.status(200).json(followships)
+      return res.status(200).json(followers)
     } catch (err) { next(err) }
   },
   putUser: async (req, res, next) => {
@@ -180,6 +181,25 @@ const userController = {
         email: updatedUser.email
       }
       return res.status(200).json({ data: responseData, message: '修改成功' })
+    } catch (err) { next(err) }
+  },
+  getUsersTop10: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        include: {
+          model: User,
+          as: 'Followers',
+          attributes: ['id', 'email', 'name', 'account', 'avatar']
+        },
+        attributes: ['id', 'name', 'account', 'avatar', 'createdAt'],
+        where: { role: { [Op.not]: 'admin' } }
+      })
+      const userTop = users.map(user => ({
+        ...user.toJSON(), // 整理格式
+        followersCount: user.Followers.length, // 計算追蹤者數量
+        isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id) // 判斷目前登入使用者是否追蹤該物件
+      })).sort((a, b) => b.followersCount - a.followersCount)// 按照人數多->少排序
+      return res.status(200).json(userTop)
     } catch (err) { next(err) }
   }
 }
