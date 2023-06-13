@@ -41,7 +41,6 @@ describe('# admin requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function(err, res) {
-            console.log('=======AA======')
             if (err) return done(err);
             // 檢查回傳資料是否是陣列類型
             expect(res.body).to.be.an('array');
@@ -97,6 +96,7 @@ describe('# admin requests', () => {
             if (err) return done(err);
             // 檢查是否 Tweet table 中的資料是空的，表示有刪除成功
             db.Tweet.findByPk(1).then(tweet => {
+              console.log(`====${tweet}====`)
               expect(tweet).to.be.null
               return done();
             })
