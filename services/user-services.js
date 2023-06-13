@@ -4,6 +4,22 @@ const { imgurFileHandler } = require('../_helpers')
 const { getUser } = require('../_helpers')
 
 const userController = {
+  signIn: (req, cb) => {
+    const { account, password } = req.body
+    if (!account || !password) throw new Error('帳號或密碼必填')
+    return User.findOne({
+      where: { account }
+    })
+      .then(user => {
+        if (!user) throw new Error('帳號或密碼輸入錯誤！')
+        if (!bcrypt.compareSync(password, user.password)) throw new Error('帳號或密碼輸入錯誤！')
+        const userData = user.toJSON()
+        delete userData.password
+        const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+        return cb(null, { token, user: userData })
+      })
+      .catch(err => cb(err))
+  },
   signUp: (req, cb) => {
     if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match!')
     Promise.all([
