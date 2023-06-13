@@ -30,6 +30,7 @@ const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
+        attributes: ['id', 'name', 'account'],
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' },
@@ -58,7 +59,7 @@ const adminController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
-        include: [{ model: User, as: 'TweetUser' }],
+        include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }],
         order: [['createdAt', 'DESC']]
       })
       return res.status(200).json(tweets)
