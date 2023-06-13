@@ -28,16 +28,16 @@ const adminController = {
       .catch((err) => next(err))
   },
   getTweets: (req, res, next) =>{
-    adminServices.getTweets(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+    adminServices.getTweets(req, (err, data) => err ? next(err) : res.json(data))
   },
   getUsers: (req, res, next) =>{
     adminServices.getUsers(req, (err, data) => err ? next(err) : res.json(data.users))
   },
   getTweet: (req, res, next) =>{
-    adminServices.getTweet(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+    adminServices.getTweet(req, (err, data) => err ? next(err) : res.json(data))
   },
   deleteTweet: (req, res, next) =>{
-    adminServices.deleteTweet(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+    adminServices.deleteTweet(req, (err, data) => err ? next(err) : res.json(data))
   },
 }  
 

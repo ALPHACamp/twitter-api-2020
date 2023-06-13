@@ -11,7 +11,6 @@ const admin = require('./modules/admin')
 
 router.use('/admin', admin)
 
-
 router.post('/users/signin', userController.signIn)
 router.get('/users/:user_id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 router.get('/users/:user_id/replied_tweets', authenticated, authenticatedUser, userController.getUserRepliedTweets)
@@ -30,7 +29,7 @@ router.post('/tweets', authenticated, authenticatedUser, tweetController.createT
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 
 //followships
-router.post('/followships/:user_id', authenticated, authenticatedUser, userController.addFollowing)
+router.post('/followships', authenticated, authenticatedUser, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, authenticatedUser, userController.removeFollowing)
 // router.get('/followships', authenticated, authenticatedUser, userController.getTop)
 

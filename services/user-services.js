@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Followship, Like } = require('../models')
 const { imgurFileHandler } = require('../_helpers')
 
+
 const userController = {
   signIn: (req, cb) => {
     const { account, password } = req.body
@@ -59,7 +60,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
-    const UserId = Number(req.params.user_id) || ''
+    const userId = Number(req.params.user_id) || ''
     Tweet.findAll({
       include: [
         {
@@ -68,7 +69,7 @@ const userController = {
         }
       ],
       where: {
-        ...UserId ? { UserId } : {}
+        ...userId ? { userId } : {}
       },
       nest: true,
       raw: true
@@ -80,7 +81,7 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserRepliedTweets: (req, cb) => {
-    const UserId = Number(req.params.user_id) || ''
+    const userId = Number(req.params.user_id) || ''
     Reply.findAll({
       include: [
         {
@@ -90,7 +91,7 @@ const userController = {
         Tweet
       ],
       where: {
-        ...UserId ? { UserId } : {}
+        ...userId ? { userId } : {}
       },
       nest: true,
       raw: true
@@ -102,14 +103,14 @@ const userController = {
       .catch(err => cb(err))
   },
   getUserLikes: (req, cb) => {
-    const UserId = Number(req.params.user_id) || ''
+    const userId = Number(req.params.user_id) || ''
     Like.findAll({
       include: [
         { model: User },
         { model: Tweet }
       ],
       where: {
-        ...UserId ? { UserId } : {}
+        ...userId ? { userId } : {}
       },
       attributes: { exclude: ['password'] },
       nest: true,
@@ -221,25 +222,26 @@ const userController = {
       .catch(err => cb(err))
   },
   addFollowing: (req, cb) => {
-    const followingId = req.body.id
-    const followerId = getUser(req).id
-    if (followerId === followerId) throw new Error('不可追蹤自己')
-    User.findByPk(followingId).then((user)=>{
-      if (!user) throw new Error('該使用者不存在')
-      if (user.dataValues.role === 'admin') throw new Error('不可追蹤管理者')
-      Followship.findOrCreate({
+    const userId = req.params.user_id
+    Promise.all([
+      User.findByPk(userId),
+      Followship.findOne({
         where: {
-          followerId,
-          followingId
+          followerId: req.user.id,
+          followingId: userId
         }
       })
-      .then((followship) => {
-        if (!followship) throw new Error("You have followed this user!")
-        return cb(null, { followship })
+    ])
+      .then(([user, followship]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (followship) throw new Error('You are already following this user!')
+        return Followship.create({
+          followerId: req.user.id,
+          followingId: userId
+        })
       })
-       .catch((err) => next(err))
-    })
-    .catch((err) => next(err))
+      .then(followship => cb(null, followship))
+      .catch(err => cb(err))
   },
   removeFollowing: (req, cb) => {
     Followship.findOne({
@@ -255,6 +257,28 @@ const userController = {
       .then(deletedFollowship => cb(null, deletedFollowship))
       .catch(err => cb(err))
   },
+  addFollowing: (req, cb) => {
+    const followingId = req.body.id
+    const followerId = req.user.user_id
+    if (followerId === followingId) throw new Error('不可追蹤自己')
+    User.findByPk(followingId).then((user)=>{
+      if (!user) throw new Error('該使用者不存在')
+      if (user.dataValues.role === 'admin') throw new Error('不可追蹤管理者')
+      Followship.findOrCreate({
+        where: {
+          followerId,
+          followingId
+        }
+      })
+      .then((followship) => {
+        if (!followship) throw new Error("You have followed this user!")
+        return cb(null, { followship })
+      })
+       .catch((err) => cb(err))
+    })
+    .catch((err) => cb(err))
+  },
+
   addLike: (req, cb) => {
     const tweetId = req.params.id
     return Promise.all([
