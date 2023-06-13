@@ -18,11 +18,25 @@ const userController = {
   },
   getUser: (req, res, next) => {
     helpers.getUser(req)
-    return User.findByPk(req.params.id)
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ],
+      raw: true,
+      nest: true
+    })
       .then(user => {
         if (!user) throw new Error('getUser查無此人')
+        req.user.Followings = req.user.Followings || []
+        req.user.Followers = req.user.Followers || []
+        user = {
+          ...user,
+          isFollowing: req.user && req.user.Followings.some(following => following.id === user.id),
+          isFollower: req.user && req.user.Followers.some(follower => follower.id === user.id)
+        }
         // res.json({ status: 'success', user: user.toJSON() })
-        res.status(200).json(user.toJSON())
+        res.status(200).json(user)
       })
       .catch(err => next(err))
   },
@@ -219,6 +233,40 @@ const userController = {
           avatar: avatar || userData.avatar,
           banner: banner || userData.banner
         })
+      })
+      .then(updatedUser => {
+        delete updatedUser.password
+        res.status(200).json(updatedUser)
+      })
+      .catch(err => next(err))
+  },
+  patchUser: (req, res, next) => {
+    const userId = Number(req.params.id)
+    // 沒有這條, 有了token之後, 就可以亂改他人資料了
+    if (userId !== helpers.getUser(req).id) throw new Error('只能改自己的啦')
+    const { name, account, email, password, checkPassword } = req.body
+    const passwordLength = password ? password.length : ''
+    if (passwordLength > 1) {
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不符')
+    }
+    return User.findAll({
+      where: { account },
+      raw: true
+    })
+      .then(user => {
+        if (user.account === account) throw new Error('帳號已存在')
+      })
+      .then(() => {
+        return User.findByPk(userId)
+          .then(userData => {
+            if (!userData) throw new Error('putUser說: 沒這人')
+            return userData.update({
+              name: name || userData.name,
+              account: account || userData.account,
+              email: email || userData.email,
+              password: password || userData.password
+            })
+          })
       })
       .then(updatedUser => {
         delete updatedUser.password
