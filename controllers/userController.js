@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 const { User, Tweet, Followship, Like, Reply } = require('../models')
 const { Op } = require('sequelize')
 const { getUser } = require('../_helpers')
@@ -41,22 +42,16 @@ const userController = {
     try {
       // get user data
       const userData = getUser(req)?.toJSON()
-      const copyUserData = Object.assign({}, userData)
+      const tokenData = Object.assign({}, { id: userData.id })
 
       delete userData.password
-      delete userData.avatar
-      delete userData.cover
-      delete userData.email
-      delete userData.introduction
-
-      delete copyUserData.password
       // sign token
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      const token = jwt.sign(tokenData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
         status: 'success',
         data: {
           token,
-          user: copyUserData
+          user: userData
         }
       })
     } catch (err) {
