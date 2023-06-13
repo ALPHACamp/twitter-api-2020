@@ -146,11 +146,12 @@ const tweetServices = {
       if (!like) {
         throw new Error('這篇Tweet沒被like')
       }
-      await like.destroy()
-      
+      const removelike = like.destroy()
+      console.log(removelike)
+
       cb(null, { 
           message: 'Like 取消成功',
-          isLiked: (like.UserId === helpers.getUser(req).id)
+          isLiked: (removelike === helpers.getUser(req).id)
         })
     } catch (err) {
       cb(err)
