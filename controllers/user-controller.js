@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { getUser } = require('../helpers/auth-helpers.js')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -86,8 +86,13 @@ const userController = {
   },
   editUserInfo: async (req, res, next) => {
     try {
-      let { name, account, email, password, checkPassword, introduction, avatar, cover } = req.body
+      const { name, account, email, password, checkPassword, introduction } = req.body
+      console.log(req.body)
       const id = getUser(req).id
+      const files = req.files
+      const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
+      const cover = files?.cover ? await imgurFileHandler(files.cover[0]) : null
+
       if (id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可編輯該用戶基本資料!')
       let userInfo = await User.findOne({
         where: { id },
@@ -97,17 +102,15 @@ const userController = {
       if (!password) throw new Error('密碼與確認密碼不相符!')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
       const hash = await bcrypt.hash(password, 10)
-      avatar = avatar ? await imgurFileHandler(avatar) : null
-      cover = cover ? await imgurFileHandler(cover) : null
       // 把所有資訊(除了該使用者)拿出來與userInfo比對,看是否有重複account/email
       const allUsersInfo = await User.findAll({
         where: { role: 'user' },
         attributes: ['id', 'email', 'account']
       })
       for (let i = 0; i < allUsersInfo.length; i++) {
-        if (allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.account.toString() === account.toString()) {
+        if (account && allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.account.toString() === account.toString()) {
           throw new Error('account 已重複註冊！')
-        } else if (allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.email.toString() === email.toString()) {
+        } else if (email && allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.email.toString() === email.toString()) {
           throw new Error('email 已重複註冊！')
         }
       }
