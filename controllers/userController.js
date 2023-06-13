@@ -225,6 +225,7 @@ const userController = {
       const currentUserFollowing = following.map(f => f.followingId)
       const data = user.Followings.map(f => ({
         followingId: f.id,
+        UserId: f.id,
         account: f.account,
         name: f.name,
         avatar: f.avatar,
@@ -253,6 +254,7 @@ const userController = {
       const currentUserFollowing = following.map(f => f.followingId)
       const data = user.Followers.map(f => ({
         followerId: f.id,
+        UserId: f.id,
         account: f.account,
         name: f.name,
         avatar: f.avatar,
