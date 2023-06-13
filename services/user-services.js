@@ -302,7 +302,7 @@ const userServices = {
                     {
                         model: User,
                         attributes: ['avatar', 'name', 'introduction'],
-                        as: 'Followings'
+                        as: 'Followers'
                     }
                 ],
                 where: { followerId: id },
@@ -331,7 +331,7 @@ const userServices = {
                     {
                         model: User,
                         attributes: ['avatar', 'name', 'introduction'],
-                        as: 'Followers'
+                        as: 'Followings'
                     }
                 ],
                 where: { followingId: id },
