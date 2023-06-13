@@ -133,14 +133,15 @@ const userController = {
         Reply.findAll({
           where: { UserId: id },
           include: [
-            {
-              model: Tweet,
-              attributes: ['id'],
-              include: [
-                { model: User, attributes: ['id', 'account', 'name'] }
-              ]
-            }
+            { model: Tweet, attributes: [] }
           ],
+          attributes: {
+            include: [
+              [sequelize.literal('(SELECT id FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerId'],
+              [sequelize.literal('(SELECT account FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerAccount'],
+              [sequelize.literal('(SELECT name FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerName']
+            ]
+          },
           order: [['createdAt', 'DESC']],
           raw: true,
           nest: true
@@ -156,9 +157,10 @@ const userController = {
         replyerAccount: user.account,
         replyerName: user.name,
         replyerAvatar: user.avatar,
-        TweetId: r.Tweet.id,
-        tweetOwnerAccount: r.Tweet.User.account,
-        tweetOwnerName: r.Tweet.User.name,
+        TweetId: r.TweetId,
+        tweetOwnerId: r.tweetOwnerId,
+        tweetOwnerAccount: r.tweetOwnerAccount,
+        tweetOwnerName: r.tweetOwnerName,
         createdAt: r.createdAt
       }))
       res.status(200).json(data)
