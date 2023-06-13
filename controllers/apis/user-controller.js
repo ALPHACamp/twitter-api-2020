@@ -294,8 +294,8 @@ const userController = {
       const { files } = req
 
       const [avatar, background] = await Promise.all([
-        files.avatar ? await localFileHandler(files.avatar[0]) : null,
-        files.background ? await localFileHandler(files.background[0]) : null
+        files.avatar ? await imgurFileHandler(files.avatar[0]) : null,
+        files.background ? await imgurFileHandler(files.background[0]) : null
       ])
 
       const updatedUser = await user.update({
