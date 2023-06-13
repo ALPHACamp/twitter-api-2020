@@ -71,7 +71,7 @@ const userController = {
         })
       ])
       // 錯誤處理
-      if (!user) {
+      if (!user || user.role === 'admin') {
         const error = new Error('The user does not exist')
         error.status = 404
         throw error
@@ -95,7 +95,6 @@ const userController = {
       let id = req.params.id
       id = Number(id)
 
-      // 缺少 推文喜歡數量、推文數量
       const [followingCount, followerCount, user] = await Promise.all([
         Followship.findAndCountAll({ where: { followerId: id } }),
         Followship.findAndCountAll({ where: { followingId: id } }),
@@ -105,7 +104,7 @@ const userController = {
       ])
 
       // 確認使用者是否存在
-      if (!user) {
+      if (!user || user.role === 'admin') {
         const error = new Error('The tweet does not exist')
         error.status = 404
         throw error
@@ -144,7 +143,7 @@ const userController = {
       ])
 
       // 錯誤處理
-      if (!user) {
+      if (!user || user.role === 'admin') {
         const error = new Error('The user does not exist')
         error.status = 404
         throw error
@@ -180,7 +179,7 @@ const userController = {
         })
       ])
       // 錯誤處理
-      if (!user) {
+      if (!user || user.role === 'admin') {
         const error = new Error('The user does not exist')
         error.status = 404
         throw error
@@ -190,7 +189,6 @@ const userController = {
         error.status = 404
         throw error
       }
-      console.log(userLiked)
       const data = []
       for (const i of userLiked) {
         data.push(i.Tweet)
@@ -217,7 +215,7 @@ const userController = {
       ])
 
       // 錯誤處理
-      if (!user) {
+      if (!user || user.role === 'admin') {
         const error = new Error('The user does not exist')
         error.status = 404
         throw error
@@ -248,7 +246,7 @@ const userController = {
       ])
 
       // 錯誤處理
-      if (!user) {
+      if (!user || user.role === 'admin') {
         const error = new Error('The user does not exist')
         error.status = 404
         throw error
@@ -270,6 +268,13 @@ const userController = {
       let { id } = req.params
       id = Number(id)
 
+      // 使用者不能編輯他人資料
+      if (getUser(req).id !== id) {
+        const error = new Error('You can only edit your profile')
+        error.status = 403
+        throw error
+      }
+
       // introduction與name的字數限制
       if (introduction.length > 160) {
         const error = new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
@@ -284,7 +289,7 @@ const userController = {
 
       const user = await User.findByPk(id)
       // 錯誤處理
-      if (!user) {
+      if (!user || user.role === 'admin') {
         const error = new Error('The user does not exist')
         error.status = 404
         throw error
@@ -323,8 +328,9 @@ const userController = {
   putUserSetting: async (req, res, next) => {
     try {
       const { account, name, email, introduction, password, checkPassword } = req.body
-      console.log('-------------------------------------req.body')
-      console.log(req.body)
+      let { id } = req.params
+      id = Number(id)
+
       // introduction與name的字數限制
       if (introduction.length > 160) {
         const error = new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
@@ -344,6 +350,13 @@ const userController = {
         throw error
       }
 
+      // 使用者不能編輯他人資料
+      if (getUser(req).id !== id) {
+        const error = new Error('You can only edit your profile')
+        error.status = 403
+        throw error
+      }
+
       // 檢查account, email 是否重複
       const [userAccount, userEmail] = await Promise.all([
         User.findOne({ where: { account } }),
@@ -360,7 +373,7 @@ const userController = {
         throw error
       }
 
-      const user = await User.findByPk(req.params.id)
+      const user = await User.findByPk(id)
       const updatedUser = await user.update({
         account: account || user.account,
         name: name || user.name,
