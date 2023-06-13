@@ -1,7 +1,10 @@
 const adminServices = require('../services/admin-service')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
+const Sequelize = require('sequelize')
+const { literal } = Sequelize
+const moment = require('moment')
 
 const adminController = {
   signIn: async (req, res, next) => {
@@ -30,15 +33,67 @@ const adminController = {
   getTweets: (req, res, next) =>{
     adminServices.getTweets(req, (err, data) => err ? next(err) : res.json(data))
   },
-  getUsers: (req, res, next) =>{
-    adminServices.getUsers(req, (err, data) => err ? next(err) : res.json(data.users))
+  getUsers:(req, res, next) => {
+    return User.findAll({
+      attributes: {
+        include: [
+          // user data
+          [
+            literal(
+              '(SELECT COUNT(id) FROM Tweets WHERE Tweets.user_id = User.id)'
+            ),
+            'tweetCount'
+          ],
+          [
+            literal(
+              '(SELECT COUNT(id) FROM Likes WHERE Likes.user_id = User.id)'
+            ),
+            'likeCount'
+          ],
+          [
+            literal(
+              '(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = User.id)'
+            ),
+            'followerCount'
+          ],
+          [
+            literal(
+              '(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = User.id)'
+            ),
+            'followingCount'
+          ]
+        ],
+        exclude: ['password', 'createdAt', 'updatedAt', 'role']
+      },
+      // sort user data by tweetCount
+      order: [[literal('tweetCount'), 'DESC']],
+      raw: true,
+      nest: true
+    })
+    .then(users => {
+      if (!users) throw new Error('No users found.')
+      return res.status(200).json(users)
+    })
+    .catch(err => next(err))
   },
   getTweet: (req, res, next) =>{
     adminServices.getTweet(req, (err, data) => err ? next(err) : res.json(data))
   },
-  deleteTweet: (req, res, next) =>{
-    adminServices.deleteTweet(req, (err, data) => err ? next(err) : res.json(data))
-  },
+  deleteTweet:(req, res, next) => {
+    return Tweet.findByPk(req.params.id)
+    .then(tweet => {
+      if (!tweet) throw new Error("The tweet didn't exist!")
+      Promise.all(
+          Reply.destroy({ where: { TweetId: req.params.id } }),
+          Like.destroy({ where: { TweetId: req.params.id } })
+      )
+      const deletedTweet = tweet.toJSON()
+      return tweet.destroy().then(() => {
+        return res.status(200).json(deletedTweet)
+      })
+    })
+    .catch(err => next(err))
+  }
 }  
 
 module.exports = adminController

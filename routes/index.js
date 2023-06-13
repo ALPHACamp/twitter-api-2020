@@ -7,21 +7,20 @@ const { authenticated, authenticatedUser, authenticatedAdmin } = require('../mid
 const upload = require('../middleware/multer') // 載入 multer
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
+const likeController = require('../controllers/like-controller')
+const followController = require('../controllers/follow-controller')
 const admin = require('./modules/admin')
 
 router.use('/admin', admin)
 
-router.post('/users/signin', userController.signIn)
-router.get('/users/:user_id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
-router.get('/users/:user_id/replied_tweets', authenticated, authenticatedUser, userController.getUserRepliedTweets)
 
 // replies
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postComment)
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getComment) 
 
 //like
-router.post('/tweets/:id/like', authenticated, userController.addLike)
-router.post('/tweets/:id/unlike', authenticated, userController.removeLike)
+router.post('/tweets/:id/like', authenticated, likeController.addLike)
+router.post('/tweets/:id/unlike', authenticated, likeController.removeLike)
 
 // tweets
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
@@ -29,20 +28,11 @@ router.post('/tweets', authenticated, authenticatedUser, tweetController.createT
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 
 //followships
-router.post('/followships', authenticated, authenticatedUser, userController.addFollowing)
-router.delete('/followships/:followingId', authenticated, authenticatedUser, userController.removeFollowing)
+router.post('/followships', authenticated, authenticatedUser, followController.addFollowing)
+router.delete('/followships/:followingId', authenticated, authenticatedUser, followController.removeFollowing)
+
 // router.get('/followships', authenticated, authenticatedUser, userController.getTop)
 
-//user data
-router.get('/users/tops', authenticated, authenticatedUser, userController.getTopUsers)
-router.get('/users/:user_id/likes', authenticated, authenticatedUser, userController.getUserLikes)
-router.get('/users/:user_id/followings', authenticated, authenticatedUser, userController.getUserFollowings)
-router.get('/users/:user_id/followers', authenticated,authenticatedUser,  userController.getUserFollowers)
-router.get('/users/:user_id/edit', authenticated, authenticatedUser, userController.editUser)
-router.put('/users/:user_id', authenticated, authenticatedUser, upload.single('image'), userController.putUser)
-router.get('/users/:user_id', authenticated, authenticatedUser, userController.getUser)
-
-router.post('/users', userController.signUp)
 
 router.use('/', apiErrorHandler)
 
