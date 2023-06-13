@@ -71,25 +71,25 @@ const userController = {
       })
       .catch((err) => next(err))
   },
-  putUser: (req, res, next) => {
+  putUser: async (req, res, next) => {
     // 為了做到可以&只能更新自己的資料，且如果自己的資料重複也能更新，且不能跟別人重複account、email
     // 下一階段再考慮優化它
+    const { setting } = req.query
     const paramsUserId = Number(req.params.id)
-    const userId = Number(req.user.id)
-    if (paramsUserId !== userId) return res.status(403).json('Can not change others data')
-    const userAccount = req.user.account
-    const userEmail = req.user.email
-    const { account, name, email, password, passwordCheck, introduction } = req.body
+    const userId = Number(req.user?.id)
+    const userAccount = req.user?.account
+    const userEmail = req.user?.email
     const { file } = req
-    if (password !== passwordCheck) return res.status(400).json('Password do not match!')
-    Promise.all([
-      User.findAll({
-        attributes: ['account', 'email']
-      }),
-      User.findByPk(userId),
-      imgurFileHandler(file)
-    ])
-      .then(([users, userdata, filePath]) => {
+    console.log(file)
+    const { account, name, email, password, passwordCheck, introduction } = req.body
+
+    try {
+      if (setting) {
+        if (!password) return res.status(401).json('You may into wrong place.')
+        if (paramsUserId !== userId) return res.status(403).json('Can not change others data')
+        if (password !== passwordCheck) return res.status(400).json('Password do not match!')
+        const users = await User.findAll({ attributes: ['account', 'email'] })
+        const user = await User.findByPk(userId)
         const accountList = []
         const emailList = []
         users.map((user) => {
@@ -101,21 +101,29 @@ const userController = {
         emailList.splice(emailList.indexOf(userEmail), 1)
         if (accountList.includes(account)) return res.status(400).json('This account has been used!')
         if (emailList.includes(email)) return res.status(400).json('This email has been used!')
-        return bcrypt.hash(password, 10).then((hash) => {
-          userdata.update({
-            account,
-            name,
-            email,
-            avatar: filePath || null,
-            password: hash,
-            introduction
-          })
+        const hash = await bcrypt.hash(password, 10)
+        await user.update({
+          account,
+          name,
+          email,
+          password: hash
         })
-      })
-      .then(() => {
         return res.status(200).json('update success')
-      })
-      .catch((err) => next(err))
+      } else if (!setting) {
+        if (!introduction) return res.status(401).json('You may into wrong place.')
+        const user = await User.findByPk(userId)
+        const filePath = await imgurFileHandler(file)
+        await user.update({
+          name,
+          avatar: filePath || null,
+          coverPhoto: filePath || null,
+          introduction
+        })
+        return res.status(200).json('update success')
+      }
+    } catch (err) {
+      next(err)
+    }
   },
   deleteUser: (req, res, next) => {
     const userId = req.params.id
