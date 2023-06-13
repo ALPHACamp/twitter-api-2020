@@ -50,7 +50,7 @@ const followshipServices = {
       cb(null, {
         status: '取消追蹤！',
         ...deletedFollowship.toJSON(),
-        isFollowed: (followingId === req.body.id)
+        isFollowed: (followingId === req.params.id)
       })
     } catch (err) {
       cb(err)
