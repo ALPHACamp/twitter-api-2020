@@ -24,17 +24,17 @@ const tweetServices = {
 
       if (!tweets) throw new Error("目前沒有任何推文！")
       tweets = tweets.map(tweet => {
-      const subDescription = tweet.description ? tweet.description.substring(0, 100) : ''
+        const subDescription = tweet.description ? tweet.description.substring(0, 100) : ''
 
-      return {
-        ...tweet.dataValues,
-        description: subDescription,
-        createdAt: relativeTimeFromNow(tweet.dataValues.createdAt),
-        isLiked: tweet.Likes.some(like => like.UserId === req.userId),
-        replyCount: tweet.Replies.length,
-        likeCount: tweet.Likes.length
-      }
-    })
+        return {
+          ...tweet.dataValues,
+          description: subDescription,
+          createdAt: relativeTimeFromNow(tweet.dataValues.createdAt),
+          isLiked: tweet.Likes.some(like => like.UserId === req.userId),
+          replyCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length
+        }
+      })
       cb(null, tweets)
     } catch (err) {
       cb(err)
@@ -42,7 +42,7 @@ const tweetServices = {
   },
   getTweet: (req, cb) => {
     const { id } = req.params
-      return Promise.all([
+    return Promise.all([
       Tweet.findByPk(id, {
         include: [
           User,
@@ -62,24 +62,24 @@ const tweetServices = {
         order: [['createdAt', 'DESC']]
       })
     ])
-    .then(([tweet, likes, replies]) => {
-      return Like.findOne({
-        where: {
-          UserId: helpers.getUser(req).id,
-          TweetId: id
-        }
-      })
-      .then((like) => {
-        cb(null, {
-          ...tweet,
-          likeCount: likes,
-          replyCount: replies,
-          createdAt: relativeTimeFromNow(tweet.createdAt),
-          isLiked: !!like
+      .then(([tweet, likes, replies]) => {
+        return Like.findOne({
+          where: {
+            UserId: helpers.getUser(req).id,
+            TweetId: id
+          }
         })
+          .then((like) => {
+            cb(null, {
+              ...tweet,
+              likeCount: likes,
+              replyCount: replies,
+              createdAt: relativeTimeFromNow(tweet.createdAt),
+              isLiked: !!like
+            })
+          })
       })
-    })
-    .catch(err => cb(err))
+      .catch(err => cb(err))
   },
   postTweets: async (req, cb) => {
     try {
@@ -125,11 +125,11 @@ const tweetServices = {
         UserId: helpers.getUser(req).id,
         TweetId: Number(id)
       })
-      cb( null, {
+      cb(null, {
         status: '已加入喜歡！',
         ...likeCreate.toJSON(),
         isLiked: (likeCreate.UserId === helpers.getUser(req).id)
-        })
+      })
     } catch (err) {
       cb(err)
     }
@@ -146,13 +146,13 @@ const tweetServices = {
       if (!like) {
         throw new Error('這篇Tweet沒被like')
       }
-      const removelike = like.destroy()
-      console.log(removelike)
+      const removelike = await like.destroy()
 
-      cb(null, { 
-          message: 'Like 取消成功',
-          isLiked: (removelike === helpers.getUser(req).id)
-        })
+      cb(null, {
+        message: 'Like 取消成功',
+        ...removelike.toJSON(),
+        isLiked: (removelike === helpers.getUser(req).id)
+      })
     } catch (err) {
       cb(err)
     }
