@@ -1,7 +1,7 @@
 // const Sequelize = require('sequelize')
 const { getLastUpdated, getLastUpd, getUser } = require('../_helpers')
 const { User, Tweet, Like, Reply, Followship } = require('../models')
-const { get } = require('../routes')
+
 const tweetController = {
   getTweets: async (req, res, next) => {
     // query設計

@@ -45,7 +45,7 @@ const replyController = {
     }
 
     return Reply.create({
-      UserId: req.user.id || getUser(req).id,
+      UserId: req.user.id || getUser(req).dataValues.id,
       TweetId,
       comment
     })
