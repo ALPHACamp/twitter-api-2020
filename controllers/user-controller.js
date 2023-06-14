@@ -78,6 +78,7 @@ const userController = {
         })
       })
       .then(signUpUser => {
+        signUpUser = signUpUser.toJSON()
         delete signUpUser.password
         res.json({ status: 'success', signUpUser })
       })

@@ -12,7 +12,8 @@ const tweetController = {
           include: [{ model: Like }]
         },
         { model: Reply, attributes: ['id'] },
-        { model: Like, attributes: ['id'] }]
+        { model: Like, attributes: ['id'] }],
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         req.user.Likes = req.user.Likes || []
