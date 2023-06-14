@@ -176,6 +176,7 @@ const userController = {
   },
   putUser: (req, cb) => {
     const { name, email, introduction, password } = req.body
+    console.log(req.body)
     if (!name) throw new Error('User name is required!')
 
     const { file } = req
