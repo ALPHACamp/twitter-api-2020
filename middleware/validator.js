@@ -31,7 +31,11 @@ const signUpValidator = [
   (req, res, next) => {
     const result = validationResult(req)
     if (!result.isEmpty()) {
-      return res.status(400).json({ errors: result.array() })
+      const errors = result.errors.map(e => ({
+        msg: e.msg
+      }))
+
+      return res.status(400).json({ status: 'error', message: errors })
     }
     next()
   }
@@ -47,7 +51,10 @@ const signInValidator = [
   (req, res, next) => {
     const result = validationResult(req)
     if (!result.isEmpty()) {
-      return res.status(400).json({ errors: result.array() })
+      const errors = result.errors.map(e => ({
+        msg: e.msg
+      }))
+      return res.status(400).json({ status: 'error', message: errors })
     }
     next()
   }
