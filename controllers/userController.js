@@ -16,8 +16,25 @@ const userController = {
         raw: true,
         nest: true
       })
-      if (user?.account === req.body.account) return res.status(400).json({ status: 'error', message: 'account已重複註冊!' })
-      if (user?.email === req.body.email) return res.status(400).json({ status: 'error', message: 'email已重複註冊!' })
+      if (user?.account === req.body.account) {
+        return res.status(400).json({
+          status: 'error',
+          message: [{
+            path: 'account',
+            msg: 'account已重複註冊!'
+          }]
+        })
+      }
+      if (user?.email === req.body.email) {
+        return res.status(400).json({
+          status: 'error',
+          message: [
+            {
+              path: 'account',
+              msg: 'email已重複註冊!'
+            }]
+        })
+      }
 
       const hash = await bcrypt.hash(req.body.password, 10)
       await User.create({
@@ -113,7 +130,7 @@ const userController = {
       const data = tweets.map(tweet => ({
         TweetId: tweet.id,
         tweetOwnerId: user.id,
-        tweetOwnerAccount: user.accout,
+        tweetOwnerAccount: user.account,
         tweetOwnerName: user.name,
         tweetOwnerAvatar: user.avatar,
         description: tweet.description,
@@ -218,7 +235,8 @@ const userController = {
           include: {
             model: User,
             as: 'Followings'
-          }
+          },
+          order: [['createdAt', 'DESC']]
         }),
         // 目前登入者的追蹤資料
         Followship.findAll({
@@ -248,7 +266,8 @@ const userController = {
       const currentUserId = getUser(req).dataValues.id
       const [user, following] = await Promise.all([
         User.findByPk(id, {
-          include: { model: User, as: 'Followers' }
+          include: { model: User, as: 'Followers' },
+          order: [['createdAt', 'DESC']]
         }),
         Followship.findAll({
           where: { followerId: currentUserId },
