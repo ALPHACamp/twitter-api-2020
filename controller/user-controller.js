@@ -242,6 +242,7 @@ const userController = {
         followersCount: user.Followers.length, // 計算追蹤者數量
         isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id) // 判斷目前登入使用者是否追蹤該物件
       })).sort((a, b) => b.followersCount - a.followersCount)// 按照人數多->少排序
+        .slice(0, 10)
       return res.status(200).json(userTop)
     } catch (err) { next(err) }
   }
