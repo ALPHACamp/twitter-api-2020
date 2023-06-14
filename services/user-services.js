@@ -108,7 +108,7 @@ const userServices = {
       where: { UserId: req.params.id },
       order: [['createdAt', 'DESC']],
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account'] }] }
+      { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account'] }] }
       ]
     })
       .then(replies => {
@@ -237,7 +237,8 @@ const userServices = {
           model: User,
           as: 'Followers',
           attributes: ['id', 'name', 'avatar', 'introduction', 'account']
-        }]
+        }],
+        order: [['createdAt', 'DESC']]
       }),
       Followship.findAll({
         where: { followerId: helpers.getUser(req).id },
@@ -257,6 +258,7 @@ const userServices = {
           delete f.id
           return f
         })
+          .reverse()
         return cb(null, followers)
       })
       .catch(err => cb(err))
@@ -288,6 +290,7 @@ const userServices = {
           delete f.id
           return f
         })
+          .reverse()
         return cb(null, followings)
       })
       .catch(err => cb(err))
