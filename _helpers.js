@@ -1,9 +1,22 @@
+const fs = require('fs')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 imgur.setClientId(IMGUR_CLIENT_ID)
 
 const getUser = req => {
   return req.user || null
+}
+
+const localFileHandler = (file) => {
+  return new Promise((resolve, reject) => {
+    if (!file) return resolve(null)
+    const fileName = `upload/${file.originalname}`
+    return fs.promises
+      .readFile(file.path)
+      .then(data => fs.promises.writeFile(fileName, data))
+      .then(() => resolve(`/${fileName}`))
+      .catch((err) => reject(err))
+  })
 }
 
 const imgurFileHandler = file => {
@@ -19,5 +32,6 @@ const imgurFileHandler = file => {
 
 module.exports = {
   getUser,
+  localFileHandler,
   imgurFileHandler
 }
