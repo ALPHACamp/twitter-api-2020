@@ -1,0 +1,241 @@
+{
+  "getUsers": {
+    "status": "success",
+    "data": {
+        "users": [
+            {
+                "id": 1,
+                "account": "test-acount-1",
+                "email": "test1@example.com",
+                "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                "name": "test-1",
+                "avatar": "https://i.imgur.com/YcP0tik.jpeg",
+                "introduction": "Hi I am test No.1",
+                "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                "role": "user",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 2,
+                "account": "test-acount-2",
+                "email": "test2@example.com",
+                "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                "name": "test-2",
+                "avatar": "https://i.imgur.com/D5wcicT.jpeg",
+                "introduction": "Hi I am test No.2",
+                "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                "role": "user",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 3,
+                "account": "test-acount-1",
+                "email": "test1@example.com",
+                "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                "name": "test-3",
+                "avatar": "https://i.imgur.com/iM1zUJP.gif",
+                "introduction": "Hi I am test No.3",
+                "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                "role": "user",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 4,
+                "account": "test-acount-4",
+                "email": "test1@example.com",
+                "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                "name": "test-4",
+                "avatar": "https://i.imgur.com/eTxzk46.jpeg",
+                "introduction": "Hi I am test No.4",
+                "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                "role": "user",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 5,
+                "account": "test-acount-5",
+                "email": "test1@example.com",
+                "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                "name": "test-5",
+                "avatar": "https://i.imgur.com/Uschheg.jpeg",
+                "introduction": "Hi I am test No.5",
+                "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                "role": "user",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            }
+
+        ]
+    }
+},
+  "getUser": {
+    "status": "success",
+    "data": {
+        "user": {
+            "id": 1,
+            "account": "test-acount-1",
+            "email": "test1@example.com",
+            "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+            "name": "test-1",
+            "avatar": "https://i.imgur.com/YcP0tik.jpeg",
+            "introduction": "Hi I am test No.1",
+            "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+            "role": "user",
+            "createdAt": "2023-05-25T11:09:42.000Z",
+            "updatedAt": "2023-05-25T11:09:42.000Z",
+            "tweets": [
+                {
+                    "id": 1,
+                    "userId": 1,
+                    "description": "Test-Tweet-user1-1",
+                    "createdAt": "2023-05-25T11:09:42.000Z",
+                    "updatedAt": "2023-05-25T11:09:42.000Z",
+                    "isLiked": true,
+                    "repliesCount": 1,
+                    "user": {
+                        "name": "test-1-name",
+                        "account": "test-1-account",
+                        "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+                    }
+                },
+                {
+                    "id": 2,
+                    "userId": 1,
+                    "description": "Test-Tweet-user1-2",
+                    "createdAt": "2023-05-25T11:09:42.000Z",
+                    "updatedAt": "2023-05-25T11:09:42.000Z",
+                    "isLiked": false,
+                    "repliesCount": 2,
+                    "user": {
+                        "name": "test-1-name",
+                        "account": "test-1-account",
+                        "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+                    }
+                },
+                {
+                    "id": 3,
+                    "userId": 1,
+                    "description": "Test-Tweet-user3-3",
+                    "createdAt": "2023-05-25T11:09:42.000Z",
+                    "updatedAt": "2023-05-25T11:09:42.000Z",
+                    "isLiked": false,
+                    "repliesCount": 3,
+                    "user": {
+                        "name": "test-1-name",
+                        "account": "test-1-account",
+                        "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+                    }
+                }
+            ]
+        }
+    }
+},
+    "getTopUsers":{
+        "status": "success",
+        "data": {
+            "users": [
+                {
+                    "id": 1,
+                    "account": "test-acount-1",
+                    "email": "test1@example.com",
+                    "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                    "name": "test-1",
+                    "avatar": "https://i.imgur.com/YcP0tik.jpeg",
+                    "introduction": "Hi I am test No.1",
+                    "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                    "role": "user",
+                    "createdAt": "2023-05-25T11:09:42.000Z",
+                    "updatedAt": "2023-05-25T11:09:42.000Z",
+                    "isFollowing": true
+                },
+                {
+                    "id": 2,
+                    "account": "test-acount-2",
+                    "email": "test2@example.com",
+                    "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                    "name": "test-2",
+                    "avatar": "https://i.imgur.com/D5wcicT.jpeg",
+                    "introduction": "Hi I am test No.2",
+                    "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                    "role": "user",
+                    "createdAt": "2023-05-25T11:09:42.000Z",
+                    "updatedAt": "2023-05-25T11:09:42.000Z",
+                    "isFollowing": true
+                },
+                {
+                    "id": 3,
+                    "account": "test-acount-1",
+                    "email": "test1@example.com",
+                    "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                    "name": "test-3",
+                    "avatar": "https://i.imgur.com/iM1zUJP.gif",
+                    "introduction": "Hi I am test No.3",
+                    "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                    "role": "user",
+                    "createdAt": "2023-05-25T11:09:42.000Z",
+                    "updatedAt": "2023-05-25T11:09:42.000Z",
+                    "isFollowing": true
+                },
+                {
+                    "id": 4,
+                    "account": "test-acount-4",
+                    "email": "test1@example.com",
+                    "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                    "name": "test-4",
+                    "avatar": "https://i.imgur.com/eTxzk46.jpeg",
+                    "introduction": "Hi I am test No.4",
+                    "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                    "role": "user",
+                    "createdAt": "2023-05-25T11:09:42.000Z",
+                    "updatedAt": "2023-05-25T11:09:42.000Z",
+                    "isFollowing": false
+                },
+                {
+                    "id": 5,
+                    "account": "test-acount-5",
+                    "email": "test1@example.com",
+                    "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                    "name": "test-5",
+                    "avatar": "https://i.imgur.com/Uschheg.jpeg",
+                    "introduction": "Hi I am test No.5",
+                    "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                    "role": "user",
+                    "createdAt": "2023-05-25T11:09:42.000Z",
+                    "updatedAt": "2023-05-25T11:09:42.000Z",
+                    "isFollowing": false
+                }
+    
+            ]
+        }
+},
+    "getUserTweet": [
+        {
+            "description": "PopuLady出身的宇珊8日驚喜宣布自己被交往4年的男友Josh求婚成功，經紀人證實喜訊，宇珊也笑說，其實男友是一天照三餐在問「願意當我老婆嗎？」直到去露營第五次時，男友這回直接單膝下跪，把戒指拿出來正式求婚，讓她感動到直接飆淚：「這一切他居然都沒有用任何的器材或設備記錄下來，我才發現原來求婚就是3分鐘這樣子的事情而已呀！」",
+            "user": {
+                "name": "apple-name",
+                "account": "apple-account",
+                "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+            }
+        },
+        {
+            "description": "環球科技大學經教育部審議財務狀況未改善，將於明年退場，今天舉辦畢業典禮，創辦人許文志的兒子、全國商業總會理事長許舒博現身致詞，指民進黨總統參選人賴清德曾尋求他的支持，他反問賴清德，把環球科大毀了，要怎麼支持？",
+            "user": {
+                "name": "apple-name",
+                "account": "apple-account",
+                "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+            }
+        },
+        {
+            "description": "許舒博說，為了環球科大，他也曾跟台塑總裁談過，但教育政策所趨，環球終究是退場了，他對此感到抱歉，他希望環球的畢業生要在社會創造自我的價值，如果學生出社會有困難，他願意以商總身份親自拜託你的老闆，環球是個大家庭培育許多優秀人才，大家要讓環球精神永續。",
+            "user": {
+                "name": "apple-name",
+                "account": "apple-account",
+                "avatar": "https://i.imgur.com/YcP0tik.jpeg"
+            }
+        }
+    ]
+}

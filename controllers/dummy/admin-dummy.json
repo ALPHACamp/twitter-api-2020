@@ -1,0 +1,130 @@
+{
+  "getUsers": {
+    "status": "success",
+    "data": {
+        "users": [
+            {
+                "id": 1,
+                "account": "test-acount-1",
+                "email": "test1@example.com",
+                "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                "name": "test-1",
+                "avatr": "https://i.imgur.com/YcP0tik.jpeg",
+                "introduction": "Hi I am test No.1",
+                "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                "role": "user",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 2,
+                "account": "test-acount-2",
+                "email": "test2@example.com",
+                "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                "name": "test-2",
+                "avatr": "https://i.imgur.com/D5wcicT.jpeg",
+                "introduction": "Hi I am test No.2",
+                "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                "role": "user",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 3,
+                "account": "test-acount-1",
+                "email": "test1@example.com",
+                "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                "name": "test-3",
+                "avatr": "https://i.imgur.com/iM1zUJP.gif",
+                "introduction": "Hi I am test No.3",
+                "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                "role": "user",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 4,
+                "account": "test-acount-4",
+                "email": "test1@example.com",
+                "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                "name": "test-4",
+                "avatr": "https://i.imgur.com/eTxzk46.jpeg",
+                "introduction": "Hi I am test No.4",
+                "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                "role": "user",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 5,
+                "account": "test-acount-5",
+                "email": "test1@example.com",
+                "password": "$2a$10$MlmbvV0fDfjJuqipEU88W.KSo75y8Zc1C/hxA.rdG772HaALUiSQ.",
+                "name": "test-5",
+                "avatr": "https://i.imgur.com/Uschheg.jpeg",
+                "introduction": "Hi I am test No.5",
+                "banner": "https://i.imgur.com/3ZH4ZZ8.jpeg",
+                "role": "user",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            }
+
+        ]
+    }
+},
+  "getTweets": {
+    "status": "success",
+    "data": {
+        "tweets": [
+            {
+                "id": 1,
+                "userId": 1,
+                "description": "Test-Tweet-user1-1",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 2,
+                "userId": 1,
+                "description": "Test-Tweet-user1-2",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 3,
+                "userId": 1,
+                "description": "Test-Tweet-user3-3",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 4,
+                "userId": 2,
+                "description": "Test-Tweet-user2-1",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 5,
+                "userId": 2,
+                "description": "Test-Tweet-user2-2",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },
+            {
+                "id": 6,
+                "userId": 3,
+                "description": "Test-Tweet-user3-1",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            },{
+                "id": 7,
+                "userId": 3,
+                "description": "Test-Tweet-user3-2",
+                "createdAt": "2023-05-25T11:09:42.000Z",
+                "updatedAt": "2023-05-25T11:09:42.000Z"
+            }
+        ]
+    }
+}
+}
