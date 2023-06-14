@@ -123,7 +123,7 @@ const adminServices = {
 
       if (!tweets) throw new Error("目前沒有任何推文！")
       tweets = tweets.map(tweet => {
-      const subDescription = tweet.description ? tweet.description.substring(0, 50) : ''
+      const subDescription = tweet.description.length > 100 ? tweet.description.substring(0, 100) + '...' : tweet.description
 
       return {
         ...tweet.dataValues,
