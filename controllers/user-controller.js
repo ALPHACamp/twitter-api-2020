@@ -90,6 +90,19 @@ const userController = {
       if (!user) {
         throw new Error('user does not exist')
       }
+      
+      if (account) {
+        const checkAccount = await User.findOne({ where: { account: account } })
+        if (checkAccount && account !== user.account) {
+          throw new Error('Account already exist!')
+        }
+      }
+      if (email) {
+        const checkEmail = await User.findOne({ where: { email: email } })
+        if (checkEmail && email !== user.email) {
+          throw new Error('Email already exist!')
+        }
+      }   
 
       // //用bcrypt 加密函數進行密碼驗證
       // const passwordMatch = await bcrypt.compare(password, user.password);
