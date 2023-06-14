@@ -201,7 +201,8 @@ const userController = {
   },
   putUserSetting: async (req, res, next) => {
     try {
-      const { name, password, account, email } = req.body
+      const { name, password, account, email, checkPassword } = req.body
+      if (password !== checkPassword) throw new Error('Passwords do not match')
       const userId = helpers.getUser(req).id
       if (name.length > 51) throw new Error('使用者註冊名稱(name)上限為50字')
       if (!validator.validate(email)) throw new Error('Email格式不正確!')
