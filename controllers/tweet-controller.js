@@ -1,4 +1,5 @@
 const { Tweet, User, Like, Reply } = require('../models')
+const { getUser } = require('../helpers/auth-helpers.js')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -69,6 +70,7 @@ const tweetController = {
   postTweet: async (req, res, next) => {
     try {
       const { description } = req.body
+      const user = await User.findByPk(getUser(req).id)
       if (!description) {
         return res.status(400).json({ status: 'error', message: 'Please input tweet.' })
       }
@@ -79,7 +81,7 @@ const tweetController = {
         UserId: helpers.getUser(req).id,
         description
       })
-      return res.status(200).json({ status: 'success', data })
+      return res.status(200).json({ status: 'success', user, data })
     } catch (err) {
       next(err)
     }
