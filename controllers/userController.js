@@ -39,29 +39,28 @@ const userController = {
     }
   },
   signUp: (req, res, next) => {
-    if (req.body.password !== req.body.passwordCheck) { return res.status(400).json('Password do not match!') }
-    if (req.body.name.length > 50) return res.status(400).json('Max length 50')
+    const { account, name, email, password, checkPassword } = req.body
+    if (password !== checkPassword) { return res.status(400).json('Password do not match!') }
+    if (name.length > 50) return res.status(400).json('Max length 50')
     return Promise.all([
-      User.findOne({ where: { email: req.body.email } }),
-      User.findOne({ where: { account: req.body.account } })
+      User.findOne({ where: { email } }),
+      User.findOne({ where: { account } })
     ])
       .then(([emailCheck, accountCheck]) => {
         if (emailCheck) return res.status(400).json('Email already exists!')
         if (accountCheck) { return res.status(400).json('Account already exists!') }
-        return bcrypt.hash(req.body.password, 10)
+        return bcrypt.hash(password, 10)
       })
       .then((hash) =>
         User.create({
-          account: req.body.account,
-          name: req.body.name,
-          email: req.body.email,
+          account,
+          name,
+          email,
           password: hash,
           role: 'user'
         })
       )
-      .then((data) => {
-        const userData = data.toJSON() // 需修改?
-        delete userData.password // 需修改?
+      .then(() => {
         res.status(200).json('Create success')
       })
       .catch((err) => next(err))
