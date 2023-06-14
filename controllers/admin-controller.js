@@ -75,8 +75,8 @@ const adminController = {
       user.followingsCount = followings?.length
       return user
     }))
-
-    return res.json(userData)
+    const userSortData = userData?.sort((a, b) => b.tweetsCount - a.tweetsCount)
+    return res.json(userSortData)
   }
 }
 
