@@ -1,7 +1,7 @@
 const helpers = require('../_helpers')
 
 const {
-    relativeTimeFromNow
+    relativeTimeFromNow, switchTime
 } = require('../helpers/dayjs-helpers')
 const {
     Tweet, User, Like, Reply
@@ -77,7 +77,7 @@ const tweetServices = {
                 cb(null, {...tweet,
                     likeCount: likes,
                     replyCount: replies,
-                    createdAt: relativeTimeFromNow(tweet.createdAt),
+                    createdAt: switchTime(tweet.createdAt),
                     isLiked: !! like
                 })
             })
