@@ -209,28 +209,36 @@ const userController = {
   getFollowings: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
-      // 使用者正在追蹤的對象
+
+      // 指定的使用者(:id)
       const user = await User.findByPk(req.params.id, {
         attributes: { exclude: ['password'] }
       })
       if (!user) throw new Error('使用者不存在!')
 
+      // 指定的使用者(:id)正在追蹤的對象
       const followings = await Followship.findAll({
         where: { followerId: req.params.id },
         include: [
           {
             model: User,
             as: 'Following',
-            attributes: { exclude: ['password'] }
+            attributes: {
+              exclude: ['password'],
+              include: [
+                // 查詢token user 有沒有追隨這位 Following
+                [
+                  sequelize.literal('(SELECT CASE WHEN EXISTS(SELECT * FROM Followships WHERE followerId = ' + currentUserId + ' AND followingId = Following.id) THEN "true" ELSE "false" END)'), 'isCurrentUserFollowed'
+                ]
+              ]
+            }
           }
         ],
         order: [['createdAt', 'DESC']]
       })
 
       const followingsData = followings.map(following => ({
-        ...following.toJSON(),
-        isCurrentUserFollowed:
-          following.followerId.toString() === currentUserId.toString()
+        ...following.toJSON()
       }))
       res.status(200).json(followingsData)
     } catch (err) {
@@ -240,28 +248,36 @@ const userController = {
   getFollowers: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
-      // 找出正在追蹤此使用者的其它使用者
+
+      // 指定的使用者(:id)
       const user = await User.findByPk(req.params.id, {
         attributes: { exclude: ['password'] }
       })
       if (!user) throw new Error('使用者不存在!')
 
+      // 正在追蹤指定的使用者(:id)的使用者
       const followers = await Followship.findAll({
         where: { followingId: req.params.id },
         include: [
           {
             model: User,
             as: 'Follower',
-            attributes: { exclude: ['password'] }
+            attributes: {
+              exclude: ['password'],
+              include: [
+                // 查詢token user 有沒有追隨這位 Follower
+                [
+                  sequelize.literal('(SELECT CASE WHEN EXISTS(SELECT * FROM Followships WHERE followerId = ' + currentUserId + ' AND followingId = Follower.id) THEN "true" ELSE "false" END)'), 'isCurrentUserFollowed'
+                ]
+              ]
+            }
           }
         ],
         order: [['createdAt', 'DESC']]
       })
 
       const followersData = followers.map(follower => ({
-        ...follower.toJSON(),
-        isCurrentUserFollowed:
-          follower.followerId.toString() === currentUserId.toString()
+        ...follower.toJSON()
       }))
       res.status(200).json(followersData)
     } catch (err) {
