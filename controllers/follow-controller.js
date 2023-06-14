@@ -4,12 +4,11 @@ const followController = {
   addFollowing: (req, res, next) => {
     const followingId = req.body.id
     const followerId = req.user.id
-    console.log(followingId, followerId)
-    if (followerId === followingId) throw new Error('不可追蹤自己')
+    if (followerId === followingId) throw new Error('You cannot follow yourself.')
     User.findByPk(followingId)
       .then((user) => {
-        if (!user) throw new Error('該使用者不存在')
-        if (user.dataValues.role === 'admin') throw new Error('不可追蹤管理者')
+        if (!user) throw new Error('The user does not exist.')
+        if (user.dataValues.role === 'admin') throw new Error('You cannot follow an administrator.')
         Followship.findOrCreate({
           where: {
             followerId,
@@ -17,9 +16,8 @@ const followController = {
           },
         })
           .then((followship) => {
-            // followship[1]為boolean，建立成功回傳true
-            if (!followship[1]) throw new Error('已經追蹤過該使用者了')
-            return res.status(200).json({ message: '成功建立追蹤關係' })
+            if (!followship[1]) throw new Error('You have followed this user!')
+            return res.status(200).json({ message: 'Successfully established a following relationship.' })
           })
           .catch((err) => next(err))
       })
@@ -36,8 +34,8 @@ const followController = {
     })
       .then(followship => {
         if (!followship) throw new Error("You haven't followed this user!")
-        followship.destroy().then(() => {
-          return res.status(200).json({ message: '成功移除追蹤' })
+        followship.destroy().then(()=>{
+          return res.status(200).json({ message: 'Successfully removed a following relationship.' })
         })
       })
       .catch((err) => next(err))
