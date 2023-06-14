@@ -71,43 +71,9 @@ const userController = {
   getUser: (req, res) => {
     return Promise.all([
       User.findByPk(req.params.id),
-      // Tweet.findAll({
-      //   //取得req.params.id的所有tweets
-      //   where: {
-      //     userId: req.params.id
-      //   },
-      //   //額外取得兩個屬性
-      //   include: [
-      //     { model: Reply },
-      //     { model: Like, }
-      //   ],
-      // }),
-      // Followship.findOne({
-      //   where: {
-      //     followingId: helpers.getUser(req),
-      //     followerId: req.params.id
-      //   }
-      // }),
-      // User.findOne({
-      //   where: { id: req.params.id },
-      //   include: [{ model: User, as: 'Followings' }]
-      // }),
-      // User.findOne({
-      //   where: { id: req.params.id },
-      //   include: [{ model: User, as: 'Followers' }]
-      // })
     ])
       .then(([user]) => {
         if (!user) throw new Error(`User didn't exist`)
-        // tweets = tweets.map(tweet => {
-        //   const tweetData = tweet.toJSON()
-        //   tweetData.RepliesCount = tweet.Replies.length
-        //   tweetData.LikesCount = tweet.Likes.length
-        //   return tweetData
-        // })
-        // const isFollowing = followship ? true : false
-        // const followingsCount = followings.Followings.length
-        // const followersCount = followers.Followers.length
         user = user.toJSON()
         delete user.password
         return res.status(200).json(user)
@@ -117,9 +83,41 @@ const userController = {
   getUserTweets: (req, res) => {
     User.findByPk(req.params.id, { include: [{ model: Tweet }] })
       .then(user => {
-        
-
+        if (!user) throw new Error(`User didn't exist`)
         return res.status(200).json(user.Tweets)
+      })
+      .catch(err => res.status(500).json({ status: 'error', error: err }))
+  },
+  getUserReplies: (req, res) => {
+    User.findByPk(req.params.id, { include: [{ model: Reply }] })
+      .then(user => {
+        if (!user) throw new Error(`User didn't exist`)
+        return res.status(200).json(user.Replies)
+      })
+      .catch(err => res.status(500).json({ status: 'error', error: err }))
+  },
+  getUserLikes: (req, res) => {
+    User.findByPk(req.params.id, { include: [{ model: Like }] })
+      .then(user => {
+        return res.status(200).json(user.Likes)
+      })
+      .catch(err => res.status(500).json({ status: 'error', error: err }))
+  },
+  getUserFollowings: (req, res) => {
+    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followings' }] })
+      .then(user => {
+        if (!user) throw new Error(`User didn't exist`)
+        const followings = user.Followings.map(following => ({ followingId: following.id }));
+        return res.status(200).json(followings);
+      })
+      .catch(err => res.status(500).json({ status: 'error', error: err }))
+  },
+  getUserFollowers: (req, res) => {
+    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }] })
+      .then(user => {
+        if (!user) throw new Error(`User didn't exist`)
+        const followers = user.Followers.map(follower => ({ followerId: follower.id }));
+        return res.status(200).json(followers);
       })
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
@@ -138,7 +136,7 @@ const userController = {
     const files = req.files || {}
     if (!name) throw new Error('User name is required')
     return Promise.all([
-      User.findByPk(req.user.id),
+      User.findByPk(helpers.getUser(req).id),
       files.avatar ? imgurFileHandler(files.avatar[0]) : null,
       files.banner ? imgurFileHandler(files.banner[0]) : null
     ])
@@ -155,17 +153,17 @@ const userController = {
       .then((updatedUser) => {
         updatedUser = updatedUser.toJSON()
         delete updatedUser.password
-        return res.status(200).json({ status: 'success', updatedUser })
+        return res.status(200).json(updatedUser)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
   addLike: (req, res) => {
-    const { tweetId } = req.params
+    const tweetId = req.params.id
     return Promise.all([
       Tweet.findByPk(tweetId),
       Like.findOne({
         where: {
-          userId: req.user.id,
+          userId: helpers.getUser(req).id,
           tweetId
         }
       })
@@ -174,34 +172,34 @@ const userController = {
         if (!tweet) throw new Error(`tweet didn't exist!`)
         if (like) throw new Error(`You have liked this tweet!`)
         return Like.create({
-          userId: req.user.id,
+          userId: helpers.getUser(req).id,
           tweetId
         })
       })
-      .then((likedTweet) => res.status(200).json({ status: 'success', likedTweet }))
+      .then((likedTweet) => res.status(200).json(likedTweet))
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
   removeLike: (req, res) => {
     Like.findOne({
       where: {
-        userId: req.user.id,
-        tweetId: req.params.tweetId
+        userId: helpers.getUser(req).id,
+        tweetId: req.params.id
       }
     })
       .then(like => {
         if (!like) throw new Error(`You haven't liked this tweet`)
         return like.destroy()
       })
-      .then(removedLike => res.status(200).json({ status: 'success', removedLike }))
+      .then(removedLike => res.status(200).json(removedLike))
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
   addFollowing: (req, res) => {
-    const { userId } = req.params
+    const userId = req.body.id
     Promise.all([
       User.findByPk(userId),
       Followship.findOne({
         where: {
-          followerId: req.user.id,
+          followerId: helpers.getUser(req).id,
           followingId: userId
         }
       })
@@ -210,26 +208,26 @@ const userController = {
         if (!user) throw new Error("User didn't exist!")
         if (followship) throw new Error('You are already following this user!')
         return Followship.create({
-          followerId: req.user.id,
+          followerId: helpers.getUser(req).id,
           followingId: userId
         })
       })
-      .then(updateFollowship => res.status(200).json({ status: 'success', updateFollowship }))
+      .then(updateFollowship => res.status(200).json(updateFollowship))
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
   removeFollowing: (req, res) => {
-    const { userId } = req.params
+    const { followingId } = req.params
     return Followship.findOne({
       where: {
-        followerId: req.user.id,
-        followingId: userId
+        followerId: helpers.getUser(req).id,
+        followingId: followingId
       }
     })
       .then(followship => {
         if (!followship) throw new Error(`You haven't followed this user!`)
         return followship.destroy()
       })
-      .then(removedFollowship => res.status(200).json({ status: 'success', removedFollowship }))
+      .then(removedFollowship => res.status(200).json(removedFollowship))
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
   getTopUsers: (req, res) => {
