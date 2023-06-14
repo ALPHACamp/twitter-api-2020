@@ -1,8 +1,9 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const validator = require('email-validator')
+const { Op } = require('sequelize')
 const userController = {
   signIn: async (req, res, next) => {
     try {
@@ -20,7 +21,7 @@ const userController = {
       // Check password and check Password must be the same
       if (password !== checkPassword) throw new Error('Passwords do not match')
       // Check name.length must < 50
-      if (name.length > 51) throw new Error('使用者註冊名稱(name)上限為50字')
+      if (name.length > 50) throw new Error('使用者註冊名稱(name)上限為50字')
       // Check if email matches the required format
       if (!validator.validate(email)) throw new Error('Email格式不正確!')
       // check if user with given email or account already exists
@@ -57,7 +58,6 @@ const userController = {
       return res.status(200).json(user)
     } catch (err) { next(err) }
   },
-  // const reqUserId = helpers.getUser(req).id
   getUserTweets: async (req, res, next) => {
     try {
       const userId = Number(req.params.id)
@@ -108,29 +108,73 @@ const userController = {
   getFollowings: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const followships = await Followship.findAll({
-        where: { followerId: userId },
-        include: [
-          { model: User, as: 'Followings', attributes: { exclude: ['password'] } }
+      const followings = await User.findByPk(userId, {
+        include: {
+          model: User,
+          as: 'Followings',
+          attributes: [
+            ['id', 'followingId'],
+            'name',
+            'account',
+            'avatar',
+            'cover',
+            'introduction'
+          ]
+        },
+        attributes: [
+          ['id', 'userId'],
+          'name',
+          'account',
+          'avatar',
+          'cover'
         ]
       })
-
-      if (followships.length === 0) throw new Error('該用戶無正在追蹤對象')
-      return res.status(200).json(followships)
+      if (followings.Followings.length === 0) throw new Error('該用戶沒有追蹤對象')
+      const followingId = helpers.getUser(req).Followings.map(user => user.id)
+      const result = followings.Followings
+        .map(f => ({
+          ...f.toJSON(),
+          isFollowed: followingId.includes(f.toJSON().followingId) || false
+        }))
+        .sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
+      result.forEach(i => delete i.Followship)
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   },
   getFollowers: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const followships = await Followship.findAll({
-        where: { followingId: userId },
-        include: [
-          { model: User, as: 'Followers', attributes: { exclude: ['password'] } }
+      const followers = await User.findByPk(userId, {
+        include: {
+          model: User,
+          as: 'Followers',
+          attributes: [
+            ['id', 'followerId'],
+            'name',
+            'account',
+            'avatar',
+            'cover',
+            'introduction'
+          ]
+        },
+        attributes: [
+          ['id', 'userId'],
+          'name',
+          'account',
+          'avatar',
+          'cover'
         ]
       })
-      // delete followships.Followers.password
-      if (followships.length === 0) throw new Error('該用戶無正在追蹤對象')
-      return res.status(200).json(followships)
+      if (followers.Followers.length === 0) throw new Error('該用戶沒有追蹤者')
+      const followingId = helpers.getUser(req).Followings.map(user => user.id)
+      const result = followers.Followers
+        .map(f => ({
+          ...f.toJSON(),
+          isFollowed: followingId.includes(f.toJSON().followerId) || false
+        }))
+        .sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
+      result.forEach(i => delete i.Followship)
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   },
   putUser: async (req, res, next) => {
@@ -139,6 +183,7 @@ const userController = {
       const userId = helpers.getUser(req).id
       const user = await User.findByPk(userId)
       if (!user) throw new Error('User not found!')
+      if (introduction.length > 160 || name.length > 50) throw new Error('字數超出上限')
       const updatedUser = await user.update({
         name: name || user.name,
         avatar: avatar || user.avatar,
@@ -152,6 +197,51 @@ const userController = {
         introduction: updatedUser.introduction
       }
       return res.status(200).json({ data: responseData, message: '修改成功' })
+    } catch (err) { next(err) }
+  },
+  putUserSetting: async (req, res, next) => {
+    try {
+      const { name, password, account, email } = req.body
+      const userId = helpers.getUser(req).id
+      if (name.length > 51) throw new Error('使用者註冊名稱(name)上限為50字')
+      if (!validator.validate(email)) throw new Error('Email格式不正確!')
+      const existingAccount = await User.findAll({ where: { [Op.or]: [{ account }, { email }] } })
+      if (existingAccount.some(user => user.account === account && user.id !== userId)) throw new Error('account已重複註冊!')
+      if (existingAccount.some(user => user.email === email && user.id !== userId)) throw new Error('email已重複註冊!')
+      const user = await User.findByPk(userId)
+      if (!user) throw new Error('User not found!')
+      const hash = await bcrypt.hash(password, 10)
+      const updatedUser = await user.update({
+        name: name || user.name,
+        password: hash || user.password,
+        account: account || user.account,
+        email: email || user.email
+      })
+      const responseData = {
+        name: updatedUser.name,
+        account: updatedUser.account,
+        email: updatedUser.email
+      }
+      return res.status(200).json({ data: responseData, message: '修改成功' })
+    } catch (err) { next(err) }
+  },
+  getUsersTop10: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        include: {
+          model: User,
+          as: 'Followers',
+          attributes: ['id', 'email', 'name', 'account', 'avatar']
+        },
+        attributes: ['id', 'name', 'account', 'avatar', 'createdAt'],
+        where: { role: { [Op.not]: 'admin' } }
+      })
+      const userTop = users.map(user => ({
+        ...user.toJSON(), // 整理格式
+        followersCount: user.Followers.length, // 計算追蹤者數量
+        isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id) // 判斷目前登入使用者是否追蹤該物件
+      })).sort((a, b) => b.followersCount - a.followersCount)// 按照人數多->少排序
+      return res.status(200).json(userTop)
     } catch (err) { next(err) }
   }
 }

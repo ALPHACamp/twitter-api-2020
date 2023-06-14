@@ -10,17 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     followerId: DataTypes.INTEGER,
     followingId: DataTypes.INTEGER
   }, {})
-  Followship.associate = function (models) {
-    Followship.belongsTo(models.User, {
-      foreignKey: 'followerId',
-      as: 'Followers'
-    })
-
-    Followship.belongsTo(models.User, {
-      foreignKey: 'followingId',
-      as: 'Followings'
-    })
-  }
+  Followship.associate = function (models) {}
   Followship.init({
     followerId: DataTypes.INTEGER,
     followingId: DataTypes.INTEGER
