@@ -123,14 +123,20 @@ const tweetServices = {
             })
             if (!tweet) throw new Error("推文不存在!")
             if (like) throw new Error('你已經like過這篇Tweet了')
-            const likeCreate = await Like.create({
+            await Like.create({
                 UserId: helpers.getUser(req).id,
                 TweetId: Number(id)
+                })
+            const addToLike = await Like.findOne({
+                where: {
+                    UserId: helpers.getUser(req).id,
+                    TweetId: id
+                }
             })
             cb(null, {
                 status: '已加入喜歡！',
-                ...likeCreate.toJSON(),
-                isLiked: (likeCreate.UserId === helpers.getUser(req).id)
+                ...addToLike.toJSON(),
+                isLiked: (!!addToLike)
             })
         } catch (err) {
             cb(err)
@@ -152,10 +158,16 @@ const tweetServices = {
             if (!like) {
                 throw new Error('這篇Tweet沒被like')
             }
-            const removelike = await like.destroy()
+            await like.destroy()
+            const dislike = await Like.findOne({
+                where: {
+                    UserId: helpers.getUser(req).id,
+                    tweetId: id
+                }
+            })
             cb(null, {
                 message: 'Like 取消成功',
-                isLiked: (removelike === helpers.getUser(req).id)
+                isLiked: (!!dislike)
             })
         } catch (err) {
             cb(err)
