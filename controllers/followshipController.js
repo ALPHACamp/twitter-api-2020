@@ -21,9 +21,9 @@ const followshipController = {
       })
       // check the user exist
       if (!followingUser) {
-        return res.status(400).json({
+        return res.status(404).json({
           status: 'error',
-          message: "This user doesn't exist"
+          message: '追蹤者不存在'
         })
       }
 
@@ -31,7 +31,7 @@ const followshipController = {
       if (user.id === followingId) {
         return res
           .status(400)
-          .json({ status: 'error', message: 'You cannot follow yourself!' })
+          .json({ status: 'error', message: '你不能追蹤自己' })
       }
 
       // check if a followship already exists
@@ -40,7 +40,7 @@ const followshipController = {
       })
       // if a followship exists
       if (follow) {
-        return res.status(400).json({status: 'error', message: 'You have followed this user!' })
+        return res.status(400).json({ status: 'error', message: '你已經追蹤這個使用者!' })
       }
 
       // if no followship exists
@@ -50,7 +50,7 @@ const followshipController = {
       })
       return res.status(200).json({
         status: 'success',
-        message: 'Followed'
+        message: '成功追蹤'
       })
     } catch (err) {
       next(err)
@@ -62,7 +62,7 @@ const followshipController = {
       // get the current user
       const user = helpers.getUser(req)
       const followerId = user.id
-      const followingId = req.params.followingId;
+      const followingId = req.params.followingId
 
       // following use cannoot be admin
       const unfollowingUser = await User.findOne({
@@ -75,9 +75,9 @@ const followshipController = {
       })
       // check the user exist
       if (!unfollowingUser) {
-        return res.status(400).json({
+        return res.status(404).json({
           status: 'error',
-          message: "This user doesn't exist"
+          message: '追蹤者不存在'
         })
       }
 
@@ -85,7 +85,7 @@ const followshipController = {
       if (user.id === followingId) {
         return res
           .status(400)
-          .json({ status: 'error', message: 'You cannot unfollow yourself!' })
+          .json({ status: 'error', message: '你不能取消追蹤自己' })
       }
 
       // check if a followship already exists
@@ -99,14 +99,14 @@ const followshipController = {
       if (!follow) {
         return res
           .status(400)
-          .json({ status: 'error', message: "You haven't followed this user before" })
+          .json({ status: 'error', message: '你尚未追蹤此使用者' })
       }
       // delete the following
       await follow.destroy()
 
       return res.status(200).json({
         status: 'success',
-        message: 'Unfollowed'
+        message: '取消追蹤'
       })
     } catch (err) {
       next(err)
@@ -138,6 +138,11 @@ const followshipController = {
         raw: true,
         nest: true
       })
+      if (!users) {
+        return res
+          .status(200)
+          .json({ status: 'success', message: '無推薦追蹤的名單' })
+      }
 
       const data = await Promise.all(
         users.map(async user => {

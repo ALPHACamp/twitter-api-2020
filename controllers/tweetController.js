@@ -19,6 +19,12 @@ const tweetController = {
         ],
         order: [['createdAt', 'DESC']]
       })
+      // 無推文資料
+      if (!tweets) {
+        return res
+          .status(200)
+          .json({ status: 'success', message: '無推文資料' })
+      }
 
       // get tweet ID
       const tweetIds = tweets.map(tweet => tweet.id)
@@ -35,7 +41,6 @@ const tweetController = {
 
       // get tweetId(array) liked by the current user
       const currentUserLikes = likes.map(l => l.TweetId)
-      console.log(currentUserLikes)
 
       const data = tweets.map(tweet => {
         return {
@@ -63,18 +68,18 @@ const tweetController = {
       const { description } = req.body
       const UserId = user.id
 
-      // check if description is more than 160 characters
+      // check if description is more than 140 characters
       if (description.trim().length > 140) {
         return res.status(404).json({
           status: 'error',
-          message: 'Description should be within 160 characters!'
+          message: '字數超過限制, 請輸入少於140個字'
         })
       }
       // check if description is whitespace
       if (!description.trim().length) {
         return res.status(404).json({
           status: 'error',
-          message: 'Description cannot be whitespace'
+          message: '內容不可為空白'
         })
       }
 
@@ -127,7 +132,7 @@ const tweetController = {
       if (!tweet) {
         return res
           .status(200)
-          .json({ status: 'success', message: 'No tweet data available.' })
+          .json({ status: 'success', message: '無推文資料' })
       }
 
       const currentUserLikes = likes.map(l => l.TweetId)
@@ -165,9 +170,7 @@ const tweetController = {
       })
 
       if (!tweet) {
-        return res
-          .status(404)
-          .json({ status: 'error', message: 'Tweet not found' })
+        return res.status(404).json({ status: 'error', message: '推文不存在' })
       }
 
       const replies = await Reply.findAll({
@@ -191,7 +194,11 @@ const tweetController = {
         raw: true,
         nest: true
       })
-      console.log(replies)
+      if (!replies) {
+        return res
+          .status(200)
+          .json({ status: 'success', message: '無回覆資料' })
+      }
 
       const data = replies.map(reply => ({
         replyId: reply.id,
@@ -216,15 +223,13 @@ const tweetController = {
       const { tweet_id: tweetId } = req.params
       const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) {
-        return res.status(404).json({ error: 'Tweet not found!' })
+        return res.status(404).json({ error: '推文不存在' })
       }
 
       // check if comment is whitespace
       const { comment } = req.body
       if (comment.trim().length === 0) {
-        return res
-          .status(404)
-          .json({ error: 'Comment cannot be only whitespace!' })
+        return res.status(404).json({ error: '內容不可為空白' })
       }
 
       // get user information
@@ -241,9 +246,9 @@ const tweetController = {
 
       return res.status(200).json({
         TweetId: tweet.id,
-        TweetOwneId: tweetOwner.id,
-        TweetOwnerName: tweetOwner.name,
-        TweetOwnerAccount: tweetOwner.account,
+        tweetOwnerId: tweetOwner.id,
+        tweetOwnerName: tweetOwner.name,
+        tweetOwnerAccount: tweetOwner.account,
         replyOwnerId: user.id,
         replyOwnerName: user.name,
         replyOwnerAvatar: user.avatar,
@@ -260,9 +265,7 @@ const tweetController = {
       const tweet = await Tweet.findByPk(tweetId)
 
       if (!tweet) {
-        return res
-          .status(404)
-          .json({ status: 'error', message: 'Tweet not found!' })
+        return res.status(404).json({ status: 'error', message: '推文不存在' })
       }
 
       // get user id
@@ -279,7 +282,7 @@ const tweetController = {
       if (like) {
         return res
           .status(404)
-          .json({ status: 'error', message: 'You have liked this tweet!' })
+          .json({ status: 'error', message: '你已經喜歡過這則推文!' })
       }
 
       await Like.create({
@@ -289,7 +292,7 @@ const tweetController = {
       })
       return res
         .status(200)
-        .json({ status: 'success', message: 'You liked this tweet!' })
+        .json({ status: 'success', message: '你已成功喜歡這則貼文!' })
     } catch (err) {
       next(err)
     }
@@ -300,9 +303,7 @@ const tweetController = {
       const tweet = await Tweet.findByPk(tweetId)
 
       if (!tweet) {
-        return res
-          .status(404)
-          .json({ status: 'error', message: 'Tweet not found!' })
+        return res.status(404).json({ status: 'error', message: '推文不存在' })
       }
       // get user id
       const user = helpers.getUser(req)
@@ -319,14 +320,14 @@ const tweetController = {
       if (!like) {
         return res
           .status(404)
-          .json({ status: 'error', message: "You haven't liked this tweet!" })
+          .json({ status: 'error', message: '你尚未喜歡這則貼文!' })
       }
 
       await like.destroy()
 
       return res
         .status(200)
-        .json({ status: 'success', message: 'Like removed successfully' })
+        .json({ status: 'success', message: '你已成功移除喜歡' })
     } catch (err) {
       next(err)
     }
