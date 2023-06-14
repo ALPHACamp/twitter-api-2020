@@ -228,8 +228,6 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      // 判斷內容
-      if (followings.length === 0) throw new Error(`沒有使用者(id:${user.id})追隨的人！`)
 
       // Current User 正在追蹤的對象
       const currentUserFollowings = await Followship.findAll({
@@ -271,9 +269,6 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-
-      // 判斷內容
-      if (followers.length === 0) throw new Error(`沒有追隨使用者(id:${user.id})的人！`)
 
       // Current User 正在追蹤的對象
       const currentUserFollowings = await Followship.findAll({
