@@ -133,8 +133,8 @@ const userController = {
       .then(data => {
         if (!data) throw new Error("User's following didn't exist!")
         const followings = data.map(user => user.Followings)
-        followings.map(following => { 
-          following.followingId = following.id 
+        followings.map(following => {
+          following.followingId = following.id
           delete following.id
 
         })
@@ -178,20 +178,17 @@ const userController = {
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
-    // const { name, introduction } = req.body
     if (!req.body.name) throw new Error('User name is required!')
     const { file } = req
     return Promise.all([
       User.findByPk(req.params.user_id),
-      imgurFileHandler(file),
-      bcrypt.hash(req.body.password, 10)])
-      .then(([user, filePath, hash]) => {
+      imgurFileHandler(file)])
+      .then(([user, filePath]) => {
         if (!user) throw new Error("User didn't exist!")
         return user.update({
           account: req.body.account || user.account,
           name: req.body.name || user.name,
           email: req.body.email || user.email,
-          password: hash || user.password,
           introduction: req.body.introduction || user.introduction,
           avatar: filePath || user.avatar
         })
