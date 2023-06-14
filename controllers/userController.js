@@ -226,7 +226,7 @@ const userController = {
           raw: true
         })
       ])
-
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
       if (!user.Followings.length) return res.status(200).json({ status: 'success', message: '無追蹤其他使用者' })
 
       const currentUserFollowing = following.map(f => f.followingId)
@@ -256,6 +256,7 @@ const userController = {
         })
       ])
 
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
       if (!user.Followers.length) return res.status(200).json({ status: 'success', message: '無跟隨者資料' })
 
       const currentUserFollowing = following.map(f => f.followingId)
