@@ -93,7 +93,6 @@ describe('# tweet requests', () => {
           .expect(404)
           .end(function(err, res) {
             if (err) return done(err);
-            console.log('test', res.body)
             expect(res.body).to.be.an('array');
             // 檢查是否回傳資料有 User1 的 Tweet1
             res.body[0].description.should.equal('User1 的 Tweet1');

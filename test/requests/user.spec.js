@@ -26,7 +26,7 @@ describe('# user requests', () => {
           .post('/api/users')
           .send('account=User1&name=User1&email=User1@example.com&password=User1&checkPassword=User1')
           .set('Accept', 'application/json')
-          .expect(400)
+          .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查是否有成功新增資料到資料庫裡

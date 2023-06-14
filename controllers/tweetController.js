@@ -105,7 +105,6 @@ const tweetController = {
       })
     ])
       .then(([user, data]) => {
-        console.log(user)
         if (!data) return res.status(404).json('Tweets not found')
         const tweet = data.dataValues
         tweet.likesCount = tweet.Likes.length
