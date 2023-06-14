@@ -22,8 +22,19 @@ module.exports = {
         updatedAt: new Date()
       }
     })
+      const uniqueCombinations = {}
+      const uniqueFollowships = []
 
-    await queryInterface.bulkInsert('Followships', followships, {});
+    for (const followship of followships) {
+      const combination = `${followship.FollowerId}-${followship.FollowingId}`
+      
+      if (!uniqueCombinations[combination]) {
+        uniqueCombinations[combination] = true
+        uniqueFollowships.push(followship)
+      }
+    }
+
+      await queryInterface.bulkInsert('Followships', uniqueFollowships, {})
   },
 
   down: async (queryInterface, Sequelize) => {
