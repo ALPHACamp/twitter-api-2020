@@ -49,7 +49,7 @@ const replyServices = {
                 comment
             } = req.body
             const user = await User.findByPk(helpers.getUser(req).id)
-            const tweet = Tweet.findByPk(id)
+            const tweet = await Tweet.findByPk(id)
             if (!user) throw new Error('查無此人！')
             if (!tweet) throw new Error('推文不存在！')
             if (!comment) throw new Error('回覆不能為空！')
