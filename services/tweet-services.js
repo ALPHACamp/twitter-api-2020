@@ -16,7 +16,7 @@ const tweetServices = {
                     attributes: ['name', 'avatar', 'account']
                 }, {
                     model: Like,
-                    attributes: ['id']
+                    attributes: ['id','UserId']
                 }, {
                     model: Reply,
                     attributes: ['id']
@@ -27,12 +27,11 @@ const tweetServices = {
             })
             if (!tweets) throw new Error("目前沒有任何推文！")
             tweets = await tweets.map(tweet => {
-                const subDescription = tweet.description ? tweet.description.substring(0, 100) : ''
-
+                const subDescription = tweet.description.length > 100 ? tweet.description.substring(0, 100) + '...' : tweet.description
                 return {...tweet.dataValues,
                     description: subDescription,
                     createdAt: relativeTimeFromNow(tweet.dataValues.createdAt),
-                    isLiked: tweet.Likes.some(like => like.UserId === req.userId),
+                    isLiked: (tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)) ? true : false,
                     replyCount: tweet.Replies.length,
                     likeCount: tweet.Likes.length
                 }
