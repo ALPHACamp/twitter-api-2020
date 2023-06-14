@@ -14,8 +14,6 @@ const { getUser } = require('./_helpers')
 
 const app = express()
 const port = process.env.PORT || 3000
-const http = require('http')
-const server = http.createServer(app)
 
 const SESSION_SECRET = 'secret'
 
@@ -49,6 +47,6 @@ app.get('/favicon.ico', (req, res) => {
   res.sendStatus(204)
 })
 
-server.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
