@@ -120,45 +120,48 @@ const userController = {
   },
   getUserFollowings: (req, cb) => {
     const userId = Number(req.params.user_id) || ''
-    return Promise.all([
-      User.findByPk(userId, {
-        include: {
-          model: User, as: 'Followings',
-          attributes: { exclude: ['password'] }
-        },
-        attributes: { exclude: ['password'] },
-        nest: true,
-        raw: true
-      }),
-      Followship.findAll({
-        where: { followerId: userId }
-      })
-    ])
-      .then(([user, followings]) => {
-        if (!followings) throw new Error("User's following didn't exist!")
-        cb(null, { user, followings })
+    User.findAll({
+      include: {
+        model: User, as: 'Followings',
+        attributes: { exclude: ['password'] }
+      },
+      attributes: { exclude: ['password'] },
+      where: { id: userId },
+      nest: true,
+      raw: true
+    })
+      .then(data => {
+        if (!data) throw new Error("User's following didn't exist!")
+        const followings = data.map(user => user.Followings)
+        followings.map(following => { 
+          following.followingId = following.id 
+          delete following.id
+
+        })
+        cb(null, followings)
       })
       .catch(err => cb(err))
   },
   getUserFollowers: (req, cb) => {
     const userId = Number(req.params.user_id) || ''
-    Promise.all([
-      User.findByPk(userId, {
-        include: {
-          model: User, as: 'Followers',
-          attributes: { exclude: ['password'] }
-        },
-        attributes: { exclude: ['password'] },
-        nest: true,
-        raw: true
-      }),
-      Followship.findAll({
-        where: { followingId: userId }
-      })
-    ])
-      .then(([user, followers]) => {
-        if (!followers) throw new Error("User's followers didn't exist!")
-        cb(null, { user, followers })
+    User.findAll({
+      include: {
+        model: User, as: 'Followers',
+        attributes: { exclude: ['password'] }
+      },
+      attributes: { exclude: ['password'] },
+      where: { id: userId },
+      nest: true,
+      raw: true
+    })
+      .then(data => {
+        if (!data) throw new Error("User's followers didn't exist!")
+        const followers = data.map(user => user.Followers)
+        followers.map(follower => {
+          follower.followerId = follower.id
+          delete follower.id
+        })
+        cb(null, followers)
       })
       .catch(err => cb(err))
   },
@@ -176,7 +179,6 @@ const userController = {
   },
   putUser: (req, cb) => {
     const { name, email, introduction, password } = req.body
-    console.log(req.body)
     if (!name) throw new Error('User name is required!')
 
     const { file } = req
@@ -195,8 +197,9 @@ const userController = {
         })
       })
       .then(user => {
-        delete user.password
-        return cb(null, user)
+        const putData = user.dataValues
+        delete putData.password
+        return cb(null, putData)
       })
       .catch(err => cb(err))
   },
