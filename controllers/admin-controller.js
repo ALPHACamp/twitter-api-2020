@@ -124,7 +124,8 @@ const adminController = {
     .catch(err => next(err))
   },
   getTweet:(req, res, next) => {
-    return Tweet.findByPk(req.params.id, { include: [Reply] }).then(tweet => {
+    return Tweet.findByPk(req.params.id, { include: [Reply] })
+    .then(tweet => {
       if (!tweet) throw new Error("The tweet didn't exist!")
       return tweet
     })

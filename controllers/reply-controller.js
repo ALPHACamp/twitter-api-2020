@@ -1,6 +1,5 @@
 const { Tweet, Reply } = require('../models')
 
-
 const replyController = {
   postComment: (req, res, next) => {
     const tweetId = req.params.tweet_id
