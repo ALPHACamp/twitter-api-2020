@@ -1,7 +1,7 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Reply, Like } = require('../models')
 const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
@@ -42,7 +42,9 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
     include: [
       // 看要include那些
       { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
+      { model: User, as: 'Followings' },
+      { model: Reply },
+      { model: Like }
     ]
   })
     .then(user => cb(null, user.toJSON()))

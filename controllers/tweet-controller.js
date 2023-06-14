@@ -5,40 +5,50 @@ const tweetController = {
   // GET /tweets - 所有推文，包括推文作者
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      include: [{
-        model: User,
-        attributes: [
-          'id', 'account', 'name', 'avatar'
-        ]
-      }, {
-        model: Reply,
-        attributes: ['id']
-      }, {
-        model: Like,
-        attributes: ['id']
-      }]
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'account', 'name', 'avatar'],
+          include: [{ model: Like }]
+        },
+        { model: Reply, attributes: ['id'] },
+        { model: Like, attributes: ['id'] }],
+      order: [['createdAt', 'DESC']]
     })
-      .then(tweets => res.json(tweets))
+      .then(tweets => {
+        req.user.Likes = req.user.Likes || []
+        tweets = tweets.map(t => ({
+          ...t.toJSON(),
+          repliesCount: t.Replies.length,
+          likesCount: t.Likes.length,
+          isLike: req.user && req.user.Likes.some(like => like.TweetId === t.id)
+        }))
+        res.status(200).json(tweets)
+      })
       .catch(err => next(err))
   },
   // GET /tweets/:tweet_id - 一筆推文
   getTweet: (req, res, next) => {
     return Tweet.findByPk(req.params.id, {
-      include: [{
-        model: User,
-        attributes: [
-          'id', 'account', 'name', 'avatar'
-        ]
-      }, {
-        model: Reply,
-        attributes: ['id']
-      }, {
-        model: Like,
-        attributes: ['id']
-      }]
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'account', 'name', 'avatar'],
+          include: [{ model: Like }]
+        },
+        { model: Reply, attributes: ['id'] },
+        { model: Like, attributes: ['id'] }
+      ]
     })
       .then(tweet => {
         if (!tweet) throw new Error('此推文不存在')
+        req.user.Likes = req.user.Likes || []
+        tweet = {
+          ...tweet.toJSON(),
+          repliesCount: tweet.Replies.length,
+          likesCount: tweet.Likes.length,
+          isLike: req.user && req.user.Likes.some(like => like.TweetId === tweet.id)
+        }
         res.json(tweet)
       })
       .catch(err => next(err))
@@ -99,7 +109,8 @@ const tweetController = {
           model: User,
           attributes: [
             'id', 'account', 'name', 'avatar'
-          ]
+          ],
+          order: [['createdAt', 'DESC']]
         }
       })
     ])

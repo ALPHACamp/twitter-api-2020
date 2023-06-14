@@ -35,7 +35,7 @@ const adminController = {
     return Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) throw new Error('沒這篇耶')
-        tweet.destroy()
+        return tweet.destroy()
       })
       .then(tweet => res.status(200).json({ message: '推文已刪除' }))
       .catch(err => next(err))

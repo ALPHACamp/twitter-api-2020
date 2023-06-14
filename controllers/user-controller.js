@@ -22,18 +22,18 @@ const userController = {
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
-      ],
-      raw: true,
-      nest: true
+      ]
     })
       .then(user => {
         if (!user) throw new Error('getUser查無此人')
         req.user.Followings = req.user.Followings || []
         req.user.Followers = req.user.Followers || []
         user = {
-          ...user,
+          ...user.toJSON(),
           isFollowing: req.user && req.user.Followings.some(following => following.id === user.id),
-          isFollower: req.user && req.user.Followers.some(follower => follower.id === user.id)
+          isFollower: req.user && req.user.Followers.some(follower => follower.id === user.id),
+          followersCount: req.user && req.user.Followers.length,
+          followingsCount: req.user && req.user.Followers.length
         }
         // res.json({ status: 'success', user: user.toJSON() })
         delete user.password
@@ -61,9 +61,13 @@ const userController = {
   signUp: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     if (password !== checkPassword) throw new Error('Password do not match!')
-    return User.findOne({ where: { email: req.body.email } })
-      .then(user => {
-        if (user) throw new Error('Email already exists!')
+    return Promise.all([
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
+    ])
+      .then(([user1, user2]) => {
+        if (user1) throw new Error('account 已重複註冊！')
+        if (user2) throw new Error('email 已重複註冊！')
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => {
@@ -78,6 +82,7 @@ const userController = {
         })
       })
       .then(signUpUser => {
+        signUpUser = signUpUser.toJSON()
         delete signUpUser.password
         res.json({ status: 'success', signUpUser })
       })
@@ -252,14 +257,13 @@ const userController = {
     if (passwordLength > 1) {
       if (password !== checkPassword) throw new Error('密碼與確認密碼不符')
     }
-    return User.findAll({
-      where: { account },
-      raw: true
-    })
-      .then(user => {
-        if (user.account === account) throw new Error('帳號已存在')
-      })
-      .then(() => {
+    return Promise.all([
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
+    ])
+      .then(([user1, user2]) => {
+        if (user1) throw new Error('account 已重複註冊！')
+        if (user2) throw new Error('email 已重複註冊！')
         return User.findByPk(userId)
           .then(userData => {
             if (!userData) throw new Error('putUser說: 沒這人')
