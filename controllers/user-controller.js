@@ -49,7 +49,7 @@ const userController = {
           ]
         }
       })
-      if (user?.account === account) throw new Error('account 已重複註冊！')
+      if (user?.account === account) throw new Error('帳號已重複註冊！')
       if (user?.email === email) throw new Error('email 已重複註冊！')
       // 創立新使用者
       await User.create({
@@ -310,7 +310,7 @@ const userController = {
             [Op.or]: [email ? { email } : {}, account ? { account } : {}]
           }
         })
-        if (account !== currentUser.account && checkUser?.account === account) throw new Error('account 已重複註冊！')
+        if (account !== currentUser.account && checkUser?.account === account) throw new Error('帳號已重複註冊！')
         if (email !== currentUser.email && checkUser?.email === email) throw new Error('email 已重複註冊！')
       }
 
