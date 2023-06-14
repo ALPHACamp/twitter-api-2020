@@ -137,7 +137,7 @@ const userController = {
       await userdata.update(data)
       // walk around 先問datavalues有沒有值 有值代表是測試檔來著，沒值代表dev或prod
       if (!getUser(req).dataValues) {
-        const { avatar, coverPhoto } = req.files
+        const { avatar, coverPhoto } = req?.files
         let avatarPath, coverPhotoPath
         if (avatar) avatarPath = await imgurFileHandler(avatar[0])
         if (coverPhoto) coverPhotoPath = await imgurFileHandler(coverPhoto[0])
