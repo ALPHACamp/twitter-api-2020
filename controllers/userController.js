@@ -39,8 +39,8 @@ const userController = {
     }
   },
   signUp: (req, res, next) => {
-    const { account, name, email, password, passwordCheck } = req.body
-    if (password !== passwordCheck) { return res.status(400).json('Password do not match!') }
+    const { account, name, email, password, checkPassword } = req.body
+    if (password !== checkPassword) { return res.status(400).json('Password do not match!') }
     if (name.length > 50) return res.status(400).json('Max length 50')
     return Promise.all([
       User.findOne({ where: { email } }),
