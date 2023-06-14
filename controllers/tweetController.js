@@ -14,6 +14,7 @@ const tweetController = {
           attributes: ['followingId']
         })
         const followingIds = followingIdData.map(row => row.followingId)
+        followingIds.push(userId)
         tweets = await Tweet.findAll({
           include: [
             {
@@ -32,8 +33,6 @@ const tweetController = {
           nest: true
         })
       } else if (liked) {
-        // 先從like找到喜歡的編號
-        // 再從編號找該貼文
         const likes = await Like.findAll({
           where: [{ User_Id: userId }],
           attributes: ['TweetId'],
@@ -41,6 +40,7 @@ const tweetController = {
           nest: true
         })
         const tweetIds = likes.map(row => row.TweetId)
+        tweetIds.push(userId)
         tweets = await Tweet.findAll({
           where: [{ id: tweetIds }],
           include: [
@@ -73,7 +73,6 @@ const tweetController = {
           nest: true
         })
       }
-      console.log('6')
       if (tweets.length === 0) return res.status(404).json('Tweets not found')
       const counts = tweets.map((tweet) => ({
         ...tweet.toJSON(),
@@ -131,6 +130,7 @@ const tweetController = {
         tweet.name = tweet.User.name
         tweet.avatar = tweet.User.avatar
         tweet.userAvatar = user.avatar
+        tweet.isLiked = tweet.Likes?.some((f) => f.UserId === Number(userId))
         delete tweet.User
         delete tweet.Likes
         delete tweet.Replies
