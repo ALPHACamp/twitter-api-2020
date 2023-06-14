@@ -109,11 +109,11 @@ const userController = {
       }
       const userAccount = req.user.account
       const userEmail = req.user.email
-      const { account, name, email, password, passwordCheck, introduction } =
+      const { account, name, email, password, checkPassword, introduction } =
         req.body
       // 目標是req中要有兩個file 在取得時做拆分，再各自讓imgur helper上傳
       // 如何成功抓兩張圖片，multer定義的file代表單張，會回傳單一物件，files為兩張(或以上)，回傳 array
-      if (password !== passwordCheck) {
+      if (password !== checkPassword) {
         return res.status(400).json('Password do not match!')
       }
       // 能不能用findall直接去找user的account跟email，如果找到的話跟req.user比對，成功就保留，失敗則回傳重複?
