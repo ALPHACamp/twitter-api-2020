@@ -10,7 +10,11 @@ const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 const upload = require('../middleware/multer')
 const fields = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }])
 
-router.use('/admin', authenticated, authenticatedAdmin, admin)
+// router.use('/admin', authenticated, authenticatedAdmin, admin)
+
+router.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
+
 // if  req.user.role = admin 才能登入
 router.post('/api/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn)
 // if  req.user.role = admin 不能登入
@@ -30,7 +34,9 @@ router.get('/api/users/:id/replied_tweets')
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 
 router.get('/api/postTweet', authenticated, tweetController.getPostTweet)
-router.post('/api/postTweet', authenticated, tweetController.postTweet)
+router.post('/api/tweets', authenticated, tweetController.postTweet)
+
+router.delete('/api/admin/tweets/:tweetId', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 router.get('/api/tweet/:id', authenticated, tweetController.getTweet)
 
@@ -47,7 +53,6 @@ router.delete('/api/like/:tweetId', authenticated, userController.removeLike)
 
 router.post('/api/following/:userId', authenticated, userController.addFollowing)
 router.delete('/api/following/:userId', authenticated, userController.removeFollowing)
-
 
 router.use('/', apiErrorHandler)
 
