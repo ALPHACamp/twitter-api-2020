@@ -9,7 +9,7 @@ module.exports = {
     const usersTweets = []
     users.forEach(user => usersTweets.push(
       ...Array.from({ length: 10 }, () => ({
-        description: faker.lorem.text(),
+        description: faker.lorem.text().substring(0, 140),
         created_at: new Date(),
         updated_at: new Date(),
         user_id: user.id
