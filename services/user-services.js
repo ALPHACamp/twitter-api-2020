@@ -145,6 +145,7 @@ const userServices = {
             tweets = tweets.map(tweet => ({
                 ...tweet.dataValues,
                 createdAt: relativeTimeFromNow(tweet.dataValues.createdAt),
+                description: tweet.dataValues.description.length > 100 ? tweet.dataValues.description.substring(0, 100) + '...' : tweet.dataValues.description,
                 isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(tweet.id) : false,
                 replyCount: tweet.Replies.length,
                 likeCount: tweet.Likes.length
@@ -238,6 +239,7 @@ const userServices = {
             repliedTweets = repliedTweets.map(repliedTweet => ({
                 ...repliedTweet.dataValues,
                 createdAt: relativeTimeFromNow(repliedTweet.dataValues.createdAt),
+                shortDescription: repliedTweet.dataValues.Tweet.description.length > 100 ? repliedTweet.dataValues.Tweet.description.substring(0, 100) + '...' : repliedTweet.dataValues.Tweet.description,
                 isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(repliedTweet.Tweet.id) : false,
                 replyCount: repliedTweet.Tweet.Replies.length,
                 likeCount: repliedTweet.Tweet.Likes.length
@@ -282,6 +284,7 @@ const userServices = {
             likedTweets = likedTweets.map(likedTweet => ({
                 ...likedTweet.dataValues,
                 createdAt: relativeTimeFromNow(likedTweet.dataValues.createdAt),
+                shortDescription: likedTweet.dataValues.Tweet.description.length > 100 ? likedTweet.dataValues.Tweet.description.substring(0, 100) + '...' : likedTweet.dataValues.Tweet.description,
                 isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(likedTweet.Tweet.id) : false,
                 replyCount: likedTweet.Tweet.Replies.length,
                 likeCount: likedTweet.Tweet.Likes.length
@@ -355,7 +358,7 @@ const userServices = {
             const users = await User.findAll({
                 include: [{ model: User, as: 'Followers' }]
             })
-            
+
             const result = await users
                 .map(user => ({
                     ...user.dataValues,
