@@ -25,7 +25,13 @@ router.post('/api/signin', (req, res, next) => {
   passport.authenticate('local', { session: false }), userController.signIn,
 )
 
+
+router.get('/api/tweets/:tweet_id/replies', authenticated, tweetController.getReplies)
+router.post('/api/tweets/:tweet_id/replies', authenticated, tweetController.postReply)
+
+
 router.get('/api/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+
 router.get('/api/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/api/users/:id/likes', authenticated, userController.getUserLikes)
 router.get('/api/users/:id/followings', authenticated, userController.getUserFollowings)
@@ -36,8 +42,16 @@ router.put('/api/users/:id', fields, authenticated, userController.putUser)
 router.post('/api/users', userController.signUp)
 
 
+
+
+router.get('/api/tweets/:tweet_id', authenticated, tweetController.getTweet)
+
+router.get('/api/tweets', authenticated, tweetController.getTweets)
+router.post('/api/tweets', authenticated, tweetController.postTweet)
+
 router.post('/api/tweets/:id/like', authenticated, userController.addLike)
 router.post('/api/tweets/:id/unlike', authenticated, userController.removeLike)
+
 
 
 router.post('/api/followships', authenticated, userController.addFollowing)
@@ -48,13 +62,13 @@ router.get('/api/users/top', authenticated, userController.getTopUsers)
 
 
 
-
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.get('/api/postTweet', authenticated, tweetController.getPostTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
 router.get('/api/tweet/:id', authenticated, tweetController.getTweet)
 router.get('/api/reply/:tweetId', authenticated, tweetController.getReply)
 router.post('/api/reply/:tweetId', authenticated, tweetController.postReply)
+
 
 
 

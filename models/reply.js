@@ -10,8 +10,8 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Reply.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
-      Reply.belongsTo(models.User, { foreignKey: 'userId' })
+      Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
+      Reply.belongsTo(models.User, { foreignKey: 'UserId' })
     }
   };
   Reply.init({
