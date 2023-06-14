@@ -61,9 +61,10 @@ const userController = {
   signUp: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     if (password !== checkPassword) throw new Error('Password do not match!')
-    return User.findOne({ where: { email: req.body.email } })
+    return User.findOne({ where: { account: req.body.account } })
       .then(user => {
-        if (user) throw new Error('Email already exists!')
+        if (user.account === account) throw new Error('account 已重複註冊！')
+        if (user.email === email) throw new Error('email 已重複註冊！')
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => {
