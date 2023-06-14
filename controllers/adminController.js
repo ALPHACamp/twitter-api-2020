@@ -7,13 +7,11 @@ const adminController = {
     try {
       // get user data
       const userData = getUser(req)?.toJSON()
+      const tokenData = Object.assign({}, { id: userData.id })
       delete userData.password
-      delete userData.avatar
-      delete userData.cover
-      delete userData.email
-      delete userData.introduction
+
       // sign token
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      const token = jwt.sign(tokenData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
         status: 'success',
         data: {
@@ -47,6 +45,7 @@ const adminController = {
         raw: true,
         nest: true
       })
+      if (!users) return res.status(404).json({ status: 'error', messages: '使用者不存在' })
       res.status(200).json(users)
     } catch (err) {
       next(err)
