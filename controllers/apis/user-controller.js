@@ -2,11 +2,13 @@ const bcrypt = require('bcryptjs')
 const { User, Reply, Tweet, Followship, Like } = require('../../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
+const helpers = require('../../_helpers')
 
 const userController = {
   signIn: (req, res,) => {
     try {
-      const userData = req.user.toJSON()
+      // const userData = req.user.toJSON()
+      const userData = helpers.getUser(req).toJSON()
       if (userData.role === 'admin') throw new Error('Account does not exist!')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -22,7 +24,7 @@ const userController = {
     }
   },
   signUp: (req, res) => {
-    const { name, email, password, avatar, introduction, role, account, passwordCheck } = req.body
+    const { name, email, password, avatar, introduction, role, account, checkPassword } = req.body
     new Promise((resolve, reject) => {
       if (!account) {
         reject(new Error('Account is required'))
@@ -31,7 +33,7 @@ const userController = {
       }
       if (name && name.length > 50) { reject(new Error(`Name too long`)) }
       if (introduction && introduction.length > 160) reject(new Error('Introduction too long'))
-      if (password != passwordCheck) reject(new Error('Password do not match'))
+      if (password !== checkPassword) reject(new Error('Password do not match'))
       resolve()
     })
       .then(() => {
@@ -60,57 +62,66 @@ const userController = {
       .then((user) => {
         user = user.toJSON()
         delete user.password
-        return res.status(200).json({ status: 'success', data: { user } })
+        return res.status(200).json(user)
       })
       .catch(err => {
-        res.status(500).json({ status: 'error', error: err.message })
+        res.status(404).json({ status: 'error', error: err.message })
       })
   },
   getUser: (req, res) => {
     return Promise.all([
       User.findByPk(req.params.id),
-      Tweet.findAll({
-        //取得req.params.id的所有tweets
-        where: {
-          userId: req.params.id
-        },
-        //額外取得兩個屬性
-        include: [
-          { model: Reply },
-          { model: Like, }
-        ],
-      }),
-      Followship.findOne({
-        where: {
-          followingId: req.user.id,
-          followerId: req.params.id
-        }
-      }),
-      User.findOne({
-        where: { id: req.params.id },
-        include: [{ model: User, as: 'Followings' }]
-      }),
-      User.findOne({
-        where: { id: req.params.id },
-        include: [{ model: User, as: 'Followers' }]
-      })
+      // Tweet.findAll({
+      //   //取得req.params.id的所有tweets
+      //   where: {
+      //     userId: req.params.id
+      //   },
+      //   //額外取得兩個屬性
+      //   include: [
+      //     { model: Reply },
+      //     { model: Like, }
+      //   ],
+      // }),
+      // Followship.findOne({
+      //   where: {
+      //     followingId: helpers.getUser(req),
+      //     followerId: req.params.id
+      //   }
+      // }),
+      // User.findOne({
+      //   where: { id: req.params.id },
+      //   include: [{ model: User, as: 'Followings' }]
+      // }),
+      // User.findOne({
+      //   where: { id: req.params.id },
+      //   include: [{ model: User, as: 'Followers' }]
+      // })
     ])
-      .then(([user, tweets, followship, followings, followers]) => {
+      .then(([user]) => {
         if (!user) throw new Error(`User didn't exist`)
-        tweets = tweets.map(tweet => {
-          const tweetData = tweet.toJSON()
-          tweetData.RepliesCount = tweet.Replies.length
-          tweetData.LikesCount = tweet.Likes.length
-          return tweetData
-        })
-        const isFollowing = followship ? true : false
-        const followingsCount = followings.Followings.length
-        const followersCount = followers.Followers.length
+        // tweets = tweets.map(tweet => {
+        //   const tweetData = tweet.toJSON()
+        //   tweetData.RepliesCount = tweet.Replies.length
+        //   tweetData.LikesCount = tweet.Likes.length
+        //   return tweetData
+        // })
+        // const isFollowing = followship ? true : false
+        // const followingsCount = followings.Followings.length
+        // const followersCount = followers.Followers.length
         user = user.toJSON()
         delete user.password
-        return res.status(200).json({ status: 'success', user, tweets, isFollowing, followingsCount, followersCount })
+        return res.status(200).json(user)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  getUserTweets: (req, res) => {
+    User.findByPk(req.params.id, { include: [{ model: Tweet }] })
+      .then(user => {
+        
+
+        return res.status(200).json(user.Tweets)
+      })
+      .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
   editUser: (req, res) => {
     return User.findByPk(req.params.id)
