@@ -7,7 +7,7 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const users = await queryInterface.sequelize.query(
-      'SELECT id FROM Users;',
+      'SELECT id FROM Users WHERE id > (SELECT MIN(id) FROM Users);',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const repliesData = []

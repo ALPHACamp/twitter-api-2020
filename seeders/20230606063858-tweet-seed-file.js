@@ -6,7 +6,7 @@ module.exports = {
       'SELECT id FROM Users;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-    for (let i = 0; i < 5; i++) {
+    for (let i = 1; i < 6; i++) {
       await queryInterface.bulkInsert('Tweets', Array.from({ length: 10 }, (_, index) => ({
         User_id: users[i].id,
         description: `這是我的第${index + 1}篇推文，好爽，耶嘿！`,

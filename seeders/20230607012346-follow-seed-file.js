@@ -3,14 +3,14 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
-      'SELECT id FROM Users;',
+      'SELECT id FROM Users WHERE id > (SELECT MIN(id) FROM Users);',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
 
     const followships = new Set()
     const followshipArray = []
 
-    while (followships.size < 11) {
+    while (followships.size <= 10) {
       const followerId = users[Math.floor(Math.random() * users.length)].id
       let followingId = users[Math.floor(Math.random() * users.length)].id
 
