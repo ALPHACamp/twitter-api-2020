@@ -91,7 +91,7 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      const userId = Number(getUser(req).dataValues?.id) || getUser(req).id
+      const userId = Number(req.user.id) || Number(getUser(req).dataValues?.id)
       const paramsUserId = Number(req.params.id)
       if (paramsUserId !== userId) {
         return res.status(403).json('Can not change others data')
@@ -103,10 +103,6 @@ const userController = {
         req.body
       // 目標是req中要有兩個file 在取得時做拆分，再各自讓imgur helper上傳
       // 如何成功抓兩張圖片，multer定義的file代表單張，會回傳單一物件，files為兩張(或以上)，回傳 array
-      const { avatar, coverPhoto } = req.files
-      let avatarPath, coverPhotoPath
-      if (avatar) avatarPath = await imgurFileHandler(avatar[0])
-      if (coverPhoto) coverPhotoPath = await imgurFileHandler(coverPhoto[0])
       if (password !== passwordCheck) {
         return res.status(400).json('Password do not match!')
       }
@@ -135,14 +131,24 @@ const userController = {
       const data = {
         account,
         name,
+        introduction,
         email,
-        avatar: avatarPath,
-        coverPhoto: coverPhotoPath,
-        password: hash || userdata.password,
-        introduction
+        password: hash || userdata.password
       }
       await userdata.update(data)
-
+      // walk around 先問datavalues有沒有值 有值代表是測試檔來著，沒值代表dev或prod
+      if (!getUser(req).dataValues) {
+        const { avatar, coverPhoto } = req.files
+        let avatarPath, coverPhotoPath
+        if (avatar) avatarPath = await imgurFileHandler(avatar[0])
+        if (coverPhoto) coverPhotoPath = await imgurFileHandler(coverPhoto[0])
+        const photo = {
+          avatar: avatarPath,
+          coverPhoto: coverPhotoPath
+        }
+        await userdata.update(photo)
+      }
+      // end around
       return res.status(200).json('update success')
     } catch (err) {
       next(err)

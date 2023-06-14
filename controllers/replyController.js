@@ -1,5 +1,5 @@
 const { Reply, User, Tweet } = require('../models')
-const { getLastUpdated, getUser} = require('../_helpers')
+const { getLastUpdated, getUser } = require('../_helpers')
 
 const replyController = {
   getReplies: async (req, res, next) => {
