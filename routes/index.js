@@ -25,23 +25,23 @@ router.post('/api/signin', (req, res, next) => {
   passport.authenticate('local', { session: false }), userController.signIn,
 )
 
+router.get('/api/tweets/:tweet_id/replies', authenticated, tweetController.getReplies)
+router.post('/api/tweets/:tweet_id/replies', authenticated, tweetController.postReply)
+
 router.get('/api/users/:id/tweets', authenticated, userController.getUserTweets)
 router.post('/api/users', userController.signUp)
 router.get('/api/users/:id', authenticated, userController.getUser)
 
 router.get('/api/users/:id/replied_tweets')
 
-router.get('/api/tweets', authenticated, tweetController.getTweets)
+// router.get('/api/tweet', authenticated, tweetController.getPostTweet)
 
-router.get('/api/postTweet', authenticated, tweetController.getPostTweet)
+router.get('/api/tweets/:tweet_id', authenticated, tweetController.getTweet)
+
+router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
 
 router.delete('/api/admin/tweets/:tweetId', authenticated, authenticatedAdmin, adminController.deleteTweet)
-
-router.get('/api/tweet/:id', authenticated, tweetController.getTweet)
-
-router.get('/api/reply/:tweetId', authenticated, tweetController.getReply)
-router.post('/api/reply/:tweetId', authenticated, tweetController.postReply)
 
 router.get('/api/users/top', authenticated, userController.getTopUsers)
 router.get('/api/users/:id/edit', authenticated, userController.editUser)
