@@ -1,7 +1,7 @@
 const { Tweet, User, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 const tweetController = {
-  createTweet: async (req, res, next) => {
+  postTweet: async (req, res, next) => {
     try {
       const reqUserId = helpers.getUser(req).id
       const { description } = req.body
@@ -21,15 +21,15 @@ const tweetController = {
   },
   getTweets: async (req, res, next) => {
     try {
-      const reqUserId = helpers.getUser(req).id
       let tweets = await Tweet.findAll({
-        raw: true,
+        // raw: true,  使用這個就不能sequelize相關功能
         nest: true,
         include: [User, Reply, Like],
         order: [['createdAt', 'DESC']]
       })
       tweets = tweets.map(tweet => ({
-        UserId: reqUserId,
+        id: tweet.id,
+        UserId: tweet.UserId,
         description: tweet.description,
         createdAt: tweet.createdAt,
         replyCount: tweet.Replies.length,
@@ -47,7 +47,7 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
-      const reqUserId = helpers.getUser(req).id
+      // const reqUserId = helpers.getUser(req).id
       const tweetId = req.params.tweet_id
       let tweet = await Tweet.findByPk(tweetId, {
         include: [User, Like, Reply]
@@ -63,7 +63,6 @@ const tweetController = {
         likeCount: tweet.Likes.length,
         replyCount: tweet.Replies.length,
         user: {
-          UserId: reqUserId,
           name: tweet.User.name,
           account: tweet.User.account,
           avatar: tweet.User.avatar
@@ -76,6 +75,32 @@ const tweetController = {
       next(error)
     }
   },
+
+  getTweetLikes: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id
+      const likes = await Like.findAll({
+        where: { TweetId: tweetId },
+        include: { model: User }
+      })
+
+      if (!likes) {
+        return res.status(404).json({ message: 'Likes not found' })
+      }
+
+      const likedUsers = likes.map(like => ({
+        id: like.User.id,
+        name: like.User.name,
+        account: like.User.account,
+        avatar: like.User.avatar
+      }))
+
+      return res.status(200).json(likedUsers)
+    } catch (err) {
+      next(err)
+    }
+  },
+
   postReply: async (req, res, next) => {
     try {
       const { comment } = req.body
