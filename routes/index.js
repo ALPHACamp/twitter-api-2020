@@ -12,9 +12,9 @@ const fields = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner',
 
 // router.use('/admin', authenticated, authenticatedAdmin, admin)
 
+router.delete('/api/admin/tweets/:tweetId', authenticated, authenticatedAdmin, adminController.deleteTweet)
 router.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
-
 // if  req.user.role = admin 才能登入
 router.post('/api/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn)
 // if  req.user.role = admin 不能登入
@@ -25,34 +25,44 @@ router.post('/api/signin', (req, res, next) => {
   passport.authenticate('local', { session: false }), userController.signIn,
 )
 
+router.get('/api/users/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/api/users/:id/tweets', authenticated, userController.getUserTweets)
-router.post('/api/users', userController.signUp)
+router.get('/api/users/:id/likes', authenticated, userController.getUserLikes)
+router.get('/api/users/:id/followings', authenticated, userController.getUserFollowings)
+router.get('/api/users/:id/followers', authenticated, userController.getUserFollowers)
+router.get('/api/users/:id/edit', authenticated, userController.editUser)
 router.get('/api/users/:id', authenticated, userController.getUser)
+router.put('/api/users/:id', fields, authenticated, userController.putUser)
+router.post('/api/users', userController.signUp)
 
-router.get('/api/users/:id/replied_tweets')
+
+router.post('/api/tweets/:id/like', authenticated, userController.addLike)
+router.post('/api/tweets/:id/unlike', authenticated, userController.removeLike)
+
+
+router.post('/api/followships', authenticated, userController.addFollowing)
+router.delete('/api/followships/:followingId', authenticated, userController.removeFollowing)
+
+
+router.get('/api/users/top', authenticated, userController.getTopUsers)
+
+
+
 
 router.get('/api/tweets', authenticated, tweetController.getTweets)
-
 router.get('/api/postTweet', authenticated, tweetController.getPostTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
-
-router.delete('/api/admin/tweets/:tweetId', authenticated, authenticatedAdmin, adminController.deleteTweet)
-
 router.get('/api/tweet/:id', authenticated, tweetController.getTweet)
-
 router.get('/api/reply/:tweetId', authenticated, tweetController.getReply)
 router.post('/api/reply/:tweetId', authenticated, tweetController.postReply)
 
-router.get('/api/users/top', authenticated, userController.getTopUsers)
-router.get('/api/users/:id/edit', authenticated, userController.editUser)
 
-router.put('/api/users/:id', fields, authenticated, userController.putUser)
 
-router.post('/api/like/:tweetId', authenticated, userController.addLike)
-router.delete('/api/like/:tweetId', authenticated, userController.removeLike)
 
-router.post('/api/following/:userId', authenticated, userController.addFollowing)
-router.delete('/api/following/:userId', authenticated, userController.removeFollowing)
+
+
+
+
 
 router.use('/', apiErrorHandler)
 

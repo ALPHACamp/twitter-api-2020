@@ -33,8 +33,6 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
     include: [
-      //包含user的所有like及這些like所對應的tweet
-      // { model: Like, as: 'likedTweets', include: [Tweet] },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
