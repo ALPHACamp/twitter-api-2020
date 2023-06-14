@@ -1,12 +1,12 @@
-const { getUser } = require('../helpers/auth-helpers.js')
 const { User, Tweet, Like, Reply } = require('../models')
+const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 // 之後加'../helpers/file-helpers'
 
 const adminController = {
   login: async (req, res, next) => {
     try {
-      const userData = await getUser(req)?.toJSON()
+      const userData = await helpers.getUser(req)?.toJSON()
       delete userData.password
       const token = await jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       if (userData.role !== 'admin') throw new Error('帳號不存在!')
@@ -73,24 +73,6 @@ const adminController = {
     }
   },
   getTweets: async (req, res, next) => {
-    // try {
-    //   let tweets = await Tweet.findAll({
-    //     attributes: ['id', 'description', 'createdAt'],
-    //     include: [
-    //       { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-    //     ]
-    //   })
-    //   tweets = await Promise.all(tweets.map(async tweet => {
-    //     if (tweet.description.length > 50) {
-    //       tweet.description = tweet.description.substring(0, 50) + '...'
-    //       return tweet
-    //     }
-    //     return tweet
-    //   }))
-    //   return res.json({ data: { tweets } })
-    // } catch (err) {
-    //   next(err)
-    // }
     try {
       let tweets = await Tweet.findAll({
         include: [

@@ -1,9 +1,10 @@
 const { User, Tweet, Reply, Like } = require('../models')
 const { getUser } = require('../helpers/auth-helpers.js')
+const { Op } = require('sequelize')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers.js')
-
+const helpers = require('../_helpers')
 const userController = {
   register: async (req, res, next) => {
     try {
@@ -85,42 +86,51 @@ const userController = {
   },
   editUserInfo: async (req, res, next) => {
     try {
+      console.log(helpers.getUser(req))
       const { name, account, email, password, checkPassword, introduction } = req.body
-      const id = getUser(req).id
+      const currentUser = helpers.getUser(req)
+      const UserId = helpers.getUser(req).id
+      const id = req.params.id
       const files = req.files
       const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
       const cover = files?.cover ? await imgurFileHandler(files.cover[0]) : null
-
-      if (id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可編輯該用戶基本資料!')
+      // 使用者只能編輯自己的資料
+      if (Number(UserId) !== Number(id)) throw new Error('非該用戶不可編輯該用戶基本資料!')
+      // 確認使用者是否存在
       let userInfo = await User.findOne({
         where: { id },
         attributes: ['id', 'account', 'email', 'password', 'name', 'avatar', 'cover', 'introduction']
       })
-      if (!userInfo) throw new Error('該用戶不存在!')
-      if (!password) throw new Error('密碼與確認密碼不相符!')
+      if (!userInfo || userInfo.role === 'admin') throw new Error('該用戶不存在!')
+      // 如有修改password，passwor與checkPassword是否相符
       if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
-      const hash = await bcrypt.hash(password, 10)
-      // 把所有資訊(除了該使用者)拿出來與userInfo比對,看是否有重複account/email
-      const allUsersInfo = await User.findAll({
-        where: { role: 'user' },
-        attributes: ['id', 'email', 'account']
-      })
-      for (let i = 0; i < allUsersInfo.length; i++) {
-        if (account && allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.account.toString() === account.toString()) {
-          throw new Error('account 已重複註冊！')
-        } else if (email && allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.email.toString() === email.toString()) {
-          throw new Error('email 已重複註冊！')
-        }
+      // 確認暱稱是否超過上限
+      if (name && name.length > 50) throw new Error('name 超過字數限制50字元!')
+      // 確認自我介紹是否超過上限
+      if (introduction && introduction.length > 160) throw new Error('introduction 超過字數限制160字元!')
+      // 如有修改account，確認是否與現有資料庫重複
+      if (account) {
+        const accountUser = await User.findOne({
+          where: { account, id: { [Op.ne]: UserId } }
+        })
+        if (account !== currentUser.account && accountUser) throw new Error('Account 已重複註冊!')
+      }
+      // 如有修改email，確認是否與現有資料庫重複
+      if (email) {
+        const emailUser = await User.findOne({
+          where: { email, id: { [Op.ne]: UserId } }
+        })
+        if (email !== currentUser.email && emailUser) throw new Error('Email 已重複註冊!')
       }
 
       userInfo = await userInfo.update({
-        account,
-        email,
-        password: hash, // 為了不讓有心人拿到密碼, 所以並沒有將使用者原本的password傳到前端, 這也造成只要是進入到edit頁面都需要重新輸入password, 但此舉只是因為password不可空白, 並無身分認證功能
-        name,
-        avatar: avatar || userInfo.avarat,
+        account: account || userInfo.account,
+        email: email || userInfo.email,
+        password: password ? bcrypt.hashSync(password, 10) : userInfo.password,
+        name: name || userInfo.name,
+        avatar: avatar || userInfo.avatar,
         cover: cover || userInfo.cover,
-        introduction
+        introduction: introduction || userInfo.introduction
       })
       return res.status(200).json(userInfo)
     } catch (err) {
