@@ -95,7 +95,18 @@ const userController = {
       if (paramsUserId !== userId) {
         return res.status(403).json('Can not change others data')
       }
+      let fileData = null
+      if (req.files) {
+        const { avatar, coverPhoto } = req.files
+        let avatarPath, coverPhotoPath
 
+        if (avatar) avatarPath = await imgurFileHandler(avatar[0])
+        if (coverPhoto) coverPhotoPath = await imgurFileHandler(coverPhoto[0])
+        fileData = {
+          avatar: avatarPath,
+          coverPhoto: coverPhotoPath
+        }
+      }
       const userAccount = req.user.account
       const userEmail = req.user.email
       const { account, name, email, password, passwordCheck, introduction } =
@@ -132,21 +143,10 @@ const userController = {
         name,
         introduction,
         email,
-        password: hash || userdata.password
+        password: hash || userdata.password,
+        ...fileData
       }
       await userdata.update(data)
-      // walk around 先問datavalues有沒有值 有值代表是測試檔來著，沒值代表dev或prod
-      if (!getUser(req).dataValues) {
-        const { avatar, coverPhoto } = req?.files
-        let avatarPath, coverPhotoPath
-        if (avatar) avatarPath = await imgurFileHandler(avatar[0])
-        if (coverPhoto) coverPhotoPath = await imgurFileHandler(coverPhoto[0])
-        const photo = {
-          avatar: avatarPath,
-          coverPhoto: coverPhotoPath
-        }
-        await userdata.update(photo)
-      }
       // end around
       return res.status(200).json('update success')
     } catch (err) {
