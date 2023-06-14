@@ -2,7 +2,6 @@ const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
 const authenticated = (req, res, next) => {
-  console.log('by authenticated', helpers.getUser(req))
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err || !user) return res.status(401).json({ status: 'error', message: '登入信息驗證失敗' })
     req.user = user
