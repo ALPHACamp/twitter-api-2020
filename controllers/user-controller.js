@@ -22,18 +22,18 @@ const userController = {
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
-      ],
-      raw: true,
-      nest: true
+      ]
     })
       .then(user => {
         if (!user) throw new Error('getUser查無此人')
         req.user.Followings = req.user.Followings || []
         req.user.Followers = req.user.Followers || []
         user = {
-          ...user,
+          ...user.toJSON(),
           isFollowing: req.user && req.user.Followings.some(following => following.id === user.id),
-          isFollower: req.user && req.user.Followers.some(follower => follower.id === user.id)
+          isFollower: req.user && req.user.Followers.some(follower => follower.id === user.id),
+          followersCount: req.user && req.user.Followers.length,
+          followingsCount: req.user && req.user.Followers.length
         }
         // res.json({ status: 'success', user: user.toJSON() })
         delete user.password
