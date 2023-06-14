@@ -82,6 +82,9 @@ const userController = {
         if (!data) return res.status(404).json('User not found!')
         delete data.password
         data.tweetsCounts = tweets.length
+        data.isFollowing = req.user.Followings
+          ? req.user.Followings.some((f) => Number(f.id) === Number(userId))
+          : false
         res.status(200).json(data)
       })
       .catch((err) => next(err))
