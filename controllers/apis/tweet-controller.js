@@ -158,6 +158,9 @@ const tweetController = {
         UserId: res.locals.userId,
         TweetId: id
       })
+      // likedCount + 1
+      await PromiseArr[0].increment('likedCount', { by: 1 })
+
       return res.status(200).json(like)
     } catch (error) {
       next(error)
