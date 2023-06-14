@@ -1,5 +1,5 @@
 const { getUser } = require('../helpers/auth-helpers.js')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 const jwt = require('jsonwebtoken')
 // 之後加'../helpers/file-helpers'
 
@@ -73,12 +73,33 @@ const adminController = {
     }
   },
   getTweets: async (req, res, next) => {
+    // try {
+    //   let tweets = await Tweet.findAll({
+    //     attributes: ['id', 'description', 'createdAt'],
+    //     include: [
+    //       { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+    //     ]
+    //   })
+    //   tweets = await Promise.all(tweets.map(async tweet => {
+    //     if (tweet.description.length > 50) {
+    //       tweet.description = tweet.description.substring(0, 50) + '...'
+    //       return tweet
+    //     }
+    //     return tweet
+    //   }))
+    //   return res.json({ data: { tweets } })
+    // } catch (err) {
+    //   next(err)
+    // }
     try {
       let tweets = await Tweet.findAll({
-        attributes: ['id', 'description', 'createdAt'],
         include: [
-          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-        ]
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
+          Reply,
+          Like,
+          { model: User, as: 'LikedUsers' }
+        ],
+        order: [['createdAt', 'DESC']]
       })
       tweets = await Promise.all(tweets.map(async tweet => {
         if (tweet.description.length > 50) {
@@ -87,7 +108,21 @@ const adminController = {
         }
         return tweet
       }))
-      return res.json({ data: { tweets } })
+      const data = tweets.map(tweet => {
+        return {
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar,
+          likedCount: tweet.Likes.length,
+          repliedCount: tweet.Replies.length,
+          isLiked: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
+        }
+      })
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }

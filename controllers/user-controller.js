@@ -38,7 +38,6 @@ const userController = {
   },
   login: async (req, res, next) => {
     try {
-      console.log(req.user)
       const userData = await getUser(req)?.toJSON()
       delete userData.password
       const token = await jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -67,9 +66,16 @@ const userController = {
         ]
       })
       if (!userInfo || userInfo.role !== 'user') throw new Error('該用戶不存在')
-      const follower = userInfo.Followings.length
-      const following = userInfo.Followers.length
-      userInfo = { ...userInfo.toJSON(), follower, following }
+      const following = userInfo.Followings.length
+      const follower = userInfo.Followers.length
+      let isFollowed = false
+      for (let i = 0; i < follower; i++) {
+        if (userInfo.Followers[i].id.toString() === getUser(req).id.toString()) {
+          isFollowed = true
+          break
+        }
+      }
+      userInfo = { ...userInfo.toJSON(), follower, following, isFollowed }
       delete userInfo.Followers
       delete userInfo.Followings
       return res.status(200).json(userInfo)
@@ -79,8 +85,13 @@ const userController = {
   },
   editUserInfo: async (req, res, next) => {
     try {
-      let { id, name, account, email, password, checkPassword, introduction, avatar, cover } = req.body
-      if (req.user.dataValues.id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可編輯該用戶基本資料!')
+      const { name, account, email, password, checkPassword, introduction } = req.body
+      const id = getUser(req).id
+      const files = req.files
+      const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
+      const cover = files?.cover ? await imgurFileHandler(files.cover[0]) : null
+
+      if (id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可編輯該用戶基本資料!')
       let userInfo = await User.findOne({
         where: { id },
         attributes: ['id', 'account', 'email', 'password', 'name', 'avatar', 'cover', 'introduction']
@@ -89,8 +100,19 @@ const userController = {
       if (!password) throw new Error('密碼與確認密碼不相符!')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不相符!')
       const hash = await bcrypt.hash(password, 10)
-      avatar = avatar ? await imgurFileHandler(avatar) : null
-      cover = cover ? await imgurFileHandler(cover) : null
+      // 把所有資訊(除了該使用者)拿出來與userInfo比對,看是否有重複account/email
+      const allUsersInfo = await User.findAll({
+        where: { role: 'user' },
+        attributes: ['id', 'email', 'account']
+      })
+      for (let i = 0; i < allUsersInfo.length; i++) {
+        if (account && allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.account.toString() === account.toString()) {
+          throw new Error('account 已重複註冊！')
+        } else if (email && allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.email.toString() === email.toString()) {
+          throw new Error('email 已重複註冊！')
+        }
+      }
+
       userInfo = await userInfo.update({
         account,
         email,
@@ -100,20 +122,6 @@ const userController = {
         cover: cover || userInfo.cover,
         introduction
       })
-
-      // 把所有資訊(除了該使用者)拿出來與userInfo比對,看是否有重複account/email
-      const allUsersInfo = await User.findAll({
-        where: { role: 'user' },
-        attributes: ['id', 'email', 'account']
-      })
-      console.log(allUsersInfo[1].dataValues)
-      for (let i = 0; i < allUsersInfo.length; i++) {
-        if (allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.account.toString() === account.toString()) {
-          throw new Error('account 已重複註冊！')
-        } else if (allUsersInfo[i].dataValues.id.toString() !== id.toString() && allUsersInfo[i].dataValues.email.toString() === email.toString()) {
-          throw new Error('email 已重複註冊！')
-        }
-      }
       return res.status(200).json(userInfo)
     } catch (err) {
       next(err)
@@ -256,18 +264,34 @@ const userController = {
   getTopUsers: async (req, res, next) => {
     try {
       let users = await User.findAll({
+        where: { role: 'user' },
         attributes: ['id', 'name', 'account', 'avatar'],
         include: [
           { model: User, as: 'Followers' }
         ]
       })
-      users = await Promise.all(users.map(async user => {
+      const isFollowed = []
+      for (let j = 0; j < users.length; j++) {
+        if (!users[j].Followers[0])isFollowed.push(false)
+        for (let i = 0; i < users[j].Followers.length; i++) {
+          console.log(users[j].id, users[j].Followers[i].id.toString())
+          if (users[j].Followers[i].id?.toString() === getUser(req).id.toString()) {
+            isFollowed.push(true)
+            break
+          } else {
+            isFollowed.push(false)
+          }
+        }
+      }
+      console.log(isFollowed)
+      users = await Promise.all(users.map(async (user, isFollowedBoolean) => {
         return {
           userName: user.name,
           userId: user.id,
           userAccount: user.account,
           userAvatar: user.avatar,
-          followerCount: user.Followers.length
+          followerCount: user.Followers.length,
+          isFollowed: isFollowed[isFollowedBoolean]
         }
       }))
       users = users.sort((a, b) => b.followerCount - a.followerCount)
