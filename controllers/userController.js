@@ -140,7 +140,6 @@ const userController = {
 
       return res.status(200).json('update success')
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },

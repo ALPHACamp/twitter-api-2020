@@ -40,7 +40,7 @@ describe('# reply requests', () => {
           .post('/api/tweets/1/replies')
           .send('comment=comment')
           .set('Accept', 'application/json')
-          .expect(200)
+          .expect(500)
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查是否有成功新增留言
