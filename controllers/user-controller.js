@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const imgur = require('imgur')
-imgur.setAPIUrl('https://api.imgur.com/3/')
+imgur.setAPIUrl('https://api.imgur.com/3/')  // 
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const helpers = require('../_helpers')
@@ -79,8 +79,9 @@ const userController = {
       if (currentUserId.toString() !== req.params.id) {
         throw new Error('Cannot edit other users profile')
       }
-      const { account, name, email, avatar, password, checkPassword, introduction } = req.body
-      const { banner } = req.files || {} // 圖片存在req.files屬性中&確保非空值
+      const { account, name, email, password, introduction } = req.body
+      // const { banner } = req.files || {} // 圖片存在req.files屬性中&確保非空值
+      const files = req.files || ''
 
       // AC測試規定: 自我介紹字數上限 160 字、暱稱上限 50 字
       if (name && name.length > 50) throw new Error('name length should <= 50')
@@ -110,8 +111,15 @@ const userController = {
       //   throw new Error('Password check failed');
       // }
 
-      const avatarUrl = avatar ? await imgurFileHandler(avatar[0]) : null
-      const bannerUrl = banner ? await imgurFileHandler(banner[0]) : null
+      let avatarUrl = ''
+      let bannerUrl = ''
+
+      if (files.avatar && files.avatar[0].fieldname === 'avatar') {
+        avatarUrl = await imgurFileHandler(files.avatar[0])
+      }
+      if (files.banner && files.banner[0].fieldname === 'banner') {
+        bannerUrl = await imgurFileHandler(files.banner[0])
+      }
 
       await user.update({
         name: name || user.name,
