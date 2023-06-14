@@ -28,6 +28,7 @@ router.post('/followships/', authenticated, followshipController.postFollowship)
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship)
 
 // 有關user的routes
+router.get('/users/top', authenticated, userController.getTopUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserRepliedTweet)
 router.get('/users/:id', authenticated, userController.getUser)

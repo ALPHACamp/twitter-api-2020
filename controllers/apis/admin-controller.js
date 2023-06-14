@@ -62,7 +62,17 @@ const adminController = {
         include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }],
         order: [['createdAt', 'DESC']]
       })
-      return res.status(200).json(tweets)
+
+      // 50字快覽
+      const data = tweets.map(tweet => {
+        const { description, ...rest } = tweet.toJSON()
+        return {
+          ...rest,
+          description: description.length >= 50 ? description.slice(0, 50) : description
+        }
+      })
+
+      return res.status(200).json(data)
     } catch (error) {
       next(error)
     }
