@@ -4,24 +4,24 @@ const likeController = {
   addLike: (req, cb) => {
     const tweetId = req.params.id
     return Promise.all([
-      Tweet.findByPk(tweetId), 
+      Tweet.findByPk(tweetId),
       Like.findOne({
-      where: {
-        userId: req.user.id,
-        tweetId
-      }
-    })
-  ])
-    .then(([tweet, like])=>{
-      if (!tweet) throw new Error("Tweet didn't exist!")
-      if (like) throw new Error('You have Liked this restaurant!')
-      return Like.create({
-        userId: req.user.id,
-        tweetId
+        where: {
+          userId: req.user.id,
+          tweetId
+        }
       })
-    })
-    .then(like => cb(null, {like})) //要不要加花括弧?
-    .catch(err => cb(err))
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        if (like) throw new Error('You have Liked this tweet!')
+        return Like.create({
+          userId: req.user.id,
+          tweetId
+        })
+      })
+      .then(like => cb(null, like)) //要不要加花括弧?
+      .catch(err => cb(err))
   },
   // POST /tweets/:id/unlike
   removeLike: (req, cb) => {

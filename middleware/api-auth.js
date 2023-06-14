@@ -13,7 +13,6 @@ const authenticated = (req, res, next) => {
 // 前台登入驗證
 const authenticatedUser = (req, res, next) => {
   if (req.user && req.user.role !== 'admin') { 
-    console.log(req.user)
     return next() 
   }
   return res.status(403).json({ status: 'error', message: 'permission denied, only for user' })

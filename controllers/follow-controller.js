@@ -4,6 +4,7 @@ const followController = {
   addFollowing: (req, res, next) => {
     const followingId = req.body.id
     const followerId = req.user.id
+    console.log(followingId, followerId)
     if (followerId === followingId) throw new Error('不可追蹤自己')
     User.findByPk(followingId)
       .then((user) => {
@@ -24,7 +25,7 @@ const followController = {
       })
       .catch((err) => next(err))
   },
-    removeFollowing: (req, res, next) => {
+  removeFollowing: (req, res, next) => {
     const followingId = req.params.followingId
     const followerId = req.user.id
     Followship.findOne({
@@ -35,7 +36,7 @@ const followController = {
     })
       .then(followship => {
         if (!followship) throw new Error("You haven't followed this user!")
-        followship.destroy().then(()=>{
+        followship.destroy().then(() => {
           return res.status(200).json({ message: '成功移除追蹤' })
         })
       })
