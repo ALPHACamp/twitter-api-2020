@@ -1,5 +1,5 @@
 const helpers = require('../_helpers')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 
 const adminController = {
@@ -24,6 +24,21 @@ const adminController = {
       if (!tweet) throw new Error('This tweet is not exist!')
       await tweet.destroy()
       return res.status(200).json({ message: '此推文成功刪除' })
+    } catch (err) { next(err) }
+  },
+  getTweetList: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        include: { model: User, attributes: ['id', 'email', 'name', 'account', 'avatar', 'cover'] },
+        attributes: [
+          'id',
+          [Sequelize.literal('SUBSTRING(description, 1,50)'), 'shortDescription'],
+          'createdAt',
+          'updatedAt'
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      return res.status(200).json(tweets)
     } catch (err) { next(err) }
   }
 }

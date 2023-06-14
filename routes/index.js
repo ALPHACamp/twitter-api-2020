@@ -41,6 +41,7 @@ router.post('/api/users', userController.signUp)
 // 後台
 router.post('/api/admin/login', passport.authenticate('local', { session: false }), adminController.signIn)
 router.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweetList)
 router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
