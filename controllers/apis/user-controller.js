@@ -7,7 +7,6 @@ const helpers = require('../../_helpers')
 const userController = {
   signIn: (req, res,) => {
     try {
-      // const userData = req.user.toJSON()
       const userData = helpers.getUser(req).toJSON()
       if (userData.role === 'admin') throw new Error('Account does not exist!')
       delete userData.password
@@ -158,13 +157,12 @@ const userController = {
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
   addLike: (req, res) => {
-    const tweetId = req.params.id
     return Promise.all([
-      Tweet.findByPk(tweetId),
+      Tweet.findByPk(req.params.id),
       Like.findOne({
         where: {
-          userId: helpers.getUser(req).id,
-          tweetId
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.id
         }
       })
     ])
@@ -172,8 +170,8 @@ const userController = {
         if (!tweet) throw new Error(`tweet didn't exist!`)
         if (like) throw new Error(`You have liked this tweet!`)
         return Like.create({
-          userId: helpers.getUser(req).id,
-          tweetId
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.id
         })
       })
       .then((likedTweet) => res.status(200).json(likedTweet))
