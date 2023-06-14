@@ -399,20 +399,46 @@ const userController = {
   },
   getTopUser: async (req, res, next) => {
     try {
-      const users = await User.findAll({
-        where: { role: 'user' },
-        attributes: ['id', 'name', 'account'],
-        include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account'] }]
-      })
-      const data = users.map(user => {
+      // 找出追隨者數量前10名
+      const [user, users] = await Promise.all([
+        User.findByPk(getUser(req).id,
+          {
+            include: [{ model: User, as: 'Followings', attributes: ['id'] }],
+            attributes: ['id']
+          }
+        ),
+        User.findAll({
+          where: { role: 'user' },
+          attributes: ['id', 'name', 'account'],
+          include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account'] }]
+        })
+      ])
+
+      let data = users.map(user => {
         const { Followers, ...rest } = user.toJSON()
         return {
           ...rest,
           followerCount: user.Followers.length
         }
       })
-      data.sort((a, b) => b.followerCount - a.followerCount)
+
+      // 排列top10順序 並 將使用者移除推薦追蹤列表
+      data = data.sort((a, b) => b.followerCount - a.followerCount).filter(e => e.id !== getUser(req).id)
       const top10 = data.slice(0, 10)
+      const userFollowings = user.toJSON().Followings
+
+      const dic = {}
+      for (let i = 0; i < userFollowings.length; i++) {
+        dic[userFollowings[i].id] = i
+      }
+
+      for (const i of top10) {
+        if (dic[i.id] >= 0) {
+          i.isFollowed = true
+        } else {
+          i.isFollowed = false
+        }
+      }
       res.status(200).json(top10)
     } catch (error) {
       next(error)
