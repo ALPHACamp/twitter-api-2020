@@ -264,18 +264,34 @@ const userController = {
   getTopUsers: async (req, res, next) => {
     try {
       let users = await User.findAll({
+        where: { role: 'user' },
         attributes: ['id', 'name', 'account', 'avatar'],
         include: [
           { model: User, as: 'Followers' }
         ]
       })
-      users = await Promise.all(users.map(async user => {
+      const isFollowed = []
+      for (let j = 0; j < users.length; j++) {
+        if (!users[j].Followers[0])isFollowed.push(false)
+        for (let i = 0; i < users[j].Followers.length; i++) {
+          console.log(users[j].id, users[j].Followers[i].id.toString())
+          if (users[j].Followers[i].id?.toString() === getUser(req).id.toString()) {
+            isFollowed.push(true)
+            break
+          } else {
+            isFollowed.push(false)
+          }
+        }
+      }
+      console.log(isFollowed)
+      users = await Promise.all(users.map(async (user, isFollowedBoolean) => {
         return {
           userName: user.name,
           userId: user.id,
           userAccount: user.account,
           userAvatar: user.avatar,
-          followerCount: user.Followers.length
+          followerCount: user.Followers.length,
+          isFollowed: isFollowed[isFollowedBoolean]
         }
       }))
       users = users.sort((a, b) => b.followerCount - a.followerCount)
