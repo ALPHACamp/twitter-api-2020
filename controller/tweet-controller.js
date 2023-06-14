@@ -21,7 +21,6 @@ const tweetController = {
   },
   getTweets: async (req, res, next) => {
     try {
-      const reqUserId = helpers.getUser(req).id
       let tweets = await Tweet.findAll({
         // raw: true,  使用這個就不能sequelize相關功能
         nest: true,
@@ -29,7 +28,8 @@ const tweetController = {
         order: [['createdAt', 'DESC']]
       })
       tweets = tweets.map(tweet => ({
-        UserId: reqUserId,
+        id: tweet.id,
+        UserId: tweet.UserId,
         description: tweet.description,
         createdAt: tweet.createdAt,
         replyCount: tweet.Replies.length,
