@@ -131,8 +131,8 @@ const tweetController = {
       ])
       if (!tweet) {
         return res
-          .status(200)
-          .json({ status: 'success', message: '無推文資料' })
+          .status(404)
+          .json({ status: 'error', message: '推文不存在' })
       }
 
       const currentUserLikes = likes.map(l => l.TweetId)
@@ -282,7 +282,7 @@ const tweetController = {
       if (like) {
         return res
           .status(404)
-          .json({ status: 'error', message: '你已經喜歡過這則推文!' })
+          .json({ status: 'error', message: '你已經喜歡過這則推文' })
       }
 
       await Like.create({
@@ -292,7 +292,7 @@ const tweetController = {
       })
       return res
         .status(200)
-        .json({ status: 'success', message: '你已成功喜歡這則貼文!' })
+        .json({ status: 'success', message: '你已成功喜歡這則貼文' })
     } catch (err) {
       next(err)
     }
@@ -320,7 +320,7 @@ const tweetController = {
       if (!like) {
         return res
           .status(404)
-          .json({ status: 'error', message: '你尚未喜歡這則貼文!' })
+          .json({ status: 'error', message: '你尚未喜歡這則貼文' })
       }
 
       await like.destroy()
