@@ -20,7 +20,13 @@ router.post('/api/signin', (req, res, next) => {
 },
   passport.authenticate('local', { session: false }), userController.signIn,
 )
-router.post('/api/signup', userController.signUp)
+
+router.get('/api/users/:id/tweets', authenticated, userController.getUserTweets)
+router.post('/api/users', userController.signUp)
+router.get('/api/users/:id', authenticated, userController.getUser)
+
+router.get('/api/users/:id/replied_tweets')
+
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 
 router.get('/api/postTweet', authenticated, tweetController.getPostTweet)
@@ -33,7 +39,7 @@ router.post('/api/reply/:tweetId', authenticated, tweetController.postReply)
 
 router.get('/api/users/top', authenticated, userController.getTopUsers)
 router.get('/api/users/:id/edit', authenticated, userController.editUser)
-router.get('/api/users/:id', authenticated, userController.getUser)
+
 router.put('/api/users/:id', fields, authenticated, userController.putUser)
 
 router.post('/api/like/:tweetId', authenticated, userController.addLike)
