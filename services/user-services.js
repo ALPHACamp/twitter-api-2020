@@ -355,9 +355,12 @@ const userServices = {
             const users = await User.findAll({
                 include: [{ model: User, as: 'Followers' }]
             })
+            
             const result = await users
                 .map(user => ({
                     ...user.dataValues,
+                    name: (user.dataValues.name.length <= 6) ? user.dataValues.name : user.dataValues.name.substring(0, 6) + '...',
+                    password: '',
                     followerCount: user.Followers.length,
                     isFollowed: req.user.Followings.some(f => f.id === user.id)
                 }))
