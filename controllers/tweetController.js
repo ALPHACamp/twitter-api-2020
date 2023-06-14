@@ -1,7 +1,6 @@
 // const Sequelize = require('sequelize')
 const { getLastUpdated, getLastUpd, getUser } = require('../_helpers')
 const { User, Tweet, Like, Reply, Followship } = require('../models')
-const { get } = require('../routes')
 const tweetController = {
   getTweets: async (req, res, next) => {
     // query設計
@@ -99,16 +98,21 @@ const tweetController = {
     }
   },
   getTweet: (req, res, next) => {
-    const id = req.params.id
-    Tweet.findByPk(id, {
-      include: [
-        { model: User, attributes: ['account', 'name', 'avatar'] },
-        { model: Like, attributes: ['UserId'] },
-        { model: Reply, attributes: ['UserId'] }
-      ],
-      nest: true
-    })
-      .then((data) => {
+    const tweetId = req.params.id
+    const userId = getUser(req).id || getUser(req).dataValues.id
+    Promise.all([
+      User.findByPk(userId, { attributes: ['avatar'], raw: true }),
+      Tweet.findByPk(tweetId, {
+        include: [
+          { model: User, attributes: ['account', 'name', 'avatar'] },
+          { model: Like, attributes: ['UserId'] },
+          { model: Reply, attributes: ['UserId'] }
+        ],
+        nest: true
+      })
+    ])
+      .then(([user, data]) => {
+        console.log(user)
         if (!data) return res.status(404).json('Tweets not found')
         const tweet = data.dataValues
         tweet.likesCount = tweet.Likes.length
@@ -116,6 +120,7 @@ const tweetController = {
         tweet.account = tweet.User.account
         tweet.name = tweet.User.name
         tweet.avatar = tweet.User.avatar
+        tweet.userAvatar = user.avatar
         delete tweet.User
         delete tweet.Likes
         delete tweet.Replies
