@@ -5,6 +5,7 @@ const express = require('express')
 const session = require('express-session')
 const passport = require('./config/passport')
 const flash = require('connect-flash')
+const path = require('path')
 
 const methodOverride = require('method-override')
 const routes = require('./routes')
@@ -30,6 +31,7 @@ app.use((err, req, res, next) => {
   next()
 })
 app.use(methodOverride('_method'))
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(flash())
 app.use((err, req, res, next) => {
   if (err) console.error(err)

@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Followship, Like } = require('../models')
-const { imgurFileHandler } = require('../_helpers')
+const { imgurFileHandler, localFileHandler } = require('../_helpers')
 
 const userController = {
   signIn: (req, cb) => {
@@ -178,13 +178,16 @@ const userController = {
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
+    const fileHandler = process.env.NODE_ENV !== 'production' ? localFileHandler : imgurFileHandler
     const { name, email, introduction, password } = req.body
     if (!name) throw new Error('User name is required!')
+    console.log(req)
 
     const { file } = req
+    console.log(file)
     return Promise.all([
       User.findByPk(req.params.user_id),
-      imgurFileHandler(file),
+      fileHandler(file),
       bcrypt.hash(password, 10)])
       .then(([user, filePath, hash]) => {
         if (!user) throw new Error("User didn't exist!")
