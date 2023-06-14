@@ -90,7 +90,7 @@ describe('# tweet requests', () => {
         request(app)
           .get('/api/tweets')
           .set('Accept', 'application/json')
-          .expect(404)
+          .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
             expect(res.body).to.be.an('array');

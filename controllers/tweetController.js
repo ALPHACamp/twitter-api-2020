@@ -73,6 +73,7 @@ const tweetController = {
           nest: true
         })
       }
+      console.log('6')
       if (tweets.length === 0) return res.status(404).json('Tweets not found')
       const counts = tweets.map((tweet) => ({
         ...tweet.toJSON(),
@@ -89,6 +90,23 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getAllTweets: (req, res, next) => {
+    Tweet.findAll({
+      include: [
+        { model: User, attributes: ['account', 'name', 'avatar'] }
+      ]
+    })
+      .then((tweets) => {
+        return tweets.map((tweet) => ({
+          ...tweet.get({ plain: true }),
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar
+        }))
+      })
+      .then((data) => res.status(200).json(data))
+      .catch((err) => next(err))
   },
   getTweet: (req, res, next) => {
     const tweetId = req.params.id
