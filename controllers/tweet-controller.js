@@ -23,7 +23,7 @@ const tweetController = {
           likesCount: t.Likes.length,
           isLike: req.user && req.user.Likes.some(like => like.TweetId === t.id)
         }))
-        res.status(200).json(req.user)
+        res.status(200).json(tweets)
       })
       .catch(err => next(err))
   },

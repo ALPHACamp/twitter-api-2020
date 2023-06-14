@@ -61,10 +61,13 @@ const userController = {
   signUp: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     if (password !== checkPassword) throw new Error('Password do not match!')
-    return User.findOne({ where: { account: req.body.account } })
-      .then(user => {
-        if (user.account === account) throw new Error('account 已重複註冊！')
-        if (user.email === email) throw new Error('email 已重複註冊！')
+    return Promise.all([
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
+    ])
+      .then(([user1, user2]) => {
+        if (user1) throw new Error('account 已重複註冊！')
+        if (user2) throw new Error('email 已重複註冊！')
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => {
@@ -254,14 +257,13 @@ const userController = {
     if (passwordLength > 1) {
       if (password !== checkPassword) throw new Error('密碼與確認密碼不符')
     }
-    return User.findAll({
-      where: { account },
-      raw: true
-    })
-      .then(user => {
-        if (user.account === account) throw new Error('帳號已存在')
-      })
-      .then(() => {
+    return Promise.all([
+      User.findOne({ where: { account } }),
+      User.findOne({ where: { email } })
+    ])
+      .then(([user1, user2]) => {
+        if (user1) throw new Error('account 已重複註冊！')
+        if (user2) throw new Error('email 已重複註冊！')
         return User.findByPk(userId)
           .then(userData => {
             if (!userData) throw new Error('putUser說: 沒這人')
