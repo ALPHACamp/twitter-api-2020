@@ -174,7 +174,16 @@ const userController = {
         User.findByPk(id),
         Like.findAll({
           where: { UserId: Number(id) },
-          include: [Tweet, { model: User, as: 'LikedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
+          include: [
+            {
+              model: Tweet,
+              include: {
+                model: User,
+                as: 'TweetUser',
+                attributes: ['id', 'name', 'account', 'avatar']
+              }
+            }
+          ],
           raw: true,
           nest: true
         })
@@ -186,7 +195,7 @@ const userController = {
         throw error
       }
       if (!userLiked.length) {
-        const error = new Error('He does not like tweet.')
+        const error = new Error('He does not like any tweet.')
         error.status = 404
         throw error
       }
