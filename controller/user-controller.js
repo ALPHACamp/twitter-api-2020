@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const validator = require('email-validator')
