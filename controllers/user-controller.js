@@ -209,12 +209,14 @@ const userController = {
   getFollowings: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
-      // 使用者正在追蹤的對象
+
+      // 指定的使用者(:id)
       const user = await User.findByPk(req.params.id, {
         attributes: { exclude: ['password'] }
       })
       if (!user) throw new Error('使用者不存在!')
 
+      // 指定的使用者(:id)正在追蹤的對象
       const followings = await Followship.findAll({
         where: { followerId: req.params.id },
         include: [
@@ -226,11 +228,21 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
+      // 判斷內容
+      if (followings.length === 0) throw new Error(`沒有使用者(id:${user.id})追隨的人！`)
+
+      // Current User 正在追蹤的對象
+      const currentUserFollowings = await Followship.findAll({
+        attributes: ['followerId', 'followingId'],
+        where: { followerId: currentUserId },
+        raw: true
+      })
+      const currentUserFollowingArray = currentUserFollowings.map(f => f.followingId.toString()).sort((a, b) => a - b)
 
       const followingsData = followings.map(following => ({
         ...following.toJSON(),
-        isCurrentUserFollowed:
-          following.followerId.toString() === currentUserId.toString()
+        // is Current User following 指定使用者的 following
+        isCurrentUserFollowed: currentUserFollowingArray.includes(following.followingId.toString())
       }))
       res.status(200).json(followingsData)
     } catch (err) {
@@ -240,12 +252,14 @@ const userController = {
   getFollowers: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
-      // 找出正在追蹤此使用者的其它使用者
+
+      // 指定的使用者(:id)
       const user = await User.findByPk(req.params.id, {
         attributes: { exclude: ['password'] }
       })
       if (!user) throw new Error('使用者不存在!')
 
+      // 正在追蹤指定的使用者(:id)的使用者
       const followers = await Followship.findAll({
         where: { followingId: req.params.id },
         include: [
@@ -258,10 +272,20 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
 
+      // 判斷內容
+      if (followers.length === 0) throw new Error(`沒有追隨使用者(id:${user.id})的人！`)
+
+      // Current User 正在追蹤的對象
+      const currentUserFollowings = await Followship.findAll({
+        attributes: ['followingId'],
+        where: { followerId: currentUserId }
+      })
+      const currentUserFollowingArray = currentUserFollowings.map(f => f.followingId.toString()).sort((a, b) => a - b)
+
       const followersData = followers.map(follower => ({
         ...follower.toJSON(),
-        isCurrentUserFollowed:
-          follower.followerId.toString() === currentUserId.toString()
+        // is Current User following 指定使用者的 following
+        isCurrentUserFollowed: currentUserFollowingArray.includes(follower.followerId.toString())
       }))
       res.status(200).json(followersData)
     } catch (err) {
