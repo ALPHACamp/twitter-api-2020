@@ -392,7 +392,6 @@ describe('# user requests', () => {
             if (err) return done(err);
             db.User.findByPk(1).then(user => {
               // 檢查資料是否有變更
-              console.log('user-test', user.toJSON())
               user.name.should.equal('User11');
               user.introduction.should.equal('User11');
               return done();

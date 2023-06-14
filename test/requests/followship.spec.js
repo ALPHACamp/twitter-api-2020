@@ -46,7 +46,6 @@ describe('# followship requests', () => {
             if (err) return done(err);
             // 檢查 Followship 資料裡，是否有 followerId=1, followingId = 2 的資料
             db.Followship.findByPk(1).then(followship => {
-              console.log(followship)
               followship.followerId.should.equal(1);
               followship.followingId.should.equal(2);
               return done();

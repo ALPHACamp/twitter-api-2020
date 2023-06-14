@@ -85,7 +85,7 @@ describe('# tweet requests', () => {
         await db.Reply.create({UserId: 1, TweetId: 1, comment: 'Tweet1 的 comment'})
       })
 
-      // GET /tweets - 所有推文，包括推文作者
+      // GET /tweets - 所有推文，包括推文作者 
       it(' - successfully', (done) => {
         request(app)
           .get('/api/tweets')
@@ -93,6 +93,7 @@ describe('# tweet requests', () => {
           .expect(404)
           .end(function(err, res) {
             if (err) return done(err);
+            console.log('test', res.body)
             expect(res.body).to.be.an('array');
             // 檢查是否回傳資料有 User1 的 Tweet1
             res.body[0].description.should.equal('User1 的 Tweet1');

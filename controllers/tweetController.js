@@ -1,6 +1,7 @@
 // const Sequelize = require('sequelize')
-const { getLastUpdated, getLastUpd } = require('../_helpers')
+const { getLastUpdated, getLastUpd, getUser } = require('../_helpers')
 const { User, Tweet, Like, Reply, Followship } = require('../models')
+const { get } = require('../routes')
 const tweetController = {
   getTweets: async (req, res, next) => {
     // query設計
@@ -161,7 +162,7 @@ const tweetController = {
     const { description, likable, commendable } = req.body
     if (!description) return res.status(400).json('Description can not be empty!')
     if (description.length > 140) return res.status(400).json('Max length 140.')
-    const id = req.user.id
+    const id = req.user.id || getUser(req).dataValues.id
     Tweet.create({
       UserId: id,
       description,
