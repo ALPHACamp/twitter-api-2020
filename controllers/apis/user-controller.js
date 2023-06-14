@@ -65,7 +65,7 @@ const userController = {
         return res.status(200).json(user)
       })
       .catch(err => {
-        res.status(404).json({ status: 'error', error: err.message })
+        res.status(500).json({ status: 'error', error: err.message })
       })
   },
   getUser: (req, res) => {
