@@ -1,6 +1,5 @@
 const { Reply, User, Tweet } = require('../models')
 const { getLastUpdated, getUser} = require('../_helpers')
-const { ge } = require('faker/lib/locales')
 
 const replyController = {
   getReplies: async (req, res, next) => {
@@ -45,7 +44,7 @@ const replyController = {
     }
 
     return Reply.create({
-      UserId: req.user.id || getUser(req).id,
+      UserId: req.user.id || getUser(req).dataValues.id,
       TweetId,
       comment
     })

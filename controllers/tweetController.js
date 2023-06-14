@@ -3,13 +3,6 @@ const { getLastUpdated, getLastUpd, getUser } = require('../_helpers')
 const { User, Tweet, Like, Reply, Followship } = require('../models')
 const tweetController = {
   getTweets: async (req, res, next) => {
-    // query設計
-    // const userId = req.params.id
-    // const { self, liked } = req.query
-    // if (self) {
-    // 1找到該使用者所有推文
-    // 2找到該使用者追蹤的用戶的推文(依照時間序)
-    // 3找到該使用者like過的文章
     try {
       const follows = req.query.follows
       const liked = req.query.liked

@@ -2,7 +2,7 @@ const { Followship, User, Like, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
 const followController = {
   addFollowing: (req, res, next) => {
-    const followerId = getUser(req).id
+    const followerId = req.user.id || getUser(req).dataValues.id
     const followingId = req.body.id
     if (!followingId) {
       return res
@@ -31,7 +31,7 @@ const followController = {
       .catch((error) => next(error))
   },
   removeFollowing: (req, res, next) => {
-    const followerId = getUser(req).id
+    const followerId = req.user.id || getUser(req).dataValues.id
     const followingId = req.params.id
     if (!followingId) {
       return res.status(400).json('缺少追蹤的用戶id')
@@ -141,7 +141,7 @@ const followController = {
       .catch((error) => next(error))
   },
   addLike: (req, res, next) => {
-    const UserId = req.user.id
+    const UserId = req.user.id || getUser(req).dataValues.id
     const TweetId = req.params.id
     if (!TweetId) return res.status(400).json('缺少推文id')
     // 檢查是否有推文
@@ -171,7 +171,7 @@ const followController = {
       .catch((error) => next(error))
   },
   removeLike: (req, res, next) => {
-    const UserId = req.user.id
+    const UserId = req.user.id || getUser(req).dataValues.id
     const TweetId = req.params.id
     if (!TweetId) return res.status(400).json('缺少推文id')
     return Like.findOne({
