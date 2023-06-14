@@ -4,12 +4,11 @@
 
 ## About - 介紹
 ---
-這是一個前後端分離的小組專案，前端使用React，後端使用Express跟MySQL關連式資料庫。
-Simple Twitter 提供註冊，登入，推文，回覆推文，喜歡跟追蹤使用者等功能。
+這是一個前後端分離的小組專案，前端使用React，後端則使用Node.js、Express搭配MySQL關連式資料庫所打造的API Server。
+Simple Twitter 提供後台管理及前台頁面，使用者可以註冊，登入，推文，回覆推文，喜歡跟追蹤使用者等功能。
 <br><br>
-## Website - 前端網站連結
---- 
-（這裡放入前端網頁連結）
+## Website - https://zebrrrra.github.io/AC_twitter_frontend
+## 前端github repo - https://github.com/zebrrrra/AC_twitter_frontend
 <br><br>
 
 ## API - 接口文件
@@ -83,8 +82,6 @@ password: 12345678 <br>
 <br>
 ## Development Tools - 開發工具
 ---
-* MongoDB
-* nodemon
 * bcrypt-nodejs: "0.0.3",
 * bcryptjs: "^2.4.3",
 * body-parser: "^1.18.3",
