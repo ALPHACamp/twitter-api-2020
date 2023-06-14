@@ -62,7 +62,7 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id);
       if (!user) throw new Error('This user does not exist')
-    
+
       const userData = {
         ...user.toJSON()
       }

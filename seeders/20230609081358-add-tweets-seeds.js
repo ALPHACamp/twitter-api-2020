@@ -18,7 +18,7 @@ module.exports = {
       for (let j = 0; j < 10; j++) {
         tweets.push({
           UserId: user.id,
-          description: faker.lorem.text(150),
+          description: faker.lorem.text(140), //ac: 推文限制在140字以內
           createdAt: new Date(),
           updatedAt: new Date()
         });
