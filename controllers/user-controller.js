@@ -226,6 +226,7 @@ const userController = {
             attributes: {
               exclude: ['password'],
               include: [
+                // 查詢token user 有沒有追隨這位 Following
                 [
                   sequelize.literal('(SELECT CASE WHEN EXISTS(SELECT * FROM Followships WHERE followerId = ' + currentUserId + ' AND followingId = Following.id) THEN "true" ELSE "false" END)'), 'isCurrentUserFollowed'
                 ]
@@ -236,18 +237,8 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
 
-      // // Current User 正在追蹤的對象
-      // const currentUserFollowings = await Followship.findAll({
-      //   attributes: ['followerId', 'followingId'],
-      //   where: { followerId: currentUserId },
-      //   raw: true
-      // })
-      // const currentUserFollowingArray = currentUserFollowings.map(f => f.followingId.toString()).sort((a, b) => a - b)
-
       const followingsData = followings.map(following => ({
-        ...following.toJSON(),
-        // is Current User following 指定使用者的 following
-        // isCurrentUserFollowed: following.isCurrentUserFollowed === 1
+        ...following.toJSON()
       }))
       res.status(200).json(followingsData)
     } catch (err) {
@@ -271,23 +262,22 @@ const userController = {
           {
             model: User,
             as: 'Follower',
-            attributes: { exclude: ['password'] }
+            attributes: {
+              exclude: ['password'],
+              include: [
+                // 查詢token user 有沒有追隨這位 Follower
+                [
+                  sequelize.literal('(SELECT CASE WHEN EXISTS(SELECT * FROM Followships WHERE followerId = ' + currentUserId + ' AND followingId = Follower.id) THEN "true" ELSE "false" END)'), 'isCurrentUserFollowed'
+                ]
+              ]
+            }
           }
         ],
         order: [['createdAt', 'DESC']]
       })
 
-      // Current User 正在追蹤的對象
-      const currentUserFollowings = await Followship.findAll({
-        attributes: ['followingId'],
-        where: { followerId: currentUserId }
-      })
-      const currentUserFollowingArray = currentUserFollowings.map(f => f.followingId.toString()).sort((a, b) => a - b)
-
       const followersData = followers.map(follower => ({
-        ...follower.toJSON(),
-        // is Current User following 指定使用者的 following
-        isCurrentUserFollowed: currentUserFollowingArray.includes(follower.followerId.toString())
+        ...follower.toJSON()
       }))
       res.status(200).json(followersData)
     } catch (err) {
