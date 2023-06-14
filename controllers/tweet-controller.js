@@ -1,5 +1,4 @@
 const { Tweet, User, Like, Reply } = require('../models')
-const { getUser } = require('../helpers/auth-helpers.js')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -69,16 +68,17 @@ const tweetController = {
   },
   postTweet: async (req, res, next) => {
     try {
+      const UserId = helpers.getUser(req).id
       const { description } = req.body
-      const user = await User.findByPk(getUser(req).id)
       if (!description) {
         return res.status(400).json({ status: 'error', message: 'Please input tweet.' })
       }
       if (description && description.length > 140) {
         return res.status(409).json({ status: 'error', message: "Tweet can't be more than 140 words." })
       }
+      const user = await User.findByPk(UserId)
       const data = await Tweet.create({
-        UserId: helpers.getUser(req).id,
+        UserId,
         description
       })
       return res.status(200).json({ status: 'success', user, data })
