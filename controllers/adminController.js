@@ -45,6 +45,7 @@ const adminController = {
         raw: true,
         nest: true
       })
+      if (!users) return res.status(404).json({ status: 'error', messages: '使用者不存在' })
       res.status(200).json(users)
     } catch (err) {
       next(err)
