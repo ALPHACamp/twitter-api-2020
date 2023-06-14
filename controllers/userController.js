@@ -14,7 +14,6 @@ const userController = {
         )
     }
     try {
-      // if(from === 'back')
       if (req.authInfo && req.authInfo.message) { return res.status(400).json(req.authInfo.message) }
       const userData = getUser(req).toJSON()
       if (
@@ -56,7 +55,8 @@ const userController = {
           account: req.body.account,
           name: req.body.name,
           email: req.body.email,
-          password: hash
+          password: hash,
+          role: 'user'
         })
       )
       .then((data) => {
@@ -87,10 +87,8 @@ const userController = {
       .catch((err) => next(err))
   },
   putUser: async (req, res, next) => {
-    // 為了做到可以&只能更新自己的資料，且如果自己的資料重複也能更新，且不能跟別人重複account、email
-    // 下一階段再考慮優化它
     try {
-      const userId = Number(getUser(req).dataValues.id)
+      const userId = Number(getUser(req).dataValues?.id) || getUser(req).id
       const paramsUserId = Number(req.params.id)
       if (paramsUserId !== userId) {
         return res.status(403).json('Can not change others data')
@@ -100,16 +98,19 @@ const userController = {
       const userEmail = req.user.email
       const { account, name, email, password, passwordCheck, introduction } =
         req.body
-      const { file } = req
-
+      // 目標是req中要有兩個file 在取得時做拆分，再各自讓imgur helper上傳
+      // 如何成功抓兩張圖片，multer定義的file代表單張，會回傳單一物件，files為兩張(或以上)，回傳 array
+      const { avatar, coverPhoto } = req.files
+      let avatarPath, coverPhotoPath
+      if (avatar) avatarPath = await imgurFileHandler(avatar[0])
+      if (coverPhoto) coverPhotoPath = await imgurFileHandler(coverPhoto[0])
       if (password !== passwordCheck) {
         return res.status(400).json('Password do not match!')
       }
-
-      const [users, userdata, filePath] = await Promise.all([
+      // 能不能用findall直接去找user的account跟email，如果找到的話跟req.user比對，成功就保留，失敗則回傳重複?
+      const [users, userdata] = await Promise.all([
         User.findAll({ attributes: ['account', 'email'] }),
-        User.findByPk(userId),
-        imgurFileHandler(file)
+        User.findByPk(userId)
       ])
 
       const accountList = users.map((user) => user.account)
@@ -132,7 +133,8 @@ const userController = {
         account,
         name,
         email,
-        avatar: filePath || null,
+        avatar: avatarPath,
+        coverPhoto: coverPhotoPath,
         password: hash || userdata.password,
         introduction
       }

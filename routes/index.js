@@ -42,7 +42,11 @@ router.delete('/tweets/:id', authenticated, tweetController.deleteTweet)
 // user
 router.post('/users', userController.signUp)
 router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id', upload.single('avatar'), authenticated, userController.putUser)
+router.put('/users/:id',
+  upload.fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'coverPhoto', maxCount: 1 }
+  ]), authenticated, userController.putUser)
 router.delete('/users/:id', authenticated, userController.deleteUser)
 
 router.use('/', apiErrorHandler)
