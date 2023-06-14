@@ -81,12 +81,14 @@ const adminController = {
             [
               sequelize.literal(
                 '(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'
-              ), 'repliesCount'
+              ),
+              'repliesCount'
             ],
             [
               sequelize.literal(
                 '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id)'
-              ), 'likesCount'
+              ),
+              'likesCount'
             ]
           ]
         },
@@ -106,14 +108,15 @@ const adminController = {
       // 回傳全部tweet，最新的在前面
       const tweetsData = tweets.map(tweet => ({
         ...tweet.toJSON(),
-        isCurrentUserLiked: tweet.Likes.some(like => like.UserId === currentUserId)
+        isCurrentUserLiked: tweet.Likes.some(
+          like => like.UserId === currentUserId
+        )
       }))
 
       res.json(tweetsData)
     } catch (err) {
       next(err)
     }
-
   },
   deleteTweet: async (req, res, next) => {
     try {
@@ -130,8 +133,55 @@ const adminController = {
       res.status(200).json({
         status: 'success',
         message: '成功刪除推文'
-
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUsersData: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        attributes: {
+          exclude: ['password'],
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'
+              ),
+              'followersCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'
+              ),
+              'followingsCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Tweets WHERE UserId = User.id)'
+              ),
+              'tweetsCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM likes l INNER JOIN tweets t on l.TweetId = t.id where t.UserId = User.id)'
+              ),
+              'receivedLikesCount'
+            ]
+          ]
+        },
+        order: [[sequelize.literal('TweetsCount'), 'DESC']]
+      })
+
+      // reorganize users data
+      const usersData = users.map(user => {
+        const userData = user.toJSON()
+        return {
+          ...userData
+        }
+      })
+
+      res.status(200).json(usersData)
     } catch (err) {
       next(err)
     }
