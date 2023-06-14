@@ -39,8 +39,11 @@ app.use((req, res, next) => {
 })
 app.use(routes)
 
-app.get('/', (req, res) => {
+app.get('', (req, res) => {
   res.send('Hello world!')
+})
+app.get('/favicon.ico', (req, res) => {
+  res.sendStatus(204)
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
