@@ -274,6 +274,8 @@ const userController = {
   },
   putUserProfile: async (req, res, next) => {
     const { name, introduction } = req.body
+    if (name.trim().length > 20) return res.status(400).json({ status: 'error', message: '暱稱上限 50 字' })
+    if (introduction.trim().length > 160) return res.status(400).json({ status: 'error', message: '自我介紹上限 160 字' })
     const avatar = req.files?.avatar?.[0] || null
     const cover = req.files?.cover?.[0] || null
     const [user, avatarFilePath, coverFilePath] = await Promise.all([User.findByPk(req.params.id),
