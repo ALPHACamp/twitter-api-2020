@@ -178,20 +178,21 @@ const userController = {
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
-    const { name, email, introduction, password } = req.body
-    if (!name) throw new Error('User name is required!')
+    // const { name, introduction } = req.body
+    if (!req.body.name) throw new Error('User name is required!')
     const { file } = req
     return Promise.all([
       User.findByPk(req.params.user_id),
       imgurFileHandler(file),
-      bcrypt.hash(password, 10)])
+      bcrypt.hash(req.body.password, 10)])
       .then(([user, filePath, hash]) => {
         if (!user) throw new Error("User didn't exist!")
         return user.update({
-          password: hash,
-          name,
-          email,
-          introduction,
+          account: req.body.account || user.account,
+          name: req.body.name || user.name,
+          email: req.body.email || user.email,
+          password: hash || user.password,
+          introduction: req.body.introduction || user.introduction,
           avatar: filePath || user.avatar
         })
       })
