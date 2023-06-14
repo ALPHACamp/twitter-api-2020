@@ -108,6 +108,56 @@ const tweetController = {
         res.json(replies)
       })
       .catch(err => next(err))
+  },
+  // POST /tweets/:id/like  喜歡一則推文
+  postTweetLike: (req, res, next) => {
+    const userId = helpers.getUser(req).id
+    const tweetId = req.params.id
+
+    return Promise.all([
+      Tweet.findByPk(tweetId),
+      Like.findOne({
+        where: {
+          UserId: userId,
+          TweetId: tweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error('此推文不存在')
+        if (like) throw new Error('已經喜歡過此篇推文')
+
+        return Like.create({
+          UserId: userId,
+          TweetId: tweet.id
+        })
+      })
+      .then(newLike => res.json(newLike))
+      .catch(err => next(err))
+  },
+  // POST /tweets/:id/unlike 取消喜歡
+  postTweetUnlike: (req, res, next) => {
+    const userId = helpers.getUser(req).id
+    const tweetId = req.params.id
+
+    return Like.findOne({
+      where: {
+        UserId: userId,
+        TweetId: tweetId
+      }
+    })
+      .then(like => {
+        if (!like) throw new Error('尚未喜歡這則推文')
+
+        return Like.destroy({
+          where: {
+            UserId: userId,
+            TweetId: tweetId
+          }
+        })
+      })
+      .then(() => res.json({ message: '取消喜歡', UserId: userId, TweetId: tweetId }))
+      .catch(err => next(err))
   }
 }
 
