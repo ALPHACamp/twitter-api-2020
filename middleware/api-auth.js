@@ -1,4 +1,5 @@
 const passport = require('../config/passport') // 引入 passport
+const helpers = require('../_helpers')
 
 // 登入驗證
 const authenticated = (req, res, next) => {
@@ -20,6 +21,7 @@ const authenticatedUser = (req, res, next) => {
 
 // 後台登入驗證
 const authenticatedAdmin = (req, res, next) => {
+  req.user = helpers.getUser(req)
   if (req.user && (req.user.role === 'admin')) {
     return next()
   }
