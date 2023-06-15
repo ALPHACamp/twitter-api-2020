@@ -84,8 +84,8 @@ const userController = {
       include: [{
         model: Tweet,
         include: [Reply, Like],
-        order: [['createdAt', 'DESC']]
       }],
+      order: [[Tweet, 'createdAt', 'DESC']],
     })
       .then(user => {
         if (!user) throw new Error(`User didn't exist`)
@@ -96,7 +96,7 @@ const userController = {
           name: user.name,
           account: user.account,
           avatar: user.avatar,
-          createdAt: user.createdAt,
+          createdAt: tweet.createdAt,
           replyCount: tweet.Replies.length,
           likeCount: tweet.Likes.length
         }))
