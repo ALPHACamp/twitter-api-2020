@@ -368,12 +368,12 @@ const userController = {
         User.findOne({ where: { account } }),
         User.findOne({ where: { email } })
       ])
-      if (userAccount) {
+      if (userAccount && account !== getUser(req).account) {
         const error = new Error('Account already exist')
         error.status = 400
         throw error
       }
-      if (userEmail) {
+      if (userEmail && email !== getUser(req).email) {
         const error = new Error('Email already exist')
         error.status = 400
         throw error
