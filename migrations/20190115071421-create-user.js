@@ -31,7 +31,7 @@ module.exports = {
       },
       cover: {
         type: Sequelize.STRING,
-        defaultValue: 'https://i.com.com/PiJ0HXw.png'
+        defaultValue: 'https://i.imgur.com/xZoHPfC.png'
       },
       password: {
         type: Sequelize.STRING
