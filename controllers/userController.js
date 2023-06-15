@@ -236,7 +236,7 @@ const userController = {
             model: User,
             as: 'Followings'
           },
-          order: [['createdAt', 'DESC']]
+          order: [[sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']]
         }),
         // 目前登入者的追蹤資料
         Followship.findAll({
@@ -267,7 +267,7 @@ const userController = {
       const [user, following] = await Promise.all([
         User.findByPk(id, {
           include: { model: User, as: 'Followers' },
-          order: [['createdAt', 'DESC']]
+          order: [[sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']]
         }),
         Followship.findAll({
           where: { followerId: currentUserId },
