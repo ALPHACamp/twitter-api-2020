@@ -112,7 +112,7 @@ const userController = {
       raw: true
     })
       .then(likedtweets => {
-        if (!likedtweets) throw new Error("User's likedtweets didn't exist!")
+        if (!likedtweets.length) throw new Error("User's likedtweets didn't exist!")
         cb(null, likedtweets)
       })
       .catch(err => cb(err))
