@@ -14,7 +14,7 @@ const likeController = {
     ])
       .then(([tweet, like]) => {
         if (!tweet) throw new Error("Tweet didn't exist!")
-        if (like) throw new Error('You have Liked this restaurant!')
+        if (like) throw new Error('You have Liked this tweet!')
         return Like.create({
           userId: req.user.id,
           tweetId

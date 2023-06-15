@@ -38,12 +38,12 @@ router.get('/api/users/:user_id/likes', authenticated, authenticatedUser, userCo
 router.use('/api/admin', admin)
 
 // replies
-router.post('/api/tweets/:tweet_id/replies', authenticated, replyController.postComment)
-router.get('/api/tweets/:tweet_id/replies', authenticated, replyController.getComment)
+router.post('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postComment)
+router.get('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getComment)
 
 //like
-router.post('/api/tweets/:id/like', authenticated, likeController.addLike)
-router.post('/api/tweets/:id/unlike', authenticated, likeController.removeLike)
+router.post('/api/tweets/:id/like', authenticated, authenticatedUser, likeController.addLike)
+router.post('/api/tweets/:id/unlike', authenticated, authenticatedUser, likeController.removeLike)
 
 // tweets
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.createTweet)
