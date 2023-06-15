@@ -174,14 +174,17 @@ const userController = {
         User.findByPk(id),
         Like.findAll({
           where: { UserId: Number(id) },
+          attributes: ['id', 'UserId', 'TweetId'],
           include: [
             {
               model: Tweet,
-              include: {
-                model: User,
-                as: 'TweetUser',
-                attributes: ['id', 'name', 'account', 'avatar']
-              }
+              include: [
+                {
+                  model: User,
+                  as: 'TweetUser',
+                  attributes: ['id', 'name', 'account', 'avatar']
+                }
+              ]
             }
           ],
           raw: true,
