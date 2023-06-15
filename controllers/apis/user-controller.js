@@ -169,11 +169,26 @@ const userController = {
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
   getUserFollowers: (req, res) => {
-    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }] })
+    User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followers', }],
+    })
       .then(user => {
         if (!user) throw new Error(`User didn't exist`)
-        const followers = user.Followers.map(follower => ({ followerId: follower.id }));
-        return res.status(200).json(followers);
+        const followers = user.Followers.map(follower => {
+          const followerJson = follower.toJSON()
+          delete followerJson.password
+          return {
+            name: follower.name,
+            account: follower.account,
+            avatar: follower.avatar,
+            introduction: follower.introduction,
+            followerId: follower.Followship.followerId,
+            followingId: follower.Followship.followingId,
+            createdAt: follower.Followship.createdAt,
+          }
+        })
+        followers.sort((a, b) => b.createdAt - a.createdAt)
+        return res.status(200).json(followers)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
