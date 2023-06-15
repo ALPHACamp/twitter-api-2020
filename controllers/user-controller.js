@@ -1,3 +1,4 @@
+const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const imgur = require('imgur')
@@ -140,25 +141,38 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
-      const userId = req.params.userId
-      const tweets = await Tweet.findAll({
-        where: { UserId: userId },
+      const ThisUserId = req.params.userId
+      let tweets = await Tweet.findAll({
+        where: { userId: ThisUserId },
         include: [
-          { model: User },
+          { model: User, attributes: { exclude: ['password'] } },
           { model: Reply },
-          { model: Like }
+          { model: Like },
+          {
+            model: Like,
+            attributes: [],
+          },
+        ],
+        attributes: [
+          'id',
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${ThisUserId} AND Likes.deletedAt IS NULL) > 0`
+            ),
+            'isLiked'
+          ],
         ],
         order: [['createdAt', 'DESC']],
-        nest: true
-      });
+      })
       const tweetsData = tweets.map(tweet => ({
         ...tweet.toJSON(),
-      }));
-      res.status(200).json(tweetsData);
+        isLiked: Boolean(tweet.dataValues.isLiked)
+      }))
+      res.json(tweetsData)
     } catch (err) {
-      next(err);
+      next(err)
     }
-  },
+},
   getUserReplies: async (req, res, next) => {
     try {
       const userId = req.params.userId
@@ -188,11 +202,22 @@ const userController = {
           { model: Tweet }
         ],
         order: [['createdAt', 'DESC']],
-        nest: true
+        nest: true,
+        attributes: [
+          'id',
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${userId} AND Likes.deletedAt IS NULL) > 0`
+            ),
+            'isLiked'
+          ],
+        ],
       })
-
-      const userLikesData = likes.map(like => like.toJSON())
-      res.status(200).json(userLikesData)
+      const userLikesData = likes.map(like => ({
+        ...like.toJSON(),
+        isLiked: Boolean(like.dataValues.isLiked)
+      }))
+      res.json(userLikesData)
     } catch (err) {
       next(err)
     }
