@@ -1,7 +1,6 @@
 const helpers = require('../_helpers')
 const { User, Tweet, Like } = require('../models')
 const jwt = require('jsonwebtoken')
-const { Sequelize } = require('sequelize')
 
 const adminController = {
   signIn: async (req, res, next) => {
