@@ -96,18 +96,7 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
 
-      const RepliesJSON = userReplies.map(r => {
-        const replyJson = r.toJSON()
-        const tweet = replyJson.Tweet // 推文者（Tweet 的 user）
-
-        return {
-          ...replyJson,
-          Tweet: {
-            ...tweet
-          }
-        }
-      })
-      return res.status(200).json(RepliesJSON)
+      return res.status(200).json(userReplies)
     } catch (err) {
       next(err)
     }
