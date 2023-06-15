@@ -81,15 +81,38 @@ const userController = {
       const userReplies = await Reply.findAll({
         where: { UserId: userId },
         include: [
-          { model: Tweet }
+          {
+            model: Tweet,
+            include: {
+              model: User,
+              attributes: ['account']
+            }
+          },
+          {
+            model: User,
+            attributes: ['avatar']
+          }
         ],
         order: [['createdAt', 'DESC']]
       })
-      const RepliesJSON = userReplies.map(r => r.toJSON())
-      if (RepliesJSON.length === 0) throw new Error('此用戶沒有回覆任何貼文')
+
+      const RepliesJSON = userReplies.map(r => {
+        const replyJson = r.toJSON()
+        const tweet = replyJson.Tweet // 推文者（Tweet 的 user）
+
+        return {
+          ...replyJson,
+          Tweet: {
+            ...tweet
+          }
+        }
+      })
       return res.status(200).json(RepliesJSON)
-    } catch (err) { next(err) }
+    } catch (err) {
+      next(err)
+    }
   },
+
   getLikedTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
