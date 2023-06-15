@@ -96,13 +96,11 @@ const userController = {
       const likesTweets = await Like.findAll({
         where: { UserId: userId },
         include: [
-          { model: Tweet }
+          { model: Tweet, include: { model: User, attributes: ['name', 'account', 'avatar'] } }
         ],
         order: [['createdAt', 'DESC']]
       })
-      const likesJSON = likesTweets.map(l => l.toJSON())
-      if (likesJSON.length === 0) throw new Error('此用戶沒有對任何貼文按讚')
-      return res.status(200).json(likesJSON)
+      return res.status(200).json(likesTweets)
     } catch (err) { next(err) }
   },
   getFollowings: async (req, res, next) => {

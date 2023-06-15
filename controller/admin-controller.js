@@ -1,6 +1,7 @@
 const helpers = require('../_helpers')
-const { User, Tweet, Sequelize } = require('../models')
+const { User, Tweet, Like } = require('../models')
 const jwt = require('jsonwebtoken')
+const { Sequelize } = require('sequelize')
 
 const adminController = {
   signIn: async (req, res, next) => {
@@ -13,8 +14,29 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      const users = await User.findAll({ attributes: { exclude: ['password'] } })
-      return res.status(200).json(users)
+      const users = await User.findAll({
+        attributes: { exclude: ['password'] },
+        where: { role: { [Sequelize.Op.ne]: 'admin' } },
+        include: [
+          { model: Tweet, attributes: ['id'], include: { model: Like, attributes: ['id'] } },
+          { model: User, as: 'Followings', attributes: ['id'] },
+          { model: User, as: 'Followers', attributes: ['id'] }
+        ]
+      })
+      const result = users.map(u => ({
+        ...u.toJSON(),
+        TweetsCount: u.Tweets.length,
+        FollowingsCount: u.Followings.length,
+        FollowersCount: u.Followers.length,
+        TweetsLikedCount: u.Tweets.reduce((acc, tweet) => acc + tweet.Likes.length, 0)
+      }))
+      result.forEach(r => {
+        delete r.Tweets
+        delete r.Followings
+        delete r.Followers
+      })
+      result.sort((a, b) => b.TweetsCount - a.TweetsCount)
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   },
   deleteTweet: async (req, res, next) => {
