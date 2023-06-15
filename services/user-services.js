@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Followship, Like } = require('../models')
-const { imgurFileHandler, localFileHandler } = require('../_helpers')
+const { imgurFileHandler } = require('../_helpers')
 
 const userController = {
   signIn: (req, cb) => {
@@ -133,8 +133,8 @@ const userController = {
       .then(data => {
         if (!data) throw new Error("User's following didn't exist!")
         const followings = data.map(user => user.Followings)
-        followings.map(following => { 
-          following.followingId = following.id 
+        followings.map(following => {
+          following.followingId = following.id
           delete following.id
 
         })
@@ -178,24 +178,18 @@ const userController = {
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
-    const fileHandler = process.env.NODE_ENV !== 'production' ? localFileHandler : imgurFileHandler
-    const { name, email, introduction, password } = req.body
-    if (!name) throw new Error('User name is required!')
-    console.log(req)
-
+    if (!req.body.name) throw new Error('User name is required!')
     const { file } = req
-    console.log(file)
     return Promise.all([
       User.findByPk(req.params.user_id),
-      fileHandler(file),
-      bcrypt.hash(password, 10)])
-      .then(([user, filePath, hash]) => {
+      imgurFileHandler(file)])
+      .then(([user, filePath]) => {
         if (!user) throw new Error("User didn't exist!")
         return user.update({
-          password: hash,
-          name,
-          email,
-          introduction,
+          account: req.body.account || user.account,
+          name: req.body.name || user.name,
+          email: req.body.email || user.email,
+          introduction: req.body.introduction || user.introduction,
           avatar: filePath || user.avatar
         })
       })

@@ -9,11 +9,11 @@ const getUser = req => {
 
 const localFileHandler = (file) => {
   return new Promise((resolve, reject) => {
-    if (file === undefined) return resolve(null)
-    const fileName = `upload/${file[0].originalname}`
+    if (!file) return resolve(null)
+    const fileName = `upload/${file.originalname}`
     return fs.promises
-      .readFile(file[0].path)
-      .then((data) => fs.promises.writeFile(fileName, data))
+      .readFile(file.path)
+      .then(data => fs.promises.writeFile(fileName, data))
       .then(() => resolve(`/${fileName}`))
       .catch((err) => reject(err))
   })
