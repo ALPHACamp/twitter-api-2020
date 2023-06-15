@@ -5,14 +5,15 @@ module.exports = (sequelize, DataTypes) => {
     static associate (models) {
     }
   };
-  Followship.init({
-    followerId: DataTypes.INTEGER,
-    followingId: DataTypes.INTEGER
-  },
-  {
-    sequelize,
-    modelName: 'Followship',
-    tableName: 'Followships'
-  })
+  Followship.init(
+    {
+      followerId: DataTypes.INTEGER,
+      followingId: DataTypes.INTEGER
+    },
+    {
+      sequelize,
+      modelName: 'Followship',
+      tableName: 'Followships'
+    })
   return Followship
 }
