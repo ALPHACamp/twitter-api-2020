@@ -106,7 +106,7 @@ const userController = {
           coverPhoto: coverPhotoPath
         }
       }
-      if (req.query) {
+      if (Object.keys(req.query).length !== 0) {
         const { avatar, coverPhoto } = req.query
         let avatarPath, coverPhotoPath
         if (avatar) avatarPath = null
