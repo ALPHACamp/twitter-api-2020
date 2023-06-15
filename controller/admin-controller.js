@@ -16,7 +16,6 @@ const adminController = {
     try {
       const users = await User.findAll({
         attributes: { exclude: ['password'] },
-        where: { role: { [Sequelize.Op.ne]: 'admin' } },
         include: [
           { model: Tweet, attributes: ['id'], include: { model: Like, attributes: ['id'] } },
           { model: User, as: 'Followings', attributes: ['id'] },
