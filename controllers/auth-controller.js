@@ -1,14 +1,14 @@
 const authController = {
   checkUserToken: async (req, res, next) => {
     try {
-      return res.status(200).json({ stauts: 'success', message: "It's a User" })
+      return res.status(200).json({ status: 'success', message: "It's a User" })
     } catch (err) {
       next(err)
     }
   },
   checkAdminToken: async (req, res, next) => {
     try {
-      return res.status(200).json({ stauts: 'success', message: "It's an admin" })
+      return res.status(200).json({ status: 'success', message: "It's an admin" })
     } catch (err) {
       next(err)
     }
