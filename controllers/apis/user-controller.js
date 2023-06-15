@@ -107,9 +107,9 @@ const userController = {
   getUserReplies: (req, res) => {
     User.findByPk(req.params.id, {
       include: [{
-        model: Reply,
+        model: Reply, include: { model: Tweet, attributes: ['id'], include: { model: User, attributes: ['account'] } }
       }],
-      order: [[Reply, 'createdAT', 'DESC']]
+      order: [[Reply, 'createdAt', 'DESC']]
     })
       .then(user => {
         if (!user) throw new Error(`User didn't exist`)
@@ -119,7 +119,7 @@ const userController = {
             ...replyJSON,
             name: user.name,
             account: user.account,
-            avatar: user.avatar
+            avatar: user.avatar,
           }
         })
         return res.status(200).json(repliesData)
@@ -157,7 +157,9 @@ const userController = {
     User.findByPk(req.params.id, { include: [{ model: User, as: 'Followings' }] })
       .then(user => {
         if (!user) throw new Error(`User didn't exist`)
-        const followings = user.Followings.map(following => ({ followingId: following.id }));
+        const followings = user.Followings.map(following => ({
+          followingId: following.id
+        }));
         return res.status(200).json(followings);
       })
       .catch(err => res.status(500).json({ status: 'error', error: err }))
