@@ -12,14 +12,14 @@ const passport = require('passport')
 const router = require('./routes')
 const app = express()
 const port = process.env.PORT || 3000
-const corsOptions = {
-  origin: [
-    '*'
-  ],
-  method: 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS',
-  allowedHeaders: ['Content-Type', 'Authorization']
-}
-app.use(cors(corsOptions))
+// const corsOptions = {
+//   origin: [
+//     '*'
+//   ],
+//   method: 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS',
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }    corsOptions
+app.use('*', cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
