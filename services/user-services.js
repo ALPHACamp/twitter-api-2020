@@ -21,12 +21,12 @@ const userController = {
       .catch(err => cb(err))
   },
   signUp: (req, cb) => {
-    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
     Promise.all([
       User.findOne({ where: { email: req.body.email } }),
       User.findOne({ where: { account: req.body.account } })
     ])
       .then(([userByEmail, userByAccount]) => {
+        if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
         if (userByEmail || userByAccount) throw new Error('Email or Account already exists!')
         return bcrypt.hash(req.body.password, 10)
       })
