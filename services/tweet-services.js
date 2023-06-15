@@ -67,19 +67,19 @@ const tweetServices = {
         })])
             .then(([tweet, likes, replies]) => {
             if (!tweet) throw new Error('推文不存在！')
-            return Like.findOne({
+            const like = Like.findOne({
                 where: {
                     UserId: helpers.getUser(req).id,
                     TweetId: id
                 }
             })
-                .then((like) => {
+            const date = tweet.dataValue  
                 cb(null, {...tweet,
                     likeCount: likes,
                     replyCount: replies,
-                    createdAt: switchTime(tweet.createdAt),
+                    createdAt: switchTime(date),
+                    countDown: relativeTimeFromNow(date),
                     isLiked: !! like
-                })
             })
         })
             .

@@ -239,7 +239,7 @@ const userServices = {
             repliedTweets = repliedTweets.map(repliedTweet => ({
                 ...repliedTweet.dataValues,
                 createdAt: relativeTimeFromNow(repliedTweet.dataValues.createdAt),
-                shortDescription: repliedTweet.dataValues.Tweet.description.length > 100 ? repliedTweet.dataValues.Tweet.description.substring(0, 100) + '...' : repliedTweet.dataValues.Tweet.description,
+                comment: repliedTweet.dataValues.comment.length > 100 ? repliedTweet.dataValues.comment.substring(0, 100) + '...' : repliedTweet.dataValues.comment,
                 isLiked: userLikedTweetsId.length ? userLikedTweetsId.includes(repliedTweet.Tweet.id) : false,
                 replyCount: repliedTweet.Tweet.Replies.length,
                 likeCount: repliedTweet.Tweet.Likes.length
