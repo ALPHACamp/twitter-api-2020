@@ -6,7 +6,6 @@ const { imgurFileHandler } = require('../_helpers')
 const userController = {
   signIn: (req, cb) => {
     const { account, password } = req.body
-    if (!account || !password) throw new Error('帳號或密碼必填')
     return User.findOne({
       where: { account }
     })
@@ -178,12 +177,12 @@ const userController = {
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
-    if (!req.body.name) throw new Error('User name is required!')
     const { file } = req
     return Promise.all([
       User.findByPk(req.params.user_id),
       imgurFileHandler(file)])
       .then(([user, filePath]) => {
+        if (!req.body.name) throw new Error('User name is required!')
         if (!user) throw new Error("User didn't exist!")
         return user.update({
           account: req.body.account || user.account,
