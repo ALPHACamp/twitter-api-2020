@@ -4,9 +4,15 @@ const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: (req, res, next) => {
+    const ThisUserId = helpers.getUser(req).id
     return Tweet.findAll({
       include: [
-        { model: User, attributes: { exclude: ['password'] } }
+        { model: User, attributes: { exclude: ['password'] } },
+        {
+          model: Like,
+          attributes: [],
+          // where: { UserId: ThisUserId }
+        }
       ],
       attributes: [
         'id',
@@ -26,20 +32,22 @@ const tweetController = {
           ),
           'replyCount'
         ],
+        [
+          sequelize.literal(
+            `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${ThisUserId} AND Likes.deletedAt IS NULL) > 0`
+          ),
+          'isLiked'
+        ],
       ]
     })
       .then(tweets => {
-        const ThisUserId = helpers.getUser(req).id;
         const tweetsData = tweets.map(tweet => {
-          const tweetJSON = tweet.toJSON();
-          const tweetLikes = tweet.get('Likes') || []
-          
           return {
-            ...tweetJSON,
-            isLiked: tweetLikes.some(like => like.userId === ThisUserId)
-          };
+            ...tweet.toJSON(),
+            isLiked: Boolean(tweet.dataValues.isLiked)
+          }
         })
-        res.json(tweetsData);
+        res.json(tweetsData)
       })
       .catch(err => next(err))
   },
