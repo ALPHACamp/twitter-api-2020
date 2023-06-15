@@ -19,6 +19,19 @@ const userController = {
       next(err)
     }
   },
+  // 驗證token並抓取當前帳號資料
+  getIsSelfUser: (req, res, next) => {
+    try {
+      const selfUserData = helpers.getUser(req)
+      const selfUserDataJson = selfUserData.toJSON()
+      delete selfUserDataJson.password
+      delete selfUserDataJson.Followings
+      delete selfUserDataJson.Followers
+      return res.json(selfUserDataJson)
+    } catch (err) {
+      next(err)
+    }
+  },
   // 使用者註冊
   signup: async (req, res, next) => {
     try {

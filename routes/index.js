@@ -18,6 +18,8 @@ router.post('/adminSignin', passport.authenticate('local', { session: false }), 
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 // token 驗證
 router.get('/tokenCheck', authenticated, userController.getTokenCheck)
+// 驗證token並抓取當前帳號資料
+router.get('/isSelfUser', authenticated, userController.getIsSelfUser)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/users', authenticated, users)
