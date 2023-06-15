@@ -337,16 +337,12 @@ const userController = {
   },
   putUserSetting: async (req, res, next) => {
     try {
-      const { account, name, email, introduction, password, checkPassword } = req.body
+      const { account, name, email, password, checkPassword } = req.body
       let { id } = req.params
       id = Number(id)
 
-      // introduction與name的字數限制
-      if (introduction.length > 160) {
-        const error = new Error('Your self-introduction is a little too long for me to handle! Please less than 160.')
-        error.status = 400
-        throw error
-      }
+      // name的字數限制
+
       if (name.length > 50) {
         const error = new Error('Your self-introduction is a little too long for me to handle! ! Please less than 50.')
         error.status = 400
@@ -388,8 +384,7 @@ const userController = {
         account: account || user.account,
         name: name || user.name,
         email: email || user.email,
-        password: password ? bcrypt.hashSync(password) : user.password,
-        introduction: introduction || user.introduction
+        password: password ? bcrypt.hashSync(password) : user.password
       })
 
       return res.status(200).json(updatedUser)
@@ -409,7 +404,7 @@ const userController = {
         ),
         User.findAll({
           where: { role: 'user' },
-          attributes: ['id', 'name', 'account'],
+          attributes: ['id', 'name', 'account', 'avatar'],
           include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account'] }]
         })
       ])
