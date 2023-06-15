@@ -1,3 +1,4 @@
+const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const imgur = require('imgur')
@@ -67,7 +68,48 @@ const userController = {
         ...user.toJSON()
       }
       res.status(200).json(userData)
-      // res.json({ status: 'success', user: user.toJSON(userData) })
+    } catch (err) {
+      next(err);
+    }
+  },
+  getUserDataByAccount: async (req, res, next) => {
+    try {
+      const user = await User.findOne({ 
+        where: { account: req.params.account },
+        attributes: [
+          'id',
+          'email',
+          'name',
+          'avatar',
+          'introduction',
+          'account',
+          'banner',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'
+            ),
+            'tweetCount'
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)`
+            ),
+            'FollowingsCount'
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`
+            ),
+            'FollowersCount'
+          ],
+        ],
+      });
+      if (!user) throw new Error('This user does not exist')
+
+      const userData = {
+        ...user.toJSON()
+      }
+      res.status(200).json(userData)
     } catch (err) {
       next(err);
     }
