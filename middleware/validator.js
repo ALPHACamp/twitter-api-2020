@@ -2,18 +2,18 @@ const { body, validationResult } = require('express-validator')
 const signUpValidator = [
   body('account')
     .trim()
-    .notEmpty().withMessage('帳號為必填項目')
+    .notEmpty().withMessage('帳號不能為空白')
     .bail()
     .isLength({ max: 20 }).withMessage('帳號最多20個字'),
   body('email')
     .trim()
-    .notEmpty().withMessage('信箱為必填項目')
+    .notEmpty().withMessage('信箱不能為空白')
     .bail()
     .isEmail().withMessage('必須是合法email')
     .isLength({ max: 32 }).withMessage('信箱最多32個字'),
   body('name')
     .trim()
-    .notEmpty().withMessage('姓名為必填項目')
+    .notEmpty().withMessage('姓名不能為空白')
     .bail() // 第一個條件不通過 不繼續檢查
     .isLength({ max: 50 }).withMessage('姓名最多50個字'),
   body('password').trim().isLength({ min: 4, max: 32 }).withMessage('密碼長度至少4位'),
