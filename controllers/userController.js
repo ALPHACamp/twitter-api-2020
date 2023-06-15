@@ -21,7 +21,7 @@ const userController = {
           status: 'error',
           message: [{
             path: 'account',
-            msg: 'account已重複註冊!'
+            msg: 'account 已重複註冊！'
           }]
         })
       }
@@ -31,7 +31,7 @@ const userController = {
           message: [
             {
               path: 'account',
-              msg: 'email已重複註冊!'
+              msg: 'email 已重複註冊！'
             }]
         })
       }
@@ -328,8 +328,8 @@ const userController = {
         nest: true
       })
 
-      if (foundUser?.account === req.body.account) return res.status(400).json({ status: 'error', message: [{ path: 'account', msg: 'account已重複註冊' }] })
-      if (foundUser?.email === req.body.email) return res.status(400).json({ status: 'error', message: [{ path: 'email', msg: 'email已重複註冊' }] })
+      if (foundUser?.account === req.body.account) return res.status(400).json({ status: 'error', message: [{ path: 'account', msg: 'account 已重複註冊！' }] })
+      if (foundUser?.email === req.body.email) return res.status(400).json({ status: 'error', message: [{ path: 'email', msg: 'email 已重複註冊！' }] })
 
       const hash = await bcrypt.hash(req.body.password, 10)
 
