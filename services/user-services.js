@@ -130,7 +130,7 @@ const userController = {
       raw: true
     })
       .then(data => {
-        if (!data) throw new Error("User's following didn't exist!")
+        if (!data.length) throw new Error("User's following didn't exist!")
         const followings = data.map(user => user.Followings)
         followings.map(following => {
           following.followingId = following.id
@@ -154,7 +154,7 @@ const userController = {
       raw: true
     })
       .then(data => {
-        if (!data) throw new Error("User's followers didn't exist!")
+        if (!data.length) throw new Error("User's followers didn't exist!")
         const followers = data.map(user => user.Followers)
         followers.map(follower => {
           follower.followerId = follower.id
