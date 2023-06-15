@@ -48,7 +48,7 @@ const tweetServices = {
         return Promise.all([
         Tweet.findByPk(id, {
             include: [
-            User, ],
+            User ],
             nest: true,
             raw: true
         }),
@@ -66,19 +66,18 @@ const tweetServices = {
             ]
         })])
             .then(([tweet, likes, replies]) => {
-            if (!tweet) throw new Error('推文不存在！')
+                if (!tweet) throw new Error('推文不存在！')
             const like = Like.findOne({
                 where: {
                     UserId: helpers.getUser(req).id,
                     TweetId: id
                 }
             })
-            const date = tweet.dataValue  
                 cb(null, {...tweet,
                     likeCount: likes,
                     replyCount: replies,
-                    createdAt: switchTime(date),
-                    countDown: relativeTimeFromNow(date),
+                    createdAt: switchTime(tweet.createdAt),
+                    countDown: relativeTimeFromNow(tweet.createdAt),
                     isLiked: !! like
             })
         })
