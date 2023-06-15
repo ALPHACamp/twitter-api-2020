@@ -91,15 +91,14 @@ const followController = {
       })
       const data = followers[0].Followers.map(follower => {
         const introduction = follower.introduction?.substring(0, 50)
-        const isfollower = followingsId.includes(follower.id)
+        const isFollowing = followingsId.includes(follower.id)
         return {
           followerId: follower.id,
           name: follower.name,
           account: follower.account,
           avatar: follower.avatar,
           introduction,
-          isfollower
-          // 每個followerid跟我的正在追蹤的follwingid比對
+          isFollowing
         }
       })
       return res.status(200).json(data)
@@ -114,7 +113,6 @@ const followController = {
     }
     const user = await User.findByPk(followerId)
     if (!user) return res.status(400).json('用戶不存在')
-    // error "SequelizeEagerLoadingError: User is not associated to Followship!"
     try {
       const followings = await User.findAll({
         where: { id: followerId },
