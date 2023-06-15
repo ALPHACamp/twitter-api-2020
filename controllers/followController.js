@@ -72,12 +72,33 @@ const followController = {
         ],
         order: [['createdAt', 'DESC']]
       })
+      const followings = await User.findAll({
+        where: { id: followingId },
+        attributes: [],
+        include: [
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id'],
+            through: { attributes: [] }
+          }
+        ],
+        raw: true,
+        nest: true
+      })
+      const followingsId = followings.map(following => {
+        return following.Followings.id
+      })
       const data = followers[0].Followers.map(follower => {
         const introduction = follower.introduction?.substring(0, 50)
+        const isfollower = followingsId.includes(follower.id)
         return {
-          ...follower.get(),
+          followerId: follower.id,
+          name: follower.name,
+          account: follower.account,
+          avatar: follower.avatar,
           introduction,
-          followerId: follower.id
+          isfollower
           // 每個followerid跟我的正在追蹤的follwingid比對
         }
       })
@@ -111,9 +132,11 @@ const followController = {
       const data = followings[0].Followings.map(following => {
         const introduction = following.introduction?.substring(0, 50)
         return {
-          ...following.get(),
-          introduction,
-          followingId: following.id
+          followingId: following.id,
+          name: following.name,
+          account: following.account,
+          avatar: following.avatar,
+          introduction
         }
       })
       return res.status(200).json(data)
