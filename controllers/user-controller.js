@@ -24,6 +24,8 @@ const userController = {
     try {
       const selfUserData = helpers.getUser(req)
       const selfUserDataJson = selfUserData.toJSON()
+      selfUserDataJson.followersCount = selfUserDataJson.Followers.length
+      selfUserDataJson.followingsCount = selfUserDataJson.Followings.length
       delete selfUserDataJson.password
       delete selfUserDataJson.Followings
       delete selfUserDataJson.Followers
