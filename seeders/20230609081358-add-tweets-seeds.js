@@ -11,20 +11,24 @@ module.exports = {
         type: queryInterface.sequelize.QueryTypes.SELECT
       }
     )
-    const tweets = [] 
+    const tweets = []
+    const maxLength = 140
     for (let i = 0; i < users.length; i++) {
       const user = users[i];
-
       for (let j = 0; j < 10; j++) {
+        let randomText = faker.lorem.text(140)
+        if (randomText.length > maxLength) {
+          randomText = randomText.substring(0, maxLength)
+        }
         tweets.push({
           UserId: user.id,
-          description: faker.lorem.text(140), //ac: 推文限制在140字以內
+          description: randomText, //ac: 推文限制在140字以內
           createdAt: new Date(),
           updatedAt: new Date()
         });
       }
     }
-    await queryInterface.bulkInsert('Tweets',tweets)
+    await queryInterface.bulkInsert('Tweets', tweets)
   },
 
   down: async (queryInterface, Sequelize) => {
