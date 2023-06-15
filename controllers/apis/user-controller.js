@@ -80,25 +80,76 @@ const userController = {
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
   getUserTweets: (req, res) => {
-    User.findByPk(req.params.id, { include: [{ model: Tweet }] })
+    User.findByPk(req.params.id, {
+      include: [{
+        model: Tweet,
+        include: [Reply, Like],
+        order: [['createAt', 'DESC']]
+      }],
+    })
       .then(user => {
         if (!user) throw new Error(`User didn't exist`)
-        return res.status(200).json(user.Tweets)
+        const tweetsData = user.Tweets.map(tweet => ({
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          name: user.name,
+          account: user.account,
+          avatar: user.avatar,
+          createdAt: user.createdAt,
+          replyCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length
+        }))
+        return res.status(200).json(tweetsData)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
   getUserReplies: (req, res) => {
-    User.findByPk(req.params.id, { include: [{ model: Reply }] })
+    User.findByPk(req.params.id, {
+      include: [{
+        model: Reply,
+      }],
+      order: [[Reply, 'createdAT', 'DESC']]
+    })
       .then(user => {
         if (!user) throw new Error(`User didn't exist`)
-        return res.status(200).json(user.Replies)
+        const repliesData = user.Replies.map(reply => {
+          const replyJSON = reply.toJSON()
+          return {
+            ...replyJSON,
+            name: user.name,
+            account: user.account,
+            avatar: user.avatar
+          }
+        })
+        return res.status(200).json(repliesData)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
   getUserLikes: (req, res) => {
-    User.findByPk(req.params.id, { include: [{ model: Like }] })
+    User.findByPk(req.params.id, {
+      include: [
+        {
+          model: Like,
+          include: [{ model: Tweet, include: [User] }]
+        }],
+      order: [[Like, 'createdAt', 'DESC']]
+    })
       .then(user => {
-        return res.status(200).json(user.Likes)
+        if (!user) throw new Error(`User didn't exist`)
+        const likesData = user.Likes.map(like => {
+          const likeJson = like.toJSON()
+          return {
+            UserId: likeJson.UserId,
+            TweetId: likeJson.TweetId,
+            createdAt: likeJson.createdAt,
+            description: likeJson.Tweet.description,
+            name: likeJson.Tweet.User.name,
+            account: likeJson.Tweet.User.account,
+            avatar: likeJson.Tweet.User.avatar
+          }
+        })
+        return res.status(200).json(likesData)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
