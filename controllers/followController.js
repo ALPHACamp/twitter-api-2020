@@ -7,10 +7,10 @@ const followController = {
     if (!followingId) {
       return res
         .status(400)
-        .json('缺少追蹤的用戶id')
+        .json('Following id is necessary')
     }
-    if (followerId === followingId) {
-      return res.status(400).json('無法追蹤自己')
+    if (Number(followerId) === Number(followingId)) {
+      return res.status(400).json('Can not follow yourself')
     }
     Followship.findOne({
       where: {
@@ -20,7 +20,7 @@ const followController = {
     })
       .then((followship) => {
         if (followship) {
-          return res.status(400).json('已經追蹤過')
+          return res.status(400).json('Already followed')
         }
         return Followship.create({
           followerId,
@@ -34,7 +34,7 @@ const followController = {
     const followerId = req.user.id || getUser(req).dataValues.id
     const followingId = req.params.id
     if (!followingId) {
-      return res.status(400).json('缺少追蹤的用戶id')
+      return res.status(400).json('Following id is necessary')
     }
 
     return Followship.findOne({
@@ -44,7 +44,7 @@ const followController = {
       }
     })
       .then((followship) => {
-        if (!followship) { return res.status(401).json('未追蹤過') }
+        if (!followship) { return res.status(401).json('Not followed yet') }
         return followship.destroy()
       })
       .then(() => res.status(200).json('unfollow success'))
@@ -53,10 +53,10 @@ const followController = {
   getFollowers: async (req, res, next) => {
     const followingId = req.params.id
     if (!followingId) {
-      return res.status(400).json('缺少追蹤的用戶id')
+      return res.status(400).json('User id is necessary')
     }
     const user = await User.findByPk(followingId)
-    if (!user) return res.status(400).json('用戶不存在')
+    if (!user) return res.status(400).json('User do not exists')
 
     try {
       const followers = await User.findAll({
@@ -70,7 +70,10 @@ const followController = {
             through: { attributes: [] }
           }
         ],
-        order: [['createdAt', 'DESC']]
+        order: [
+          ['createdAt', 'DESC'],
+          ['id', 'DESC']
+        ]
       })
       const followings = await User.findAll({
         where: { id: followingId },
@@ -109,10 +112,10 @@ const followController = {
   getFollowings: async (req, res, next) => {
     const followerId = req.params.id
     if (!followerId) {
-      return res.status(400).json('缺少追蹤的用戶id')
+      return res.status(400).json('Follower id is necessary')
     }
     const user = await User.findByPk(followerId)
-    if (!user) return res.status(400).json('用戶不存在')
+    if (!user) return res.status(400).json('User not exists')
     try {
       const followings = await User.findAll({
         where: { id: followerId },
@@ -125,7 +128,9 @@ const followController = {
             through: { attributes: [] }
           }
         ],
-        order: [['createdAt', 'DESC']]
+        order: [
+          ['createdAt', 'DESC'],
+          ['id', 'DESC']]
       })
       const data = followings[0].Followings.map(following => {
         const introduction = following.introduction?.substring(0, 50)
@@ -144,11 +149,11 @@ const followController = {
   },
   getFollowCounts: (req, res, next) => {
     const userId = req.params.id
-    if (!userId) return res.status(400).json('缺少用戶id')
+    if (!userId) return res.status(400).json('User id is necessary')
     User.findByPk(userId)
       .then((user) => {
         if (!user) {
-          return res.status(404).json('用戶不存在')
+          return res.status(404).json('User do not exists')
         }
         return Promise.all([
           Followship.count({ where: { followerId: userId } }),
@@ -167,12 +172,12 @@ const followController = {
   addLike: (req, res, next) => {
     const UserId = req.user.id || getUser(req).dataValues.id
     const TweetId = req.params.id
-    if (!TweetId) return res.status(400).json('缺少推文id')
+    if (!TweetId) return res.status(400).json('Tweet id is necessary')
     // 檢查是否有推文
     return Tweet.findByPk(TweetId)
       .then((tweet) => {
         if (!tweet) {
-          return res.status(400).json('推文不存在')
+          return res.status(400).json('Tweet id not exists')
         }
       })
       .then(() => {
@@ -185,7 +190,7 @@ const followController = {
         })
       })
       .then(like => {
-        if (like) return res.status(400).json('已按過讚')
+        if (like) return res.status(400).json('Already liked')
         return Like.create({
           UserId,
           TweetId
@@ -205,8 +210,8 @@ const followController = {
       }
     })
       .then((like) => {
-        if (!like) return res.status(400).json('未按過讚')
-        if (like.toJSON().UserId !== UserId) return res.status(400).json('非本人按讚')
+        if (!like) return res.status(400).json('Not liked yet')
+        if (like.toJSON().UserId !== UserId) return res.status(400).json('Your not like by yourself')
         return like.destroy()
       })
       .then(() => res.status(200).json('Unlike success'))
@@ -215,7 +220,7 @@ const followController = {
   getLikes: (req, res, next) => {
     const UserId = req.params.id
     if (!UserId) {
-      return res.status(400).json('缺少用戶id')
+      return res.status(400).json('User id is necessary')
     }
     // 這個api除了給likecounts外也要給出like的關係，所以不能只回likecounts否則測試會失敗
     Like.findAll({
@@ -225,7 +230,7 @@ const followController = {
       nest: true
     })
       .then((user) => {
-        if (!user) return res.status(400).json('找不到')
+        if (!user) return res.status(400).json('User not found')
         const likeCounts = user.length
         user.push({ likeCounts })
         return res.status(200).json(user)

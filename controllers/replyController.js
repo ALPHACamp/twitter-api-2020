@@ -38,7 +38,7 @@ const replyController = {
   postReply: (req, res, next) => {
     const TweetId = req.params.id
     const { comment } = req.body
-    if (!comment) return res.status(400).json('留言不得空白')
+    if (!comment) return res.status(400).json('Comment should not be empty')
     if (comment.length > 140) {
       return res.status(400).json('Comment should not be more than 140 characters')
     }
@@ -54,8 +54,8 @@ const replyController = {
   putReply: (req, res, next) => {
     const { id } = req.params
     const { comment } = req.body
-    if (!id) return res.status(400).json('reply_id 不能為空白')
-    if (!comment) return res.status(400).json('Comment 不能為空白')
+    if (!id) return res.status(400).json('Reply id is necessary')
+    if (!comment) return res.status(400).json('Comment can not be empty')
     if (comment.length > 140) {
       return res.status(400).json('Comment should not be more than 140 characters')
     }
@@ -73,7 +73,7 @@ const replyController = {
   },
   deleteReply: (req, res, next) => {
     const { id } = req.params
-    if (!id) return res.status(400).json('reply_id 不能為空白')
+    if (!id) return res.status(400).json('Reply id is necessary')
 
     return Reply.findOne({ where: { id } })
       .then((reply) => {
