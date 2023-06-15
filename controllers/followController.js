@@ -52,6 +52,7 @@ const followController = {
   },
   getFollowers: async (req, res, next) => {
     const followingId = req.params.id
+    // const userId = Number(req.user.id) || Number(getUser(req).dataValues?.id)
     if (!followingId) {
       return res.status(400).json('缺少追蹤的用戶id')
     }
@@ -77,6 +78,7 @@ const followController = {
           ...follower.get(),
           introduction,
           followerId: follower.Followship.followerId
+          // 每個followerid跟我的正在追蹤的follwingid比對
         }
       })
       return res.status(200).json(data)

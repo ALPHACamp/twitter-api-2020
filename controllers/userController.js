@@ -96,16 +96,21 @@ const userController = {
         return res.status(403).json('Can not change others data')
       }
       let fileData = null
-      if (req.query) fileData = req.query
-      // console.log(fileData)
-      // console.log(req.files)
       if (req.files) {
-        const { avatar, coverPhoto } = req.files
+        const { avatar, cover } = req.files
         let avatarPath, coverPhotoPath
-        if (req.query.avatar) avatarPath = null
-        if (req.query.cover) coverPhotoPath = null
         if (avatar) avatarPath = await imgurFileHandler(avatar[0])
-        if (coverPhoto) coverPhotoPath = await imgurFileHandler(coverPhoto[0])
+        if (cover) coverPhotoPath = await imgurFileHandler(cover[0])
+        fileData = {
+          avatar: avatarPath,
+          coverPhoto: coverPhotoPath
+        }
+      }
+      if (req.query) {
+        const { avatar, cover } = req.query
+        let avatarPath, coverPhotoPath
+        if (avatar) avatarPath = null
+        if (cover) coverPhotoPath = null
         fileData = {
           avatar: avatarPath,
           coverPhoto: coverPhotoPath

@@ -46,7 +46,7 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id',
   upload.fields([
     { name: 'avatar', maxCount: 1 },
-    { name: 'coverPhoto', maxCount: 1 }
+    { name: 'cover', maxCount: 1 }
   ]), authenticated, userController.putUser)
 router.delete('/users/:id', authenticated, userController.deleteUser)
 
