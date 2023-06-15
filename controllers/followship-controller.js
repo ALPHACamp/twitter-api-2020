@@ -58,7 +58,7 @@ const followshipController = {
   getTopUser: (req, res, next) => {
     return User.findAll({
       include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
-      attributes: { exclude: ['password'] }
+      attributes: { exclude: ['password'] },
     })
       .then(users => {
         const result = users
@@ -68,6 +68,7 @@ const followshipController = {
             isFollowed: req.user.Followings.some(f => f.id === user.id)
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
+          .slice(0, 10) //只留top 10
         return res.json({ users: result })
       })
       .catch(err => next(err))
