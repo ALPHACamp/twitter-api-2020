@@ -6,15 +6,13 @@ const tweetController = {
       const reqUserId = helpers.getUser(req).id
       const { description } = req.body
       // 檢查推文內容是否為空白或超過字數限制
-      if (!description || description.length > 140) {
-        return res.status(400).json({ status: 'error', message: 'Invalid tweet description' })
-      }
+      if (!description || description.length > 140) throw new Error('字數超過限制')
       // 將推文存入資料庫
       const tweet = await Tweet.create({
         description,
         UserId: reqUserId
       })
-      return res.json({ status: 'success', data: tweet })
+      return res.status(200).json({ message: '發送成功' })
     } catch (err) {
       next(err)
     }

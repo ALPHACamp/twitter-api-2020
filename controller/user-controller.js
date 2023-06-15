@@ -67,12 +67,21 @@ const userController = {
         where: { UserId: userId },
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          { model: Like, attributes: ['userId'] }
+          { model: Like, attributes: ['userId'] },
+          { model: Reply, attributes: ['id'] }
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (tweets.length === 0) throw new Error('此用戶尚未發布推文')
-      return res.status(200).json(tweets)
+      const result = tweets.map(t => ({
+        ...t.toJSON(),
+        RepliesCount: t.Replies.length,
+        LikesCount: t.Likes.length
+      }))
+      result.forEach(r => {
+        delete r.Likes
+        delete r.Replies
+      })
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   },
   getUserReplies: async (req, res, next) => {
@@ -108,11 +117,27 @@ const userController = {
       const likesTweets = await Like.findAll({
         where: { UserId: userId },
         include: [
-          { model: Tweet, include: { model: User, attributes: ['name', 'account', 'avatar'] } }
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['name', 'account', 'avatar'] },
+              { model: Reply },
+              { model: Like }
+            ]
+          }
         ],
         order: [['createdAt', 'DESC']]
       })
-      return res.status(200).json(likesTweets)
+      const result = likesTweets.map(l => ({
+        ...l.toJSON(),
+        RepliesCount: l.Tweet.Replies.length,
+        LikesCount: l.Tweet.Likes.length
+      }))
+      result.forEach(r => {
+        delete r.Tweet.Replies
+        delete r.Tweet.Likes
+      })
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   },
   getFollowings: async (req, res, next) => {
