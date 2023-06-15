@@ -6,7 +6,7 @@ const { User } = require('../models')
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: process.env.JWT_SECRET || 'travis' // travis 測試用
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   return User.findByPk(jwtPayload.id, {
