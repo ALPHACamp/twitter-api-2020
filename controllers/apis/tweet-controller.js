@@ -59,8 +59,8 @@ const tweetController = {
           {
             model: Reply,
             as: 'TweetReply',
-            attributes: ['id'],
-            include: [{ model: User, as: 'RepliedUser', attributes: ['name', 'account', 'avatar'] }]
+            attributes: ['id', 'comment'],
+            include: [{ model: User, as: 'RepliedUser', attributes: ['name', 'account', 'avatar'] }] 
           },
           { model: Like, as: 'TweetLike', attributes: ['id'] }
         ],
