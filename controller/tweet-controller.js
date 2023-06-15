@@ -21,6 +21,7 @@ const tweetController = {
   },
   getTweets: async (req, res, next) => {
     try {
+      const reqUserId = helpers.getUser(req).id
       let tweets = await Tweet.findAll({
         // raw: true,  使用這個就不能sequelize相關功能
         nest: true,
@@ -34,6 +35,7 @@ const tweetController = {
         createdAt: tweet.createdAt,
         replyCount: tweet.Replies.length,
         likeCount: tweet.Likes.length,
+        isLiked: tweet.Likes.some(like => like.UserId === reqUserId), // 檢查貼文是否被當前使用者點讚
         user: {
           avatar: tweet.User.avatar,
           name: tweet.User.name,
@@ -47,6 +49,7 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
+      const reqUserId = helpers.getUser(req).id
       // const reqUserId = helpers.getUser(req).id
       const tweetId = req.params.tweet_id
       let tweet = await Tweet.findByPk(tweetId, {
@@ -62,6 +65,7 @@ const tweetController = {
         updatedAt: tweet.updatedAt,
         likeCount: tweet.Likes.length,
         replyCount: tweet.Replies.length,
+        isLiked: tweet.Likes.some(like => like.UserId === reqUserId), // 檢查貼文是否被當前使用者點讚
         user: {
           name: tweet.User.name,
           account: tweet.User.account,
@@ -119,6 +123,7 @@ const tweetController = {
       return res.status(200).json({ message: 'Reply posted successfully!' })
     } catch (err) { next(err) }
   },
+
   getReplies: async (req, res, next) => {
     try {
       const tweetId = req.params.tweet_id
