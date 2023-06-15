@@ -111,7 +111,7 @@ const tweetController = {
             'id', 'account', 'name', 'avatar'
           ]
         },
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'ASC']] // 回覆串最新的在下面
       })
     ])
       .then(([tweet, replies]) => {
