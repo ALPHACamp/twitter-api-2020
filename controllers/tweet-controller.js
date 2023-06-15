@@ -7,6 +7,25 @@ const tweetController = {
     return Tweet.findAll({
       include: [
         { model: User, attributes: { exclude: ['password'] } }
+      ],
+      attributes: [
+        'id',
+        'UserId',
+        'description',
+        'createdAt',
+        'updatedAt',
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)'
+          ),
+          'likeCount'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+          ),
+          'replyCount'
+        ],
       ]
     })
       .then(tweets => {
@@ -19,6 +38,25 @@ const tweetController = {
     return Tweet.findByPk(tweetId, {
       include: [
         { model: User, attributes: { exclude: ['password'] } }
+      ],
+      attributes: [
+        'id',
+        'UserId',
+        'description',
+        'createdAt',
+        'updatedAt',
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)'
+          ),
+          'likeCount'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+          ),
+          'replyCount'
+        ],
       ]
     })
       .then(tweet => {
