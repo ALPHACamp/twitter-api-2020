@@ -97,20 +97,20 @@ const userController = {
       }
       let fileData = null
       if (req.files) {
-        const { avatar, cover } = req.files
+        const { avatar, coverPhoto } = req.files
         let avatarPath, coverPhotoPath
         if (avatar) avatarPath = await imgurFileHandler(avatar[0])
-        if (cover) coverPhotoPath = await imgurFileHandler(cover[0])
+        if (coverPhoto) coverPhotoPath = await imgurFileHandler(coverPhoto[0])
         fileData = {
           avatar: avatarPath,
           coverPhoto: coverPhotoPath
         }
       }
       if (req.query) {
-        const { avatar, cover } = req.query
+        const { avatar, coverPhoto } = req.query
         let avatarPath, coverPhotoPath
         if (avatar) avatarPath = null
-        if (cover) coverPhotoPath = null
+        if (coverPhoto) coverPhotoPath = null
         fileData = {
           avatar: avatarPath,
           coverPhoto: coverPhotoPath
