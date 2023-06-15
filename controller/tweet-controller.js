@@ -21,7 +21,7 @@ const tweetController = {
   },
   getTweets: async (req, res, next) => {
     try {
-      const reqUserId = helpers.getUser(req).id;
+      const reqUserId = helpers.getUser(req).id
       let tweets = await Tweet.findAll({
         // raw: true,  使用這個就不能sequelize相關功能
         nest: true,
@@ -49,7 +49,7 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
-      const reqUserId = helpers.getUser(req).id;
+      const reqUserId = helpers.getUser(req).id
       // const reqUserId = helpers.getUser(req).id
       const tweetId = req.params.tweet_id
       let tweet = await Tweet.findByPk(tweetId, {
