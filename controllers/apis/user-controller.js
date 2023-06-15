@@ -84,7 +84,7 @@ const userController = {
       include: [{
         model: Tweet,
         include: [Reply, Like],
-        order: [['createAt', 'DESC']]
+        order: [['createdAt', 'DESC']]
       }],
     })
       .then(user => {
