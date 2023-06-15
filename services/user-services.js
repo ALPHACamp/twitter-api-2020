@@ -33,7 +33,8 @@ const userController = {
         name: req.body.name,
         email: req.body.email,
         account: req.body.account,
-        password: hash
+        password: hash,
+        role: req.body.role
       }))
       .then(user => {
         return cb(null, { user })
