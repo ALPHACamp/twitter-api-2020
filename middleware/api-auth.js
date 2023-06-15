@@ -1,4 +1,5 @@
 const passport = require('../config/passport') // 引入 passport
+const helpers = require('../_helpers')
 
 // 登入驗證
 const authenticated = (req, res, next) => {
@@ -12,6 +13,7 @@ const authenticated = (req, res, next) => {
 
 // 前台登入驗證
 const authenticatedUser = (req, res, next) => {
+  req.user = helpers.getUser(req)
   if (req.user && req.user.role !== 'admin') { 
     return next() 
   }
@@ -19,8 +21,11 @@ const authenticatedUser = (req, res, next) => {
 }
 
 // 後台登入驗證
-const authenticatedAdmin = (req, res, next) => {
-  if (req.user && req.user.role == 'admin') return next()
+ const authenticatedAdmin = (req, res, next) => {
+  req.user = helpers.getUser(req)
+  if (req.user && req.user.role == 'admin') {
+    return next()
+  }
   return res.status(403).json({ status: 'error', message: 'permission denied, only for admin' })
 }
 
