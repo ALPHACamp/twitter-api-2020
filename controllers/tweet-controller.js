@@ -29,7 +29,17 @@ const tweetController = {
       ]
     })
       .then(tweets => {
-        res.json(tweets)
+        const ThisUserId = helpers.getUser(req).id;
+        const tweetsData = tweets.map(tweet => {
+          const tweetJSON = tweet.toJSON();
+          const tweetLikes = tweet.get('Likes') || []
+          
+          return {
+            ...tweetJSON,
+            isLiked: tweetLikes.some(like => like.userId === ThisUserId)
+          };
+        })
+        res.json(tweetsData);
       })
       .catch(err => next(err))
   },
