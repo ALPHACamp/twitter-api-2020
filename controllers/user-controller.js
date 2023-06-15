@@ -233,17 +233,24 @@ const userController = {
           nest: true,
           where: { followerId: userId },
           order: [['createdAt', 'DESC']],
+          attributes: ['id', 'followerId', 'followingId', 'createdAt', 'updatedAt'],
           include: [{
             model: User,
+            as: 'Following',
             attributes: ['id', 'name', 'avatar', 'account', 'introduction']
           }]
         })
       ])
       if (!user) newErrorGenerate('使用者不存在', 404)
-      const followsData = follows?.map(follow => ({
-        ...follow,
-        isSelfUserFollow: helpers?.getUser(req).Followings?.some(s => s.id === follow.followingId)
-      }))
+      const followsData = follows?.map(follow => {
+        const result = {
+          ...follow,
+          User: follow.Following,
+          isSelfUserFollow: helpers?.getUser(req)?.Followings?.some(s => s.id === follow.followingId)
+        }
+        delete result.Following
+        return result
+      })
       return res.json(followsData)
     } catch (err) {
       next(err)
@@ -263,15 +270,24 @@ const userController = {
           nest: true,
           where: { followingId: userId },
           attributes: ['id', 'followerId', 'followingId', 'createdAt', 'updatedAt'],
-          order: [['createdAt', 'DESC']]
+          order: [['createdAt', 'DESC']],
+          include: [{
+            model: User,
+            as: 'Follower',
+            attributes: ['id', 'name', 'avatar', 'account', 'introduction']
+          }]
         })
       ])
       if (!user) newErrorGenerate('使用者不存在', 404)
-      const followsData = await Promise.all(follows?.map(async follow => ({
-        ...follow,
-        User: await User.findByPk(follow.followerId, { raw: true, attributes: ['id', 'name', 'avatar', 'account', 'introduction'] }),
-        isSelfUserFollow: helpers?.getUser(req)?.Followings?.some(s => s.id === follow.followerId)
-      })))
+      const followsData = follows?.map(follow => {
+        const result = {
+          ...follow,
+          User: follow.Follower,
+          isSelfUserFollow: helpers?.getUser(req)?.Followings?.some(s => s.id === follow.followerId)
+        }
+        delete result.Follower
+        return result
+      })
       return res.json(followsData)
     } catch (err) {
       next(err)

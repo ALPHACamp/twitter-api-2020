@@ -1,8 +1,9 @@
-const { User, Tweet, Like, Followship } = require('../models')
+const { User, Tweet, Like } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
 const { relativeTimeFromNow } = require('../helpers/dayFix-helper')
+const { Sequelize } = require('sequelize')
 const TWEETS_WORD_INDICATE = 50
 
 const adminController = {
@@ -57,24 +58,33 @@ const adminController = {
   // 取得所有使用者資料
   getUsers: async (req, res, next) => {
     const users = await User.findAll({
-      raw: true,
-      attributes: ['id', 'name', 'email', 'account', 'backgroundImage', 'avatar', 'createdAt'],
-      order: [['createdAt', 'DESC']]
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'backgroundImage',
+        'avatar',
+        [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount'],
+        [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount'],
+        [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followerId` = `User`.`id`)'), 'followingsCount']
+      ],
+      include: [
+        { model: Tweet, attributes: ['id'], include: [{ model: Like, attributes: ['id'] }] }
+      ]
     })
-    const userData = await Promise.all(users.map(async user => {
-      const userId = user.id
-      const [tweets, likes, followers, followings] = await Promise.all([
-        Tweet.findAll({ where: { UserId: userId }, raw: true, attributes: ['id'] }),
-        Like.findAll({ where: { UserId: userId }, raw: true, attributes: ['id'] }),
-        Followship.findAll({ where: { followerId: userId }, raw: true, attributes: ['id'] }),
-        Followship.findAll({ where: { followingId: userId }, raw: true, attributes: ['id'] })
-      ])
-      user.tweetsCount = tweets?.length
-      user.likesCount = likes?.length
-      user.followersCount = followers?.length
-      user.followingsCount = followings?.length
-      return user
-    }))
+    const userData = users?.map(user => {
+      let likesCount = 0
+      user.Tweets.forEach(element => {
+        const count = element.Likes.length
+        likesCount = likesCount + count
+      })
+      const result = {
+        ...user.toJSON(),
+        likesCount: likesCount
+      }
+      delete result.Tweets
+      return result
+    })
     const userSortData = userData?.sort((a, b) => b.tweetsCount - a.tweetsCount)
     return res.json(userSortData)
   }
