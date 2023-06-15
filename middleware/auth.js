@@ -3,12 +3,12 @@ const helpers = require('../_helpers')
 
 // 檢查user role
 const userRole = (req, res, next) => {
-  if (helpers.getUser(req).role === 'admin') return res.status(403).json({ status: 'error', message: '帳號不存在' })
+  if (helpers.getUser(req).role === 'admin') return res.status(403).json({ status: 'error', message: [{ path: 'account', msg: '帳號不存在' }] })
   next()
 }
 
 const adminRole = (req, res, next) => {
-  if (helpers.getUser(req).role === 'user') return res.status(403).json({ status: 'error', message: '帳號不存在' })
+  if (helpers.getUser(req).role === 'user') return res.status(403).json({ status: 'error', message: [{ path: 'account', msg: '帳號不存在' }] })
   next()
 }
 // 驗證token
