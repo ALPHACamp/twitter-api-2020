@@ -52,13 +52,12 @@ const followController = {
   },
   getFollowers: async (req, res, next) => {
     const followingId = req.params.id
-    // const userId = Number(req.user.id) || Number(getUser(req).dataValues?.id)
     if (!followingId) {
       return res.status(400).json('缺少追蹤的用戶id')
     }
     const user = await User.findByPk(followingId)
     if (!user) return res.status(400).json('用戶不存在')
-    // error "SequelizeEagerLoadingError: User is not associated to Followship!"
+
     try {
       const followers = await User.findAll({
         where: { id: followingId },
@@ -67,17 +66,39 @@ const followController = {
           {
             model: User,
             as: 'Followers',
-            attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+            attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+            through: { attributes: [] }
           }
         ],
         order: [['createdAt', 'DESC']]
       })
+      const followings = await User.findAll({
+        where: { id: followingId },
+        attributes: [],
+        include: [
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id'],
+            through: { attributes: [] }
+          }
+        ],
+        raw: true,
+        nest: true
+      })
+      const followingsId = followings.map(following => {
+        return following.Followings.id
+      })
       const data = followers[0].Followers.map(follower => {
         const introduction = follower.introduction?.substring(0, 50)
+        const isfollower = followingsId.includes(follower.id)
         return {
-          ...follower.get(),
+          followerId: follower.id,
+          name: follower.name,
+          account: follower.account,
+          avatar: follower.avatar,
           introduction,
-          followerId: follower.Followship.followerId
+          isfollower
           // 每個followerid跟我的正在追蹤的follwingid比對
         }
       })
@@ -102,7 +123,8 @@ const followController = {
           {
             model: User,
             as: 'Followings',
-            attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+            attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+            through: { attributes: [] }
           }
         ],
         order: [['createdAt', 'DESC']]
@@ -110,9 +132,11 @@ const followController = {
       const data = followings[0].Followings.map(following => {
         const introduction = following.introduction?.substring(0, 50)
         return {
-          ...following.get(),
-          introduction,
-          followingId: following.Followship.followingId
+          followingId: following.id,
+          name: following.name,
+          account: following.account,
+          avatar: following.avatar,
+          introduction
         }
       })
       return res.status(200).json(data)
