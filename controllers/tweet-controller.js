@@ -109,9 +109,9 @@ const tweetController = {
           model: User,
           attributes: [
             'id', 'account', 'name', 'avatar'
-          ],
-          order: [['createdAt', 'DESC']]
-        }
+          ]
+        },
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([tweet, replies]) => {
