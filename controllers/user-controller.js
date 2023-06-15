@@ -157,7 +157,7 @@ const userController = {
           'id',
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${ThisUserId} AND Likes.deletedAt IS NULL) > 0`
+              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${req.user.id} AND Likes.deletedAt IS NULL) > 0`
             ),
             'isLiked'
           ],
