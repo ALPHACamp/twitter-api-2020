@@ -52,13 +52,12 @@ const followController = {
   },
   getFollowers: async (req, res, next) => {
     const followingId = req.params.id
-    // const userId = Number(req.user.id) || Number(getUser(req).dataValues?.id)
     if (!followingId) {
       return res.status(400).json('缺少追蹤的用戶id')
     }
     const user = await User.findByPk(followingId)
     if (!user) return res.status(400).json('用戶不存在')
-    // error "SequelizeEagerLoadingError: User is not associated to Followship!"
+
     try {
       const followers = await User.findAll({
         where: { id: followingId },
@@ -67,7 +66,8 @@ const followController = {
           {
             model: User,
             as: 'Followers',
-            attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+            attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+            through: { attributes: [] }
           }
         ],
         order: [['createdAt', 'DESC']]
@@ -77,7 +77,7 @@ const followController = {
         return {
           ...follower.get(),
           introduction,
-          followerId: follower.Followship.followerId
+          followerId: follower.id
           // 每個followerid跟我的正在追蹤的follwingid比對
         }
       })
@@ -102,7 +102,8 @@ const followController = {
           {
             model: User,
             as: 'Followings',
-            attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+            attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+            through: { attributes: [] }
           }
         ],
         order: [['createdAt', 'DESC']]
@@ -112,7 +113,7 @@ const followController = {
         return {
           ...following.get(),
           introduction,
-          followingId: following.Followship.followingId
+          followingId: following.id
         }
       })
       return res.status(200).json(data)
