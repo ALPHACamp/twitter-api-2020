@@ -1,10 +1,32 @@
+const sequelize = require('sequelize')
 const { Tweet, User, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      raw: true
+      include: [
+        { model: User, attributes: { exclude: ['password'] } }
+      ],
+      attributes: [
+        'id',
+        'UserId',
+        'description',
+        'createdAt',
+        'updatedAt',
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)'
+          ),
+          'likeCount'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+          ),
+          'replyCount'
+        ],
+      ]
     })
       .then(tweets => {
         res.json(tweets)
@@ -13,7 +35,30 @@ const tweetController = {
   },
   getTweet: (req, res, next) => {
     const tweetId = req.params.tweetId
-    return Tweet.findByPk(tweetId)
+    return Tweet.findByPk(tweetId, {
+      include: [
+        { model: User, attributes: { exclude: ['password'] } }
+      ],
+      attributes: [
+        'id',
+        'UserId',
+        'description',
+        'createdAt',
+        'updatedAt',
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)'
+          ),
+          'likeCount'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+          ),
+          'replyCount'
+        ],
+      ]
+    })
       .then(tweet => {
         res.json( tweet )
       })
@@ -22,7 +67,11 @@ const tweetController = {
   getReplies: (req, res, next) => {
     const tweetId = req.params.tweetId
     return Reply.findAll({
-      where: {tweetId}
+      where: {tweetId},
+      include: [
+        { model: User, attributes: { exclude: ['password'] } },
+        { model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }] },
+      ]
     })
       .then(replies => {
         res.json(replies)
