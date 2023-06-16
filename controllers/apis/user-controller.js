@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcrypt')
 const { User, Reply, Tweet, Followship, Like } = require('../../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
