@@ -24,16 +24,16 @@ const replyServices = {
                 ],
                 include: [{
                     model: User
-                }, ],
+                } ],
             })
             const tweet = await Tweet.findByPk(id)
             if (!tweet) throw new Error('推文不存在！')
-            const newComment = await replies.map(comment => {
-                comment.createdAt = relativeTimeFromNow(comment.createdAt)
-                delete comment.User.password
-                return comment
-            })
-            cb(null, newComment)
+            const newreplies = await replies.map(reply => {
+                const createdAt = relativeTimeFromNow(reply.createdAt)
+                return {...reply,
+                createdAt:  createdAt
+            }})
+            cb(null, newreplies)
         } catch (err) {
             cb(err, {
                 message: "錯誤訊息"
