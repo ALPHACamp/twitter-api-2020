@@ -33,8 +33,8 @@ const userController = {
           ...user.toJSON(),
           isFollowing: req.user && req.user.Followings.some(following => following.id === user.id),
           isFollower: req.user && req.user.Followers.some(follower => follower.id === user.id),
-          followersCount: req.user && req.user.Followers.length,
-          followingsCount: req.user && req.user.Followings.length
+          followersCount: user.Followers.length,
+          followingsCount: user.Followings.length
         }
         // res.json({ status: 'success', user: user.toJSON() })
         delete user.password
