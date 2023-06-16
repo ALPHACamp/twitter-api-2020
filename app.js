@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000
 
 const corsOptions = {
   origin: [
-    'https://ywcheng1207.github.io',
+    'https://ywcheng1207.github.io/',
     'http://localhost'
   ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'
