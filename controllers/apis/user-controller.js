@@ -74,12 +74,15 @@ const userController = {
   },
   getUser: (req, res) => {
     return Promise.all([
-      User.findByPk(req.params.id),
+      User.findByPk(req.params.id, { attributes: { exclude: ['password'] } }),
+      Followship.count({ where: { followerId: req.params.id } }),
+      Followship.count({ where: { followingId: req.params.id } })
     ])
-      .then(([user]) => {
+      .then(([user, follower, following]) => {
         if (!user) throw new Error(`User didn't exist`)
         user = user.toJSON()
-        delete user.password
+        user.followerCount = follower
+        user.followingCount = following
         return res.status(200).json(user)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
