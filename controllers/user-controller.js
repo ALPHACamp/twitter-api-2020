@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-felpers')
+const { Op } = require("sequelize")
 
 const userController = {
   getUsers: (req, res, next) => {
@@ -43,6 +44,10 @@ const userController = {
   },
   getUsersTop: (req, res, next) => {
     return User.findAll({
+      where: {
+        account: { [Op.not]: 'root' },
+        id: { [Op.not]: req.user.id }
+      },
       attributes: { exclude: ['password'] },
       include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }]
     })
@@ -126,10 +131,12 @@ const userController = {
     ])
       .then(([user, tweetsData]) => {
         if (!user) throw new Error('getUserTweets說: 沒這人')
+        req.user.Likes = req.user.Likes || []
         const tweets = tweetsData.map(t => ({
           ...t.toJSON(),
           repliesCount: t.Replies.length,
-          likesCount: t.Likes.length
+          likesCount: t.Likes.length,
+          isLike: req.user && req.user.Likes.some(like => like.TweetId === t.id)
         }))
         res.status(200).json(tweets)
       })
@@ -228,13 +235,13 @@ const userController = {
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
+    console.log(req.body)
     const userId = Number(req.params.id)
     let avatarFile, bannerFile
     console.log(helpers.getUser(req))
     if (
-      helpers.getUser(req).id === 1 &&
-      helpers.getUser(req).followings === [] &&
-      helpers.getUser(req).role !== 'user'
+      helpers.getUser(req).id !== 1 &&
+      helpers.getUser(req).followings === []
     ) {
       if (req.files.avatar && req.files.avatar.length > 0) {
         avatarFile = req.files.avatar[0]

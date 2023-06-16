@@ -38,7 +38,8 @@ const tweetController = {
         },
         { model: Reply, attributes: ['id'] },
         { model: Like, attributes: ['id'] }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(tweet => {
         if (!tweet) throw new Error('此推文不存在')
