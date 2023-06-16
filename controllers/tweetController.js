@@ -8,7 +8,7 @@ const tweetController = {
       const follows = req.query.follows
       const liked = req.query.liked
       const userId = req.params.id
-      let options
+      const options = {}
       if (follows) {
         const followingIdData = await Followship.findAll({
           where: { follower_Id: userId },
@@ -16,7 +16,7 @@ const tweetController = {
         })
         const followingIds = followingIdData.map((row) => row.followingId)
         followingIds.push(userId)
-        options = { UserId: followingIds }
+        options.UserId = followingIds
       } else if (liked) {
         const likes = await Like.findAll({
           where: { User_Id: userId },
@@ -26,9 +26,9 @@ const tweetController = {
         })
         const tweetIds = likes.map((row) => row.TweetId)
         tweetIds.push(userId)
-        options = { id: tweetIds }
+        options.id = tweetIds
       } else {
-        options = { UserId: userId }
+        options.UserId = userId
       }
       const tweets = await Tweet.findAll({
         where: options,
