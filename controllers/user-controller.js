@@ -208,13 +208,13 @@ const userController = {
           ], 
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = ${helpers.getUser(req).id})`
+              `(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`
             ),
-            'tweetCount'
+            'replyCount'
           ],
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)`
+              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)`
             ),
             'likeCount'
           ],
@@ -278,7 +278,7 @@ const userController = {
           ],
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)`
+              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)`
             ),
             'likeCount'
           ],
