@@ -236,10 +236,8 @@ const userController = {
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
-    console.log(req.body)
     const userId = Number(req.params.id)
     let avatarFile, bannerFile
-    console.log(helpers.getUser(req))
     if (
       helpers.getUser(req).id !== 1 &&
       helpers.getUser(req).followings === []
