@@ -119,6 +119,7 @@ const userController = {
 
   getLikedTweets: async (req, res, next) => {
     try {
+      const reqUserId = helpers.getUser(req).id
       const userId = req.params.id
       const likesTweets = await Like.findAll({
         where: { UserId: userId },
@@ -134,14 +135,27 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      const result = likesTweets.map(l => ({
-        ...l.toJSON(),
-        RepliesCount: l.Tweet.Replies.length,
-        LikesCount: l.Tweet.Likes.length
-      }))
+      const result = likesTweets.map(r => {
+        if (!r || !r.Tweet) {
+          return null // 或者根据需求返回空对象 {}
+        }
+        return {
+          ...r.toJSON(),
+          RepliesCount: r.Tweet.Replies.length,
+          LikesCount: r.Tweet.Likes.length,
+          isLiked: r.Tweet.Likes.some(like => like.UserId === reqUserId),
+          Tweet: {
+            ...r.Tweet.toJSON(),
+            name: r.Tweet.User ? r.Tweet.User.name : null,
+            account: r.Tweet.User ? r.Tweet.User.account : null,
+            avatar: r.Tweet.User ? r.Tweet.User.avatar : null
+          }
+        }
+      }).filter(Boolean) // 过滤掉空对象
       result.forEach(r => {
         delete r.Tweet.Replies
         delete r.Tweet.Likes
+        delete r.Tweet.User
       })
       return res.status(200).json(result)
     } catch (err) { next(err) }
