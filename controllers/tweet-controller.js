@@ -10,11 +10,9 @@ const tweetController = {
   postTweet: async (req, res, next) => {
     try {
       const { description } = req.body
-      if (!description?.trim()) newErrorGenerate('內容不可空白', 400)
-      if (description?.length > TWEETS_WORD_LIMIT) newErrorGenerate(`字數限制${TWEETS_WORD_LIMIT}字以內`, 400)
+      if (!description.trim()) newErrorGenerate('內容不可空白', 400)
+      if (description.length > TWEETS_WORD_LIMIT) newErrorGenerate(`字數限制${TWEETS_WORD_LIMIT}字以內`, 400)
       const userId = helpers.getUser(req).id
-      const user = await User.findByPk(userId, { raw: true })
-      if (!user) newErrorGenerate('使用者不存在', 404)
       const newTweet = await Tweet.create({ description, UserId: userId })
       return res.json({ status: 'success', data: { newTweet } })
     } catch (err) {
@@ -44,9 +42,9 @@ const tweetController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      const selfUserLike = await Like.findAll({ raw: true, attributes: ['TweetId'], where: { UserId: selfUser } })
       if (!tweets) newErrorGenerate('推文不存在', 404)
-      const tweetsData = tweets?.map(tweet => ({
+      const selfUserLike = await Like.findAll({ raw: true, attributes: ['TweetId'], where: { UserId: selfUser } })
+      const tweetsData = tweets.map(tweet => ({
         ...tweet,
         relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt),
         isSelfUserLike: selfUserLike.some(s => s.TweetId === tweet.id)
@@ -80,8 +78,8 @@ const tweetController = {
           }
         ]
       })
-      const selfUserLike = await Like.findAll({ raw: true, attributes: ['TweetId'], where: { UserId: selfUser } })
       if (!tweet) newErrorGenerate('推文不存在', 404)
+      const selfUserLike = await Like.findAll({ raw: true, attributes: ['TweetId'], where: { UserId: selfUser } })
       const tweetData = {
         ...tweet,
         switchTime: switchTime(tweet.createdAt),
@@ -98,13 +96,8 @@ const tweetController = {
     try {
       const tweetId = req.params.tweet_id
       const userId = helpers.getUser(req).id
-      const [tweet, user] = await Promise.all([
-        Tweet.findByPk(tweetId, { raw: true, attributes: ['id'] }),
-        User.findByPk(userId, { raw: true, attributes: ['id'] })
-      ])
+      const tweet = await Tweet.findByPk(tweetId, { raw: true, attributes: ['id'] })
       if (!tweet) newErrorGenerate('推文不存在', 404)
-      if (!user) newErrorGenerate('使用者不存在', 404)
-
       const { comment } = req.body
       if (!comment.trim()) newErrorGenerate('內容不可空白', 400)
       if (comment.length > TWEETS_WORD_LIMIT) newErrorGenerate(`字數限制${TWEETS_WORD_LIMIT}字以內`, 400)
@@ -117,20 +110,14 @@ const tweetController = {
   // 按讚推文
   addTweetLike: async (req, res, next) => {
     try {
-      const tweetId = req.params.tweet_id
+      const tweetId = Number(req.params.tweet_id)
       const userId = helpers.getUser(req).id
-      const [tweet, user, like] = await Promise.all([
-        Tweet.findByPk(tweetId, { raw: true, attributes: ['id'] }),
-        User.findByPk(userId, { raw: true, attributes: ['id'] }),
-        Like.findOne({ where: { tweetId, userId }, raw: true })
-      ])
+      const tweet = await Tweet.findByPk(tweetId, { raw: true, attributes: ['id'] })
+      const like = await Like.findOne({ where: { tweetId, userId }, raw: true })
       if (!tweet) newErrorGenerate('推文不存在', 404)
-      if (!user) newErrorGenerate('使用者不存在', 404)
       if (like) newErrorGenerate('已按過喜歡', 400)
       const addLike = await Like.create({ TweetId: tweetId, UserId: userId })
-      const addLikeJson = addLike.toJSON()
-      addLikeJson.TweetId = Number(addLikeJson.TweetId)
-      return res.json(addLikeJson)
+      return res.json(addLike)
     } catch (err) {
       next(err)
     }
@@ -140,13 +127,9 @@ const tweetController = {
     try {
       const tweetId = req.params.tweet_id
       const userId = helpers.getUser(req).id
-      const [tweet, user, like] = await Promise.all([
-        Tweet.findByPk(tweetId, { raw: true, attributes: ['id'] }),
-        User.findByPk(userId, { raw: true, attributes: ['id'] }),
-        Like.findOne({ where: { tweetId, userId } })
-      ])
+      const tweet = await Tweet.findByPk(tweetId, { raw: true, attributes: ['id'] })
       if (!tweet) newErrorGenerate('推文不存在', 404)
-      if (!user) newErrorGenerate('使用者不存在', 404)
+      const like = await Like.findOne({ where: { tweetId, userId } })
       if (!like) newErrorGenerate('未按過喜歡', 400)
       const removeLike = await like.destroy()
       return res.json(removeLike)
@@ -164,6 +147,7 @@ const tweetController = {
         attributes: ['id'],
         include: [{ model: User, attributes: ['id', 'account'] }]
       })
+      if (!tweet) newErrorGenerate('推文不存在', 404)
       const replies = await Reply.findAll({
         attributes: [
           'id',
@@ -177,7 +161,6 @@ const tweetController = {
         raw: true,
         nest: true
       })
-      if (!tweet) newErrorGenerate('推文不存在', 404)
       if (!replies) newErrorGenerate('找不到回應訊息', 404)
       const repliesData = replies.map(reply => {
         reply.replyUser = reply.User

@@ -1,4 +1,4 @@
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { newErrorGenerate } = require('../helpers/newError-helper')
@@ -33,7 +33,7 @@ const adminController = {
         nest: true,
         include: [User]
       })
-      const tweetsData = tweets?.map(tweet => ({
+      const tweetsData = tweets.map(tweet => ({
         ...tweet,
         description: tweet.description.substring(0, TWEETS_WORD_INDICATE),
         relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt)
@@ -49,8 +49,10 @@ const adminController = {
       const tweetId = req.params.id
       const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) newErrorGenerate('該篇推文不存在', 404)
-      const deletedTweet = await tweet.destroy()
-      return res.json({ status: 'success', data: { deletedTweet } })
+      await Reply.destroy({ where: { TweetId: tweetId } })
+      await Like.destroy({ where: { TweetId: tweetId } })
+      await tweet.destroy()
+      return res.status(200).json({ status: 'success', message: '已成功刪除推文' })
     } catch (err) {
       next(err)
     }
@@ -72,7 +74,7 @@ const adminController = {
         { model: Tweet, attributes: ['id'], include: [{ model: Like, attributes: ['id'] }] }
       ]
     })
-    const userData = users?.map(user => {
+    const userData = users.map(user => {
       let likesCount = 0
       user.Tweets.forEach(element => {
         const count = element.Likes.length

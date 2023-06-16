@@ -39,13 +39,11 @@ const userController = {
     try {
       const { name, account, email, password, checkPassword } = req.body
       if (!name || !account || !email || !password || !checkPassword) newErrorGenerate('所有欄位皆為必填!', 400)
-      if (name?.length > USERS_WORD_LIMIT) newErrorGenerate('暱稱字數超出上限!', 400)
+      if (name.length > USERS_WORD_LIMIT) newErrorGenerate('暱稱字數超出上限!', 400)
       if (password !== checkPassword) newErrorGenerate('密碼及確認密碼不相符!', 400)
-      const [userAccount, userEmail] = await Promise.all([
-        User.findOne({ where: { account } }),
-        User.findOne({ where: { email } })
-      ])
+      const userAccount = await User.findOne({ where: { account } })
       if (userAccount) newErrorGenerate('account 已重複註冊！', 400)
+      const userEmail = await User.findOne({ where: { email } })
       if (userEmail) newErrorGenerate('email 已重複註冊！', 400)
       const hash = await bcrypt.hash(password, 10)
       const user = await User.create({
@@ -138,7 +136,7 @@ const userController = {
         include: [{ raw: true, model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
       })
       const selfUserLike = await Like.findAll({ raw: true, attributes: ['TweetId'], where: { UserId: selfUser } })
-      const tweetsData = tweets?.map(tweet => ({
+      const tweetsData = tweets.map(tweet => ({
         ...tweet,
         relativeTimeFromNow: relativeTimeFromNow(tweet.createdAt),
         isSelfUserLike: selfUserLike.some(s => s.TweetId === tweet.id)
@@ -170,7 +168,7 @@ const userController = {
         raw: true,
         nest: true
       })
-      const repliesData = replies?.map(reply => {
+      const repliesData = replies.map(reply => {
         reply.tweetUser = reply.Tweet.User
         reply.User = user
         reply.relativeTimeFromNow = relativeTimeFromNow(reply.createdAt)
@@ -210,8 +208,8 @@ const userController = {
         }
       })
       const selfUserLike = await Like.findAll({ raw: true, attributes: ['TweetId'], where: { UserId: selfUser } })
-      const likesData = likes?.map(like => {
-        like.User = like?.Tweet.User
+      const likesData = likes.map(like => {
+        like.User = like.Tweet.User
         like.Tweet.relativeTimeFromNow = relativeTimeFromNow(like?.Tweet?.createdAt)
         like.isSelfUserLike = selfUserLike.some(s => s.TweetId === like.TweetId)
         delete like.Tweet.User
@@ -226,30 +224,28 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const [user, follows] = await Promise.all([
-        User.findByPk(userId, {
-          raw: true,
-          attributes: ['id']
-        }),
-        Followship.findAll({
-          raw: true,
-          nest: true,
-          where: { followerId: userId },
-          order: [['createdAt', 'DESC']],
-          attributes: ['id', 'followerId', 'followingId', 'createdAt', 'updatedAt'],
-          include: [{
-            model: User,
-            as: 'Following',
-            attributes: ['id', 'name', 'avatar', 'account', 'introduction']
-          }]
-        })
-      ])
+      const user = await User.findByPk(userId, {
+        raw: true,
+        attributes: ['id']
+      })
       if (!user) newErrorGenerate('使用者不存在', 404)
-      const followsData = follows?.map(follow => {
+      const follows = await Followship.findAll({
+        raw: true,
+        nest: true,
+        where: { followerId: userId },
+        order: [['createdAt', 'DESC']],
+        attributes: ['id', 'followerId', 'followingId', 'createdAt', 'updatedAt'],
+        include: [{
+          model: User,
+          as: 'Following',
+          attributes: ['id', 'name', 'avatar', 'account', 'introduction']
+        }]
+      })
+      const followsData = follows.map(follow => {
         const result = {
           ...follow,
           User: follow.Following,
-          isSelfUserFollow: helpers?.getUser(req)?.Followings?.some(s => s.id === follow.followingId)
+          isSelfUserFollow: helpers.getUser(req).Followings.some(s => s.id === follow.followingId)
         }
         delete result.Following
         return result
@@ -263,30 +259,28 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const [user, follows] = await Promise.all([
-        User.findByPk(userId, {
-          raw: true,
-          attributes: ['id']
-        }),
-        Followship.findAll({
-          raw: true,
-          nest: true,
-          where: { followingId: userId },
-          attributes: ['id', 'followerId', 'followingId', 'createdAt', 'updatedAt'],
-          order: [['createdAt', 'DESC']],
-          include: [{
-            model: User,
-            as: 'Follower',
-            attributes: ['id', 'name', 'avatar', 'account', 'introduction']
-          }]
-        })
-      ])
+      const user = await User.findByPk(userId, {
+        raw: true,
+        attributes: ['id']
+      })
       if (!user) newErrorGenerate('使用者不存在', 404)
-      const followsData = follows?.map(follow => {
+      const follows = await Followship.findAll({
+        raw: true,
+        nest: true,
+        where: { followingId: userId },
+        attributes: ['id', 'followerId', 'followingId', 'createdAt', 'updatedAt'],
+        order: [['createdAt', 'DESC']],
+        include: [{
+          model: User,
+          as: 'Follower',
+          attributes: ['id', 'name', 'avatar', 'account', 'introduction']
+        }]
+      })
+      const followsData = follows.map(follow => {
         const result = {
           ...follow,
           User: follow.Follower,
-          isSelfUserFollow: helpers?.getUser(req)?.Followings?.some(s => s.id === follow.followerId)
+          isSelfUserFollow: helpers.getUser(req).Followings.some(s => s.id === follow.followerId)
         }
         delete result.Follower
         return result
@@ -300,22 +294,19 @@ const userController = {
   putUser: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const user = await User.findByPk(userId, { attributes: ['id'] })
+      const user = await User.findByPk(userId, { attributes: ['id', 'account', 'email'] })
       if (!user) newErrorGenerate('使用者不存在', 400)
       if (!isUser(req)) newErrorGenerate('使用者非本帳號無權限編輯', 400)
       const { name, account, email, password, checkPassword, introduction } = req.body
       const { files } = req
-      console.log(files)
-      if (account ? await User.findOne({ attributes: ['id'], where: { account: account.trim() } }) : false) newErrorGenerate('account 已重複註冊', 400)
-      if (email ? await User.findOne({ attributes: ['id'], where: { email: email.trim() } }) : false) newErrorGenerate('email 已重複註冊', 400)
+      if (account && account !== user.account ? !!await User.findOne({ attributes: ['id'], where: { account: account.trim() } }) : false) newErrorGenerate('account 已重複註冊', 400)
+      if (email && email !== user.email ? !!await User.findOne({ attributes: ['id'], where: { email: email.trim() } }) : false) newErrorGenerate('email 已重複註冊', 400)
       if (name?.length > USERS_WORD_LIMIT) newErrorGenerate('字數超出上限', 400)
       if (password && password !== checkPassword) newErrorGenerate('密碼與確認密碼不相符', 400)
       if (introduction?.length > USERS_INTRODUCTION_WORD_LIMIT) newErrorGenerate('字數超出上限', 400)
       const hash = password ? await bcrypt.hash(password, 10) : null
       const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
       const backgroundImage = files?.backgroundImage ? await imgurFileHandler(files.backgroundImage[0]) : null
-      console.log(avatar)
-      console.log(backgroundImage)
       const selfUser = await User.findByPk(helpers.getUser(req).id)
       const updatedUser = await selfUser.update({
         name: name?.trim() || selfUser.name,
@@ -336,7 +327,7 @@ const userController = {
   // 查看推薦跟隨
   getTopUser: async (req, res, next) => {
     try {
-      const TOP_USER_COUNT = req.query?.top || 10
+      const TOP_USER_COUNT = req.query.top || 10
       const selfUser = helpers.getUser(req).id
       const users = await User.findAll({
         raw: true,
@@ -345,13 +336,13 @@ const userController = {
         where: { role: { [Sequelize.Op.ne]: 'admin' }, id: { [Sequelize.Op.ne]: selfUser } }
       })
       const usersData = users
-        ?.map(user => ({
+        .map(user => ({
           ...user,
-          isUserFollowed: helpers.getUser(req)?.Followings?.some(f => f.id === user.id)
+          isUserFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
         }))
-        ?.sort((a, b) => b.followersCount - a.followersCount)
-        ?.slice(0, TOP_USER_COUNT)
-        ?.sort((a, b) => (a.isUserFollowed === b.isUserFollowed) ? 0 : a.isUserFollowed ? -1 : 1)
+        .sort((a, b) => b.followersCount - a.followersCount)
+        .slice(0, TOP_USER_COUNT)
+        .sort((a, b) => (a.isUserFollowed === b.isUserFollowed) ? 0 : a.isUserFollowed ? -1 : 1)
       return res.json(usersData)
     } catch (err) {
       next(err)
