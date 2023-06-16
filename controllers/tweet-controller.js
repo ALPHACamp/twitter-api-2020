@@ -24,7 +24,7 @@ const tweetController = {
      },
     })
     .then(tweets => {
-        if (!tweets) throw new Error("The tweets didn't exist!")
+        if (!tweets) throw new Error("All tweets didn't exist!")
         return res.status(200).json(tweets);
       })
     .catch(err => next(err))
@@ -36,7 +36,6 @@ const tweetController = {
         model: User,
         attributes: {
         exclude: [ 'password', 'role'],
-        
         }
       }, 
     ],
