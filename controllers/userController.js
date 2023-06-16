@@ -30,7 +30,7 @@ const userController = {
           status: 'error',
           message: [
             {
-              path: 'account',
+              path: 'email',
               msg: 'email 已重複註冊！'
             }]
         })
