@@ -1,7 +1,7 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt-nodejs')
 const { User, Like, Tweet, Reply } = require('../models')
 
 const JWTStrategy = passportJWT.Strategy
@@ -16,7 +16,7 @@ passport.use(new LocalStrategy(
   (req, account, password, cb) => {
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) cb('That account is not registered!')
+        if (!user) return cb('That account is not registered!')
         bcrypt.compare(password, user.password).then(res => {
           if (!res) cb('Email or Password incorrect.')
           return cb(null, user)
