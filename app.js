@@ -16,7 +16,7 @@ const rateLimit = require('express-rate-limit')
 
 const limiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 限制時間
-  max: 100 // 限制請求數量
+  max: 250 // 限制請求數量
 })
 
 // const corsOptions = {
