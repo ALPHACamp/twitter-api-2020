@@ -42,16 +42,18 @@ const tweetController = {
       }
       const data = tweets.map(e => e.toJSON())
 
-      data.forEach(tweet => {
-        for (const i of tweet.TweetLike) {
-          if (i.UserId === getUser(req).id) {
-            tweet.isLiked = true
-          } else {
-            tweet.isLiked = false
-          }
+      const likes = await Like.findAll({ where: { UserId: getUser(req).id }, attributes: ['id', 'TweetId'] })
+      const dic = {}
+      for (let i = 0; i < likes.length; i++) {
+        dic[likes[i].TweetId] = i
+      }
+
+      for (const i of data) {
+        i.isLiked = false
+        if (dic[i.id] >= 0) {
+          i.isLiked = true
         }
-        if (tweet.TweetLike.length < 1)tweet.isLiked = false
-      })
+      }
 
       return res.status(200).json(data)
     } catch (error) {
