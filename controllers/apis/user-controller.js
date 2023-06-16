@@ -76,13 +76,15 @@ const userController = {
     return Promise.all([
       User.findByPk(req.params.id, { attributes: { exclude: ['password'] } }),
       Followship.count({ where: { followerId: req.params.id } }),
-      Followship.count({ where: { followingId: req.params.id } })
+      Followship.count({ where: { followingId: req.params.id } }),
+      Tweet.findAll({ where: { UserId: req.params.id } })
     ])
-      .then(([user, follower, following]) => {
+      .then(([user, follower, following, Tweet]) => {
         if (!user) throw new Error(`User didn't exist`)
         user = user.toJSON()
         user.followerCount = follower
         user.followingCount = following
+        user.TweetCount = Tweet.length
         return res.status(200).json(user)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
@@ -152,9 +154,9 @@ const userController = {
             TweetId: likeJson.TweetId,
             createdAt: likeJson.createdAt,
             description: likeJson.Tweet.description,
-            name: likeJson.Tweet.User.name,
-            account: likeJson.Tweet.User.account,
-            avatar: likeJson.Tweet.User.avatar,
+            tweetOwnerName: likeJson.Tweet.User.name,
+            tweetOwnerAccount: likeJson.Tweet.User.account,
+            tweetOwnerAvatar: likeJson.Tweet.User.avatar,
             likeCount: likeJson.Tweet.Likes.length,
             replyCount: likeJson.Tweet.Replies.length,
             isLiked: likeJson.UserId === helpers.getUser(req).id
@@ -174,14 +176,15 @@ const userController = {
         }
       ],
     })
-      .then(user => {
+      .then((user) => {
         if (!user) throw new Error(`User didn't exist`)
         let followings = user.Followings.map(following => ({
           followingId: following.id,
           followingName: following.name,
           followingAvatar: following.avatar,
           followingIntroduction: following.introduction,
-          followshipCreatedAt: following.Followship.createdAt
+          followshipCreatedAt: following.Followship.createdAt,
+          isFollowing: helpers.getUser(req).Followings.some(f => f.id === following.id)
         }))
         followings = followings.sort((a, b) =>
           new Date(b.followshipCreatedAt) - new Date(a.followshipCreatedAt))
@@ -190,22 +193,20 @@ const userController = {
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
   getUserFollowers: (req, res) => {
-    User.findByPk(req.params.id, {
-      include: [{ model: User, as: 'Followers', }],
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followers', }]
     })
-      .then(user => {
+      .then((user) => {
         if (!user) throw new Error(`User didn't exist`)
         const followers = user.Followers.map(follower => {
-          const followerJson = follower.toJSON()
-          delete followerJson.password
           return {
-            name: follower.name,
-            account: follower.account,
-            avatar: follower.avatar,
-            introduction: follower.introduction,
+            followerName: follower.name,
+            followerAvatar: follower.avatar,
+            followerIntroduction: follower.introduction,
             followerId: follower.Followship.followerId,
             followingId: follower.Followship.followingId,
             createdAt: follower.Followship.createdAt,
+            isFollowed: helpers.getUser(req).Followings.some(f => f.id === follower.id)
           }
         })
         followers.sort((a, b) => b.createdAt - a.createdAt)
@@ -336,7 +337,7 @@ const userController = {
           return {
             ...userData,
             followersCount: user.Followers.length,
-            isFollowed: req.user.Followings.some(f => f.id === user.id)
+            isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
           }
         })
         users = users.sort((a, b) => b.followersCount - a.followersCount)
