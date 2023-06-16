@@ -2,6 +2,7 @@ const db = require('../models')
 const { User, Tweet, Reply, Like } = db
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
+const { raw } = require('body-parser')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -132,16 +133,56 @@ const tweetController = {
   },
   getReplies: async (req, res, next) => {
     try {
+      console.log('getReplies')
+
       const tweetId = req.params.tweetId
+
+      // // 推文擁有者
+      // const tweet = await Tweet.findByPk(tweetId, {
+      //   attributes: [],
+      //   include: {
+      //     model: User,
+      //     attributes: ['id', 'account', 'name', 'avatar']
+      //   },
+      //   nest: true,
+      //   raw: true
+      // })
+
+      // // 回覆 + 回覆者
+      // const replies = await Reply.findAll({
+      //   where: { TweetId: tweetId },
+      //   include: [
+      //     { model: User, attributes: { exclude: ['password'] } }
+      //   ],
+      //   order: [['createdAt', 'DESC']],
+      //   raw: true,
+      //   nest: true
+      // })
+
       const replies = await Reply.findAll({
         where: { TweetId: tweetId },
         include: [
-          { model: User, attributes: { exclude: ['password'] } }
+          {
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatar'],
+          },
+          {
+            model: Tweet,
+            attributes: [],
+            where: { id: tweetId },
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'account', 'name', 'avatar'],
+              }
+            ]
+          }
         ],
         order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
+
       res.json(replies)
     } catch (error) {
       next(error)
