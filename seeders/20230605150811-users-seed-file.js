@@ -11,7 +11,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'root',
         avatar: `https://loremflickr.com/320/240/people`,
-        introduction: faker.lorem.text(),
+        introduction: faker.lorem.sentence(),
         role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -22,7 +22,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user1',
         avatar: `https://loremflickr.com/320/240/people`,
-        introduction: faker.lorem.text(),
+        introduction: faker.lorem.sentence(),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -33,7 +33,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user2',
         avatar: `https://loremflickr.com/320/240/people`,
-        introduction: faker.lorem.text(),
+        introduction: faker.lorem.sentence(),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -44,7 +44,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user3',
         avatar: `https://loremflickr.com/320/240/people`,
-        introduction: faker.lorem.text(),
+        introduction: faker.lorem.sentence(),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -55,7 +55,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user4',
         avatar: `https://loremflickr.com/320/240/people`,
-        introduction: faker.lorem.text(),
+        introduction: faker.lorem.sentence(),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -66,7 +66,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user5',
         avatar: `https://loremflickr.com/320/240/people`,
-        introduction: faker.lorem.text(),
+        introduction: faker.lorem.sentence(),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -77,7 +77,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user6',
         avatar: `https://loremflickr.com/320/240/people`,
-        introduction: faker.lorem.text(),
+        introduction: faker.lorem.sentence(),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -88,7 +88,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user7',
         avatar: `https://loremflickr.com/320/240/people`,
-        introduction: faker.lorem.text(),
+        introduction: faker.lorem.sentence(),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -99,7 +99,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user8',
         avatar: `https://loremflickr.com/320/240/people`,
-        introduction: faker.lorem.text(),
+        introduction: faker.lorem.sentence(),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -121,7 +121,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user10',
         avatar: `https://loremflickr.com/320/240/people`,
-        introduction: faker.lorem.text(),
+        introduction: faker.lorem.sentence(),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
