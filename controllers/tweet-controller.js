@@ -1,4 +1,3 @@
-const Sequelize = require('sequelize')
 const { Tweet, User, Reply } = require('../models')
 const { literal } = Sequelize
 const moment = require('moment')
@@ -8,15 +7,20 @@ const tweetController = {
     return Tweet.findAll({
       raw: true,
       nest: true,
-      include: [User],
-      attributes: {
+      include: [{
+        model: User,
+        attributes: {
+        exclude: [ 'password', 'role'],
+        
+        }
+      }, 
+    ],
+      attributes: { 
+        exclude: ['UserId'],
         include: [
-          [
-            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'),
-            'repliesCount',
-          ]
+          [literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
         ]
-      },
+     },
     })
       .then(tweet => {
         if (!tweet.length) throw new Error("Tweets didn't exist!")
