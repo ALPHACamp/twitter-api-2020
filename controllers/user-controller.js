@@ -320,7 +320,7 @@ const userController = {
       const userFollowersData = followers.map(follower => ({
         ...follower.toJSON(),
         isCurrentUserFollowed:
-          follower.followerId.toString() === ThisUserId.toString()
+          follower.followingId.toString() === ThisUserId.toString()
       }))
       res.status(200).json(userFollowersData)
     } catch (err) {
