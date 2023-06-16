@@ -201,10 +201,11 @@ const userController = {
     const userId = req.params.id
     return Promise.all([
       User.findByPk(userId),
-      Followship.findAll({
-        where: { followerId: userId },
-        raw: true,
-        order: [['createdAt', 'DESC']]
+      User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
       })
     ])
       .then(([user, followingsData]) => {
