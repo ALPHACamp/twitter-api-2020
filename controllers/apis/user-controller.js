@@ -87,10 +87,10 @@ const userController = {
   },
   getUserTweets: (req, res) => {
     User.findByPk(req.params.id, {
-      include: [{
-        model: Tweet,
-        include: [Reply, Like],
-      }],
+      include: [
+        { model: Tweet, include: [Reply, Like], },
+        { model: Like }
+      ],
       order: [[Tweet, 'createdAt', 'DESC']],
     })
       .then(user => {
@@ -104,7 +104,8 @@ const userController = {
           avatar: user.avatar,
           createdAt: tweet.createdAt,
           replyCount: tweet.Replies.length,
-          likeCount: tweet.Likes.length
+          likeCount: tweet.Likes.length,
+          isLiked: user.Likes.some(like => like.TweetId === tweet.id)
         }))
         return res.status(200).json(tweetsData)
       })
