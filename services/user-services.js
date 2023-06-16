@@ -1,12 +1,12 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Sequelize = require('sequelize')
 const { User, Tweet, Reply, Followship, Like } = require('../models')
 const { imgurFileHandler } = require('../_helpers')
 
 const userController = {
   signIn: (req, cb) => {
     const { account, password } = req.body
-    if (!account || !password) throw new Error('帳號或密碼必填')
     return User.findOne({
       where: { account }
     })
@@ -21,12 +21,12 @@ const userController = {
       .catch(err => cb(err))
   },
   signUp: (req, cb) => {
-    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
     Promise.all([
       User.findOne({ where: { email: req.body.email } }),
       User.findOne({ where: { account: req.body.account } })
     ])
       .then(([userByEmail, userByAccount]) => {
+        if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
         if (userByEmail || userByAccount) throw new Error('Email or Account already exists!')
         return bcrypt.hash(req.body.password, 10)
       })
@@ -34,7 +34,8 @@ const userController = {
         name: req.body.name,
         email: req.body.email,
         account: req.body.account,
-        password: hash
+        password: hash,
+        role: req.body.role
       }))
       .then(user => {
         return cb(null, { user })
@@ -43,12 +44,22 @@ const userController = {
   },
   getUser: (req, cb) => {
     const userId = Number(req.params.user_id) || ''
-    User.findByPk(userId, {
-      attributes: { exclude: ['password'] },
+    return User.findByPk(userId, {
+      raw: true,
       nest: true,
-      raw: true
-    }
-    )
+      attributes: {
+        include: [
+          [
+            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = User.id)'),
+            'follower',
+          ],
+          [
+            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = User.id)'),
+            'following',
+          ]
+        ]
+      },
+    })
       .then((user) => {
         if (!user) throw new Error("User didn't exist!")
         cb(null, user)
@@ -113,7 +124,7 @@ const userController = {
       raw: true
     })
       .then(likedtweets => {
-        if (!likedtweets) throw new Error("User's likedtweets didn't exist!")
+        if (!likedtweets.length) throw new Error("User's likedtweets didn't exist!")
         cb(null, likedtweets)
       })
       .catch(err => cb(err))
@@ -131,7 +142,7 @@ const userController = {
       raw: true
     })
       .then(data => {
-        if (!data) throw new Error("User's following didn't exist!")
+        if (!data.length) throw new Error("User's following didn't exist!")
         const followings = data.map(user => user.Followings)
         followings.map(following => {
           following.followingId = following.id
@@ -155,7 +166,7 @@ const userController = {
       raw: true
     })
       .then(data => {
-        if (!data) throw new Error("User's followers didn't exist!")
+        if (!data.length) throw new Error("User's followers didn't exist!")
         const followers = data.map(user => user.Followers)
         followers.map(follower => {
           follower.followerId = follower.id
@@ -178,12 +189,12 @@ const userController = {
       .catch(err => cb(err))
   },
   putUser: (req, cb) => {
-    if (!req.body.name) throw new Error('User name is required!')
     const { file } = req
     return Promise.all([
       User.findByPk(req.params.user_id),
       imgurFileHandler(file)])
       .then(([user, filePath]) => {
+        if (!req.body.name) throw new Error('User name is required!')
         if (!user) throw new Error("User didn't exist!")
         return user.update({
           account: req.body.account || user.account,

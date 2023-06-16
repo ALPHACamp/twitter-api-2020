@@ -61,8 +61,8 @@ const tweetController = {
       userId,
       description
     })
-    .then(tweet => res.status(200).json(tweet))
-    .catch(err => next(err))
+      .then(tweet => res.status(200).json(tweet))
+      .catch(err => next(err))
   }
 }
 
