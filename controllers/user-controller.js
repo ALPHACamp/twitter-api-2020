@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-felpers')
-const { Op } = require("sequelize")
+const { Op } = require('sequelize')
 
 const userController = {
   getUsers: (req, res, next) => {
