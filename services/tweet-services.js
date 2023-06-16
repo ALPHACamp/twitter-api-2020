@@ -8,7 +8,7 @@ const tweetServices = {
         {
           model: User,
           attributes: {
-            exclude: ['passwords']
+            exclude: ['password']
           }
         },
         Like
@@ -37,7 +37,7 @@ const tweetServices = {
         {
           model: User,
           attributes: {
-            exclude: ['passwords']
+            exclude: ['password']
           }
         },
         Like

@@ -108,7 +108,7 @@ const userServices = {
       where: { UserId: req.params.id },
       order: [['createdAt', 'DESC']],
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-      { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account'] }] }
+        { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account'] }] }
       ]
     })
       .then(replies => {
