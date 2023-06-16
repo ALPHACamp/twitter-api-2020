@@ -5,7 +5,8 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
-// const { imgurFileHandler } = require('../helpers/file-felpers')
+const { imgurFileHandler } = require('../helpers/file-felpers')
+const { Op } = require('sequelize')
 
 const userController = {
   getUsers: (req, res, next) => {
@@ -43,6 +44,10 @@ const userController = {
   },
   getUsersTop: (req, res, next) => {
     return User.findAll({
+      where: {
+        account: { [Op.not]: 'root' },
+        id: { [Op.not]: req.user.id }
+      },
       attributes: { exclude: ['password'] },
       include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }]
     })
@@ -126,10 +131,12 @@ const userController = {
     ])
       .then(([user, tweetsData]) => {
         if (!user) throw new Error('getUserTweets說: 沒這人')
+        req.user.Likes = req.user.Likes || []
         const tweets = tweetsData.map(t => ({
           ...t.toJSON(),
           repliesCount: t.Replies.length,
-          likesCount: t.Likes.length
+          likesCount: t.Likes.length,
+          isLike: req.user && req.user.Likes.some(like => like.TweetId === t.id)
         }))
         res.status(200).json(tweets)
       })
@@ -170,6 +177,7 @@ const userController = {
           {
             model: Tweet,
             include: [
+              { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
               { model: Reply },
               { model: Like }
             ]
@@ -228,18 +236,37 @@ const userController = {
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
+    console.log(req.body)
     const userId = Number(req.params.id)
+    let avatarFile, bannerFile
+    console.log(helpers.getUser(req))
+    if (
+      helpers.getUser(req).id !== 1 &&
+      helpers.getUser(req).followings === []
+    ) {
+      if (req.files.avatar && req.files.avatar.length > 0) {
+        avatarFile = req.files.avatar[0]
+      }
+      if (req.files.banner && req.files.banner.length > 0) {
+        bannerFile = req.files.banner[0]
+      }
+    }
+    console.log('----------- 這 -----------')
     // 沒有這條, 有了token之後, 就可以亂改他人資料了
     if (userId !== helpers.getUser(req).id) throw new Error('只能改自己的啦')
-    const { name, introduction, avatar, banner } = req.body
-    return User.findByPk(userId)
-      .then(userData => {
+    const { name, introduction } = req.body
+    return Promise.all([
+      User.findByPk(userId),
+      imgurFileHandler(avatarFile),
+      imgurFileHandler(bannerFile)
+    ])
+      .then(([userData, avatarUrl, bannerUrl]) => {
         if (!userData) throw new Error('putUser說: 沒這人')
         return userData.update({
           name: name || userData.name,
           introduction: introduction || userData.introduction,
-          avatar: avatar || userData.avatar,
-          banner: banner || userData.banner
+          avatar: avatarUrl || userData.avatar,
+          banner: bannerUrl || userData.banner
         })
       })
       .then(updatedUser => {

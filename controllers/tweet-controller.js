@@ -38,7 +38,8 @@ const tweetController = {
         },
         { model: Reply, attributes: ['id'] },
         { model: Like, attributes: ['id'] }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(tweet => {
         if (!tweet) throw new Error('此推文不存在')
@@ -109,9 +110,9 @@ const tweetController = {
           model: User,
           attributes: [
             'id', 'account', 'name', 'avatar'
-          ],
-          order: [['createdAt', 'DESC']]
-        }
+          ]
+        },
+        order: [['createdAt', 'ASC']] // 回覆串最新的在下面
       })
     ])
       .then(([tweet, replies]) => {
