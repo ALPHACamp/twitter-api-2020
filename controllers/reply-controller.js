@@ -1,4 +1,7 @@
-const { Tweet, Reply } = require('../models')
+const { Tweet, User, Reply } = require('../models')
+const Sequelize = require('sequelize')
+const { literal } = Sequelize
+const moment = require('moment')
 
 const replyController = {
   postComment: (req, res, next) => {
@@ -22,12 +25,37 @@ const replyController = {
     const tweetId = req.params.tweet_id
     return Reply.findAll({
     where: { tweetId },
+    order: [['createdAt', 'DESC']],
+    include: [
+      {
+        model: Tweet,
+        attributes: [
+        [
+          Sequelize.literal('Tweet.id'), 'TweetId'
+        ],
+        [
+          Sequelize.literal('Tweet.description'), 'TweetDescription'
+        ]
+      ]
+      }
+    ],
+    raw: true
   })
-  .then(reply => {
-    if (!reply.length) throw new Error("Replies didn't exist!")
-    res.status(200).json(reply)
-  })
-  .catch(err => next(err))
+  .then((replies) => {
+        if (!replies) throw new Error('Replies are not exists!')
+        const modifyReply = replies.map((reply) => {
+          const createdAt = moment(reply.createdAt).format('YYYY-MM-DD HH:mm:ss')
+          const updatedAt = moment(reply.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+          return {
+            ...reply,
+            createdAt,
+            updatedAt
+          }
+        })
+        
+        return res.status(200).json(modifyReply)
+        })
+  .catch((err) => next(err))
   }
 }  
 

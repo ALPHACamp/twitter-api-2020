@@ -1,37 +1,62 @@
-const Sequelize = require('sequelize')
 const { Tweet, User, Reply } = require('../models')
+const Sequelize = require('sequelize')
+const { literal } = Sequelize
+const moment = require('moment')
 
 const tweetController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       raw: true,
       nest: true,
-      include: [User],
-      attributes: {
+      include: [{
+        model: User,
+        attributes: {
+        exclude: [ 'password', 'role'],
+        
+        }
+      }, 
+    ],
+      attributes: { 
+        exclude: ['UserId'],
         include: [
-          [
-            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'),
-            'repliesCount',
-          ]
+          [literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
         ]
-      },
+     },
     })
-      .then(tweet => res.status(200).json(tweet))
-      .catch(err => next(err))
-  },
-  getTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.tweet_id)
-      .then(tweet => {
-        if (!tweet) throw new Error("The tweet didn't exist!")
-        return tweet
+    .then(tweets => {
+        if (!tweets) throw new Error("The tweets didn't exist!")
+        return res.status(200).json(tweets);
       })
-      .then(tweet => res.status(200).json(tweet))
-      .catch(err => next(err))
+    .catch(err => next(err))
+  },
+
+  getTweet: (req, res, next) => {
+    return Tweet.findByPk(req.params.tweet_id, {
+      include: [{
+        model: User,
+        attributes: {
+        exclude: [ 'password', 'role'],
+        
+        }
+      }, 
+    ],
+      attributes: { 
+        exclude: ['UserId'],
+        include: [
+          [literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
+        ]
+     },
+    })
+    .then(tweet => {
+      if (!tweet) throw new Error("The tweet didn't exist!")
+      return res.status(200).json(tweet)
+    })
+    .catch(err => next(err))
   },
   createTweet: (req, res, next) => {
     const { description } = req.body
     const userId = req.user.id
-    if (!description) throw new Error('Descrption text is required!')
+    if (!description) throw new Error('Descrption is required!')
     return Tweet.create({
       userId,
       description
