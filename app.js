@@ -9,8 +9,15 @@ const passport = require('./config/passport')
 const app = express()
 const port = process.env.PORT || 3000
 
+const corsOptions = {
+  origin: [
+    'https://ywcheng1207.github.io',
+    'http://localhost'
+  ],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+}
 // middleware
-app.use(cors())
+app.use(cors(corsOptions))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
