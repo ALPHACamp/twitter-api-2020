@@ -196,9 +196,13 @@ const userController = {
         ],
         attributes: [
           'id',
+          'UserId',
+          'description',
+          'createdAt',
+          'updatedAt',
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${req.user.id} AND Likes.deletedAt IS NULL) > 0`
+              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${helpers.getUser(req).id} AND Likes.deletedAt IS NULL) > 0`
             ),
             'isLiked'
           ],
@@ -246,9 +250,11 @@ const userController = {
         nest: true,
         attributes: [
           'id',
+          'TweetId',
+          'UserId',
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${userId} AND Likes.deletedAt IS NULL) > 0`
+              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${helpers.getUser(req).id} AND Likes.deletedAt IS NULL) > 0`
             ),
             'isLiked'
           ],
