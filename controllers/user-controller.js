@@ -313,11 +313,15 @@ const userController = {
       if (email || account) {
         const checkUser = await User.findOne({
           where: {
-            [Op.or]: [email ? { email } : {}, account ? { account } : {}]
+            [Op.or]: [email ? { email } : {}, account ? { account } : {}],
+            id: {
+              [Op.not]: currentUserId
+            }
           }
         })
-        if (account !== currentUser.account && checkUser?.account === account) throw new Error('帳號已重複註冊！')
-        if (email !== currentUser.email && checkUser?.email === email) throw new Error('email 已重複註冊！')
+
+        if (checkUser?.account === account) throw new Error('帳號已重複註冊！')
+        if (checkUser?.email === email) throw new Error('email 已重複註冊！')
       }
 
       const user = await User.findByPk(req.params.id)
@@ -398,7 +402,10 @@ const userController = {
           attributes: ['id']
         },
         // 排除目前的使用者
-        where: { id: { [sequelize.Op.not]: currentUserId } },
+        where: {
+          id: { [sequelize.Op.not]: currentUserId },
+          role: { [sequelize.Op.not]: 'admin' }
+        },
         order: [
           [sequelize.literal('followersCount'), 'DESC']
         ],
