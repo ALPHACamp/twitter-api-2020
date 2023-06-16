@@ -88,15 +88,10 @@ const tweetController = {
         ],
       ]
     })
-      .then(tweets => {
-        if (!Array.isArray(tweets)) {
-          tweets = [tweets]; // put tweets in an array
-        }
-        const tweetsData = tweets.map(tweet => ({
-          ...tweet.toJSON(),
-          isLiked: Boolean(tweet.dataValues.isLiked),
-        }));
-        res.json(tweetsData);
+      .then(tweet => {
+        const tweetData = tweet.toJSON()
+        tweetData.isLiked = Boolean(tweetData.isLiked)
+        res.json(tweetData);
       })
       .catch(err => next(err))
   },
