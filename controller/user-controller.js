@@ -95,13 +95,18 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      const result = userReplies.map(r => ({
-        ...r.toJSON(),
-        Tweet: {
-          ...r.Tweet.toJSON(),
-          account: r.Tweet.User.account
+      const result = userReplies.map(r => {
+        if (!r || !r.Tweet) {
+          return null // 或者根据需求返回空对象 {}
         }
-      }))
+        return {
+          ...r.toJSON(),
+          Tweet: {
+            ...r.Tweet.toJSON(),
+            account: r.Tweet.User ? r.Tweet.User.account : null
+          }
+        }
+      }).filter(Boolean) // 过滤掉空对象
       result.forEach(r => {
         delete r.Tweet.User
       })
