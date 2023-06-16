@@ -76,13 +76,15 @@ const userController = {
     return Promise.all([
       User.findByPk(req.params.id, { attributes: { exclude: ['password'] } }),
       Followship.count({ where: { followerId: req.params.id } }),
-      Followship.count({ where: { followingId: req.params.id } })
+      Followship.count({ where: { followingId: req.params.id } }),
+      Tweet.findAll({ where: { UserId: req.params.id } })
     ])
-      .then(([user, follower, following]) => {
+      .then(([user, follower, following, Tweet]) => {
         if (!user) throw new Error(`User didn't exist`)
         user = user.toJSON()
         user.followerCount = follower
         user.followingCount = following
+        user.TweetCount = Tweet.length
         return res.status(200).json(user)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
@@ -152,9 +154,9 @@ const userController = {
             TweetId: likeJson.TweetId,
             createdAt: likeJson.createdAt,
             description: likeJson.Tweet.description,
-            name: likeJson.Tweet.User.name,
-            account: likeJson.Tweet.User.account,
-            avatar: likeJson.Tweet.User.avatar,
+            tweetOwnerName: likeJson.Tweet.User.name,
+            tweetOwnerAccount: likeJson.Tweet.User.account,
+            tweetOwnerAvatar: likeJson.Tweet.User.avatar,
             likeCount: likeJson.Tweet.Likes.length,
             replyCount: likeJson.Tweet.Replies.length,
             isLiked: likeJson.UserId === helpers.getUser(req).id
@@ -190,22 +192,27 @@ const userController = {
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
   getUserFollowers: (req, res) => {
-    User.findByPk(req.params.id, {
-      include: [{ model: User, as: 'Followers', }],
-    })
-      .then(user => {
+    Promise.all([
+      User.findByPk(helpers.getUser(req).id, {
+        include: [{ model: User, as: 'Followings' }]
+      }),
+      User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followers', }]
+      })
+    ])
+
+      .then(([currentUser, user]) => {
         if (!user) throw new Error(`User didn't exist`)
+        const followingsId = currentUser.Followings.map(following => following.id)
         const followers = user.Followers.map(follower => {
-          const followerJson = follower.toJSON()
-          delete followerJson.password
           return {
-            name: follower.name,
-            account: follower.account,
-            avatar: follower.avatar,
-            introduction: follower.introduction,
+            followerName: follower.name,
+            followerAvatar: follower.avatar,
+            followerIntroduction: follower.introduction,
             followerId: follower.Followship.followerId,
             followingId: follower.Followship.followingId,
             createdAt: follower.Followship.createdAt,
+            isFollowed: followingsId.includes(follower.id)
           }
         })
         followers.sort((a, b) => b.createdAt - a.createdAt)
