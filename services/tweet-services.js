@@ -67,12 +67,6 @@ const tweetServices = {
         })])
             .then(([tweet, likes, replies]) => {
                 if (!tweet) throw new Error('推文不存在！')
-                .then(likes = Like.findOne({
-                    where: {
-                        UserId: helpers.getUser(req).id,
-                        TweetId: id
-                        }
-                    }))
                 cb(null, {...tweet,
                     likeCount: likes,
                     replyCount: replies,

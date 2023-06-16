@@ -10,7 +10,7 @@ module.exports = {
           for (let i = 0; i < 10; i++) {
             tweets.push ({
               UserId: user.id,
-              description: faker.lorem.sentence(),
+              description: faker.lorem.text(),
               createdAt: new Date(),
               updatedAt: new Date()
             })

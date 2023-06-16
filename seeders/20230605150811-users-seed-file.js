@@ -110,7 +110,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
         name: 'user9',
         avatar: `https://loremflickr.com/320/240/people`,
-        introduction: faker.lorem.text(),
+        introduction: faker.lorem.sentence(),
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
