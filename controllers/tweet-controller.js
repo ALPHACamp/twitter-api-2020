@@ -13,9 +13,7 @@ const tweetController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (tweets.length === 0) {
-        return res.status(404).json({ status: 'error', message: "Tweets didn't exist!" })
-      }
+      if (tweets.length === 0) throw new Error('資料庫中未找到推文')
       const data = tweets.map(tweet => {
         return {
           id: tweet.id,
@@ -46,9 +44,7 @@ const tweetController = {
             Reply,
             { model: User, as: 'LikedUsers' }]
         })
-      if (!tweet) {
-        return res.status(404).json({ status: 'error', message: "Tweet didn't exist!" })
-      }
+      if (!tweet) throw new Error('資料庫中未找到推文')
       const data = {
         id: tweet.id,
         UserId: tweet.UserId,
@@ -70,14 +66,12 @@ const tweetController = {
     try {
       const UserId = helpers.getUser(req).id
       const { description } = req.body
-      if (!description) {
-        return res.status(400).json({ status: 'error', message: 'Please input tweet.' })
-      }
-      if (description && description.length > 140) {
-        return res.status(409).json({ status: 'error', message: "Tweet can't be more than 140 words." })
-      }
-      const user = await User.findByPk(UserId)
-      delete user.password
+      if (!description) throw new Error('請輸入內容')
+      if (description && description.length > 140) throw new Error('內容字數超過140字元限制')
+      const user = await User.findOne({
+        where: { id: UserId },
+        attributes: ['name', 'account', 'avatar']
+      })
       const data = await Tweet.create({
         UserId,
         description
@@ -90,8 +84,11 @@ const tweetController = {
   putTweet: async (req, res, next) => {
     try {
       const tweet = await Tweet.findByPk(req.params.id)
-      if (!tweet) return res.status(404).json({ status: 'error', message: "Tweet didn't exist!" })
-      const data = await tweet.update({ description: req.body.description })
+      const { description } = req.body
+      if (!description) throw new Error('請輸入內容')
+      if (!tweet) throw new Error('資料庫中未找到推文')
+      if (description && description.length > 140) throw new Error('內容字數超過140字元限制')
+      const data = await tweet.update({ description })
       return res.status(200).json({ status: 'success', data })
     } catch (error) {
       next(error)
@@ -105,27 +102,14 @@ const tweetController = {
         TweetId,
         { include: User }
       )
-      if (!tweet) {
-        return res.status(404).json({ status: 'error', message: "Tweet didn't exist!" })
-      }
-      const likedTweetAuthor = tweet.dataValues.User.dataValues.account
+      if (!tweet) throw new Error('資料庫中未找到推文')
+      // const likedTweetAuthor = tweet.dataValues.User.dataValues.account
       const isLiked = await Like.findOne({
         where: { UserId, TweetId }
       })
-      if (isLiked) {
-        return res.status(400).json({ status: 'error', message: 'You have liked this tweet.' })
-      }
-      const createdLike = await Like.create({ UserId, TweetId })
-      console.log(createdLike)
-      return res.status(200).json({
-        status: 'success',
-        data: {
-          id: createdLike.id,
-          UserId: createdLike.UserId,
-          TweetId: createdLike.TweetId,
-          likedTweetAuthor
-        }
-      })
+      if (isLiked) throw new Error('你已經按讚本篇推文')
+      const data = await Like.create({ UserId, TweetId })
+      return res.status(200).json({ status: 'success', data })
     } catch (err) {
       next(err)
     }
@@ -137,24 +121,14 @@ const tweetController = {
       const tweet = await Tweet.findByPk(
         TweetId, { include: User }
       )
-      if (!tweet) {
-        return res.status(404).json({ status: 'error', message: "Tweet didn't exist!" })
-      }
-      const unlikedTweetAuthor = tweet.dataValues.User.dataValues.account
+      if (!tweet) throw new Error('資料庫中未找到推文')
+      // const unlikedTweetAuthor = tweet.dataValues.User.dataValues.account
       const isliked = await Like.findOne({
         where: { UserId, TweetId }
       })
-      if (!isliked) { return res.status(400).json({ status: 'error', message: "You haven't liked this tweet" }) }
-      const deletedLike = await isliked.destroy()
-      return res.status(200).json({
-        status: 'success',
-        data: {
-          id: deletedLike.id,
-          Userid: deletedLike.UserId,
-          Tweetid: deletedLike.TweetId,
-          unlikedTweetAuthor
-        }
-      })
+      if (!isliked) throw new Error('你還沒按讚過本篇推文')
+      const data = await isliked.destroy()
+      return res.status(200).json({ status: 'success', data })
     } catch (err) {
       next(err)
     }
@@ -169,9 +143,7 @@ const tweetController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (replies.length === 0) {
-        return res.status(404).json({ status: 'error', message: "Replies didn't exist." })
-      }
+      if (replies.length === 0) throw new Error('資料庫中未找到留言')
       const data = replies.map(reply => {
         return {
           id: reply.id,
@@ -194,17 +166,11 @@ const tweetController = {
     try {
       const TweetId = req.params.tweet_id
       const tweet = await Tweet.findByPk(TweetId, { include: User })
-      if (!tweet) {
-        return res.status(404).json({ status: 'error', message: "Tweet didn't exist." })
-      }
+      if (!tweet) throw new Error('資料庫中未找到推文')
       const repliedTweetAuthor = tweet.dataValues.User.dataValues.account
       const { comment } = req.body
-      if (!comment) {
-        return res.status(400).json({ status: 'error', message: 'Please input comment.' })
-      }
-      if (comment && comment.length > 50) {
-        return res.status(409).json({ status: 'error', message: "Comment can't be more than 50 words." })
-      }
+      if (!comment) throw new Error('請輸入留言內容')
+      if (comment && comment.length > 50) throw new Error('內容自數超過50字元限制')
       const createdReply = await Reply.create({
         UserId: helpers.getUser(req).id,
         TweetId,

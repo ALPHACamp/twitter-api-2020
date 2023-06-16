@@ -23,14 +23,10 @@ const followController = {
       })
 
       // 確認兩者同時存在
-      if (!followingUser || !followerUser) {
-        return res.status(404).json({ status: 'error', message: "Can't' find this followingId or followerId." })
-      }
+      if (!followingUser || !followerUser) throw new Error('資料庫中未找到followingId或followerId')
 
       // 不能追蹤自己
-      if (Number(followerId) === Number(followingId)) {
-        return res.status(403).json({ status: 'error', message: "You can't' follow yourself." })
-      }
+      if (Number(followerId) === Number(followingId)) throw new Error('無法追蹤自己本人')
 
       // 確認是否已追蹤
       const followship = await Followship.findOne({
@@ -40,9 +36,7 @@ const followController = {
         }
       })
 
-      if (followship) {
-        return res.status(409).json({ status: 'error', message: `You have followed ${followingUser.account}` })
-      }
+      if (followship) throw new Error('你已經追蹤該帳號')
 
       const data = await Followship.create({
         followerId,
@@ -72,9 +66,7 @@ const followController = {
         }
       })
 
-      if (!followingUser || !followerUser) {
-        return res.status(404).json({ status: 'error', message: "Can't' find this followingId or followerId." })
-      }
+      if (!followingUser || !followerUser) throw new Error('資料庫中未找到followingId或followerId')
 
       const followship = await Followship.findOne({
         where: {
@@ -83,9 +75,7 @@ const followController = {
         }
       })
 
-      if (!followship) {
-        return res.status(409).json({ status: 'error', message: `You didn't followed ${followingUser.account}.` })
-      }
+      if (!followship) throw new Error('你尚未追蹤該帳號')
 
       const data = await followship.destroy()
 
