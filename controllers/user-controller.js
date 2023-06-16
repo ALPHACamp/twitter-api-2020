@@ -148,6 +148,7 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
+      if (tweets.length === 0) throw new Error('該用戶沒有推文')
       tweets = await tweets.map(tweet => {
         return {
           id: tweet.id,
@@ -176,6 +177,7 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
+      if (replies.length === 0) throw new Error('該用戶沒有留言')
       return res.status(200).json(replies)
     } catch (err) {
       next(err)
@@ -196,6 +198,7 @@ const userController = {
           }
         ]
       })
+      if (likedTweets.length === 0) throw new Error('該用戶沒有按讚推文')
       likedTweets = await Promise.all(likedTweets.map(async likedTweet => {
         return {
           TweetId: likedTweet.Tweet.id,
@@ -227,6 +230,7 @@ const userController = {
         ]
       })
       followings = followings[0].Followings
+      if (followings.length === 0) throw new Error('該使用者未追蹤任何人')
       followings = await Promise.all(followings.map(async following => {
         return {
           followshipId: following.Followship.id,
@@ -254,6 +258,7 @@ const userController = {
         ]
       })
       followers = followers[0].Followers
+      if (followers.length === 0) throw new Error('該使用者未被任何人追蹤')
       followers = await Promise.all(followers.map(async follower => {
         return {
           followshipId: follower.Followship.id,
@@ -273,6 +278,7 @@ const userController = {
   },
   getTopUsers: async (req, res, next) => {
     try {
+      const UserId = helpers.getUser(req).id
       let users = await User.findAll({
         where: { role: 'user' },
         attributes: ['id', 'name', 'account', 'avatar'],
@@ -304,12 +310,16 @@ const userController = {
           isFollowed: isFollowed[isFollowedBoolean]
         }
       }))
-      users = users.sort((a, b) => b.followerCount - a.followerCount)
-      let topUsers = []
-      for (let i = 0; i < 10; i++) {
-        if (!users[i]) break // 避免少於10位用戶時還要回傳null
-        topUsers = topUsers.concat(users[i])
-      }
+      const topUsers = users
+        .filter(u => u.id !== UserId)
+        .sort((a, b) => b.followerCount - a.followerCount)
+        .slice(0, 10)
+        .filter(u => u.followerCount > 0)
+      // let topUsers = []
+      // for (let i = 0; i < 10; i++) {
+      //   if (!users[i]) break // 避免少於10位用戶時還要回傳null
+      //   topUsers = topUsers.concat(users[i])
+      // }
       return res.status(200).json(topUsers)
     } catch (err) {
       next(err)

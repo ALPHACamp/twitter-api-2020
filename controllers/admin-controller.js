@@ -32,6 +32,7 @@ const adminController = {
           { model: User, as: 'Followings' }
         ]
       })
+      if (users.length === 0) throw new Error('資料庫中未找到使用者')
       users = await Promise.all(users.map(async user => ({
         ...user.toJSON(),
         likes: user.Tweets.LikedUsers?.length,
@@ -83,6 +84,7 @@ const adminController = {
         ],
         order: [['createdAt', 'DESC']]
       })
+      if (tweets.length === 0) throw new Error('資料庫中未找到推文')
       tweets = await Promise.all(tweets.map(async tweet => {
         if (tweet.description.length > 50) {
           tweet.description = tweet.description.substring(0, 50) + '...'
@@ -112,11 +114,7 @@ const adminController = {
   deleteTweet: async (req, res, next) => {
     try {
       let tweet = await Tweet.findByPk(req.params.id)
-      if (!tweet) {
-        const err = new Error("tweet didn't exist!")
-        err.status = 404
-        throw err
-      }
+      if (!tweet) throw new Error('資料庫中未找到推文')
       tweet = await tweet.destroy()
       return res.json({
         status: 'delete success',
