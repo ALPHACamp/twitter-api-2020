@@ -200,7 +200,8 @@ const userController = {
                   model: User,
                   as: 'TweetUser',
                   attributes: ['id', 'name', 'account', 'avatar']
-                }
+                },
+                { model: Like, as: 'TweetLike', attributes: ['id', 'UserId'] }
               ]
             }
           ],
@@ -219,7 +220,12 @@ const userController = {
         error.status = 404
         throw error
       }
-      userLiked.forEach(e => { e.isLiked = true })
+      userLiked.forEach(e => {
+        e.isLiked = false
+        if (e.Tweet.TweetLike.UserId === getUser(req).id) {
+          e.isLiked = true
+        }
+      })
       return res.status(200).json(userLiked)
     } catch (error) {
       next(error)
