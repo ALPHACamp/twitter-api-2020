@@ -51,7 +51,7 @@ Example app listening on port 3000!
 
 12. 伺服器將在 http://localhost:3000/ 上啟動運行
 
-13. 若要暫停使用伺服器，請在終端機中按下 `Ctrl + C` (macOS: `Command + C`)
+13. 若要暫停使用伺服器，請在終端機按下 `Ctrl + C` (macOS: `Command + C`)
 
 ## 路由列表
 請參考[API文件說明](https://www.notion.so/API-7208e32ecbe34cbe945813ead050aab3)以獲得詳細的路由清單、必要參數和回傳格式
