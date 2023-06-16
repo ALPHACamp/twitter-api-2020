@@ -242,14 +242,15 @@ const userController = {
       id = Number(id)
 
       // 確認使用者是否存在 與 其追蹤者
-      const [user, userFollows] = await Promise.all([
+      const [user, userFollows, followings] = await Promise.all([
         User.findByPk(id),
         Followship.findAll({
           where: { followerId: Number(id) },
           include: [{ model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'introduction'] }],
           raw: true,
           nest: true
-        })
+        }),
+        Followship.findAll({ where: { followerId: getUser(req).id } })
       ])
 
       // 錯誤處理
@@ -263,7 +264,17 @@ const userController = {
         error.status = 404
         throw error
       }
-      userFollows.forEach(e => { e.isFollowed = true })
+
+      const dic = {}
+      for (let i = 0; i < followings.length; i++) {
+        dic[followings[i].followingId] = i
+      }
+      userFollows.forEach(e => {
+        e.isFollowed = false
+        if (dic[e.followingId] >= 0) {
+          e.isFollowed = true
+        }
+      })
       return res.status(200).json(userFollows)
     } catch (error) {
       next(error)
