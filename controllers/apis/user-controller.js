@@ -296,6 +296,7 @@ const userController = {
       .then(([user, followship]) => {
         if (!user) throw new Error("User didn't exist!")
         if (followship) throw new Error('You are already following this user!')
+        if (helpers.getUser(req).id === Number(req.body.id)) throw new Error('Cannot follow oneself!')
         return Followship.create({
           followerId: helpers.getUser(req).id,
           followingId: userId
