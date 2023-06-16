@@ -14,7 +14,7 @@ const corsOptions = {
     'https://ywcheng1207.github.io',
     'http://localhost'
   ],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'
 }
 // middleware
 app.use(cors(corsOptions))
