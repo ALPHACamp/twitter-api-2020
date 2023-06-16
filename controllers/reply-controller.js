@@ -26,36 +26,76 @@ const replyController = {
     return Reply.findAll({
     where: { tweetId },
     order: [['createdAt', 'DESC']],
-    include: [
-      {
-        model: Tweet,
-        attributes: [
-        [
-          Sequelize.literal('Tweet.id'), 'TweetId'
-        ],
-        [
-          Sequelize.literal('Tweet.description'), 'TweetDescription'
-        ]
-      ]
-      }
-    ],
+    attributes: {
+      exclude: ['UserId', 'TweetId'],
+    },
     raw: true
   })
   .then((replies) => {
-        if (!replies) throw new Error('Replies are not exists!')
-        const modifyReply = replies.map((reply) => {
-          const createdAt = moment(reply.createdAt).format('YYYY-MM-DD HH:mm:ss')
-          const updatedAt = moment(reply.updatedAt).format('YYYY-MM-DD HH:mm:ss')
-          return {
-            ...reply,
-            createdAt,
-            updatedAt
-          }
-        })
-        
-        return res.status(200).json(modifyReply)
-        })
-  .catch((err) => next(err))
+    if (!replies.length) throw new Error("Replies didn't exists!")
+    res.status(200).json(replies)
+  })
+  .catch(err => next(err))
+  },
+  editComment: (req, res, next) => {
+    const replyId = req.params.reply_id
+    const userId = req.user.id
+    return Reply.findByPk(replyId, {
+      raw: true,
+      nest: true,
+      attributes: {
+      exclude: ['UserId', 'TweetId'],
+      },
+    })
+    .then(reply => {
+      if (!reply) throw new Error("Reply didn't exist!")
+      if (reply.userId !== userId) {
+        throw new Error('You are not authorized to edit this reply!')
+      }
+      return res.status(200).json(reply)
+    })
+    .catch(err => next(err))
+  },
+  putComment: (req, res, next) => {
+    const replyId = req.params.reply_id
+    const userId = req.user.id
+    return Reply.findByPk(replyId)
+    .then(reply => {
+      if (!reply) {
+        throw new Error('Reply not found!')
+      }
+      if (reply.userId !== userId) {
+        throw new Error('You are not authorized to edit this reply!')
+      }
+      if (!req.body.comment) throw new Error('Comment text is required!')
+      
+      return reply.update({
+        comment: req.body.comment
+      })
+    })
+    .then(updatedReply => {
+      res.status(200).json(updatedReply)
+    })
+    .catch(err => next(err))
+  },
+  deletedComment: (req, res, next) => {
+    const replyId = req.params.reply_id
+    const userId = req.user.id
+    return Reply.findByPk(replyId)
+    .then(reply => {
+      if (!reply) {
+        throw new Error('Reply not found!')
+      }
+      if (reply.userId !== userId) {
+        throw new Error('You are not authorized to delete this reply!')
+      }
+      
+      return reply.destroy()
+    })
+    .then(deletedReply => {
+      res.status(200).json(deletedReply)
+    })
+    .catch(err => next(err))
   }
 }  
 

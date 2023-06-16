@@ -65,18 +65,8 @@ const adminController = {
     })
       .then((tweets) => {
         if (!tweets) throw new Error('No tweets found')
-        const processedTweets = tweets.map((tweet) => {
-          const createdAt = moment(tweet.createdAt).format('YYYY-MM-DD HH:mm:ss')
-          const updatedAt = moment(tweet.updatedAt).format('YYYY-MM-DD HH:mm:ss')
-          const diffCreatedAt = moment().subtract(tweet.diffCreatedAt, 'seconds').fromNow()
-          return {
-            ...tweet,
-            createdAt,
-            updatedAt,
-            diffCreatedAt
-          }
-        })
-        return res.status(200).json(processedTweets)
+        return res.status(200).json(tweets)
+        
       })
       .catch((err) => next(err))
   },
