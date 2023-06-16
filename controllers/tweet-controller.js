@@ -61,10 +61,7 @@ const tweetController = {
   putTweet: (req, res, next) => {
     const tweetId = req.params.tweet_id
     const userId = req.user.id
-    return Tweet.findByPk(tweetId, {
-      raw: true,
-      nest: true
-    })
+    return Tweet.findByPk(tweetId)
     .then(tweet => {
       if (!tweet) {
         throw new Error('Tweet not found!')
