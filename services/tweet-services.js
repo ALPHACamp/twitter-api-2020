@@ -67,22 +67,21 @@ const tweetServices = {
         })])
             .then(([tweet, likes, replies]) => {
                 if (!tweet) throw new Error('推文不存在！')
-            const like = Like.findOne({
-                where: {
-                    UserId: helpers.getUser(req).id,
-                    TweetId: id
-                }
-            })
+                .then(likes = Like.findOne({
+                    where: {
+                        UserId: helpers.getUser(req).id,
+                        TweetId: id
+                        }
+                    }))
                 cb(null, {...tweet,
                     likeCount: likes,
                     replyCount: replies,
                     createdAt: switchTime(tweet.createdAt),
                     countDown: relativeTimeFromNow(tweet.createdAt),
-                    isLiked: !! like
+                    isLiked: !! likes
             })
         })
-            .
-        catch (err => cb(err))
+            .catch (err => cb(err))
     },
     postTweets: async(req, cb) => {
         try {
