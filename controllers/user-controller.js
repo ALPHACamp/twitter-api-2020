@@ -199,40 +199,43 @@ const userController = {
   },
   getUserFollowings: (req, res, next) => {
     const userId = req.params.id
-    return Promise.all([
-      User.findByPk(userId),
-      User.findByPk(req.params.id, {
-        include: [
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
-        ]
-      })
-    ])
-      .then(([user, followingsData]) => {
-        if (!user) throw new Error('getUserFollowings說: 沒這人')
-        res.status(200).json(followingsData)
+    return User.findByPk(userId, {
+      include: [
+        { model: User, as: 'Followings' }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then((followingsData) => {
+        if (!followingsData) throw new Error('getUserFollowings說: 沒這人')
+        const followings = followingsData.Followings.map(f => ({
+          ...f.toJSON(),
+          followingId: f.Followship.followingId
+        }))
+        res.status(200).json(followings)
       })
       .catch(err => next(err))
   },
   getUserFollowers: (req, res, next) => {
     const userId = req.params.id
-    return Promise.all([
-      User.findByPk(userId),
-      Followship.findAll({
-        where: { followingId: userId },
-        raw: true,
-        order: [['createdAt', 'DESC']]
-      })
-    ])
-      .then(([user, followersData]) => {
-        if (!user) throw new Error('getUserFollowers說: 沒這人')
-        if (req.user.Followings) {
-          followersData = followersData.map(follower => ({
-            ...follower,
-            isFollowing: req.user && req.user.Followings.some(following => following.id === follower.id)
-          }))
-        }
-        res.status(200).json(followersData)
+    return User.findByPk(userId, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then((followersData) => {
+        if (!followersData) throw new Error('getUserFollowers說: 沒這人')
+        const followingsPool = []
+        followersData.Followings.forEach(f => {
+          followingsPool.push(f.Followship.followingId)
+        })
+        const followers = followersData.Followers.map(f => ({
+          ...f.toJSON(),
+          followerId: f.Followship.followerId,
+          isfollowing: followingsPool.includes(f.id)
+        }))
+        res.status(200).json(followers)
       })
       .catch(err => next(err))
   },
