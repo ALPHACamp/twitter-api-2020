@@ -11,63 +11,52 @@ const tweetController = {
       include: [{
         model: User,
         attributes: {
-        exclude: ['createdAt', 'updatedAt', 'password', 'role'],
-        include: [
-          [Sequelize.literal('DATE_FORMAT(User.created_at, "%Y-%m-%d %H:%i:%s")'), 'createdAt'],
-          [Sequelize.literal('DATE_FORMAT(User.updated_at, "%Y-%m-%d %H:%i:%s")'), 'updatedAt']
-          ]
+        exclude: [ 'password', 'role'],
+        
         }
       }, 
-      // {
-      //   model: Reply,
-      //   attributes: {
-      //   exclude: ['UserId', 'TweetId', 'createdAt', 'updatedAt'], // 排除原始的 createdAt 和 updatedAt
-      //   include: [
-      //     [Sequelize.literal('DATE_FORMAT(Replies.created_at, "%Y-%m-%d %H:%i:%s")'), 'createdAt'],
-      //     [Sequelize.literal('DATE_FORMAT(Replies.updated_at, "%Y-%m-%d %H:%i:%s")'), 'updatedAt']
-      //     ]
-      //   }
-      // }
     ],
       attributes: { 
-        exclude: ['UserId', 'createdAt', 'updatedAt'],
+        exclude: ['UserId'],
         include: [
           [literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
-          [Sequelize.literal('DATE_FORMAT(Tweet.created_at, "%Y-%m-%d %H:%i:%s")'), 'createdAt'],
-          [Sequelize.literal('DATE_FORMAT(Tweet.updated_at, "%Y-%m-%d %H:%i:%s")'), 'updatedAt']
         ]
      },
     })
     .then(tweets => {
-      const modifiedTweets = tweets.map(tweet => {
-        // const modifiedReplies = tweets
-          // .filter(t => t.id === tweet.id)
-          // .map(t => t.Replies);
-
-        return {
-          ...tweet,
-          // Replies: modifiedReplies
-        };
-      });
-
-      return res.status(200).json(modifiedTweets);
-    })
+        if (!tweets) throw new Error("The tweets didn't exist!")
+        return res.status(200).json(tweets);
+      })
     .catch(err => next(err))
   },
 
   getTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.tweet_id)
+    return Tweet.findByPk(req.params.tweet_id, {
+      include: [{
+        model: User,
+        attributes: {
+        exclude: [ 'password', 'role'],
+        
+        }
+      }, 
+    ],
+      attributes: { 
+        exclude: ['UserId'],
+        include: [
+          [literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
+        ]
+     },
+    })
     .then(tweet => {
       if (!tweet) throw new Error("The tweet didn't exist!")
-      return tweet
+      return res.status(200).json(tweet)
     })
-    .then(tweet => res.status(200).json(tweet))
     .catch(err => next(err))
   },
   createTweet: (req, res, next) => {
     const { description } = req.body
     const userId = req.user.id
-    if (!description) throw new Error('Descrption text is required!')
+    if (!description) throw new Error('Descrption is required!')
     return Tweet.create({
       userId,
       description
