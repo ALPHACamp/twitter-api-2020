@@ -305,6 +305,8 @@ const userController = {
       if (!isUser(req)) newErrorGenerate('使用者非本帳號無權限編輯', 400)
       const { name, account, email, password, checkPassword, introduction } = req.body
       const { files } = req
+      console.log(files)
+      if (!files) newErrorGenerate('照片不可為空', 400)
       if (account ? await User.findOne({ attributes: ['id'], where: { account: account.trim() } }) : false) newErrorGenerate('account 已重複註冊', 400)
       if (email ? await User.findOne({ attributes: ['id'], where: { email: email.trim() } }) : false) newErrorGenerate('email 已重複註冊', 400)
       if (name?.length > USERS_WORD_LIMIT) newErrorGenerate('字數超出上限', 400)
