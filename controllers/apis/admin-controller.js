@@ -30,7 +30,7 @@ const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
-        attributes: ['id', 'name', 'account'],
+        attributes: ['id', 'name', 'account', 'avatar', 'background'],
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' },
@@ -59,7 +59,7 @@ const adminController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
-        include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }],
+        include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] }],
         order: [['createdAt', 'DESC']]
       })
 
