@@ -1,5 +1,5 @@
 'use strict'
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const banner = 'https://i.imgur.com/jsrSDDm.png'
 const faker = require('faker')
 
