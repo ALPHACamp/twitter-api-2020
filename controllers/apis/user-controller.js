@@ -167,23 +167,28 @@ const userController = {
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
   getUserFollowings: (req, res) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        {
-          model: User, as: 'Followings',
-          attributes: ['id', 'name', 'introduction', 'avatar'],
-          through: { attributes: ['createdAt'] },
-        }
-      ],
-    })
-      .then(user => {
+    return Promise.all([
+      User.findByPk(helpers.getUser(req).id, { include: [{ model: User, as: 'Followings' }] }),
+      User.findByPk(req.params.id, {
+        include: [
+          {
+            model: User, as: 'Followings',
+            attributes: ['id', 'name', 'introduction', 'avatar'],
+            through: { attributes: ['createdAt'] },
+          }
+        ],
+      })
+    ])
+      .then(([currentUser, user]) => {
         if (!user) throw new Error(`User didn't exist`)
+        const followingsId = currentUser.Followings.map(following => following.id)
         let followings = user.Followings.map(following => ({
           followingId: following.id,
           followingName: following.name,
           followingAvatar: following.avatar,
           followingIntroduction: following.introduction,
-          followshipCreatedAt: following.Followship.createdAt
+          followshipCreatedAt: following.Followship.createdAt,
+          isFollowing: followingsId.includes(following.id)
         }))
         followings = followings.sort((a, b) =>
           new Date(b.followshipCreatedAt) - new Date(a.followshipCreatedAt))
