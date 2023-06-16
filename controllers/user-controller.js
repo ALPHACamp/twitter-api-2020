@@ -285,8 +285,9 @@ const userController = {
       if (password !== checkPassword) throw new Error('密碼與確認密碼不符')
     }
     return Promise.all([
-      User.findOne({ where: { account } }),
-      User.findOne({ where: { email } })
+      // 反查, 但是要排除自己的account & email
+      User.findOne({ where: { account, id: { [Op.not]: req.user.id } } }),
+      User.findOne({ where: { email, id: { [Op.not]: req.user.id } } })
     ])
       .then(([user1, user2]) => {
         if (user1) throw new Error('account 已重複註冊！')
@@ -294,12 +295,15 @@ const userController = {
         return User.findByPk(userId)
           .then(userData => {
             if (!userData) throw new Error('patchUser說: 沒這人')
-            return userData.update({
-              name: name || userData.name,
-              account: account || userData.account,
-              email: email || userData.email,
-              password: password || userData.password
-            })
+            return bcrypt.hash(password, 10)
+              .then(hash => {
+                return userData.update({
+                  name: name || userData.name,
+                  account: account || userData.account,
+                  email: email || userData.email,
+                  password: hash || userData.password
+                })
+              })
           })
       })
       .then(updatedUser => {
