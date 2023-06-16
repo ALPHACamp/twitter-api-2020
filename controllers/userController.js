@@ -210,7 +210,7 @@ const userController = {
             : false
         }))
         .sort((a, b) => b.followerCount - a.followerCount)
-      const final = data.map(({ Followers, ...rest }) => rest)
+      const final = data.map(({ Followers, ...rest }) => rest).slice(0, 10)
       res.status(200).json(final)
     } catch (err) {
       next(err)
