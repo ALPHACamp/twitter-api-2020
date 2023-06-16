@@ -81,8 +81,7 @@ const tweetServices = {
                     isLiked: !! likes
             })
         })
-            .
-        catch (err => cb(err))
+            .catch (err => cb(err))
     },
     postTweets: async(req, cb) => {
         try {
