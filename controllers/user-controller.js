@@ -34,7 +34,7 @@ const userController = {
           isFollowing: req.user && req.user.Followings.some(following => following.id === user.id),
           isFollower: req.user && req.user.Followers.some(follower => follower.id === user.id),
           followersCount: req.user && req.user.Followers.length,
-          followingsCount: req.user && req.user.Followers.length
+          followingsCount: req.user && req.user.Followings.length
         }
         // res.json({ status: 'success', user: user.toJSON() })
         delete user.password
@@ -293,7 +293,7 @@ const userController = {
         if (user2) throw new Error('email 已重複註冊！')
         return User.findByPk(userId)
           .then(userData => {
-            if (!userData) throw new Error('putUser說: 沒這人')
+            if (!userData) throw new Error('patchUser說: 沒這人')
             return userData.update({
               name: name || userData.name,
               account: account || userData.account,
