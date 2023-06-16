@@ -288,7 +288,7 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']],
         // nest: true
-      });
+      })
 
       const ThisUserId = helpers.getUser(req).id
       const userFollowingsData = followings.map(following => ({
@@ -319,15 +319,28 @@ const userController = {
           }
         ],
         order: [['createdAt', 'DESC']],
+        attributes: [
+          'followerId',
+          'followingId',
+          'createdAt',
+          'updatedAt',
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${helpers.getUser(req).id} AND Followships.followingId = follower.id ) > 0`
+            ),
+            'isFollowed'
+          ],
+        ],
         // nest: true
-      });
+      })
 
-      const ThisUserId = helpers.getUser(req).id
-      const userFollowersData = followers.map(follower => ({
-        ...follower.toJSON(),
-        isCurrentUserFollowed:
-          follower.followingId.toString() === ThisUserId.toString()
-      }))
+      const userFollowersData = followers.map(follower => {
+        const isCurrentUserFollowed = follower.getDataValue('isFollowed') === 1
+        return {
+          ...follower.Follower.toJSON(),
+          isCurrentUserFollowed,
+        }
+      })
       res.status(200).json(userFollowersData)
     } catch (err) {
       next(err)
