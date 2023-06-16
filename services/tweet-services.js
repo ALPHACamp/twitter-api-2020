@@ -41,50 +41,58 @@ const tweetServices = {
             cb(err)
         }
     },
-    getTweet: (req, cb) => {
-        const {
-            id
-        } = req.params
-        return Promise.all([
-        Tweet.findByPk(id, {
+    getTweet: async (req, cb) => {
+    try {
+        const { id } = req.params;
+        
+        const tweet = await Tweet.findOne({
+            where: { id },
             include: [
-            User ],
-            nest: true,
-            raw: true
-        }),
-        Like.count({
+                {
+                    model: User,
+                    attributes: ['name', 'avatar', 'account']
+                },
+                {
+                    model: Like,
+                    attributes: ['id']
+                },
+                {
+                    model: Reply,
+                    attributes: ['id']
+                }
+            ],
+        });
+
+        if (!tweet) {
+            throw new Error('推文不存在！');
+        }
+
+        const isLiked = await Like.findOne({
             where: {
-                TweetId: id
+                TweetId: id,
+                UserId: helpers.getUser(req).id
             }
-        }),
-        Reply.count({
-            where: {
-                TweetId: id
-            },
-            order: [
-                ['createdAt', 'DESC']
-            ]
-        })])
-            .then(([tweet, likes, replies,isliked ]) => {
-                if (!tweet) throw new Error('推文不存在！')
-                return  isliked = Like.findOne({
-                where: {
-                    TweetId: id,
-                    UserId : helpers.getUser(req).id
-                    }
-                })
-                .then((isliked) => {
-                cb(null, {
-                    ...tweet,
-                    likeCount: likes,
-                    replyCount: replies,
-                    createdAt: switchTime(tweet.createdAt),
-                    countDown: relativeTimeFromNow(tweet.createdAt),
-                    isLiked: (isliked !== null)
-                })
-            })
-        })
-            .catch (err => cb(err))
+        });
+
+        const likeCount = await Like.count({
+            where: { TweetId: id }
+        });
+
+        const replyCount = await Reply.count({
+            where: { TweetId: id }
+        });
+
+        cb(null, {
+            ...tweet.toJSON(),
+            likeCount,
+            replyCount,
+            createdAt: switchTime(tweet.createdAt),
+            countDown: relativeTimeFromNow(tweet.createdAt),
+            isLiked: !!isLiked
+        });
+    } catch (err) {
+        cb(err);
+    }
     },
     postTweets: async(req, cb) => {
         try {
