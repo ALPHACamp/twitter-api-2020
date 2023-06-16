@@ -11,6 +11,7 @@ module.exports = {
       role: 'admin',
       name: 'root',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
+      cover: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
       created_at: new Date(),
       updated_at: new Date()
@@ -21,6 +22,7 @@ module.exports = {
       role: 'user',
       name: 'user1',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
+      cover: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
       created_at: new Date(),
       updated_at: new Date()
@@ -31,6 +33,7 @@ module.exports = {
       role: 'user',
       name: 'user2',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
+      cover: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
       created_at: new Date(),
       updated_at: new Date()
@@ -41,6 +44,7 @@ module.exports = {
       role: 'user',
       name: 'user3',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
+      cover: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
       created_at: new Date(),
       updated_at: new Date()
@@ -51,6 +55,7 @@ module.exports = {
       role: 'user',
       name: 'user4',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
+      cover: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
       created_at: new Date(),
       updated_at: new Date()
@@ -62,6 +67,7 @@ module.exports = {
       role: 'user',
       name: 'user5',
       avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
+      cover: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
       introduction: faker.lorem.text(),
       created_at: new Date(),
       updated_at: new Date()

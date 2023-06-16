@@ -49,6 +49,9 @@ router.post('/api/tweets/:id/unlike', authenticated, authenticatedUser, likeCont
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.createTweet)
 router.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 router.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
+router.get('/api/tweets/:tweet_id/edit', authenticated, authenticatedUser, tweetController.editTweet)
+router.put('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.putTweet)
+router.delete('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.deletedTweet)
 
 //followships
 router.post('/api/followships', authenticated, authenticatedUser, followController.addFollowing)

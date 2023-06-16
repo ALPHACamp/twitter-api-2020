@@ -3,6 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const express = require('express')
 const session = require('express-session')
+const cors = require('cors')
 const passport = require('./config/passport')
 const flash = require('connect-flash')
 const path = require('path')
@@ -17,6 +18,7 @@ const port = process.env.PORT || 3000
 
 const SESSION_SECRET = 'secret'
 
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 

@@ -29,54 +29,17 @@ const replyController = {
     attributes: {
       exclude: ['UserId', 'TweetId'],
     },
-    // include: [{
-    //     model: User,
-    //     attributes: {
-    //     exclude: [ 'password', 'role'],
-        
-    //     }
-    //   }, {
-    //     model: Tweet,
-    //     include: [
-    //         {
-    //           model: User,
-    //           attributes: ['id', 'account', 'name', 'avatar']
-    //         }
-    //       ]
-    //   }
-    // ],
     raw: true
   })
   .then((replies) => {
     if (!replies) throw new Error("Replies didn't exists!")
-  //   const nestedReplies = replies.map((reply) => ({
-  //   // reply
-  //   replyId: reply.id,
-  //   comment: reply.comment,
-  //   createdAt: reply.createdAt,
-  //   updatedAt: reply.updatedAt,
-  //   // reply's userId
-  //   replierUserData: {
-  //     replierUserId: reply['User.id'],
-  //     account: reply['User.account'],
-  //     name: reply['User.name'],
-  //     avatar: reply['User.avatar'],
-  //     createdAt: reply.createdAt,
-  //     updatedAt: reply.updatedAt,
-  //   },
-  //   tweetData: {
-  //     tweetId: reply.TweetId,
-  //     tweetText: reply['Tweet.description'],
-  //     tweetPosterId: reply['Tweet.User.id'],
-  //     tweetPosterAccount: reply['Tweet.User.account'],
-  //     createdAt: reply['Tweet.createdAt'],
-  //     updatedAt: reply['Tweet.updatedAt']
-  //   }
-  // }))
-
     res.status(200).json(replies)
   })
-  .catch((err) => next(err))
+  .then(reply => {
+    if (!reply.length) throw new Error("Replies didn't exist!")
+    res.status(200).json(reply)
+  })
+  .catch(err => next(err))
   }
 }  
 

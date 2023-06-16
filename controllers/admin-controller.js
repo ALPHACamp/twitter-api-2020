@@ -13,7 +13,7 @@ const adminController = {
     return User.findOne({ where: { account }}).then((user)=>{
       if (!user) throw new Error('Admin not exists!')
       if (user.role === 'user') throw new Error('Admin not exists')
-      if (!bcrypt.compareSync(password, user.password)) { throw new Error('Password Account or Password incorrect') }
+      if (!bcrypt.compareSync(password, user.password)) { throw new Error('Account or Password incorrect') }
         const adminData = user.toJSON()
         delete adminData.password
         const token = jwt.sign(adminData, process.env.JWT_SECRET, {
@@ -65,18 +65,8 @@ const adminController = {
     })
       .then((tweets) => {
         if (!tweets) throw new Error('No tweets found')
-        const processedTweets = tweets.map((tweet) => {
-          const createdAt = moment(tweet.createdAt).format('YYYY-MM-DD HH:mm:ss')
-          const updatedAt = moment(tweet.updatedAt).format('YYYY-MM-DD HH:mm:ss')
-          const diffCreatedAt = moment().subtract(tweet.diffCreatedAt, 'seconds').fromNow()
-          return {
-            ...tweet,
-            createdAt,
-            updatedAt,
-            diffCreatedAt
-          }
-        })
-        return res.status(200).json(processedTweets)
+        return res.status(200).json(tweets)
+        
       })
       .catch((err) => next(err))
   },
