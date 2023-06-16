@@ -306,7 +306,6 @@ const userController = {
       const { name, account, email, password, checkPassword, introduction } = req.body
       const { files } = req
       console.log(files)
-      if (!files) newErrorGenerate('照片不可為空', 400)
       if (account ? await User.findOne({ attributes: ['id'], where: { account: account.trim() } }) : false) newErrorGenerate('account 已重複註冊', 400)
       if (email ? await User.findOne({ attributes: ['id'], where: { email: email.trim() } }) : false) newErrorGenerate('email 已重複註冊', 400)
       if (name?.length > USERS_WORD_LIMIT) newErrorGenerate('字數超出上限', 400)
@@ -315,6 +314,8 @@ const userController = {
       const hash = password ? await bcrypt.hash(password, 10) : null
       const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
       const backgroundImage = files?.backgroundImage ? await imgurFileHandler(files.backgroundImage[0]) : null
+      console.log(avatar)
+      console.log(backgroundImage)
       const selfUser = await User.findByPk(helpers.getUser(req).id)
       const updatedUser = await selfUser.update({
         name: name?.trim() || selfUser.name,
