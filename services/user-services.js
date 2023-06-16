@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Sequelize = require('sequelize')
 const { User, Tweet, Reply, Followship, Like } = require('../models')
 const { imgurFileHandler } = require('../_helpers')
 
@@ -43,12 +44,22 @@ const userController = {
   },
   getUser: (req, cb) => {
     const userId = Number(req.params.user_id) || ''
-    User.findByPk(userId, {
-      attributes: { exclude: ['password'] },
+    return User.findByPk(userId, {
+      raw: true,
       nest: true,
-      raw: true
-    }
-    )
+      attributes: {
+        include: [
+          [
+            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = User.id)'),
+            'follower',
+          ],
+          [
+            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = User.id)'),
+            'following',
+          ]
+        ]
+      },
+    })
       .then((user) => {
         if (!user) throw new Error("User didn't exist!")
         cb(null, user)
