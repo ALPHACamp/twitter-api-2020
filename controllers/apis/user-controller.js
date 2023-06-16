@@ -139,7 +139,7 @@ const userController = {
       include: [
         {
           model: Like,
-          include: [{ model: Tweet, include: [User] }]
+          include: [{ model: Tweet, include: [User, Like, Reply] }]
         }],
       order: [[Like, 'createdAt', 'DESC']]
     })
@@ -154,7 +154,10 @@ const userController = {
             description: likeJson.Tweet.description,
             name: likeJson.Tweet.User.name,
             account: likeJson.Tweet.User.account,
-            avatar: likeJson.Tweet.User.avatar
+            avatar: likeJson.Tweet.User.avatar,
+            likeCount: likeJson.Tweet.Likes.length,
+            replyCount: likeJson.Tweet.Replies.length,
+            isLiked: likeJson.UserId === helpers.getUser(req).id
           }
         })
         return res.status(200).json(likesData)
