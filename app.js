@@ -6,20 +6,12 @@ const express = require('express')
 const cors = require('cors')
 const routes = require('./routes')
 const passport = require('./config/passport')
+const { CORSHeader } = require('./middleware/CORS-header') 
 const app = express()
 const port = process.env.PORT || 3000
 
-const corsOptions = {
-  origin: [
-    'https://ywcheng1207.github.io/',
-    'http://localhost'
-  ],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  allowedHeaders: ['Content-Type', 'Authorization']
-}
-
 // middleware
-app.use(cors(corsOptions))
+app.use(cors(CORSHeader))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
