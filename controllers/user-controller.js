@@ -83,6 +83,7 @@ const userController = {
   // 查看使用者資料
   getUser: async (req, res, next) => {
     try {
+      const selfUser = helpers.getUser(req).id
       const userId = req.params.id
       const user = await User.findByPk(userId, {
         raw: true,
@@ -103,9 +104,11 @@ const userController = {
         ]
       })
       if (!user) newErrorGenerate('使用者不存在', 404)
+      const isSelfUserFollow = !!await Followship.findOne({ where: { followerId: selfUser, followingId: userId } })
       const userData = {
         ...user,
-        isSignInUser: isUser(req)
+        isSignInUser: isUser(req),
+        isSelfUserFollow: isSelfUserFollow
       }
       return res.json(userData)
     } catch (err) {
