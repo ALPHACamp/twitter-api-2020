@@ -94,10 +94,10 @@ const userController = {
       // 查看其他使用者是否有追蹤自己
       if (Number(id) !== currentUserId) {
         const currentUserFollowing = await Followship.findAll({
-          where: { followerId: id },
+          where: { followerId: currentUserId },
           raw: true
         })
-        user.followed = currentUserFollowing.some(f => f.followingId === currentUserId)
+        user.isFollowed = currentUserFollowing.some(f => f.followingId === Number(id))
       }
 
       res.status(200).json(user)
