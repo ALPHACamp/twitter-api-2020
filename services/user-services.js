@@ -237,8 +237,7 @@ const userServices = {
           model: User,
           as: 'Followers',
           attributes: ['id', 'name', 'avatar', 'introduction', 'account']
-        }],
-        order: [['createdAt', 'DESC']]
+        }]
       }),
       Followship.findAll({
         where: { followerId: helpers.getUser(req).id },
