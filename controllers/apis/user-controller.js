@@ -134,7 +134,7 @@ const userController = {
           include: [
             {
               model: Tweet,
-              attributes: ['id', 'UserId'],
+              attributes: ['id', 'UserId', 'LikedCount', 'repliedCount'],
               include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }]
             },
             { model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
@@ -174,14 +174,17 @@ const userController = {
         User.findByPk(id),
         Like.findAll({
           where: { UserId: Number(id) },
+          attributes: ['id', 'UserId', 'TweetId'],
           include: [
             {
               model: Tweet,
-              include: {
-                model: User,
-                as: 'TweetUser',
-                attributes: ['id', 'name', 'account', 'avatar']
-              }
+              include: [
+                {
+                  model: User,
+                  as: 'TweetUser',
+                  attributes: ['id', 'name', 'account', 'avatar']
+                }
+              ]
             }
           ],
           raw: true,
