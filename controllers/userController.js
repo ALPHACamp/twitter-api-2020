@@ -180,6 +180,7 @@ const userController = {
       .catch((err) => next(err))
   },
   getTopUsers: async (req, res, next) => {
+    const userId = req.user.id || getUser(req).dataValues.id
     try {
       const root = await User.findOne({
         where: { account: 'root' },
@@ -189,7 +190,7 @@ const userController = {
       const users = await User.findAll({
         where: {
           id: {
-            [Op.not]: root.id
+            [Op.not]: [root.id, userId]
           }
         },
         include: [
