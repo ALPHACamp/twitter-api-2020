@@ -1,4 +1,5 @@
 const { Tweet, User, Reply } = require('../models')
+const Sequelize = require('sequelize')
 const { literal } = Sequelize
 const moment = require('moment')
 
