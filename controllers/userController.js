@@ -30,7 +30,7 @@ const userController = {
           status: 'error',
           message: [
             {
-              path: 'account',
+              path: 'email',
               msg: 'email 已重複註冊！'
             }]
         })
@@ -300,8 +300,8 @@ const userController = {
     const avatar = req.files?.avatar?.[0] || null
     const cover = req.files?.cover?.[0] || null
     const [user, avatarFilePath, coverFilePath] = await Promise.all([User.findByPk(req.params.id),
-      imgurFileHandler(avatar),
-      imgurFileHandler(cover)
+    imgurFileHandler(avatar),
+    imgurFileHandler(cover)
     ])
 
     if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
