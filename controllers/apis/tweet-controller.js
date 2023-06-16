@@ -55,17 +55,6 @@ const tweetController = {
         }
       }
 
-      // data.forEach(tweet => {
-      //   for (const i of tweet.TweetLike) {
-      //     if (i.UserId === getUser(req).id) {
-      //       tweet.isLiked = true
-      //     } else {
-      //       tweet.isLiked = false
-      //     }
-      //   }
-      //   if (tweet.TweetLike.length < 1)tweet.isLiked = false
-      // })
-
       return res.status(200).json(data)
     } catch (error) {
       next(error)
