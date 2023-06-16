@@ -16,10 +16,10 @@ passport.use(new LocalStrategy(
   (req, account, password, cb) => {
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) throw new Error('Account or Password incorrect')
+        if (!user) throw new Error('Account incorrect')
         bcrypt.compare(password, user.password)
           .then(res => {
-            if (!res) throw new Error('Account or Password incorrect')
+            if (!res) throw new Error('Password incorrect')
             return cb(null, user)
           })
           .catch(err => cb(err))

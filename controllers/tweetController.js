@@ -9,16 +9,7 @@ const tweetController = {
       const follows = req.query.follows
       const liked = req.query.liked
       const userId = req.params.id
-      const lastId = req.query.lastId // Last seen tweet ID
-      const limit = 10 // Number of tweets to return
-
-      const whereClause = {}
-      if (lastId) {
-        whereClause.id = { [Op.lt]: lastId }
-      }
-
-      let tweetIdCondition = null
-
+      let options
       if (follows) {
         const followingIdData = await Followship.findAll({
           where: { follower_Id: userId },
@@ -26,7 +17,7 @@ const tweetController = {
         })
         const followingIds = followingIdData.map((row) => row.followingId)
         followingIds.push(userId)
-        tweetIdCondition = { User_Id: followingIds }
+        options = { UserId: followingIds }
       } else if (liked) {
         const likes = await Like.findAll({
           where: { User_Id: userId },
@@ -36,20 +27,14 @@ const tweetController = {
         })
         const tweetIds = likes.map((row) => row.TweetId)
         tweetIds.push(userId)
-        tweetIdCondition = { id: tweetIds }
+        options = { id: tweetIds }
+      } else {
+        options = { UserId: userId }
       }
-
-      if (tweetIdCondition) {
-        whereClause[Op.and] = [tweetIdCondition]
-      }
-
-      const options = {
+      const tweets = await Tweet.findAll({
+        where: options,
         include: [
-          {
-            model: User,
-            as: 'User',
-            attributes: ['account', 'name', 'avatar']
-          },
+          { model: User, attributes: ['account', 'name', 'avatar'] },
           { model: Like, attributes: ['UserId'] },
           { model: Reply, attributes: ['UserId'] }
         ],
@@ -57,12 +42,8 @@ const tweetController = {
           ['createdAt', 'DESC'],
           ['id', 'DESC']
         ],
-        limit,
-        where: whereClause
-      }
-
-      const tweets = await Tweet.findAll(options)
-
+        nest: true
+      })
       if (tweets.length === 0) return res.status(404).json('Tweets not found')
 
       const counts = tweets.map((tweet) => ({
@@ -85,14 +66,17 @@ const tweetController = {
   },
   getAllTweets: (req, res, next) => {
     Tweet.findAll({
-      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }]
+      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+      order: [['createdAt', 'DESC']],
+      nest: true
     })
       .then((tweets) => {
         return tweets.map((tweet) => ({
           ...tweet.get({ plain: true }),
           account: tweet.User.account,
           name: tweet.User.name,
-          avatar: tweet.User.avatar
+          avatar: tweet.User.avatar,
+          User: undefined
         }))
       })
       .then((data) => res.status(200).json(data))
@@ -166,12 +150,8 @@ const tweetController = {
   },
   postTweet: (req, res, next) => {
     const { description, likable, commendable } = req.body
-    if (!description) {
-      return res.status(400).json('Description can not be empty!')
-    }
-    if (description.length > 140) {
-      return res.status(400).json('Max length 140.')
-    }
+    if (!description) { return res.status(400).json('Description can not be empty!') }
+    if (description.length > 140) { return res.status(400).json('Max length 140.') }
     const id = req.user.id || getUser(req).dataValues.id
     Tweet.create({
       UserId: id,
@@ -189,12 +169,8 @@ const tweetController = {
   putTweet: (req, res, next) => {
     const { description, likable, commendable } = req.body
     const id = req.params.id
-    if (!description) {
-      return res.status(400).json('Description can not be empty!')
-    }
-    if (description.length > 140) {
-      return res.status(400).json('Max length 140.')
-    }
+    if (!description) { return res.status(400).json('Description can not be empty!') }
+    if (description.length > 140) { return res.status(400).json('Max length 140.') }
     Tweet.findByPk(id)
       .then((tweet) => {
         if (!tweet) return res.status(404).json('Tweet not found!')
