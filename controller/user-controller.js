@@ -90,22 +90,23 @@ const userController = {
       const userReplies = await Reply.findAll({
         where: { UserId: userId },
         include: [
-          {
-            model: Tweet,
-            include: {
-              model: User,
-              attributes: ['account']
-            }
-          },
-          {
-            model: User,
-            attributes: ['avatar']
-          }
+          { model: Tweet, include: { model: User } },
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         ],
         order: [['createdAt', 'DESC']]
       })
+      const result = userReplies.map(r => ({
+        ...r.toJSON(),
+        Tweet: {
+          ...r.Tweet.toJSON(),
+          account: r.Tweet.User.account
+        }
+      }))
+      result.forEach(r => {
+        delete r.Tweet.User
+      })
 
-      return res.status(200).json(userReplies)
+      return res.status(200).json(result)
     } catch (err) {
       next(err)
     }
