@@ -103,22 +103,13 @@ const tweetController = {
         { include: User }
       )
       if (!tweet) throw new Error('資料庫中未找到推文')
-      const likedTweetAuthor = tweet.dataValues.User.dataValues.account
+      // const likedTweetAuthor = tweet.dataValues.User.dataValues.account
       const isLiked = await Like.findOne({
         where: { UserId, TweetId }
       })
       if (isLiked) throw new Error('你已經按讚本篇推文')
-      const createdLike = await Like.create({ UserId, TweetId })
-      console.log(createdLike)
-      return res.status(200).json({
-        status: 'success',
-        data: {
-          id: createdLike.id,
-          UserId: createdLike.UserId,
-          TweetId: createdLike.TweetId,
-          likedTweetAuthor
-        }
-      })
+      const data = await Like.create({ UserId, TweetId })
+      return res.status(200).json({ status: 'success', data })
     } catch (err) {
       next(err)
     }
@@ -131,21 +122,13 @@ const tweetController = {
         TweetId, { include: User }
       )
       if (!tweet) throw new Error('資料庫中未找到推文')
-      const unlikedTweetAuthor = tweet.dataValues.User.dataValues.account
+      // const unlikedTweetAuthor = tweet.dataValues.User.dataValues.account
       const isliked = await Like.findOne({
         where: { UserId, TweetId }
       })
       if (!isliked) throw new Error('你還沒按讚過本篇推文')
-      const deletedLike = await isliked.destroy()
-      return res.status(200).json({
-        status: 'success',
-        data: {
-          id: deletedLike.id,
-          Userid: deletedLike.UserId,
-          Tweetid: deletedLike.TweetId,
-          unlikedTweetAuthor
-        }
-      })
+      const data = await isliked.destroy()
+      return res.status(200).json({ status: 'success', data })
     } catch (err) {
       next(err)
     }
