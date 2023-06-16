@@ -3,7 +3,6 @@ const { User, Reply, Tweet, Followship, Like } = require('../../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
 const helpers = require('../../_helpers')
-const { Sequelize } = require('sequelize');
 
 
 const userController = {
