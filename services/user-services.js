@@ -238,8 +238,7 @@ const userServices = {
           model: User,
           as: 'Followers',
           attributes: ['id', 'name', 'avatar', 'introduction', 'account']
-        }],
-        order: [['createdAt', 'DESC']]
+        }]
       }),
       Followship.findAll({
         where: { followerId: helpers.getUser(req).id },
@@ -299,6 +298,9 @@ const userServices = {
   getTopTenUsers: (req, cb) => {
     Promise.all([
       User.findAll({
+        where: {
+          role: { [Op.not]: 'admin' }
+        },
         attributes: ['id', 'name', 'account', 'email', 'avatar', 'coverPhoto', 'createdAt', 'updatedAt',
           [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id )'), 'followerCount'],
           [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id )'), 'followingCount'],
