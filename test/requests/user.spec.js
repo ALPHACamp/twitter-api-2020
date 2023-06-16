@@ -367,7 +367,6 @@ describe('# user requests', () => {
         await db.User.destroy({where: {},truncate: true, force: true})
         await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
         // 模擬登入資料
-        console.log('-------開始--------');
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
           return (req,res,next)=>{};
@@ -390,9 +389,7 @@ describe('# user requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             db.User.findByPk(1).then(user => {
-              console.log('---------------');
               // 檢查資料是否有變更
-              console.log(user)
               user.name.should.equal('User11');
               user.introduction.should.equal('User11');
               return done();
