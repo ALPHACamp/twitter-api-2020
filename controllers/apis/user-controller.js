@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
 const helpers = require('../../_helpers')
 
+
 const userController = {
   signIn: async (req, res,) => {
     try {
@@ -161,14 +162,26 @@ const userController = {
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
   getUserFollowings: (req, res) => {
-    //
-    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followings' }] })
+    return User.findByPk(req.params.id, {
+      include: [
+        {
+          model: User, as: 'Followings',
+          attributes: ['id', 'name', 'introduction'],
+          through: { attributes: ['createdAt'] },
+        }
+      ],
+    })
       .then(user => {
         if (!user) throw new Error(`User didn't exist`)
-        const followings = user.Followings.map(following => ({
-          followingId: following.id
-        }));
-        return res.status(200).json(followings);
+        let followings = user.Followings.map(following => ({
+          followingId: following.id,
+          followingName: following.name,
+          followingIntroduction: following.introduction,
+          followshipCreatedAt: following.Followship.createdAt
+        }))
+        followings = followings.sort((a, b) =>
+          new Date(b.followshipCreatedAt) - new Date(a.followshipCreatedAt))
+        res.status(200).json(followings)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
