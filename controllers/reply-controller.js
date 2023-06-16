@@ -32,12 +32,8 @@ const replyController = {
     raw: true
   })
   .then((replies) => {
-    if (!replies) throw new Error("Replies didn't exists!")
+    if (!replies.length) throw new Error("Replies didn't exists!")
     res.status(200).json(replies)
-  })
-  .then(reply => {
-    if (!reply.length) throw new Error("Replies didn't exist!")
-    res.status(200).json(reply)
   })
   .catch(err => next(err))
   },

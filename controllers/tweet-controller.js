@@ -18,7 +18,10 @@ const tweetController = {
         ]
       },
     })
-      .then(tweet => res.status(200).json(tweet))
+      .then(tweet => {
+        if (!tweet.length) throw new Error("Tweets didn't exist!")
+        return res.status(200).json(tweet)
+      })
       .catch(err => next(err))
   },
 
