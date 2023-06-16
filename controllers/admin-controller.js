@@ -13,7 +13,7 @@ const adminController = {
     return User.findOne({ where: { account }}).then((user)=>{
       if (!user) throw new Error('Admin not exists!')
       if (user.role === 'user') throw new Error('Admin not exists')
-      if (!bcrypt.compareSync(password, user.password)) { throw new Error('Password incorrect') }
+      if (!bcrypt.compareSync(password, user.password)) { throw new Error('Account or Password incorrect') }
         const adminData = user.toJSON()
         delete adminData.password
         const token = jwt.sign(adminData, process.env.JWT_SECRET, {

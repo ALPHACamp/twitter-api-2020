@@ -23,7 +23,10 @@ const replyController = {
     return Reply.findAll({
     where: { tweetId },
   })
-  .then(reply => res.status(200).json(reply))
+  .then(reply => {
+    if (!reply.length) throw new Error("Replies didn't exist!")
+    res.status(200).json(reply)
+  })
   .catch(err => next(err))
   }
 }  
