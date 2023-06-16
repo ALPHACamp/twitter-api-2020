@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const { User, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const { Op } = require('sequelize')
 const bcrypt = require('bcryptjs')
 const userController = {
   signIn: (req, res, next) => {
@@ -178,33 +179,41 @@ const userController = {
       })
       .catch((err) => next(err))
   },
-  getTopUsers: (req, res, next) => {
-    // 研究如何把followers從res中移除，否則回傳資料太大包
-    User.findAll({
-      include: [
-        {
-          model: User,
-          as: 'Followers'
-        }
-      ]
-    })
-      .then((users) => {
-        const data = users
-          .map((user) => ({
-            ...user.toJSON(),
-            followerCount: user.Followers.length,
-            isFollowing: req.user.Followings
-              ? req.user.Followings.some((f) => f.id === user.id)
-              : false
-          }))
-          .sort((a, b) => b.followerCount - a.followerCount)
-        data.forEach((user, index) => {
-          if (user.account === 'root') data.splice(index, 1)
-        })
-        const final = data.map(({ Followers, ...rest }) => rest)
-        res.status(200).json(final)
+  getTopUsers: async (req, res, next) => {
+    try {
+      const root = await User.findOne({
+        where: { account: 'root' },
+        attributes: ['id'],
+        raw: true
       })
-      .catch((err) => next(err))
+      const users = await User.findAll({
+        where: {
+          id: {
+            [Op.not]: root.id
+          }
+        },
+        include: [
+          {
+            model: User,
+            as: 'Followers'
+          }
+        ],
+        limit: [10]
+      })
+      const data = users
+        .map((user) => ({
+          ...user.toJSON(),
+          followerCount: user.Followers.length,
+          isFollowing: req.user.Followings
+            ? req.user.Followings.some((f) => f.id === user.id)
+            : false
+        }))
+        .sort((a, b) => b.followerCount - a.followerCount)
+      const final = data.map(({ Followers, ...rest }) => rest)
+      res.status(200).json(final)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
