@@ -308,12 +308,9 @@ const userController = {
       if (password && password !== checkPassword) newErrorGenerate('密碼與確認密碼不相符', 400)
       if (introduction?.length > USERS_INTRODUCTION_WORD_LIMIT) newErrorGenerate('字數超出上限', 400)
       const hash = password ? await bcrypt.hash(password, 10) : null
-      const [fixedFile, selfUser] = await Promise.all([
-        imgurFileHandler(files),
-        User.findByPk(helpers.getUser(req).id)
-      ])
-      const avatar = fixedFile ? fixedFile[0] : null
-      const backgroundImage = fixedFile ? fixedFile[1] : null
+      const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
+      const backgroundImage = files?.backgroundImage ? await imgurFileHandler(files.backgroundImage[0]) : null
+      const selfUser = await User.findByPk(helpers.getUser(req).id)
       const updatedUser = await selfUser.update({
         name: name?.trim() || selfUser.name,
         account: account?.trim() || selfUser.account,

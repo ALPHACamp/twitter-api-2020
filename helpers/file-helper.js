@@ -2,21 +2,17 @@ const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 imgur.setClientId(IMGUR_CLIENT_ID)
 
-const imgurFileHandler = files => {
+const imgurFileHandler = file => {
   return new Promise((resolve, reject) => {
-    if (!files) return resolve(null)
-    const allFiles = [...Object.values(files)]
-    Promise.all([
-      imgur.uploadFile(allFiles[0][0].path),
-      imgur.uploadFile(allFiles[1][0].path)
-    ])
-      .then(([avatar, backgrounImage]) => {
-        resolve([avatar?.link || null, backgrounImage?.link || null])
+    if (!file) return resolve(null)
+    return imgur
+      .uploadFile(file.path)
+      .then(img => {
+        resolve(img?.link || null) // 檢查 img 是否存在
       })
       .catch(err => reject(err))
   })
 }
-
 module.exports = {
   imgurFileHandler
 }
