@@ -77,6 +77,7 @@ const tweetController = {
         return res.status(409).json({ status: 'error', message: "Tweet can't be more than 140 words." })
       }
       const user = await User.findByPk(UserId)
+      delete user.password
       const data = await Tweet.create({
         UserId,
         description
@@ -115,6 +116,7 @@ const tweetController = {
         return res.status(400).json({ status: 'error', message: 'You have liked this tweet.' })
       }
       const createdLike = await Like.create({ UserId, TweetId })
+      console.log(createdLike)
       return res.status(200).json({
         status: 'success',
         data: {
