@@ -23,15 +23,17 @@ const replyServices = {
                     ['createdAt', 'DESC']
                 ],
                 include: [{
-                    model: User
-                } ],
+                    model: User,
+                    attributes: ['account','name','avatar']
+                }]
             })
             const tweet = await Tweet.findByPk(id)
             if (!tweet) throw new Error('推文不存在！')
             const newreplies = await replies.map(reply => {
                 const createdAt = relativeTimeFromNow(reply.createdAt)
-                return {...reply,
-                createdAt:  createdAt
+                return {
+                ...reply,
+                createdAt: createdAt,
             }})
             cb(null, newreplies)
         } catch (err) {
