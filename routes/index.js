@@ -6,7 +6,6 @@ const passport = require('../config/passport')
 const { authenticated, authenticatedAdmin, isUser } = require('../middleware/api-auth')
 const admin = require('./modules/admin')
 const followships = require('./modules/followships')
-const likes = require('./modules/likes')
 const tweets = require('./modules/tweets')
 const users = require('./modules/users')
 const adminController = require('../controllers/admin-controller')
@@ -19,7 +18,6 @@ router.post('/api/admin/users', passport.authenticate('local', { session: false 
 // use modules
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 router.use('/api/followships', authenticated, isUser, followships)
-router.use('/api/likes', authenticated, isUser, likes)
 router.use('/api/tweets', authenticated, isUser, tweets)
 router.use('/api/users', authenticated, isUser, users)
 
