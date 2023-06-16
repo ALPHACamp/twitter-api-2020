@@ -6,21 +6,17 @@ const helpers = require('../../_helpers')
 
 
 const userController = {
-  signIn: async (req, res,) => {
+  signIn: (req, res,) => {
     try {
       const userData = helpers.getUser(req).toJSON()
       if (userData.role === 'admin') throw new Error('Account does not exist!')
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      const followingsCount = await Followship.count({ where: { followingId: helpers.getUser(req).id } })
-      const followerCount = await Followship.count({ where: { followerId: helpers.getUser(req).id } })
       res.status(200).json({
         status: 'success',
         data: {
           token,
           user: userData,
-          followingsCount: followingsCount,
-          followerCount: followerCount
         }
       })
     } catch (err) {
@@ -127,9 +123,9 @@ const userController = {
           const replyJSON = reply.toJSON()
           return {
             ...replyJSON,
-            name: user.name,
-            account: user.account,
-            avatar: user.avatar,
+            replyName: user.name,
+            replyAccount: user.account,
+            replyAvatar: user.avatar,
           }
         })
         return res.status(200).json(repliesData)
