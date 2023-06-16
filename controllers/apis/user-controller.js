@@ -65,7 +65,7 @@ const userController = {
           where: { UserId: id },
           include: [
             { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] },
-            { model: Reply, as: 'TweetReply', attributes: ['id'] }
+            { model: Like, as: 'TweetLike', attributes: ['id', 'UserId'] }
           ],
           nest: true
         })
@@ -81,11 +81,18 @@ const userController = {
         error.status = 404
         throw error
       }
-      for (const i of userTweets) {
-        i.dataValues.tweetReplyCount = i.dataValues.TweetReply.length
-        delete i.dataValues.TweetReply
-      }
-      return res.status(200).json(userTweets)
+
+      const data = userTweets.map(e => {
+        e = e.toJSON()
+        e.isLiked = false
+        for (const i of e.TweetLike) {
+          if (i.UserId === getUser(req).id) {
+            e.isLiked = true
+          }
+        }
+        return e
+      })
+      return res.status(200).json(data)
     } catch (error) {
       next(error)
     }
@@ -127,7 +134,7 @@ const userController = {
       id = Number(id)
 
       // 確認使用者是否存在 與 回過文
-      const [user, repliedTweets] = await Promise.all([
+      let [user, repliedTweets] = await Promise.all([
         User.findByPk(id),
         Reply.findAll({
           where: { UserId: id },
@@ -135,13 +142,18 @@ const userController = {
             {
               model: Tweet,
               attributes: ['id', 'UserId', 'LikedCount', 'repliedCount'],
-              include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }]
+              include: [
+                { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] },
+                { model: Like, as: 'TweetLike', attributes: ['id', 'UserId'] }
+              ]
             },
-            { model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
-          raw: true,
-          nest: true
+            { model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }]
         })
       ])
+
+      // 資料格式處理
+      user = user.toJSON()
+      repliedTweets = repliedTweets.map(e => e.toJSON())
 
       // 錯誤處理
       if (!user || user.role === 'admin') {
@@ -155,10 +167,15 @@ const userController = {
         throw error
       }
 
-      const data = []
-      for (const i of repliedTweets) {
-        data.push(i.Tweet)
-      }
+      repliedTweets.forEach(e => {
+        e.isLiked = false
+        for (const i of e.Tweet.TweetLike) {
+          if (i.UserId === getUser(req).id) {
+            e.isLiked = true
+          }
+        }
+      })
+
       return res.status(200).json(repliedTweets)
     } catch (error) {
       next(error)
@@ -202,10 +219,7 @@ const userController = {
         error.status = 404
         throw error
       }
-      const data = []
-      for (const i of userLiked) {
-        data.push(i.Tweet)
-      }
+      userLiked.forEach(e => { e.isLiked = true })
       return res.status(200).json(userLiked)
     } catch (error) {
       next(error)
@@ -238,7 +252,7 @@ const userController = {
         error.status = 404
         throw error
       }
-
+      userFollows.forEach(e => { e.isFollowed = true })
       return res.status(200).json(userFollows)
     } catch (error) {
       next(error)
@@ -250,13 +264,17 @@ const userController = {
       id = Number(id)
 
       // 確認使用者是否存在 與 其追隨者
-      const [user, userFollowers] = await Promise.all([
+      let [user, userFollowers] = await Promise.all([
         User.findByPk(id),
         Followship.findAll({
           where: { followingId: Number(id) },
           include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'avatar', 'introduction'] }]
         })
       ])
+
+      // 資料格式處理
+      user = user.toJSON()
+      userFollowers = userFollowers.map(e => e.toJSON())
 
       // 錯誤處理
       if (!user || user.role === 'admin') {
@@ -270,6 +288,19 @@ const userController = {
         throw error
       }
 
+      const userFollowings = await Followship.findAll({ where: { followerId: getUser(req).id }, raw: true })
+
+      const dic = {}
+      for (let i = 0; i < userFollowings.length; i++) {
+        dic[userFollowings[i].followingId] = i
+      }
+
+      userFollowers.forEach(e => {
+        e.isFollowed = false
+        if (dic[e.followerId] >= 0) {
+          e.isFollowed = true
+        }
+      })
       return res.status(200).json(userFollowers)
     } catch (error) {
       next(error)

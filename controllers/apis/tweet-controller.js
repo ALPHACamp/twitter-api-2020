@@ -1,4 +1,5 @@
 const { User, Tweet, Reply, Like } = require('../../models')
+const { getUser } = require('../../_helpers')
 
 const tweetController = {
   postTweet: async (req, res, next) => {
@@ -27,7 +28,7 @@ const tweetController = {
             attributes: ['id'],
             include: [{ model: User, as: 'RepliedUser', attributes: ['name', 'account', 'avatar'] }]
           },
-          { model: Like, as: 'TweetLike', attributes: ['id'] }
+          { model: Like, as: 'TweetLike', attributes: ['id', 'UserId'] }
         ],
         nest: true,
         order: [['createdAt', 'DESC']]
@@ -39,13 +40,20 @@ const tweetController = {
         error.status = 404
         throw error
       }
+      const data = tweets.map(e => e.toJSON())
 
-      tweets.forEach(tweet => {
-        tweet.likedCount = tweet.TweetLike.length
-        tweet.repliedCount = tweet.TweetReply.length
+      data.forEach(tweet => {
+        for (const i of tweet.TweetLike) {
+          if (i.UserId === getUser(req).id) {
+            tweet.isLiked = true
+          } else {
+            tweet.isLiked = false
+          }
+        }
+        if (tweet.TweetLike.length < 1)tweet.isLiked = false
       })
 
-      return res.status(200).json(tweets)
+      return res.status(200).json(data)
     } catch (error) {
       next(error)
     }
@@ -60,22 +68,31 @@ const tweetController = {
             model: Reply,
             as: 'TweetReply',
             attributes: ['id', 'comment'],
-            include: [{ model: User, as: 'RepliedUser', attributes: ['name', 'account', 'avatar'] }] 
+            include: [{ model: User, as: 'RepliedUser', attributes: ['name', 'account', 'avatar'] }]
           },
-          { model: Like, as: 'TweetLike', attributes: ['id'] }
-        ],
-        nest: true
-      }
+          { model: Like, as: 'TweetLike', attributes: ['id', 'UserId'] }
+        ]
+      } // 這裡如果使用nest會有bug
       )
-      tweet.likedCount = tweet.TweetLike.length
-      tweet.repliedCount = tweet.TweetReply.length
-      if (!tweet) {
+      const data = tweet.toJSON()
+
+      // 錯誤處理
+      if (!data) {
         const error = new Error('The tweet does not exist')
         error.status = 404
         throw error
       }
 
-      return res.status(200).json(tweet)
+      let isLiked = false
+      for (const i of data.TweetLike) {
+        if (i.UserId === getUser(req).id) {
+          isLiked = true
+          data.isLiked = isLiked
+          break
+        }
+      }
+
+      return res.status(200).json(data)
     } catch (error) {
       next(error)
     }
@@ -108,7 +125,18 @@ const tweetController = {
   getReply: async (req, res, next) => {
     try {
       const { tweet_id } = req.params
-      const tweet = await Tweet.findByPk(tweet_id)
+      const tweet = await Tweet.findByPk(tweet_id, {
+        include: [
+          { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] },
+          { model: Like, as: 'TweetLike', attributes: ['id', 'UserId'] },
+          {
+            model: Reply,
+            as: 'TweetReply',
+            attributes: ['id', 'UserId', 'comment'],
+            include: [{ model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }]
+          }
+        ]
+      })
 
       // 錯誤處理
       if (!tweet) {
@@ -117,13 +145,17 @@ const tweetController = {
         throw error
       }
 
-      const replies = await Reply.findAll({
-        where: { TweetId: tweet_id },
-        include: [{ model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account'] }],
-        raw: true,
-        nest: true
-      })
-      return res.status(200).json(replies)
+      const data = tweet.toJSON()
+
+      // 先留著避免重寫
+
+      // data.isLiked = false
+      // for (const i of data.TweetLike) {
+      //   if (i.UserId === getUser(req).id) {
+      //     data.TweetReply.isLiked = true
+      //   }
+      // }
+      return res.status(200).json(data.TweetReply)
     } catch (error) {
       next(error)
     }
