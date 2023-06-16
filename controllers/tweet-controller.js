@@ -1,4 +1,4 @@
-
+const Sequelize = require('sequelize')
 const { Tweet, User, Reply } = require('../models')
 
 const tweetController = {
@@ -6,19 +6,27 @@ const tweetController = {
     return Tweet.findAll({
       raw: true,
       nest: true,
-      include: [User, Reply]
+      include: [User],
+      attributes: {
+        include: [
+          [
+            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'),
+            'repliesCount',
+          ]
+        ]
+      },
     })
-    .then(tweet => res.status(200).json(tweet))
-    .catch(err => next(err))
+      .then(tweet => res.status(200).json(tweet))
+      .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
     return Tweet.findByPk(req.params.tweet_id)
-    .then(tweet => {
-      if (!tweet) throw new Error("The tweet didn't exist!")
-      return tweet
-    })
-    .then(tweet => res.status(200).json(tweet))
-    .catch(err => next(err))
+      .then(tweet => {
+        if (!tweet) throw new Error("The tweet didn't exist!")
+        return tweet
+      })
+      .then(tweet => res.status(200).json(tweet))
+      .catch(err => next(err))
   },
   createTweet: (req, res, next) => {
     const { description } = req.body
@@ -28,8 +36,8 @@ const tweetController = {
       userId,
       description
     })
-    .then(tweet => res.status(200).json(tweet))
-    .catch(err => next(err))
+      .then(tweet => res.status(200).json(tweet))
+      .catch(err => next(err))
   }
 }
 
