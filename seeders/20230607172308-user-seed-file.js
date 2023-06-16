@@ -11,7 +11,7 @@ module.exports = {
       role: 'admin',
       name: 'root',
       account: 'root',
-      avatar: faker.image.avatar(),
+      avatar: 'http://randomuser.me/api/portraits/women/3.jpg',
       banner: banner,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -21,7 +21,7 @@ module.exports = {
       role: 'user',
       name: 'user1',
       account: 'user1',
-      avatar: faker.image.avatar(),
+      avatar: 'http://randomuser.me/api/portraits/women/4.jpg',
       banner: banner,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -31,7 +31,7 @@ module.exports = {
       role: 'user',
       name: 'user2',
       account: 'user2',
-      avatar: faker.image.avatar(),
+      avatar: 'http://randomuser.me/api/portraits/women/5.jpg',
       banner: banner,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -41,7 +41,7 @@ module.exports = {
       role: 'user',
       name: 'user3',
       account: 'user3',
-      avatar: faker.image.avatar(),
+      avatar: 'http://randomuser.me/api/portraits/women/6.jpg',
       banner: banner,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -51,7 +51,7 @@ module.exports = {
       role: 'user',
       name: 'user4',
       account: 'user4',
-      avatar: faker.image.avatar(),
+      avatar: 'http://randomuser.me/api/portraits/women/7.jpg',
       banner: banner,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -61,7 +61,7 @@ module.exports = {
       role: 'user',
       name: 'user5',
       account: 'user5',
-      avatar: faker.image.avatar(),
+      avatar: 'http://randomuser.me/api/portraits/women/8.jpg',
       banner: banner,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -72,7 +72,7 @@ module.exports = {
       role: 'user',
       name: 'user6',
       account: 'user6',
-      avatar: faker.image.avatar(),
+      avatar: 'http://randomuser.me/api/portraits/women/9.jpg',
       banner: banner,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -83,7 +83,7 @@ module.exports = {
       role: 'user',
       name: 'user7',
       account: 'user7',
-      avatar: faker.image.avatar(),
+      avatar: 'http://randomuser.me/api/portraits/women/10.jpg',
       banner: banner,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -94,7 +94,7 @@ module.exports = {
       role: 'user',
       name: 'user8',
       account: 'user8',
-      avatar: faker.image.avatar(),
+      avatar: 'http://randomuser.me/api/portraits/women/11.jpg',
       banner: banner,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -105,7 +105,7 @@ module.exports = {
       role: 'user',
       name: 'user9',
       account: 'user9',
-      avatar: faker.image.avatar(),
+      avatar: 'http://randomuser.me/api/portraits/women/12.jpg',
       banner: banner,
       createdAt: new Date(),
       updatedAt: new Date()
