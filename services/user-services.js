@@ -61,7 +61,8 @@ const userServices = {
       ],
       attributes: ['id', 'name', 'account', 'email', 'avatar', 'coverPhoto', 'introduction',
         [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id )'), 'followerCount'],
-        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id )'), 'followingCount']
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id )'), 'followingCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.user_id = User.id )'), 'tweetCount']
       ],
       nest: true
     })
@@ -108,7 +109,7 @@ const userServices = {
       where: { UserId: req.params.id },
       order: [['createdAt', 'DESC']],
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-      { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account'] }] }
+        { model: Tweet, include: [{ model: User, attributes: ['id', 'name', 'account'] }] }
       ]
     })
       .then(replies => {
