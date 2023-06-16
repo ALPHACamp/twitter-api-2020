@@ -4,9 +4,15 @@ const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: (req, res, next) => {
+    const ThisUserId = helpers.getUser(req).id
     return Tweet.findAll({
       include: [
-        { model: User, attributes: { exclude: ['password'] } }
+        { model: User, attributes: { exclude: ['password'] } },
+        {
+          model: Like,
+          attributes: [],
+          // where: { UserId: ThisUserId }
+        }
       ],
       attributes: [
         'id',
@@ -25,19 +31,36 @@ const tweetController = {
             '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
           ),
           'replyCount'
+        ],
+        [
+          sequelize.literal(
+            `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${ThisUserId} AND Likes.deletedAt IS NULL) > 0`
+          ),
+          'isLiked'
         ],
       ]
     })
       .then(tweets => {
-        res.json(tweets)
+        const tweetsData = tweets.map(tweet => {
+          return {
+            ...tweet.toJSON(),
+            isLiked: Boolean(tweet.dataValues.isLiked)
+          }
+        })
+        res.json(tweetsData)
       })
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
+    const ThisUserId = helpers.getUser(req).id
     const tweetId = req.params.tweetId
     return Tweet.findByPk(tweetId, {
       include: [
-        { model: User, attributes: { exclude: ['password'] } }
+        { model: User, attributes: { exclude: ['password'] } },
+        {
+          model: Like,
+          attributes: [],
+        }
       ],
       attributes: [
         'id',
@@ -57,10 +80,23 @@ const tweetController = {
           ),
           'replyCount'
         ],
+        [
+          sequelize.literal(
+            `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${ThisUserId} AND Likes.deletedAt IS NULL) > 0`
+          ),
+          'isLiked'
+        ],
       ]
     })
-      .then(tweet => {
-        res.json( tweet )
+      .then(tweets => {
+        if (!Array.isArray(tweets)) {
+          tweets = [tweets]; // put tweets in an array
+        }
+        const tweetsData = tweets.map(tweet => ({
+          ...tweet.toJSON(),
+          isLiked: Boolean(tweet.dataValues.isLiked),
+        }));
+        res.json(tweetsData);
       })
       .catch(err => next(err))
   },
