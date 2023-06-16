@@ -164,7 +164,7 @@ const userController = {
       include: [
         {
           model: User, as: 'Followings',
-          attributes: ['id', 'name', 'introduction'],
+          attributes: ['id', 'name', 'introduction', 'avatar'],
           through: { attributes: ['createdAt'] },
         }
       ],
@@ -174,6 +174,7 @@ const userController = {
         let followings = user.Followings.map(following => ({
           followingId: following.id,
           followingName: following.name,
+          followingAvatar: following.avatar,
           followingIntroduction: following.introduction,
           followshipCreatedAt: following.Followship.createdAt
         }))
