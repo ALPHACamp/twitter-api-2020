@@ -4,6 +4,7 @@ const adminController = {
   getUsers: (req, res, next) => {
     User.findAll({
       attributes: [
+        'id',
         'account',
         'name',
         'avatar',
@@ -48,6 +49,9 @@ const adminController = {
         data.forEach((user, index) => {
           if (user.account === 'root') data.splice(index, 1)
         })
+        data
+          .sort((a, b) => b.tweetsCount - a.tweetsCount)
+          .sort((a, b) => b.likesCount - a.likesCount)
         return res
           .status(200)
           .json(data)

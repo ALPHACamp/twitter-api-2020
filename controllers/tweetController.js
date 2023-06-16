@@ -47,12 +47,12 @@ const tweetController = {
 
       const counts = tweets.map((tweet) => ({
         ...tweet.toJSON(),
-        likesCount: tweet.Likes.length,
-        repliesCount: tweet.Replies.length,
-        lastUpdated: getLastUpd(tweet),
         account: tweet.User.account,
         name: tweet.User.name,
         avatar: tweet.User.avatar,
+        likesCount: tweet.Likes.length,
+        repliesCount: tweet.Replies.length,
+        lastUpdated: getLastUpd(tweet),
         isLiked: tweet.Likes?.some((l) => l.UserId === Number(userId))
       }))
 
@@ -64,8 +64,13 @@ const tweetController = {
     }
   },
   getAllTweets: (req, res, next) => {
+    const userId = req.params.id
     Tweet.findAll({
-      include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+      include: [
+        { model: User, attributes: ['account', 'name', 'avatar'] },
+        { model: Like, attributes: ['UserId'] },
+        { model: Reply, attributes: ['UserId'] }
+      ],
       order: [['createdAt', 'DESC']],
       nest: true
     })
@@ -75,7 +80,13 @@ const tweetController = {
           account: tweet.User.account,
           name: tweet.User.name,
           avatar: tweet.User.avatar,
-          User: undefined
+          likesCount: tweet.Likes.length,
+          repliesCount: tweet.Replies.length,
+          lastUpdated: getLastUpd(tweet),
+          isLiked: tweet.Likes?.some((l) => l.UserId === Number(userId)),
+          User: undefined,
+          Likes: undefined,
+          Replies: undefined
         }))
       })
       .then((data) => res.status(200).json(data))
