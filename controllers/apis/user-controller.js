@@ -200,7 +200,8 @@ const userController = {
                   model: User,
                   as: 'TweetUser',
                   attributes: ['id', 'name', 'account', 'avatar']
-                }
+                },
+                { model: Like, as: 'TweetLike', attributes: ['id', 'UserId'] }
               ]
             }
           ],
