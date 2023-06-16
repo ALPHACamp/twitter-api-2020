@@ -140,15 +140,14 @@ const userController = {
           return null // 或者根据需求返回空对象 {}
         }
         return {
-          ...r.toJSON(),
-          RepliesCount: r.Tweet.Replies.length,
-          LikesCount: r.Tweet.Likes.length,
-          isLiked: r.Tweet.Likes.some(like => like.UserId === reqUserId),
           Tweet: {
             ...r.Tweet.toJSON(),
             name: r.Tweet.User ? r.Tweet.User.name : null,
             account: r.Tweet.User ? r.Tweet.User.account : null,
-            avatar: r.Tweet.User ? r.Tweet.User.avatar : null
+            avatar: r.Tweet.User ? r.Tweet.User.avatar : null,
+            RepliesCount: r.Tweet.Replies.length,
+            LikesCount: r.Tweet.Likes.length,
+            isLiked: r.Tweet.Likes.some(like => like.UserId === reqUserId)
           }
         }
       }).filter(Boolean) // 过滤掉空对象
