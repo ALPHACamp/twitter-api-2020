@@ -219,7 +219,17 @@ const userController = {
         error.status = 404
         throw error
       }
-      userLiked.forEach(e => { e.isLiked = true })
+      const likes = Like.findAll({ where: { UserId: getUser(req).id } })
+      const dic = {}
+      for (let i = 0; i < likes.length; i++) {
+        dic[likes[i].TweetId] = i
+      }
+      userLiked.forEach(e => {
+        e.isLiked = false
+        if (dic[e.TweetId] >= 0) {
+          e.isLiked = true
+        }
+      })
       return res.status(200).json(userLiked)
     } catch (error) {
       next(error)
