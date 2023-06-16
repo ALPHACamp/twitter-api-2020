@@ -38,6 +38,9 @@ router.get('/api/users/:user_id/likes', authenticated, authenticatedUser, userCo
 router.use('/api/admin', admin)
 
 // replies
+router.get('/api/tweets/replies/:reply_id/edit', authenticated, authenticatedUser, replyController.editComment)
+router.put('/api/tweets/replies/:reply_id', authenticated, authenticatedUser, replyController.putComment)
+router.delete('/api/tweets/replies/:reply_id', authenticated, authenticatedUser, replyController.deletedComment)
 router.post('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postComment)
 router.get('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getComment)
 

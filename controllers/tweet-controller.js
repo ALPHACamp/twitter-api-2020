@@ -23,7 +23,17 @@ const tweetController = {
   },
 
   getTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.tweet_id)
+    return Tweet.findByPk(req.params.tweet_id, {
+      include: [Reply, User],
+      attributes: {
+        include: [
+          [
+            Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'),
+            'repliesCount',
+          ]
+        ]
+      },
+    })
       .then(tweet => {
         if (!tweet) throw new Error("The tweet didn't exist!")
         return tweet
@@ -83,10 +93,7 @@ const tweetController = {
   deletedTweet: (req, res, next) => {
     const tweetId = req.params.tweet_id
     const userId = req.user.id
-    return Tweet.findByPk(tweetId, {
-      raw: true,
-      nest: true
-    })
+    return Tweet.findByPk(tweetId)
     .then(tweet => {
       if (!tweet) {
         throw new Error('Tweet not found!')
