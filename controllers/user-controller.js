@@ -243,14 +243,13 @@ const userController = {
   },
   putUser: (req, res, next) => {
     console.log(req.body)
-    console.log('----------- 這 -----------')
     const userId = Number(req.params.id)
     let avatarFile, bannerFile
     if (helpers.getUser(req).id !== 1) {
-      if (req.files.avatar && req.files.avatar.length > 0) {
+      if (req.files.avatar) {
         avatarFile = req.files.avatar[0]
       }
-      if (req.files.banner && req.files.banner.length > 0) {
+      if (req.files.banner) {
         bannerFile = req.files.banner[0]
       }
     }
@@ -259,8 +258,8 @@ const userController = {
     const { name, introduction } = req.body
     return Promise.all([
       User.findByPk(userId),
-      imgurFileHandler(avatarFile),
-      imgurFileHandler(bannerFile)
+      avatarFile ? imgurFileHandler(avatarFile) : Promise.resolve(),
+      bannerFile ? imgurFileHandler(bannerFile) : Promise.resolve()
     ])
       .then(([userData, avatarUrl, bannerUrl]) => {
         if (!userData) throw new Error('putUser說: 沒這人')
