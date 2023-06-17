@@ -113,8 +113,8 @@ const tweetController = {
       const tweetId = Number(req.params.tweet_id)
       const userId = helpers.getUser(req).id
       const tweet = await Tweet.findByPk(tweetId, { raw: true, attributes: ['id'] })
-      const like = await Like.findOne({ where: { tweetId, userId }, raw: true })
       if (!tweet) newErrorGenerate('推文不存在', 404)
+      const like = await Like.findOne({ where: { tweetId, userId }, raw: true })
       if (like) newErrorGenerate('已按過喜歡', 400)
       const addLike = await Like.create({ TweetId: tweetId, UserId: userId })
       return res.json(addLike)
