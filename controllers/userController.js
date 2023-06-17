@@ -41,15 +41,15 @@ const userController = {
   },
   signUp: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
-    if (password !== checkPassword) { return res.status(400).json('Password do not match!') }
-    if (name.length > 50) return res.status(400).json('Max length 50')
+    if (password !== checkPassword) { return res.status(200).json('Password do not match!') }
+    if (name.length > 50) return res.status(200).json('Max length 50')
     return Promise.all([
       User.findOne({ where: { email } }),
       User.findOne({ where: { account } })
     ])
       .then(([emailCheck, accountCheck]) => {
-        if (emailCheck) return res.status(400).json('Email already exists!')
-        if (accountCheck) { return res.status(400).json('Account already exists!') }
+        if (emailCheck) return res.status(200).json('Email already exists!')
+        if (accountCheck) { return res.status(200).json('Account already exists!') }
         return bcrypt.hash(password, 10)
       })
       .then((hash) =>
