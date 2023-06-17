@@ -8,10 +8,13 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      email: {
+      account: {
         type: Sequelize.STRING
       },
       password: {
+        type: Sequelize.STRING
+      },
+      email: {
         type: Sequelize.STRING
       },
       name: {
@@ -20,17 +23,21 @@ module.exports = {
       avatar: {
         type: Sequelize.STRING
       },
+      cover: {
+        type: Sequelize.STRING
+      },
       introduction: {
         type: Sequelize.TEXT
       },
       role: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: "user"
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }
