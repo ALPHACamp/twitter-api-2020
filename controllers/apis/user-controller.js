@@ -67,7 +67,8 @@ const userController = {
             { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] },
             { model: Like, as: 'TweetLike', attributes: ['id', 'UserId'] }
           ],
-          nest: true
+          nest: true,
+          order: [['updatedAt', 'DESC']]
         })
       ])
       // 錯誤處理
@@ -158,7 +159,8 @@ const userController = {
                 { model: Like, as: 'TweetLike', attributes: ['id', 'UserId'] }
               ]
             },
-            { model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }]
+            { model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
+          order: [['updatedAt', 'DESC']]
         })
       ])
 
@@ -216,6 +218,7 @@ const userController = {
               ]
             }
           ],
+          order: [['updatedAt', 'DESC']],
           raw: true,
           nest: true
         }),
