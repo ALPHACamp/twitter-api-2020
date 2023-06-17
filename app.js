@@ -7,7 +7,6 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const routes = require('./routes')
 
-const helpers = require('./_helpers')
 const methodOverride = require('method-override')
 
 const passport = require('./config/passport')

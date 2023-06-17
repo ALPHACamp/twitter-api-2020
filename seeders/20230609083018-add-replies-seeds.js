@@ -6,7 +6,7 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
-      //先過濾掉role=admin, 只留下純users
+      // 先過濾掉role=admin, 只留下純users
       "SELECT id FROM Users WHERE role <> 'admin'",
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
@@ -28,7 +28,7 @@ module.exports = {
           comment: randomText,
           createdAt: new Date(),
           updatedAt: new Date()
-        });
+        })
       }
     }
 

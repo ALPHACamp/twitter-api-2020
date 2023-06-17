@@ -25,7 +25,7 @@ const followshipController = {
           followingId
         })
       })
-      .then((followship) => {
+      .then(followship => {
         res.json({
           status: 'success',
           followship: followship
@@ -50,7 +50,7 @@ const followshipController = {
       .then(() => {
         res.json({
           status: 'success',
-          message: "Followship deleted successfully"
+          message: 'Followship deleted successfully'
         })
       })
       .catch(err => next(err))
@@ -58,7 +58,7 @@ const followshipController = {
   getTopUser: (req, res, next) => {
     return User.findAll({
       include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
-      attributes: { exclude: ['password'] },
+      attributes: { exclude: ['password'] }
     })
       .then(users => {
         const result = users
@@ -68,11 +68,11 @@ const followshipController = {
             isFollowed: req.user.Followings.some(f => f.id === user.id)
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
-          .slice(0, 10) //只留top 10
+          .slice(0, 10) // 只留top 10
         return res.json({ users: result })
       })
       .catch(err => next(err))
-  },
+  }
 }
 
 module.exports = followshipController

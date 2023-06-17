@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
@@ -6,7 +6,7 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const admin = {
-      //一組admin
+      // 一組admin
       email: 'root@example.com',
       password: await bcrypt.hash('12345678', 10),
       name: 'root',
@@ -16,11 +16,11 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date(),
       account: 'root',
-      banner: `https://loremflickr.com/640/480/mountain/?lock=${Math.random() * 100}`,
+      banner: `https://loremflickr.com/640/480/mountain/?lock=${Math.random() * 100}`
     }
 
-    const users = [];
-    //五組隨機user
+    const users = []
+    // 五組隨機user
     for (let i = 0; i < 5; i++) {
       users.push({
         email: `user${i + 1}@example.com`,
@@ -32,15 +32,15 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
         account: `user${i + 1}`,
-        banner: `https://loremflickr.com/640/480/mountain/?lock=${Math.random() * 100}`,
-      });
+        banner: `https://loremflickr.com/640/480/mountain/?lock=${Math.random() * 100}`
+      })
     }
 
-    await queryInterface.bulkInsert('Users', [admin]);
-    await queryInterface.bulkInsert('Users', users);
+    await queryInterface.bulkInsert('Users', [admin])
+    await queryInterface.bulkInsert('Users', users)
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Users', {});
+    await queryInterface.bulkDelete('Users', {})
   }
 }

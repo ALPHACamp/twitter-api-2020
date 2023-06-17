@@ -15,7 +15,6 @@ const userController = require('../controllers/user-controller')
 
 const { authenticated, isUser, isAdmin, authenticatedUser, authenticatedAdmin, signInAuth } = require('../middleware/auth')
 
-
 router.post('/api/admin/signin', signInAuth, isAdmin, adminController.signIn)
 
 router.post('/api/users/signin', signInAuth, isUser, userController.signIn)
