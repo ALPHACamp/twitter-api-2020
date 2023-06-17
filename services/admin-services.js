@@ -51,6 +51,10 @@ const adminServices = {
           [
             sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId IN (SELECT id FROM Tweets WHERE Tweets.UserId = User.id))'),
             'likesCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'),
+            'tweetsCount'
           ]
         ],
         include: [
@@ -75,13 +79,14 @@ const adminServices = {
         raw: true,
         nest: true
       })
-      const usersWithCounts = await Promise.all(
-        users.map(async (user) => {
-          const tweetData = await Tweet.count({ where: { UserId: user.id } })
-          user.tweetsCount = tweetData
-          return user
-        })
-      )
+      // 另一種promise寫法
+      //   await Promise.all(
+      //   users.map(async (user) => {
+      //     const tweetData = await Tweet.count({ where: { UserId: user.id } })
+      //     user.tweetsCount = tweetData
+      //     return user
+      //   })
+      // )
 
       const sortedUsers = users.sort((a, b) => b.tweetsCount - a.tweetsCount)
 
