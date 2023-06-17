@@ -134,8 +134,8 @@ const tweetController = {
           {
             model: Reply,
             as: 'TweetReply',
-            attributes: ['id', 'UserId', 'comment'],
-            include: [{ model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }]
+            include: [{ model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
+            order: [['createdAt', 'DESC']]
           }
         ]
       })
