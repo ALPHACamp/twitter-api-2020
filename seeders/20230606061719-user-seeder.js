@@ -1,13 +1,14 @@
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
+const numOfUsers = 15
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const avatarsIndex = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    const avatarsIndex = Array.from(Array(numOfUsers).keys())
 
     await queryInterface.bulkInsert(
       'Users',
-      Array.from({ length: 10 }, (_, i) =>
+      Array.from({ length: numOfUsers }, (_, i) =>
         i === 0
           ? {
             // admin account
