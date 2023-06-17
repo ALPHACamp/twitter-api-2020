@@ -68,8 +68,8 @@ const userController = {
         where: { UserId: userId },
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          { model: Like, attributes: ['userId'] },
-          { model: Reply, attributes: ['id'] }
+          { model: Like },
+          { model: Reply }
         ],
         order: [['createdAt', 'DESC']]
       })
@@ -156,7 +156,7 @@ const userController = {
       }).filter(Boolean) // 过滤掉空对象
       result.forEach(r => {
         delete r.Tweet.Replies
-        delete r.Tweet.Likes
+        // delete r.Tweet.Likes
         delete r.Tweet.User
       })
       return res.status(200).json(result)
