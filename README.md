@@ -29,7 +29,7 @@
 
 ### MySQL 安裝及連線
 
-**MySQL 安裝：如果你的電腦已經安裝，請跳過。實作本專案時，我們使用的版本是 8.0.15（Windows）。**
+MySQL 安裝：如果你的電腦已經安裝，請跳過。實作本專案時，我們使用的版本是 8.0.15（Windows）。
 
 請先根據你的作業系統至官方[下載](https://dev.mysql.com/downloads/mysql)對應的安裝檔，下載過程中可能會出現官方廣告，請忽略並繼續下載即可 。
 
@@ -110,25 +110,25 @@
 5. 請打開 package.json 檔案，根據你的作業系統確認 scripts 中的指令是否能在你的作業系統或是終端機上使用，以下提供簡單示例：
 
 ```js
-// macOS
-  "scripts": {
-    "start": "NODE_ENV=development node app.js",
-    "dev": "NODE_ENV=development nodemon app.js"
-  }
-// windows：若你使用 Cmder 等模擬 Linux 指令的套件請留意
-  "scripts": {
-    "start": "set \"NODE_ENV=development\" && node app.js",
-    "dev": "set \"NODE_ENV=development\" && nodemon app.js"
-  }
+  // macOS
+    "scripts": {
+      "start": "NODE_ENV=development node app.js",
+      "dev": "NODE_ENV=development nodemon app.js"
+    }
+  // windows：若你使用 Cmder 等模擬 Linux 指令的套件請留意
+    "scripts": {
+      "start": "set \"NODE_ENV=development\" && node app.js",
+      "dev": "set \"NODE_ENV=development\" && nodemon app.js"
+    }
 ```
 
 6. 待上一步確認完成後，再輸入：
 
 ```js
-// 如果你想使用我們的專案繼續開發
-npm run dev
-// 如果你只是想要試用我們的專案
-npm run start
+  // 如果你想使用我們的專案繼續開發
+  npm run dev
+  // 如果你只是想要試用我們的專案
+  npm run start
 ```
 
 7. 待上一步完成後，終端機若提示如下，表示伺服器已開始運行：
@@ -140,9 +140,9 @@ npm run start
 9. 如有需要使用本專案的種子資料，請依序輸入：
 
 ```js
-// 生成種子資料
-npx sequelize db:migrate
-npx sequelize db:seed:all
+  // 生成種子資料
+  npx sequelize db:migrate
+  npx sequelize db:seed:all
 ```
 
 該種子資料會生成假使用者、假推文、假回覆等等資料，以下列出一位管理者及一位使用者帳號供試用，其他詳細訊息請查看資料庫：
@@ -151,13 +151,18 @@ npx sequelize db:seed:all
 - 使用者帳號：user1，使用者密碼：12345678
 
 ```js
-// 補充：若生成種子資料有問題，你也可以使用以下指令將資料庫內的資料全部清除再重新生成
-npx sequelize db:migrate:undo:all
+  // 補充：若生成種子資料有問題，你也可以使用以下指令將資料庫內的資料全部清除再重新生成
+  npx sequelize db:migrate:undo:all
 ```
 
 ## 開發者名單
 
+後端：
+
 - [Allison](https://github.com/AllisonLin8)
 - [Wayne Sun](https://github.com/WeiWayne1030)
+
+前端：
+
 - [Sutao Liang](https://github.com/phoenix850508)
 - [Johnny Fang](https://github.com/JohnnyFangFangFang)
