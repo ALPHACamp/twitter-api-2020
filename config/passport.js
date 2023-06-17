@@ -11,8 +11,10 @@ passport.use(new LocalStrategy(
   { usernameField: 'account', passwordField: 'password', passReqToCallback: true },
   async (req, account, password, cb) => {
     try {
-      const passwordError = '密碼輸入錯誤！'
-      const accountError = '帳戶不存在！'
+
+      const accountError = '帳號不存在！'
+      const passwordError = '帳號或密碼輸入錯誤！'
+
       const user = await User.findOne({ where: { account } })
 
       // 帳號或密碼輸入錯誤 暫時的錯誤處理 status code 200
