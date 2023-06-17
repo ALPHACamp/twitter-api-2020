@@ -156,7 +156,12 @@ const userController = {
         where: { UserId: req.params.id },
         include: [
           { model: User, attributes: { exclude: ['password'] } },
-          { model: Tweet }
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+            ]
+          }
         ],
         order: [['createdAt', 'DESC']]
       })
@@ -170,6 +175,7 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
+
       const likes = await Like.findAll({
         where: {
           UserId: req.params.id
@@ -202,10 +208,20 @@ const userController = {
             }
           }]
       })
+      // 原本邏輯是這個 like 是不是 token user點選的，所以會有問題
+      // 查看token 使用者有沒有喜歡這個 tweet
+      const currentUserLikeTweets = await Like.findAll({
+        attributes: ['TweetId'],
+        where: [
+          { UserId: currentUserId }
+        ],
+        raw: true
+      })
+      const currentUserLikeTweetsId = currentUserLikeTweets.map(tweet => tweet.TweetId)
 
       const likesData = likes.map(like => ({
         ...like.toJSON(),
-        isCurrentUserLiked: like.UserId.toString() === currentUserId.toString()
+        isCurrentUserLiked: currentUserLikeTweetsId.some(id => id.toString() === like.Tweet.id.toString())
       }))
       res.status(200).json(likesData)
     } catch (err) {
