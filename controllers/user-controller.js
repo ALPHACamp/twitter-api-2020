@@ -205,6 +205,18 @@ const userController = {
               `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${helpers.getUser(req).id} AND Likes.deletedAt IS NULL) > 0`
             ),
             'isLiked'
+          ], 
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`
+            ),
+            'replyCount'
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)`
+            ),
+            'likeCount'
           ],
         ],
         order: [['createdAt', 'DESC']],
@@ -257,6 +269,18 @@ const userController = {
               `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${helpers.getUser(req).id} AND Likes.deletedAt IS NULL) > 0`
             ),
             'isLiked'
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`
+            ),
+            'replyCount'
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)`
+            ),
+            'likeCount'
           ],
         ],
       })
