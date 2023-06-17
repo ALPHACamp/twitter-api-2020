@@ -13,6 +13,7 @@ module.exports = {
       account: 'root',
       avatar: 'http://randomuser.me/api/portraits/women/3.jpg',
       banner: banner,
+      introduction: faker.lorem.sentence(),
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -23,6 +24,7 @@ module.exports = {
       account: 'user1',
       avatar: 'http://randomuser.me/api/portraits/women/4.jpg',
       banner: banner,
+      introduction: faker.lorem.sentence(),
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -33,6 +35,7 @@ module.exports = {
       account: 'user2',
       avatar: 'http://randomuser.me/api/portraits/women/5.jpg',
       banner: banner,
+      introduction: faker.lorem.sentence(),
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -43,6 +46,7 @@ module.exports = {
       account: 'user3',
       avatar: 'http://randomuser.me/api/portraits/women/6.jpg',
       banner: banner,
+      introduction: faker.lorem.sentence(),
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -53,6 +57,7 @@ module.exports = {
       account: 'user4',
       avatar: 'http://randomuser.me/api/portraits/women/7.jpg',
       banner: banner,
+      introduction: faker.lorem.sentence(),
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -63,6 +68,7 @@ module.exports = {
       account: 'user5',
       avatar: 'http://randomuser.me/api/portraits/women/8.jpg',
       banner: banner,
+      introduction: faker.lorem.sentence(),
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -74,6 +80,7 @@ module.exports = {
       account: 'user6',
       avatar: 'http://randomuser.me/api/portraits/women/9.jpg',
       banner: banner,
+      introduction: faker.lorem.sentence(),
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -85,6 +92,7 @@ module.exports = {
       account: 'user7',
       avatar: 'http://randomuser.me/api/portraits/women/10.jpg',
       banner: banner,
+      introduction: faker.lorem.sentence(),
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -96,6 +104,7 @@ module.exports = {
       account: 'user8',
       avatar: 'http://randomuser.me/api/portraits/women/11.jpg',
       banner: banner,
+      introduction: faker.lorem.sentence(),
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -107,6 +116,7 @@ module.exports = {
       account: 'user9',
       avatar: 'http://randomuser.me/api/portraits/women/12.jpg',
       banner: banner,
+      introduction: faker.lorem.sentence(),
       createdAt: new Date(),
       updatedAt: new Date()
     },
