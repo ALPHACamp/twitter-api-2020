@@ -60,6 +60,7 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
+      const reqUserId = helpers.getUser(req).id
       const userId = Number(req.params.id)
       const user = await User.findByPk(userId)
       if (!user) throw new Error('此用戶不存在')
@@ -67,12 +68,22 @@ const userController = {
         where: { UserId: userId },
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          { model: Like, attributes: ['userId'] }
+          { model: Like },
+          { model: Reply }
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (tweets.length === 0) throw new Error('此用戶尚未發布推文')
-      return res.status(200).json(tweets)
+      const result = tweets.map(t => ({
+        ...t.toJSON(),
+        RepliesCount: t.Replies.length,
+        LikesCount: t.Likes.length,
+        isLiked: t.Likes.some(like => like.UserId === reqUserId)
+      }))
+      result.forEach(r => {
+        delete r.Likes
+        delete r.Replies
+      })
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   },
   getUserReplies: async (req, res, next) => {
@@ -81,33 +92,28 @@ const userController = {
       const userReplies = await Reply.findAll({
         where: { UserId: userId },
         include: [
-          {
-            model: Tweet,
-            include: {
-              model: User,
-              attributes: ['account']
-            }
-          },
-          {
-            model: User,
-            attributes: ['avatar']
-          }
+          { model: Tweet, include: { model: User } },
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         ],
         order: [['createdAt', 'DESC']]
       })
-
-      const RepliesJSON = userReplies.map(r => {
-        const replyJson = r.toJSON()
-        const tweet = replyJson.Tweet // 推文者（Tweet 的 user）
-
+      const result = userReplies.map(r => {
+        if (!r || !r.Tweet) {
+          return null // 或者根据需求返回空对象 {}
+        }
         return {
-          ...replyJson,
+          ...r.toJSON(),
           Tweet: {
-            ...tweet
+            ...r.Tweet.toJSON(),
+            account: r.Tweet.User ? r.Tweet.User.account : null
           }
         }
+      }).filter(Boolean) // 过滤掉空对象
+      result.forEach(r => {
+        delete r.Tweet.User
       })
-      return res.status(200).json(RepliesJSON)
+
+      return res.status(200).json(result)
     } catch (err) {
       next(err)
     }
@@ -115,15 +121,45 @@ const userController = {
 
   getLikedTweets: async (req, res, next) => {
     try {
+      const reqUserId = helpers.getUser(req).id
       const userId = req.params.id
       const likesTweets = await Like.findAll({
         where: { UserId: userId },
         include: [
-          { model: Tweet, include: { model: User, attributes: ['name', 'account', 'avatar'] } }
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['name', 'account', 'avatar'] },
+              { model: Reply },
+              { model: Like }
+            ]
+          }
         ],
         order: [['createdAt', 'DESC']]
       })
-      return res.status(200).json(likesTweets)
+      const result = likesTweets.map(r => {
+        if (!r || !r.Tweet) {
+          return null // 或者根据需求返回空对象 {}
+        }
+        return {
+          ...r.toJSON(),
+          Tweet: {
+            ...r.Tweet.toJSON(),
+            name: r.Tweet.User ? r.Tweet.User.name : null,
+            account: r.Tweet.User ? r.Tweet.User.account : null,
+            avatar: r.Tweet.User ? r.Tweet.User.avatar : null,
+            RepliesCount: r.Tweet.Replies.length,
+            LikesCount: r.Tweet.Likes.length,
+            isLiked: r.Tweet.Likes.some(like => like.UserId === reqUserId)
+          }
+        }
+      }).filter(Boolean) // 过滤掉空对象
+      result.forEach(r => {
+        delete r.Tweet.Replies
+        // delete r.Tweet.Likes
+        delete r.Tweet.User
+      })
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   },
   getFollowings: async (req, res, next) => {
