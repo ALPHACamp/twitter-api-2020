@@ -156,7 +156,12 @@ const userController = {
         where: { UserId: req.params.id },
         include: [
           { model: User, attributes: { exclude: ['password'] } },
-          { model: Tweet }
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+            ]
+          }
         ],
         order: [['createdAt', 'DESC']]
       })
