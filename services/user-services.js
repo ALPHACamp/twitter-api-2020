@@ -358,7 +358,11 @@ const userServices = {
     topUsers: async (req, cb) => {
         try {
             const users = await User.findAll({
-                include: [{ model: User, as: 'Followers' }],
+                include: [{
+                        model: User,
+                        attributes: ['avatar', 'name', 'account'],
+                        as: 'Followers'
+                    }],
                 where: {
                     id: { [sequelize.Op.not]: helpers.getUser(req).id },
                     role: { [sequelize.Op.not]: 'admin' }
