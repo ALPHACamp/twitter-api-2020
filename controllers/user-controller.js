@@ -245,7 +245,10 @@ const userController = {
         where: { UserId: userId },
         include: [
           { model: User, attributes: { exclude: ['password'] } },
-          { model: Tweet }
+          { 
+            model: Tweet,
+            include: [{ model: User, attributes: ['account'] }] 
+          }
         ],
         order: [['createdAt', 'DESC']],
         nest: true
