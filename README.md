@@ -85,7 +85,7 @@ MySQL 安裝：如果你的電腦已經安裝，請跳過。實作本專案時�
 - Username: root
 - Password: password
 
-3. 上一步都輸入完成後，按下 OK，你會看到 Workbench MySQL Connections 的下方出現了我們剛剛新 增的 Local instance 3306。
+3. 上一步都輸入完成後，按下 OK，你會看到 Workbench MySQL Connections 的下方出現了我們剛剛新增的 Local instance 3306。
 
 4. 點擊剛才建立好的 Local instance 3306 來啟動連線，我們會先被要求登入 MySQL server，請使用剛剛設定的 Username 和 Password 登入，這樣就完成了 MySQL Workbench 的基本安裝與設定，並且與本機的 MySQL server 連線。
 
