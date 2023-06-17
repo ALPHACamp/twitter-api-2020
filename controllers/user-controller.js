@@ -102,12 +102,20 @@ const userController = {
             ),
             'FollowersCount'
           ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${helpers.getUser(req).id} AND Followships.followingId = User.id ) > 0`
+            ),
+            'isFollowed'
+          ],
         ],
       });
       if (!user) throw new Error('This user does not exist')
 
+      const isCurrentUserFollowed = user.getDataValue('isFollowed') === 1
       const userData = {
-        ...user.toJSON()
+        ...user.toJSON(),
+        isCurrentUserFollowed
       }
       res.status(200).json(userData)
     } catch (err) {
