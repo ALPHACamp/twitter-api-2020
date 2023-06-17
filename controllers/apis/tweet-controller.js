@@ -84,12 +84,10 @@ const tweetController = {
         error.status = 404
         throw error
       }
-
-      let isLiked = false
+      data.isLiked = false
       for (const i of data.TweetLike) {
         if (i.UserId === getUser(req).id) {
-          isLiked = true
-          data.isLiked = isLiked
+          data.isLiked = true
           break
         }
       }
