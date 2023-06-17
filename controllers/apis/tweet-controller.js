@@ -113,29 +113,25 @@ const tweetController = {
         res.status(500).json({ statue: 'err', error: err.message })
       })
   },
-  getTweet: (req, res, next) => {
+  getTweet: (req, res) => {
     const tweetId = req.params.tweet_id
-    return Tweet.findByPk(tweetId, {
-      include: [
-        { model: User, attributes: { exclude: ['password'] } },
-        { model: Like },
-        {
-          model: Reply,
-          include: [{ model: User }],
-          order: [['createdAt', 'DESC']]
-        },
-      ]
-    })
-      .then(tweet => {
+    return Promise.all([
+      Tweet.findByPk(tweetId, {
+        include: [
+          { model: User, attributes: { exclude: ['password'] } },
+          { model: Like }
+        ]
+      }),
+      Reply.count({ where: { TweetId: tweetId } }),
+    ])
+      .then(([tweet, replies]) => {
         if (!tweet) throw new Error('The tweet does not exist.')
-        const tweetData = tweet.toJSON()
-        tweetData.Replies.forEach(reply => {
-          delete reply.User.password
-        })
-        tweetData.replyCount = tweetData.Replies.length
-        tweetData.LikesCount = tweetData.Likes.length
-        tweetData.isLiked = tweetData.Likes.some(like => like.UserId === helpers.getUser(req).id)
-        res.status(200).json(tweetData)
+        tweet = tweet.toJSON()
+        tweet.LikeCount = tweet.Likes.length
+        tweet.ReplyCount = replies
+        tweet.isLiked = tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
+        delete tweet.Likes
+        res.status(200).json(tweet)
       })
       .catch(err => {
         res.status(500).json({ status: 'err', error: err.message })
