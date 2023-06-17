@@ -24,11 +24,13 @@ const userController = {
     try {
       const selfUserData = helpers.getUser(req)
       const selfUserDataJson = selfUserData.toJSON()
+      selfUserDataJson.tweetsCount = selfUserDataJson.Tweets.length
       selfUserDataJson.followersCount = selfUserDataJson.Followers.length
       selfUserDataJson.followingsCount = selfUserDataJson.Followings.length
       delete selfUserDataJson.password
       delete selfUserDataJson.Followings
       delete selfUserDataJson.Followers
+      delete selfUserDataJson.Tweets
       return res.json(selfUserDataJson)
     } catch (err) {
       next(err)
