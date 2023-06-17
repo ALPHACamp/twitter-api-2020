@@ -241,12 +241,10 @@ const userController = {
   },
   putUser: (req, res, next) => {
     console.log(req.body)
+    console.log('----------- 這 -----------')
     const userId = Number(req.params.id)
     let avatarFile, bannerFile
-    if (
-      helpers.getUser(req).id !== 1 &&
-      helpers.getUser(req).followings === []
-    ) {
+    if (helpers.getUser(req).id !== 1) {
       if (req.files.avatar && req.files.avatar.length > 0) {
         avatarFile = req.files.avatar[0]
       }
@@ -254,7 +252,6 @@ const userController = {
         bannerFile = req.files.banner[0]
       }
     }
-    console.log('----------- 這 -----------')
     // 沒有這條, 有了token之後, 就可以亂改他人資料了
     if (userId !== helpers.getUser(req).id) throw new Error('只能改自己的啦')
     const { name, introduction } = req.body
