@@ -224,7 +224,7 @@ const tweetController = {
         error.status = 404
         throw error
       }
-
+      await tweet.increment('likedCount', { by: -1 })
       await like.destroy()
       return res.status(200).json(like)
     } catch (err) {
