@@ -240,6 +240,7 @@ const userController = {
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
+    console.log(req.body)
     const userId = Number(req.params.id)
     let avatarFile, bannerFile
     if (
