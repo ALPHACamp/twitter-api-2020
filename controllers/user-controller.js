@@ -245,7 +245,7 @@ const userController = {
     console.log('-- 進入putUser--')
     const userId = Number(req.params.id)
     let avatarFile, bannerFile
-    if (helpers.getUser(req).id !== 1) {
+    if (helpers.getUser(req).id !== 1 && req.files) {
       if (req.files.avatar) {
         avatarFile = req.files.avatar[0]
       }
