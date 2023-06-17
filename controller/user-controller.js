@@ -60,6 +60,7 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
+      const reqUserId = helpers.getUser(req).id
       const userId = Number(req.params.id)
       const user = await User.findByPk(userId)
       if (!user) throw new Error('此用戶不存在')
@@ -75,7 +76,8 @@ const userController = {
       const result = tweets.map(t => ({
         ...t.toJSON(),
         RepliesCount: t.Replies.length,
-        LikesCount: t.Likes.length
+        LikesCount: t.Likes.length,
+        isLiked: t.Likes.some(like => like.UserId === reqUserId)
       }))
       result.forEach(r => {
         delete r.Likes
@@ -140,6 +142,7 @@ const userController = {
           return null // 或者根据需求返回空对象 {}
         }
         return {
+          ...r.toJSON(),
           Tweet: {
             ...r.Tweet.toJSON(),
             name: r.Tweet.User ? r.Tweet.User.name : null,
