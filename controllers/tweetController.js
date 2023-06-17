@@ -7,28 +7,31 @@ const tweetController = {
     try {
       const follows = req.query.follows
       const liked = req.query.liked
-      const userId = req.params.id
+      const userId = getUser(req).id || getUser(req).dataValues.id
+      const searchUserId = req.params.id
       const options = {}
+      // follows目前不必要
       if (follows) {
+        // 不管有沒有follows都會有自己的貼文
         const followingIdData = await Followship.findAll({
-          where: { follower_Id: userId },
+          where: { follower_Id: searchUserId },
           attributes: ['followingId']
         })
         const followingIds = followingIdData.map((row) => row.followingId)
-        followingIds.push(userId)
+        followingIds.push(searchUserId)
         options.UserId = followingIds
       } else if (liked) {
         const likes = await Like.findAll({
-          where: { User_Id: userId },
+          where: { User_Id: searchUserId },
           attributes: ['TweetId'],
           raw: true,
           nest: true
         })
         const tweetIds = likes.map((row) => row.TweetId)
-        tweetIds.push(userId)
+        // tweetIds.push(userId)
         options.id = tweetIds
       } else {
-        options.UserId = userId
+        options.UserId = searchUserId
       }
       const tweets = await Tweet.findAll({
         where: options,
@@ -53,9 +56,8 @@ const tweetController = {
         likesCount: tweet.Likes.length,
         repliesCount: tweet.Replies.length,
         lastUpdated: getLastUpd(tweet),
-        isLiked: tweet.Likes?.some((l) => l.UserId === Number(userId))
+        isLiked: tweet.Likes?.some((l) => Number(l.UserId) === Number(userId))
       }))
-
       const data = counts.map(({ Likes, Replies, User, ...rest }) => rest)
 
       return res.status(200).json(data)
