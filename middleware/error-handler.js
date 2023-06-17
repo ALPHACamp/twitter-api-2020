@@ -5,6 +5,11 @@ module.exports = {
         status: 'error',
         message: err
       })
+    } else if (err === '帳號不存在！') {
+      res.status(200).json({
+        status: 'error',
+        message: err
+      })
     } else if (err instanceof Error) {
       res.status(err.status || 500).json({
         status: 'error',
