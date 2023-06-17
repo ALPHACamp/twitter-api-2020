@@ -2,9 +2,10 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const users = await queryInterface.sequelize.query('SELECT id FROM Users;', {
-      type: queryInterface.sequelize.QueryTypes.SELECT
-    })
+    const users = await queryInterface.sequelize.query(
+      "SELECT id FROM Users WHERE role <> 'admin'",
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
     
     const followships = Array.from({ length: 30 }, () => {
       let FollowerId = users[Math.floor(Math.random() * users.length)].id

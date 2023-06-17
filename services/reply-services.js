@@ -37,9 +37,7 @@ const replyServices = {
             }})
             cb(null, newreplies)
         } catch (err) {
-            cb(err, {
-                message: "錯誤訊息"
-            })
+            cb(err)
         }
     },
     postReplies: async(req, cb) => {
@@ -65,9 +63,7 @@ const replyServices = {
                 createdAt: relativeTimeFromNow(reply.dataValues.createdAt)
             })
         } catch (err) {
-            cb(err, {
-                message: "錯誤訊息"
-            })
+            cb(err)
         }
     },
 }
