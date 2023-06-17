@@ -247,15 +247,18 @@ const userController = {
     let avatarFile, bannerFile
     if (helpers.getUser(req).id !== 1) {
       if (req.files.avatar) {
+        console.log('-------', req.files.avatar)
         avatarFile = req.files.avatar[0]
       }
       if (req.files.banner) {
+        console.log('-------', req.files.banner)
         bannerFile = req.files.banner[0]
       }
     }
     // 沒有這條, 有了token之後, 就可以亂改他人資料了
     if (userId !== helpers.getUser(req).id) throw new Error('只能改自己的啦')
     const { name, introduction } = req.body
+    console.log('-------', 3333333333333333)
     return Promise.all([
       User.findByPk(userId),
       avatarFile ? imgurFileHandler(avatarFile) : Promise.resolve(),
