@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken')
 const Sequelize = require('sequelize')
 const { literal } = Sequelize
 const moment = require('moment')
-const { getUser } = require('../_helpers')
 
 const adminController = {
   signIn: (req, res, next) => {
