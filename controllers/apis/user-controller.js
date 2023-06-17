@@ -81,6 +81,8 @@ const userController = {
         user.followerCount = follower
         user.followingCount = following
         user.TweetCount = Tweet.length
+        const currentUser = helpers.getUser(req)
+        user.isFollowing = currentUser.Followings ? currentUser.Followings.some(f => f.id === user.id) : false
         return res.status(200).json(user)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
