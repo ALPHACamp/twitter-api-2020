@@ -104,7 +104,7 @@ const userController = {
       .catch((err) => next(err))
   },
   putUserProfile: async (req, res, next) => {
-    const fileHandler = process.env.NODE_ENV !== 'production' ? localFileHandler : imgurFileHandler
+    // const fileHandler = process.env.NODE_ENV !== 'production' ? localFileHandler : imgurFileHandler
     if (getUser(req).id !== Number(req.params.id)) throw new Error('permission denied')
     return User.findByPk(req.params.id)
       .then((user) => {
@@ -113,13 +113,13 @@ const userController = {
         if (!user) throw new Error('帳號不存在！')
         // 判斷有沒有上傳東西
         if (JSON.stringify(files) !== '{}' && files !== undefined) {
-          return Promise.all([fileHandler(files.cover), fileHandler(files.avatar)]).then(
+          return Promise.all([imgurFileHandler(files.cover), imgurFileHandler(files.avatar)]).then(
             ([coverFilePath, avatarFilePath]) => {
               return user.update({
                 name: name !== undefined ? req.body.name : user.toJSON().name,
                 introduction: introduction !== undefined ? introduction : user.toJSON().introduction,
-                cover: coverFilePath || user.toJSON().cover,
-                avatar: avatarFilePath || user.toJSON().avatar,
+                cover: coverFilePath || user.cover,
+                avatar: avatarFilePath || user.avatar,
               })
             }
           )
