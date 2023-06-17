@@ -156,7 +156,7 @@ const userController = {
       }).filter(Boolean) // 过滤掉空对象
       result.forEach(r => {
         delete r.Tweet.Replies
-        // delete r.Tweet.Likes
+        delete r.Tweet.Likes
         delete r.Tweet.User
       })
       return res.status(200).json(result)

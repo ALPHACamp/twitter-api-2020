@@ -122,11 +122,20 @@ const tweetController = {
       const tweetId = req.params.tweet_id
       const replies = await Reply.findAll({
         where: { TweetId: tweetId },
-        include: { model: User },
+        include: [
+          { model: User, attributes: ['id', 'email', 'name', 'account', 'avatar', 'cover'] },
+          { model: Tweet, include: User }
+        ],
         order: [['createdAt', 'DESC']]
       })
       if (!replies) throw new Error("replies didn't exist")
-      return res.status(200).json(replies)
+      const result = replies.map(r => ({
+        ...r.toJSON(),
+        Tweet: {
+          account: r.Tweet.User.account
+        }
+      }))
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   }
 }
