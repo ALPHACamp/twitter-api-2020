@@ -67,6 +67,7 @@ const followshipController = {
             followerCount: user.Followers.length,
             isFollowed: req.user.Followings.some(f => f.id === user.id)
           }))
+          .filter(user => user.role === 'user')
           .sort((a, b) => b.followerCount - a.followerCount)
           .slice(0, 10) // 只留top 10
         return res.json({ users: result })

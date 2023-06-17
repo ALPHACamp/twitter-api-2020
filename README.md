@@ -5,7 +5,7 @@
 ## About The Project
 ![Alt text](image-1.png)
 
-A RESTful API server for Simple Twitter project built with React, Node.js, Express framework, and MySQL.
+A RESTful API server for Simple Twitter project built with Node.js, Express framework, and MySQL.
 
 ## Usage
 
@@ -95,7 +95,6 @@ Use the default accounts to login
 - sinon: ^10.0.0,
 - sinon-chai: ^3.3.0,
 - tslib: ^2.5.3
-- (前端開發待補上)
 
 ## Contributors
 - Kelly Ko [https://github.com/magic9701](https://github.com/magic9701)
