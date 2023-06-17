@@ -21,7 +21,7 @@ const userController = {
         (userData.role === 'user' && from === 'front') ||
         (userData.role === 'admin' && from === 'back')
       ) {
-        if (!userData) { return res.status(400).json('account or password incorrect!') }
+        if (!userData) { return res.status(200).json('account or password incorrect!') }
         delete userData.password
 
         const token = jwt.sign(userData, process.env.JWT_SECRET, {

@@ -50,8 +50,9 @@ const adminController = {
           if (user.account === 'root') data.splice(index, 1)
         })
         data
-          .sort((a, b) => b.tweetsCount - a.tweetsCount)
           .sort((a, b) => b.likesCount - a.likesCount)
+          .sort((a, b) => b.tweetsCount - a.tweetsCount)
+
         return res
           .status(200)
           .json(data)
