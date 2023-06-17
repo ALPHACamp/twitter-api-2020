@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
+const helpers = require('../_helpers')
 const { Op } = require('sequelize')
 const { getUserData } = require('../helpers/getUserData')
 const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
@@ -356,7 +358,11 @@ const userServices = {
     topUsers: async (req, cb) => {
         try {
             const users = await User.findAll({
-                include: [{ model: User, as: 'Followers' }]
+                include: [{ model: User, as: 'Followers' }],
+                where: {
+                    id: { [sequelize.Op.not]: helpers.getUser(req).id },
+                    role: { [sequelize.Op.not]: 'admin' }
+                },
             })
 
             const result = await users
