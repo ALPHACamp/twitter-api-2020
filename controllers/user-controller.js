@@ -64,7 +64,7 @@ const userController = {
   signIn: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
-      if (userData?.role === 'admin') newErrorGenerate('帳號不存在！', 404)
+      if (userData.role === 'admin') newErrorGenerate('帳號不存在！', 404)
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       return res.json({
@@ -210,7 +210,7 @@ const userController = {
       const selfUserLike = await Like.findAll({ raw: true, attributes: ['TweetId'], where: { UserId: selfUser } })
       const likesData = likes.map(like => {
         like.User = like.Tweet.User
-        like.Tweet.relativeTimeFromNow = relativeTimeFromNow(like?.Tweet?.createdAt)
+        like.Tweet.relativeTimeFromNow = relativeTimeFromNow(like.Tweet.createdAt)
         like.isSelfUserLike = selfUserLike.some(s => s.TweetId === like.TweetId)
         delete like.Tweet.User
         return like
@@ -299,8 +299,8 @@ const userController = {
       if (!isUser(req)) newErrorGenerate('使用者非本帳號無權限編輯', 400)
       const { name, account, email, password, checkPassword, introduction } = req.body
       const { files } = req
-      if (account && account !== user.account ? !!await User.findOne({ attributes: ['id'], where: { account: account.trim() } }) : false) newErrorGenerate('account 已重複註冊', 400)
-      if (email && email !== user.email ? !!await User.findOne({ attributes: ['id'], where: { email: email.trim() } }) : false) newErrorGenerate('email 已重複註冊', 400)
+      if (account && account !== user.account && (await User.findOne({ attributes: ['id'], where: { account: account.trim() } }))) { newErrorGenerate('account 已重複註冊', 400) }
+      if (email && email !== user.email && (await User.findOne({ attributes: ['id'], where: { email: email.trim() } }))) { newErrorGenerate('email 已重複註冊', 400) }
       if (name?.length > USERS_WORD_LIMIT) newErrorGenerate('字數超出上限', 400)
       if (password && password !== checkPassword) newErrorGenerate('密碼與確認密碼不相符', 400)
       if (introduction?.length > USERS_INTRODUCTION_WORD_LIMIT) newErrorGenerate('字數超出上限', 400)
@@ -319,7 +319,7 @@ const userController = {
       })
       const updatedUserJSON = updatedUser.toJSON()
       delete updatedUserJSON.password
-      return res.json(updatedUserJSON)
+      return res.json({ status: 'success', data: { updatedUser: updatedUserJSON } })
     } catch (err) {
       next(err)
     }

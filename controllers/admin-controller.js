@@ -87,7 +87,7 @@ const adminController = {
       delete result.Tweets
       return result
     })
-    const userSortData = userData?.sort((a, b) => b.tweetsCount - a.tweetsCount)
+    const userSortData = userData.sort((a, b) => b.tweetsCount - a.tweetsCount)
     return res.json(userSortData)
   }
 }
