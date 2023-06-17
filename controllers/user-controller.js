@@ -21,6 +21,7 @@ const userController = {
     helpers.getUser(req)
     return User.findByPk(req.params.id, {
       include: [
+        { model: Tweet },
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
       ]
@@ -34,7 +35,8 @@ const userController = {
           isFollowing: req.user && req.user.Followings.some(following => following.id === user.id),
           isFollower: req.user && req.user.Followers.some(follower => follower.id === user.id),
           followersCount: user.Followers.length,
-          followingsCount: user.Followings.length
+          followingsCount: user.Followings.length,
+          tweetsCount: user.Tweets.length
         }
         // res.json({ status: 'success', user: user.toJSON() })
         delete user.password
