@@ -127,8 +127,12 @@ const tweetController = {
       .then(([tweet, replies]) => {
         if (!tweet) throw new Error('The tweet does not exist.')
         tweet = tweet.toJSON()
-        tweet.LikeCount = tweet.Likes.length
-        tweet.ReplyCount = replies
+        tweet.tweetOwnerName = tweet.User.name
+        tweet.tweetOwnerAccount = tweet.User.account
+        tweet.tweetOwnerAvatar = tweet.User.avatar
+        delete tweet.User
+        tweet.tweetLikeCount = tweet.Likes.length
+        tweet.tweetReplyCount = replies
         tweet.isLiked = tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
         delete tweet.Likes
         res.status(200).json(tweet)
