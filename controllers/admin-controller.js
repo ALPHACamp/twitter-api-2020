@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const Sequelize = require('sequelize')
 const { literal } = Sequelize
 const moment = require('moment')
+const { getUser } = require('../_helpers')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -31,6 +32,10 @@ const adminController = {
         })
       })
       .catch((err) => next(err))
+  },
+
+  getCurrentAdmin: (req, res, next) => {
+    return res.status(200).json({ status: 'success', message: 'Admin auth success' })
   },
 
   getUsers: (req, res, next) => {
