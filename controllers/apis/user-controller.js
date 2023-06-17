@@ -102,12 +102,13 @@ const userController = {
       let id = req.params.id
       id = Number(id)
 
-      const [followingCount, followerCount, user] = await Promise.all([
+      const [followingCount, followerCount, user, followers] = await Promise.all([
         Followship.findAndCountAll({ where: { followerId: id } }),
         Followship.findAndCountAll({ where: { followingId: id } }),
         User.findByPk(id, {
           include: [{ model: Tweet, as: 'UserTweets' }]
-        })
+        }),
+        Followship.findAll({ where: { followerId: getUser(req).id }, raw: true })
       ])
 
       // 確認使用者是否存在
@@ -118,6 +119,16 @@ const userController = {
       }
 
       const data = user.toJSON()
+
+      // 建立追蹤清單檢查表
+      const dic = {}
+      followers.forEach(e => {
+        dic[e.followingId] = e.followingId
+      })
+      console.log(dic)
+      // 檢查該用戶是否在追蹤清單上
+      dic[data.id] >= 0 ? data.isFollowed = true : data.isFollowed = false
+
       data.userTweetCount = data.UserTweets.length
       data.followingCount = followingCount.count
       data.followerCount = followerCount.count
@@ -187,7 +198,7 @@ const userController = {
       id = Number(id)
 
       // 確認使用者是否存在 與 喜歡的貼文
-      const [user, userLiked] = await Promise.all([
+      const [user, userLiked, likes] = await Promise.all([
         User.findByPk(id),
         Like.findAll({
           where: { UserId: Number(id) },
@@ -207,7 +218,8 @@ const userController = {
           ],
           raw: true,
           nest: true
-        })
+        }),
+        Like.findAll({ where: { UserId: getUser(req).id } })
       ])
       // 錯誤處理
       if (!user || user.role === 'admin') {
@@ -220,7 +232,7 @@ const userController = {
         error.status = 404
         throw error
       }
-      const likes = Like.findAll({ where: { UserId: getUser(req).id } })
+
       const dic = {}
       for (let i = 0; i < likes.length; i++) {
         dic[likes[i].TweetId] = i
