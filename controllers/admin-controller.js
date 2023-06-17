@@ -1,10 +1,8 @@
-
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply, Like } = require('../models')
 const Sequelize = require('sequelize')
 const { literal } = Sequelize
-const moment = require('moment')
 
 const adminController = {
   signIn: async (req, res, next) => {
