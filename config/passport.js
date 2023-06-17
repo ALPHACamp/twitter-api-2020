@@ -20,15 +20,15 @@ passport.use(new LocalStrategy({
       // ]
     })
     if (!user) {
-      return done(null, false, { status: 401, message: '帳號不存在'});
+      return done(null, false, { status: 401, message: '帳號不存在' })
     }
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
-      return done(null, false, { status: 401, message: '密碼錯誤' });
+      return done(null, false, { status: 401, message: '密碼錯誤' })
     }
-    return done(null, user.get());
+    return done(null, user.get())
   } catch (err) {
-    return done(err, false);
+    return done(err, false)
   }
 }))
 
@@ -40,10 +40,10 @@ const jwtOptions = {
 
 // jwtStrategy
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, { //拿payload裡面的id
+  User.findByPk(jwtPayload.id, { // 拿payload裡面的id
     include: [
       { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' },
+      { model: User, as: 'Followings' }
     ]
   })
     .then(user => {
@@ -62,7 +62,7 @@ passport.deserializeUser((id, cb) => {
   return User.findByPk(id, { // 使以下可透過req.user查詢
     include: [
       { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' },
+      { model: User, as: 'Followings' }
     ]
   })
     .then(user => cb(null, user.toJSON()))

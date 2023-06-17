@@ -2,7 +2,7 @@ const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const imgur = require('imgur')
-imgur.setAPIUrl('https://api.imgur.com/3/')  // 
+imgur.setAPIUrl('https://api.imgur.com/3/') //
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const helpers = require('../_helpers')
@@ -33,7 +33,7 @@ const userController = {
 
       const user = await User.findOne({
         where: {
-          [Op.or]: [ //抓出email重複或account重複
+          [Op.or]: [ // 抓出email重複或account重複
             { email: email },
             { account: account }
           ]
@@ -41,7 +41,7 @@ const userController = {
       })
       if (user?.email === email) throw new Error('Email has already been registered')
       if (user?.account === account) throw new Error('This account has already been registered')
-      //create new user
+      // create new user
       await User.create({
         email,
         password: bcrypt.hashSync(password),
@@ -61,7 +61,7 @@ const userController = {
   },
   getUserData: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id);
+      const user = await User.findByPk(req.params.id)
       if (!user) throw new Error('This user does not exist')
 
       const userData = {
@@ -69,12 +69,12 @@ const userController = {
       }
       res.status(200).json(userData)
     } catch (err) {
-      next(err);
+      next(err)
     }
   },
   getUserDataByAccount: async (req, res, next) => {
     try {
-      const user = await User.findOne({ 
+      const user = await User.findOne({
         where: { account: req.params.account },
         attributes: [
           'id',
@@ -92,13 +92,13 @@ const userController = {
           ],
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)`
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
             ),
             'FollowingsCount'
           ],
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
             ),
             'FollowersCount'
           ],
@@ -107,9 +107,9 @@ const userController = {
               `(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${helpers.getUser(req).id} AND Followships.followingId = User.id ) > 0`
             ),
             'isFollowed'
-          ],
-        ],
-      });
+          ]
+        ]
+      })
       if (!user) throw new Error('This user does not exist')
 
       const isCurrentUserFollowed = user.getDataValue('isFollowed') === 1
@@ -119,7 +119,7 @@ const userController = {
       }
       res.status(200).json(userData)
     } catch (err) {
-      next(err);
+      next(err)
     }
   },
   editUserData: async (req, res, next) => {
@@ -141,7 +141,7 @@ const userController = {
       if (!user) {
         throw new Error('user does not exist')
       }
-      
+
       if (account) {
         const checkAccount = await User.findOne({ where: { account: account } })
         if (checkAccount && account !== user.account) {
@@ -153,7 +153,7 @@ const userController = {
         if (checkEmail && email !== user.email) {
           throw new Error('Email already exist!')
         }
-      }   
+      }
 
       // //用bcrypt 加密函數進行密碼驗證
       // const passwordMatch = await bcrypt.compare(password, user.password);
@@ -191,7 +191,7 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const ThisUserId = req.params.userId
-      let tweets = await Tweet.findAll({
+      const tweets = await Tweet.findAll({
         where: { userId: ThisUserId },
         include: [
           { model: User, attributes: { exclude: ['password'] } },
@@ -199,8 +199,8 @@ const userController = {
           { model: Like },
           {
             model: Like,
-            attributes: [],
-          },
+            attributes: []
+          }
         ],
         attributes: [
           'id',
@@ -213,21 +213,21 @@ const userController = {
               `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${helpers.getUser(req).id} AND Likes.deletedAt IS NULL) > 0`
             ),
             'isLiked'
-          ], 
+          ],
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
             ),
             'replyCount'
           ],
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)`
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)'
             ),
             'likeCount'
-          ],
+          ]
         ],
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC']]
       })
       const tweetsData = tweets.map(tweet => ({
         ...tweet.toJSON(),
@@ -237,7 +237,7 @@ const userController = {
     } catch (err) {
       next(err)
     }
-},
+  },
   getUserReplies: async (req, res, next) => {
     try {
       const userId = req.params.userId
@@ -245,9 +245,9 @@ const userController = {
         where: { UserId: userId },
         include: [
           { model: User, attributes: { exclude: ['password'] } },
-          { 
+          {
             model: Tweet,
-            include: [{ model: User, attributes: ['account'] }] 
+            include: [{ model: User, attributes: ['account'] }]
           }
         ],
         order: [['createdAt', 'DESC']],
@@ -283,17 +283,17 @@ const userController = {
           ],
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
             ),
             'replyCount'
           ],
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)`
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)'
             ),
             'likeCount'
-          ],
-        ],
+          ]
+        ]
       })
       const userLikesData = likes.map(like => ({
         ...like.toJSON(),
@@ -306,11 +306,11 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
-      const userId = req.params.userId;
+      const userId = req.params.userId
       const user = await User.findByPk(userId, {
         attributes: { exclude: ['password'] }
-      });
-      if (!user) throw new Error('User does not exist');
+      })
+      if (!user) throw new Error('User does not exist')
 
       const followings = await Followship.findAll({
         where: { followerId: userId },
@@ -332,8 +332,8 @@ const userController = {
               `(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${helpers.getUser(req).id} AND Followships.followingId = following.id ) > 0`
             ),
             'isFollowed'
-          ],
-        ],
+          ]
+        ]
         // nest: true
       })
 
@@ -341,7 +341,7 @@ const userController = {
         const isCurrentUserFollowed = following.getDataValue('isFollowed') === 1
         return {
           ...following.Following.toJSON(),
-          isCurrentUserFollowed,
+          isCurrentUserFollowed
         }
       })
       res.status(200).json(userFollowingsData)
@@ -351,11 +351,11 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      const userId = req.params.userId;
+      const userId = req.params.userId
       const user = await User.findByPk(userId, {
         attributes: { exclude: ['password'] }
-      });
-      if (!user) throw new Error('User does not exist');
+      })
+      if (!user) throw new Error('User does not exist')
 
       const followers = await Followship.findAll({
         where: { followingId: userId },
@@ -377,8 +377,8 @@ const userController = {
               `(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${helpers.getUser(req).id} AND Followships.followingId = follower.id ) > 0`
             ),
             'isFollowed'
-          ],
-        ],
+          ]
+        ]
         // nest: true
       })
 
@@ -386,7 +386,7 @@ const userController = {
         const isCurrentUserFollowed = follower.getDataValue('isFollowed') === 1
         return {
           ...follower.Follower.toJSON(),
-          isCurrentUserFollowed,
+          isCurrentUserFollowed
         }
       })
       res.status(200).json(userFollowersData)

@@ -10,7 +10,7 @@ const tweetController = {
         { model: User, attributes: { exclude: ['password'] } },
         {
           model: Like,
-          attributes: [],
+          attributes: []
           // where: { UserId: ThisUserId }
         }
       ],
@@ -37,7 +37,7 @@ const tweetController = {
             `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${ThisUserId} AND Likes.deletedAt IS NULL) > 0`
           ),
           'isLiked'
-        ],
+        ]
       ]
     })
       .then(tweets => {
@@ -59,7 +59,7 @@ const tweetController = {
         { model: User, attributes: { exclude: ['password'] } },
         {
           model: Like,
-          attributes: [],
+          attributes: []
         }
       ],
       attributes: [
@@ -85,23 +85,23 @@ const tweetController = {
             `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${ThisUserId} AND Likes.deletedAt IS NULL) > 0`
           ),
           'isLiked'
-        ],
+        ]
       ]
     })
       .then(tweet => {
         const tweetData = tweet.toJSON()
         tweetData.isLiked = Boolean(tweetData.isLiked)
-        res.json(tweetData);
+        res.json(tweetData)
       })
       .catch(err => next(err))
   },
   getReplies: (req, res, next) => {
     const tweetId = req.params.tweetId
     return Reply.findAll({
-      where: {tweetId},
+      where: { tweetId },
       include: [
         { model: User, attributes: { exclude: ['password'] } },
-        { model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }] },
+        { model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }] }
       ]
     })
       .then(replies => {
@@ -156,7 +156,7 @@ const tweetController = {
         return Reply.create({
           comment,
           userId,
-          tweetId,
+          tweetId
         })
       })
       .then(reply => {
@@ -182,10 +182,10 @@ const tweetController = {
     ])
       .then(([tweet, like]) => {
         if (!tweet) throw new Error("Tweet didn't exist!")
-        if (like) throw new Error("You have liked this tweet!")
+        if (like) throw new Error('You have liked this tweet!')
         return Like.create({
           userId,
-          tweetId,
+          tweetId
         })
       })
       .then(like => {

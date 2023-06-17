@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet } = require('../models')
 const sequelize = require('sequelize')
 
 const adminController = {
@@ -23,7 +23,7 @@ const adminController = {
     try {
       const users = await User.findAll({
         // where: { role: 'user' }, //測試後發現不需限定只抓user
-        //profile以外的值都直接傳「counts」（不要detail）給前端
+        // profile以外的值都直接傳「counts」（不要detail）給前端
         attributes: [
           'id',
           'name',
@@ -44,18 +44,18 @@ const adminController = {
           ],
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)`
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
             ),
             'FollowingsCount'
           ],
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
             ),
             'FollowersCount'
-          ],
+          ]
         ],
-        order: [[sequelize.literal('tweetCount'), 'DESC']] //ac規格：按推文數排序
+        order: [[sequelize.literal('tweetCount'), 'DESC']] // ac規格：按推文數排序
       })
 
       const allUsersData = users.map(user => {
@@ -64,25 +64,26 @@ const adminController = {
           ...userData
         }
       })
-      res.status(200).json(allUsersData);
+      res.status(200).json(allUsersData)
     } catch (err) {
-      next(err);
+      next(err)
     }
   },
   getAllTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
         include: [
-          { model: User, 
+          {
+            model: User,
             attributes: {
-              exclude: ['password'],
+              exclude: ['password']
             }
-          },
+          }
         ],
         attributes: {
           include: [
-            [ //AC規格：快覽 Tweet 的前 50 個字
-              sequelize.literal("SUBSTRING(`Tweet`.`description`, 1, 50)"),
+            [ // AC規格：快覽 Tweet 的前 50 個字
+              sequelize.literal('SUBSTRING(`Tweet`.`description`, 1, 50)'),
               'description'
             ]
           ]
@@ -91,11 +92,11 @@ const adminController = {
         nest: true
       })
       const tweetsData = tweets.map(tweet => ({
-        ...tweet.toJSON(),
+        ...tweet.toJSON()
       }))
-      res.status(200).json(tweetsData);
+      res.status(200).json(tweetsData)
     } catch (err) {
-      next(err);
+      next(err)
     }
   },
   deleteTweet: async (req, res, next) => {
@@ -105,10 +106,11 @@ const adminController = {
       if (!tweet) {
         throw new Error("Tweet didn't exist!")
       }
-      const deletedData = await tweet.destroy()
+      await tweet.destroy()
       res.status(200).json({
         status: 'success',
-        message: 'This tweet has been deleted successfully', tweetId
+        message: 'This tweet has been deleted successfully',
+        tweetId
       })
     } catch (err) {
       next(err)
@@ -117,4 +119,3 @@ const adminController = {
 }
 
 module.exports = adminController
-

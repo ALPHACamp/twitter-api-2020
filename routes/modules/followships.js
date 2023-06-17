@@ -8,4 +8,3 @@ router.get('/', followshipController.getTopUser)
 router.post('/', followshipController.addFollowing)
 
 module.exports = router
-

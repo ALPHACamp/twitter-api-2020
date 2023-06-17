@@ -1,8 +1,8 @@
 const passport = require('../config/passport')
-const helpers = require('../_helpers') 
+const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 
-//驗證 authenticated
+// 驗證 authenticated
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
@@ -45,11 +45,11 @@ const authenticatedAdmin = (req, res, next) => {
 const signInAuth = (req, res, next) => {
   passport.authenticate('local', { session: false }, (err, user, info) => {
     if (info) {
-      return res.status(401).json(info);
+      return res.status(401).json(info)
     }
     req.user = user
-    next();
-  })(req, res, next);
+    next()
+  })(req, res, next)
 }
 
 module.exports = {
