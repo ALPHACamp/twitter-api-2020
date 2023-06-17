@@ -66,7 +66,7 @@
 - macOS：
   請到「系統偏好設定」，點擊 MySQL 圖標後，查看資料庫伺服器的狀態，目前應該會是「停用」的狀態，請點擊 Start MySQL Server 啟動你的伺服器。當圈圈變成綠色，且按鈕變成 Stop MySQL Server，就代表現在 MySQL 已經啟用。
 
-  > macOS 請 [下載](https://dev.mysql.com/downloads/workbench/>) MySQL Workbench，按下 .dmg 檔案並完成安裝過程，再前往 **MySQL 連線** 步驟。
+  > macOS 請 [下載](https://dev.mysql.com/downloads/workbench/) MySQL Workbench，按下 .dmg 檔案並完成安裝過程，再前往 **MySQL 連線** 步驟。
 
 - Windows：
   MySQL Workbench 會自動開啟。這時可以點擊我們剛剛建立的 Local instance 3306，並點擊 Server Status；如果出現綠色箭頭，就表示 MySQL 與 MySQL Workbench 已成功連線。
@@ -157,7 +157,7 @@ npx sequelize db:migrate:undo:all
 
 ## 開發者名單
 
-[Allison](https://github.com/AllisonLin8)
-[Wayne Sun](https://github.com/WeiWayne1030)
-[Sutao Liang](https://github.com/phoenix850508)
-[Johnny Fang](https://github.com/JohnnyFangFangFang)
+- [Allison](https://github.com/AllisonLin8)
+- [Wayne Sun](https://github.com/WeiWayne1030)
+- [Sutao Liang](https://github.com/phoenix850508)
+- [Johnny Fang](https://github.com/JohnnyFangFangFang)
