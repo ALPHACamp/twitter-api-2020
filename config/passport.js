@@ -11,20 +11,21 @@ passport.use(new LocalStrategy(
   { usernameField: 'account', passwordField: 'password', passReqToCallback: true },
   async (req, account, password, cb) => {
     try {
-      const errorMessage = '帳號或密碼輸入錯誤！'
+      const passwordError = '密碼輸入錯誤！'
+      const accountError = '帳戶不存在！'
       const user = await User.findOne({ where: { account } })
 
       // 帳號或密碼輸入錯誤 暫時的錯誤處理 status code 200
       if (!user) {
         // return cb(null, false)
-        return cb(errorMessage, false)
+        return cb(accountError, false)
       }
       const isMatch = await bcrypt.compare(password, user.password)
 
       // 帳號或密碼輸入錯誤 暫時的錯誤處理 status code 200
       if (!isMatch) {
         // return cb(null, false)
-        return cb(errorMessage, false)
+        return cb(passwordError, false)
       }
       return cb(null, user)
     } catch (error) {
