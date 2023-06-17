@@ -33,6 +33,10 @@ const adminController = {
       .catch((err) => next(err))
   },
 
+  getCurrentAdmin: (req, res, next) => {
+    return res.status(200).json({ status: 'success', message: 'Admin auth success' })
+  },
+
   getUsers: (req, res, next) => {
     return User.findAll({
       attributes: {
