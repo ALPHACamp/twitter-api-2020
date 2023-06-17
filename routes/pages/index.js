@@ -4,10 +4,11 @@ const { apiErrorHandler } = require('../../middleware/error-handler')
 const { authenticated, roleChecker, authenticatedAdmin } = require('../../middleware/api-auth')
 
 router.get('/logout', userController.logout)
-router.get('/register')
-router.get('/login')
+router.get('/register', userController.enter)
+router.get('/login', userController.enter)
+router.use('/admin', userController.enter)
 
-router.use('/admin', authenticatedAdmin, roleChecker, userController.enter)
+// router.use('/admin', authenticatedAdmin, roleChecker, userController.enter)
 router.use('/', authenticated, userController.enter)
 router.use('/', apiErrorHandler)
 
