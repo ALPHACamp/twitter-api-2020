@@ -66,7 +66,7 @@ const tweetController = {
     }
   },
   getAllTweets: (req, res, next) => {
-    const userId = req.params.id
+    const userId = getUser(req).id || getUser(req).dataValues.id
     Tweet.findAll({
       include: [
         { model: User, attributes: ['account', 'name', 'avatar'] },
