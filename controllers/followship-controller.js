@@ -53,24 +53,25 @@ const followshipController = {
       next(err)
     }
   },
-  getTopUser: (req, res, next) => {
-    return User.findAll({
-      include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
-      attributes: { exclude: ['password'] }
-    })
-      .then(users => {
-        const result = users
-          .map(user => ({
-            ...user.toJSON(),
-            followerCount: user.Followers.length,
-            isFollowed: req.user.Followings.some(f => f.id === user.id)
-          }))
-          .filter(user => user.role === 'user')
-          .sort((a, b) => b.followerCount - a.followerCount)
-          .slice(0, 10) // 只留top 10
-        return res.json({ users: result })
+  getTopUser: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
+        attributes: { exclude: ['password'] }
       })
-      .catch(err => next(err))
+      const result = users
+        .map(user => ({
+          ...user.toJSON(),
+          followerCount: user.Followers.length,
+          isFollowed: req.user.Followings.some(f => f.id === user.id)
+        }))
+        .filter(user => user.role === 'user')
+        .sort((a, b) => b.followerCount - a.followerCount)
+        .slice(0, 10) // 只留top 10
+      return res.json({ users: result })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
