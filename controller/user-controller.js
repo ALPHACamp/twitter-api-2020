@@ -186,7 +186,6 @@ const userController = {
           'cover'
         ]
       })
-      if (followings.Followings.length === 0) throw new Error('該用戶沒有追蹤對象')
       const followingId = helpers.getUser(req).Followings.map(user => user.id)
       const result = followings.Followings
         .map(f => ({
@@ -222,7 +221,6 @@ const userController = {
           'cover'
         ]
       })
-      if (followers.Followers.length === 0) throw new Error('該用戶沒有追蹤者')
       const followingId = helpers.getUser(req).Followings.map(user => user.id)
       const result = followers.Followers
         .map(f => ({
