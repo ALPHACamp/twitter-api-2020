@@ -113,26 +113,25 @@ const tweetController = {
       next(err)
     }
   },
-  postTweet: (req, res, next) => {
-    const { description } = req.body
-    const getUser = helpers.getUser(req)
-    const userId = getUser.id
-    if (!description) throw new Error('Description text is required!')
-    return User.findByPk(userId)
-      .then(user => {
-        if (!user) throw new Error("User didn't exist!")
-        return Tweet.create({
-          description,
-          userId
-        })
+  postTweet: async (req, res, next) => {
+    try {
+      const { description } = req.body
+      const getUser = helpers.getUser(req)
+      const userId = getUser.id
+      if (!description) throw new Error('Description text is required!')
+      const user = await User.findByPk(userId)
+      if (!user) throw new Error("User didn't exist!")
+      const tweet = await Tweet.create({
+        description,
+        userId
       })
-      .then(tweets => {
-        res.json({
-          status: 'success',
-          data: tweets
-        })
+      res.json({
+        status: 'success',
+        data: tweet
       })
-      .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
   },
   deleteTweet: (req, res, next) => {
     const tweetId = req.params.tweetId
