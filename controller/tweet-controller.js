@@ -6,21 +6,20 @@ const tweetController = {
       const reqUserId = helpers.getUser(req).id
       const { description } = req.body
       // 檢查推文內容是否為空白或超過字數限制
-      if (!description || description.length > 140) {
-        return res.status(400).json({ status: 'error', message: 'Invalid tweet description' })
-      }
+      if (!description || description.length > 140) throw new Error('字數超過限制')
       // 將推文存入資料庫
       const tweet = await Tweet.create({
         description,
         UserId: reqUserId
       })
-      return res.json({ status: 'success', data: tweet })
+      return res.status(200).json({ message: '發送成功' })
     } catch (err) {
       next(err)
     }
   },
   getTweets: async (req, res, next) => {
     try {
+      const reqUserId = helpers.getUser(req).id
       let tweets = await Tweet.findAll({
         // raw: true,  使用這個就不能sequelize相關功能
         nest: true,
@@ -34,6 +33,7 @@ const tweetController = {
         createdAt: tweet.createdAt,
         replyCount: tweet.Replies.length,
         likeCount: tweet.Likes.length,
+        isLiked: tweet.Likes.some(like => like.UserId === reqUserId), // 檢查貼文是否被當前使用者點讚
         user: {
           avatar: tweet.User.avatar,
           name: tweet.User.name,
@@ -47,30 +47,27 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
+      const reqUserId = helpers.getUser(req).id
       // const reqUserId = helpers.getUser(req).id
       const tweetId = req.params.tweet_id
-      let tweet = await Tweet.findByPk(tweetId, {
-        include: [User, Like, Reply]
+      const tweet = await Tweet.findByPk(tweetId, {
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'email', 'avatar'] },
+          { model: Like },
+          { model: Reply, include: [{ model: User, attributes: ['id', 'name', 'account', 'email', 'avatar'] }] }
+        ]
       })
-
       if (!tweet) throw new Error('Tweet not found')
 
-      tweet = {
-        id: tweet.id,
-        description: tweet.description,
-        createdAt: tweet.createdAt,
-        updatedAt: tweet.updatedAt,
-        likeCount: tweet.Likes.length,
-        replyCount: tweet.Replies.length,
-        user: {
-          name: tweet.User.name,
-          account: tweet.User.account,
-          avatar: tweet.User.avatar
-        }
-
+      const result = {
+        ...tweet.toJSON(),
+        RepliesCount: tweet.Replies.length,
+        LikesCount: tweet.Likes.length,
+        isLiked: tweet.Likes.some(like => like.UserId === reqUserId)
       }
+      delete result.Likes
 
-      return res.status(200).json(tweet)
+      return res.status(200).json(result)
     } catch (error) {
       next(error)
     }
@@ -119,16 +116,26 @@ const tweetController = {
       return res.status(200).json({ message: 'Reply posted successfully!' })
     } catch (err) { next(err) }
   },
+
   getReplies: async (req, res, next) => {
     try {
       const tweetId = req.params.tweet_id
       const replies = await Reply.findAll({
         where: { TweetId: tweetId },
-        include: { model: User },
+        include: [
+          { model: User, attributes: ['id', 'email', 'name', 'account', 'avatar', 'cover'] },
+          { model: Tweet, include: User }
+        ],
         order: [['createdAt', 'DESC']]
       })
       if (!replies) throw new Error("replies didn't exist")
-      return res.status(200).json(replies)
+      const result = replies.map(r => ({
+        ...r.toJSON(),
+        Tweet: {
+          account: r.Tweet.User.account
+        }
+      }))
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   }
 }

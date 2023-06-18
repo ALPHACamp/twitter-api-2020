@@ -60,6 +60,7 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
+      const reqUserId = helpers.getUser(req).id
       const userId = Number(req.params.id)
       const user = await User.findByPk(userId)
       if (!user) throw new Error('此用戶不存在')
@@ -67,12 +68,22 @@ const userController = {
         where: { UserId: userId },
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          { model: Like, attributes: ['userId'] }
+          { model: Like },
+          { model: Reply }
         ],
         order: [['createdAt', 'DESC']]
       })
-      if (tweets.length === 0) throw new Error('此用戶尚未發布推文')
-      return res.status(200).json(tweets)
+      const result = tweets.map(t => ({
+        ...t.toJSON(),
+        RepliesCount: t.Replies.length,
+        LikesCount: t.Likes.length,
+        isLiked: t.Likes.some(like => like.UserId === reqUserId)
+      }))
+      result.forEach(r => {
+        delete r.Likes
+        delete r.Replies
+      })
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   },
   getUserReplies: async (req, res, next) => {
@@ -81,28 +92,74 @@ const userController = {
       const userReplies = await Reply.findAll({
         where: { UserId: userId },
         include: [
-          { model: Tweet }
+          { model: Tweet, include: { model: User } },
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         ],
         order: [['createdAt', 'DESC']]
       })
-      const RepliesJSON = userReplies.map(r => r.toJSON())
-      if (RepliesJSON.length === 0) throw new Error('此用戶沒有回覆任何貼文')
-      return res.status(200).json(RepliesJSON)
-    } catch (err) { next(err) }
+      const result = userReplies.map(r => {
+        if (!r || !r.Tweet) {
+          return null // 或者根据需求返回空对象 {}
+        }
+        return {
+          ...r.toJSON(),
+          Tweet: {
+            ...r.Tweet.toJSON(),
+            account: r.Tweet.User ? r.Tweet.User.account : null
+          }
+        }
+      }).filter(Boolean) // 过滤掉空对象
+      result.forEach(r => {
+        delete r.Tweet.User
+      })
+
+      return res.status(200).json(result)
+    } catch (err) {
+      next(err)
+    }
   },
+
   getLikedTweets: async (req, res, next) => {
     try {
+      const reqUserId = helpers.getUser(req).id
       const userId = req.params.id
       const likesTweets = await Like.findAll({
         where: { UserId: userId },
         include: [
-          { model: Tweet }
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['name', 'account', 'avatar'] },
+              { model: Reply },
+              { model: Like }
+            ]
+          }
         ],
         order: [['createdAt', 'DESC']]
       })
-      const likesJSON = likesTweets.map(l => l.toJSON())
-      if (likesJSON.length === 0) throw new Error('此用戶沒有對任何貼文按讚')
-      return res.status(200).json(likesJSON)
+      const result = likesTweets.map(r => {
+        if (!r || !r.Tweet) {
+          return null // 或者根据需求返回空对象 {}
+        }
+        return {
+          ...r.toJSON(),
+          Tweet: {
+            ...r.Tweet.toJSON(),
+            name: r.Tweet.User ? r.Tweet.User.name : null,
+            account: r.Tweet.User ? r.Tweet.User.account : null,
+            avatar: r.Tweet.User ? r.Tweet.User.avatar : null,
+            RepliesCount: r.Tweet.Replies.length,
+            LikesCount: r.Tweet.Likes.length,
+            isLiked: r.Tweet.Likes.some(like => like.UserId === reqUserId)
+          }
+        }
+      }).filter(Boolean) // 过滤掉空对象
+      result.forEach(r => {
+        delete r.Tweet.Replies
+        delete r.Tweet.Likes
+        delete r.Tweet.User
+      })
+      return res.status(200).json(result)
     } catch (err) { next(err) }
   },
   getFollowings: async (req, res, next) => {
@@ -201,7 +258,8 @@ const userController = {
   },
   putUserSetting: async (req, res, next) => {
     try {
-      const { name, password, account, email } = req.body
+      const { name, password, account, email, checkPassword } = req.body
+      if (password !== checkPassword) throw new Error('Passwords do not match')
       const userId = helpers.getUser(req).id
       if (name.length > 51) throw new Error('使用者註冊名稱(name)上限為50字')
       if (!validator.validate(email)) throw new Error('Email格式不正確!')
@@ -241,6 +299,7 @@ const userController = {
         followersCount: user.Followers.length, // 計算追蹤者數量
         isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id) // 判斷目前登入使用者是否追蹤該物件
       })).sort((a, b) => b.followersCount - a.followersCount)// 按照人數多->少排序
+        .slice(0, 10)
       return res.status(200).json(userTop)
     } catch (err) { next(err) }
   }
