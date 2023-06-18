@@ -1216,6 +1216,7 @@ npm install
 5. 新增.env檔並加入以下內容
 ```
 JWT_SECRET=自定義
+INGUR_CLIENT_ID=輸入個人帳號
 ```
 
 6. 載入MySQL Table
