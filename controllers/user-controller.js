@@ -340,7 +340,7 @@ const userController = {
       const userFollowingsData = followings.map(following => {
         const isCurrentUserFollowed = following.getDataValue('isFollowed') === 1
         return {
-          ...following.Following.toJSON(),
+          ...following.toJSON(),
           isCurrentUserFollowed
         }
       })
@@ -385,7 +385,7 @@ const userController = {
       const userFollowersData = followers.map(follower => {
         const isCurrentUserFollowed = follower.getDataValue('isFollowed') === 1
         return {
-          ...follower.Follower.toJSON(),
+          ...follower.toJSON(),
           isCurrentUserFollowed
         }
       })
