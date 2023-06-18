@@ -13,7 +13,7 @@ const tweetController = {
 
       if (liked) {
         const likes = await Like.findAll({
-          where: { User_Id: searchUserId },
+          where: { User_Id: userId },
           attributes: ['TweetId'],
           raw: true,
           nest: true
@@ -30,7 +30,7 @@ const tweetController = {
         })
         if (tweets.length === 0) return res.status(404).json('Tweets not found')
         counts = tweets.map((tweet) => {
-          const fileteredLikesTime = tweet.Likes.filter((like) => like.UserId === Number(userId))[0].dataValues.updatedAt
+          const fileteredLikesTime = tweet.Likes.filter((like) => like.UserId === Number(searchUserId))[0].dataValues.updatedAt
           // console.log(fileteredLikesTime)
           return {
             ...tweet.toJSON(),
@@ -41,7 +41,7 @@ const tweetController = {
             repliesCount: tweet.Replies.length,
             lastUpdated: getLastUpd(tweet),
             isLiked: tweet.Likes?.some(
-              (l) => Number(l.UserId) === Number(userId)
+              (l) => Number(l.UserId) === Number(searchUserId)
             ),
             updatedAt: fileteredLikesTime
           }
