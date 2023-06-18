@@ -23,7 +23,7 @@
 
 ## API 文件
 Tweet:
-1. GET /api/tweets/postTweet
+#1. GET /api/tweets/postTweet
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -47,7 +47,7 @@ Failure - status code : 500
 }
 ```
 
-2. GET /api/tweets/:tweet_id/replies
+#2. GET /api/tweets/:tweet_id/replies
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -90,7 +90,7 @@ Failure - status code : 500
 }
 ```
 
-3. POST /api/tweets/:tweet_id/replies
+#3. POST /api/tweets/:tweet_id/replies
 - HTTP Method
     - POST
 - 中文說明 - 這條 API 是做什麼的？
@@ -118,7 +118,7 @@ Failure - status code : 500
 }
 ```
 
-4. GET /api/tweets/:tweet_id
+#4. GET /api/tweets/:tweet_id
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -151,7 +151,7 @@ Failure - status code : 500
 }
 ```
 
-5. POST /api/tweets/:id/unlike
+#5. POST /api/tweets/:id/unlike
 - HTTP Method
     - POST
 - 中文說明 - 這條 API 是做什麼的？
@@ -178,7 +178,7 @@ Failure - status code : 500
 }
 ```
 
-6. POST /api/tweets/:id/like
+#6. POST /api/tweets/:id/like
 - HTTP Method
     - POST
 - 中文說明 - 這條 API 是做什麼的？
@@ -205,7 +205,7 @@ Failure - status code : 500
 }
 ```
 
-7. GET /api/tweets
+#7. GET /api/tweets
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -314,7 +314,7 @@ Failure - status code : 500
 }
 ```
 
-8. POST /api/tweets
+#8. POST /api/tweets
 - HTTP Method
     - POST
 - 中文說明 - 這條 API 是做什麼的？
@@ -342,7 +342,7 @@ Failure - status code : 500
 ```
 
 User:
-9. POST /api/users/signin
+#9. POST /api/users/signin
 - HTTP Method
     - POST
 - 中文說明 - 這條 API 是做什麼的？
@@ -383,7 +383,7 @@ Failure - status code : 500
 }
 ```
 
-10. GET /api/users/top
+#10. GET /api/users/top
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -495,7 +495,7 @@ Failure - status code : 500
 }
 ```
 
-11. GET /api/users/:id/replied_tweets
+#11. GET /api/users/:id/replied_tweets
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -533,7 +533,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-12. GET /api/users/:id/tweets
+#12. GET /api/users/:id/tweets
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -566,7 +566,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-13. GET /api/users/:id/likes
+#13. GET /api/users/:id/likes
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -599,7 +599,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-14. GET /api/users/:id/followings
+#14. GET /api/users/:id/followings
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -628,7 +628,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-15. GET /api/users/:id/followers
+#15. GET /api/users/:id/followers
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -658,7 +658,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-16. GET /api/users/:id/edit
+#16. GET /api/users/:id/edit
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -692,7 +692,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-17. GET /api/users/:id/edit
+#17. GET /api/users/:id/edit
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -727,7 +727,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-18. PUT /api/users/:id
+#18. PUT /api/users/:id
 - HTTP Method
     - PUT
 - 中文說明 - 這條 API 是做什麼的？
@@ -758,7 +758,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-19. POST /api/users
+#19. POST /api/users
 - HTTP Method
     - POST
 - 中文說明 - 這條 API 是做什麼的？
@@ -788,7 +788,7 @@ Failure - status code : 500
 ```
 
 Followship:
-20. POST /api/followships
+#20. POST /api/followships
 - HTTP Method
     - POST
 - 中文說明 - 這條 API 是做什麼的？
@@ -813,7 +813,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-21. DEL /api/followships/:followingId
+#21. DEL /api/followships/:followingId
 - HTTP Method
     - DEL
 - 中文說明 - 這條 API 是做什麼的？
@@ -840,7 +840,7 @@ Failure - status code : 500
 ```
 
 Admin:
-22. GET /api/admin/tweets
+#22. GET /api/admin/tweets
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -886,7 +886,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-23. POST /api/admin/signin
+#23. POST /api/admin/signin
 - HTTP Method
     - POST
 - 中文說明 - 這條 API 是做什麼的？
@@ -923,7 +923,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-24. DEL /api/admin/tweets/:tweetId
+#24. DEL /api/admin/tweets/:tweetId
 - HTTP Method
     - DEL
 - 中文說明 - 這條 API 是做什麼的？
@@ -952,7 +952,7 @@ Failure - status code : 500
     status: 'error', error: err.message
 }
 ```
-25. GET /api/amin/users
+#25. GET /api/amin/users
 - HTTP Method
     - GET
 - 中文說明 - 這條 API 是做什麼的？
@@ -1213,35 +1213,45 @@ npm init -y
 npm install
 ```
 
-5. 新增.env檔並加入以下內容
+5. 安裝cross-env
+```
+npm install --save-dev cross-env
+```
+
+6. 安裝nodemon
+```
+npm install --save-dev nodemon
+```
+
+7. 新增.env檔並加入以下內容
 ```
 JWT_SECRET=自定義
 INGUR_CLIENT_ID=輸入個人帳號
 ```
 
-6. 載入MySQL Table
+8. 載入MySQL Table
 ```
 npx sequelize db:migrate
 ```
 
-7. 載入預設範例資料
+9. 載入預設範例資料
 ```
 npx sequelize db:seed:all
 ```
 
-8. app.js allowedOrigins變數加入網域名稱
+10. app.js allowedOrigins變數加入網域名稱
 ```
 const allowedOrigins = ['http://localhost:3000', '自定義'];
 ```
 
-9. package.json 內容修改
+11. package.json 內容修改
 ```
 "scripts": {
     "start": "NODE_ENV=development node app.js",
     "dev": "cross-env NODE_ENV=development nodemon app.js"
 ```
 
-23. 可使用以下帳號測試  
+12. 可使用以下帳號測試  
 ```
 後台
 account: root
