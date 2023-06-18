@@ -43,7 +43,7 @@ const tweetController = {
     new Promise((resolve, reject) => {
       if (Number(description.length) > 140) reject(new Error('The character count cannot exceed 140.'))
       if (Number(description.length) < 1) reject(new Error('Content cannot be blank.'))
-      resolve(description)
+      resolve()
     })
       .then(() => {
         return Tweet.create({
