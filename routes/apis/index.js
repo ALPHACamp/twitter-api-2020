@@ -7,7 +7,7 @@ const tweetController = require('../../controllers/apis/tweet-controller')
 const followshipController = require('../../controllers/apis/followship-controller')
 const { uploadFiles } = require('../../middleware/multer')
 const { apiErrorHandler } = require('../../middleware/error-handler')
-const { authenticated, roleChecker, authenticatedAdmin } = require('../../middleware/api-auth')
+const { authenticated, roleChecker, authenticatedAdmin, adminChecker } = require('../../middleware/api-auth')
 
 // 有關admin的routes
 // admin登入
@@ -39,7 +39,7 @@ router.put('/users/:id/setting', authenticated, userController.putUserSetting) /
 router.put('/users/:id', authenticated, uploadFiles, userController.editUserProfile) // 編輯個人資料
 
 // 使用者登入
-router.post('/users/login', passport.authenticate('local', { session: false }), userController.login)
+router.post('/users/login', passport.authenticate('local', { session: false }), adminChecker, userController.login)
 // 使用者註冊
 router.post('/users', userController.signUp)
 // 錯誤處理
