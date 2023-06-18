@@ -65,7 +65,6 @@ const adminController = {
           ...userData
         }
       })
-        .filter(user => user.role === 'user')
       res.status(200).json(allUsersData)
     } catch (err) {
       next(err)
