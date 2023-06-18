@@ -147,27 +147,26 @@ const tweetController = {
       next(err)
     }
   },
-  postReplies: (req, res, next) => {
-    const { comment } = req.body
-    const tweetId = req.params.tweetId
-    const getUser = helpers.getUser(req)
-    const userId = getUser.id
-    return Tweet.findByPk(tweetId)
-      .then(tweet => {
-        if (!tweet) throw new Error("Tweet didn't exist!")
-        return Reply.create({
-          comment,
-          userId,
-          tweetId
-        })
+  postReplies: async (req, res, next) => {
+    try {
+      const { comment } = req.body
+      const tweetId = req.params.tweetId
+      const getUser = helpers.getUser(req)
+      const userId = getUser.id
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      const reply = await Reply.create({
+        comment,
+        userId,
+        tweetId
       })
-      .then(reply => {
-        res.json({
-          status: 'success',
-          data: reply
-        })
+      res.json({
+        status: 'success',
+        data: reply
       })
-      .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
   },
   postLike: (req, res, next) => {
     const tweetId = req.params.tweetId
