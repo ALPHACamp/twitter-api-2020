@@ -30,6 +30,7 @@ const adminController = {
           'avatar',
           'account',
           'banner',
+          'role',
           [
             sequelize.literal(
               '(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'
@@ -64,6 +65,7 @@ const adminController = {
           ...userData
         }
       })
+        .filter(user => user.role === 'user')
       res.status(200).json(allUsersData)
     } catch (err) {
       next(err)
