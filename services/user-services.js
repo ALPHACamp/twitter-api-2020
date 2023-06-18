@@ -165,8 +165,12 @@ const userServices = {
         if (password !== checkPassword) throw new Error('密碼與確認密碼不一致！')
         if (name.length >= 50) throw new Error('名稱不可超過50字！')
         if (introduction.length >= 160) throw new Error('自我介紹不可超過160字！')
-        const salt = bcrypt.genSaltSync(10)
-        const hash = bcrypt.hashSync(password, salt)
+        let salt = null
+        let hash = null
+        if (password) {
+            salt = bcrypt.genSaltSync(10)
+            hash = bcrypt.hashSync(password, salt)
+        }
         return Promise.all([
             User.findAll({
                 raw: true,
@@ -191,7 +195,7 @@ const userServices = {
                     name,
                     account,
                     email,
-                    password: hash,
+                    password: hash || user.password,
                     introduction,
                     avatar: filePath[0] || user.avatar,
                     banner: filePath[1] || user.banner
