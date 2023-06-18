@@ -16,7 +16,7 @@ function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
-const allowedOrigins = ['http://localhost:3000'];
+const allowedOrigins = ['http://localhost:3000', 'https://owenlu0125.github.io/'];
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -29,7 +29,6 @@ app.use(cors({
     return callback(null, true);
   }
 }));
-
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
