@@ -11,7 +11,6 @@ passport.use(new LocalStrategy(
   { usernameField: 'account', passwordField: 'password', passReqToCallback: true },
   async (req, account, password, cb) => {
     try {
-
       const accountError = '帳號不存在！'
       const passwordError = '帳號或密碼輸入錯誤！'
 

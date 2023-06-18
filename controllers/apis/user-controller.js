@@ -383,7 +383,7 @@ const userController = {
 
       // 檔案承接
       const { files } = req
-
+      console.log(files)
       if (files) {
         const [avatar, background] = await Promise.all([
           files.avatar ? await imgurFileHandler(files.avatar[0]) : null,
