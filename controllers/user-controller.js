@@ -127,7 +127,6 @@ const userController = {
           return user.update({
             name: name !== undefined ? name : user.toJSON().name,
             introduction: introduction !== undefined ? introduction : user.toJSON().introduction,
-            cover: null,
           })
         }
       })
