@@ -30,6 +30,7 @@ const userController = {
       order: [['createdAt', 'DESC']],
     })
       .then(ts => {
+        if(!ts)throw new Error('Tweets is not exist')
         const tweets = ts.map(tweet => {
           const tweetJSON = tweet.toJSON()
           delete tweetJSON.User.password
@@ -65,6 +66,7 @@ const userController = {
       ]
     })
       .then(users => {
+        if (!users) throw new Error('Users is not exist')
         const userData = users.map(user => {
           let userJson = user.toJSON()
           delete userJson.password
