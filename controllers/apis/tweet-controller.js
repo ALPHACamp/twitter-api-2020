@@ -1,5 +1,7 @@
 const { Tweet, Reply, Like, User } = require('../../models')
 const helpers = require('../../_helpers')
+const { resolve } = require('path')
+const { reject } = require('p-cancelable')
 
 const tweetController = {
   getTweets: (req, res, next) => {
@@ -38,18 +40,21 @@ const tweetController = {
         res.status(500).json({ status: 'error', error: err.message })
       })
   },
-  postTweet: (req, res, next) => {
+  postTweet: (req, res) => {
     const { description } = req.body
-    if (Number(description.length) > 140) throw new Error('The character count cannot exceed 140.')
-    if (Number(description.length) < 1) throw new Error('Content cannot be blank.')
-    return Tweet.create({
-      description: description,
-      UserId: helpers.getUser(req).id
+    new Promise((resolve, reject) => {
+      if (Number(description.length) > 140) reject(new Error('The character count cannot exceed 140.'))
+      if (Number(description.length) < 1) reject(new Error('Content cannot be blank.'))
+      resolve(description)
     })
-      .then(tweet => res.status(200).json(tweet))
-      .catch(err => {
-        res.status(500).json({ statue: 'err', error: err.message })
+      .then(() => {
+        return Tweet.create({
+          description: description,
+          UserId: helpers.getUser(req).id
+        })
       })
+      .then(tweet => res.status(200).json(tweet))
+      .catch(err => res.status(500).json({ status: 'err', error: err.message }))
   },
   getReply: (req, res, next) => {
     const userId = helpers.getUser(req).id
@@ -88,15 +93,20 @@ const tweetController = {
         res.status(500).json({ statue: 'err', error: err.message })
       })
   },
-  postReply: (req, res, next) => {
+  postReply: (req, res) => {
     const UserId = helpers.getUser(req).id
     const TweetId = req.params.tweet_id
     const { comment } = req.body
-    if (Number(comment.length) < 1) throw new Error('Content cannot be blank.')
-    Promise.all([
-      Tweet.findByPk(TweetId),
-      User.findByPk(UserId)
-    ])
+    new Promise((resolve, reject) => {
+      if (Number(req.body.comment.length) < 1) reject(new Error('Content cannot be blank.'))
+      resolve()
+    })
+      .then(() => {
+        return Promise.all([
+          Tweet.findByPk(TweetId),
+          User.findByPk(UserId)
+        ])
+      })
       .then(([tweet, user]) => {
         if (!tweet) throw new Error('The tweet does not exist.')
         if (!user) throw new Error(`Please log in again.`)
@@ -106,12 +116,8 @@ const tweetController = {
           TweetId
         })
       })
-      .then(reply => {
-        res.status(200).json(reply)
-      })
-      .catch(err => {
-        res.status(500).json({ statue: 'err', error: err.message })
-      })
+      .then(reply => res.status(200).json(reply))
+      .catch(err => res.status(500).json({ status: 'err', error: err.message }))
   },
   getTweet: (req, res) => {
     const tweetId = req.params.tweet_id
