@@ -38,7 +38,8 @@ const tweetController = {
           ),
           'isLiked'
         ]
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         const tweetsData = tweets.map(tweet => {
@@ -102,7 +103,8 @@ const tweetController = {
       include: [
         { model: User, attributes: { exclude: ['password'] } },
         { model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }] }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(replies => {
         res.json(replies)
