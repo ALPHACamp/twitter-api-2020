@@ -97,11 +97,11 @@ const followController = {
           account: follower.account,
           avatar: follower.avatar,
           introduction,
-          updatedAt: Number(follower.updatedAt),
+          updatedAt: follower.updatedAt,
           isFollowing
         }
       })
-        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))
       return res.status(200).json(data)
     } catch (error) {
       return next(error)
@@ -135,10 +135,10 @@ const followController = {
           account: following.account,
           avatar: following.avatar,
           introduction,
-          updatedAt: Number(following.updatedAt)
+          updatedAt: following.updatedAt
         }
       })
-        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))
       return res.status(200).json(data)
     } catch (error) {
       return next(error)

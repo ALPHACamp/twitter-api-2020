@@ -48,7 +48,8 @@ function getDate (length = 1, index = 0) {
     random.setHours(Math.floor(Math.random() * 24))
     return random
   })
-  return dateArray[index]
+  if (dateArray.length === 1) return dateArray[index]
+  return dateArray
 }
 
 module.exports = {
