@@ -30,10 +30,9 @@ const roleChecker = (req, res, next) => {
 }
 
 const adminChecker = (req, res, next) => {
-  console.log(req.body)
   const user = getUser(req)
   if (user.role !== 'admin') return next()
-  return res.status(404).json({ status: 'error', message: "The user doesn't exist." })
+  return res.status(200).json({ status: 'error', message: '帳號不存在！' })
 }
 
 module.exports = {
