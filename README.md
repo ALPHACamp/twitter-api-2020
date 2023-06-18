@@ -164,5 +164,7 @@ MySQL 安裝：如果你的電腦已經安裝，請跳過。實作本專案時�
 
 前端：
 
+[前端 repo 請參考](https://github.com/phoenix850508/simple-twitter)
+
 - [Sutao Liang](https://github.com/phoenix850508)
 - [Johnny Fang](https://github.com/JohnnyFangFangFang)
