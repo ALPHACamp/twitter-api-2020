@@ -31,8 +31,8 @@ const adminServices = {
     }
   },
   getUsers: async (req, cb) => {
-    try {
-      const getUsersData = async () => {
+  try {
+    const getUsersData = async () => {
       const users = await User.findAll({
         attributes: [
           'id',
@@ -47,6 +47,14 @@ const adminServices = {
           [
             sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
             'followingsCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId IN (SELECT id FROM Tweets WHERE Tweets.UserId = User.id))'),
+            'likesCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'),
+            'tweetsCount'
           ]
         ],
         include: [
@@ -71,38 +79,26 @@ const adminServices = {
         raw: true,
         nest: true
       })
+      // 另一種promise寫法
+      //   await Promise.all(
+      //   users.map(async (user) => {
+      //     const tweetData = await Tweet.count({ where: { UserId: user.id } })
+      //     user.tweetsCount = tweetData
+      //     return user
+      //   })
+      // )
 
-      const getLikesCount = async (userId) => {
-        const likesCount = await Like.count({
-          where: { UserId: userId }
-        })
-
-        return likesCount
-      }
-
-      const usersWithCounts = await Promise.all(
-        users.map(async (user) => {
-          const tweetData = await Tweet.count({ where: { UserId: user.id } })
-          user.tweetsCount = tweetData
-
-          const likesCount = await getLikesCount(user.id)
-          user.likesCount = likesCount
-
-          return user
-        })
-      )
-
-      const sortedUsers = usersWithCounts.sort((a, b) => b.tweetsCount - a.tweetsCount)
+      const sortedUsers = users.sort((a, b) => b.tweetsCount - a.tweetsCount)
 
       return sortedUsers
     }
 
     const usersWithCounts = await getUsersData()
     cb(null, usersWithCounts)
-    } catch (err) {
-      cb(err)
-    }
-  },
+  } catch (err) {
+    cb(err)
+  }
+},
   getAdminTweets: async (req, cb) => {
     try {
       let tweets = await Tweet.findAll({
