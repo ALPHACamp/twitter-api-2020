@@ -3,7 +3,6 @@
 ![screenshot](public/images/placeholder1.png)
 
 ## About - 介紹
----
 這是一個前後端分離的小組專案，前端使用React，後端則使用Node.js、Express搭配MySQL關連式資料庫所打造的API Server。
 Simple Twitter 提供後台管理及前台頁面，使用者可以註冊，登入，推文，回覆推文，喜歡跟追蹤使用者等功能。
 <br><br>
@@ -12,21 +11,18 @@ Simple Twitter 提供後台管理及前台頁面，使用者可以註冊，登�
 <br><br>
 
 ## API - 接口文件
----
 文件內提供每個街口的的使用方式，回傳，成功跟失敗的回傳資訊：<br>
 https://www.notion.so/API-c1a90264a00848d2af202689ae0148be 
 <br><br>
 
 ## Environment - 開發環境
----
 * node v14.16.0
 * nodemon
 <br><br>
 ## Installation and Execution - 安裝與執行步驟
----
 ### 1. 開啟Terminal, Clone此專案至本機:
 ```
- https://github.com/klu0926/twitter-api-2023
+git clone https://github.com/klu0926/twitter-api-2023.git
 ```
 ### 2. 進入存放此專案的資料夾
 ```
@@ -68,7 +64,6 @@ Example app listening on port 3000!
 <br>
 
 ## Seed Accounts - 測試帳號
----
 專案提供 1 個後台管理者帳號與跟 9 位使用者帳號<br>
 管理者帳號只可以使用後台功能，使用者帳號只能使用前台功能
 ### # 管理者帳號 - 後台
@@ -81,7 +76,6 @@ email: user1@example.com <br>
 password: 12345678 <br>
 <br>
 ## Development Tools - 開發工具
----
 * bcrypt-nodejs: "0.0.3",
 * bcryptjs: "^2.4.3",
 * body-parser: "^1.18.3",
@@ -108,7 +102,6 @@ password: 12345678 <br>
 <br><br>
 
 ## Team - 團隊成員
---- 
 ### 前端
 [zebrrrra](https://github.com/zebrrrra)<br>
 [Jena Lin](https://github.com/J6127)

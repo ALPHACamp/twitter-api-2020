@@ -102,7 +102,7 @@ const tweetController = {
       if (!description) throw new Error('請輸入內容！')
       if (description.length > 140) throw new Error('內容限制為140字以內！')
       await Tweet.create({
-        userId: helpers.getUser(req).id,
+        UserId: helpers.getUser(req).id,
         description
       })
       // 回傳成功訊息
