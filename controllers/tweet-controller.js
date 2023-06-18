@@ -133,20 +133,19 @@ const tweetController = {
       next(err)
     }
   },
-  deleteTweet: (req, res, next) => {
-    const tweetId = req.params.tweetId
-    return Tweet.findByPk(tweetId)
-      .then(tweet => {
-        if (!tweet) throw new Error("Tweet didn't exist!")
-        return tweet.destroy()
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweetId
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      await tweet.destroy()
+      res.json({
+        status: 'success',
+        message: 'Tweet deleted successfully'
       })
-      .then(() => {
-        res.json({
-          status: 'success',
-          message: 'Tweet deleted successfully'
-        })
-      })
-      .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
   },
   postReplies: (req, res, next) => {
     const { comment } = req.body
