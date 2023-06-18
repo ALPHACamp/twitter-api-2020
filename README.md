@@ -2,7 +2,7 @@
 
 ## API URL
 
-[https://twitter-azx79115.herokuapp.com/api]
+https://twitter-azx79115.herokuapp.com/api
 
 ## 功能
 
