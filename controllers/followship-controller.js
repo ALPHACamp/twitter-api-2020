@@ -2,36 +2,35 @@ const { User, Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const followshipController = {
-  addFollowing: (req, res, next) => {
-    const followingId = req.body.id
-    if (!followingId) throw new Error('Following id is required!')
-    const getUser = helpers.getUser(req)
-    const userId = getUser.id
-    if (userId.toString() === followingId) throw new Error("Can't follow yourself!")
-    return Promise.all([
-      Followship.findOne({
-        where: {
-          followerId: userId,
-          followingId
-        }
-      }),
-      User.findByPk(followingId)
-    ])
-      .then(([followship, user]) => {
-        if (followship) throw new Error('You are already following this user!')
-        if (!user) throw new Error("User didn't exist!")
-        return Followship.create({
-          followerId: userId,
-          followingId
-        })
+  addFollowing: async (req, res, next) => {
+    try {
+      const followingId = req.body.id
+      if (!followingId) throw new Error('Following id is required!')
+      const getUser = helpers.getUser(req)
+      const userId = getUser.id
+      if (userId.toString() === followingId) throw new Error("Can't follow yourself!")
+      const [followship, user] = await Promise.all([
+        Followship.findOne({
+          where: {
+            followerId: userId,
+            followingId
+          }
+        }),
+        User.findByPk(followingId)
+      ])
+      if (followship) throw new Error('You are already following this user!')
+      if (!user) throw new Error("User didn't exist!")
+      const createdFollowship = await Followship.create({
+        followerId: userId,
+        followingId
       })
-      .then(followship => {
-        res.json({
-          status: 'success',
-          followship: followship
-        })
+      res.json({
+        status: 'success',
+        followship: createdFollowship
       })
-      .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
   },
   deleteFollowing: (req, res, next) => {
     const followingId = req.params.followingId
