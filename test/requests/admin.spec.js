@@ -96,6 +96,7 @@ describe('# admin requests', () => {
             if (err) return done(err);
             // 檢查是否 Tweet table 中的資料是空的，表示有刪除成功
             db.Tweet.findByPk(1).then(tweet => {
+              console.log(`====${tweet}====`)
               expect(tweet).to.be.null
               return done();
             })
