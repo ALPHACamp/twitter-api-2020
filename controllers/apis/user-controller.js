@@ -164,10 +164,6 @@ const userController = {
         })
       ])
 
-      // 資料格式處理
-      user = user.toJSON()
-      repliedTweets = repliedTweets.map(e => e.toJSON())
-
       // 錯誤處理
       if (!user || user.role === 'admin') {
         const error = new Error('The user does not exist')
@@ -179,6 +175,10 @@ const userController = {
         error.status = 404
         throw error
       }
+
+      // 資料格式處理
+      user = user.toJSON()
+      repliedTweets = repliedTweets.map(e => e.toJSON())
 
       repliedTweets.forEach(e => {
         e.isLiked = false
