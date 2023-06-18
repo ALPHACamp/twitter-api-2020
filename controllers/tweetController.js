@@ -6,14 +6,14 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const liked = req.query.liked
-      const userId = getUser(req).id || getUser(req).dataValues.id
-      const searchUserId = req.params.id
+      const userId = getUser(req).id || getUser(req).dataValues.id // 2 user1
+      const searchUserId = req.params.id // 3 user2
       let tweets
       let counts
 
       if (liked) {
         const likes = await Like.findAll({
-          where: { User_Id: userId },
+          where: { User_Id: searchUserId },
           attributes: ['TweetId'],
           raw: true,
           nest: true
@@ -41,7 +41,7 @@ const tweetController = {
             repliesCount: tweet.Replies.length,
             lastUpdated: getLastUpd(tweet),
             isLiked: tweet.Likes?.some(
-              (l) => Number(l.UserId) === Number(searchUserId)
+              (l) => Number(l.UserId) === Number(userId)
             ),
             updatedAt: fileteredLikesTime
           }
