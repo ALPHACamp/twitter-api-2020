@@ -87,6 +87,7 @@ Installing - 專案安裝流程
 
     JWT_SECRET="你的jwt secret"
     IMGUR_CLIENT_ID="你的imgur client_id"(非必要)
+    GITHUB_PAGE="你的指定前端網域"
     SESSION_SECRET="你的 session secret"
 
 6.mysql資料庫設定
