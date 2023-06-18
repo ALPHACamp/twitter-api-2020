@@ -168,34 +168,33 @@ const tweetController = {
       next(err)
     }
   },
-  postLike: (req, res, next) => {
-    const tweetId = req.params.tweetId
-    const getUser = helpers.getUser(req)
-    const userId = getUser.id
-    return Promise.all([
-      Tweet.findByPk(tweetId),
-      Like.findOne({
-        where: {
-          userId,
-          tweetId
-        }
-      })
-    ])
-      .then(([tweet, like]) => {
-        if (!tweet) throw new Error("Tweet didn't exist!")
-        if (like) throw new Error('You have liked this tweet!')
-        return Like.create({
-          userId,
-          tweetId
+  postLike: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweetId
+      const getUser = helpers.getUser(req)
+      const userId = getUser.id
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(tweetId),
+        Like.findOne({
+          where: {
+            userId,
+            tweetId
+          }
         })
+      ])
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      if (like) throw new Error('You have liked this tweet!')
+      const createdLike = await Like.create({
+        userId,
+        tweetId
       })
-      .then(like => {
-        res.json({
-          status: 'success',
-          data: like
-        })
+      res.json({
+        status: 'success',
+        data: createdLike
       })
-      .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
   },
   postUnlike: (req, res, next) => {
     const tweetId = req.params.tweetId
