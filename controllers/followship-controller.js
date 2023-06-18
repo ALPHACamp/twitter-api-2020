@@ -48,7 +48,7 @@ const followshipController = {
   addFollowship: (req, res, next) => {
     const followingId = req.body.id
     const followerId = helpers.getUser(req).id
-    if (followerId === followingId) throw new Error('不可追蹤自己')
+    if (followerId == followingId) throw new Error('不可追蹤自己')
     User.findByPk(followingId)
       .then((user) => {
         if (!user) throw new Error('該使用者不存在')
