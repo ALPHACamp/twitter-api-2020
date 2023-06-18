@@ -42,13 +42,12 @@ function getLastUpd (data) {
   }
   return lastUpdated
 }
-function getDate (length = 1, index = 0) {
+function getDate (length = 10) {
   const dateArray = Array.from({ length }, () => {
     const random = new Date()
-    random.setHours(Math.floor(Math.random() * 24))
+    random.setSeconds(Math.floor(Math.random() * length))
     return random
   })
-  if (dateArray.length === 1) return dateArray[index]
   return dateArray
 }
 

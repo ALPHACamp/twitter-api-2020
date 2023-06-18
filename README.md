@@ -1,13 +1,14 @@
 # 專案名稱: twitter-api-2020
 
 本專案為開發推特的後端API服務，前端開發者可向本服務請求資料，包含用戶註冊、登錄、發布推文、追蹤其他用戶、查看推文等功能。
-更多關於的使用請查看我們撰寫的API文件 https://lime-quokka-29b.notion.site/API-4e6a515faffe40f895ea28a7b2fe126c?pvs=4
+更多關於的使用請查看我們撰寫的[API文件] 
+[Node.js](https://nodejs.org/en/)
+(https://lime-quokka-29b.notion.site/API-4e6a515faffe40f895ea28a7b2fe126c?pvs=4)
 
 ## 目錄
 
 - [初始化](#初始化)
-- [使用方法](#使用方法)
-- [貢獻](#貢獻)
+- [使用方式](#使用方式)
 - [套件版本](#套件版本)
 
 ## 初始化
@@ -24,7 +25,7 @@ cd twitter-api-2020
 npm install
 ```
 
-## 使用方法
+## 使用方式
 
 1. 在你的電腦中安裝MySQL Workbench以便連結並瀏覽資料庫
 
@@ -45,17 +46,6 @@ npm run start
 
 5. 使用postman進行api request test
 
-
-## 貢獻
-如果您對該專案有任何建議或想要貢獻，請隨時提交pull request或開啟issue。
-在提交您的pull request前，請確保程式碼格式、撰寫風格與本專案一致，可透過ESLint進行確認及調整
-
-ESLint啟動與執行
-
-```
-npm run eslintInit // 初始化lint
-npm run lint  // 啟動lint
-```
 
 ## 套件版本
 
