@@ -66,13 +66,9 @@ const followController = {
           {
             model: User,
             as: 'Followers',
-            attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+            attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'updatedAt'],
             through: { attributes: [] }
           }
-        ],
-        order: [
-          ['id', 'DESC'],
-          ['createdAt', 'DESC']
         ]
       })
       const followings = await User.findAll({
@@ -101,9 +97,11 @@ const followController = {
           account: follower.account,
           avatar: follower.avatar,
           introduction,
+          updatedAt: Number(follower.updatedAt),
           isFollowing
         }
       })
+        .sort((a, b) => b.updatedAt - a.updatedAt)
       return res.status(200).json(data)
     } catch (error) {
       return next(error)
@@ -124,13 +122,10 @@ const followController = {
           {
             model: User,
             as: 'Followings',
-            attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+            attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'updatedAt'],
             through: { attributes: [] }
           }
-        ],
-        order: [
-          ['id', 'DESC'],
-          ['createdAt', 'DESC']]
+        ]
       })
       const data = followings[0].Followings.map(following => {
         const introduction = following.introduction?.substring(0, 50)
@@ -139,9 +134,11 @@ const followController = {
           name: following.name,
           account: following.account,
           avatar: following.avatar,
-          introduction
+          introduction,
+          updatedAt: Number(following.updatedAt)
         }
       })
+        .sort((a, b) => b.updatedAt - a.updatedAt)
       return res.status(200).json(data)
     } catch (error) {
       return next(error)
