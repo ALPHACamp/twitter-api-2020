@@ -2,7 +2,7 @@
 
 本專案為開發推特的後端API服務，使用nodeJS與express框架，並使用MySQL資料庫
 前端開發者可向本服務請求資料，包含用戶註冊、登錄、發布推文、追蹤其他用戶、查看推文等功能。
-API使用方式請查看我們撰寫的[API文件] 
+API使用方式請查看我們撰寫的[API文件](https://lime-quokka-29b.notion.site/API-4e6a515faffe40f895ea28a7b2fe126c)
 
 ## 目錄
 
