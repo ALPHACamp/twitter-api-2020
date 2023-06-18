@@ -1,6 +1,6 @@
 # Simple Twitter
 
-![screenshot](public/images/demo.png)
+![screenshot]([public/images/demo.png](https://github.com/KenYuChang/twitter-api-2020/blob/master/public/images/demo.jpg))
 
 ## About
 
