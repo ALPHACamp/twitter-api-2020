@@ -327,6 +327,7 @@ const userController = {
       include: [{ model: User, as: 'Followers' }]
     })
       .then(users => {
+        if (!users) throw new Error(`User is not exist!`)
         users = users.map(user => {
           let userData = user.toJSON()
           delete userData.password

@@ -2,7 +2,7 @@ const { Tweet, Reply, Like, User } = require('../../models')
 const helpers = require('../../_helpers')
 
 const tweetController = {
-  getTweets: (req, res, next) => {
+  getTweets: (req, res) => {
     return Tweet.findAll({
       include: [
         { model: User },
@@ -12,6 +12,7 @@ const tweetController = {
       order: [['createdAt', 'DESC']]
     })
       .then(ts => {
+        if (!ts) throw new Error('Tweets is not exist')
         const tweetData = ts.map(tweet => {
           const tweetMapData = tweet.toJSON()
           delete tweetMapData.User.password
@@ -27,7 +28,7 @@ const tweetController = {
         res.status(500).json({ status: 'error', error: err.message })
       })
   },
-  getPostTweet: (req, res, next) => {
+  getPostTweet: (req, res) => {
     User.findOne({ where: { id: helpers.getUser(req).id } })
       .then(user => {
         if (!user) throw new Error('Not logged in')
@@ -77,7 +78,7 @@ const tweetController = {
         res.status(500).json({ statue: 'err', error: err.message })
       })
   },
-  getReplies: (req, res, next) => {
+  getReplies: (req, res) => {
     // const userId = helpers.getUser(req).id
     const tweetId = req.params.tweet_id
     return Tweet.findByPk(tweetId, {
@@ -85,6 +86,7 @@ const tweetController = {
         [{ model: Reply, include: [{ model: User }] }]
     })
       .then(tweet => {
+        if (!tweet) throw new Error('Tweet is no exist')
         res.status(200).json(tweet.Replies)
       })
       .catch(err => {
