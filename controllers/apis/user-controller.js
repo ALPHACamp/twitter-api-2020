@@ -31,7 +31,7 @@ const userController = {
       } else if (account.length > 50) {
         reject(new Error(`Account too long`))
       }
-      if (name && name.length > 50) { reject(new Error(`Name too long`)) }
+      if (name && name.length > 50) reject(new Error(`Name too long`))
       if (introduction && introduction.length > 160) reject(new Error('Introduction too long'))
       if (password !== checkPassword) reject(new Error('Password do not match'))
       resolve()
