@@ -71,8 +71,8 @@ const followController = {
           }
         ],
         order: [
-          ['createdAt', 'DESC'],
-          ['id', 'DESC']
+          ['id', 'DESC'],
+          ['createdAt', 'DESC']
         ]
       })
       const followings = await User.findAll({
@@ -129,8 +129,8 @@ const followController = {
           }
         ],
         order: [
-          ['createdAt', 'DESC'],
-          ['id', 'DESC']]
+          ['id', 'DESC'],
+          ['createdAt', 'DESC']]
       })
       const data = followings[0].Followings.map(following => {
         const introduction = following.introduction?.substring(0, 50)
