@@ -24,7 +24,9 @@ const followController = {
         }
         return Followship.create({
           followerId,
-          followingId
+          followingId,
+          createdAt: new Date(),
+          updatedAt: new Date()
         })
       })
       .then(() => res.status(200).json('Add success'))
@@ -190,7 +192,9 @@ const followController = {
         if (like) return res.status(400).json('Already liked')
         return Like.create({
           UserId,
-          TweetId
+          TweetId,
+          createdAt: new Date(),
+          updatedAt: new Date()
         })
       })
       .then(() => res.status(200).json('Like success'))
