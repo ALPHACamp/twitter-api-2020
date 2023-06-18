@@ -1,6 +1,6 @@
 # Simple Twitter
 
-demo pic TBC.
+![screenshot](public/images/demo.png)
 
 ## About
 
@@ -19,14 +19,14 @@ Mocking the basic functions as below:
 
 ---
 
-FE demo TBC.
+[Visit our beautiful website!](https://liam67726978.github.io/simple-twitter)
 <br><br>
 
 ## API
 
 ---
 
-API document TBC.
+[Get to know how to use our API.](https://yoruyeh.notion.site/API-2c3cc2ba2b194c9baa9ce3df08630569?pvs=4)
 <br><br>
 
 ## Environment
@@ -119,10 +119,10 @@ password: 12345678 <br>
 
 ### Front-End
 
-[Yoru](https://github.com/Yoruyeh)<br>
+[Yoru Yeh](https://github.com/Yoruyeh)<br>
 [Liam](https://github.com/Liam67726978)
 
 ### Back-End
 
-[Ken](https://github.com/KenYuChang)<br>
-[Jasmine](https://github.com/Jasmineeds)
+[Ken Yu Chang](https://github.com/KenYuChang)<br>
+[Jasmine Huang](https://github.com/Jasmineeds)
