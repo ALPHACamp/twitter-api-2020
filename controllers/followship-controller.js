@@ -32,27 +32,26 @@ const followshipController = {
       next(err)
     }
   },
-  deleteFollowing: (req, res, next) => {
-    const followingId = req.params.followingId
-    const getUser = helpers.getUser(req)
-    const userId = getUser.id
-    return Followship.findOne({
-      where: {
-        followerId: userId,
-        followingId
-      }
-    })
-      .then(followship => {
-        if (!followship) throw new Error("You haven't following this user!")
-        return followship.destroy()
+  deleteFollowing: async (req, res, next) => {
+    try {
+      const followingId = req.params.followingId
+      const getUser = helpers.getUser(req)
+      const userId = getUser.id
+      const followship = await Followship.findOne({
+        where: {
+          followerId: userId,
+          followingId
+        }
       })
-      .then(() => {
-        res.json({
-          status: 'success',
-          message: 'Followship deleted successfully'
-        })
+      if (!followship) throw new Error("You haven't following this user!")
+      await followship.destroy()
+      res.json({
+        status: 'success',
+        message: 'Followship deleted successfully'
       })
-      .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
   },
   getTopUser: (req, res, next) => {
     return User.findAll({
