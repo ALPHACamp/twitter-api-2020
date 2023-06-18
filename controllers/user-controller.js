@@ -288,14 +288,15 @@ const userController = {
       })
       const isFollowed = []
       for (let j = 0; j < users.length; j++) {
-        if (!users[j].Followers[0])isFollowed.push(false)
+        console.log(users[j].id)
+        if (users[j].Followers.length === 0) isFollowed[j] = false
         for (let i = 0; i < users[j].Followers.length; i++) {
           console.log(users[j].id, users[j].Followers[i].id.toString())
-          if (users[j].Followers[i].id?.toString() === getUser(req).id.toString()) {
-            isFollowed.push(true)
+          if (users[j].Followers[i].Followship.followerId?.toString() === getUser(req).id.toString()) {
+            isFollowed[j] = true
             break
           } else {
-            isFollowed.push(false)
+            isFollowed[j] = false
           }
         }
       }
