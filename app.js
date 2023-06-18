@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 const corsOptions = {
-  origin: 'http://localhost:3000', // 允許的網域
+  origin: ['http://localhost:3000', 'https://zionyou.github.io/simple-twitter'], // 允許的網域
   methods: 'GET, POST, PUT, DELETE', // 允許的 HTTP 方法
   allowedHeaders: 'Content-Type, Authorization' // 允許的請求標頭
 }
