@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = ['http://localhost:3000', 'https://zionyou.github.io/simple-twitter']
+    const allowedOrigins = ['http://localhost:3000', 'https://zionyou.github.io']
     if (allowedOrigins.includes(origin) || !origin) {
       callback(null, true)
     } else {
