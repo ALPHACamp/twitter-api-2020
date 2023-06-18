@@ -2,6 +2,8 @@
 
 ## API URL
 
+[https://twitter-azx79115.herokuapp.com/api]
+
 ## 功能
 
 - 使用者可以註冊/登入帳號
