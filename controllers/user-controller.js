@@ -21,6 +21,7 @@ const userController = {
     helpers.getUser(req)
     return User.findByPk(req.params.id, {
       include: [
+        { model: Tweet },
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
       ]
@@ -34,7 +35,8 @@ const userController = {
           isFollowing: req.user && req.user.Followings.some(following => following.id === user.id),
           isFollower: req.user && req.user.Followers.some(follower => follower.id === user.id),
           followersCount: user.Followers.length,
-          followingsCount: user.Followings.length
+          followingsCount: user.Followings.length,
+          tweetsCount: user.Tweets.length
         }
         // res.json({ status: 'success', user: user.toJSON() })
         delete user.password
@@ -240,27 +242,24 @@ const userController = {
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
+    console.log('-- 進入putUser--')
     const userId = Number(req.params.id)
     let avatarFile, bannerFile
-    if (
-      helpers.getUser(req).id !== 1 &&
-      helpers.getUser(req).followings === []
-    ) {
-      if (req.files.avatar && req.files.avatar.length > 0) {
+    if (helpers.getUser(req).id !== 1 && req.files) {
+      if (req.files.avatar) {
         avatarFile = req.files.avatar[0]
       }
-      if (req.files.banner && req.files.banner.length > 0) {
+      if (req.files.banner) {
         bannerFile = req.files.banner[0]
       }
     }
-    console.log('----------- 這 -----------')
     // 沒有這條, 有了token之後, 就可以亂改他人資料了
     if (userId !== helpers.getUser(req).id) throw new Error('只能改自己的啦')
     const { name, introduction } = req.body
     return Promise.all([
       User.findByPk(userId),
-      imgurFileHandler(avatarFile),
-      imgurFileHandler(bannerFile)
+      avatarFile ? imgurFileHandler(avatarFile) : Promise.resolve(),
+      bannerFile ? imgurFileHandler(bannerFile) : Promise.resolve()
     ])
       .then(([userData, avatarUrl, bannerUrl]) => {
         if (!userData) throw new Error('putUser說: 沒這人')

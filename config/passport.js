@@ -9,7 +9,7 @@ const ExtractJWT = passportJWT.ExtractJwt
 // for JWT
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET || 'travisSecret'
+  secretOrKey: process.env.JWT_SECRET || 'authenticate'
 }
 
 // LocalStrategy

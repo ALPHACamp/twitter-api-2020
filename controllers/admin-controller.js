@@ -1,4 +1,4 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like } = require('../models')
 const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 
@@ -6,10 +6,20 @@ const adminController = {
   getUsers: (req, res, next) => {
     return User.findAll({
       attributes: { exclude: ['password'] },
-      raw: true,
-      nest: true
+      include: [
+        { model: Tweet, include: [{ model: Like }] },
+        { model: User, as: 'Followings' },
+        { model: User, as: 'Followers' }
+      ]
     })
       .then(users => {
+        users = users.map(u => ({
+          ...u.toJSON(),
+          tweetsCount: u.Tweets.length,
+          followingsCount: u.Followings.length,
+          followersCount: u.Followers.length,
+          likeCount: u.Tweets.reduce((totalLikes, tweet) => totalLikes + tweet.Likes.length, 0)
+        })).sort((a, b) => b.tweetsCount - a.tweetsCount)
         res.status(200).json(users)
       })
       .catch(err => next(err))
