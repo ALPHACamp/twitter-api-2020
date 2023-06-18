@@ -9,7 +9,7 @@ const JWTStrategy = passportJWT.Strategy
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: process.env.JWT_SECRET || 'travis'
 }
 
 passport.use(new LocalStrategy(
