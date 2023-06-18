@@ -32,6 +32,7 @@ module.exports = {
       },
       cover: {
         type: Sequelize.STRING,
+        defaultValue: 'https://i.imgur.com/BWEPlza.jpeg',
       },
       created_at: {
         allowNull: false,
