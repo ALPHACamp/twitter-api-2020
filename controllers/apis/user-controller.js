@@ -223,9 +223,7 @@ const userController = {
               ]
             }
           ],
-          order: [['updatedAt', 'DESC']],
-          raw: true,
-          nest: true
+          order: [['updatedAt', 'DESC']]
         }),
         Like.findAll({ where: { UserId: getUser(req).id } })
       ])
@@ -241,17 +239,22 @@ const userController = {
         throw error
       }
 
+      // 資料格式處理
+      const data = userLiked.map(e => e.toJSON())
+      console.log(data)
+
       const dic = {}
       for (let i = 0; i < likes.length; i++) {
         dic[likes[i].TweetId] = i
       }
-      userLiked.forEach(e => {
+
+      data.forEach(e => {
         e.isLiked = false
         if (dic[e.TweetId] >= 0) {
           e.isLiked = true
         }
       })
-      return res.status(200).json(userLiked)
+      return res.status(200).json(data)
     } catch (error) {
       next(error)
     }
