@@ -126,7 +126,7 @@ const userController = {
       followers.forEach(e => {
         dic[e.followingId] = e.followingId
       })
-      console.log(dic)
+
       // 檢查該用戶是否在追蹤清單上
       dic[data.id] >= 0 ? data.isFollowed = true : data.isFollowed = false
 
