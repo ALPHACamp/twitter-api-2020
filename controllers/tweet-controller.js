@@ -52,49 +52,50 @@ const tweetController = {
       next(err)
     }
   },
-  getTweet: (req, res, next) => {
-    const ThisUserId = helpers.getUser(req).id
-    const tweetId = req.params.tweetId
-    return Tweet.findByPk(tweetId, {
-      include: [
-        { model: User, attributes: { exclude: ['password'] } },
-        {
-          model: Like,
-          attributes: []
-        }
-      ],
-      attributes: [
-        'id',
-        'UserId',
-        'description',
-        'createdAt',
-        'updatedAt',
-        [
-          sequelize.literal(
-            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)'
-          ),
-          'likeCount'
+  getTweet: async (req, res, next) => {
+    try {
+      const ThisUserId = helpers.getUser(req).id
+      const tweetId = req.params.tweetId
+      const tweet = await Tweet.findByPk(tweetId, {
+        include: [
+          { model: User, attributes: { exclude: ['password'] } },
+          {
+            model: Like,
+            attributes: []
+          }
         ],
-        [
-          sequelize.literal(
-            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
-          ),
-          'replyCount'
-        ],
-        [
-          sequelize.literal(
-            `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${ThisUserId} AND Likes.deletedAt IS NULL) > 0`
-          ),
-          'isLiked'
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          'updatedAt',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)'
+            ),
+            'likeCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+            ),
+            'replyCount'
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${ThisUserId} AND Likes.deletedAt IS NULL) > 0`
+            ),
+            'isLiked'
+          ]
         ]
-      ]
-    })
-      .then(tweet => {
-        const tweetData = tweet.toJSON()
-        tweetData.isLiked = Boolean(tweetData.isLiked)
-        res.json(tweetData)
       })
-      .catch(err => next(err))
+      const tweetData = tweet.toJSON()
+      tweetData.isLiked = Boolean(tweetData.isLiked)
+      res.json(tweetData)
+    } catch (err) {
+      next(err)
+    }
   },
   getReplies: (req, res, next) => {
     const tweetId = req.params.tweetId
