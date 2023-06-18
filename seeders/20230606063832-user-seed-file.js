@@ -1,6 +1,7 @@
 'use strict'
 const bcrypt = require('bcryptjs')
 const { getDate } = require('../_helpers')
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Users', [{
@@ -13,6 +14,7 @@ module.exports = {
       updated_at: new Date()
     }])
     const usersData = []
+    const dateArray = getDate(5)
     for (let i = 1; i < 6; i++) {
       const userData = {
         account: `user${i}`,
@@ -20,8 +22,8 @@ module.exports = {
         email: `user${i}@example.com`,
         password: await bcrypt.hash('12345678', 10),
         role: 'user',
-        created_at: getDate(),
-        updated_at: getDate(),
+        created_at: dateArray[i - 1],
+        updated_at: dateArray[i - 1],
         introduction: `user${i} introduction`
       }
       usersData.push(userData)

@@ -12,8 +12,8 @@ module.exports = {
     )
     const likesCheck = new Set()
     const likesArray = []
-
-    while (likesArray.length <= 50) {
+    const dateArray = getDate(50)
+    while (likesArray.length < 50) {
       let tweetId = tweets[Math.floor(Math.random() * tweets.length)].id
       const userId = users[Math.floor(Math.random() * users.length)].id
       while (likesCheck.has(`${tweetId}-${userId}`)) {
@@ -23,8 +23,8 @@ module.exports = {
       likesArray.push({
         Tweet_Id: tweetId,
         User_Id: userId,
-        created_at: getDate(),
-        updated_at: getDate()
+        created_at: dateArray[likesArray.length],
+        updated_at: dateArray[likesArray.length]
       })
     }
     await queryInterface.bulkInsert('Likes', likesArray)

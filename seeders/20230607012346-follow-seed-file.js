@@ -9,8 +9,8 @@ module.exports = {
 
     const followships = new Set()
     const followshipArray = []
-
-    while (followships.size <= 10) {
+    const dateArray = getDate(10)
+    while (followships.size < 10) {
       const followerId = users[Math.floor(Math.random() * users.length)].id
       let followingId = users[Math.floor(Math.random() * users.length)].id
 
@@ -23,8 +23,8 @@ module.exports = {
       followshipArray.push({
         follower_Id: followerId,
         following_Id: followingId,
-        created_at: getDate(),
-        updated_at: getDate()
+        created_at: dateArray[followshipArray.length],
+        updated_at: dateArray[followshipArray.length]
       })
     }
 

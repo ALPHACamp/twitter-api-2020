@@ -22,7 +22,7 @@ module.exports = {
       }
       return randomUsers
     }
-
+    const dateArray = getDate(150)
     for (let j = 0; j < tweets.length; j++) {
       const randomUsers = getRandomUsers(users, 3)
       for (let i = 0; i < 3; i++) {
@@ -30,8 +30,8 @@ module.exports = {
           User_id: randomUsers[i].id,
           Tweet_id: tweets[j].id,
           comment: `你好棒${i + 1}`,
-          created_at: getDate(),
-          updated_at: getDate()
+          created_at: dateArray[j * 3 + i],
+          updated_at: dateArray[j * 3 + i]
         }
         repliesData.push(replyData)
       }
