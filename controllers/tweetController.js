@@ -5,64 +5,76 @@ const { User, Tweet, Like, Reply, Followship } = require('../models')
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
-      const follows = req.query.follows
       const liked = req.query.liked
       const userId = getUser(req).id || getUser(req).dataValues.id
       const searchUserId = req.params.id
-      const options = {}
-      // follows目前不必要
-      if (follows) {
-        // 不管有沒有follows都會有自己的貼文
-        const followingIdData = await Followship.findAll({
-          where: { follower_Id: searchUserId },
-          attributes: ['followingId']
-        })
-        const followingIds = followingIdData.map((row) => row.followingId)
-        followingIds.push(searchUserId)
-        options.UserId = followingIds
-      } else if (liked) {
+      let tweets
+      let counts
+
+      if (liked) {
         const likes = await Like.findAll({
           where: { User_Id: searchUserId },
           attributes: ['TweetId'],
-          order: [
-            ['createdAt', 'DESC']
-          ],
           raw: true,
           nest: true
         })
         const tweetIds = likes.map((row) => row.TweetId)
-        // tweetIds.push(userId)
-        options.id = tweetIds
+        tweets = await Tweet.findAll({
+          where: { id: tweetIds },
+          include: [
+            { model: User, attributes: ['account', 'name', 'avatar'] },
+            { model: Like, attributes: ['UserId', 'updatedAt'] },
+            { model: Reply, attributes: ['UserId'] }
+          ],
+          nest: true
+        })
+        if (tweets.length === 0) return res.status(404).json('Tweets not found')
+        counts = tweets.map((tweet) => {
+          const fileteredLikesTime = tweet.Likes.filter((like) => like.UserId === Number(userId))[0].dataValues.updatedAt
+          // console.log(fileteredLikesTime)
+          return {
+            ...tweet.toJSON(),
+            account: tweet.User.account,
+            name: tweet.User.name,
+            avatar: tweet.User.avatar,
+            likesCount: tweet.Likes.length,
+            repliesCount: tweet.Replies.length,
+            lastUpdated: getLastUpd(tweet),
+            isLiked: tweet.Likes?.some(
+              (l) => Number(l.UserId) === Number(userId)
+            ),
+            updatedAt: fileteredLikesTime
+          }
+        })
+          .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))
       } else {
-        options.UserId = searchUserId
+        tweets = await Tweet.findAll({
+          where: { UserId: searchUserId },
+          include: [
+            { model: User, attributes: ['account', 'name', 'avatar'] },
+            { model: Like, attributes: ['UserId', 'updatedAt'] },
+            { model: Reply, attributes: ['UserId'] }
+          ],
+          nest: true,
+          order: [['createdAt', 'DESC']]
+        })
+        if (tweets.length === 0) return res.status(404).json('Tweets not found')
+        counts = tweets.map((tweet) => ({
+          ...tweet.toJSON(),
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar,
+          likesCount: tweet.Likes.length,
+          repliesCount: tweet.Replies.length,
+          lastUpdated: getLastUpd(tweet),
+          isLiked: tweet.Likes?.some(
+            (l) => Number(l.UserId) === Number(userId)
+          )
+        }))
       }
-      const tweets = await Tweet.findAll({
-        where: options,
-        include: [
-          { model: User, attributes: ['account', 'name', 'avatar'] },
-          { model: Like, attributes: ['UserId'] },
-          { model: Reply, attributes: ['UserId'] }
-        ],
-        order: [
-          ['createdAt', 'DESC'],
-          ['id', 'DESC']
-        ],
-        nest: true
-      })
-      if (tweets.length === 0) return res.status(404).json('Tweets not found')
 
-      const counts = tweets.map((tweet) => ({
-        ...tweet.toJSON(),
-        account: tweet.User.account,
-        name: tweet.User.name,
-        avatar: tweet.User.avatar,
-        likesCount: tweet.Likes.length,
-        repliesCount: tweet.Replies.length,
-        lastUpdated: getLastUpd(tweet),
-        isLiked: tweet.Likes?.some((l) => Number(l.UserId) === Number(userId))
-      }))
       const data = counts.map(({ Likes, Replies, User, ...rest }) => rest)
-
+      console.log(data)
       return res.status(200).json(data)
     } catch (err) {
       next(err)
