@@ -196,37 +196,35 @@ const tweetController = {
       next(err)
     }
   },
-  postUnlike: (req, res, next) => {
-    const tweetId = req.params.tweetId
-    const getUser = helpers.getUser(req)
-    const userId = getUser.id
-    return Promise.all([
-      Tweet.findByPk(tweetId),
-      Like.findOne({
-        where: {
-          userId,
-          tweetId
-        }
-      })
-    ])
-      .then(([tweet, like]) => {
-        if (!tweet) throw new Error("Tweet didn't exist!")
-        if (!like) throw new Error("You haven't liked this tweet!")
-        return Like.destroy({
+  postUnlike: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweetId
+      const getUser = helpers.getUser(req)
+      const userId = getUser.id
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(tweetId),
+        Like.findOne({
           where: {
             userId,
             tweetId
           }
         })
+      ])
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      if (!like) throw new Error("You haven't liked this tweet!")
+      const unlike = await Like.destroy({
+        where: {
+          userId,
+          tweetId
+        }
       })
-      .then(unlike => {
-        console.log(unlike)
-        res.json({
-          status: 'success',
-          data: unlike
-        })
+      res.json({
+        status: 'success',
+        data: unlike
       })
-      .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
