@@ -146,7 +146,7 @@ const userController = {
       id = Number(id)
 
       // 確認使用者是否存在 與 回過文
-      let [user, repliedTweets] = await Promise.all([
+      let [user, repliedTweets, likes] = await Promise.all([
         User.findByPk(id),
         Reply.findAll({
           where: { UserId: id },
@@ -161,7 +161,8 @@ const userController = {
             },
             { model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
           order: [['updatedAt', 'DESC']]
-        })
+        }),
+        Like.findAll({ where: { UserId: getUser(req).id } })
       ])
 
       // 錯誤處理
@@ -180,12 +181,16 @@ const userController = {
       user = user.toJSON()
       repliedTweets = repliedTweets.map(e => e.toJSON())
 
+      // 建立like資料表
+      const dic = {}
+      for (let i = 0; i < likes.length; i++) {
+        dic[likes[i].TweetId] = i
+      }
+
       repliedTweets.forEach(e => {
         e.isLiked = false
-        for (const i of e.Tweet.TweetLike) {
-          if (i.UserId === getUser(req).id) {
-            e.isLiked = true
-          }
+        if (dic[e.TweetId] >= 0) {
+          e.isLiked = true
         }
       })
 
