@@ -97,20 +97,21 @@ const tweetController = {
       next(err)
     }
   },
-  getReplies: (req, res, next) => {
-    const tweetId = req.params.tweetId
-    return Reply.findAll({
-      where: { tweetId },
-      include: [
-        { model: User, attributes: { exclude: ['password'] } },
-        { model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }] }
-      ],
-      order: [['createdAt', 'DESC']]
-    })
-      .then(replies => {
-        res.json(replies)
+  getReplies: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweetId
+      const replies = await Reply.findAll({
+        where: { tweetId },
+        include: [
+          { model: User, attributes: { exclude: ['password'] } },
+          { model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }] }
+        ],
+        order: [['createdAt', 'DESC']]
       })
-      .catch(err => next(err))
+      res.json(replies)
+    } catch (err) {
+      next(err)
+    }
   },
   postTweet: (req, res, next) => {
     const { description } = req.body
