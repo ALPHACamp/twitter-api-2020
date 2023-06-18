@@ -125,18 +125,14 @@ const tweetController = {
   getReply: async (req, res, next) => {
     try {
       const { tweet_id } = req.params
-      const tweet = await Tweet.findByPk(tweet_id, {
-        include: [
-          { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] },
-          { model: Like, as: 'TweetLike', attributes: ['id', 'UserId'] },
-          {
-            model: Reply,
-            as: 'TweetReply',
-            include: [{ model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
-            order: [['createdAt', 'DESC']]
-          }
-        ]
-      })
+      const [replies, tweet] = await Promise.all([
+        Reply.findAll({
+          where: { TweetId: tweet_id },
+          include: [{ model: User, as: 'RepliedUser', attributes: ['id', 'name', 'account', 'avatar'] }],
+          order: [['createdAt', 'DESC']]
+        }),
+        Tweet.findByPk(tweet_id)
+      ])
 
       // 錯誤處理
       if (!tweet) {
@@ -145,17 +141,10 @@ const tweetController = {
         throw error
       }
 
-      const data = tweet.toJSON()
+      // 資料格式處理
+      const data = replies.map(e => e.toJSON())
 
-      // 先留著避免重寫
-
-      // data.isLiked = false
-      // for (const i of data.TweetLike) {
-      //   if (i.UserId === getUser(req).id) {
-      //     data.TweetReply.isLiked = true
-      //   }
-      // }
-      return res.status(200).json(data.TweetReply)
+      return res.status(200).json(data)
     } catch (error) {
       next(error)
     }
