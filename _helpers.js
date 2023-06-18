@@ -42,7 +42,15 @@ function getLastUpd (data) {
   }
   return lastUpdated
 }
+function getDate (length = 1, index = 0) {
+  const dateArray = Array.from({ length }, () => {
+    const random = new Date()
+    random.setHours(Math.floor(Math.random() * 24))
+    return random
+  })
+  return dateArray[index]
+}
 
 module.exports = {
-  getUser, getLastUpdated, getLastUpd
+  getUser, getLastUpdated, getLastUpd, getDate
 }

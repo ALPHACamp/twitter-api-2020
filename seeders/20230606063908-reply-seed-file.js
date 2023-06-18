@@ -1,5 +1,5 @@
 'use strict'
-
+const { getDate } = require('../_helpers')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const tweets = await queryInterface.sequelize.query(
@@ -30,8 +30,8 @@ module.exports = {
           User_id: randomUsers[i].id,
           Tweet_id: tweets[j].id,
           comment: `你好棒${i + 1}`,
-          created_at: new Date(),
-          updated_at: new Date()
+          created_at: getDate(),
+          updated_at: getDate()
         }
         repliesData.push(replyData)
       }

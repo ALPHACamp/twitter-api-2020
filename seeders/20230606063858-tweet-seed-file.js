@@ -1,5 +1,5 @@
 'use strict'
-
+const { getDate } = require('../_helpers')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
@@ -12,8 +12,8 @@ module.exports = {
         description: `這是我的第${index + 1}篇推文，好爽，耶嘿！`,
         likable: true,
         commendable: true,
-        created_at: new Date(),
-        updated_at: new Date()
+        created_at: getDate(),
+        updated_at: getDate()
       })))
     }
   },

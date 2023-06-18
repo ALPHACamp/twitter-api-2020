@@ -1,5 +1,5 @@
 'use strict'
-
+const { getDate } = require('../_helpers')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
@@ -23,8 +23,8 @@ module.exports = {
       followshipArray.push({
         follower_Id: followerId,
         following_Id: followingId,
-        created_at: new Date(),
-        updated_at: new Date()
+        created_at: getDate(),
+        updated_at: getDate()
       })
     }
 

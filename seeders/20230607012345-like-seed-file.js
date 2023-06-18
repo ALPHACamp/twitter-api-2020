@@ -1,5 +1,5 @@
 'use strict'
-
+const { getDate } = require('../_helpers')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
@@ -23,8 +23,8 @@ module.exports = {
       likesArray.push({
         Tweet_Id: tweetId,
         User_Id: userId,
-        created_at: new Date(),
-        updated_at: new Date()
+        created_at: getDate(),
+        updated_at: getDate()
       })
     }
     await queryInterface.bulkInsert('Likes', likesArray)
