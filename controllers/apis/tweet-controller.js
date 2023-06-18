@@ -1,7 +1,5 @@
 const { Tweet, Reply, Like, User } = require('../../models')
 const helpers = require('../../_helpers')
-const { resolve } = require('path')
-const { reject } = require('p-cancelable')
 
 const tweetController = {
   getTweets: (req, res, next) => {
