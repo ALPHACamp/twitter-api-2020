@@ -20,85 +20,85 @@ const adminServices = {
       const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' })
       const adminData = admin.toJSON()
       delete adminData.password
-      return cb (null, {
+      return cb(null, {
         status: 'success',
         message: '登入成功！',
         token,
         admin: adminData
       })
     } catch (err) {
-      cb (err)
+      cb(err)
     }
   },
   getUsers: async (req, cb) => {
-  try {
-    const getUsersData = async () => {
-      const users = await User.findAll({
-        attributes: [
-          'id',
-          'account',
-          'name',
-          'avatar',
-          'banner',
-          [
-            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
-            'followersCount'
+    try {
+      const getUsersData = async () => {
+        const users = await User.findAll({
+          attributes: [
+            'id',
+            'account',
+            'name',
+            'avatar',
+            'banner',
+            [
+              sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+              'followersCount'
+            ],
+            [
+              sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+              'followingsCount'
+            ],
+            [
+              sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId IN (SELECT id FROM Tweets WHERE Tweets.UserId = User.id))'),
+              'likesCount'
+            ],
+            [
+              sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'),
+              'tweetsCount'
+            ]
           ],
-          [
-            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
-            'followingsCount'
+          include: [
+            {
+              model: User,
+              as: 'Followers',
+              attributes: [],
+              through: { attributes: [] }
+            },
+            {
+              model: User,
+              as: 'Followings',
+              attributes: [],
+              through: { attributes: [] }
+            },
+            {
+              model: Tweet,
+              attributes: []
+            }
           ],
-          [
-            sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId IN (SELECT id FROM Tweets WHERE Tweets.UserId = User.id))'),
-            'likesCount'
-          ],
-          [
-            sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'),
-            'tweetsCount'
-          ]
-        ],
-        include: [
-          {
-            model: User,
-            as: 'Followers',
-            attributes: [],
-            through: { attributes: [] }
-          },
-          {
-            model: User,
-            as: 'Followings',
-            attributes: [],
-            through: { attributes: [] }
-          },
-          {
-            model: Tweet,
-            attributes: []
-          }
-        ],
-        group: ['User.id'],
-        raw: true,
-        nest: true
-      })
-      // 另一種promise寫法
-      //   await Promise.all(
-      //   users.map(async (user) => {
-      //     const tweetData = await Tweet.count({ where: { UserId: user.id } })
-      //     user.tweetsCount = tweetData
-      //     return user
-      //   })
-      // )
+          group: ['User.id'],
+          raw: true,
+          nest: true
+        })
+        // 另一種promise寫法
+        //   await Promise.all(
+        //   users.map(async (user) => {
+        //     const tweetData = await Tweet.count({ where: { UserId: user.id } })
+        //     user.tweetsCount = tweetData
+        //     return user
+        //   })
+        // )
 
-      const sortedUsers = users.sort((a, b) => b.tweetsCount - a.tweetsCount)
+        const sortedUsers = users.sort((a, b) => b.tweetsCount - a.tweetsCount)
 
-      return sortedUsers
+        return sortedUsers
+      }
+
+      const usersWithCounts = await getUsersData()
+      cb(null, usersWithCounts)
+    } catch (err) {
+      cb(err)
     }
-
-    const usersWithCounts = await getUsersData()
-    cb(null, usersWithCounts)
-  } catch (err) {
-    cb(err)
-  }
-},
+  },
   getAdminTweets: async (req, cb) => {
     try {
       let tweets = await Tweet.findAll({
@@ -119,33 +119,33 @@ const adminServices = {
 
       if (!tweets) throw new Error("目前沒有任何推文！")
       tweets = tweets.map(tweet => {
-      const subDescription = tweet.description.length > 100 ? tweet.description.substring(0, 100) + '...' : tweet.description
+        const subDescription = tweet.description.length > 50 ? tweet.description.substring(0, 50) + '...' : tweet.description
 
-      return {
-        ...tweet.dataValues,
-        description: subDescription,
-        createdAt: relativeTimeFromNow(tweet.dataValues.createdAt),
-        isLiked: tweet.Likes.some(like => like.UserId === req.userId),
-        replyCount: tweet.Replies.length,
-        likeCount: tweet.Likes.length
-      }
-    })
+        return {
+          ...tweet.dataValues,
+          description: subDescription,
+          createdAt: relativeTimeFromNow(tweet.dataValues.createdAt),
+          isLiked: tweet.Likes.some(like => like.UserId === req.userId),
+          replyCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length
+        }
+      })
       cb(null, tweets)
     } catch (err) {
       cb(err)
     }
   },
-  delTweet: async(req, cb) => {
+  delTweet: async (req, cb) => {
     const { id } = req.params
-    try{
+    try {
       const tweet = await Tweet.findByPk(id)
       if (!tweet) throw new Error("推文不存在！")
       await tweet.destroy()
       await Reply.destroy({ where: { TweetId: id } })
       await Like.destroy({ where: { TweetId: id } })
-      return cb(null,{ status: 'success', message: '刪除成功' })
+      return cb(null, { status: 'success', message: '刪除成功' })
     } catch (err) {
-    cb (err)
+      cb(err)
     }
   }
 }
