@@ -24,6 +24,9 @@ const tweetController = {
         const likes = await Like.findAll({
           where: { User_Id: searchUserId },
           attributes: ['TweetId'],
+          order: [
+            ['createdAt', 'DESC']
+          ],
           raw: true,
           nest: true
         })

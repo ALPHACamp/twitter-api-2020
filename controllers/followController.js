@@ -57,21 +57,13 @@ const followController = {
     if (!followingId) {
       return res.status(400).json('User id is necessary')
     }
-    const user = await User.findByPk(followingId)
-    if (!user) return res.status(400).json('User do not exists')
-
     try {
-      const followers = await User.findAll({
-        where: { id: followingId },
-        attributes: [],
-        include: [
-          {
-            model: User,
-            as: 'Followers',
-            attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'updatedAt'],
-            through: { attributes: [] }
-          }
-        ]
+      const user = await User.findByPk(followingId)
+      if (!user) return res.status(400).json('User do not exists')
+      const followers = await user.getFollowers({
+        attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'updatedAt'],
+        raw: true,
+        nest: true
       })
       const followings = await User.findAll({
         where: { id: followingId },
@@ -90,7 +82,7 @@ const followController = {
       const followingsId = followings.map(following => {
         return following.Followings.id
       })
-      const data = followers[0].Followers.map(follower => {
+      const data = followers.map(follower => {
         const introduction = follower.introduction?.substring(0, 50)
         const isFollowing = followingsId.includes(follower.id)
         return {
@@ -99,7 +91,7 @@ const followController = {
           account: follower.account,
           avatar: follower.avatar,
           introduction,
-          updatedAt: follower.updatedAt,
+          updatedAt: follower.Followship.updatedAt,
           isFollowing
         }
       })
@@ -114,22 +106,15 @@ const followController = {
     if (!followerId) {
       return res.status(400).json('Follower id is necessary')
     }
-    const user = await User.findByPk(followerId)
-    if (!user) return res.status(400).json('User not exists')
     try {
-      const followings = await User.findAll({
-        where: { id: followerId },
-        attributes: [],
-        include: [
-          {
-            model: User,
-            as: 'Followings',
-            attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'updatedAt'],
-            through: { attributes: [] }
-          }
-        ]
+      const user = await User.findByPk(followerId)
+      if (!user) return res.status(400).json('User not exists')
+      const followings = await user.getFollowings({
+        attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'updatedAt'],
+        raw: true,
+        nest: true
       })
-      const data = followings[0].Followings.map(following => {
+      const data = followings.map(following => {
         const introduction = following.introduction?.substring(0, 50)
         return {
           followingId: following.id,
@@ -137,7 +122,7 @@ const followController = {
           account: following.account,
           avatar: following.avatar,
           introduction,
-          updatedAt: following.updatedAt
+          updatedAt: following.Followship.updatedAt
         }
       })
         .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))
