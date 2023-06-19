@@ -5,12 +5,14 @@ const express = require('express')
 const helpers = require('./_helpers')
 const router = require('./routes')
 const cors = require('cors')
+const path = require('path')
 
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3500
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = ['http://localhost:3000', 'https://zionyou.github.io']
