@@ -170,7 +170,7 @@ const tweetController = {
         throw error
       }
       if (PromiseArr[1]) {
-        const error = new Error('The tweet does not exist')
+        const error = new Error('You already like the tweet')
         error.status = 409
         throw error
       }
