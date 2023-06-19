@@ -1,5 +1,5 @@
 # Simple Twitter
-![markdown](https://i.imgur.com/AAQaM0Z.png "Login Page")
+![markdown](https://i.imgur.com/w40859T.png "Home Page")
 ## 介紹
 利用前後端分離的方式，打造一個類Twitter的社群平台"Alphitter"，前端使用React框架，後端使用Express框架與MySQL關聯式資料庫，使用者可在平台建立帳號，新增、瀏覽、更新、刪除貼文，並追蹤其他使用者。
 ## Features功能
