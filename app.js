@@ -11,10 +11,10 @@ const passport = require('./config/passport')
 const routes = require('./routes')
 
 // const allowedOrigins = ['http://localhost:3000', 'https://owenlu0125.github.io/'];
-const corsOptions = {
-  origin: ['http://localhost:3000','https://owenlu0125.github.io/'],
-  optionsSuccessStatus: 200
-}
+// const corsOptions = {
+//   origin: ['http://localhost:3000','https://owenlu0125.github.io/'],
+//   optionsSuccessStatus: 200
+// }
 // app.use(cors({
 //   origin: function (origin, callback) {
 //     if (!origin) return callback(null, true);
@@ -26,7 +26,10 @@ const corsOptions = {
 //     return callback(null, true);
 //   }
 // }));
-app.use(cors(corsOptions))
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://owenlu0125.github.io/'],
+}));
+
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
