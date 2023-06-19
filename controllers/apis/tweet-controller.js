@@ -12,14 +12,6 @@ const tweetController = {
       ],
       order: [['createdAt', 'DESC']]
     })
-      // return Tweet.findAll({
-      //   include: [
-      //     { model: User, attributes: ['name', 'account'] },
-      //     { model: Reply, attributes: ['name', 'account'] },
-      //     { model: Like }
-      //   ],
-      //   order: [['createdAt', 'DESC']]
-      // })
       .then(ts => {
         if (!ts) throw new Error('Tweets is not exist')
         const tweetData = ts.map(tweet => {
