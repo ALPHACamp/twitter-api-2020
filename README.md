@@ -22,6 +22,7 @@
 17. 後台瀏覽所有使用者資訊
 
 ## API 文件
+
 Tweet:
 #1. GET /api/tweets/postTweet
 - HTTP Method
@@ -1195,7 +1196,7 @@ Failure - status code : 500
 ## Installing 安裝流程
 1. Clone 此專案至本機電腦，打開你的 terminal
 ```
-git clone https://github.com/deamo771003/Reastaurant-list.git](https://github.com/Lanways/twitter-api-2020.git
+git clone https://github.com/Lanways/twitter-api-2020.git
 ```
 
 2. 開啟終端機(Terminal)，進入存放此專案的資料夾  
