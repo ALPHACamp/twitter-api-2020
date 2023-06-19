@@ -3,23 +3,32 @@ const helpers = require('../../_helpers')
 
 const tweetController = {
   getTweets: (req, res) => {
+
     return Tweet.findAll({
       include: [
-        { model: User },
-        { model: Reply },
-        { model: Like }
+        { model: User, attributes: ['name', 'account'] },
+        { model: Like, attributes: ['UserId'] },
+        { model: Reply, attributes: ['id'] }
       ],
       order: [['createdAt', 'DESC']]
     })
+      // return Tweet.findAll({
+      //   include: [
+      //     { model: User, attributes: ['name', 'account'] },
+      //     { model: Reply, attributes: ['name', 'account'] },
+      //     { model: Like }
+      //   ],
+      //   order: [['createdAt', 'DESC']]
+      // })
       .then(ts => {
         if (!ts) throw new Error('Tweets is not exist')
         const tweetData = ts.map(tweet => {
           const tweetMapData = tweet.toJSON()
-          delete tweetMapData.User.password
           return {
             ...tweetMapData,
             RepliesCount: tweet.Replies.length,
-            LikesCount: tweet.Likes.length
+            LikesCount: tweet.Likes.length,
+            isLiked: tweet.Likes.some(like => like.UserId === helpers.getUser(req).id)
           }
         })
         res.status(200).json(tweetData)
