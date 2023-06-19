@@ -11,7 +11,7 @@ passport.use(new LocalStrategy(
   {
     usernameField: 'account',
     passwordField: 'password',
-    secretOrKey: process.env.JWT_SECRET || 'UNSAFE_SECRET',
+    secretOrKey: process.env.JWT_SECRET || 'alphacamp',
     passReqToCallback: true // 如果需要在 verify callback 中取得 req
   },
   // authenticate user
