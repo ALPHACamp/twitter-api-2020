@@ -26,10 +26,10 @@ const routes = require('./routes')
 //     return callback(null, true);
 //   }
 // }));
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://owenlu0125.github.io/'],
-}));
-
+// app.use(cors({
+//   origin: ['http://localhost:3000', 'https://owenlu0125.github.io/'],
+// }));
+app.use(cors())
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
