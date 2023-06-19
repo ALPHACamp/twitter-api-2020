@@ -23,7 +23,7 @@ module.exports = {
     // 五組隨機user
     for (let i = 0; i < 5; i++) {
       const maxLength = 160
-      let randomText = faker.lorem.text(140)
+      let randomText = faker.lorem.text(160)
       if (randomText.length > maxLength) {
         randomText = randomText.substring(0, maxLength)
       }
