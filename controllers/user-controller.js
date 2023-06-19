@@ -56,8 +56,6 @@ const userController = {
   },
   getUserInfo: async (req, res, next) => { // 元件之一, 提供自己/其他使用者頁的介紹資訊
     try {
-      // if (req.user.dataValues.id.toString() !== req.params.id.toString()) throw new Error('非該用戶不可取得該用戶基本資料!')
-      // 上面不需要, 因為每個人都可以互相瀏覽對方的資訊
       let userInfo = await User.findOne({
         where: { id: req.params.id },
         attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction', 'role', 'email'],
@@ -86,7 +84,6 @@ const userController = {
   },
   editUserInfo: async (req, res, next) => {
     try {
-      console.log(helpers.getUser(req))
       const { name, account, email, password, checkPassword, introduction } = req.body
       const currentUser = helpers.getUser(req)
       const UserId = helpers.getUser(req).id
@@ -316,11 +313,6 @@ const userController = {
         .sort((a, b) => b.followerCount - a.followerCount)
         .slice(0, 10)
         .filter(u => u.followerCount > 0)
-      // let topUsers = []
-      // for (let i = 0; i < 10; i++) {
-      //   if (!users[i]) break // 避免少於10位用戶時還要回傳null
-      //   topUsers = topUsers.concat(users[i])
-      // }
       return res.status(200).json(topUsers)
     } catch (err) {
       next(err)
