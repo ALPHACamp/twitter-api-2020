@@ -12,7 +12,7 @@ module.exports = {
       name: 'root',
       role: 'admin',
       avatar: `https://i.pravatar.cc/300?img=${Math.floor(Math.random() * 100)}`,
-      introduction: faker.lorem.text(10),
+      introduction: "I'm admin.",
       createdAt: new Date(),
       updatedAt: new Date(),
       account: 'root',
@@ -22,13 +22,18 @@ module.exports = {
     const users = []
     // 五組隨機user
     for (let i = 0; i < 5; i++) {
+      const maxLength = 140
+      let randomText = faker.lorem.text(140)
+      if (randomText.length > maxLength) {
+        randomText = randomText.substring(0, maxLength)
+      }
       users.push({
         email: `user${i + 1}@example.com`,
         password: await bcrypt.hash('12345678', 10),
         name: `user${i + 1}`,
         role: 'user',
         avatar: `https://i.pravatar.cc/300?img=${Math.floor(Math.random() * 100)}`,
-        introduction: faker.lorem.text(10),
+        introduction: randomText,
         createdAt: new Date(),
         updatedAt: new Date(),
         account: `user${i + 1}`,
