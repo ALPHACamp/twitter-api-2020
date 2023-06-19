@@ -1,9 +1,9 @@
-const { User, Tweet, Reply, Like } = require('../../models')
+const { User, Tweet, Like } = require('../../models')
 const jwt = require('jsonwebtoken')
 const helpers = require('../../_helpers')
 
 const userController = {
-  signIn: (req, res, next) => {
+  signIn: (req, res) => {
     try {
       const userData = helpers.getUser(req).toJSON()
       if (userData.role !== 'admin') throw new Error('Account does not exist!')
@@ -20,28 +20,28 @@ const userController = {
       res.status(500).json({ status: 'error', error: err.message })
     }
   },
-  getTweets: (req, res, next) => {
+  getTweets: (req, res) => {
     return Tweet.findAll({
       include: [
         { model: User },
-        { model: Reply },
-        { model: Like }
       ],
       order: [['createdAt', 'DESC']],
     })
-      .then(ts => {
-        if(!ts)throw new Error('Tweets is not exist')
-        const tweets = ts.map(tweet => {
-          const tweetJSON = tweet.toJSON()
-          delete tweetJSON.User.password
+      .then(tweets => {
+        if (!tweets)throw new Error('Tweets is not exist')
+        const tweetsData = tweets.map(tweet => {
+          tweet = tweet.toJSON()
           return {
-            ...tweetJSON,
+            id:tweet.id,
+            UserId:tweet.UserId,
             description: tweet.description.substring(0, 50),
-            RepliesCount: tweet.Replies.length,
-            LikesCount: tweet.Likes.length
+            createdAt: tweet.createdAt,
+            tweetOwnerName:tweet.User.name,
+            tweetOwnerAccount: tweet.User.account,
+            tweetOwnerAvatar: tweet.User.avatar
           }
         })
-        res.status(200).json({ status: 'success', tweets })
+        res.status(200).json({ status: 'success', tweetsData })
       })
       .catch(err => {
         res.status(500).json({ status: 'error', error: err.message })
