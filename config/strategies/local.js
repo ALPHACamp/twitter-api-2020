@@ -12,7 +12,7 @@ module.exports = passport => {
     User.findOne({ where: { account } })
       .then(user => {
         if (!user) {
-          const error = new Error('使用者不存在！')
+          const error = new Error('帳號不存在！')
           error.status = 401
           return done(error, false)
         }
