@@ -10,7 +10,7 @@
     "start": "set NODE_ENV=development && node app.js",
     "dev": "set NODE_ENV=development && nodemon app.js",
     "lint": "set \"NODE_ENV=development\" && eslint \"**/*.js\" --fix",
-    "test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000"
+    "test": "mocha test --exit --recursive --timeout 5000"
   },
   "author": "",
   "license": "ISC",
