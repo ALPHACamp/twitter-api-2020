@@ -9,6 +9,7 @@ const followshipController = require('../controller/followship-controller')
 const admin = require('./modules/admin')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/api-auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
+const upload = require('../middleware/multer')
 
 // Tweets
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
@@ -32,7 +33,7 @@ router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, us
 router.get('/api/users/:id/likes', authenticated, authenticatedUser, userController.getLikedTweets)
 router.get('/api/users/:id/followings', authenticated, authenticatedUser, userController.getFollowings)
 router.get('/api/users/:id/followers', authenticated, authenticatedUser, userController.getFollowers)
-router.put('/api/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
+router.put('/api/users/:id/setting', authenticated, authenticatedUser, upload.array(['avatar', 'cover']), userController.putUserSetting)
 router.put('/api/users/:id', authenticated, authenticatedUser, userController.putUser)
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 // 登入& 註冊

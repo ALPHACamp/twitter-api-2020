@@ -238,6 +238,8 @@ const userController = {
       const { name, introduction } = req.body
       const avatar = req.files?.avatar
       const cover = req.files?.cover
+      console.log(req.files)
+      console.log(req.files?.cover)
       const avatarFile = avatar ? avatar[0] : null
       const coverFile = cover ? cover[0] : null
       const userId = helpers.getUser(req).id
