@@ -13,7 +13,10 @@ const SESSION_SECRET = process.env.SESSION_SECRET
 const app = express()
 const port = process.env.PORT || 3000
 const corsOptions = {
-  origin: process.env.GITHUB_PAGE,
+  origin: [
+    process.env.GITHUB_PAGE,
+    'http://localhost:3000'
+  ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: ['Content-Type', 'Authorization']
 }
