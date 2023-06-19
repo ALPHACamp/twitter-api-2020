@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const validator = require('email-validator')
 const { Op } = require('sequelize')
+const { imgurFileHandler } = require('../file-helpers')
 const userController = {
   signIn: async (req, res, next) => {
     try {
@@ -234,24 +235,27 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      const { name, introduction, avatar, cover } = req.body
+      const { name, introduction } = req.body
+      const avatar = req.files?.avatar
+      const cover = req.files?.cover
+      const avatarFile = avatar ? avatar[0] : null
+      const coverFile = cover ? cover[0] : null
       const userId = helpers.getUser(req).id
-      const user = await User.findByPk(userId)
-      if (!user) throw new Error('User not found!')
+      const [foundUser, avatarLink, coverLink] = await Promise.all([
+        User.findByPk(userId),
+        imgurFileHandler(avatarFile),
+        imgurFileHandler(coverFile)
+      ])
+      if (!foundUser) throw new Error('User not found!')
       if (introduction.length > 160 || name.length > 50) throw new Error('字數超出上限')
-      const updatedUser = await user.update({
-        name: name || user.name,
-        avatar: avatar || user.avatar,
-        cover: cover || user.cover,
-        introduction: introduction || user.introduction
+      const data = await foundUser.update({
+        name,
+        introduction,
+        avatar: avatarLink || foundUser.avatar,
+        cover: coverLink || foundUser.cover
       })
-      const responseData = {
-        name: updatedUser.name,
-        avatar: updatedUser.avatar,
-        cover: updatedUser.cover,
-        introduction: updatedUser.introduction
-      }
-      return res.status(200).json({ data: responseData, message: '修改成功' })
+
+      return res.status(200).json({ data, message: '修改成功' })
     } catch (err) { next(err) }
   },
   putUserSetting: async (req, res, next) => {
