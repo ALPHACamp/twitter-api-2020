@@ -13,6 +13,7 @@ const routes = require('./routes')
 // const allowedOrigins = ['http://localhost:3000', 'https://owenlu0125.github.io/'];
 // const corsOptions = {
 //   origin: ['http://localhost:3000','https://owenlu0125.github.io/'],
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 //   optionsSuccessStatus: 200
 // }
 // app.use(cors({
