@@ -35,16 +35,16 @@ app.use(passport.initialize())
 app.use(flash())
 
 // cors
-const corsOptions = {
-  origin: [
-    'http://localhost',
-    'https://bluelsa.github.io/twitter-frontend-2023/'
-  ],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  allowedHeaders: ['Content-Type', 'Authorization']
+// const corsOptions = {
+//   origin: [
+//     'http://localhost',
+//     'https://bluelsa.github.io/twitter-frontend-2023/'
+//   ],
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+//   allowedHeaders: ['Content-Type', 'Authorization']
 
-}
-app.use(cors(corsOptions))
+// }
+app.use(cors())
 
 // locals
 app.use((req, res, next) => {
