@@ -76,14 +76,14 @@ const tweetController = {
         ]
       } // 這裡如果使用nest會有bug
       )
-      const data = tweet.toJSON()
 
       // 錯誤處理
-      if (!data) {
+      if (!tweet) {
         const error = new Error('The tweet does not exist')
         error.status = 404
         throw error
       }
+      const data = tweet.toJSON()
       data.isLiked = false
       for (const i of data.TweetLike) {
         if (i.UserId === getUser(req).id) {
