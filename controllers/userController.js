@@ -204,7 +204,7 @@ const userController = {
       const data = users
         .map((user) => ({
           ...user.toJSON(),
-          followerCount: user.Followers.length,
+          followerCount: user.Followers?.length,
           isFollowing: req.user.Followings
             ? req.user.Followings.some((f) => f.id === user.id)
             : false
