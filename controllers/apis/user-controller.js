@@ -43,6 +43,8 @@ const userController = {
       const user = await User.create({
         name,
         account,
+        avatar: 'https://loremflickr.com/320/240/person/?random=101',
+        background: 'https://images.unsplash.com/photo-1580436541340-36b8d0c60bae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=688&q=80',
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
       })
