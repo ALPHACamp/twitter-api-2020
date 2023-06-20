@@ -209,7 +209,7 @@ const userController = {
             ? req.user.Followings.some((f) => f.id === user.id)
             : false
         }))
-        .sort((a, b) => b.followerCount - a.followerCount)
+        .sort((a, b) => Number(b.followerCount) - Number(a.followerCount))
       const final = data.map(({ Followers, ...rest }) => rest)
       res.status(200).json(final)
     } catch (err) {

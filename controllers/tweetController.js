@@ -157,14 +157,15 @@ const tweetController = {
       nest: true
     })
       .then((tweets) => {
+        console.log(tweets)
         const beforeData = tweets.map((tweet) => ({
           ...tweet.toJSON(),
-          tweetUserName: tweet.Tweet.User.name,
-          tweetUserAccount: tweet.Tweet.User.account,
-          tweetUserAvatar: tweet.Tweet.User.avatar,
-          repliedUserName: tweet.User.name,
-          repliedUserAccount: tweet.User.account,
-          repliedUserAvatar: tweet.User.avatar,
+          tweetUserName: tweet.Tweet?.User.name,
+          tweetUserAccount: tweet.Tweet?.User.account,
+          tweetUserAvatar: tweet.Tweet?.User.avatar,
+          repliedUserName: tweet?.User.name,
+          repliedUserAccount: tweet?.User.account,
+          repliedUserAvatar: tweet?.User.avatar,
           lastUpdated: getLastUpd(tweet)
         }))
         const data = beforeData.map(({ Tweet, User, ...rest }) => rest)
