@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet } = require('../../models')
+const { User, Tweet, Like, Reply } = require('../../models')
 const { getUser } = require('../../_helpers')
 
 const adminController = {
@@ -81,8 +81,13 @@ const adminController = {
     try {
       const { id } = req.params
       const tweet = await Tweet.findByPk(id)
+
       if (!tweet) throw new Error('The tweet does not exist')
-      await tweet.destroy()
+      await Promise.all([
+        tweet.destroy(),
+        Like.destroy({ where: { TweetId: id } }),
+        Reply.destroy({ where: { TweetId: id } })
+      ])
       return res.status(200).json({ status: 'success', message: 'The tweet was successfully deleted' })
     } catch (error) {
       next(error)
