@@ -19,10 +19,10 @@ router.get('/:id/likes', authenticated, userController.getUserLikes)
 router.get('/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/:id/followers', authenticated, userController.getUserFollowers)
 router.get('/:id/edit', authenticated, userController.editUser)
+router.get('/:id/set', authenticated, userController.getSetUser)
+router.put('/:id/set', authenticated, userController.putSetUser)
 router.get('/:id', authenticated, userController.getUser)
 router.put('/:id', fields, authenticated, userController.putUser)
 router.post('/', userController.signUp)
-
-
 
 module.exports = router

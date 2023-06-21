@@ -249,6 +249,52 @@ const userController = {
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
+  getSetUser: (req, res) => {
+    return User.findByPk(req.params.id, { attributes: ['id', 'name', 'account', 'email'] })
+      .then((user) => {
+        if (!user) throw new Error("User didn't exist!")
+        res.status(200).json(user)
+      })
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  putSetUser: (req, res) => {
+    const { account, name, email, password, checkPassword } = req.body
+    return new Promise((resolve, reject) => {
+      User.findByPk(req.params.id, { attributes: ['id', 'name', 'account', 'email'] })
+        .then(user => {
+          if (!user) reject(new Error("User didn't exist!"))
+          if (!account || !name || !email || !password) reject(new Error("The fields for account, name, password and email are required!"))
+          if (account.length > 50) reject(new Error("Account too long"))
+          if (name && name.length > 50) reject(new Error(`Name too long`))
+          if (password !== checkPassword) reject(new Error("Password do not match"))
+          updateUser = user
+          resolve()
+        })
+    })
+      .then(() => {
+        return Promise.all([
+          User.findOne({ where: { email } }),
+          User.findOne({ where: { account } })
+        ])
+      })
+      .then(([userEmail, userAccount]) => {
+        if (userEmail) throw new Error('Email already exists!')
+        if (userAccount) throw new Error('Account already registered!')
+        return bcrypt.hash(password, 10)
+      })
+      .then((hash) => {
+        return updateUser.update({
+          name,
+          account,
+          email,
+          password: hash
+        })
+      })
+      .then((updatedUser) => {
+        res.status(200).json(updatedUser)
+      })
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
   addLike: (req, res) => {
     return Promise.all([
       Tweet.findByPk(req.params.id),
