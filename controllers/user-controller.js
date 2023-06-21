@@ -263,43 +263,50 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const userId = req.params.userId
+      const ThisUserId = helpers.getUser(req).id
       const likes = await Like.findAll({
         where: { UserId: userId },
-        include: [
-          { model: User, attributes: { exclude: ['password'] } },
-          { model: Tweet }
-        ],
         order: [['createdAt', 'DESC']],
-        nest: true,
-        attributes: [
-          'id',
-          'TweetId',
-          'UserId',
-          [
-            sequelize.literal(
-              `(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.UserId = ${helpers.getUser(req).id} AND Likes.deletedAt IS NULL) > 0`
-            ),
-            'isLiked'
-          ],
-          [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
-            ),
-            'replyCount'
-          ],
-          [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id AND Likes.deletedAt IS NULL)'
-            ),
-            'likeCount'
-          ]
-        ]
+        include: [
+          { model: Tweet,
+            include: [
+              { model: User, //這裡指該則tweet發文的user
+                attributes: ['id', 'account', 'name', 'avatar', 'banner']
+              }],
+            attributes: {
+              include: [
+                [
+                  sequelize.literal(
+                    '(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'
+                  ),
+                  'repliesCount'
+                ],
+                [
+                  sequelize.literal(
+                    '(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id)'
+                  ),
+                  'likesCount'
+                ]
+              ]
+            }
+          }]
       })
-      const userLikesData = likes.map(like => ({
+      //從like model中篩出目前登入的使用者有按like的tweet
+      const thisUserLikeTweets = await Like.findAll({
+        attributes: ['TweetId'],
+        where: [
+          { UserId: ThisUserId }
+        ],
+        raw: true
+      })
+      //遍歷每一則目前使用者按過like的tweet
+      const thisUserLikeTweetsId = thisUserLikeTweets.map(tweet => tweet.TweetId)
+      //回傳前新增屬性：判斷目前使用者是否此like物件按過like
+      const likesData = likes.map(like => ({
         ...like.toJSON(),
-        isLiked: Boolean(like.dataValues.isLiked)
+        isCurrentUserLiked: thisUserLikeTweetsId.some(id => id === like.Tweet.id)
       }))
-      res.json(userLikesData)
+      res.status(200).json(likesData)
     } catch (err) {
       next(err)
     }
