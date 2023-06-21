@@ -15,9 +15,6 @@ passport.use(new LocalStrategy({
   try {
     const user = await User.findOne({
       where: { account } // user checking by account
-      // include: [
-      //   { model: Tweet, as: 'Tweets', order: [['createdAt', 'DESC']] }
-      // ]
     })
     if (!user) {
       return done(null, false, { status: 401, message: '帳號不存在' })
