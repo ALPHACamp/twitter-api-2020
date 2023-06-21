@@ -86,24 +86,27 @@ const adminController = {
           if (tweet.description.length > 50) tweet.description = tweet.description.substring(0, 50) + '...'
           // 取得現在的時間 - 更新時間
           getLastUpdated(tweet)
-          tweet.account = tweet.User.account
-          tweet.name = tweet.User.name
-          tweet.avatar = tweet.User.avatar
+          tweet.account = tweet.User?.account
+          tweet.name = tweet.User?.name
+          tweet.avatar = tweet.User?.avatar
           delete tweet.User
         })
         return res.status(200).json(tweets)
       })
       .catch(error => next(error))
   },
-  deleteTweet: (req, res, next) => {
-    const tweetId = req.params.id
-    Tweet.findByPk(tweetId).then((tweet) => {
-      tweet.destroy().then(() => {
-        return res.status(200).json('Delete success')
-      })
-        .catch(error => next(error))
-    })
-      .catch(error => next(error))
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) return res.status(404).json('Tweet not found')
+      await tweet.destroy()
+      await Like.destroy({ where: { TweetId: tweetId } })
+      await Reply.destroy({ where: { TweetId: tweetId } })
+      return res.status(200).json('Delete success')
+    } catch (err) {
+      next(err)
+    }
   },
   getReplies: (req, res, next) => {
     Reply.findAll({
@@ -116,9 +119,9 @@ const adminController = {
           // 只顯示前50個字
           if (reply.comment.length > 50) reply.comment = reply.comment.substring(0, 50) + '...'
           getLastUpdated(reply)
-          reply.account = reply.User.account
-          reply.name = reply.User.name
-          reply.avatar = reply.User.avatar
+          reply.account = reply.User?.account
+          reply.name = reply.User?.name
+          reply.avatar = reply.User?.avatar
           delete reply.User
         })
         return res.status(200).json(replies)

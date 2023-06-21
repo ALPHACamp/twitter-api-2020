@@ -86,12 +86,12 @@ const followController = {
         const introduction = follower.introduction?.substring(0, 50)
         const isFollowing = followingsId.includes(follower.id)
         return {
-          followerId: follower.id,
-          name: follower.name,
-          account: follower.account,
-          avatar: follower.avatar,
+          followerId: follower?.id,
+          name: follower?.name,
+          account: follower?.account,
+          avatar: follower?.avatar,
           introduction,
-          updatedAt: follower.Followship.updatedAt,
+          updatedAt: follower?.Followship?.updatedAt,
           isFollowing
         }
       })
@@ -117,12 +117,12 @@ const followController = {
       const data = followings.map(following => {
         const introduction = following.introduction?.substring(0, 50)
         return {
-          followingId: following.id,
-          name: following.name,
-          account: following.account,
-          avatar: following.avatar,
+          followingId: following?.id,
+          name: following?.name,
+          account: following?.account,
+          avatar: following?.avatar,
           introduction,
-          updatedAt: following.Followship.updatedAt
+          updatedAt: following?.Followship?.updatedAt
         }
       })
         .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))

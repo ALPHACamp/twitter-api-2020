@@ -21,12 +21,12 @@ const replyController = {
         raw: true
       })
       replies.forEach((reply) => {
-        reply.repliedUserName = reply.User.name
-        reply.repliedUserAccount = reply.User.account
-        reply.repliedUserAvatar = reply.User.avatar
-        reply.tweetUserName = tweet.User.name
-        reply.tweetUserAccount = tweet.User.account
-        reply.tweetUserAvatar = tweet.User.avatar
+        reply.repliedUserName = reply.User?.name
+        reply.repliedUserAccount = reply.User?.account
+        reply.repliedUserAvatar = reply.User?.avatar
+        reply.tweetUserName = tweet.User?.name
+        reply.tweetUserAccount = tweet.User?.account
+        reply.tweetUserAvatar = tweet.User?.avatar
         delete reply.User
         getLastUpdated(reply)
       })
