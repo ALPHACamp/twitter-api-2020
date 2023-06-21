@@ -270,9 +270,10 @@ const userController = {
         User.findByPk(id),
         Followship.findAll({
           where: { followerId: Number(id) },
-          include: [{ model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'introduction'] }],
+          include: [{ model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'createdAt'] }],
           raw: true,
-          nest: true
+          nest: true,
+          order: [['createdAt', 'DESC']]
         }),
         Followship.findAll({ where: { followerId: getUser(req).id } })
       ])
@@ -314,7 +315,8 @@ const userController = {
         User.findByPk(id),
         Followship.findAll({
           where: { followingId: Number(id) },
-          include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'avatar', 'introduction'] }]
+          include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'createdAt'] }],
+          order: [['createdAt', 'DESC']]
         })
       ])
 
