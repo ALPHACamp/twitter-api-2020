@@ -38,8 +38,8 @@ const adminController = {
             'tweetCount'
           ],
           [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id AND Likes.deletedAt IS NULL)'
+            sequelize.literal( //改成該使用者「收到的like數」並排除重複計算
+              '(SELECT COUNT(*) FROM likes L INNER JOIN tweets T on L.TweetId = T.id where T.UserId = User.id AND L.deletedAt IS NULL)'
             ),
             'likeCount'
           ],
