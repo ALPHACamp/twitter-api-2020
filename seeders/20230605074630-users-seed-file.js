@@ -73,6 +73,116 @@ module.exports = {
         background,
         createdAt: new Date(),
         updatedAt: new Date()
+      }, {
+        email: 'user6@example.com',
+        password: await bcrypt.hash('12345678', 10),
+        name: 'user6',
+        avatar: 'https://loremflickr.com/320/240/person/?random=105',
+        introduction: faker.lorem.text(),
+        role: 'user',
+        account: 'user6',
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }, {
+        email: 'user7@example.com',
+        password: await bcrypt.hash('12345678', 10),
+        name: 'user7',
+        avatar: 'https://loremflickr.com/320/240/person/?random=105',
+        introduction: faker.lorem.text(),
+        role: 'user',
+        account: 'user7',
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }, {
+        email: 'user8@example.com',
+        password: await bcrypt.hash('12345678', 10),
+        name: 'user8',
+        avatar: 'https://loremflickr.com/320/240/person/?random=105',
+        introduction: faker.lorem.text(),
+        role: 'user',
+        account: 'user8',
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }, {
+        email: 'user9@example.com',
+        password: await bcrypt.hash('12345678', 10),
+        name: 'user9',
+        avatar: 'https://loremflickr.com/320/240/person/?random=105',
+        introduction: faker.lorem.text(),
+        role: 'user',
+        account: 'user9',
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }, {
+        email: 'user10@example.com',
+        password: await bcrypt.hash('12345678', 10),
+        name: 'user10',
+        avatar: 'https://loremflickr.com/320/240/person/?random=105',
+        introduction: faker.lorem.text(),
+        role: 'user',
+        account: 'user10',
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }, {
+        email: 'user11@example.com',
+        password: await bcrypt.hash('12345678', 10),
+        name: 'user11',
+        avatar: 'https://loremflickr.com/320/240/person/?random=105',
+        introduction: faker.lorem.text(),
+        role: 'user',
+        account: 'user11',
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }, {
+        email: 'user12@example.com',
+        password: await bcrypt.hash('12345678', 10),
+        name: 'user12',
+        avatar: 'https://loremflickr.com/320/240/person/?random=105',
+        introduction: faker.lorem.text(),
+        role: 'user',
+        account: 'user12',
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }, {
+        email: 'user13@example.com',
+        password: await bcrypt.hash('12345678', 10),
+        name: 'user13',
+        avatar: 'https://loremflickr.com/320/240/person/?random=105',
+        introduction: faker.lorem.text(),
+        role: 'user',
+        account: 'user13',
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }, {
+        email: 'user14@example.com',
+        password: await bcrypt.hash('12345678', 10),
+        name: 'user14',
+        avatar: 'https://loremflickr.com/320/240/person/?random=105',
+        introduction: faker.lorem.text(),
+        role: 'user',
+        account: 'user14',
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }, {
+        email: 'user15@example.com',
+        password: await bcrypt.hash('12345678', 10),
+        name: 'user15',
+        avatar: 'https://loremflickr.com/320/240/person/?random=105',
+        introduction: faker.lorem.text(),
+        role: 'user',
+        account: 'user15',
+        background,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     ])
   },
