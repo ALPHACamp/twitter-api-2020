@@ -8,7 +8,7 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const tweets = []
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 150; i++) {
       let description = faker.lorem.text()
       if (description.length > 140) {
         description = description.slice(0, 140)
