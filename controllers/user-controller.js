@@ -155,12 +155,6 @@ const userController = {
         }
       }
 
-      // //用bcrypt 加密函數進行密碼驗證
-      // const passwordMatch = await bcrypt.compare(password, user.password);
-      // if (!passwordMatch) {
-      //   throw new Error('Password check failed');
-      // }
-
       let avatarUrl = ''
       let bannerUrl = ''
 
@@ -268,9 +262,11 @@ const userController = {
         where: { UserId: userId },
         order: [['createdAt', 'DESC']],
         include: [
-          { model: Tweet,
+          {
+            model: Tweet,
             include: [
-              { model: User, //這裡指該則tweet發文的user
+              {
+                model: User, // 這裡指該則tweet發文的user
                 attributes: ['id', 'account', 'name', 'avatar', 'banner']
               }],
             attributes: {
@@ -291,7 +287,7 @@ const userController = {
             }
           }]
       })
-      //從like model中篩出目前登入的使用者有按like的tweet
+      // 從like model中篩出目前登入的使用者有按like的tweet
       const thisUserLikeTweets = await Like.findAll({
         attributes: ['TweetId'],
         where: [
@@ -299,9 +295,9 @@ const userController = {
         ],
         raw: true
       })
-      //遍歷每一則目前使用者按過like的tweet
+      // 遍歷每一則目前使用者按過like的tweet
       const thisUserLikeTweetsId = thisUserLikeTweets.map(tweet => tweet.TweetId)
-      //回傳前新增屬性：判斷目前使用者是否此like物件按過like
+      // 回傳前新增屬性：判斷目前使用者是否此like物件按過like
       const likesData = likes.map(like => ({
         ...like.toJSON(),
         isCurrentUserLiked: thisUserLikeTweetsId.some(id => id === like.Tweet.id)
@@ -341,7 +337,6 @@ const userController = {
             'isFollowed'
           ]
         ]
-        // nest: true
       })
 
       const userFollowingsData = followings.map(following => {
@@ -386,7 +381,6 @@ const userController = {
             'isFollowed'
           ]
         ]
-        // nest: true
       })
 
       const userFollowersData = followers.map(follower => {
