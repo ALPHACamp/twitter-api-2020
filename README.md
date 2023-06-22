@@ -97,7 +97,5 @@ Use the default accounts to login
 - tslib: ^2.5.3
 
 ## Contributors
-- Kelly Ko [https://github.com/magic9701](https://github.com/magic9701)
 - Kevin_L [https://github.com/av124773](https://github.com/av124773)
 - Chia-Hsuan Chu [https://github.com/jiasyuanchu](https://github.com/jiasyuanchu)
-- Aray [https://github.com/aray81205](https://github.com/aray81205)
