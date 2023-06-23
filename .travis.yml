@@ -16,4 +16,5 @@ before_install:
 
 # 在執行測試之前的指令
 before_script:
+  - echo "JWT_SECRET=alphacamp" >> .env
   - sequelize db:migrate
