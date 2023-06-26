@@ -192,9 +192,9 @@ const userController = {
         followings = followings.sort((a, b) =>
           new Date(b.followshipCreatedAt) - new Date(a.followshipCreatedAt))
         const result = {
-          currentUserId: user.id,
-          currentUserName: user.name,
-          currentUserTweetsCount: tweetCount,
+          userId: user.id,
+          userName: user.name,
+          tweetCount: tweetCount,
           followings: followings
         }
         res.status(200).json(result)
