@@ -206,7 +206,6 @@ const userController = {
             followerAvatar: follower.avatar,
             followerIntroduction: follower.introduction,
             followerId: follower.Followship.followerId,
-            followingId: follower.Followship.followingId,
             createdAt: follower.Followship.createdAt,
             isFollowed: helpers.getUser(req).Followings.some(f => f.id === follower.id)
           }
