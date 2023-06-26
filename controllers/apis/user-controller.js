@@ -371,23 +371,24 @@ const userController = {
       include: [{ model: User, as: 'Followers' }]
     })
       .then(users => {
-        if (!users) throw new Error(`User is not exist!`)
-        users = users.map(user => {
-          let userData = user.toJSON()
-          delete userData.password
-          userData.Followers = userData.Followers.map(follower => {
-            delete follower.password
-            return follower
-          })
+        if (!users || users.length === 0) throw new Error(`User is not exist!`)
+        const currentUserId = helpers.getUser(req).id
+        users = users.sort((a, b) => b.Followers.length - a.Followers.length)
+        users = users.some(u => u.id === currentUserId)
+          ? users.slice(0, 11)
+          : users.slice(0, 10)
+        users = users.filter(user => user.id !== currentUserId)
+        const topUsers = users.map(user => {
           return {
-            ...userData,
+            id: user.id,
+            name: user.name,
+            account: user.account,
+            avatar: user.avatar,
             followersCount: user.Followers.length,
             isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
           }
         })
-        users = users.sort((a, b) => b.followersCount - a.followersCount)
-        users = users.slice(0, 10)
-        return res.status(200).json({ status: 'success', users })
+        return res.status(200).json({ topUsers })
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   }
