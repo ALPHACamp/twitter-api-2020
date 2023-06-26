@@ -202,9 +202,6 @@ const userController = {
         if (!user) throw new Error(`User didn't exist`)
         const followers = user.Followers.map(follower => {
           return {
-            userId:user.id,
-            userName:user.name,          
-            tweetCount: tweetCount,
             followerName: follower.name,
             followerAvatar: follower.avatar,
             followerIntroduction: follower.introduction,
@@ -214,8 +211,14 @@ const userController = {
             isFollowed: helpers.getUser(req).Followings.some(f => f.id === follower.id)
           }
         })
-        followers.sort((a, b) => b.createdAt - a.createdAt)
-        return res.status(200).json(followers)
+        followers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        const result = {
+          userId: user.id,
+          userName: user.name,
+          tweetCount: tweetCount,
+          followers: followers
+        }
+        return res.status(200).json(result)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
