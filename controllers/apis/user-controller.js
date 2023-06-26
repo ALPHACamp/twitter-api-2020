@@ -166,18 +166,25 @@ const userController = {
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
   getUserFollowings: (req, res) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        {
-          model: User, as: 'Followings',
-          attributes: ['id', 'name', 'introduction', 'avatar'],
-          through: { attributes: ['createdAt'] },
-        }
-      ],
-    })
-      .then((user) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        attributes: ['id', 'name',],
+        include: [
+          {
+            model: User, as: 'Followings',
+            attributes: ['id', 'name', 'introduction', 'avatar'],
+            through: { attributes: ['createdAt'] },
+          },
+        ]
+      }),
+      Tweet.count({ where: { UserId: req.params.id } })
+    ])
+      .then(([user, tweetCount]) => {
         if (!user) throw new Error(`User didn't exist`)
         let followings = user.Followings.map(following => ({
+          currentUserId: user.id,
+          currentUserName: user.name,
+          currentUserTweetsCount: tweetCount,
           followingId: following.id,
           followingName: following.name,
           followingAvatar: following.avatar,
