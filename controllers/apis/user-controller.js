@@ -182,9 +182,6 @@ const userController = {
       .then(([user, tweetCount]) => {
         if (!user) throw new Error(`User didn't exist`)
         let followings = user.Followings.map(following => ({
-          currentUserId: user.id,
-          currentUserName: user.name,
-          currentUserTweetsCount: tweetCount,
           followingId: following.id,
           followingName: following.name,
           followingAvatar: following.avatar,
@@ -194,7 +191,13 @@ const userController = {
         }))
         followings = followings.sort((a, b) =>
           new Date(b.followshipCreatedAt) - new Date(a.followshipCreatedAt))
-        res.status(200).json(followings)
+        const result = {
+          currentUserId: user.id,
+          currentUserName: user.name,
+          currentUserTweetsCount: tweetCount,
+          followings: followings
+        }
+        res.status(200).json(result)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
