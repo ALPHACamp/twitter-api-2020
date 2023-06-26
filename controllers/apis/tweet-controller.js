@@ -7,7 +7,7 @@ const tweetController = {
     return Tweet.findAll({
       include: [
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: Like, attributes: ['UserId'] },
+        { model: Like, attributes: ['id', 'UserId'] },
         { model: Reply, attributes: ['id'] }
       ],
       order: [['createdAt', 'DESC']]

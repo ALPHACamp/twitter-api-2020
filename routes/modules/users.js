@@ -13,6 +13,8 @@ router.post('/signin', (req, res, next) => {
   passport.authenticate('local', { session: false }), userController.signIn)
 
 router.get('/top', authenticated, userController.getTopUsers)
+router.get('/setting', authenticated, userController.getSetUser)
+router.put('/setting', authenticated, userController.putSetUser)
 router.get('/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/:id/likes', authenticated, userController.getUserLikes)
@@ -23,8 +25,5 @@ router.get('/:id', authenticated, userController.getUser)
 router.put('/:id', fields, authenticated, userController.putUser)
 router.post('/', userController.signUp)
 
-
-
 module.exports = router
-
 

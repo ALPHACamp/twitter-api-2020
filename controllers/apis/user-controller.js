@@ -166,16 +166,20 @@ const userController = {
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
   getUserFollowings: (req, res) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        {
-          model: User, as: 'Followings',
-          attributes: ['id', 'name', 'introduction', 'avatar'],
-          through: { attributes: ['createdAt'] },
-        }
-      ],
-    })
-      .then((user) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        attributes: ['id', 'name',],
+        include: [
+          {
+            model: User, as: 'Followings',
+            attributes: ['id', 'name', 'introduction', 'avatar'],
+            through: { attributes: ['createdAt'] },
+          },
+        ]
+      }),
+      Tweet.count({ where: { UserId: req.params.id } })
+    ])
+      .then(([user, tweetCount]) => {
         if (!user) throw new Error(`User didn't exist`)
         let followings = user.Followings.map(following => ({
           followingId: following.id,
@@ -187,7 +191,13 @@ const userController = {
         }))
         followings = followings.sort((a, b) =>
           new Date(b.followshipCreatedAt) - new Date(a.followshipCreatedAt))
-        res.status(200).json(followings)
+        const result = {
+          userId: user.id,
+          userName: user.name,
+          tweetCount: tweetCount,
+          followings: followings
+        }
+        res.status(200).json(result)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
@@ -254,6 +264,50 @@ const userController = {
         updatedUser = updatedUser.toJSON()
         delete updatedUser.password
         return res.status(200).json(updatedUser)
+      })
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  getSetUser: (req, res) => {
+    return User.findByPk(helpers.getUser(req).id, { attributes: ['id', 'name', 'account', 'email'] })
+      .then((user) => {
+        if (!user) throw new Error("User didn't exist!")
+        res.status(200).json(user)
+      })
+      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  },
+  putSetUser: (req, res) => {
+    const { account, name, email, password, checkPassword } = req.body
+    return new Promise((resolve, reject) => {
+      if (!account || !name || !email || !password) reject(new Error("The fields for account, name, password and email are required!"))
+      if (account.length > 50) reject(new Error("Account too long"))
+      if (name && name.length > 50) reject(new Error(`Name too long`))
+      if (password !== checkPassword) reject(new Error("Password do not match"))
+      resolve()
+    })
+      .then(() => {
+        return Promise.all([
+          User.findByPk(helpers.getUser(req).id, { attributes: ['id', 'name', 'account', 'email'] }),
+          User.findOne({ where: { email } }),
+          User.findOne({ where: { account } })
+        ])
+      })
+      .then(([user, userEmail, userAccount]) => {
+        if (userEmail) throw new Error('Email already exists!')
+        if (userAccount) throw new Error('Account already registered!')
+        if (!user) throw new Error("User didn't exist!")
+        updatedUser = user
+        return bcrypt.hash(password, 10)
+      })
+      .then((hash) => {
+        return updatedUser.update({
+          name,
+          account,
+          email,
+          password: hash
+        })
+      })
+      .then((updatedUser) => {
+        res.status(200).json(updatedUser)
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
@@ -335,23 +389,24 @@ const userController = {
       include: [{ model: User, as: 'Followers' }]
     })
       .then(users => {
-        if (!users) throw new Error(`User is not exist!`)
-        users = users.map(user => {
-          let userData = user.toJSON()
-          delete userData.password
-          userData.Followers = userData.Followers.map(follower => {
-            delete follower.password
-            return follower
-          })
+        if (!users || users.length === 0) throw new Error(`User is not exist!`)
+        const currentUserId = helpers.getUser(req).id
+        users = users.sort((a, b) => b.Followers.length - a.Followers.length)
+        users = users.some(u => u.id === currentUserId)
+          ? users.slice(0, 11)
+          : users.slice(0, 10)
+        users = users.filter(user => user.id !== currentUserId)
+        const topUsers = users.map(user => {
           return {
-            ...userData,
+            id: user.id,
+            name: user.name,
+            account: user.account,
+            avatar: user.avatar,
             followersCount: user.Followers.length,
             isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
           }
         })
-        users = users.sort((a, b) => b.followersCount - a.followersCount)
-        users = users.slice(0, 10)
-        return res.status(200).json({ status: 'success', users })
+        return res.status(200).json({ topUsers })
       })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   }
