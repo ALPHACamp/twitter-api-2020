@@ -331,8 +331,8 @@ const userController = {
         const currentUserId = helpers.getUser(req).id
         users = users.sort((a, b) => b.Followers.length - a.Followers.length)
         users = users.some(u => u.id === currentUserId)
-          ? users.slice(0, 10)
-          : users.slice(0, 11)
+          ? users.slice(0, 11)
+          : users.slice(0, 10)
         users = users.filter(user => user.id !== currentUserId)
         const topUsers = users.map(user => {
           return {
