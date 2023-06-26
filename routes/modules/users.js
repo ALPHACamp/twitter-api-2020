@@ -26,3 +26,4 @@ router.put('/:id', fields, authenticated, userController.putUser)
 router.post('/', userController.signUp)
 
 module.exports = router
+
