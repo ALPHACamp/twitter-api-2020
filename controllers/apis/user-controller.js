@@ -77,8 +77,8 @@ const userController = {
       .then(([user, follower, following, Tweet]) => {
         if (!user) throw new Error(`User didn't exist`)
         user = user.toJSON()
-        user.followerCount = follower
-        user.followingCount = following
+        user.followerCount = follower // 追蹤數量
+        user.followingCount = following // 被追蹤數量
         user.TweetCount = Tweet.length
         const currentUser = helpers.getUser(req)
         user.isFollowing = currentUser.Followings ? currentUser.Followings.some(f => f.id === user.id) : false
