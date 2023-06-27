@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
 const helpers = require('../../_helpers')
 
-
 const userController = {
   signIn: (req, res,) => {
     try {
