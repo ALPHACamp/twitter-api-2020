@@ -88,15 +88,21 @@ const userController = {
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
   getUserTweets: (req, res) => {
-    User.findByPk(req.params.id, {
-      include: [
-        { model: Tweet, include: [Reply, Like], },
-        { model: Like }
-      ],
-      order: [[Tweet, 'createdAt', 'DESC']],
-    })
-      .then(user => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: [
+          { model: Tweet, include: [Reply, Like], },
+          { model: Like }
+        ],
+        order: [[Tweet, 'createdAt', 'DESC']],
+      }),
+      User.findByPk(helpers.getUser(req).id, {
+        include: [{ model: Like, attributes: ['TweetId'] }]
+      })
+    ])
+      .then(([user, currentUser]) => {
         if (!user) throw new Error(`User didn't exist`)
+        if (!currentUser) throw new Error(`Havn't liked any tweet`)
         const tweetsData = user.Tweets.map(tweet => ({
           id: tweet.id,
           UserId: tweet.UserId,
@@ -107,7 +113,7 @@ const userController = {
           createdAt: tweet.createdAt,
           replyCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
-          isLiked: user.Likes.some(like => like.TweetId === tweet.id)
+          currentUserIsLiked: currentUser.Likes.some(like => like.TweetId === tweet.id)
         }))
         return res.status(200).json(tweetsData)
       })
