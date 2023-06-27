@@ -16,14 +16,18 @@ module.exports = {
     }
     let startDate = new Date(1988, 10, 3);
     let endDate = new Date();
-    for (let i = 0; i < tweets.length; i++) {
+    // 每個 user 按隨機 3 則不重複 tweet like
+    for (let i = 0; i < users.length; i++) {
+      let tweetsCopy = [...tweets]
       for (let j = 0; j < 3; j++) {
+        let randomIndex = Math.floor(Math.random() * tweetsCopy.length)
         likes.push({
-          tweetId: tweets[i].id,
-          userId: users[Math.floor(Math.random() * users.length)].id,
+          tweetId: tweetsCopy[randomIndex].id,
+          userId: users[i].id,
           createdAt: getRandomDate(startDate, endDate),
           updatedAt: getRandomDate(startDate, endDate),
         })
+        tweetsCopy.splice(randomIndex, 1)
       }
     }
     await queryInterface.bulkInsert('Likes', likes)
