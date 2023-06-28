@@ -292,18 +292,10 @@ const userController = {
         return Promise.all([
           User.findByPk(helpers.getUser(req).id, { attributes: ['id', 'name', 'account', 'email'] }),
           User.findOne({
-            where: {
-              email, id: {
-                [Op.ne]: helpers.getUser(req).id
-              }
-            }
+            where: {email, id: {[Op.ne]: helpers.getUser(req).id}}
           }),
           User.findOne({
-            where: {
-              account, id: {
-                [Op.ne]: helpers.getUser(req).id
-              }
-            }
+            where: {account, id: {[Op.ne]: helpers.getUser(req).id}}
           })
         ])
       })
