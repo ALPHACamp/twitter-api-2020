@@ -23,7 +23,7 @@ const userController = {
     }
   },
   signUp: (req, res) => {
-    const { name, email, password, avatar, introduction, role, account, checkPassword } = req.body
+    const { name, email, password, account, checkPassword } = req.body
     new Promise((resolve, reject) => {
       if (!account) {
         reject(new Error('Account is required'))
@@ -50,9 +50,7 @@ const userController = {
         return User.create({
           name,
           email,
-          avatar,
-          introduction,
-          role,
+          role: 'user',
           account,
           banner: 'https://i.imgur.com/jsrSDDm.png',
           password: hash
