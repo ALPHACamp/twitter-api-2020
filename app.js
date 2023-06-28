@@ -7,8 +7,13 @@ const routes = require('./routes')
 const methodOverride = require('method-override')
 const passport = require('./config/passport')
 const cors = require('cors')
-
 const app = express()
+
+// creat socket.io server
+const { createServer } = require('http')
+const httpServer = createServer(app)
+const io = require('socket.io')(httpServer)
+const useSocket = require('./socket/index')
 const port = process.env.PORT || 3000
 
 // middleware
@@ -31,7 +36,10 @@ app.use(
 app.get('/', (req, res) => { res.send('Welcome to the real world!') })
 app.use(routes)
 
+// use socket modules
+useSocket(io)
+
 // start
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+httpServer.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
