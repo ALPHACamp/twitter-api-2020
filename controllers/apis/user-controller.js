@@ -3,6 +3,8 @@ const { User, Reply, Tweet, Followship, Like } = require('../../models')
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
 const helpers = require('../../_helpers')
+// sequelize Op 比較功能
+const { Op } = require('sequelize')
 
 const userController = {
   signIn: (req, res,) => {
@@ -289,8 +291,20 @@ const userController = {
       .then(() => {
         return Promise.all([
           User.findByPk(helpers.getUser(req).id, { attributes: ['id', 'name', 'account', 'email'] }),
-          User.findOne({ where: { email } }),
-          User.findOne({ where: { account } })
+          User.findOne({
+            where: {
+              email, id: {
+                [Op.ne]: helpers.getUser(req).id
+              }
+            }
+          }),
+          User.findOne({
+            where: {
+              account, id: {
+                [Op.ne]: helpers.getUser(req).id
+              }
+            }
+          })
         ])
       })
       .then(([user, userEmail, userAccount]) => {
