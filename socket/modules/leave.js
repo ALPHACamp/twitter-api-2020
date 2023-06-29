@@ -6,8 +6,8 @@ module.exports = async (io, socket, userAccount) => {
     // 檢查 使用者存在
     const user = await userExist(userAccount)
 
-    // 檢查 使用者在不在上線名單上 (不確定要不要回報錯誤)
-    if (!userInPublic(user)) return
+    // 檢查 使用者在不在上線名單上 (暫時傳錯誤給postman)
+    if (!userInPublic(user)) throw new Error('使用者已經不在上線名單上！(已下線)')
 
     // 從上線名單移除使用者
     usersInPublic.splice(userIndexInPublic(user), 1)
