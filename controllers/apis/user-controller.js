@@ -141,29 +141,33 @@ const userController = {
       .catch(err => res.status(500).json({ status: 'error', error: err }))
   },
   getUserLikes: (req, res) => {
-    User.findByPk(req.params.id, {
-      include: [
-        {
-          model: Like,
-          include: [{ model: Tweet, include: [User, Like, Reply] }]
-        }],
-      order: [[Like, 'createdAt', 'DESC']]
-    })
-      .then(user => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: [
+          {
+            model: Like,
+            include: [{ model: Tweet, include: [User, Like, Reply] }]
+          }],
+        order: [[Like, 'createdAt', 'DESC']]
+      }),
+      User.findByPk(helpers.getUser(req).id, {
+        include: [{ model: Like, attributes: ['TweetId'] }]
+      })
+    ])
+      .then(([user, currentUser]) => {
         if (!user) throw new Error(`User didn't exist`)
         const likesData = user.Likes.map(like => {
-          const likeJson = like.toJSON()
           return {
-            UserId: likeJson.UserId,
-            TweetId: likeJson.TweetId,
-            createdAt: likeJson.createdAt,
-            description: likeJson.Tweet.description,
-            tweetOwnerName: likeJson.Tweet.User.name,
-            tweetOwnerAccount: likeJson.Tweet.User.account,
-            tweetOwnerAvatar: likeJson.Tweet.User.avatar,
-            likeCount: likeJson.Tweet.Likes.length,
-            replyCount: likeJson.Tweet.Replies.length,
-            isLiked: likeJson.UserId === helpers.getUser(req).id
+            UserId: like.UserId,
+            TweetId: like.TweetId,
+            createdAt: like.createdAt,
+            description: like.Tweet.description,
+            tweetOwnerName: like.Tweet.User.name,
+            tweetOwnerAccount: like.Tweet.User.account,
+            tweetOwnerAvatar: like.Tweet.User.avatar,
+            likeCount: like.Tweet.Likes.length,
+            replyCount: like.Tweet.Replies.length,
+            currentUserIsLiked: currentUser.Likes.some(l => l.TweetId === like.TweetId)
           }
         })
         return res.status(200).json(likesData)
