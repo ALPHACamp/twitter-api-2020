@@ -148,21 +148,20 @@ const userController = {
         }],
       order: [[Like, 'createdAt', 'DESC']]
     })
-      .then(user => {
+      .then((user) => {
         if (!user) throw new Error(`User didn't exist`)
         const likesData = user.Likes.map(like => {
-          const likeJson = like.toJSON()
           return {
-            UserId: likeJson.UserId,
-            TweetId: likeJson.TweetId,
-            createdAt: likeJson.createdAt,
-            description: likeJson.Tweet.description,
-            tweetOwnerName: likeJson.Tweet.User.name,
-            tweetOwnerAccount: likeJson.Tweet.User.account,
-            tweetOwnerAvatar: likeJson.Tweet.User.avatar,
-            likeCount: likeJson.Tweet.Likes.length,
-            replyCount: likeJson.Tweet.Replies.length,
-            isLiked: likeJson.UserId === helpers.getUser(req).id
+            UserId: like.UserId,
+            TweetId: like.TweetId,
+            createdAt: like.createdAt,
+            description: like.Tweet.description,
+            tweetOwnerName: like.Tweet.User.name,
+            tweetOwnerAccount: like.Tweet.User.account,
+            tweetOwnerAvatar: like.Tweet.User.avatar,
+            likeCount: like.Tweet.Likes.length,
+            replyCount: like.Tweet.Replies.length,
+            currentUserIsLiked: like.Tweet.Likes.some(l => l.UserId === helpers.getUser(req).id)
           }
         })
         return res.status(200).json(likesData)
