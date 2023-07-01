@@ -53,7 +53,6 @@ const userController = {
           email,
           role: 'user',
           account,
-          banner: 'https://i.imgur.com/jsrSDDm.png',
           password: hash
         })
       })
