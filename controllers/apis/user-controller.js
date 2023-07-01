@@ -291,10 +291,10 @@ const userController = {
         return Promise.all([
           User.findByPk(helpers.getUser(req).id, { attributes: ['id', 'name', 'account', 'email'] }),
           User.findOne({
-            where: {email, id: {[Op.ne]: helpers.getUser(req).id}}
+            where: { email, id: { [Op.ne]: helpers.getUser(req).id } }
           }),
           User.findOne({
-            where: {account, id: {[Op.ne]: helpers.getUser(req).id}}
+            where: { account, id: { [Op.ne]: helpers.getUser(req).id } }
           })
         ])
       })
@@ -373,7 +373,11 @@ const userController = {
           followingId: userId
         })
       })
-      .then(updateFollowship => res.status(200).json(updateFollowship))
+      .then(updateFollowship => {
+        updateFollowship = updateFollowship.toJSON()
+        updateFollowship.isFollowed = true
+        res.status(200).json(updateFollowship)
+      })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
   removeFollowing: (req, res) => {
@@ -388,7 +392,11 @@ const userController = {
         if (!followship) throw new Error(`You haven't followed this user!`)
         return followship.destroy()
       })
-      .then(removedFollowship => res.status(200).json(removedFollowship))
+      .then(removedFollowship => {
+        removedFollowship = removedFollowship.toJSON()
+        removedFollowship.isFollowed = false
+        res.status(200).json(removedFollowship)
+      })
       .catch(err => res.status(500).json({ status: 'error', error: err.message }))
   },
   getTopUsers: (req, res) => {
