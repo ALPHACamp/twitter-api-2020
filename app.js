@@ -9,10 +9,15 @@ const passport = require('./config/passport')
 const cors = require('cors')
 const app = express()
 
-// creat socket.io server
+// create socket.io server
 const { createServer } = require('http')
 const httpServer = createServer(app)
-const io = require('socket.io')(httpServer)
+const io = require('socket.io')(httpServer, {
+  cors: {
+    origin: '*',
+    credentials: true
+  }
+})
 const useSocket = require('./socket/index')
 const port = process.env.PORT || 3000
 
