@@ -99,7 +99,7 @@ const userServices = {
           likeCount: tweet.Likes.length,
           currentUserIsLiked: currentUser.Likes.some(like => like.TweetId === tweet.id)
         }))
-        return cb(null,tweetsData)
+        return cb(null, tweetsData)
       })
       .catch(err => cb(err))
   },
@@ -151,6 +151,42 @@ const userServices = {
           }
         })
         return cb(null, likesData)
+      })
+      .catch(err => cb(err))
+  },
+  getUserFollowings: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        attributes: ['id', 'name',],
+        include: [
+          {
+            model: User, as: 'Followings',
+            attributes: ['id', 'name', 'introduction', 'avatar'],
+            through: { attributes: ['createdAt'] },
+          },
+        ]
+      }),
+      Tweet.count({ where: { UserId: req.params.id } })
+    ])
+      .then(([user, tweetCount]) => {
+        if (!user) throw new Error(`User didn't exist`)
+        let followings = user.Followings.map(following => ({
+          followingId: following.id,
+          followingName: following.name,
+          followingAvatar: following.avatar,
+          followingIntroduction: following.introduction,
+          followshipCreatedAt: following.Followship.createdAt,
+          isFollowing: helpers.getUser(req).Followings.some(f => f.id === following.id)
+        }))
+        followings = followings.sort((a, b) =>
+          new Date(b.followshipCreatedAt) - new Date(a.followshipCreatedAt))
+        const result = {
+          userId: user.id,
+          userName: user.name,
+          tweetCount: tweetCount,
+          followings: followings
+        }
+        return cb(null, result)
       })
       .catch(err => cb(err))
   }
