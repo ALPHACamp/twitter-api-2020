@@ -1,5 +1,5 @@
 const usersInPublic = require('./userOnline')
-const { userExist, userInPublic, emitError } = require('../helper')
+const { userExist, isUserInPublic, emitError } = require('../helper')
 
 module.exports = async (io, socket, userAccount) => {
   try {
@@ -7,7 +7,10 @@ module.exports = async (io, socket, userAccount) => {
     const user = await userExist(userAccount)
 
     // 檢查 使用者已經在上線名單上 (暫時傳錯誤給postman)
-    if (userInPublic(user)) throw new Error('使用者已經在上線名單上！(已上線)')
+    if (isUserInPublic(user)) throw new Error('使用者已經在上線名單上！(已上線)')
+
+    // add socket id
+    user.socketId = socket.id
 
     // 使用者加入上線名單
     usersInPublic.push(user)

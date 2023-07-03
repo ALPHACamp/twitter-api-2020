@@ -15,10 +15,10 @@ const helper = {
     if (!user) throw new Error('使用者不存在！')
     return user.toJSON()
   },
-  userInPublic: user => {
+  isUserInPublic: user => {
     return findUserIndexInPublic(user) !== -1
   },
-  userIndexInPublic: user => {
+  isUserIndexInPublic: user => {
     return findUserIndexInPublic(user)
   },
   hasMessage: message => {
