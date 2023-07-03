@@ -95,18 +95,21 @@ const adminController = {
       })
       .catch(error => next(error))
   },
-  deleteTweet: async (req, res, next) => {
-    try {
-      const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId)
-      if (!tweet) return res.status(404).json('Tweet not found')
-      await tweet.destroy()
-      await Like.destroy({ where: { TweetId: tweetId } })
-      await Reply.destroy({ where: { TweetId: tweetId } })
-      return res.status(200).json('Delete success')
-    } catch (err) {
-      next(err)
-    }
+  deleteTweet: (req, res, next) => {
+    const tweetId = req.params.id
+    Tweet.findByPk(tweetId)
+      .then((tweet) => {
+        if (!tweet) return res.status(404).json('Tweet not found')
+        return Promise.all([
+          tweet.destroy(),
+          Like.destroy({ where: { TweetId: tweetId } }),
+          Reply.destroy({ where: { TweetId: tweetId } })
+        ])
+      })
+      .then(() => {
+        return res.status(200).json('Delete success')
+      })
+      .catch(error => next(error))
   },
   getReplies: (req, res, next) => {
     Reply.findAll({
