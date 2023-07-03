@@ -13,7 +13,7 @@ module.exports = async (io, socket, userAccount) => {
     usersInPublic.splice(isUserIndexInPublic(user), 1)
 
     // 給全部使用者 更新的上線名單
-    io.emit('server-update', usersInPublic)
+    socket.broadcast.emit('server-update', usersInPublic)
     // broadcast 下線訊息
     socket.broadcast.emit('server-leave', `${user.name} 下線`)
     return
