@@ -17,6 +17,9 @@ module.exports = {
       roomId: {
         type: Sequelize.INTEGER
       },
+      timestamp: {
+        type: Sequelize.DATE
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
