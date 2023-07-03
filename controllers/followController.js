@@ -52,84 +52,99 @@ const followController = {
       .then(() => res.status(200).json('unfollow success'))
       .catch((error) => next(error))
   },
-  getFollowers: async (req, res, next) => {
+  getFollowers: (req, res, next) => {
     const followingId = req.params.id
     if (!followingId) {
       return res.status(400).json('User id is necessary')
     }
-    try {
-      const user = await User.findByPk(followingId)
-      if (!user) return res.status(400).json('User do not exists')
-      const followers = await user.getFollowers({
-        attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'updatedAt'],
-        raw: true,
-        nest: true
+    User.findByPk(followingId)
+      .then((user) => {
+        if (!user) return res.status(400).json('User do not exists')
+        return Promise.all([
+          user.getFollowers({
+            attributes: [
+              'id',
+              'name',
+              'account',
+              'avatar',
+              'introduction',
+              'updatedAt'
+            ],
+            raw: true,
+            nest: true
+          }),
+          User.findAll({
+            where: { id: followingId },
+            attributes: [],
+            include: [
+              {
+                model: User,
+                as: 'Followings',
+                attributes: ['id'],
+                through: { attributes: [] }
+              }
+            ],
+            raw: true,
+            nest: true
+          })
+        ])
       })
-      const followings = await User.findAll({
-        where: { id: followingId },
-        attributes: [],
-        include: [
-          {
-            model: User,
-            as: 'Followings',
-            attributes: ['id'],
-            through: { attributes: [] }
+      .then((followers, followings) => {
+        const followingsId = followings.map(following => {
+          return following.Followings.id
+        })
+        return [followers, followingsId]
+      })
+      .then(([followers, followingsId]) => {
+        return followers.map(follower => {
+          const introduction = follower.introduction?.substring(0, 50)
+          const isFollowing = followingsId.includes(follower.id)
+          return {
+            followerId: follower.id,
+            name: follower.name,
+            account: follower.account,
+            avatar: follower.avatar,
+            introduction,
+            updatedAt: follower.Followship.updatedAt,
+            isFollowing
           }
-        ],
-        raw: true,
-        nest: true
+        })
+          .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))
       })
-      const followingsId = followings.map(following => {
-        return following.Followings.id
-      })
-      const data = followers.map(follower => {
-        const introduction = follower.introduction?.substring(0, 50)
-        const isFollowing = followingsId.includes(follower.id)
-        return {
-          followerId: follower.id,
-          name: follower.name,
-          account: follower.account,
-          avatar: follower.avatar,
-          introduction,
-          updatedAt: follower.Followship.updatedAt,
-          isFollowing
-        }
-      })
-        .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))
-      return res.status(200).json(data)
-    } catch (error) {
-      return next(error)
-    }
+      .then((data) => res.status(200).json(data))
+      .catch((error) => next(error))
   },
-  getFollowings: async (req, res, next) => {
+  getFollowings: (req, res, next) => {
     const followerId = req.params.id
     if (!followerId) {
       return res.status(400).json('Follower id is necessary')
     }
-    try {
-      const user = await User.findByPk(followerId)
-      if (!user) return res.status(400).json('User not exists')
-      const followings = await user.getFollowings({
-        attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'updatedAt'],
-        raw: true,
-        nest: true
+    User.findByPk(followerId)
+      .then((user) => {
+        if (!user) return res.status(400).json('User not exists')
+        return user.getFollowings({
+          attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'updatedAt'],
+          raw: true,
+          nest: true
+        })
       })
-      const data = followings.map(following => {
-        const introduction = following.introduction?.substring(0, 50)
-        return {
-          followingId: following.id,
-          name: following.name,
-          account: following.account,
-          avatar: following.avatar,
-          introduction,
-          updatedAt: following.Followship.updatedAt
-        }
+      .then((followings) => {
+        const data = followings.map(following => {
+          const introduction = following.introduction?.substring(0, 50)
+          return {
+            followingId: following.id,
+            name: following.name,
+            account: following.account,
+            avatar: following.avatar,
+            introduction,
+            updatedAt: following.Followship.updatedAt
+          }
+        })
+          .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))
+        return data
       })
-        .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))
-      return res.status(200).json(data)
-    } catch (error) {
-      return next(error)
-    }
+      .then((data) => res.status(200).json(data))
+      .catch((error) => next(error))
   },
   getFollowCounts: (req, res, next) => {
     const userId = req.params.id

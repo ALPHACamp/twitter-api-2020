@@ -31,7 +31,6 @@ const tweetController = {
         if (tweets.length === 0) return res.status(404).json('Tweets not found')
         counts = tweets.map((tweet) => {
           const fileteredLikesTime = tweet.Likes.filter((like) => like.UserId === Number(userId))[0].dataValues.updatedAt
-          // console.log(fileteredLikesTime)
           return {
             ...tweet.toJSON(),
             account: tweet.User.account,
@@ -74,7 +73,6 @@ const tweetController = {
       }
 
       const data = counts.map(({ Likes, Replies, User, ...rest }) => rest)
-      console.log(data)
       return res.status(200).json(data)
     } catch (err) {
       next(err)
