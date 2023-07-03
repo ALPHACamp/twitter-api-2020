@@ -5,7 +5,6 @@ module.exports = async (io, socket, userAccount, message, room = null) => {
   try {
     // 檢查 使用者存在
     const user = await userExist(userAccount)
-
     // 檢查有沒有訊息 (同時用trim)
     const trimmedMessage = hasMessage(message)
 
@@ -21,7 +20,7 @@ module.exports = async (io, socket, userAccount, message, room = null) => {
     await Chat.create({
       message: trimmedMessage,
       userId: user.id,
-      roomId: room.id || null,
+      roomId: room?.id || null,
       timestamp: new Date() // 應由前端傳進來, 先暫用new date
     })
   } catch (err) {
