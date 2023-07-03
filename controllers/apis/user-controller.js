@@ -42,41 +42,15 @@ const userController = {
   getUserFollowers: (req, res, next) => {
     userServices.getUserFollowers(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
-  editUser: (req, res) => {
-    return User.findByPk(req.params.id)
-      .then(user => {
-        if (!user) throw new Error(`User didn't exist`)
-        user = user.toJSON()
-        delete user.password
-        return res.status(200).json({ status: 'success', user })
-      })
-      .catch(err => res.status(500).json({ status: 'error', error: err }))
+  editUser: (req, res, next) => {
+    userServices.editUser(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
-  putUser: (req, res) => {
+  putUser: (req, res, next) => {
     const { name, introduction } = req.body
-    const files = req.files || {}
-    if (!name) throw new Error('User name is required')
-    return Promise.all([
-      User.findByPk(helpers.getUser(req).id),
-      files.avatar ? imgurFileHandler(files.avatar[0]) : null,
-      files.banner ? imgurFileHandler(files.banner[0]) : null
-    ])
-      .then(([user, avatarPath, bannerPath]) => {
-        if (!user) throw new Error("User didn't exist!")
-        if (user.id !== Number(req.params.id)) throw new Error('Edit self profile only!')
-        return user.update({
-          name,
-          introduction,
-          avatar: avatarPath || user.avatar,
-          banner: bannerPath || user.banner
-        })
-      })
-      .then((updatedUser) => {
-        updatedUser = updatedUser.toJSON()
-        delete updatedUser.password
-        return res.status(200).json(updatedUser)
-      })
-      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+    if (!name) return res.status(400).json({ status: 'error', message: 'User name is required' })
+
+    userServices.putUser(req, { name, introduction }, (err, data) => err ? next(err) : res.status(200).json(data))
+
   },
   getSetUser: (req, res) => {
     return User.findByPk(helpers.getUser(req).id, { attributes: ['id', 'name', 'account', 'email'] })

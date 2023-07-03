@@ -219,6 +219,40 @@ const userServices = {
         return cb(null, result)
       })
       .catch(err => cb(err))
+  },
+  editUser: (req, cb) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) throw new Error(`User didn't exist`)
+        user = user.toJSON()
+        delete user.password
+        return cb(null, user)
+      })
+      .catch(err => cb(err))
+  },
+  putUser: (req,{ name, introduction }, cb) => {
+    const files = req.files || {}
+    return Promise.all([
+      User.findByPk(helpers.getUser(req).id),
+      files.avatar ? imgurFileHandler(files.avatar[0]) : null,
+      files.banner ? imgurFileHandler(files.banner[0]) : null
+    ])
+      .then(([user, avatarPath, bannerPath]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (user.id !== Number(req.params.id)) throw new Error('Edit self profile only!')
+        return user.update({
+          name,
+          introduction,
+          avatar: avatarPath || user.avatar,
+          banner: bannerPath || user.banner
+        })
+      })
+      .then((updatedUser) => {
+        updatedUser = updatedUser.toJSON()
+        delete updatedUser.password
+        return cb(null, updatedUser)
+      })
+      .catch(err => cb(err))
   }
 }
 
