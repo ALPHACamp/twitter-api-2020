@@ -30,56 +30,11 @@ const userController = {
   getUserTweets: (req, res, next) => {
     userServices.getUserTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
-  getUserReplies: (req, res) => {
-    User.findByPk(req.params.id, {
-      include: [{
-        model: Reply, include: { model: Tweet, attributes: ['id'], include: { model: User, attributes: ['account'] } }
-      }],
-      order: [[Reply, 'createdAt', 'DESC']]
-    })
-      .then(user => {
-        if (!user) throw new Error(`User didn't exist`)
-        const repliesData = user.Replies.map(reply => {
-          const replyJSON = reply.toJSON()
-          return {
-            ...replyJSON,
-            replyName: user.name,
-            replyAccount: user.account,
-            replyAvatar: user.avatar,
-          }
-        })
-        return res.status(200).json(repliesData)
-      })
-      .catch(err => res.status(500).json({ status: 'error', error: err }))
+  getUserReplies: (req, res, next) => {
+    userServices.getUserReplies(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
-  getUserLikes: (req, res) => {
-    User.findByPk(req.params.id, {
-      include: [
-        {
-          model: Like,
-          include: [{ model: Tweet, include: [User, Like, Reply] }]
-        }],
-      order: [[Like, 'createdAt', 'DESC']]
-    })
-      .then((user) => {
-        if (!user) throw new Error(`User didn't exist`)
-        const likesData = user.Likes.map(like => {
-          return {
-            UserId: like.UserId,
-            TweetId: like.TweetId,
-            createdAt: like.createdAt,
-            description: like.Tweet.description,
-            tweetOwnerName: like.Tweet.User.name,
-            tweetOwnerAccount: like.Tweet.User.account,
-            tweetOwnerAvatar: like.Tweet.User.avatar,
-            likeCount: like.Tweet.Likes.length,
-            replyCount: like.Tweet.Replies.length,
-            currentUserIsLiked: like.Tweet.Likes.some(l => l.UserId === helpers.getUser(req).id)
-          }
-        })
-        return res.status(200).json(likesData)
-      })
-      .catch(err => res.status(500).json({ status: 'error', error: err }))
+  getUserLikes: (req, res, next) => {
+    userServices.getUserLikes(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   getUserFollowings: (req, res) => {
     return Promise.all([
