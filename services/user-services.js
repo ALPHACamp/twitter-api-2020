@@ -51,6 +51,28 @@ const userServices = {
         })
       })
       .catch(err => cb(err))
+  },
+  getUser: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, { attributes: { exclude: ['password'] } }),
+      Followship.count({ where: { followerId: req.params.id } }),
+      Followship.count({ where: { followingId: req.params.id } }),
+      Tweet.findAll({ where: { UserId: req.params.id } })
+    ])
+      .then(([user, follower, following, Tweet]) => {
+        if (!user) throw new Error(`User didn't exist`)
+        user = user.toJSON()
+        user.followerCount = follower // 追蹤數量
+        user.followingCount = following // 被追蹤數量
+        user.TweetCount = Tweet.length
+        const currentUser = helpers.getUser(req)
+        user.isFollowing = currentUser.Followings ? currentUser.Followings.some(f => f.id === user.id) : false
+        return cb(null, {
+          status: 'success',
+          user
+        })
+      })
+      .catch(err => cb(err))
   }
 }
 

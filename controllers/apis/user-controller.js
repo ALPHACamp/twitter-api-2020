@@ -24,24 +24,8 @@ const userController = {
 
     userServices.signUp({ name, email, password, account }, (err, data) => err ? next(err) : res.status(200).json(data))
   },
-  getUser: (req, res) => {
-    return Promise.all([
-      User.findByPk(req.params.id, { attributes: { exclude: ['password'] } }),
-      Followship.count({ where: { followerId: req.params.id } }),
-      Followship.count({ where: { followingId: req.params.id } }),
-      Tweet.findAll({ where: { UserId: req.params.id } })
-    ])
-      .then(([user, follower, following, Tweet]) => {
-        if (!user) throw new Error(`User didn't exist`)
-        user = user.toJSON()
-        user.followerCount = follower // 追蹤數量
-        user.followingCount = following // 被追蹤數量
-        user.TweetCount = Tweet.length
-        const currentUser = helpers.getUser(req)
-        user.isFollowing = currentUser.Followings ? currentUser.Followings.some(f => f.id === user.id) : false
-        return res.status(200).json(user)
-      })
-      .catch(err => res.status(500).json({ status: 'error', error: err.message }))
+  getUser: (req, res, next) => {
+    userServices.getUser(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   getUserTweets: (req, res) => {
     return Promise.all([
