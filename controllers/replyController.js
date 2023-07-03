@@ -23,12 +23,12 @@ const replyController = {
     ])
       .then(([tweet, replies]) => {
         return replies.map((reply) => {
-          reply.repliedUserName = reply.User.name
-          reply.repliedUserAccount = reply.User.account
-          reply.repliedUserAvatar = reply.User.avatar
-          reply.tweetUserName = tweet.User.name
-          reply.tweetUserAccount = tweet.User.account
-          reply.tweetUserAvatar = tweet.User.avatar
+          reply.repliedUserName = reply.User?.name
+          reply.repliedUserAccount = reply.User?.account
+          reply.repliedUserAvatar = reply.User?.avatar
+          reply.tweetUserName = tweet.User?.name
+          reply.tweetUserAccount = tweet.User?.account
+          reply.tweetUserAvatar = tweet.User?.avatar
           delete reply.User
           getLastUpdated(reply)
           return reply

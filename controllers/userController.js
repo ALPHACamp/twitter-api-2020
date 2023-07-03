@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const { User, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
-const { Op } = require('sequelize')
+const { Op, Sequelize } = require('sequelize')
 const bcrypt = require('bcryptjs')
 const userController = {
   signIn: (req, res, next) => {
@@ -193,23 +193,34 @@ const userController = {
             [Op.not]: [root.id, userId]
           }
         },
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'email',
+          'introduction',
+          'avatar',
+          'role',
+          'createdAt',
+          'updatedAt',
+          [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`following_Id` = `User`.`id`)'), 'followerCount']
+        ],
         include: [
           {
             model: User,
             as: 'Followers'
           }
         ],
+        order: [[Sequelize.literal('followerCount'), 'DESC']],
         limit: [10]
       })
       const data = users
         .map((user) => ({
           ...user.toJSON(),
-          followerCount: user.Followers.length,
           isFollowing: req.user.Followings
             ? req.user.Followings.some((f) => f.id === user.id)
             : false
         }))
-        .sort((a, b) => b.followerCount - a.followerCount)
       const final = data.map(({ Followers, ...rest }) => rest)
       res.status(200).json(final)
     } catch (err) {

@@ -34,7 +34,7 @@ router.delete('/replies/:id', authenticated, replyController.deleteReply)
 // tweet
 router.get('/users/:id/tweets', authenticated, tweetController.getTweets)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
-router.get('/tweets', authenticated, tweetController.getAllTweets) // 先新增這條，通過測試檔
+router.get('/tweets', authenticated, tweetController.getAllTweets)
 router.get('/users/:id/replied_tweets', authenticated, tweetController.getRepliedTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
 router.put('/tweets/:id', authenticated, tweetController.putTweet)
