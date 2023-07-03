@@ -334,7 +334,6 @@ describe('# user requests', () => {
           .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
-
             expect(res.body).to.be.an('array');
             // 有跟隨者的 followerId = 1
 

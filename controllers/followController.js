@@ -89,7 +89,7 @@ const followController = {
           })
         ])
       })
-      .then((followers, followings) => {
+      .then(([followers, followings]) => {
         const followingsId = followings.map(following => {
           return following.Followings.id
         })
