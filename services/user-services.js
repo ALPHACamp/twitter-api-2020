@@ -189,6 +189,36 @@ const userServices = {
         return cb(null, result)
       })
       .catch(err => cb(err))
+  },
+  getUserFollowers: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followers', }],
+      }),
+      Tweet.count({ where: { UserId: req.params.id } })
+    ])
+      .then(([user, tweetCount]) => {
+        if (!user) throw new Error(`User didn't exist`)
+        const followers = user.Followers.map(follower => {
+          return {
+            followerName: follower.name,
+            followerAvatar: follower.avatar,
+            followerIntroduction: follower.introduction,
+            followerId: follower.Followship.followerId,
+            createdAt: follower.Followship.createdAt,
+            isFollowed: helpers.getUser(req).Followings.some(f => f.id === follower.id)
+          }
+        })
+        followers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        const result = {
+          userId: user.id,
+          userName: user.name,
+          tweetCount: tweetCount,
+          followers: followers
+        }
+        return cb(null, result)
+      })
+      .catch(err => cb(err))
   }
 }
 
