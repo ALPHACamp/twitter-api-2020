@@ -157,7 +157,6 @@ const tweetController = {
       nest: true
     })
       .then((tweets) => {
-        console.log(tweets)
         const beforeData = tweets.map((tweet) => ({
           ...tweet.toJSON(),
           tweetUserName: tweet.Tweet?.User?.name,
