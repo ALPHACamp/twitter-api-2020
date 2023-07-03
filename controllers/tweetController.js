@@ -1,6 +1,5 @@
-// const Sequelize = require('sequelize')
 const { getLastUpdated, getLastUpd, getUser } = require('../_helpers')
-const { User, Tweet, Like, Reply, Followship } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -30,14 +29,14 @@ const tweetController = {
         })
         if (tweets.length === 0) return res.status(404).json('Tweets not found')
         counts = tweets.map((tweet) => {
-          const fileteredLikesTime = tweet.Likes.filter((like) => like.UserId === Number(userId))[0].dataValues.updatedAt
+          const fileteredLikesTime = tweet.Likes.filter((like) => like.UserId === Number(searchUserId))[0].dataValues.updatedAt
           return {
             ...tweet.toJSON(),
-            account: tweet.User.account,
-            name: tweet.User.name,
-            avatar: tweet.User.avatar,
-            likesCount: tweet.Likes.length,
-            repliesCount: tweet.Replies.length,
+            account: tweet.User?.account,
+            name: tweet.User?.name,
+            avatar: tweet.User?.avatar,
+            likesCount: tweet.Likes?.length,
+            repliesCount: tweet.Replies?.length,
             lastUpdated: getLastUpd(tweet),
             isLiked: tweet.Likes?.some(
               (l) => Number(l.UserId) === Number(userId)
@@ -60,11 +59,11 @@ const tweetController = {
         if (tweets.length === 0) return res.status(404).json('Tweets not found')
         counts = tweets.map((tweet) => ({
           ...tweet.toJSON(),
-          account: tweet.User.account,
-          name: tweet.User.name,
-          avatar: tweet.User.avatar,
-          likesCount: tweet.Likes.length,
-          repliesCount: tweet.Replies.length,
+          account: tweet.User?.account,
+          name: tweet.User?.name,
+          avatar: tweet.User?.avatar,
+          likesCount: tweet.Likes?.length,
+          repliesCount: tweet.Replies?.length,
           lastUpdated: getLastUpd(tweet),
           isLiked: tweet.Likes?.some(
             (l) => Number(l.UserId) === Number(userId)
@@ -92,11 +91,11 @@ const tweetController = {
       .then((tweets) => {
         return tweets.map((tweet) => ({
           ...tweet.get({ plain: true }),
-          account: tweet.User.account,
-          name: tweet.User.name,
-          avatar: tweet.User.avatar,
-          likesCount: tweet.Likes.length,
-          repliesCount: tweet.Replies.length,
+          account: tweet.User?.account,
+          name: tweet.User?.name,
+          avatar: tweet.User?.avatar,
+          likesCount: tweet.Likes?.length,
+          repliesCount: tweet.Replies?.length,
           lastUpdated: getLastUpd(tweet),
           isLiked: tweet.Likes?.some((l) => l.UserId === Number(userId)),
           User: undefined,
@@ -123,13 +122,13 @@ const tweetController = {
     ])
       .then(([user, data]) => {
         if (!data) return res.status(404).json('Tweets not found')
-        const tweet = data.dataValues
-        tweet.likesCount = tweet.Likes.length
-        tweet.repliesCount = tweet.Replies.length
-        tweet.account = tweet.User.account
-        tweet.name = tweet.User.name
-        tweet.avatar = tweet.User.avatar
-        tweet.userAvatar = user.avatar
+        const tweet = data?.dataValues
+        tweet.likesCount = tweet.Likes?.length
+        tweet.repliesCount = tweet.Replies?.length
+        tweet.account = tweet.User?.account
+        tweet.name = tweet.User?.name
+        tweet.avatar = tweet.User?.avatar
+        tweet.userAvatar = user?.avatar
         tweet.isLiked = tweet.Likes?.some((f) => f.UserId === Number(userId))
         delete tweet.User
         delete tweet.Likes
@@ -158,14 +157,15 @@ const tweetController = {
       nest: true
     })
       .then((tweets) => {
+        console.log(tweets)
         const beforeData = tweets.map((tweet) => ({
           ...tweet.toJSON(),
-          tweetUserName: tweet.Tweet.User.name,
-          tweetUserAccount: tweet.Tweet.User.account,
-          tweetUserAvatar: tweet.Tweet.User.avatar,
-          repliedUserName: tweet.User.name,
-          repliedUserAccount: tweet.User.account,
-          repliedUserAvatar: tweet.User.avatar,
+          tweetUserName: tweet.Tweet?.User?.name,
+          tweetUserAccount: tweet.Tweet?.User?.account,
+          tweetUserAvatar: tweet.Tweet?.User?.avatar,
+          repliedUserName: tweet.User?.name,
+          repliedUserAccount: tweet?.User.account,
+          repliedUserAvatar: tweet?.User.avatar,
           lastUpdated: getLastUpd(tweet)
         }))
         const data = beforeData.map(({ Tweet, User, ...rest }) => rest)
@@ -217,6 +217,18 @@ const tweetController = {
     Tweet.findByPk(id)
       .then((tweet) => {
         if (!tweet) return res.status(404).json('Tweet not found')
+        Like.findAll({
+          where: { TweetId: id }
+        })
+          .then((like) => {
+            like.destroy()
+          })
+        Reply.findAll({
+          where: { TweetId: id }
+        })
+          .then((reply) => {
+            reply.destroy()
+          })
         tweet.destroy()
       })
       .then(() => {
