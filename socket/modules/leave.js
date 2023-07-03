@@ -1,5 +1,5 @@
 const usersInPublic = require('./userOnline')
-const { userExist, userInPublic, userIndexInPublic, emitError } = require('../helper')
+const { userExist, isUserInPublic, isUserIndexInPublic, emitError } = require('../helper')
 
 module.exports = async (io, socket, userAccount) => {
   try {
@@ -7,10 +7,10 @@ module.exports = async (io, socket, userAccount) => {
     const user = await userExist(userAccount)
 
     // 檢查 使用者在不在上線名單上 (暫時傳錯誤給postman)
-    if (!userInPublic(user)) throw new Error('使用者已經不在上線名單上！(已下線)')
+    if (!isUserInPublic(user)) throw new Error('使用者已經不在上線名單上！(已下線)')
 
     // 從上線名單移除使用者
-    usersInPublic.splice(userIndexInPublic(user), 1)
+    usersInPublic.splice(isUserIndexInPublic(user), 1)
 
     // 給全部使用者 更新的上線名單
     io.emit('server-update', usersInPublic)
