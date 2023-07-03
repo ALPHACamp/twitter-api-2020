@@ -5,65 +5,24 @@ const { imgurFileHandler } = require('../../helpers/file-helpers')
 const helpers = require('../../_helpers')
 // sequelize Op 比較功能
 const { Op } = require('sequelize')
+const userServices = require('../../services/user-services')
 
 const userController = {
-  signIn: (req, res,) => {
-    try {
-      const userData = helpers.getUser(req).toJSON()
-      if (userData.role === 'admin') throw new Error('Account does not exist!')
-      delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.status(200).json({
-        status: 'success',
-        data: {
-          token,
-          user: userData,
-        }
-      })
-    } catch (err) {
-      res.status(500).json({ status: 'error', error: err.message })
-    }
+  signIn: (req, res, next) => {
+    if (helpers.getUser(req).role === 'admin') return res.status(400).json({ status: 'error', message: 'Account does not exist!' })
+    userServices.signIn(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
-  signUp: (req, res) => {
+  signUp: (req, res, next) => {
     const { name, email, password, account, checkPassword } = req.body
-    new Promise((resolve, reject) => {
-      if (!account) {
-        reject(new Error('Account is required'))
-      } else if (account.length > 50) {
-        reject(new Error(`Account too long`))
-      }
-      if (name && name.length > 50) reject(new Error(`Name too long`))
-      if (password !== checkPassword) reject(new Error('Password do not match'))
-      resolve()
-    })
-      .then(() => {
-        return Promise.all([
-          User.findOne({ where: { email } }),
-          User.findOne({ where: { account } })
-        ])
-      })
-      .then(([user, account]) => {
-        if (user) throw new Error('Email already exists!')
-        if (account) throw new Error('Account already registered!')
-        return bcrypt.hash(password, 10)
-      })
-      .then(hash => {
-        return User.create({
-          name,
-          email,
-          role: 'user',
-          account,
-          password: hash
-        })
-      })
-      .then((user) => {
-        user = user.toJSON()
-        delete user.password
-        return res.status(200).json(user)
-      })
-      .catch(err => {
-        res.status(500).json({ status: 'error', error: err.message })
-      })
+    if (!account) {
+      return res.status(400).json({ status: 'error', message: 'Account is required' })
+    } else if (account.length > 50) {
+      return res.status(400).json({ status: 'error', message: 'Account too long' })
+    }
+    if (name && name.length > 50) return res.status(400).json({ status: 'error', message: 'Name too long' })
+    if (password !== checkPassword) return res.status(400).json({ status: 'error', message: 'Password do not match' })
+
+    userServices.signUp({ name, email, password, account }, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   getUser: (req, res) => {
     return Promise.all([
