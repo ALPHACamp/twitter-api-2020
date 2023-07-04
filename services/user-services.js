@@ -230,7 +230,7 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
-  putUser: (req,{ name, introduction }, cb) => {
+  putUser: (req, { name, introduction }, cb) => {
     const files = req.files || {}
     return Promise.all([
       User.findByPk(helpers.getUser(req).id),
@@ -253,7 +253,46 @@ const userServices = {
         return cb(null, updatedUser)
       })
       .catch(err => cb(err))
-  }
+  },
+  getSetUser: (req, cb) => {
+    return User.findByPk(helpers.getUser(req).id, { attributes: ['id', 'name', 'account', 'email'] })
+      .then((user) => {
+        if (!user) throw new Error("User didn't exist!")
+        return cb(null, user)
+      })
+      .catch(err => cb(err))
+  },
+  putSetUser: (req, { account, name, email, password }, cb) => {
+    return Promise.all([
+      User.findByPk(helpers.getUser(req).id, { attributes: ['id', 'name', 'account', 'email'] }),
+      User.findOne({
+        where: { email, id: { [Op.ne]: helpers.getUser(req).id } }
+      }),
+      User.findOne({
+        where: { account, id: { [Op.ne]: helpers.getUser(req).id } }
+      })
+    ])
+      .then(([user, userEmail, userAccount]) => {
+        if (userEmail) throw new Error('Email already exists!')
+        if (userAccount) throw new Error('Account already registered!')
+        if (!user) throw new Error("User didn't exist!")
+        updatedUser = user
+        return bcrypt.hash(password, 10)
+      })
+      .then((hash) => {
+        return updatedUser.update({
+          name,
+          account,
+          email,
+          password: hash
+        })
+      })
+      .then((updatedUser) => {
+        return cb(null, updatedUser)
+      })
+      .catch(err => cb(err))
+  },
+  
 }
 
 module.exports = userServices
