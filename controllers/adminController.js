@@ -61,14 +61,15 @@ const adminController = {
   },
   deleteUser: (req, res, next) => {
     const userId = req.params.id
-    User.findByPk(userId).then((user) => {
-      user.destroy().then(() => {
-        return res
-          .status(200)
-          .json('Delete success')
+    User.findByPk(userId)
+      .then((user) => {
+        user.destroy().then(() => {
+          return res
+            .status(200)
+            .json('Delete success')
+        })
+          .catch(error => next(error))
       })
-        .catch(error => next(error))
-    })
       .catch(error => next(error))
   },
   getTweets: (req, res, next) => {
@@ -133,12 +134,13 @@ const adminController = {
   },
   deleteReply: (req, res, next) => {
     const replyId = req.params.id
-    Reply.findByPk(replyId).then((reply) => {
-      reply.destroy().then(() => {
-        return res.status(200).json('Delete success')
+    Reply.findByPk(replyId)
+      .then((reply) => {
+        reply.destroy().then(() => {
+          return res.status(200).json('Delete success')
+        })
+          .catch(error => next(error))
       })
-        .catch(error => next(error))
-    })
       .catch(error => next(error))
   }
 }
