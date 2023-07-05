@@ -10,6 +10,7 @@ const db = {}
 
 let sequelize
 if (config.use_env_variable) {
+  console.log(process.env.POSTGRESQL_DB_URI)
   sequelize = new Sequelize(process.env.POSTGRESQL_DB_URI, config)
 } else {
   sequelize = new Sequelize(config.database, config.username, config.password, config)
