@@ -3,11 +3,11 @@ const { getDate } = require('../_helpers')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const tweets = await queryInterface.sequelize.query(
-      'SELECT id FROM tweets;',
+      'SELECT id FROM tweet;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const users = await queryInterface.sequelize.query(
-      'SELECT id FROM users WHERE id > (SELECT MIN(id) FROM users);',
+      'SELECT id FROM user WHERE id > (SELECT MIN(id) FROM user);',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const repliesData = []

@@ -3,7 +3,7 @@ const { getDate } = require('../_helpers')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
-      'SELECT id FROM users;',
+      'SELECT id FROM user;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const dateArray = getDate(50)
