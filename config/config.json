@@ -15,7 +15,7 @@
     "logging": false
   },
   "production": {
-    "use_env_variable": "POSTGRESQL_DB_URI"
+    "use_env_variable": "AWS_DB_URI"
   },
   "travis": {
     "username": "travis",
