@@ -99,7 +99,7 @@ const userServices = {
           likeCount: tweet.Likes.length,
           currentUserIsLiked: currentUser.Likes.some(like => like.TweetId === tweet.id)
         }))
-        return cb(null,tweetsData)
+        return cb(null, tweetsData)
       })
       .catch(err => cb(err))
   },
@@ -153,7 +153,146 @@ const userServices = {
         return cb(null, likesData)
       })
       .catch(err => cb(err))
-  }
+  },
+  getUserFollowings: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        attributes: ['id', 'name',],
+        include: [
+          {
+            model: User, as: 'Followings',
+            attributes: ['id', 'name', 'introduction', 'avatar'],
+            through: { attributes: ['createdAt'] },
+          },
+        ]
+      }),
+      Tweet.count({ where: { UserId: req.params.id } })
+    ])
+      .then(([user, tweetCount]) => {
+        if (!user) throw new Error(`User didn't exist`)
+        let followings = user.Followings.map(following => ({
+          followingId: following.id,
+          followingName: following.name,
+          followingAvatar: following.avatar,
+          followingIntroduction: following.introduction,
+          followshipCreatedAt: following.Followship.createdAt,
+          isFollowing: helpers.getUser(req).Followings.some(f => f.id === following.id)
+        }))
+        followings = followings.sort((a, b) =>
+          new Date(b.followshipCreatedAt) - new Date(a.followshipCreatedAt))
+        const result = {
+          userId: user.id,
+          userName: user.name,
+          tweetCount: tweetCount,
+          followings: followings
+        }
+        return cb(null, result)
+      })
+      .catch(err => cb(err))
+  },
+  getUserFollowers: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followers', }],
+      }),
+      Tweet.count({ where: { UserId: req.params.id } })
+    ])
+      .then(([user, tweetCount]) => {
+        if (!user) throw new Error(`User didn't exist`)
+        const followers = user.Followers.map(follower => {
+          return {
+            followerName: follower.name,
+            followerAvatar: follower.avatar,
+            followerIntroduction: follower.introduction,
+            followerId: follower.Followship.followerId,
+            createdAt: follower.Followship.createdAt,
+            isFollowed: helpers.getUser(req).Followings.some(f => f.id === follower.id)
+          }
+        })
+        followers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        const result = {
+          userId: user.id,
+          userName: user.name,
+          tweetCount: tweetCount,
+          followers: followers
+        }
+        return cb(null, result)
+      })
+      .catch(err => cb(err))
+  },
+  editUser: (req, cb) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) throw new Error(`User didn't exist`)
+        user = user.toJSON()
+        delete user.password
+        return cb(null, user)
+      })
+      .catch(err => cb(err))
+  },
+  putUser: (req, { name, introduction }, cb) => {
+    const files = req.files || {}
+    return Promise.all([
+      User.findByPk(helpers.getUser(req).id),
+      files.avatar ? imgurFileHandler(files.avatar[0]) : null,
+      files.banner ? imgurFileHandler(files.banner[0]) : null
+    ])
+      .then(([user, avatarPath, bannerPath]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (user.id !== Number(req.params.id)) throw new Error('Edit self profile only!')
+        return user.update({
+          name,
+          introduction,
+          avatar: avatarPath || user.avatar,
+          banner: bannerPath || user.banner
+        })
+      })
+      .then((updatedUser) => {
+        updatedUser = updatedUser.toJSON()
+        delete updatedUser.password
+        return cb(null, updatedUser)
+      })
+      .catch(err => cb(err))
+  },
+  getSetUser: (req, cb) => {
+    return User.findByPk(helpers.getUser(req).id, { attributes: ['id', 'name', 'account', 'email'] })
+      .then((user) => {
+        if (!user) throw new Error("User didn't exist!")
+        return cb(null, user)
+      })
+      .catch(err => cb(err))
+  },
+  putSetUser: (req, { account, name, email, password }, cb) => {
+    return Promise.all([
+      User.findByPk(helpers.getUser(req).id, { attributes: ['id', 'name', 'account', 'email'] }),
+      User.findOne({
+        where: { email, id: { [Op.ne]: helpers.getUser(req).id } }
+      }),
+      User.findOne({
+        where: { account, id: { [Op.ne]: helpers.getUser(req).id } }
+      })
+    ])
+      .then(([user, userEmail, userAccount]) => {
+        if (userEmail) throw new Error('Email already exists!')
+        if (userAccount) throw new Error('Account already registered!')
+        if (!user) throw new Error("User didn't exist!")
+        updatedUser = user
+        return bcrypt.hash(password, 10)
+      })
+      .then((hash) => {
+        return updatedUser.update({
+          name,
+          account,
+          email,
+          password: hash
+        })
+      })
+      .then((updatedUser) => {
+        return cb(null, updatedUser)
+      })
+      .catch(err => cb(err))
+  },
+  
 }
 
 module.exports = userServices
