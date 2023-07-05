@@ -2,10 +2,6 @@
 const { User } = require('../../models')
 const usersInPublic = require('../modules/userOnline')
 
-const findUserIndexInPublic = user => {
-  return usersInPublic.findIndex(item => item.account === user.account)
-}
-
 const helper = {
   userExist: async userAccount => {
     const user = await User.findOne({
@@ -15,11 +11,20 @@ const helper = {
     if (!user) throw new Error('使用者不存在！')
     return user.toJSON()
   },
+  findUserIndexInPublic: user => {
+    return usersInPublic.findIndex(item => item.account === user.account)
+  },
+  findUserInPublicWithSocketId: socketId => {
+    return usersInPublic.find(user => user.socketId === socketId)
+  },
+  findUserInPublicWithAccount: account => {
+    return usersInPublic.find(user => user.account === account)
+  },
   isUserInPublic: user => {
-    return findUserIndexInPublic(user) !== -1
+    return helper.findUserIndexInPublic(user) !== -1
   },
   isUserIndexInPublic: user => {
-    return findUserIndexInPublic(user)
+    return helper.findUserIndexInPublic(user)
   },
   hasMessage: message => {
     const m = message.trim()
