@@ -7,7 +7,7 @@ const fields = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner',
 const passport = require('../../config/passport')
 
 router.post('/signin', (req, res, next) => {
-  if (!req.body.account || !req.body.password) res.status(400).json({ status: 'error', message: "Account and Password is required" })
+  if (!req.body.account || !req.body.password) return res.status(400).json({ status: 'error', message: "Account and Password is required" })
   next()
 },
   passport.authenticate('local', { session: false }), userController.signIn)
