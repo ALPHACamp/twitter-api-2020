@@ -15,7 +15,7 @@
     "logging": false
   },
   "production": {
-    "use_env_variable": "CLEARDB_DATABASE_URL"
+    "POSTGRESQL_DB_URI": "postgres://simple_twitter_9qw4_user:3OrLYBb0PwTeoN0rvOafF2Yjyg3w51Sb@dpg-ciie24aip7vpelr2mofg-a/simple_twitter_9qw4"
   },
   "travis": {
     "username": "travis",
