@@ -7,11 +7,12 @@ const basename = path.basename(__filename)
 const env = process.env.NODE_ENV || 'development'
 const config = require(path.join(__dirname, '/../config/config.json'))[env]
 const db = {}
-
 let sequelize
 if (config.use_env_variable) {
-  console.log(process.env.POSTGRESQL_DB_URI)
-  sequelize = new Sequelize(process.env.POSTGRESQL_DB_URI, config)
+  console.log('hi')
+  sequelize = new Sequelize(process.env.POSTGRESQL_DB_URI, {
+    dialect: 'postgres'
+  })
 } else {
   sequelize = new Sequelize(config.database, config.username, config.password, config)
 }
