@@ -23,7 +23,6 @@ const helper = {
     return index
   },
   findUserInPublic: (input, typeString) => {
-    console.log('findUserInPublic')
     if (typeString === 'id') input = Number(input)
     return usersInPublic.find(user => user[typeString] === input)
   },
