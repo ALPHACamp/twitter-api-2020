@@ -29,7 +29,6 @@ module.exports = async (io, socket, account) => {
       // broadcast 上線訊息
       socket.broadcast.emit('server-join', `${user.name} 上線`)
     }
-    console.log(usersInPublic)
   } catch (err) {
     emitError(socket, err)
   }
