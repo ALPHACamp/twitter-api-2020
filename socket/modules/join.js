@@ -1,10 +1,10 @@
 const usersInPublic = require('./userOnline')
-const { userExist, emitError, findUserInPublicWithAccount } = require('../helper')
+const { userExistInDB, emitError, findUserInPublic } = require('../helper')
 
 module.exports = async (io, socket, account) => {
   try {
     // 檢查 使用者是否存在上線名單中
-    const userOnList = findUserInPublicWithAccount(account)
+    const userOnList = findUserInPublic(account, 'account')
 
     if (userOnList) {
       // 使用者 reconnect
@@ -14,7 +14,7 @@ module.exports = async (io, socket, account) => {
     } else {
       // 使用者上線
       console.log('使用者上線')
-      const user = await userExist(account)
+      const user = await userExistInDB(account, 'account')
       user.socketId = socket.id
 
       // 給全部使用者 更新的上線名單

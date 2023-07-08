@@ -1,12 +1,12 @@
 const usersInPublic = require('./userOnline')
-const { emitError, findUserInPublicWithSocketId, findUserIndexInPublic } = require('../helper')
+const { emitError, findUserInPublic, findUserIndexInPublic } = require('../helper')
 
-const timeoutTime = 5000
+const timeoutTime = 10000 // 10sec
 
 module.exports = async (io, socket, reason) => {
   try {
     // 確認者用者在 上線名單中
-    const user = findUserInPublicWithSocketId(socket.id)
+    const user = findUserInPublic(socket.id, 'socketId')
 
     // 找不到使用者代表使用者有正常下線 (使用 client-leave)
     if (!user) return
@@ -14,7 +14,7 @@ module.exports = async (io, socket, reason) => {
     // 找到使用者，代表使用者可能斷線，或是刷新頁面
     const timeout = setTimeout(() => {
       // 從上線名單移除使用者 (放在裡面以免期間有其他使用者被刪除搞亂index)
-      const index = findUserIndexInPublic(user)
+      const index = findUserIndexInPublic(user.account, 'account')
       usersInPublic.splice(index, 1)
       // broadcast 更新的上線名單
       socket.broadcast.emit('server-update', usersInPublic)

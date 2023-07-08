@@ -1,10 +1,10 @@
-const { userExist, hasMessage, emitError } = require('../helper')
+const { userExistInDB, hasMessage, emitError } = require('../helper')
 const { Chat } = require('../../models')
 // 公開訊息與私人訊息之後會使用 room 參數判斷
 module.exports = async (io, socket, userAccount, message, room = null) => {
   try {
     // 檢查 使用者存在
-    const user = await userExist(userAccount)
+    const user = await userExistInDB(userAccount, 'account')
     // 檢查有沒有訊息 (同時用trim)
     const trimmedMessage = hasMessage(message)
 
