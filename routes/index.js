@@ -49,6 +49,12 @@ router.put('/users/:id',
     { name: 'coverPhoto', maxCount: 1 }
   ]), authenticated, userController.putUser)
 router.delete('/users/:id', authenticated, userController.deleteUser)
+router.get(
+  '/users/:id/vertify',
+  authenticated,
+  userController.sendVertifyEmail
+)
+router.get('/confirm/:token', userController.confirmEmail)
 
 router.use('/', apiErrorHandler)
 module.exports = router

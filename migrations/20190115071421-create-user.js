@@ -35,6 +35,13 @@ module.exports = {
       role: {
         type: Sequelize.STRING
       },
+      status:{
+        type: Sequelize.STRING,
+        defaultValue: 'Pending'
+      },
+      confirm_token: {
+        type: Sequelize.STRING
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE
