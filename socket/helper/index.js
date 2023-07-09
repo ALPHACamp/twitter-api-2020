@@ -49,13 +49,13 @@ const helper = {
       raw: true
     })
     console.log('getAllRoom:', rooms)
-    return rooms
+    const roomsArray = rooms.map(room => room.id)
+    return roomsArray
   },
   joinAllRooms: (socket, rooms) => {
-    rooms.forEach(room => {
-      socket.join(room.id.toString())
+    rooms.forEach(roomId => {
+      socket.join(roomId.toString())
     })
-    console.log('joinAllRooms', socket.rooms)
   }
 }
 module.exports = helper

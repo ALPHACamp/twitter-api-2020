@@ -14,11 +14,11 @@ module.exports = io => {
     // 離線
     socket.on('client-leave', account => leave(io, socket, account))
     // 傳送訊息
-    socket.on('client-message', (account, message, room = null) => sendMessage(io, socket, account, message, room))
+    socket.on('client-message', (message, room, time) => sendMessage(io, socket, message, room, time))
     // 歷史訊息
     socket.on('client-record', (room = null) => record(io, socket, room))
     // 取得我跟對象的roomId
-    socket.on('client-get-room', targetId => getRoom(socket, targetId))
+    socket.on('client-get-room', targetId => getRoom(io, socket, targetId))
 
     // 使用者斷線
     socket.on('disconnect', reason => disconnect(io, socket, reason))

@@ -17,8 +17,11 @@ module.exports = async (io, socket, account) => {
       // 使用者 reconnect
       console.log('使用者已經恢復連線 取消timeout')
       clearTimeout(userOnList.timeout)
-      // 更新socket.id
+      // 更新使用者資訊
       userOnList.socketId = socket.id
+      // userOnList.rooms = await getAllRooms(userOnList.id)
+      // userOnList.socket = socket
+
       delete userOnList.timeout
     }
 
@@ -27,7 +30,12 @@ module.exports = async (io, socket, account) => {
       // 使用者上線
       console.log('使用者上線')
       const user = await userExistInDB(account, 'account')
+      // 更新使用者資訊
       user.socketId = socket.id
+      user.rooms = await getAllRooms(user.id)
+
+      // cause error
+      // user.socketObject = socket
 
       // 給全部使用者 更新的上線名單
       usersInPublic.push(user)
@@ -41,7 +49,6 @@ module.exports = async (io, socket, account) => {
 
     // 把使用者加入擁有的rooms中
     // 重複的房間會自動忽略
-    if (!userOnList) throw new Error('使用者還不存在於上線名單中！')
     const rooms = await getAllRooms(userOnList.id)
     joinAllRooms(socket, rooms) // join rooms
 

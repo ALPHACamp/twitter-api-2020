@@ -1,8 +1,8 @@
-const { emitError, findUserInPublic, userExistInDB } = require('../helper')
+const { emitError, findUserInPublic, userExistInDB, getAllRooms, joinAllRooms } = require('../helper')
 const { Room } = require('../../models')
 const { Op } = require('sequelize')
 
-module.exports = async (socket, targetId) => {
+module.exports = async (io, socket, targetId) => {
   try {
     // get user Id
     const currentUser = findUserInPublic(socket.id, 'socketId')
@@ -33,7 +33,18 @@ module.exports = async (socket, targetId) => {
         userTwoId: targetId
       })
     }
+    // 傳遞房間給使用者
     socket.emit('server-get-room', room.id)
+
+    // 檢查目標是否在線上
+    const targetUser = findUserInPublic(targetId, 'id')
+    if (!targetUser) return
+
+    // 在線上就找到目標socket，找出所屬房間，加入房間，更新資訊
+    const targetSocket = io.sockets.sockets.get(targetUser.socketId)
+    const targetRooms = await getAllRooms(targetId)
+    joinAllRooms(targetSocket, targetRooms)
+    targetUser.rooms = targetRooms
   } catch (err) {
     emitError(socket, err)
   }
