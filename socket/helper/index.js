@@ -3,28 +3,28 @@ const { User } = require('../../models')
 const usersInPublic = require('../modules/userOnline')
 
 const helper = {
-  userExist: async userAccount => {
+  // user in DB
+  userExistInDB: async (input, typeString) => {
+    if (typeString === 'id') input = Number(input)
+    const whereCondition = { [typeString]: input }
+    // if typeString = id, but input is string, Error of NaN
+
     const user = await User.findOne({
-      where: { account: userAccount },
+      where: whereCondition,
       attributes: ['id', 'account', 'name', 'avatar']
     })
     if (!user) throw new Error('使用者不存在！')
     return user.toJSON()
   },
-  findUserIndexInPublic: user => {
-    return usersInPublic.findIndex(item => item.account === user.account)
+  // user online
+  findUserIndexInPublic: (input, typeString) => {
+    if (typeString === 'id') input = Number(input)
+    const index = usersInPublic.findIndex(user => user[typeString] === input)
+    return index
   },
-  findUserInPublicWithSocketId: socketId => {
-    return usersInPublic.find(user => user.socketId === socketId)
-  },
-  findUserInPublicWithAccount: account => {
-    return usersInPublic.find(user => user.account === account)
-  },
-  isUserInPublic: user => {
-    return helper.findUserIndexInPublic(user) !== -1
-  },
-  isUserIndexInPublic: user => {
-    return helper.findUserIndexInPublic(user)
+  findUserInPublic: (input, typeString) => {
+    if (typeString === 'id') input = Number(input)
+    return usersInPublic.find(user => user[typeString] === input)
   },
   hasMessage: message => {
     const m = message.trim()
@@ -32,6 +32,7 @@ const helper = {
     return m
   },
   emitError: (socket, err) => {
+    console.log(`Server Error: ${err.message}`)
     socket.emit('server-error', `Error: ${err.message}`)
   }
 }
