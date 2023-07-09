@@ -33,8 +33,8 @@ module.exports = {
             timestamp: new Date(),
             createdAt: new Date(),
             updatedAt: new Date()
-          })
-          chats.push({
+          },
+          {
             message: faker.lorem.words(2),
             userId: rooms[i].userTwoId,
             roomId: rooms[i].id,
