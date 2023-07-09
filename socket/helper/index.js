@@ -1,6 +1,8 @@
 // 用來驗證一些基本問題
-const { User } = require('../../models')
+
+const { User, Room } = require('../../models')
 const usersInPublic = require('../modules/userOnline')
+const { Op } = require('sequelize')
 
 const helper = {
   // user in DB
@@ -34,6 +36,25 @@ const helper = {
   emitError: (socket, err) => {
     console.log(`Server Error: ${err.message}`)
     socket.emit('server-error', `Error: ${err.message}`)
+  },
+  getAllRooms: async userId => {
+    const rooms = await Room.findAll({
+      where: {
+        [Op.or]: [
+          { userOneId: userId },
+          { userTwoId: userId }
+        ]
+      },
+      attributes: ['id'],
+      raw: true
+    })
+    const roomsArray = rooms.map(room => room.id.toString())
+    return roomsArray
+  },
+  joinAllRooms: (socket, rooms) => {
+    rooms.forEach(roomId => {
+      socket.join(roomId.toString())
+    })
   }
 }
 module.exports = helper
