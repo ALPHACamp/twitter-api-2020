@@ -48,7 +48,7 @@ const helper = {
       attributes: ['id'],
       raw: true
     })
-    const roomsArray = rooms.map(room => room.id)
+    const roomsArray = rooms.map(room => room.id.toString())
     return roomsArray
   },
   joinAllRooms: (socket, rooms) => {

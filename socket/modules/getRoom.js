@@ -36,7 +36,7 @@ module.exports = async (io, socket, targetId) => {
       })
     }
     // 傳遞房間給使用者
-    socket.emit('server-get-room', room.id)
+    socket.emit('server-get-room', room.id.toString())
 
     // 把使用者加入房間
     const userRooms = await getAllRooms(currentUserId)
