@@ -14,7 +14,7 @@ module.exports = io => {
     // 離線
     socket.on('client-leave', account => leave(io, socket, account))
     // 傳送訊息
-    socket.on('client-message', (message, room, time) => sendMessage(io, socket, message, room, time))
+    socket.on('client-message', (message, roomId, time) => sendMessage(socket, message, roomId, time))
     // 歷史訊息
     socket.on('client-record', (room = null) => record(io, socket, room))
     // 取得我跟對象的roomId

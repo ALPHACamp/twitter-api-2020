@@ -1,7 +1,8 @@
 const { userExistInDB, hasMessage, findUserInPublic, emitError } = require('../helper')
 const { Chat } = require('../../models')
+
 // 公開訊息與私人訊息之後會使用 room 參數判斷
-module.exports = async (io, socket, message, roomId, timestamp) => {
+module.exports = async (socket, message, roomId, timestamp) => {
   try {
     // default
     const room = roomId ?? '1'
@@ -9,6 +10,7 @@ module.exports = async (io, socket, message, roomId, timestamp) => {
 
     // 檢查 使用者存在
     const currentUser = findUserInPublic(socket.id, 'socketId')
+
     if (!currentUser) throw new Error('You need to client-join first')
     const userId = currentUser.id
     const user = await userExistInDB(userId, 'id')

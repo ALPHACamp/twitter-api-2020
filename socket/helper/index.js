@@ -48,7 +48,6 @@ const helper = {
       attributes: ['id'],
       raw: true
     })
-    console.log('getAllRoom:', rooms)
     const roomsArray = rooms.map(room => room.id)
     return roomsArray
   },

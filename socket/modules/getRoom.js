@@ -6,6 +6,8 @@ module.exports = async (io, socket, targetId) => {
   try {
     // get user Id
     const currentUser = findUserInPublic(socket.id, 'socketId')
+    console.log('currentUser:', currentUser)
+
     if (!currentUser) throw new Error('you need to use client-join first')
     const currentUserId = currentUser.id
 
@@ -35,6 +37,10 @@ module.exports = async (io, socket, targetId) => {
     }
     // 傳遞房間給使用者
     socket.emit('server-get-room', room.id)
+
+    // 把使用者加入房間
+    const userRooms = await getAllRooms(currentUserId)
+    joinAllRooms(socket, userRooms)
 
     // 檢查目標是否在線上
     const targetUser = findUserInPublic(targetId, 'id')
