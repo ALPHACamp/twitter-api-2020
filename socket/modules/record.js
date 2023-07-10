@@ -1,11 +1,19 @@
 const { emitError } = require('../helper')
-const { Chat, User } = require('../../models')
+const { Chat, User, Room } = require('../../models')
 
-module.exports = async (io, socket, room) => {
+module.exports = async (io, socket, roomId) => {
   try {
+    // 如未傳入值，預設為public room
+    if (!roomId) {
+      const room = await Room.findOne({ attributes: ['id'], raw: true })
+      roomId = room.id
+    } else {
+      const room = await Room.findOne({ where: { id: roomId } })
+      if (!room) throw new Error('此聊天室不存在!')
+    }
     // 訊息由舊到新排序
     let records = await Chat.findAll({
-      where: { roomId: room },
+      where: { roomId },
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
       nest: true,
       order: [['timestamp', 'ASC']],
