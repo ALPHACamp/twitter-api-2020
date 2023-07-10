@@ -10,6 +10,10 @@ module.exports = async (socket, message, timestamp, roomId) => {
     const room = roomId ?? publicRoom.id
     const time = timestamp ?? new Date()
 
+    // 檢查 聊天室存在
+    const isRoom = await Room.findOne({ where: { id: room } })
+    if (!isRoom) throw new Error('此聊天室不存在!')
+
     // 檢查 使用者存在
     const currentUser = findUserInPublic(socket.id, 'socketId')
 
