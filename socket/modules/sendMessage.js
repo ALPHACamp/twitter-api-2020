@@ -1,11 +1,15 @@
 const { userExistInDB, hasMessage, findUserInPublic, emitError } = require('../helper')
-const { Chat } = require('../../models')
+const { Chat, Room } = require('../../models')
 
 // 公開訊息與私人訊息之後會使用 room 參數判斷
 module.exports = async (socket, message, roomId, timestamp) => {
   try {
+    // 避免資料庫跳號問題，先找出public room id
+    const publicRoom = await Room.findOne({ attributes: ['id'], raw: true })
+    console.log('publicroom:', publicRoom)
     // default
-    const room = roomId ?? '1'
+    const room = roomId ?? publicRoom.id
+    console.log('room:', room)
     const time = timestamp ?? new Date()
 
     // 檢查 使用者存在
@@ -26,11 +30,13 @@ module.exports = async (socket, message, roomId, timestamp) => {
       room
     }
     // 傳遞
-    if (room === '1') {
+    if (room.toString() === publicRoom.id.toString()) {
       // 公開訊息
+      console.log('傳送公開訊息')
       socket.broadcast.emit('server-message', msgPackage)
     } else {
       // 一對一訊息
+      console.log('傳送私人訊息')
       socket.to(room).emit('server-message', msgPackage)
     }
     // 儲存訊息至DB
