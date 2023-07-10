@@ -9,13 +9,15 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       account: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
       name: {
         type: Sequelize.STRING
       },
       email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
       password: {
         type: Sequelize.STRING
@@ -35,7 +37,7 @@ module.exports = {
       role: {
         type: Sequelize.STRING
       },
-      status:{
+      status: {
         type: Sequelize.STRING,
         defaultValue: 'Pending'
       },
