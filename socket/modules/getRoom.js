@@ -4,6 +4,8 @@ const { Op } = require('sequelize')
 
 module.exports = async (io, socket, targetId) => {
   try {
+    console.log('client get room')
+
     // get user Id
     const currentUser = findUserInPublic(socket.id, 'socketId')
     console.log('currentUser:', currentUser)

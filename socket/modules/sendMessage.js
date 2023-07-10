@@ -2,14 +2,12 @@ const { userExistInDB, hasMessage, findUserInPublic, emitError } = require('../h
 const { Chat, Room } = require('../../models')
 
 // 公開訊息與私人訊息之後會使用 room 參數判斷
-module.exports = async (socket, message, roomId, timestamp) => {
+module.exports = async (socket, message, timestamp, roomId) => {
   try {
     // 避免資料庫跳號問題，先找出public room id
     const publicRoom = await Room.findOne({ attributes: ['id'], raw: true })
-    console.log('publicroom:', publicRoom)
     // default
     const room = roomId ?? publicRoom.id
-    console.log('room:', room)
     const time = timestamp ?? new Date()
 
     // 檢查 使用者存在
