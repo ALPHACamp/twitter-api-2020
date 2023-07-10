@@ -5,9 +5,7 @@ const followController = {
     const followerId = req.user.id || getUser(req).dataValues.id
     const followingId = req.body.id
     if (!followingId) {
-      return res
-        .status(400)
-        .json('Following id is necessary')
+      return res.status(400).json('Following id is necessary')
     }
     if (Number(followerId) === Number(followingId)) {
       return res.status(400).json('Can not follow yourself')
@@ -24,9 +22,7 @@ const followController = {
         }
         return Followship.create({
           followerId,
-          followingId,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          followingId
         })
       })
       .then(() => res.status(200).json('Add success'))
@@ -39,17 +35,18 @@ const followController = {
       return res.status(400).json('Following id is necessary')
     }
 
-    return Followship.findOne({
+    return Followship.destroy({
       where: {
         followerId,
         followingId
       }
     })
-      .then((followship) => {
-        if (!followship) { return res.status(401).json('Not followed yet') }
-        return followship.destroy()
+      .then((count) => {
+        if (count === 0) {
+          return res.status(401).json('Not followed yet')
+        }
+        return res.status(200).json('unfollow success')
       })
-      .then(() => res.status(200).json('unfollow success'))
       .catch((error) => next(error))
   },
   getFollowers: (req, res, next) => {
@@ -123,23 +120,31 @@ const followController = {
       .then((user) => {
         if (!user) return res.status(400).json('User not exists')
         return user.getFollowings({
-          attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'updatedAt'],
+          attributes: [
+            'id',
+            'name',
+            'account',
+            'avatar',
+            'introduction',
+            'updatedAt'
+          ],
           raw: true,
           nest: true
         })
       })
       .then((followings) => {
-        const data = followings.map(following => {
-          const introduction = following.introduction?.substring(0, 50)
-          return {
-            followingId: following?.id,
-            name: following?.name,
-            account: following?.account,
-            avatar: following?.avatar,
-            introduction,
-            updatedAt: following?.Followship?.updatedAt
-          }
-        })
+        const data = followings
+          .map((following) => {
+            const introduction = following.introduction?.substring(0, 50)
+            return {
+              followingId: following?.id,
+              name: following?.name,
+              account: following?.account,
+              avatar: following?.avatar,
+              introduction,
+              updatedAt: following?.Followship?.updatedAt
+            }
+          })
           .sort((a, b) => Number(b.updatedAt) - Number(a.updatedAt))
         return data
       })
@@ -173,13 +178,11 @@ const followController = {
     const TweetId = req.params.id
     if (!TweetId) return res.status(400).json('Tweet id is necessary')
     // 檢查是否有推文
-    return Tweet.findByPk(TweetId)
-      .then((tweet) => {
-        if (!tweet) {
+    return Tweet.count({ where: { id: TweetId } })
+      .then((count) => {
+        if (count === 0) {
           return res.status(400).json('Tweet id not exists')
         }
-      })
-      .then(() => {
         return Like.findOne({
           where: {
             UserId,
@@ -188,13 +191,11 @@ const followController = {
           raw: true
         })
       })
-      .then(like => {
+      .then((like) => {
         if (like) return res.status(400).json('Already liked')
         return Like.create({
           UserId,
-          TweetId,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          TweetId
         })
       })
       .then(() => res.status(200).json('Like success'))
@@ -212,7 +213,7 @@ const followController = {
     })
       .then((like) => {
         if (!like) return res.status(400).json('Not liked yet')
-        if (like.toJSON().UserId !== UserId) return res.status(400).json('Your not like by yourself')
+        if (like.toJSON().UserId !== UserId) { return res.status(400).json('Your not like by yourself') }
         return like.destroy()
       })
       .then(() => res.status(200).json('Unlike success'))

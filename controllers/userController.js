@@ -4,6 +4,8 @@ const { getUser } = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { Op, Sequelize } = require('sequelize')
 const bcrypt = require('bcryptjs')
+const nodemailer = require('../config/nodemailer')
+
 const userController = {
   signIn: (req, res, next) => {
     const { from } = req.query
@@ -45,15 +47,19 @@ const userController = {
       .then(([emailCheck, accountCheck]) => {
         if (emailCheck) return res.status(200).json('Email already exists!')
         if (accountCheck) { return res.status(200).json('Account already exists!') }
-        return bcrypt.hash(password, 10)
+        return Promise.all([
+          bcrypt.hash(password, 10),
+          jwt.sign({ email: req.body.email }, process.env.JWT_SECRET)
+        ])
       })
-      .then((hash) =>
+      .then(([hash, confirmToken]) =>
         User.create({
           account,
           name,
           email,
           password: hash,
-          role: 'user'
+          role: 'user',
+          confirmToken
         })
       )
       .then(() => {
@@ -325,6 +331,42 @@ const userController = {
         res.status(200).json(final)
       })
       .catch((err) => next(err))
+  },
+  sendVertifyEmail: (req, res, next) => {
+    const userId = req.user.id || getUser(req).dataValues.id
+    const { email } = req.body
+    User.findByPk(userId, { attributes: ['name', 'confirmToken'] })
+      .then((user) => {
+        if (!user) return res.status(404).json('User not found')
+        return nodemailer.sendConfirmationEmail(user.name, email, user.confirmToken)
+      })
+      .then(() => res.status(200).json('Send success'))
+      .catch((err) => next(err))
+  },
+  confirmEmail: (req, res, next) => {
+    const token = req.params.token
+    console.log('confirmEmail', token)
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        // The token is invalid
+        res.status(403).json('Invalid confirmation token')
+      } else {
+        // The token is valid
+        const email = decoded.email
+        // Update the user's status
+        User.findOne({ where: { email } })
+          .then((user) => {
+            if (!user) return res.status(404).json('User not found')
+            // Update the user's status
+            user.status = 'Active'
+            return user.save()
+          })
+          .then(() => {
+            res.status(200).json('Your email has been confirmed!')
+          })
+          .catch((err) => next(err))
+      }
+    })
   }
 }
 
