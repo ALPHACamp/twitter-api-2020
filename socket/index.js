@@ -16,7 +16,7 @@ module.exports = io => {
     // 傳送訊息
     socket.on('client-message', (message, roomId, time) => sendMessage(socket, message, roomId, time))
     // 歷史訊息
-    socket.on('client-record', (room = 1) => record(io, socket, room))
+    socket.on('client-record', room => record(io, socket, room))
     // 取得我跟對象的roomId
     socket.on('client-get-room', targetId => getRoom(io, socket, targetId))
 
