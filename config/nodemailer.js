@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     type: 'OAuth2',
-    user: 'vertify49@gmail.com',
+    user: process.env.GMAIL_ACCOUNT,
     clientId: process.env.OAUTH_CLIENT_ID,
     clientSecret: process.env.OAUTH_CLIENT_SECRET,
     refreshToken: process.env.REFRESH_TOKEN,
@@ -29,7 +29,7 @@ const transporter = nodemailer.createTransport({
 module.exports.sendConfirmationEmail = (name, email, confirmToken, serverDomain) => {
   transporter
     .sendMail({
-      from: 'vertify49@gmail.com',
+      from: process.env.GMAIL_ACCOUNT,
       to: `${email}`,
       subject: 'Please confirm your account',
       html: `<h1>Email Confirmation</h1>

@@ -6,6 +6,10 @@ const tweetController = {
     const liked = req.query.liked
     const userId = getUser(req).id || getUser(req).dataValues.id
     const searchUserId = req.params.id
+    const limit = parseInt(req.query.limit) || 10
+    const page = parseInt(req.query.page) || 1
+    const offset = limit * (page - 1)
+
     let counts
     if (liked) {
       Like.findAll({
@@ -25,7 +29,10 @@ const tweetController = {
               { model: Like, attributes: ['UserId', 'updatedAt'] },
               { model: Reply, attributes: ['UserId'] }
             ],
-            nest: true
+            nest: true,
+            order: [['createdAt', 'DESC']],
+            limit,
+            offset
           })
         })
         .then((tweets) => {
@@ -62,10 +69,12 @@ const tweetController = {
           { model: Reply, attributes: ['UserId'] }
         ],
         nest: true,
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        limit,
+        offset
       })
         .then((tweets) => {
-          if (tweets.length === 0) return res.status(404).json('Tweets not found')
+          if (tweets.length === 0) { return res.status(404).json('Tweets not found') }
           counts = tweets.map((tweet) => ({
             ...tweet.toJSON(),
             account: tweet.User?.account,
