@@ -18,7 +18,6 @@ const tweetController = {
           return likes.map((row) => row.TweetId)
         })
         .then((tweetIds) => {
-          console.log(tweetIds)
           return Tweet.findAll({
             where: { id: tweetIds },
             include: [
