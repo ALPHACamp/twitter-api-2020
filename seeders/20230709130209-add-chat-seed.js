@@ -16,10 +16,10 @@ module.exports = {
     const chats = []
     for (let i = 0; i < rooms.length; i++) {
       if (i === 0) {
-        chats.push(...Array.from({ length: 6 }, (_, i) => ({
+        chats.push(...Array.from({ length: 6 }, () => ({
           message: faker.lorem.words(2),
           userId: users[Math.floor(Math.random() * users.length)].id,
-          roomId: rooms[i].id,
+          roomId: rooms[0].id,
           timestamp: new Date(),
           createdAt: new Date(),
           updatedAt: new Date()

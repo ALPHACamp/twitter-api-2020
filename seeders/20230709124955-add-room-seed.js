@@ -18,12 +18,19 @@ module.exports = {
       const excludeSelfUsers = users.filter(u => u.id !== user.id)
       for (let i = 0; i < 2; i++) {
         const randomIndex = Math.floor(Math.random() * excludeSelfUsers.length)
-        rooms.push({
-          userOneId: user.id,
-          userTwoId: excludeSelfUsers[randomIndex].id,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        })
+        const isRoomExist = rooms.some(r =>
+          (r.userOneId === user.id & r.userTwoId === excludeSelfUsers[randomIndex].id) ||
+            (r.userOneId === excludeSelfUsers[randomIndex].id && r.userTwoId === user.id))
+        if (!isRoomExist) {
+          rooms.push({
+            userOneId: user.id,
+            userTwoId: excludeSelfUsers[randomIndex].id,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          })
+        } else {
+          i--
+        }
         // avoid to follow same user
         excludeSelfUsers.splice(randomIndex, 1)
       }
