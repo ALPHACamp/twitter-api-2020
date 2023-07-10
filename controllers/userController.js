@@ -46,7 +46,7 @@ const userController = {
     ])
       .then(([emailCheck, accountCheck]) => {
         if (emailCheck) return res.status(200).json('Email already exists!')
-        if (accountCheck) { return res.status(200).json('Account already exists!') }
+        if (accountCheck) return res.status(200).json('Account already exists!')
         return Promise.all([
           bcrypt.hash(password, 10),
           jwt.sign({ email: req.body.email }, process.env.JWT_SECRET)
@@ -90,6 +90,82 @@ const userController = {
       })
       .catch((err) => next(err))
   },
+  // putUser: async (req, res, next) => {
+  //   try {
+  //     const userId = Number(req.user.id) || Number(getUser(req).dataValues?.id)
+  //     const paramsUserId = Number(req.params.id)
+  //     if (paramsUserId !== userId) {
+  //       return res.status(403).json('Can not change others data')
+  //     }
+  //     let fileData = null
+  //     if (req.files) {
+  //       const { avatar, coverPhoto } = req.files
+  //       let avatarPath, coverPhotoPath
+  //       if (avatar) avatarPath = await imgurFileHandler(avatar[0])
+  //       if (coverPhoto) coverPhotoPath = await imgurFileHandler(coverPhoto[0])
+  //       fileData = {
+  //         avatar: avatarPath,
+  //         coverPhoto: coverPhotoPath
+  //       }
+  //     }
+  //     if (Object.keys(req.query).length !== 0) {
+  //       const { avatar, coverPhoto } = req.query
+  //       let avatarPath, coverPhotoPath
+  //       if (avatar) avatarPath = null
+  //       if (coverPhoto) coverPhotoPath = null
+  //       fileData = {
+  //         avatar: avatarPath,
+  //         coverPhoto: coverPhotoPath
+  //       }
+  //     }
+  //     const userAccount = req.user.account
+  //     const userEmail = req.user.email
+  //     const { account, name, email, password, checkPassword, introduction } =
+  //       req.body
+  //     // 目標是req中要有兩個file 在取得時做拆分，再各自讓imgur helper上傳
+  //     // 如何成功抓兩張圖片，multer定義的file代表單張，會回傳單一物件，files為兩張(或以上)，回傳 array
+  //     if (name?.length > 50) return res.status(400).json('max length 50')
+  //     if (introduction?.length > 160) return res.status(400).json('max length 160')
+  //     if (password !== checkPassword) {
+  //       return res.status(400).json('Password do not match!')
+  //     }
+  //     // 能不能用findall直接去找user的account跟email，如果找到的話跟req.user比對，成功就保留，失敗則回傳重複?
+  //     const [users, userdata] = await Promise.all([
+  //       User.findAll({ attributes: ['account', 'email'] }),
+  //       User.findByPk(userId)
+  //     ])
+
+  //     const accountList = users.map((user) => user.account)
+  //     const emailList = users.map((user) => user.email)
+  //     accountList.splice(accountList.indexOf(userAccount), 1)
+  //     emailList.splice(emailList.indexOf(userEmail), 1)
+
+  //     if (accountList.includes(account)) {
+  //       return res.status(400).json('This account has been used!')
+  //     }
+  //     if (emailList.includes(email)) {
+  //       return res.status(400).json('This email has been used!')
+  //     }
+
+  //     let hash
+  //     if (password) {
+  //       hash = await bcrypt.hash(password, 10)
+  //     }
+  //     const data = {
+  //       account,
+  //       name,
+  //       introduction,
+  //       email,
+  //       password: hash || userdata.password,
+  //       ...fileData
+  //     }
+  //     await userdata.update(data)
+  //     // end around
+  //     return res.status(200).json('update success')
+  //   } catch (err) {
+  //     next(err)
+  //   }
+  // },
   putUser: (req, res, next) => {
     const handleFileUpload = async () => {
       let fileData = null
@@ -139,6 +215,8 @@ const userController = {
         if (name?.length > 50) return res.status(400).json('max length 50')
         if (introduction?.length > 160) return res.status(400).json('max length 160')
         if (password !== checkPassword) {
+          console.log(password)
+          console.log(checkPassword)
           return res.status(400).json('Password do not match!')
         }
 
@@ -256,20 +334,18 @@ const userController = {
   },
   sendVertifyEmail: (req, res, next) => {
     const userId = req.user.id || getUser(req).dataValues.id
-    const protocol = req.protocol
-    const hostname = req.hostname
-    const PORT = process.env.PORT || 3000
-    const serverDomain = `${protocol}://${hostname}:${PORT}`
-    User.findByPk(userId, { attributes: ['name', 'confirmToken', 'email'] })
+    const { email } = req.body
+    User.findByPk(userId, { attributes: ['name', 'confirmToken'] })
       .then((user) => {
         if (!user) return res.status(404).json('User not found')
-        return nodemailer.sendConfirmationEmail(user.name, user.email, user.confirmToken, serverDomain)
+        return nodemailer.sendConfirmationEmail(user.name, email, user.confirmToken)
       })
       .then(() => res.status(200).json('Send success'))
       .catch((err) => next(err))
   },
   confirmEmail: (req, res, next) => {
     const token = req.params.token
+    console.log('confirmEmail', token)
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
         // The token is invalid
