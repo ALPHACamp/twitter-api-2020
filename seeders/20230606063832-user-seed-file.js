@@ -1,6 +1,8 @@
 'use strict'
 const bcrypt = require('bcryptjs')
 const { getDate } = require('../_helpers')
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -24,7 +26,11 @@ module.exports = {
         role: 'user',
         created_at: dateArray[i - 1],
         updated_at: dateArray[i - 1],
-        introduction: `user${i} introduction`
+        introduction: `user${i} introduction`,
+        confirm_token: await jwt.sign(
+          { email: `user${i}@example.com` },
+          process.env.JWT_SECRET
+        )
       }
       usersData.push(userData)
     }
