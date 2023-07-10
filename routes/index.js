@@ -50,7 +50,7 @@ router.put('/users/:id',
   ]), authenticated, userController.putUser)
 router.delete('/users/:id', authenticated, userController.deleteUser)
 router.get(
-  '/users/:id/vertify',
+  '/users/vertify',
   authenticated,
   userController.sendVertifyEmail
 )

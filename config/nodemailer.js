@@ -2,7 +2,6 @@ require('dotenv').config()
 
 const nodemailer = require('nodemailer')
 const { google } = require('googleapis')
-
 const OAuth2 = google.auth.OAuth2
 
 const oauth2Client = new OAuth2(
@@ -27,8 +26,7 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-module.exports.sendConfirmationEmail = (name, email, confirmToken) => {
-  console.log('Check')
+module.exports.sendConfirmationEmail = (name, email, confirmToken, serverDomain) => {
   transporter
     .sendMail({
       from: 'vertify49@gmail.com',
@@ -37,7 +35,7 @@ module.exports.sendConfirmationEmail = (name, email, confirmToken) => {
       html: `<h1>Email Confirmation</h1>
         <h2>Hello ${name}</h2>
         <p>Thank you for signup Twitter. Please confirm your email by clicking on the following link</p>
-        <a href=http://localhost:3000/api/confirm/${confirmToken}> Click here</a>
+        <a href=${serverDomain}/api/confirm/${confirmToken}> Click here</a>
         </div>`
     })
     .catch((err) => console.log(err))
