@@ -16,7 +16,7 @@ module.exports = io => {
     socket.on('client-leave', account => leave(io, socket, account))
     // 傳送訊息
     socket.on('client-message', (message, time, roomId) =>
-      sendMessage(socket, message, time, roomId)
+      sendMessage(io, socket, message, time, roomId)
     )
     // 歷史訊息
     socket.on('client-record', room => record(io, socket, room))

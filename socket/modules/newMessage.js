@@ -1,6 +1,6 @@
 const { emitError, findUserInPublic } = require('../helper')
 const { Chat, User } = require('../../models')
-const { Op } = require('sequelize')
+const { Op, literal } = require('sequelize')
 
 module.exports = async (io, socket) => {
   try {
@@ -20,13 +20,13 @@ module.exports = async (io, socket) => {
       include: [
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ],
-      attributes: ['message', 'roomId', 'timestamp'],
-      group: ['roomId'],
-      order: [['timestamp', 'DESC']] // 最新的訊息在最上方
+      attributes: ['id', 'message', 'roomId', 'timestamp'],
+      order: [['roomId'], ['id', 'DESC']], // 最新的訊息在最上方
+      group: ['roomId'] // 用group只會回傳第一筆,不會照時間排序 bug待修
     })
 
     // 以上做完要在做顯示未讀訊息的數量
-    let unreadMessage = 0
+    const unreadMessage = 0
     // 回傳最新訊息
     io.emit('server-new-message', newMessage)
   } catch (err) {
