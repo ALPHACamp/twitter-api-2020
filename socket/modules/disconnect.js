@@ -6,7 +6,7 @@ const timeoutTime = 5000 // 5sec
 module.exports = async (io, socket, reason) => {
   try {
     // 確認者用者在 上線名單中
-    const user = findUserInPublic(socket.id, 'socketId')
+    const user = findUserInPublic(socket.id, 'socketId', false)
     console.log('disconnect user:', user)
     // 找不到使用者代表使用者有正常下線 (使用 client-leave)
     if (!user) return

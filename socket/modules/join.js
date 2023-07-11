@@ -10,7 +10,7 @@ const {
 module.exports = async (io, socket, account) => {
   try {
     // 檢查 使用者是否存在上線名單中
-    let userOnList = findUserInPublic(account, 'account')
+    let userOnList = findUserInPublic(account, 'account', false)
 
     // 恢復連線
     if (userOnList?.timeout) {
@@ -19,8 +19,7 @@ module.exports = async (io, socket, account) => {
       clearTimeout(userOnList.timeout)
       // 更新使用者資訊
       userOnList.socketId = socket.id
-      // userOnList.rooms = await getAllRooms(userOnList.id)
-      // userOnList.socket = socket
+      userOnList.rooms = await getAllRooms(userOnList.id)
 
       delete userOnList.timeout
     }
@@ -34,13 +33,10 @@ module.exports = async (io, socket, account) => {
       user.socketId = socket.id
       user.rooms = await getAllRooms(user.id)
 
-      // cause error
-      // user.socketObject = socket
-
       // 給全部使用者 更新的上線名單
       usersInPublic.push(user)
       // 更新 userOnList
-      userOnList = findUserInPublic(account, 'account')
+      userOnList = findUserInPublic(account, 'account', false)
       // 傳遞名單
       io.emit('server-update', usersInPublic)
       // broadcast 上線訊息

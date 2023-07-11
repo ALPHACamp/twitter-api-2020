@@ -8,9 +8,6 @@ module.exports = async (io, socket, targetId) => {
 
     // get user Id
     const currentUser = findUserInPublic(socket.id, 'socketId')
-    console.log('currentUser:', currentUser)
-
-    if (!currentUser) throw new Error('you need to use client-join first')
     const currentUserId = currentUser.id
 
     // check if both id are the same
@@ -45,7 +42,7 @@ module.exports = async (io, socket, targetId) => {
     joinAllRooms(socket, userRooms)
 
     // 檢查目標是否在線上
-    const targetUser = findUserInPublic(targetId, 'id')
+    const targetUser = findUserInPublic(targetId, 'id', false)
     if (!targetUser) return
 
     // 在線上就找到目標socket，找出所屬房間，加入房間，更新資訊
