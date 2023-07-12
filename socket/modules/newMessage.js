@@ -5,10 +5,8 @@ const { Op, literal } = require('sequelize')
 module.exports = async (io, socket) => {
   try {
     // 目前bug為 sendMessage如果輸入原本沒有的roomId，這邊沒辦法回傳新聊天室的資料回去
-    
     // 確認使用者是否登入
     const currentUser = findUserInPublic(socket.id, 'socketId')
-    if (!currentUser) throw new Error('You need to client-join first')
 
     // 找出目前登入的使用者所有的room, 第一項是socket.id
     const rooms = [...socket.rooms]

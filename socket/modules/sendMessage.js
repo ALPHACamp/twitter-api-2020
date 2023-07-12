@@ -18,7 +18,6 @@ module.exports = async (io, socket, message, timestamp, roomId) => {
     // 檢查 使用者存在
     const currentUser = findUserInPublic(socket.id, 'socketId')
 
-    if (!currentUser) throw new Error('You need to client-join first')
     const userId = currentUser.id
     const user = await userExistInDB(userId, 'id')
 
