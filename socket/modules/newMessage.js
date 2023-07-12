@@ -1,16 +1,14 @@
 const { emitError, findUserInPublic } = require('../helper')
 const { Chat, User } = require('../../models')
-const { Op, literal } = require('sequelize')
+const { Op } = require('sequelize')
 
 module.exports = async (io, socket) => {
   try {
-    // 目前bug為 sendMessage如果輸入原本沒有的roomId，這邊沒辦法回傳新聊天室的資料回去
     // 確認使用者是否登入
     const currentUser = findUserInPublic(socket.id, 'socketId')
 
-    // 找出目前登入的使用者所有的room, 第一項是socket.id
-    const rooms = [...socket.rooms]
-    rooms.shift() // 移除socket.id
+    // 找出目前登入的使用者所有的room
+    const rooms = currentUser.rooms
 
     // 根據roomId去搜尋message，同一個roomId只留最新一筆訊息
     const newMessage = await Chat.findAll({

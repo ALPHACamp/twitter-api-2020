@@ -37,11 +37,9 @@ module.exports = async (io, socket, message, timestamp, roomId) => {
     // 傳遞
     if (room.toString() === publicRoom.id.toString()) {
       // 公開訊息
-      console.log('傳送公開訊息')
       socket.broadcast.emit('server-message', msgPackage)
     } else {
       // 一對一訊息
-      console.log('傳送私人訊息')
       socket.to(room).emit('server-message', msgPackage)
     }
     // 儲存訊息至DB

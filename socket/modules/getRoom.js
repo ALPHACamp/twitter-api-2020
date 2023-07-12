@@ -40,6 +40,7 @@ module.exports = async (io, socket, targetId) => {
     // 把使用者加入房間
     const userRooms = await getAllRooms(currentUserId)
     joinAllRooms(socket, userRooms)
+    currentUser.rooms = userRooms
 
     // 檢查目標是否在線上
     const targetUser = findUserInPublic(targetId, 'id', false)

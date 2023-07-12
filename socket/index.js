@@ -7,7 +7,6 @@ const getRoom = require('./modules/getRoom')
 const newMessage = require('./modules/newMessage')
 const enterRoom = require('./modules/enterRoom')
 
-
 module.exports = io => {
   io.on('connection', socket => {
     console.log(socket.id)
