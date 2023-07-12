@@ -5,7 +5,7 @@ const disconnect = require('./modules/disconnect')
 const record = require('./modules/record')
 const getRoom = require('./modules/getRoom')
 const newMessage = require('./modules/newMessage')
-const enterRoom = require('./modules/enterRoom')
+const read = require('./modules/read')
 
 module.exports = io => {
   io.on('connection', socket => {
@@ -25,8 +25,8 @@ module.exports = io => {
     socket.on('client-new-message', () => newMessage(io, socket))
     // 取得我跟目標的roomId
     socket.on('client-get-room', targetId => getRoom(io, socket, targetId))
-    // 使用者進入一個房間(紀錄最後讀取時間)
-    socket.on('client-enter-room', room => enterRoom(socket, room))
+    // 紀錄最後讀取時間
+    socket.on('client-read', room => read(socket, room))
 
     // 使用者斷線
     socket.on('disconnect', reason => disconnect(io, socket, reason))

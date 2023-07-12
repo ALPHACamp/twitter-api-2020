@@ -4,7 +4,7 @@ const { Read } = require('../../models')
 module.exports = async (socket, roomId) => {
   try {
     // 這功能不會用來建立新的房間，使用者需要先 getRoom 成功建立房間
-    // 才能使用enterRoom
+    // 才能使用 read
 
     // check user Id
     const user = findUserInPublic(socket.id, 'socketId')
@@ -17,7 +17,7 @@ module.exports = async (socket, roomId) => {
 
     // check Read record exist
     let read = await Read.findOne({
-      where: { roomId }
+      where: { userId, roomId }
     })
 
     // create one if not exist
@@ -28,25 +28,17 @@ module.exports = async (socket, roomId) => {
       })
     }
 
-    // leaving last room (update lastRead)
-    if (user.currentRoom && user.currentRoom !== roomId.toString()) {
-      const lastRoomRead = await Read.findOne({
-        where: { roomId: Number(user.currentRoom) }
-      })
-      await lastRoomRead.update({ lastRead: new Date() })
-      socket.emit('server-enter-room',
-        `${user.account} left room ${user.currentRoom}, time = ${read.lastRead}`)
-    }
-
-    // update current room
-    user.currentRoom = roomId.toString()
+    // update read
     await read.update({ lastRead: new Date() })
 
     // 傳遞時間訊息
     read = read.toJSON()
-    socket.emit('server-enter-room',
-      `${user.account} in room ${user.currentRoom}, time = ${read.lastRead}`)
-    console.log(user)
+    const readMessage = {
+      userId: read.userId,
+      roomId: read.roomId,
+      time: read.lastRead
+    }
+    socket.emit('server-read', readMessage)
   } catch (err) {
     emitError(socket, err)
   }
