@@ -1,5 +1,5 @@
 const { emitError, findUserInPublic } = require('../helper')
-const { Chat, User } = require('../../models')
+const { Chat, User, Read } = require('../../models')
 const { Op } = require('sequelize')
 
 module.exports = async (io, socket) => {
@@ -11,7 +11,7 @@ module.exports = async (io, socket) => {
     const rooms = currentUser.rooms
 
     // 根據roomId去搜尋message，同一個roomId只留最新一筆訊息
-    const newMessage = await Chat.findAll({
+    const message = await Chat.findAll({
       where: {
         roomId: { [Op.in]: rooms }
       },
@@ -19,19 +19,47 @@ module.exports = async (io, socket) => {
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ],
       attributes: ['id', 'message', 'roomId', 'timestamp'],
-      order: [['id', 'DESC']] // 最新的訊息在最上方
+      order: [['id', 'DESC']]
     })
-    // 暫時想不到直接在DB處理的方式，先抓出來處理
-    const newMessageData = []
-    newMessage.forEach(m => {
-      const roomIdExist = newMessageData.some(d => d.roomId === m.roomId)
-      if (!roomIdExist) newMessageData.push(m.toJSON())
+    // 找出該user所有的read data
+    const reads = await Read.findAll({
+      where: { userId: currentUser.id },
+      attributes: ['roomId', 'lastRead'],
+      raw: true
     })
 
-    // 以上做完要在做顯示未讀訊息的數量
-    const unreadMessage = 0
-    // 回傳最新訊息
-    io.emit('server-new-message', newMessageData)
+    // 創一個obj用來計算未讀訊息數 -> { '2' : 0, '5' : 0 }， key 為 roomId
+    const unread = rooms.reduce((acc, curr) => {
+      acc[curr] = 0
+      return acc
+    }, {})
+
+    const newMessage = []
+    // 篩選最新消息，同時計算未讀訊息數量
+    message.forEach(m => {
+      // 確認此聊天室是否有read紀錄
+      const isReadExist = reads.find(r => r.roomId === m.roomId)
+      // 如果沒有紀錄，或是lastread<timestamp
+      if (!isReadExist || isReadExist?.lastRead < m.timestamp) {
+        unread[m.roomId] += 1
+      }
+      const roomIdExist = newMessage.some(d => d.roomId === m.roomId)
+      if (!roomIdExist) newMessage.push(m.toJSON())
+    })
+
+    // 計算所有未讀訊息總數
+    let allUnreadMessageCounts = 0
+    for (const c in unread) {
+      allUnreadMessageCounts += unread[c]
+    }
+    // 將每個聊天室的未讀counts加入
+    const newMessageData = newMessage.map(n => ({
+      ...n,
+      unreadMessageCounts: unread[n.roomId]
+    }))
+
+    // 回傳最新訊息&未讀總數
+    io.emit('server-new-message', { newMessageData, allUnreadMessageCounts })
   } catch (err) {
     emitError(socket, err)
   }
