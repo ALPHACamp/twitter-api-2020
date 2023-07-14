@@ -12,9 +12,9 @@ module.exports = io => {
     console.log(socket.id)
 
     // 上線
-    socket.on('client-join', account => join(io, socket, account))
+    socket.on('client-join', userId => join(io, socket, userId))
     // 離線
-    socket.on('client-leave', account => leave(io, socket, account))
+    socket.on('client-leave', userId => leave(io, socket, userId))
     // 傳送訊息
     socket.on('client-message', (message, time, roomId) =>
       sendMessage(io, socket, message, time, roomId)

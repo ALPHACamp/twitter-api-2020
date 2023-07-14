@@ -1,55 +1,46 @@
 const usersInPublic = require('./userOnline')
 const {
-  userExistInDB,
   emitError,
-  findUserInPublic,
+  userExistInDB,
+  findUserIndexInPublic,
   getAllRooms,
+  findUserInPublic,
   joinAllRooms
 } = require('../helper')
 
-module.exports = async (io, socket, account) => {
+module.exports = async (io, socket, userId) => {
   try {
-    // 檢查 使用者是否存在上線名單中
-    let userOnList = findUserInPublic(account, 'account', false)
+    // Get new User data, if can't find will throw error
+    const user = await userExistInDB(userId, 'id')
+    const index = await findUserIndexInPublic(userId, 'id')
+    const rooms = await getAllRooms(userId)
 
-    // 恢復連線
+    // clear timeout if any
+    const userOnList = findUserInPublic(userId, 'id', false)
     if (userOnList?.timeout) {
-      // 使用者 reconnect
       console.log('使用者已經恢復連線 取消timeout')
       clearTimeout(userOnList.timeout)
-      // 更新使用者資訊
-      userOnList.socketId = socket.id
-      userOnList.rooms = await getAllRooms(userOnList.id)
-
-      delete userOnList.timeout
     }
 
-    // 新上線
-    if (!userOnList) {
-      // 使用者上線
-      console.log('使用者上線')
-      const user = await userExistInDB(account, 'account')
-      // 更新使用者資訊
-      user.socketId = socket.id
-      user.rooms = await getAllRooms(user.id)
+    // update
+    user.socketId = socket.id
+    user.rooms = rooms
 
-      // 給全部使用者 更新的上線名單
+    if (index === -1) {
       usersInPublic.push(user)
-      // 更新 userOnList
-      userOnList = findUserInPublic(account, 'account', false)
-      // 傳遞名單
-      io.emit('server-update', usersInPublic)
-      // broadcast 上線訊息
       socket.broadcast.emit('server-join', `${user.name} 上線`)
+      console.log('使用者新增到上線名單')
+    } else {
+      usersInPublic[index] = user
+      console.log('使用者上線名單資料更新')
     }
 
-    // 把使用者加入擁有的rooms中
-    // 重複的房間會自動忽略
-    const rooms = await getAllRooms(userOnList.id)
-    joinAllRooms(socket, rooms) // join rooms
+    joinAllRooms(socket, rooms)
+    console.log('已經把使用者join rooms:', socket.rooms)
 
-    console.log('已經把使用者join rooms')
-    console.log('socket.rooms:', socket.rooms)
+    // 更新上線名單
+    io.emit('server-update', usersInPublic)
+    console.log(usersInPublic)
   } catch (err) {
     emitError(socket, err)
   }
