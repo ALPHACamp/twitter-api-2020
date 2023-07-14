@@ -1,17 +1,16 @@
 const usersInPublic = require('./userOnline')
 const { userExistInDB, findUserInPublic, findUserIndexInPublic, emitError } = require('../helper')
 
-module.exports = async (io, socket, userAccount) => {
+module.exports = async (io, socket, userId) => {
   try {
-    // 檢查 使用者存在
-    const user = await userExistInDB(userAccount, 'account')
+    const user = await userExistInDB(userId, 'id')
 
     // 檢查 使用者在不在上線名單上 (暫時傳錯誤給postman)
-    const userOnline = findUserInPublic(user.account, 'account', false)
+    const userOnline = findUserInPublic(userId, 'id', false)
     if (!userOnline) throw new Error('使用者已經不在上線名單上！(已下線)')
 
     // 從上線名單移除使用者
-    usersInPublic.splice(findUserIndexInPublic(user.account, 'account'), 1)
+    usersInPublic.splice(findUserIndexInPublic(userId, 'id'), 1)
 
     // 給全部使用者 更新的上線名單
     socket.broadcast.emit('server-update', usersInPublic)

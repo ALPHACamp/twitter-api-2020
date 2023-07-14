@@ -1,6 +1,5 @@
 // 用來驗證一些基本問題
 
-const { raw } = require('body-parser')
 const { User, Room } = require('../../models')
 const usersInPublic = require('../modules/userOnline')
 const { Op } = require('sequelize')
@@ -10,8 +9,6 @@ const helper = {
   userExistInDB: async (input, typeString) => {
     if (typeString === 'id') input = Number(input)
     const whereCondition = { [typeString]: input }
-    // if typeString = id, but input is string, Error of NaN
-
     const user = await User.findOne({
       where: whereCondition,
       attributes: ['id', 'account', 'name', 'avatar']
