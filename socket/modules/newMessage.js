@@ -18,7 +18,7 @@ module.exports = async (io, socket) => {
       include: [
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ],
-      attributes: ['id', 'message', 'roomId', 'timestamp'],
+      attributes: ['message', 'roomId', 'timestamp'],
       order: [['id', 'DESC']]
     })
     // 找出該user所有的read data
