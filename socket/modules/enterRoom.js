@@ -9,10 +9,9 @@ module.exports = async (socket, roomId) => {
 
     // check user Id
     const user = findUserInPublic(socket.id, 'socketId')
-    const userId = user.id
 
     // if user belong to that room
-    const rooms = await getAllRooms(userId)
+    const rooms = await getAllRooms(user.id)
     const hasRoom = rooms.some(room => room === roomId)
     if (!hasRoom) throw new Error('You do not have that room, use getRoom first')
 
@@ -25,6 +24,9 @@ module.exports = async (socket, roomId) => {
 
     // add user's CurrentRoom
     user.currentRoom = roomId
+
+    // read once
+    readEvent(socket, roomId, user.id)
     socket.emit('server-enter-room', `enter room ${roomId}, read once`)
   } catch (err) {
     emitError(socket, err)

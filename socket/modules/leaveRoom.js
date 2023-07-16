@@ -1,4 +1,5 @@
 const { emitError, findUserInPublic } = require('../helper')
+const readEvent = require('./read')
 
 module.exports = async (socket, roomId) => {
   try {
@@ -9,9 +10,12 @@ module.exports = async (socket, roomId) => {
     if (!user.currentRoom) throw new Error('You are not currently in a room')
     if (user.currentRoom !== roomId) throw new Error(`You are not currently in ${roomId} room`)
 
+    // read again before leave
+    readEvent(socket, roomId, user.id)
+
     // cancel currentRoom
     delete user.currentRoom
-    socket.emit('server-leave-room', `leave room ${roomId}, stop reading`)
+    socket.emit('server-leave-room', `leave room ${roomId}, read once`)
   } catch (err) {
     emitError(socket, err)
   }
