@@ -20,6 +20,7 @@ module.exports = async (io, socket, userId) => {
     if (userOnList?.timeout) {
       console.log('使用者已經恢復連線 取消timeout')
       clearTimeout(userOnList.timeout)
+      delete userOnList.timeout
     }
 
     // update

@@ -1,5 +1,4 @@
 // 用來驗證一些基本問題
-
 const { User, Room } = require('../../models')
 const usersInPublic = require('../modules/userOnline')
 const { Op } = require('sequelize')
@@ -29,6 +28,14 @@ const helper = {
     if (!checkExist) return currentUser
     if (!currentUser) throw new Error('you need to use client-join first')
     return currentUser
+  },
+  filterUsersInPublic: (input, typeString, checkExist = true) => {
+    if (typeString === 'id') input = Number(input)
+    const users = usersInPublic.filter(user => user[typeString] === input)
+    // 需不需要檢查存在
+    if (!checkExist) return users
+    if (!users) throw new Error(`no user in in your search ${typeString} = ${input}`)
+    return users
   },
   hasMessage: message => {
     const m = message.trim()

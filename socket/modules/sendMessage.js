@@ -1,6 +1,7 @@
-const { userExistInDB, hasMessage, findUserInPublic, emitError } = require('../helper')
+const { userExistInDB, hasMessage, findUserInPublic, filterUsersInPublic, emitError } = require('../helper')
 const { Chat, Room } = require('../../models')
 const newMessage = require('../modules/newMessage')
+const read = require('./read')
 
 // 公開訊息與私人訊息之後會使用 room 參數判斷
 module.exports = async (io, socket, message, timestamp, roomId) => {
@@ -32,8 +33,6 @@ module.exports = async (io, socket, message, timestamp, roomId) => {
       room
     }
 
-    console.log(msgPackage)
-
     // 傳遞
     if (room.toString() === publicRoom.id.toString()) {
       // 公開訊息
@@ -41,6 +40,13 @@ module.exports = async (io, socket, message, timestamp, roomId) => {
     } else {
       // 一對一訊息
       socket.to(room).emit('server-message', msgPackage)
+
+      // 每個在房間內的使用者 觸發read
+      const usersInRoom = filterUsersInPublic(currentUser.currentRoom, 'currentRoom')
+      console.log(`users in room ${roomId}:`, usersInRoom.length)
+      usersInRoom.forEach(inRoomUser => {
+        read(socket, roomId, inRoomUser.id)
+      })
     }
     // 儲存訊息至DB
     await Chat.create({
