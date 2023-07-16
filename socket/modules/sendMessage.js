@@ -42,9 +42,8 @@ module.exports = async (io, socket, message, timestamp, roomId) => {
       socket.to(room).emit('server-message', msgPackage)
 
       // 每個在房間內的使用者 觸發read
-      console.log('finding all users in room')
       const usersInRoom = filterUsersInPublic(currentUser.currentRoom, 'currentRoom')
-      console.log('usersInRoom:', usersInRoom.length)
+      console.log(`users in room ${roomId}:`, usersInRoom.length)
       usersInRoom.forEach(inRoomUser => {
         read(socket, roomId, inRoomUser.id)
       })

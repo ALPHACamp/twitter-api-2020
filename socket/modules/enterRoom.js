@@ -17,9 +17,6 @@ module.exports = async (socket, roomId) => {
     if (!hasRoom) throw new Error('You do not have that room, use getRoom first')
 
     // cancel the last enter room's
-    console.log('user.currentRoom:', user.currentRoom, typeof user.currentRoom)
-    console.log('roomId:', roomId, typeof roomId)
-
     if (user.currentRoom === roomId) return
     // leave last room if any
     if (user.currentRoom && user.currentRoom !== roomId) {

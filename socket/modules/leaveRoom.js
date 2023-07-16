@@ -5,9 +5,6 @@ module.exports = async (socket, roomId) => {
     // find user
     const user = findUserInPublic(socket.id, 'socketId')
 
-    console.log('currentRoom:', user.currentRoom, 'roomId:', roomId)
-    console.log('currentRoom:', typeof user.currentRoom, 'roomId:', typeof roomId)
-
     // not in room
     if (!user.currentRoom) throw new Error('You are not currently in a room')
     if (user.currentRoom !== roomId) throw new Error(`You are not currently in ${roomId} room`)

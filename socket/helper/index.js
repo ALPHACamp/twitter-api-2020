@@ -31,11 +31,6 @@ const helper = {
   },
   filterUsersInPublic: (input, typeString, checkExist = true) => {
     if (typeString === 'id') input = Number(input)
-    console.log(usersInPublic)
-    console.log('currentRoom:', usersInPublic[0].currentRoom)
-    console.log('currentRoom type:', typeof usersInPublic[0].currentRoom)
-    console.log('typeString:', typeString, typeof typeString)
-
     const users = usersInPublic.filter(user => user[typeString] === input)
     // 需不需要檢查存在
     if (!checkExist) return users
