@@ -27,10 +27,8 @@ module.exports = async (socket, roomId) => {
     }
 
     // add user's CurrentRoom
-    const readInterval = setInterval(readEvent, 1000, socket, roomId, user.id)
     user.currentRoom = roomId
-    user.readInterval = readInterval
-    socket.emit('server-enter-room', `enter room ${roomId}, start reading`)
+    socket.emit('server-enter-room', `enter room ${roomId}, read once`)
   } catch (err) {
     emitError(socket, err)
   }

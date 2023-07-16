@@ -10,10 +10,6 @@ module.exports = async (io, socket, userId) => {
     if (!userOnline) throw new Error('使用者已經不在上線名單上！(已下線)')
 
     // 清除可能遺留的計時器
-    if (userOnline.readInterval) {
-      clearInterval(userOnline.readInterval)
-      delete userOnline.readInterval
-    }
     if (userOnline.timeout) {
       clearTimeout(userOnline.timeout)
       delete userOnline.timeout
