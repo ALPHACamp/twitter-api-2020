@@ -9,6 +9,16 @@ module.exports = async (io, socket, userId) => {
     const userOnline = findUserInPublic(userId, 'id', false)
     if (!userOnline) throw new Error('使用者已經不在上線名單上！(已下線)')
 
+    // 清除可能遺留的計時器
+    if (userOnline.readInterval) {
+      clearInterval(userOnline.readInterval)
+      delete userOnline.readInterval
+    }
+    if (userOnline.timeout) {
+      clearTimeout(userOnline.timeout)
+      delete userOnline.timeout
+    }
+
     // 從上線名單移除使用者
     usersInPublic.splice(findUserIndexInPublic(userId, 'id'), 1)
 
