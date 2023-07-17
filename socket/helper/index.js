@@ -26,7 +26,7 @@ const helper = {
     const currentUser = usersInPublic.find(user => user[typeString] === input)
     // 需不需要檢查存在
     if (!checkExist) return currentUser
-    if (!currentUser) throw new Error('you need to use client-join first')
+    if (!currentUser) throw new Error(`Can not find user with user.[${typeString}]=${input}, or you need to use client-join first`)
     return currentUser
   },
   filterUsersInPublic: (input, typeString, checkExist = true) => {

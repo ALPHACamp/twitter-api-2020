@@ -21,9 +21,9 @@ module.exports = io => {
       sendMessage(io, socket, message, time, roomId)
     )
     // 歷史訊息
-    socket.on('client-record', room => record(io, socket, room))
+    socket.on('client-record', room => record(socket, room))
     // 私人聊天室的最新訊息
-    socket.on('client-new-message', () => newMessage(io, socket))
+    socket.on('client-new-message', () => newMessage(socket))
     // 取得我跟目標的roomId
     socket.on('client-get-room', targetId => getRoom(io, socket, targetId))
 
