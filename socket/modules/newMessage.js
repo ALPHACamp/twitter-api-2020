@@ -2,7 +2,7 @@ const { emitError, findUserInPublic } = require('../helper')
 const { Chat, User, Read } = require('../../models')
 const { Op } = require('sequelize')
 
-module.exports = async (io, socket) => {
+module.exports = async socket => {
   try {
     // 確認使用者是否登入
     const currentUser = findUserInPublic(socket.id, 'socketId')
@@ -39,7 +39,7 @@ module.exports = async (io, socket) => {
     message.forEach(m => {
       // 確認此聊天室是否有read紀錄
       const isReadExist = reads.find(r => r.roomId === m.roomId)
-      // 如果沒有紀錄，或是lastread<timestamp
+      // 如果沒有紀錄，或是last read < timestamp
       if (!isReadExist || isReadExist?.lastRead < m.timestamp) {
         unread[m.roomId] += 1
       }
@@ -58,8 +58,8 @@ module.exports = async (io, socket) => {
       unreadMessageCounts: unread[n.roomId]
     }))
 
-    // 回傳最新訊息&未讀總數
-    io.emit('server-new-message', { newMessageData, allUnreadMessageCounts })
+    // 回傳最新訊息&未讀總數 (只傳給socket本人)
+    socket.emit('server-new-message', { newMessageData, allUnreadMessageCounts })
   } catch (err) {
     emitError(socket, err)
   }

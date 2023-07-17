@@ -1,6 +1,6 @@
 const { userExistInDB, hasMessage, findUserInPublic, filterUsersInPublic, emitError } = require('../helper')
 const { Chat, Room } = require('../../models')
-const newMessage = require('../modules/newMessage')
+const newMessageEvent = require('../modules/newMessage')
 const read = require('./read')
 
 // 公開訊息與私人訊息之後會使用 room 參數判斷
@@ -13,14 +13,18 @@ module.exports = async (io, socket, message, timestamp, roomId) => {
     const time = timestamp || new Date()
 
     // 檢查 聊天室存在
-    const isRoom = await Room.findOne({ where: { id: room } })
-    if (!isRoom) throw new Error('此聊天室不存在!')
+    const roomRecord = await Room.findOne({ where: { id: room } })
+    if (!roomRecord) throw new Error('此聊天室不存在!')
 
     // 檢查 使用者存在
     const currentUser = findUserInPublic(socket.id, 'socketId')
 
     const userId = currentUser.id
     const user = await userExistInDB(userId, 'id')
+
+    // 使用者必須 enter-room 才能傳送訊息
+    if (!currentUser.currentRoom &&
+      room !== publicRoom.id) throw new Error('使用者必須enter-room才能傳送訊息')
 
     // 檢查有沒有訊息 (同時用trim)
     const trimmedMessage = hasMessage(message)
@@ -43,9 +47,13 @@ module.exports = async (io, socket, message, timestamp, roomId) => {
 
       // 每個在房間內的使用者 觸發read
       const usersInRoom = filterUsersInPublic(currentUser.currentRoom, 'currentRoom')
-      console.log(`users in room ${roomId}:`, usersInRoom.length)
       usersInRoom.forEach(inRoomUser => {
         read(socket, roomId, inRoomUser.id)
+      })
+      // 每個在房間內的使用者 觸發newMessage
+      usersInRoom.forEach(async user => {
+        const userSocket = io.sockets.sockets.get(user.socketId)
+        await newMessageEvent(userSocket)
       })
     }
     // 儲存訊息至DB
@@ -55,8 +63,6 @@ module.exports = async (io, socket, message, timestamp, roomId) => {
       roomId: room,
       timestamp: time
     })
-    // 更新最新訊息
-    newMessage(io, socket)
   } catch (err) {
     emitError(socket, err)
   }

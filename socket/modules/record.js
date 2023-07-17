@@ -1,7 +1,7 @@
 const { emitError } = require('../helper')
 const { Chat, User, Room } = require('../../models')
 
-module.exports = async (io, socket, roomId) => {
+module.exports = async (socket, roomId) => {
   try {
     // 如未傳入值，預設為public room
     if (!roomId) {
@@ -23,7 +23,7 @@ module.exports = async (io, socket, roomId) => {
     records = records.length ? records : '尚未聊天過，開始發送訊息吧!'
 
     // 回傳歷史訊息
-    io.emit('server-record', records)
+    socket.emit('server-record', records)
   } catch (err) {
     emitError(socket, err)
   }
