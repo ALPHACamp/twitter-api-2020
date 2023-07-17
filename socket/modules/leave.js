@@ -1,13 +1,20 @@
 const usersInPublic = require('./userOnline')
 const { userExistInDB, findUserInPublic, findUserIndexInPublic, emitError } = require('../helper')
+const leaveRoomEvent = require('./leaveRoom')
 
-module.exports = async (io, socket, userId) => {
+module.exports = async (socket, userId) => {
   try {
     const user = await userExistInDB(userId, 'id')
 
     // 檢查 使用者在不在上線名單上 (暫時傳錯誤給postman)
     const userOnline = findUserInPublic(userId, 'id', false)
-    if (!userOnline) throw new Error('使用者已經不在上線名單上！(已下線)')
+    if (!userOnline) throw new Error('使用者已經不在上線名單上！')
+
+    // 目前在房間內的話就離開房間
+    if (userOnline.currentRoom) {
+      console.log('trigger leave room')
+      leaveRoomEvent(socket)
+    }
 
     // 清除可能遺留的計時器
     if (userOnline.timeout) {
