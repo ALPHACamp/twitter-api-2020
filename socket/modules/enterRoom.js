@@ -19,7 +19,7 @@ module.exports = async (socket, roomId) => {
     if (user.currentRoom === roomId) return
     // leave last room if any
     if (user.currentRoom && user.currentRoom !== roomId) {
-      leaveRoom(socket, user.currentRoom)
+      leaveRoom(socket)
     }
 
     // add user's CurrentRoom
