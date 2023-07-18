@@ -1,5 +1,6 @@
 const { emitError, findUserInPublic } = require('../helper')
 const readEvent = require('./read')
+const { Notice } = require('../../models')
 
 module.exports = async socket => {
   try {
@@ -10,11 +11,25 @@ module.exports = async socket => {
     if (!user.currentRoom) throw new Error('You are not currently in a room')
 
     // read again before leave
-    readEvent(socket, user.currentRoom, user.id)
+    if (user.currentRoom === 'notice') {
+      // currentRoom = 通知
+      const notice = await Notice.findOne({ where: { userId: user.id } })
+      if (!notice) throw new Error('離開通知房間時找不到Notice record!')
+      await notice.update({
+        noticeRead: new Date()
+      })
+    } else {
+      // currentRoom = 私人房間
+      readEvent(socket, user.currentRoom, user.id)
+    }
 
+    // 告知使用者
+    socket.emit('server-leave-room', `User ${user.id} left room ${user.currentRoom}`)
     // cancel currentRoom
-    socket.emit('server-leave-room', `leave room ${user.currentRoom}, read once`)
     delete user.currentRoom
+
+    // 測試用
+    console.log('leaveRoom:', user)
   } catch (err) {
     emitError(socket, err)
   }

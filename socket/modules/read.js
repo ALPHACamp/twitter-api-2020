@@ -17,8 +17,8 @@ module.exports = async (socket, roomId, userId) => {
 
     // update read
     await read.update({ lastRead: new Date() })
-    socket.emit('server-read', `reading room ${roomId}`)
-    console.log(`user id ${userId} read ${roomId}`)
+    socket.emit('server-read', `user id ${userId} read room ${roomId}`)
+    console.log(`user id ${userId} read room ${roomId}`)
   } catch (err) {
     emitError(socket, err)
   }
