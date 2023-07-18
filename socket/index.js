@@ -15,7 +15,7 @@ module.exports = io => {
     // 上線
     socket.on('client-join', userId => join(io, socket, userId))
     // 離線
-    socket.on('client-leave', userId => leave(socket, userId))
+    socket.on('client-leave', userId => leave(socket))
     // 傳送訊息
     socket.on('client-message', (message, time, roomId) =>
       sendMessage(io, socket, message, time, roomId)
