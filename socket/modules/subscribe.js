@@ -15,6 +15,9 @@ module.exports = async (socket, targetId) => {
       where: { fromUserId: user.id, toUserId: targetUser.id }
     })
 
+    // 不能訂閱自己
+    if (user.id === targetUser.id) throw new Error('不能訂閱自己！')
+
     // create new subscribe record
     if (!subscribe) {
       await Subscribe.create({
