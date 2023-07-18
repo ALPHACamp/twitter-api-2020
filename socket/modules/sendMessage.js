@@ -2,6 +2,7 @@ const { userExistInDB, hasMessage, findUserInPublic, filterUsersInPublic, emitEr
 const { Chat, Room } = require('../../models')
 const newMessageEvent = require('../modules/newMessage')
 const read = require('./read')
+const usersInPublic = require('../modules/userOnline')
 
 // 公開訊息與私人訊息之後會使用 room 參數判斷
 module.exports = async (io, socket, message, timestamp, roomId) => {
@@ -64,10 +65,16 @@ module.exports = async (io, socket, message, timestamp, roomId) => {
       usersInRoom.forEach(inRoomUser => {
         read(socket, roomId, inRoomUser.id)
       })
-      // 每個在房間內的使用者 觸發newMessage
-      usersInRoom.forEach(async user => {
-        const userSocket = io.sockets.sockets.get(user.socketId)
-        await newMessageEvent(userSocket)
+
+      // 每個房間的擁有者 觸發newMessage
+      const roomOwnersIds = [roomRecord.userOneId, roomRecord.userTwoId]
+
+      roomOwnersIds.forEach(async id => {
+        const user = findUserInPublic(id, 'id', false)
+        if (user?.socketId) {
+          const socket = io.sockets.sockets.get(user.socketId)
+          await newMessageEvent(socket)
+        }
       })
     }
     // 儲存訊息至DB
