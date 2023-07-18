@@ -14,7 +14,7 @@ module.exports = {
       newNotice: {
         type: Sequelize.DATE
       },
-      lastTime: {
+      noticeRead: {
         type: Sequelize.DATE
       },
       createdAt: {

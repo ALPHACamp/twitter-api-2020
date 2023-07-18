@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       userId: DataTypes.INTEGER,
       newNotice: DataTypes.DATE,
-      lastTime: DataTypes.DATE
+      noticeRead: DataTypes.DATE
     },
     {
       sequelize,
