@@ -12,7 +12,7 @@ const helper = {
       where: whereCondition,
       attributes: ['id', 'account', 'name', 'avatar']
     })
-    if (!user) throw new Error('使用者不存在！')
+    if (!user) throw new Error(`No user in db ${typeString} = ${input}`)
     return user.toJSON()
   },
   // user online

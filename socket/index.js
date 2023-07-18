@@ -7,6 +7,8 @@ const getRoom = require('./modules/getRoom')
 const newMessage = require('./modules/newMessage')
 const enterRoom = require('./modules/enterRoom')
 const leaveRoom = require('./modules/leaveRoom')
+const subscribe = require('./modules/subscribe')
+const unsubscribe = require('./modules/unsubscribe')
 
 module.exports = io => {
   io.on('connection', socket => {
@@ -15,7 +17,7 @@ module.exports = io => {
     // 上線
     socket.on('client-join', userId => join(io, socket, userId))
     // 離線
-    socket.on('client-leave', userId => leave(socket, userId))
+    socket.on('client-leave', userId => leave(socket))
     // 傳送訊息
     socket.on('client-message', (message, time, roomId) =>
       sendMessage(io, socket, message, time, roomId)
@@ -31,6 +33,11 @@ module.exports = io => {
     socket.on('client-enter-room', roomId => enterRoom(socket, roomId))
     // 離開房間(停止閱讀)
     socket.on('client-leave-room', roomId => leaveRoom(socket, roomId))
+
+    // 訂閱
+    socket.on('client-subscribe', targetId => subscribe(socket, targetId))
+    // 取消訂閱
+    socket.on('client-unsubscribe', targetId => unsubscribe(socket, targetId))
 
     // 使用者斷線
     socket.on('disconnect', reason => disconnect(socket, reason))
