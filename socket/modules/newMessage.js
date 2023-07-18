@@ -4,6 +4,7 @@ const { Op } = require('sequelize')
 
 module.exports = async socket => {
   try {
+    console.log('Trigger new Message')
     // 確認使用者是否登入
     const currentUser = findUserInPublic(socket.id, 'socketId')
 
