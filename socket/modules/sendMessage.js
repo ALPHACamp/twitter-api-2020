@@ -52,6 +52,15 @@ module.exports = async (io, socket, message, timestamp, roomId) => {
       timestamp: time,
       room
     }
+
+    // 儲存訊息至DB
+    await Chat.create({
+      message: trimmedMessage,
+      userId: user.id,
+      roomId: room,
+      timestamp: time
+    })
+
     // 傳遞
     if (room.toString() === publicRoom.id.toString()) {
       // 公開訊息
@@ -77,13 +86,6 @@ module.exports = async (io, socket, message, timestamp, roomId) => {
         }
       })
     }
-    // 儲存訊息至DB
-    await Chat.create({
-      message: trimmedMessage,
-      userId: user.id,
-      roomId: room,
-      timestamp: time
-    })
   } catch (err) {
     emitError(socket, err)
   }
