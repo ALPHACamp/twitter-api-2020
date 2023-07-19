@@ -1,5 +1,5 @@
 // 用來驗證一些基本問題
-const { User, Room } = require('../../models')
+const { User, Room, Notice } = require('../../models')
 const usersInPublic = require('../modules/userOnline')
 const { Op } = require('sequelize')
 
@@ -64,6 +64,13 @@ const helper = {
     rooms.forEach(roomId => {
       socket.join(roomId.toString())
     })
+  },
+  checkNotice: async userId => {
+    const notice = await Notice.findOne({ where: { userId } })
+    // if notice exist
+    if (notice) return notice.newNotice > notice.noticeRead
+    // if there isn't any notice record
+    return false
   }
 }
 module.exports = helper

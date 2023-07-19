@@ -5,7 +5,8 @@ const {
   findUserIndexInPublic,
   getAllRooms,
   findUserInPublic,
-  joinAllRooms
+  joinAllRooms,
+  checkNotice
 } = require('../helper')
 
 module.exports = async (io, socket, userId) => {
@@ -14,7 +15,7 @@ module.exports = async (io, socket, userId) => {
     const user = await userExistInDB(userId, 'id')
     const index = await findUserIndexInPublic(userId, 'id')
     const rooms = await getAllRooms(userId)
-
+    const unreadNotice = await checkNotice(userId)
     // clear timeout if any
     const userOnList = findUserInPublic(userId, 'id', false)
     if (userOnList?.timeout) {
@@ -26,6 +27,7 @@ module.exports = async (io, socket, userId) => {
     // update
     user.socketId = socket.id
     user.rooms = rooms
+    user.unreadNotice = unreadNotice
 
     if (index === -1) {
       usersInPublic.push(user)
@@ -42,6 +44,7 @@ module.exports = async (io, socket, userId) => {
     // 更新上線名單
     io.emit('server-update', usersInPublic)
     console.log(usersInPublic)
+    console.log(user)
   } catch (err) {
     emitError(socket, err)
   }
