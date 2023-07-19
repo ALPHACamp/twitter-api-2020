@@ -1,5 +1,5 @@
 const { emitError, findUserInPublic } = require('../helper')
-const { Chat, User, Read } = require('../../models')
+const { Chat, User, Read, Room } = require('../../models')
 const { Op } = require('sequelize')
 
 module.exports = async socket => {
@@ -7,7 +7,7 @@ module.exports = async socket => {
     console.log('Trigger new Message')
     // 確認使用者是否登入
     const currentUser = findUserInPublic(socket.id, 'socketId')
-
+    console.log('User:', currentUser)
     // 找出目前登入的使用者所有的room
     const rooms = currentUser.rooms
 
@@ -17,7 +17,23 @@ module.exports = async socket => {
         roomId: { [Op.in]: rooms }
       },
       include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        {
+          model: Room,
+          attributes: ['id'],
+          include: [
+            {
+              model: User,
+              as: 'userOne',
+              attributes: ['id', 'name', 'account', 'avatar']
+            },
+            {
+              model: User,
+              as: 'userTwo',
+              attributes: ['id', 'name', 'account', 'avatar']
+            }
+          ]
+        }
       ],
       attributes: ['message', 'roomId', 'timestamp'],
       order: [['id', 'DESC']]
@@ -54,10 +70,20 @@ module.exports = async socket => {
       allUnreadMessageCounts += unread[c]
     }
     // 將每個聊天室的未讀counts加入
-    const newMessageData = newMessage.map(n => ({
-      ...n,
-      unreadMessageCounts: unread[n.roomId]
-    }))
+    const newMessageData = newMessage.map(n => {
+      // 整理targetUser
+      if (n.Room.userOne.id.toString() === currentUser.id.toString()) {
+        n.targetUser = n.Room.userTwo
+        delete n.Room
+      } else if (n.Room.userTwo.id.toString() === currentUser.id.toString()) {
+        n.targetUser = n.Room.userOne
+        delete n.Room
+      }
+      return {
+        ...n,
+        unreadMessageCounts: unread[n.roomId]
+      }
+    })
 
     // 回傳最新訊息&未讀總數 (只傳給socket本人)
     socket.emit('server-new-message', { newMessageData, allUnreadMessageCounts })
