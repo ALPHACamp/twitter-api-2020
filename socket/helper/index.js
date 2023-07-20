@@ -68,16 +68,7 @@ const helper = {
   checkNotice: async userId => {
     const notice = await Notice.findOne({ where: { userId } })
     // if notice exist
-    if (notice) return notice.newNotice > notice.noticeRead
-    // if there isn't any notice record, create a new one and return false
-    await Notice.create({
-      userId,
-      newNotice: null,
-      noticeRead: null,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    })
-    return false
+    return notice.newNotice > notice.noticeRead
   },
   findAllSubscribers: async userId => {
     const subscribers = await Subscribe.findAll({
