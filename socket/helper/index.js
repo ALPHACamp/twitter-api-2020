@@ -1,5 +1,5 @@
 // 用來驗證一些基本問題
-const { User, Room, Notice } = require('../../models')
+const { User, Room, Notice, Subscribe } = require('../../models')
 const usersInPublic = require('../modules/userOnline')
 const { Op } = require('sequelize')
 
@@ -69,8 +69,18 @@ const helper = {
     const notice = await Notice.findOne({ where: { userId } })
     // if notice exist
     if (notice) return notice.newNotice > notice.noticeRead
-    // if there isn't any notice record
+    // if there isn't any notice record, create a new one and return false
+    await Notice.create({ userId, newNotice: new Date(), noticeRead: new Date() })
     return false
+  },
+  findAllSubscribers: async userId => {
+    const subscribers = await Subscribe.findAll({
+      where: { toUserId: userId },
+      attributes: ['fromUserId'],
+      raw: true
+    })
+    const subscribersId = subscribers.map(s => s.fromUserId)
+    return subscribersId
   }
 }
 module.exports = helper
