@@ -7,7 +7,6 @@ module.exports = async socket => {
     console.log('Trigger new Message')
     // 確認使用者是否登入
     const currentUser = findUserInPublic(socket.id, 'socketId')
-    console.log('User:', currentUser)
     // 找出目前登入的使用者所有的room
     const rooms = currentUser.rooms
 
