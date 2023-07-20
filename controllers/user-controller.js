@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const { Op } = require('sequelize')
-const { User, Tweet, Reply, Like, Followship } = db
+const { User, Tweet, Reply, Like, Followship, Notice } = db
 const sequelize = require('sequelize')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -52,13 +52,21 @@ const userController = {
       if (user?.account === account) throw new Error('account 已重複註冊！')
       if (user?.email === email) throw new Error('email 已重複註冊！')
       // 創立新使用者
-      await User.create({
+      const newUser = await User.create({
         account,
         name,
         email,
         password: bcrypt.hashSync(password),
         role: 'user',
-        createAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      // 創立新user之後也創一個新的notice 紀錄
+      await Notice.create({
+        userId: newUser.id,
+        newNotice: null,
+        noticeRead: null,
+        createdAt: new Date(),
         updatedAt: new Date()
       })
       // 回傳成功訊息
@@ -309,7 +317,6 @@ const userController = {
   putUserSetting: async (req, res, next) => {
     try {
       // 使用者僅能編輯自己的資料
-      const currentUser = helpers.getUser(req)
       const currentUserId = helpers.getUser(req).id
       if (currentUserId.toString() !== req.params.id) { throw new Error('你沒有權限可以編輯他人資料') }
 
