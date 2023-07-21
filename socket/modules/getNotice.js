@@ -1,4 +1,4 @@
-const { emitError, findUserInPublic, findAllSubscribed } = require('../helper')
+const { emitError, findUserInPublic, findAllSubscribed, calculateDate } = require('../helper')
 const { Tweet, User, Notice, Followship, Like, Reply } = require('../../models')
 const { Op } = require('sequelize')
 
@@ -8,18 +8,16 @@ module.exports = async socket => {
     const currentUser = findUserInPublic(socket.id, 'socketId')
     // 找出所有訂閱的人
     const subscribeds = await findAllSubscribed(currentUser.id)
-    // 找出currentUser的notice
-    const notice = await Notice.findOne({
-      where: { userId: currentUser.id },
-      attributes: ['noticeRead']
-    })
-    console.log('subscribeds:', subscribeds)
-    console.log('notice:', notice.noticeRead)
-    // 找出創建於上次讀取之後相關的tweets
+    const currentDate = new Date()
+    // 重跑seed之後會有超多資料這邊日期先設1天前
+    const sevenDaysAgo = calculateDate(currentDate, -1)
+    console.log('currentDate:', currentDate, 'sevenDaysAgo:', sevenDaysAgo.toISOString())
+
+    // 找出七天內創建的tweets
     const subscribeTweets = await Tweet.findAll({
       where: {
         userId: { [Op.in]: subscribeds },
-        createdAt: { [Op.gt]: notice.noticeRead }
+        createdAt: { [Op.between]: [sevenDaysAgo, currentDate] }
       },
       attributes: ['id', 'description', 'createdAt'],
       include: [{ model: User, attributes: ['id', 'name'] }]
@@ -29,7 +27,7 @@ module.exports = async socket => {
     const newFollowers = await Followship.findAll({
       where: {
         followingId: currentUser.id,
-        createdAt: { [Op.gt]: notice.noticeRead }
+        createdAt: { [Op.between]: [sevenDaysAgo, currentDate] }
       },
       attributes: ['followerId', 'createdAt'],
       include: [{
@@ -51,7 +49,7 @@ module.exports = async socket => {
     const newLikes = await Like.findAll({
       where: {
         TweetId: { [Op.in]: tweetsId },
-        createdAt: { [Op.gt]: notice.noticeRead }
+        createdAt: { [Op.between]: [sevenDaysAgo, currentDate] }
       },
       attributes: ['createdAt'],
       include: [
@@ -59,12 +57,12 @@ module.exports = async socket => {
         { model: Tweet, attributes: ['id'] }
       ]
     })
-    console.log('newLikes:', newLikes)
+    // console.log('newLikes:', newLikes)
     // 抓出reply
     const newReplies = await Reply.findAll({
       where: {
         TweetId: { [Op.in]: tweetsId },
-        createdAt: { [Op.gt]: notice.noticeRead }
+        createdAt: { [Op.between]: [sevenDaysAgo, currentDate] }
       },
       attributes: ['comment', 'createdAt'],
       include: [
