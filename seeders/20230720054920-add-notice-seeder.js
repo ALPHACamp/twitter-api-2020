@@ -8,8 +8,8 @@ module.exports = {
 
     const notices = users.map(user => ({
       userId: user.id,
-      newNotice: null,
-      noticeRead: null,
+      newNotice: new Date(),
+      noticeRead: new Date(),
       createdAt: new Date(),
       updatedAt: new Date()
     }))
