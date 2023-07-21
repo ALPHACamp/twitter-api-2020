@@ -64,8 +64,8 @@ const userController = {
       // 創立新user之後也創一個新的notice 紀錄
       await Notice.create({
         userId: newUser.id,
-        newNotice: null,
-        noticeRead: null,
+        newNotice: new Date(),
+        noticeRead: new Date(),
         createdAt: new Date(),
         updatedAt: new Date()
       })
