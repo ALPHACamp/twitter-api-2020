@@ -21,7 +21,7 @@ module.exports = async socket => {
         userId: { [Op.in]: subscribeds },
         createdAt: { [Op.gt]: notice.noticeRead }
       },
-      attributes: ['description', 'createdAt'],
+      attributes: ['id', 'description', 'createdAt'],
       include: [{ model: User, attributes: ['id', 'name'] }]
     })
     // console.log('subscribeTweets:', subscribeTweets)
@@ -81,7 +81,8 @@ module.exports = async socket => {
         noticeMessage: `${s.User.name}有新的推文通知`,
         description: s.description,
         createdAt: s.createdAt,
-        userId: s.User.id
+        userId: s.User.id,
+        tweetId: s.id
       })
     })
     newFollowers.forEach(f => {
