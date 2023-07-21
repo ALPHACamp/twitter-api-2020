@@ -71,6 +71,7 @@ const helper = {
     return notice.newNotice > notice.noticeRead
   },
   findAllSubscribers: async userId => {
+    // 找出訂閱userId的對象
     const subscribers = await Subscribe.findAll({
       where: { toUserId: userId },
       attributes: ['fromUserId'],
@@ -78,6 +79,16 @@ const helper = {
     })
     const subscribersId = subscribers.map(s => s.fromUserId)
     return subscribersId
+  },
+  findAllSubscribed: async userId => {
+    // 找出userId訂閱的對象
+    const subscribeds = await Subscribe.findAll({
+      where: { fromUserId: userId },
+      attributes: ['toUserId'],
+      raw: true
+    })
+    const subscribedsId = subscribeds.map(s => s.toUserId)
+    return subscribedsId
   }
 }
 module.exports = helper

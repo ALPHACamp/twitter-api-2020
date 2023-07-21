@@ -36,6 +36,7 @@ module.exports = async (socket, action, targetId) => {
             if (u.currentRoom && u.currentRoom === 'notice') {
               getNotice(socket)
             }
+            // renew unreadNotice status
             u.unreadNotice = checkNotice(u.id)
             socket.to(u.socketId).emit('server-push-notice', 'new notice!')
           }
@@ -58,6 +59,9 @@ module.exports = async (socket, action, targetId) => {
             // if user in notice, trigger getNotice
             getNotice(socket)
           }
+          // renew unreadNotice status
+          targetUserOnline.unreadNotice = checkNotice(targetUserOnline.id)
+
           socket.to(targetUserOnline.socketId).emit('server-push-notice', 'new notice!')
         }
       }
