@@ -94,7 +94,7 @@ const helper = {
     // date = basic date
     // number = how many days
     const newDate = new Date(date)
-    newDate.setDate(newDate.getDate() + number)
+    newDate.setDate(newDate.getDate() - number)
     return newDate
   }
 }

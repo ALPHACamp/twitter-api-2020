@@ -10,8 +10,7 @@ module.exports = async socket => {
     const subscribeds = await findAllSubscribed(currentUser.id)
     const currentDate = new Date()
     // 重跑seed之後會有超多資料這邊日期先設1天前
-    const sevenDaysAgo = calculateDate(currentDate, -1)
-    console.log('currentDate:', currentDate, 'sevenDaysAgo:', sevenDaysAgo.toISOString())
+    const sevenDaysAgo = calculateDate(currentDate, 1)
 
     // 找出七天內創建的tweets
     const subscribeTweets = await Tweet.findAll({
@@ -22,7 +21,7 @@ module.exports = async socket => {
       attributes: ['id', 'description', 'createdAt'],
       include: [{ model: User, attributes: ['id', 'name'] }]
     })
-    // console.log('subscribeTweets:', subscribeTweets)
+
     // 找出最近追蹤currentUser的users
     const newFollowers = await Followship.findAll({
       where: {
@@ -57,7 +56,7 @@ module.exports = async socket => {
         { model: Tweet, attributes: ['id'] }
       ]
     })
-    // console.log('newLikes:', newLikes)
+
     // 抓出reply
     const newReplies = await Reply.findAll({
       where: {
@@ -70,7 +69,6 @@ module.exports = async socket => {
         { model: Tweet, attributes: ['id'] }
       ]
     })
-    // console.log('newReplies:', newReplies)
 
     // 整理成新通知
     const notifications = []
