@@ -89,6 +89,13 @@ const helper = {
     })
     const subscribedsId = subscribeds.map(s => s.toUserId)
     return subscribedsId
+  },
+  calculateDate: (date, number) => {
+    // date = basic date
+    // number = how many days
+    const newDate = new Date(date)
+    newDate.setDate(newDate.getDate() - number)
+    return newDate
   }
 }
 module.exports = helper
