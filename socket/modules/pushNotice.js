@@ -1,7 +1,7 @@
 const {
   emitError,
   findUserInPublic,
-  findAllSubscribers,
+  findAllSubscribersUserId,
   checkNotice
 } = require('../helper')
 const { Notice } = require('../../models')
@@ -19,7 +19,7 @@ module.exports = async (socket, action, targetId) => {
       // 當user新增一筆推文時
       if (action === 'tweet') {
         // 找出當前使用者的所有訂戶
-        const subscribers = await findAllSubscribers(currentUser.id)
+        const subscribers = await findAllSubscribersUserId(currentUser.id)
         // 更新訂戶的newNotice時間
         await Notice.update(
           { newNotice: new Date() },
