@@ -11,6 +11,8 @@ const subscribe = require('./modules/subscribe')
 const unsubscribe = require('./modules/unsubscribe')
 const pushNotice = require('./modules/pushNotice')
 const getNotice = require('./modules/getNotice')
+const getSubscribe = require('./modules/getSubscribe')
+
 
 module.exports = io => {
   io.on('connection', socket => {
@@ -40,6 +42,8 @@ module.exports = io => {
     socket.on('client-subscribe', targetId => subscribe(socket, targetId))
     // 取消訂閱
     socket.on('client-unsubscribe', targetId => unsubscribe(socket, targetId))
+    // 取得使用者訂閱
+    socket.on('client-get-subscribe', () => getSubscribe(socket))
 
     // 觸發通知
     socket.on('client-push-notice', (action, targetId) =>

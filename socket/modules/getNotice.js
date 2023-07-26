@@ -1,4 +1,4 @@
-const { emitError, findUserInPublic, findAllSubscribed, calculateDate } = require('../helper')
+const { emitError, findUserInPublic, findAllSubscribedUserId, calculateDate } = require('../helper')
 const { Tweet, User, Notice, Followship, Like, Reply } = require('../../models')
 const { Op } = require('sequelize')
 
@@ -7,7 +7,7 @@ module.exports = async socket => {
     // 確認使用者是否登入
     const currentUser = findUserInPublic(socket.id, 'socketId')
     // 找出所有訂閱的人
-    const subscribeds = await findAllSubscribed(currentUser.id)
+    const subscribeds = await findAllSubscribedUserId(currentUser.id)
     const currentDate = new Date()
     // 重跑seed之後會有超多資料這邊日期先設1天前
     const sevenDaysAgo = calculateDate(currentDate, 1)

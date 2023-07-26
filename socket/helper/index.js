@@ -70,7 +70,7 @@ const helper = {
     // if notice exist
     return notice.newNotice > notice.noticeRead
   },
-  findAllSubscribers: async userId => {
+  findAllSubscribersUserId: async userId => {
     // 找出訂閱userId的對象
     const subscribers = await Subscribe.findAll({
       where: { toUserId: userId },
@@ -80,7 +80,7 @@ const helper = {
     const subscribersId = subscribers.map(s => s.fromUserId)
     return subscribersId
   },
-  findAllSubscribed: async userId => {
+  findAllSubscribedUserId: async userId => {
     // 找出userId訂閱的對象
     const subscribeds = await Subscribe.findAll({
       where: { fromUserId: userId },
