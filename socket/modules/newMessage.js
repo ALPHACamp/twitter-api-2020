@@ -4,7 +4,6 @@ const { Op } = require('sequelize')
 
 module.exports = async socket => {
   try {
-    console.log('Trigger new Message')
     // 確認使用者是否登入
     const currentUser = findUserInPublic(socket.id, 'socketId')
     // 找出目前登入的使用者所有的room
@@ -59,6 +58,7 @@ module.exports = async socket => {
       if (!isReadExist || isReadExist?.lastRead < m.timestamp) {
         unread[m.roomId] += 1
       }
+
       const roomIdExist = newMessage.some(d => d.roomId === m.roomId)
       if (!roomIdExist) newMessage.push(m.toJSON())
     })
@@ -80,7 +80,8 @@ module.exports = async socket => {
       }
       return {
         ...n,
-        unreadMessageCounts: unread[n.roomId]
+        unreadMessageCounts: unread[n.roomId],
+        lastRead: reads.find(r => r.roomId === n.roomId)?.lastRead || ''
       }
     })
 

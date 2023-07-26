@@ -21,8 +21,8 @@ module.exports = io => {
     // 離線
     socket.on('client-leave', userId => leave(socket))
     // 傳送訊息
-    socket.on('client-message', (message, time, roomId) =>
-      sendMessage(io, socket, message, time, roomId)
+    socket.on('client-message', (message, time) =>
+      sendMessage(io, socket, message, time)
     )
     // 歷史訊息
     socket.on('client-record', room => record(socket, room))
