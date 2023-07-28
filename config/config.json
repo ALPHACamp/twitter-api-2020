@@ -15,7 +15,7 @@
     "logging": false
   },
   "production": {
-    "use_env_variable": "MYSQL_HOST"
+    "use_env_variable": "MYSQL_URL"
   },
   "travis": {
     "username": "travis",
