@@ -42,7 +42,7 @@ module.exports = async (socket, roomId) => {
       const hasRoom = rooms.some(room => room === roomId)
       if (!hasRoom) throw new Error('You do not have that room, use getRoom first')
       // read
-      readEvent(socket, roomId, user.id)
+      await readEvent(socket, roomId, user.id)
     }
 
     // 離開上一個房間

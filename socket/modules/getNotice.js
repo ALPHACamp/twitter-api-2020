@@ -9,8 +9,8 @@ module.exports = async socket => {
     // 找出所有訂閱的人
     const subscribeds = await findAllSubscribedUserId(currentUser.id)
     const currentDate = new Date()
-    // 重跑seed之後會有超多資料這邊日期先設1天前
-    const sevenDaysAgo = calculateDate(currentDate, 1)
+    // 重跑seed之後會有超多資料這邊日期先設7天前
+    const sevenDaysAgo = calculateDate(currentDate, 7)
 
     // 找出七天內創建的tweets
     const subscribeTweets = await Tweet.findAll({

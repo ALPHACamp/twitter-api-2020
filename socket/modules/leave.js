@@ -14,7 +14,7 @@ module.exports = async socket => {
     // 目前在房間內的話就離開房間
     if (userOnline.currentRoom) {
       console.log('trigger leave room')
-      leaveRoomEvent(socket)
+      await leaveRoomEvent(socket)
     }
 
     // 清除可能遺留的計時器
