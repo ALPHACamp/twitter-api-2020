@@ -20,7 +20,7 @@ module.exports = async socket => {
       })
     } else {
       // currentRoom = 私人房間
-      readEvent(socket, user.currentRoom, user.id)
+      await readEvent(socket, user.currentRoom, user.id)
     }
 
     // 告知使用者
