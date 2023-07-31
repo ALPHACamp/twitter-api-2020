@@ -19,7 +19,7 @@ module.exports = async socket => {
         createdAt: { [Op.between]: [sevenDaysAgo, currentDate] }
       },
       attributes: ['id', 'description', 'createdAt'],
-      include: [{ model: User, attributes: ['id', 'name'] }]
+      include: [{ model: User, attributes: ['id', 'name', 'avatar'] }]
     })
 
     // 找出最近追蹤currentUser的users
@@ -32,7 +32,7 @@ module.exports = async socket => {
       include: [{
         model: User,
         as: 'Follower',
-        attributes: ['name']
+        attributes: ['id', 'name','avatar']
       }]
     })
 
@@ -52,7 +52,7 @@ module.exports = async socket => {
       },
       attributes: ['createdAt'],
       include: [
-        { model: User, attributes: ['id', 'name'] },
+        { model: User, attributes: ['id', 'name', 'avatar'] },
         { model: Tweet, attributes: ['id'] }
       ]
     })
@@ -65,7 +65,7 @@ module.exports = async socket => {
       },
       attributes: ['comment', 'createdAt'],
       include: [
-        { model: User, attributes: ['id', 'name'] },
+        { model: User, attributes: ['id', 'name', 'avatar'] },
         { model: Tweet, attributes: ['id'] }
       ]
     })
@@ -77,7 +77,7 @@ module.exports = async socket => {
         noticeMessage: `${s.User.name}有新的推文通知`,
         description: s.description,
         createdAt: s.createdAt,
-        userId: s.User.id,
+        user: s.User,
         tweetId: s.id
       })
     })
@@ -85,7 +85,7 @@ module.exports = async socket => {
       notifications.push({
         noticeMessage: `${f.Follower.name}開始追蹤你`,
         createdAt: f.createdAt,
-        userId: f.followerId
+        user: f.Follower,
       })
     })
 
@@ -93,7 +93,7 @@ module.exports = async socket => {
       notifications.push({
         noticeMessage: `${l.User.name}喜歡你的貼文`,
         createdAt: l.createdAt,
-        userId: l.User.id,
+        user: l.User,
         tweetId: l.Tweet.id
       })
     })
@@ -103,7 +103,7 @@ module.exports = async socket => {
         noticeMessage: `${r.User.name}回覆了你的貼文`,
         comment: r.comment,
         createdAt: r.createdAt,
-        userId: r.User.id,
+        user: r.User,
         tweetId: r.Tweet.id
       })
     })
