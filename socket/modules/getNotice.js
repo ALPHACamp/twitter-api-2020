@@ -32,7 +32,7 @@ module.exports = async socket => {
       include: [{
         model: User,
         as: 'Follower',
-        attributes: ['id, name, avatar']
+        attributes: ['id', 'name','avatar']
       }]
     })
 
