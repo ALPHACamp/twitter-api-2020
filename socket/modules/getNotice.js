@@ -1,4 +1,4 @@
-const { emitError, findUserInPublic, findAllSubscribedUserId, calculateDate } = require('../helper')
+const { emitError, findUserInPublic, findAllSubscribed, calculateDate } = require('../helper')
 const { Tweet, User, Notice, Followship, Like, Reply } = require('../../models')
 const { Op } = require('sequelize')
 
@@ -6,16 +6,19 @@ module.exports = async socket => {
   try {
     // 確認使用者是否登入
     const currentUser = findUserInPublic(socket.id, 'socketId')
-    // 找出所有訂閱的人
-    const subscribeds = await findAllSubscribedUserId(currentUser.id)
-    const currentDate = new Date()
+    // 找出所有訂閱的人(id, createdAt)
+    const subscribeds = await findAllSubscribed(currentUser.id)
+    // 整理成id array
+    const subscribedUserId = subscribeds.map(s => s.toUserId)
+
     // 重跑seed之後會有超多資料這邊日期先設7天前
+    const currentDate = new Date()
     const sevenDaysAgo = calculateDate(currentDate, 7)
 
     // 找出七天內創建的tweets
     const subscribeTweets = await Tweet.findAll({
       where: {
-        userId: { [Op.in]: subscribeds },
+        userId: { [Op.in]: subscribedUserId },
         createdAt: { [Op.between]: [sevenDaysAgo, currentDate] }
       },
       attributes: ['id', 'description', 'createdAt'],
@@ -32,7 +35,7 @@ module.exports = async socket => {
       include: [{
         model: User,
         as: 'Follower',
-        attributes: ['id', 'name','avatar']
+        attributes: ['id', 'name', 'avatar']
       }]
     })
 
@@ -73,19 +76,25 @@ module.exports = async socket => {
     // 整理成新通知
     const notifications = []
     subscribeTweets.forEach(s => {
-      notifications.push({
-        noticeMessage: `${s.User.name}有新的推文通知`,
-        description: s.description,
-        createdAt: s.createdAt,
-        user: s.User,
-        tweetId: s.id
-      })
+      // 找出訂閱該使用者的資料
+      const subscribe = subscribeds.find(u => u.toUserId === s.User.id)
+      // 只會show出訂閱時間後的tweets
+      if (s.createdAt > subscribe.createdAt) {
+        notifications.push({
+          noticeMessage: `${s.User.name}有新的推文通知`,
+          description: s.description,
+          createdAt: s.createdAt,
+          user: s.User,
+          tweetId: s.id
+        })
+      }
     })
+
     newFollowers.forEach(f => {
       notifications.push({
         noticeMessage: `${f.Follower.name}開始追蹤你`,
         createdAt: f.createdAt,
-        user: f.Follower,
+        user: f.Follower
       })
     })
 
