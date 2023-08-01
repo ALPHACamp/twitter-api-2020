@@ -80,15 +80,14 @@ const helper = {
     const subscribersId = subscribers.map(s => s.fromUserId)
     return subscribersId
   },
-  findAllSubscribedUserId: async userId => {
+  findAllSubscribed: async userId => {
     // 找出userId訂閱的對象
     const subscribeds = await Subscribe.findAll({
       where: { fromUserId: userId },
-      attributes: ['toUserId'],
+      attributes: ['toUserId', 'createdAt'],
       raw: true
     })
-    const subscribedsId = subscribeds.map(s => s.toUserId)
-    return subscribedsId
+    return subscribeds
   },
   calculateDate: (date, number) => {
     // date = basic date
