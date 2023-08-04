@@ -6,11 +6,9 @@ const { Notice } = require("../../models")
 // 目前房間內的使用者
 // return string (更新訊息) array (在房間內的使用者)
 module.exports = async (io,socket, roomId, message) => {
-  try {
-    console.log('starting updateRoom')
-
-    // if roomId is notice or public
-    if (roomId === "notice" || roomId === "public") return
+  try {    
+    // 通知房間不會通知
+    if (roomId === "notice") return
     // if no roomId
     if (roomId === undefined)
       throw new Error("update-room error: roomId is undefined")

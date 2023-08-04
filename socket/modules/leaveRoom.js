@@ -29,11 +29,13 @@ module.exports = async (io, socket) => {
       "server-leave-room",
       `User ${user.id} left room ${user.currentRoom}`
     )
-    // leave currentRoom
+
+    // leave room
+    const lastRoom = user.currentRoom
     user.currentRoom = ""
 
     // 告知房間裡的其他使用者
-    await updateRoom(io, socket, user.currentRoom, `${user.name} 離開房間`)
+    await updateRoom(io, socket, lastRoom, `${user.name} 離開房間`)
 
     // 測試用
     console.log("leaveRoom:", user)

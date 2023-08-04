@@ -28,6 +28,8 @@ module.exports = async (io, socket, userId) => {
     user.socketId = socket.id
     user.rooms = rooms
     user.unreadNotice = unreadNotice
+    user.currentRoom =
+      userOnList?.currentRoom === undefined ? "" : userOnList.currentRoom
 
     if (index === -1) {
       usersInPublic.push(user)
