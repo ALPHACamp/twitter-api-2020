@@ -2,7 +2,7 @@ const usersInPublic = require('./userOnline')
 const { findUserInPublic, findUserIndexInPublic, emitError } = require('../helper')
 const leaveRoomEvent = require('./leaveRoom')
 
-module.exports = async socket => {
+module.exports = async (io, socket) => {
   try {
     // 檢查 使用者在不在上線名單上
     const userOnline = findUserInPublic(socket.id, 'socketId', false)
@@ -14,7 +14,7 @@ module.exports = async socket => {
     // 目前在房間內的話就離開房間
     if (userOnline.currentRoom) {
       console.log('trigger leave room')
-      await leaveRoomEvent(socket)
+      await leaveRoomEvent(io, socket)
     }
 
     // 清除可能遺留的計時器

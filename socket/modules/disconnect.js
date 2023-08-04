@@ -4,7 +4,7 @@ const leaveEvent = require('./leave')
 
 const timeoutTime = 5000 // 5sec
 
-module.exports = async (socket, reason) => {
+module.exports = async (io, socket, reason) => {
   try {
     // 確認者用者在 上線名單中
     const user = findUserInPublic(socket.id, 'socketId', false)
@@ -14,7 +14,7 @@ module.exports = async (socket, reason) => {
 
     // 找到使用者，代表使用者可能斷線，或是刷新頁面
     const timeout = setTimeout(() => {
-      leaveEvent(socket, user.id)
+      leaveEvent(io, socket)
       console.log(`使用者 ${user.account} 已斷線：${reason}`)
     }, timeoutTime)
 

@@ -45,6 +45,6 @@ app.use(routes)
 useSocket(io)
 
 // start
-httpServer.listen(port, () => console.log(`Example app listening on port ${port}!`))
+httpServer.listen(port, () => console.log(`Server running on port:${port}!`))
 
 module.exports = app
