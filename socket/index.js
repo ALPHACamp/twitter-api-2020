@@ -21,7 +21,7 @@ module.exports = io => {
     // 上線
     socket.on('client-join', userId => join(io, socket, userId))
     // 離線
-    socket.on('client-leave', userId => leave(socket))
+    socket.on('client-leave', () => leave(io, socket))
     // 傳送訊息
     socket.on('client-message', (message, time) =>
       sendMessage(io, socket, message, time)
@@ -53,6 +53,6 @@ module.exports = io => {
     socket.on('client-get-notice', () => getNotice(socket))
 
     // 使用者斷線
-    socket.on('disconnect', reason => disconnect(socket, reason))
+    socket.on('disconnect', reason => disconnect(io, socket, reason))
   })
 }
