@@ -2,8 +2,9 @@ const { emitError, findUserInPublic, getAllRooms } = require('../helper')
 const readEvent = require('./read.js')
 const leaveRoom = require('./leaveRoom')
 const { Notice } = require('../../models')
+const updateRoom = require('./updateRoom')
 
-module.exports = async (socket, roomId) => {
+module.exports = async (io, socket, roomId) => {
   try {
     // 這功能不會用來建立新的房間，使用者需要先 getRoom 成功建立房間
     // 之後才能 enterRoom
@@ -54,6 +55,9 @@ module.exports = async (socket, roomId) => {
     user.currentRoom = roomId
     // 告知使用者
     socket.emit('server-enter-room', `User ${user.id} enter room ${roomId}`)
+    
+    // 告知房間裡的其他使用者
+    await updateRoom(io,socket, user.currentRoom, `${user.name} 進入房間`)
 
     // 測試用
     console.log('enterRoom:', user)

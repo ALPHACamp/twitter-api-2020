@@ -34,9 +34,9 @@ module.exports = io => {
     socket.on('client-get-room', targetId => getRoom(io, socket, targetId))
 
     // 進入房間(開始閱讀)
-    socket.on('client-enter-room', roomId => enterRoom(socket, roomId))
+    socket.on('client-enter-room', roomId => enterRoom(io, socket, roomId))
     // 離開房間(停止閱讀)
-    socket.on('client-leave-room', roomId => leaveRoom(socket, roomId))
+    socket.on('client-leave-room', () => leaveRoom(io, socket))
 
     // 訂閱
     socket.on('client-subscribe', targetId => subscribe(socket, targetId))

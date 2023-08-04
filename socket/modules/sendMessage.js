@@ -28,7 +28,7 @@ module.exports = async (io, socket, message, timestamp) => {
     // 避免資料庫跳號問題，先找出public room id
     const publicRoom = await Room.findOne({ attributes: ['id'], raw: true })
     // default
-    const room = currentRoom === undefined ? publicRoom.id : currentRoom
+    const room = currentRoom === '' ? publicRoom.id : currentRoom
     const time = timestamp || new Date()
 
     // 檢查 聊天室存在
