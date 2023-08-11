@@ -13,7 +13,7 @@ module.exports = async (socket, action, targetId) => {
   try {
     // 確認使用者是否登入
     const currentUser = findUserInPublic(socket.id, 'socketId')
-    const actions = ['tweet', 'like', 'reply', 'follow']
+    const actions = ['tweet', 'like', 'reply', 'follow', 'subscribe']
 
     if (actions.includes(action)) {
       // 當user新增一筆推文時
@@ -34,7 +34,7 @@ module.exports = async (socket, action, targetId) => {
           if (subscribers.includes(u.id)) {
             // send new notice message
             if (u.currentRoom && u.currentRoom === 'notice') {
-              getNotice(socket)
+              getNotice(socket, u.socketId)
             }
             // renew unreadNotice status
             u.unreadNotice = checkNotice(u.id)
@@ -42,7 +42,7 @@ module.exports = async (socket, action, targetId) => {
           }
         })
       } else {
-        // 對某人的tweet reply、like或follow某人
+        // 對某人的tweet reply、like、follow或subscribe某人
         if (!targetId) throw new Error('targetId is required!')
         // 更新targetUser的notice
         await Notice.update(
@@ -57,11 +57,10 @@ module.exports = async (socket, action, targetId) => {
         if (targetUserOnline) {
           if (targetUserOnline.currentRoom && targetUserOnline.currentRoom === 'notice') {
             // if user in notice, trigger getNotice
-            getNotice(socket)
+            getNotice(socket, targetUserOnline.socketId)
           }
           // renew unreadNotice status
           targetUserOnline.unreadNotice = checkNotice(targetUserOnline.id)
-
           socket.to(targetUserOnline.socketId).emit('server-push-notice', 'new notice!')
         }
       }

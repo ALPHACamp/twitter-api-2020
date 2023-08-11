@@ -3,8 +3,8 @@ const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class Subscribe extends Model {
     static associate (models) {
-      Subscribe.belongsTo(models.User, { foreignKey: 'fromUserId' })
-      Subscribe.belongsTo(models.User, { foreignKey: 'toUserId' })
+      Subscribe.belongsTo(models.User, { as: 'Subscriber', foreignKey: 'fromUserId' })
+      Subscribe.belongsTo(models.User, { as: 'Subscribe', foreignKey: 'toUserId' })
     }
   }
   Subscribe.init(
