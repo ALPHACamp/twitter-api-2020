@@ -1,5 +1,18 @@
-const { emitError, findUserInPublic, findAllSubscribed, calculateDate } = require('../helper')
-const { Tweet, User, Notice, Followship, Like, Reply } = require('../../models')
+const {
+  emitError,
+  findUserInPublic,
+  findAllSubscribed,
+  calculateDate
+} = require('../helper')
+const {
+  Tweet,
+  User,
+  Notice,
+  Followship,
+  Like,
+  Reply,
+  Subscribe
+} = require('../../models')
 const { Op } = require('sequelize')
 
 module.exports = async (socket, receiverSocketId = null) => {
@@ -38,6 +51,21 @@ module.exports = async (socket, receiverSocketId = null) => {
         {
           model: User,
           as: 'Follower',
+          attributes: ['id', 'name', 'avatar']
+        }
+      ]
+    })
+    // 找出最近訂閱currentUser的users
+    const newSubscribers = await Subscribe.findAll({
+      where: {
+        toUserId: currentUser.id,
+        createdAt: { [Op.between]: [sevenDaysAgo, currentDate] }
+      },
+      attributes: ['fromUserId', 'createdAt'],
+      include: [
+        {
+          model: User,
+          as: 'Subscriber',
           attributes: ['id', 'name', 'avatar']
         }
       ]
@@ -99,6 +127,14 @@ module.exports = async (socket, receiverSocketId = null) => {
         noticeMessage: `${f.Follower.name}開始追蹤你`,
         createdAt: f.createdAt,
         user: f.Follower
+      })
+    })
+
+    newSubscribers.forEach(s => {
+      notifications.push({
+        noticeMessage: `${s.Subscriber.name}訂閱了你的帳號`,
+        createdAt: s.createdAt,
+        user: s.Subscriber
       })
     })
 
