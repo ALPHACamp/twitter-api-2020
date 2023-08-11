@@ -13,7 +13,6 @@ const pushNotice = require('./modules/pushNotice')
 const getNotice = require('./modules/getNotice')
 const getSubscribe = require('./modules/getSubscribe')
 
-
 module.exports = io => {
   io.on('connection', socket => {
     console.log(socket.id)
@@ -50,7 +49,7 @@ module.exports = io => {
       pushNotice(socket, action, targetId)
     )
     // 取得通知
-    socket.on('client-get-notice', () => getNotice(socket))
+    socket.on('client-get-notice', receiverSocketId => getNotice(socket, receiverSocketId))
 
     // 使用者斷線
     socket.on('disconnect', reason => disconnect(io, socket, reason))

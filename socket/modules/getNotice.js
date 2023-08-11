@@ -2,10 +2,12 @@ const { emitError, findUserInPublic, findAllSubscribed, calculateDate } = requir
 const { Tweet, User, Notice, Followship, Like, Reply } = require('../../models')
 const { Op } = require('sequelize')
 
-module.exports = async socket => {
+module.exports = async (socket, receiverSocketId = null) => {
   try {
-    // 確認使用者是否登入
-    const currentUser = findUserInPublic(socket.id, 'socketId')
+    // 確認使用者是否登入, receiverSocketId是接收方, 如為null代表此事件是主動發生, 非由pushNotice觸發
+    const currentUser = receiverSocketId
+      ? findUserInPublic(receiverSocketId, 'socketId')
+      : findUserInPublic(socket.id, 'socketId')
     // 找出所有訂閱的人(id, createdAt)
     const subscribeds = await findAllSubscribed(currentUser.id)
     // 整理成id array
@@ -32,11 +34,13 @@ module.exports = async socket => {
         createdAt: { [Op.between]: [sevenDaysAgo, currentDate] }
       },
       attributes: ['followerId', 'createdAt'],
-      include: [{
-        model: User,
-        as: 'Follower',
-        attributes: ['id', 'name', 'avatar']
-      }]
+      include: [
+        {
+          model: User,
+          as: 'Follower',
+          attributes: ['id', 'name', 'avatar']
+        }
+      ]
     })
 
     // 先找出currentUser發過的所有tweet Id
@@ -119,10 +123,17 @@ module.exports = async socket => {
     // 按照時間排序，由新到舊
     notifications.sort((a, b) => b.createdAt - a.createdAt)
     // 更新noticeRead時間
-    await Notice.update({ noticeRead: new Date() },
-      { where: { userId: currentUser.id } })
-
-    socket.emit('server-get-notice', notifications)
+    await Notice.update(
+      { noticeRead: new Date() },
+      { where: { userId: currentUser.id } }
+    )
+    // socketId = null 代表主動發送getNotice事件
+    if (!receiverSocketId) {
+      socket.emit('server-get-notice', notifications)
+    } else {
+      // 有傳ID: push-notice時觸發更新
+      socket.to(receiverSocketId).emit('server-get-notice', notifications)
+    }
   } catch (err) {
     emitError(socket, err)
   }
