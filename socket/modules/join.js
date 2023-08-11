@@ -16,12 +16,17 @@ module.exports = async (io, socket, userId) => {
     const index = await findUserIndexInPublic(userId, 'id')
     const rooms = await getAllRooms(userId)
     const unreadNotice = await checkNotice(userId)
-    // clear timeout if any
+
+    // 檢查 斷線/重複登入
     const userOnList = findUserInPublic(userId, 'id', false)
+    // 斷線
     if (userOnList?.timeout) {
       console.log('使用者已經恢復連線 取消timeout')
       clearTimeout(userOnList.timeout)
       delete userOnList.timeout
+    } else if (userOnList) {
+      // 重複登入
+      throw new Error('該使用者已經在線上！')
     }
 
     // update
