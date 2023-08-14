@@ -29,7 +29,7 @@ module.exports = async (socket, action, targetId) => {
         )
         console.log(`NewNotices of userId:${currentUser.id}'s subscribers have updated.`)
 
-        usersOnline.forEach(u => {
+        usersOnline.forEach(async u => {
           // find online subscribers
           if (subscribers.includes(u.id)) {
             // send new notice message
@@ -37,7 +37,7 @@ module.exports = async (socket, action, targetId) => {
               getNotice(socket, u.socketId)
             }
             // renew unreadNotice status
-            u.unreadNotice = checkNotice(u.id)
+            u.unreadNotice = await checkNotice(u.id)
             socket.to(u.socketId).emit('server-push-notice', 'new notice!')
           }
         })
@@ -60,8 +60,10 @@ module.exports = async (socket, action, targetId) => {
             getNotice(socket, targetUserOnline.socketId)
           }
           // renew unreadNotice status
-          targetUserOnline.unreadNotice = checkNotice(targetUserOnline.id)
+          targetUserOnline.unreadNotice = await checkNotice(targetUserOnline.id)
+
           socket.to(targetUserOnline.socketId).emit('server-push-notice', 'new notice!')
+          socket.to(targetUserOnline.socketId).emit('server-update', usersOnline)
         }
       }
     } else {
