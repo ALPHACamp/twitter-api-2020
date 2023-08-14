@@ -60,8 +60,10 @@ module.exports = async (socket, action, targetId) => {
             getNotice(socket, targetUserOnline.socketId)
           }
           // renew unreadNotice status
-          targetUserOnline.unreadNotice = checkNotice(targetUserOnline.id)
+          targetUserOnline.unreadNotice = await checkNotice(targetUserOnline.id)
+
           socket.to(targetUserOnline.socketId).emit('server-push-notice', 'new notice!')
+          socket.to(targetUserOnline.socketId).emit('server-update', usersOnline)
         }
       }
     } else {
