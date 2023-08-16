@@ -10,6 +10,7 @@ const usersOnline = require('../modules/userOnline')
 const getNotice = require('../modules/getNotice')
 
 module.exports = async (socket, action, targetId) => {
+  targetId = targetId.toString()
   try {
     // 確認使用者是否登入
     const currentUser = findUserInPublic(socket.id, 'socketId')
@@ -39,6 +40,7 @@ module.exports = async (socket, action, targetId) => {
             // renew unreadNotice status
             u.unreadNotice = await checkNotice(u.id)
             socket.to(u.socketId).emit('server-push-notice', 'new notice!')
+            socket.to(u.socketId).emit('server-update', usersOnline)
           }
         })
       } else {
