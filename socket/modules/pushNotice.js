@@ -63,16 +63,16 @@ module.exports = async (socket, action, targetId) => {
         console.log({ action, targetId, targetUserOnline, usersOnline })
         // if targetUser online, send new notice message
         if (targetUserOnline) {
-          let text = 'if targetUserOnline = true'
+          console.log('if targetUserOnline = true')
           if (targetUserOnline.currentRoom && targetUserOnline.currentRoom === 'notice') {
             // if user in notice, trigger getNotice
             getNotice(socket, targetUserOnline.socketId)
-            text = '測試有進入此區'
+            console.log('測試有進入此區')
           }
           // renew unreadNotice status
           targetUserOnline.unreadNotice = await checkNotice(targetUserOnline.id)
 
-          socket.to(targetUserOnline.socketId).emit('server-push-notice', 'new notice!' + text)
+          socket.to(targetUserOnline.socketId).emit('server-push-notice', 'new notice!')
           socket.to(targetUserOnline.socketId).emit('server-update', usersOnline)
         }
       }
