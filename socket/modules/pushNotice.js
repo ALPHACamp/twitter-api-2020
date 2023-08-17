@@ -2,7 +2,8 @@ const {
   emitError,
   findUserInPublic,
   findAllSubscribersUserId,
-  checkNotice
+  checkNotice,
+  userExistInDB
 } = require('../helper')
 const { Notice } = require('../../models')
 const { Op } = require('sequelize')
@@ -46,6 +47,9 @@ module.exports = async (socket, action, targetId) => {
       } else {
         // 對某人的tweet reply、like、follow或subscribe某人
         if (!targetId) throw new Error('targetId is required!')
+        const isUser = await userExistInDB(targetId, 'id')
+        if (!isUser) throw new Error('The user does not exist!')
+
         // 更新targetUser的notice
         await Notice.update(
           { newNotice: new Date() },
@@ -54,17 +58,20 @@ module.exports = async (socket, action, targetId) => {
           }
         )
         console.log(`NewNotice of userId:${targetId} has updated.`)
+
         const targetUserOnline = usersOnline.find(u => u.id.toString() === targetId)
         // if targetUser online, send new notice message
         if (targetUserOnline) {
+          let text = 'if targetUserOnline = true'
           if (targetUserOnline.currentRoom && targetUserOnline.currentRoom === 'notice') {
             // if user in notice, trigger getNotice
             getNotice(socket, targetUserOnline.socketId)
+            text = '測試有進入此區'
           }
           // renew unreadNotice status
           targetUserOnline.unreadNotice = await checkNotice(targetUserOnline.id)
 
-          socket.to(targetUserOnline.socketId).emit('server-push-notice', 'new notice!')
+          socket.to(targetUserOnline.socketId).emit('server-push-notice', 'new notice!' + text)
           socket.to(targetUserOnline.socketId).emit('server-update', usersOnline)
         }
       }
