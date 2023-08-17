@@ -60,6 +60,7 @@ module.exports = async (socket, action, targetId) => {
         console.log(`NewNotice of userId:${targetId} has updated.`)
 
         const targetUserOnline = usersOnline.find(u => u.id.toString() === targetId)
+        console.log({ action, targetId, targetUserOnline, usersOnline })
         // if targetUser online, send new notice message
         if (targetUserOnline) {
           let text = 'if targetUserOnline = true'
