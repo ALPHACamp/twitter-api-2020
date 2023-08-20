@@ -3,10 +3,7 @@ const helpers = require("./_helpers");
 
 const app = express();
 const port = 3000;
-const swaggerUi = require("swagger-ui-express");
-const swaggerDocument = require("./swagger.json");
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
+const hi = "hi";
 // use helpers.getUser(req) to replace req.user
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
