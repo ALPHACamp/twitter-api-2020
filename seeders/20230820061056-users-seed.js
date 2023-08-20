@@ -7,7 +7,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       name: '南港古天樂',
       avatar: `https://images.newtalk.tw/resize_action2/800/album/news/549/604b088605df1.jpg`,
-      introduction: '每有很可以但你惹不起',
+      introduction: '沒有很可以但你惹不起',
       role: 'admin',
       account: '乂瘋狂的小風乂',
       created_at: new Date(),
