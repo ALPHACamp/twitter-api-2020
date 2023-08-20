@@ -3,7 +3,7 @@ const helpers = require("./_helpers");
 
 const app = express();
 const port = 3000;
-const hi = "hi";
+
 // use helpers.getUser(req) to replace req.user
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
