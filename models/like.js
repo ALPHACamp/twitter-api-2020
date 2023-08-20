@@ -14,8 +14,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Like.init({
-    userId: DataTypes.INTEGER,
-    tweetId: DataTypes.INTEGER
+    // 首字大寫為了過測試
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Like',
