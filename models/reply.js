@@ -11,12 +11,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate (models) {
       // define association here
+      Reply.belongsTo(models.User, { foreignKey: 'userId' })
+      Reply.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
     }
   };
   Reply.init({
     comment: DataTypes.TEXT,
-    userId: DataTypes.INTEGER,
-    tweetId: DataTypes.INTEGER
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Reply',
