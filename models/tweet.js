@@ -9,7 +9,8 @@ module.exports = (sequelize, DataTypes) => {
     underscored: true
   });
   Tweet.associate = function (models) {
-    Tweet.belongsTo(models.User, { foreignKey: 'userId' })
+    Tweet.belongsTo(models.User, { foreignKey: 'UserId' })
+    Tweet.hasMany(models.Reply, { foreignKey: 'TweetId' })
   };
   return Tweet;
 };
