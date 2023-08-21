@@ -11,11 +11,25 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     modelName: 'User',
     tableName: 'Users',
-    underscored: true
   });
   User.associate = function (models) {
     User.hasMany(models.Tweet, { foreignKey: 'UserId' })
+    User.belongsToMany(models.Tweet,{
+      through: models.Like,
+      foreignKey: 'UserId',
+      as: 'LikeTweets'
+    })
     User.hasMany(models.Reply, { foreignKey: 'UserId' })
+    User.belongsToMany(User, { // 我追蹤的人
+      through: models.Followship,
+      foreignKey: 'followerId',
+      as: 'Followings'
+    })
+    User.belongsToMany(User, { // 粉絲
+      through: models.Followship,
+      foreignKey: 'followingId',
+      as: 'Followers'
+    })
   };
   return User;
 };

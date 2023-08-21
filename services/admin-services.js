@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const adminServices = {
   signIn: async (req, cb) => {
@@ -31,16 +31,39 @@ const adminServices = {
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       return cb(null, {
-        status: 'success',
-        message: '登入成功！',
         token,
         user: userData
       })
     } catch (err) {
       cb(err)
     }
+  },
+  getUsers: async(req, cb) => {
+    try{
+      const users = await User.findAll({
+        include:[
+          Tweet,
+          { model: Reply, include: Tweet },
+          { model: Tweet, as: 'LikeTweets' },
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      })
+      const userData = users
+        .map(user => ({
+          ...user.toJSON(),
+          Tweets: user.Tweets.length,
+          Replies: user.Replies.length,
+          LikeTweets: user.LikeTweets.length,
+          Followers: user.Followers.length,
+          Followings: user.Followings.length
+        }))
+        .sort((a, b) => b.Followers - a.Followers)
+      cb(null, { userData })
+    }catch(err){
+      cb(err)
+    }
   }
-
 }
 
 module.exports = adminServices

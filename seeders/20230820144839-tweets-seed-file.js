@@ -18,8 +18,8 @@ module.exports = {
       Array.from({ length: list.length }, (_, index) => ({
         userId: list[index],
         description: faker.lorem.text(),
-        created_at: new Date(),
-        updated_at: new Date()
+        createdAt: new Date(),
+        updatedAt: new Date()
       }))
     )
   },

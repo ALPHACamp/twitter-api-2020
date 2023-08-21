@@ -10,8 +10,8 @@ module.exports = {
       introduction: '沒有很可以但你惹不起',
       role: 'admin',
       account: '乂瘋狂的小風乂',
-      created_at: new Date(),
-      updated_at: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     },{
       email: 'user1@example.com',
       password: await bcrypt.hash('12345678', 10),
@@ -20,8 +20,8 @@ module.exports = {
       introduction: '愛用炫彩拉拉',
       role: 'user',
       account: '拉拉',
-      created_at: new Date(),
-      updated_at: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     },{
       email: 'user2@example.com',
       password: await bcrypt.hash('12345678', 10),
@@ -30,8 +30,8 @@ module.exports = {
       introduction: '',
       role: 'user',
       account: '老蔡',
-      created_at: new Date(),
-      updated_at: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     },{
       email: 'user3@example.com',
       password: await bcrypt.hash('12345678', 10),
@@ -40,8 +40,8 @@ module.exports = {
       introduction: '',
       role: 'user',
       account: 'user3',
-      created_at: new Date(),
-      updated_at: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     },{
       email: 'user4@example.com',
       password: await bcrypt.hash('12345678', 10),
@@ -50,8 +50,8 @@ module.exports = {
       introduction: '',
       role: 'user',
       account: 'user4',
-      created_at: new Date(),
-      updated_at: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     },{
       email: 'user5@example.com',
       password: await bcrypt.hash('12345678', 10),
@@ -60,8 +60,8 @@ module.exports = {
       introduction: '',
       role: 'user',
       account: 'user5',
-      created_at: new Date(),
-      updated_at: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     }
   ])
 

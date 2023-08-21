@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 app.use((req, res, next) => {
-  res.locals.user = req.user
+  res.locals.user = helpers.getUser(req)
   next()
 })
 
