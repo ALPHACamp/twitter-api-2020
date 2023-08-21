@@ -17,8 +17,8 @@ router.get('/api/tweets/:id', tweetController.getTweet)
 router.get('/api/tweets', tweetController.getTweets)
 
 // 留言
+router.post('/api/tweets/:TweetId/replies', replyController.postReply)
 router.get('/api/tweets/:TweetId/replies', replyController.getReplies)
-
 
 router.use('/', apiErrorHandler)
 
