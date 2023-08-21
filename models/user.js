@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     account: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'EmptyAccount'
+      defaultValue: 'EmptyAccount' // 不加defaultValue測試不會過
     },
     name: DataTypes.STRING,
     email: DataTypes.STRING,
