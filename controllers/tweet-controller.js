@@ -8,7 +8,7 @@ const tweetController = {
         tweetServices.getTweet(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
     },
     postTweet: (req, res, next) => {
-        tweetServices.postTweet()
+        tweetServices.postTweet(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
     }
 }
 

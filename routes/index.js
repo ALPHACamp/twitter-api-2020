@@ -11,6 +11,7 @@ router.use('/api/admin', admin)
 router.post('/api/users/login', userController.signIn)
 
 // 推文
+router.post('/api/tweets', tweetController.postTweet)
 router.get('/api/tweets/:id', tweetController.getTweet)
 router.get('/api/tweets', tweetController.getTweets)
 
