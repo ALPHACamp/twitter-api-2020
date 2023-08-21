@@ -2,21 +2,17 @@ const db = require('../../models')
 const { User, Tweet, Reply, Like } = db
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
-const defaultLimit = 10
 
 const adminController = {
+  // Admin 取得所有使用者
   getUsers: (req, res) => {
     const options = {
-      limit: +req.query.limit || defaultLimit,
-      offset: +req.query.offset || 0,
       raw: true,
-      order: [['tweetNum', 'desc']],
       attributes: {
         exclude: [
           'email',
           'introduction',
           'password',
-          'lastLoginAt',
           'updatedAt',
           'createdAt'
         ]
@@ -39,12 +35,10 @@ const adminController = {
         })
       })
   },
+  // Admin取得所有貼文
   getTweets: (req, res) => {
     const options = {
-      limit: +req.query.limit || defaultLimit,
-      offset: +req.query.offset || 0,
-      attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt'],
-      order: [['createdAt', 'desc']],
+      attributes: ['id', 'description', 'createdAt'],
       include: [
         {
           model: User,
@@ -63,94 +57,40 @@ const adminController = {
       .catch(() =>
         res.status(500).json({
           status: 'error',
-          message: error
+          message: 'error'
         })
       )
   },
-  deleteTweet: (req, res) => {
-    const options = {
-      include: [
-        { model: Reply, attributes: ['id'], raw: true },
-        { model: Like, attributes: ['id', 'UserId'] }
-      ]
-    }
-    Tweet.findByPk(+req.params.tweetId, options)
-      .then(async tweet => {
-        await tweet.destroy()
-        await User.decrement({ tweetNum: 1 }, { where: { id: tweet.UserId } })
-        if (tweet.Replies.length) {
-          await Reply.destroy({
-            where: { id: tweet.Replies.map(reply => reply.id) }
-          })
-        }
-        if (tweet.Likes.length) {
-          await Like.destroy({
-            where: { id: tweet.Likes.map(like => like.id) }
-          })
-          await User.decrement(
-            { likeNum: 1 },
-            { where: { id: tweet.Likes.map(like => like.UserId) } }
+  // Admin刪除一篇貼文
+  deleteTweet: (req, cb) => {
+    return Promise.all([
+      Tweet.destroy({
+        where: { id: req.params.id },
+        raw: true,
+        nest: true
+      }),
+      Like.destroy({
+        where: { TweetId: req.params.id },
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(tweet => {
+        if (!tweet) {
+          throw new Error(
+            '此貼文不存在，可能是 Parameters 的資料錯誤或已經被刪除'
           )
         }
-        res.status(200).json({
+        return cb(null, {
           status: 'success',
-          message: 'Successfully delete tweet.'
+          message: '刪除貼文成功'
         })
       })
-      .catch(error =>
-        res.status(500).json({
-          status: 'error',
-          message: error
-        })
-      )
+      .catch(err => cb(err))
   },
+  // Admin 登入
   login: (req, res) => {
-    const { password, email } = req.body
-    if (!password || !email) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Password or email can not be empty.'
-      })
-    }
-
-    User.findOne({ where: { email, role: 'admin' } })
-      .then(user => {
-        if (!user) {
-          return res.status(401).json({
-            status: 'error',
-            message: "This admin account doesn't exist."
-          })
-        }
-        if (!bcrypt.compareSync(password, user.password)) {
-          return res.status(401).json({
-            status: 'error',
-            message: 'Password incorrect.'
-          })
-        }
-
-        const payload = {
-          id: user.id
-        }
-        const token = jwt.sign(payload, 'numberFive')
-        return res.status(200).json({
-          status: 'success',
-          message: 'Administrator successfully login.',
-          token,
-          User: {
-            id: user.id,
-            name: user.name,
-            account: user.account,
-            email: user.email,
-            role: user.role
-          }
-        })
-      })
-      .catch(error =>
-        res.status(500).json({
-          status: 'error',
-          message: error
-        })
-      )
+    // 未完成
   }
 }
 
