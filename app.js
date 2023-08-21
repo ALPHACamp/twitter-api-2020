@@ -5,6 +5,8 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const helpers = require('./_helpers')
 
+const routes = require('./routes')
+
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -12,6 +14,8 @@ const port = process.env.PORT || 3000
 function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 }
+
+app.use(routes)
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
