@@ -1,10 +1,10 @@
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
-const authenticated = (req, res, next) => {
-  passport.authenticate('jwt', {session: false}, (err, user) => {
-    req.user = user
-    if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
+const authenticated = (req, res, next) => { // 用jwt策略驗證
+  passport.authenticate('jwt', { session: false }, (err, user) => { 
+    if (err || !user) return res.status(401).json({ status: 'error', message: '沒登入' })
+    req.user = user // 用cb之後變成req.logIn函式處理所以要自己處理驗證成功時放入req.user
     next()
   })(req, res, next)
 }
