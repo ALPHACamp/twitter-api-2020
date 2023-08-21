@@ -8,23 +8,23 @@ const adminServices = {
       const { email, password } = req.body
       if (!email || !password) {
         const err = new Error('請輸入帳號密碼')
-        err.status = 400
+        err.status = 403
         throw err
       }
       const user = await User.findOne({ where: { email } })
       if (!email) {
         const err = new Error('帳號密碼輸入錯誤')
-        err.status = 400
+        err.status = 403
         throw err
       }
       if (user.role === 'user') {
         const err = new Error('帳號不存在')
-        err.status = 404
+        err.status = 403
         throw err
       }
       if (!bcrypt.compareSync(password, user.password)) {
         const err = new Error('帳號密碼輸入錯誤')
-        err.status = 400
+        err.status = 403
         throw err
       }
       const userData = user.toJSON()
