@@ -1,7 +1,6 @@
 const db = require('../../models')
-const { User, Tweet, Reply, Like } = db
-const bcrypt = require('bcrypt-nodejs')
-const jwt = require('jsonwebtoken')
+const { User, Tweet, Like } = db
+// const bcrypt = require('bcrypt-nodejs')
 
 const adminController = {
   // Admin 取得所有使用者

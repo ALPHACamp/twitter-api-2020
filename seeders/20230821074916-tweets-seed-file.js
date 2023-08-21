@@ -4,14 +4,15 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const data = []
+    // eslint-disable-next-line array-callback-return
     Array.from({ length: 5 }).map((user, i) => {
       for (let j = 0; j < 10; ++j) {
         data.push({
           id: j * 10 + i + 1,
           description: faker.lorem.text(140),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          UserId: i + 1
+          created_at: new Date(),
+          updated_at: new Date(),
+          User_id: i + 1
         })
       }
     })

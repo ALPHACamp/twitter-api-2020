@@ -21,11 +21,11 @@ module.exports = {
       'Replies',
       Array.from({ length: 150 }).map((d, i) => {
         const tweet = {
-          TweetId: tweetData[Math.floor(i / 3)].id,
-          UserId: userData[Math.floor(Math.random() * userData.length)].id,
+          Tweet_id: tweetData[Math.floor(i / 3)].id,
+          User_id: userData[Math.floor(Math.random() * userData.length)].id,
           comment: faker.lorem.text(),
-          createdAt: new Date(),
-          updatedAt: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         }
         return tweet
       }),
