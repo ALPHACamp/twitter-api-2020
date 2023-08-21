@@ -5,7 +5,7 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
-      'SELECT * FROM `Users`;',
+      `SELECT * FROM Users WHERE role = 'user';`,
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const tweets = await queryInterface.sequelize.query(
@@ -23,8 +23,8 @@ module.exports = {
         userId: users[Math.floor(Math.random() * users.length)].id,
         tweetId: list[index],
         comment: faker.lorem.text(),
-        create_at: new Date(),
-        updated_at: new Date()
+        createdAt: new Date(),
+        updatedAt: new Date()
       }))
     )
   },
