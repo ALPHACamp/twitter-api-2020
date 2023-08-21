@@ -10,18 +10,18 @@ const JWTStrategy = passportJWT.Strategy
 // local strategy
 passport.use(new LocalStrategy(
   {
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
   },
 
-  (req, email, password, cb) => {
-    User.findOne({ where: { email } })
+  (req, account, password, cb) => {
+    User.findOne({ where: { account } })
       .then(user => {
         if (!user) return cb(Error('User does not exist!'))
         bcrypt.compare(password, user.password)
           .then(res => {
-            if (!res) return cb(Error('Incorrect email or password!'))
+            if (!res) return cb(Error('Incorrect account or password!'))
             return cb(null, user)
           })
       })
@@ -35,8 +35,11 @@ const jwtOptions = {
 }
 
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findOne(jwtPayload.id, { id: jwtPayload.id })
-    .then(user => cb(null, user))
+  User.findByPk(jwtPayload.id)
+    .then(user => {
+      if (!user) return cb(null, false)
+      cb(null, user)
+    })
     .catch(err => cb(err))
 })
 )
