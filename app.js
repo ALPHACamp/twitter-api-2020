@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
-
+const test2 = "test2";
 const express = require("express");
 const helpers = require("./_helpers");
 
