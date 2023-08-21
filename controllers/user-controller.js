@@ -8,6 +8,8 @@ const userController = {
   signIn: (req, res, next) => {
     try {
       const userData = req.user.toJSON()
+      if (userData.role !== 'user') throw new Error('no such user(角色錯誤)') // 角色若不是user則不發給token
+
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       return res.json({
@@ -35,7 +37,9 @@ const userController = {
         account,
         name,
         email,
-        password: hash
+        password: hash,
+        role: 'user',
+        banner: 'https://images.unsplash.com/photo-1580436541340-36b8d0c60bae'
       })
 
       const userData = user.toJSON()

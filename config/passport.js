@@ -11,20 +11,20 @@ const JWTStrategy = passportJWT.Strategy
 passport.use(new LocalStrategy(
   {
     usernameField: 'account',
-    passwordField: 'password',
-    passReqToCallback: true
+    passwordField: 'password'
   },
+  async (account, password, done) => {
+    try {
+      const user = await User.findOne({ where: { account } })
+      if (!user) throw new Error('User does not exist!')
 
-  (req, account, password, cb) => {
-    User.findOne({ where: { account } })
-      .then(user => {
-        if (!user) return cb(Error('User does not exist!'))
-        bcrypt.compare(password, user.password)
-          .then(res => {
-            if (!res) return cb(Error('Incorrect account or password!'))
-            return cb(null, user)
-          })
-      })
+      const result = await bcrypt.compare(password, user.password)
+      if (!result) throw new Error('Incorrect account or password!')
+
+      return done(null, user)
+    } catch (err) {
+      return done(err)
+    }
   }
 ))
 
@@ -34,13 +34,15 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET
 }
 
-passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id)
-    .then(user => {
-      if (!user) return cb(null, false)
-      cb(null, user)
-    })
-    .catch(err => cb(err))
+passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
+  try {
+    const user = await User.findByPk(jwtPayload.id)
+    if (!user) return done(null, false)
+
+    return done(null, user)
+  } catch (error) {
+    return done(error)
+  }
 })
 )
 
