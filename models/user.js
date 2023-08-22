@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {}
 
   User.associate = function (models) {
-    User.hasMany(models.Tweet, { foreignKey: 'UserId', as: 'WroteTweet' })
+    User.hasMany(models.Tweet, { foreignKey: 'UserId', as: 'WrittenTweet' })
 
     User.belongsToMany(models.Tweet, {
       through: models.Like,
@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     account: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'EmptyAccount' // 不加defaultValue測試不會過
+      defaultValue: 'Unknown' // 不加defaultValue測試不會過
     },
     name: DataTypes.STRING,
     email: DataTypes.STRING,
