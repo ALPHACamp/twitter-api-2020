@@ -47,11 +47,13 @@ const adminServices = {
           { model: Tweet, as: 'LikeTweets' },
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
-        ]
+        ],
+        raw: true,
+        nest: true
       })
       const userData = users
         .map(user => ({
-          ...user.toJSON(),
+          ...user,
           Tweets: user.Tweets.length,
           Replies: user.Replies.length,
           LikeTweets: user.LikeTweets.length,
@@ -61,6 +63,22 @@ const adminServices = {
         .sort((a, b) => b.Followers - a.Followers)
       cb(null, { userData })
     }catch(err){
+      cb(err)
+    }
+  },
+  getAdminTweets: async (req, cb) => {
+    try {
+      const tweets = await Tweet.findAll({
+        include: [
+          User,
+          Reply,
+          { model: User, as: 'LikeUsers' }
+        ],
+        raw: true,
+        nest: true
+      })
+      cb(null, { tweets })
+    } catch (err) {
       cb(err)
     }
   }

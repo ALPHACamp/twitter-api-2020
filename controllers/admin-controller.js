@@ -6,6 +6,9 @@ const adminController = {
   },
   getUsers: (req, res, next) => {
     adminServices.getUsers(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  getAdminTweets: (req, res, next) => {
+    adminServices.getAdminTweets(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 
