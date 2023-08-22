@@ -38,16 +38,16 @@ const adminServices = {
       cb(err)
     }
   },
-  getUsers: async(req, cb) => {
-    try{
+  getUsers: async (req, cb) => {
+    try {
       const users = await User.findAll({
-        include:[
+        include: [
           Tweet,
           { model: Reply, include: Tweet },
           { model: Tweet, as: 'LikeTweets' },
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
-        ],
+        ]
       })
       const userData = users
         .map(user => ({
@@ -60,7 +60,7 @@ const adminServices = {
         }))
         .sort((a, b) => b.Followers - a.Followers)
       cb(null, userData)
-    }catch(err){
+    } catch (err) {
       cb(err)
     }
   },
@@ -75,22 +75,22 @@ const adminServices = {
         raw: true,
         nest: true
       })
-      cb(null, tweets )
+      cb(null, tweets)
     } catch (err) {
       cb(err)
     }
   },
   deleteTweet: async (req, cb) => {
-    try{
+    try {
       const tweet = await Tweet.findByPk(req.params.id)
       if (!tweet) {
-        const err = new Error("推文不存在！")
+        const err = new Error('推文不存在！')
         err.status = 404
         throw err
       }
       const deleteTweet = await tweet.destroy()
       cb(null, deleteTweet)
-    }catch(err){
+    } catch (err) {
       cb(err)
     }
   }
