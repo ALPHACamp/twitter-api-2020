@@ -9,6 +9,9 @@ const adminController = {
   },
   getAdminTweets: (req, res, next) => {
     adminServices.getAdminTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  deleteTweet: (req, res, next) => {
+    adminServices.deleteTweet(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 
