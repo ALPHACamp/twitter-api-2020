@@ -75,8 +75,22 @@ const adminServices = {
         raw: true,
         nest: true
       })
-      cb(null, { tweets })
+      cb(null, tweets )
     } catch (err) {
+      cb(err)
+    }
+  },
+  deleteTweet: async (req, cb) => {
+    try{
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (!tweet) {
+        const err = new Error("推文不存在！")
+        err.status = 404
+        throw err
+      }
+      const deleteTweet = await tweet.destroy()
+      cb(null, deleteTweet)
+    }catch(err){
       cb(err)
     }
   }
