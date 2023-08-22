@@ -6,12 +6,16 @@ const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
 const session = require('express-session')
 const routes = require('./routes')
+const passport = require('./config/passport') // 增加這行，引入 Passport
 
 const app = express()
 
 // bodyparser設定
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+// passport 初始化
+app.use(passport.initialize())
+app.use(passport.session())
 
 const port = process.env.PORT || 3000
 
