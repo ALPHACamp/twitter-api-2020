@@ -5,7 +5,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const data = []
     // eslint-disable-next-line array-callback-return
-    Array.from({ length: 5 }).map((user, i) => {
+    Array.from({ length: 10 }).map((user, i) => {
       for (let j = 0; j < 10; ++j) {
         data.push({
           id: j * 10 + i + 1,
