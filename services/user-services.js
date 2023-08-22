@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 const { User, Tweet, Followship } = require('../models')
 
 const userServices = {
@@ -43,27 +44,45 @@ const userServices = {
   getUser: async (req, cb) => {
     try {
       const { id } = req.params
-      const [user, tweets, followings, followers] = await Promise.all([
-        User.findByPk(id, {
-          raw: true
-        }),
-        Tweet.count({ where: { UserId: id } }),
-        Followship.count({ where: { followerId: id } }),
-        Followship.count({ where: { followingId: id } })
-      ])
+      const user = await User.findByPk(id, {
+        attributes: [
+          'id',
+          'email',
+          'account',
+          'name',
+          'avatar',
+          'banner',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+            'followersCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+            'followingsCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId IN (SELECT id FROM Tweets WHERE Tweets.UserId = User.id))'),
+            'likesCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'),
+            'tweetsCount'
+          ]
+        ],
+        raw: true,
+        nest: true
+      })
       if (!user) {
         const err = new Error('使用者不存在')
         err.status = 404
         throw err
       }
-      delete user.password
-      const UserData = [
-        { ...user },
-        { tweetCount: tweets },
-        { followerCount: followers },
-        { followingCount: followings }
-      ]
-      cb(null, UserData)
+      if (user.email === 'root@example.com') {
+        const err = new Error('使用者不存在')
+        err.status = 404
+        throw err
+      }
+      cb(null, user)
     } catch (err) {
       cb(err)
     }
