@@ -48,12 +48,10 @@ const adminServices = {
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
         ],
-        raw: true,
-        nest: true
       })
       const userData = users
         .map(user => ({
-          ...user,
+          ...user.toJSON(),
           Tweets: user.Tweets.length,
           Replies: user.Replies.length,
           LikeTweets: user.LikeTweets.length,
@@ -61,7 +59,7 @@ const adminServices = {
           Followings: user.Followings.length
         }))
         .sort((a, b) => b.Followers - a.Followers)
-      cb(null, { userData })
+      cb(null, userData)
     }catch(err){
       cb(err)
     }
