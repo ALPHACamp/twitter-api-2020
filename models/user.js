@@ -1,7 +1,5 @@
 'use strict'
-const {
-  Model
-} = require('sequelize')
+const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -11,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate (models) {
       // define association here
-      User.hasMany(models.Tweet, { foreignKey: 'userId' })
+      User.hasMany(models.Tweet, { foreignKey: 'userId', as: 'author' })
       User.hasMany(models.Reply, { foreignKey: 'userId' })
       User.hasMany(models.Like, { foreignKey: 'userId' })
       User.belongsToMany(models.User, {
@@ -25,21 +23,24 @@ module.exports = (sequelize, DataTypes) => {
         as: 'Followers'
       })
     }
-  };
-  User.init({
-    name: DataTypes.STRING,
-    email: DataTypes.STRING,
-    password: DataTypes.STRING,
-    account: DataTypes.STRING,
-    introduction: DataTypes.TEXT,
-    avatar: DataTypes.STRING,
-    cover: DataTypes.STRING,
-    role: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'User',
-    tableName: 'Users',
-    underscored: true
-  })
+  }
+  User.init(
+    {
+      name: DataTypes.STRING,
+      email: DataTypes.STRING,
+      password: DataTypes.STRING,
+      account: DataTypes.STRING,
+      introduction: DataTypes.TEXT,
+      avatar: DataTypes.STRING,
+      cover: DataTypes.STRING,
+      role: DataTypes.STRING
+    },
+    {
+      sequelize,
+      modelName: 'User',
+      tableName: 'Users',
+      underscored: true
+    }
+  )
   return User
 }
