@@ -12,6 +12,9 @@ router.post('/api/admin/login', adminController.signIn)
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 router.post('/api/users/login', userController.signIn)
 
+//user
+router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
+
 // 推文
 router.post('/api/tweets', tweetController.postTweet)
 router.get('/api/tweets/:id', tweetController.getTweet)
