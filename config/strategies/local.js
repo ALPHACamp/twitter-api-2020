@@ -24,7 +24,7 @@ module.exports = passport => {
             return done(error, false)
           }
           // authenticated, return user
-          return done(null, user.get())
+          return done(null, user)
         })
           .catch(err => done(err, false))
       })
