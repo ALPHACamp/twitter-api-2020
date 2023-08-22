@@ -36,7 +36,7 @@ module.exports = {
         name: faker.person.fullName(),
         email: faker.internet.email(),
         password: await bcrypt.hash('12345678', 10),
-        introduction: faker.lorem.paragraph({ min: 1, max: 3 }),
+        introduction: faker.lorem.paragraph({ min: 1, max: 3 }).substring(0, 160),
         avatar: faker.image.urlLoremFlickr({ width: 224, height: 224, category: 'avatar' }),
         banner: faker.image.urlLoremFlickr({ width: 1024, height: 256 }),
         role: 'user',

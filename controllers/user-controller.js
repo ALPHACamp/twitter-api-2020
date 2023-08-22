@@ -12,7 +12,7 @@ const userController = {
 
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
-      return res.json({
+      return res.status(200).json({
         status: 'success',
         data: {
           token,
@@ -25,8 +25,8 @@ const userController = {
   },
   signUp: async (req, res, next) => {
     try {
-      const { account, name, email, password, passwordCheck } = req.body
-      if (password !== passwordCheck) throw new Error('Passwords do not match!')
+      const { account, name, email, password, checkPassword } = req.body
+      if (password !== checkPassword) throw new Error('Passwords do not match!')
 
       // 確認name是否在50字之內
       if (name.length > 50) throw new Error('Name is over 50 chars!')
@@ -48,7 +48,7 @@ const userController = {
       const userData = user.toJSON()
       delete userData.password
 
-      return res.json({ status: 'success', data: userData })
+      return res.status(200).json({ status: 'success', data: userData })
     } catch (err) {
       return next(err)
     }
