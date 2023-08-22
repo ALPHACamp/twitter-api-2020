@@ -46,7 +46,7 @@ const adminController = {
         }
       ]
     }
-    Tweet.findAll(options)
+    return Tweet.findAll(options)
       .then(tweets => {
         tweets.forEach(tweet => {
           tweet.description = tweet.description.substring(0, 50)
@@ -56,7 +56,7 @@ const adminController = {
       .catch(() =>
         res.status(500).json({
           status: 'error',
-          message: 'error'
+          message: 'errorrr'
         })
       )
   },
@@ -88,8 +88,9 @@ const adminController = {
       .catch(err => cb(err))
   },
   // Admin 登入
-  login: (req, res) => {
+  signIn: (req, res) => {
     // 未完成
+    const { email, password } = req.body
   }
 }
 
