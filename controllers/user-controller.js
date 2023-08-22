@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const { User } = require('../models')
+const helpers = require('../_helpers')
 
 const userController = {
   signUp: (req, res, next) => {
@@ -22,11 +24,36 @@ const userController = {
         email,
         password: hash
       }))
-      .then(userData => res.json({
-        status: 'success',
-        data: { user: userData }
-      }))
+      .then(userData => {
+        userData = userData.toJSON()
+        delete userData.password
+        return res.json({
+          status: 'success',
+          data: { user: userData }
+        })
+      })
       .catch(err => next(err))
+  },
+  signIn: (req, res, next) => {
+    const userData = helpers.getUser(req).toJSON()
+    delete userData.password
+    if (userData.role === 'admin') {
+      const err = new Error('帳號不存在！')
+      err.status = 404
+      throw err
+    }
+    try {
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      res.json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
