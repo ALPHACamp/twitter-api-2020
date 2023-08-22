@@ -8,6 +8,7 @@ module.exports = {
       "SELECT id FROM Users WHERE role = 'user';",
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
+
     let usersList = []
     for (let i = 1; i <= 10; i++) {
       usersList = usersList.concat(users)
