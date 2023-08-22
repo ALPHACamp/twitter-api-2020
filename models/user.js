@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     account: DataTypes.STRING,
     avatar: DataTypes.STRING,
     banner: DataTypes.STRING,
-    introduction: DataTypes.STRING,
+    introduction: DataTypes.TEXT,
     role: DataTypes.STRING
   }, {
     sequelize,
