@@ -23,18 +23,10 @@ const tweetServices = {
         // 因應登入機制相關問題，暫時使用固定的UserId
         const UserId = 3
         const { description } = req.body
-        if (!UserId) {
-            const err = new Error('用戶不存在！')
-            err.status = 404
-            throw err
-        }
-        if (!description) {
-            const err = new Error('內容不可空白')
-            err.status = 404
-            throw err
-        }
+        if (!UserId) throw new Error('用戶不存在！')
+        if (!description) throw new Error('內容不可空白')
         return Tweet.create({ description, UserId })
-            .then(newTwitter => cb(null, { twitter: newTwitter }))
+            .then(newTweet => cb(null, { tweet: newTweet }))
             .catch(err => cb(err))
     }
 }
