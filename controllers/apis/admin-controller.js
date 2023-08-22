@@ -37,16 +37,18 @@ const adminController = {
   // Admin取得所有貼文
   getTweets: (req, res) => {
     const options = {
+      raw: true,
+      nest: true,
       attributes: ['id', 'description', 'createdAt'],
       include: [
         {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
-          as: 'Author'
+          as: 'author'
         }
       ]
     }
-    Tweet.findAll(options)
+    return Tweet.findAll(options)
       .then(tweets => {
         tweets.forEach(tweet => {
           tweet.description = tweet.description.substring(0, 50)
@@ -56,12 +58,12 @@ const adminController = {
       .catch(() =>
         res.status(500).json({
           status: 'error',
-          message: 'error'
+          message: 'errorrr'
         })
       )
   },
   // Admin刪除一篇貼文
-  deleteTweet: (req, cb) => {
+  deleteTweet: (req, res) => {
     return Promise.all([
       Tweet.destroy({
         where: { id: req.params.id },
@@ -80,16 +82,22 @@ const adminController = {
             '此貼文不存在，可能是 Parameters 的資料錯誤或已經被刪除'
           )
         }
-        return cb(null, {
+        return res.status(200).json({
           status: 'success',
-          message: '刪除貼文成功'
+          message: 'Successfully delete tweet.'
         })
       })
-      .catch(err => cb(err))
+      .catch(() =>
+        res.status(500).json({
+          status: 'error',
+          message: 'error'
+        })
+      )
   },
   // Admin 登入
-  login: (req, res) => {
+  signIn: (req, res) => {
     // 未完成
+    const { email, password } = req.body
   }
 }
 
