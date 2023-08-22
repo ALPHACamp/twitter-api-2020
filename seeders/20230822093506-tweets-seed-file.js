@@ -1,7 +1,7 @@
 'use strict'
+const NumOfTweetPerUser = 10 // 每個User隨機產生Tweet數
 
 const { QueryTypes } = require('sequelize')
-
 const { faker } = require('@faker-js/faker')
 
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
     // 每一個user隨機產生10篇tweets
     const tweets = []
     for (let i = 0; i < userIds.length; i++) {
-      for (let j = 0; j < 10; j++) {
+      for (let j = 0; j < NumOfTweetPerUser; j++) {
         tweets.push({
           UserId: userIds[i],
           description: faker.lorem.paragraph({ min: 1, max: 3 }).substring(0, 140),

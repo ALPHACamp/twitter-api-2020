@@ -1,4 +1,5 @@
 'use strict'
+const NumOfDummyUser = 15 // 隨機產生User數
 
 // import { faker } from '@faker-js/faker'
 const { faker } = require('@faker-js/faker')
@@ -30,7 +31,7 @@ module.exports = {
       updatedAt: new Date()
     }]
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < NumOfDummyUser; i++) {
       users.push({
         account: faker.internet.userName(),
         name: faker.person.fullName(),
