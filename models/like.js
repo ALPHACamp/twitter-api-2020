@@ -1,8 +1,12 @@
 'use strict'
+const { Model } = require('sequelize')
+
 module.exports = (sequelize, DataTypes) => {
-  const Like = sequelize.define('Like', {
-  }, {})
+  class Like extends Model { }
+
   Like.associate = function (models) {
+    Like.belongsTo(models.User, { foreignKey: 'UserId' })
+    Like.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
   }
 
   Like.init({
