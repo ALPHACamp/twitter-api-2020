@@ -10,7 +10,7 @@ module.exports = {
     const users = await queryInterface.sequelize.query("SELECT id FROM Users where `role`='user'", { type: QueryTypes.SELECT })
     const userIds = users.map(user => user.id)
 
-    // 每一個user隨機產生10篇tweets
+    // 每一個user隨機產生tweets
     const tweets = []
     for (let i = 0; i < userIds.length; i++) {
       for (let j = 0; j < NumOfTweetPerUser; j++) {
