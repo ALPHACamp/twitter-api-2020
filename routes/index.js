@@ -3,11 +3,12 @@ const router = express.Router()
 const admin = require('./modules/admin')
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
-const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const followshipController = require('../controllers/followship-controller')
+const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
+const upload = require('../middleware/multer')
 
 router.post('/api/admin/login', adminController.signIn)
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
@@ -17,8 +18,6 @@ router.post('/api/users/login', userController.signIn)
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 router.put('/api/users/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), authenticated, authenticatedUser, userController.putUser)
 router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
-
-
 
 // 推文
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
