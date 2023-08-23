@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { User, Tweet, Followship } = require('../models')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
   signIn: async (req, cb) => {
@@ -86,8 +87,46 @@ const userServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  putUser: async (req, cb) => {
+    try {
+      const { name, introduction } = req.body
+      const { id } = req.params
+      const { files } = req
+      if (!id === req.user.id) {
+        const err = new Error('無權修改')
+        err.status = 403
+        throw err
+      }
+      const user = await User.findByPk(id)
+      if (!user) {
+        const err = new Error('使用者不存在')
+        err.status = 404
+        throw err
+      }
+      if (name.length >= 50) {
+        const err = new Error('名稱不可超過50字')
+        err.status = 400
+        throw err
+      }
+      if (introduction.length >= 160) {
+        const err = new Error('名稱不可超過50字')
+        err.status = 400
+        throw err
+      }
+      const filePath = await imgurFileHandler(files)
+      const updateUser = await user.update({
+        name,
+        introduction,
+        avatar: filePath[0] || user.avatar,
+        banner: filePath[1] || user.banner
+      })
+      delete updateUser.password
+      cb(null, updateUser)
+    } catch (err) {
+      cb(err)
+    }
   }
-
 }
 
 module.exports = userServices
