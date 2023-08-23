@@ -16,6 +16,7 @@ router.post('/api/users/login', userController.signIn)
 // user
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 router.put('/api/users/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), authenticated, authenticatedUser, userController.putUser)
+router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 
 
 
