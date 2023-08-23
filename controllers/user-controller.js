@@ -1,28 +1,10 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
-const { User } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 
 const userController = {
-  signIn: (req, res, next) => {
-    try {
-      const userData = req.user.toJSON()
-      // 角色若不是user則不發給token
-      if (userData.role !== 'user') throw new Error('no such user(角色錯誤)', { cause: { accountErrMsg: '帳號不存在！', passwordErrMsg: '' } })
-
-      delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
-      return res.status(200).json({
-        status: 'success',
-        data: {
-          token,
-          user: userData
-        }
-      })
-    } catch (err) {
-      return next(err)
-    }
-  },
+  // No.1 - 註冊帳號 POST /api/users
   signUp: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword, introduction, avatar, banner } = req.body
@@ -80,6 +62,49 @@ const userController = {
     } catch (err) {
       return next(err)
     }
+  },
+  // No.2 - 登入前台帳號 POST /api/users/signin
+  signIn: (req, res, next) => {
+    try {
+      const userData = req.user.toJSON()
+      // 角色若不是user則不發給token
+      if (userData.role !== 'user') throw new Error('no such user(角色錯誤)', { cause: { accountErrMsg: '帳號不存在！', passwordErrMsg: '' } })
+
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      return res.status(200).json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+      })
+    } catch (err) {
+      return next(err)
+    }
+  },
+  // No.3 - 查看某使用者的資料 GET /api/users/:id
+  // No.4 - 查看某使用者發過的推文 GET /api/users/:id/tweets
+  getUserTweets: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+      let tweets = await Tweet.findAll({ where: { UserId }, include: [User], nest: true })
+
+      tweets = tweets.map(tweet => tweet.toJSON())
+      tweets.forEach(tweet => delete tweet.User.password)
+
+      return res.status(200).json({ success: true, data: { tweets } })
+    } catch (err) {
+      return next(err)
+    }
+  },
+  // No.5 - 查看某使用者發過的回覆 GET /api/users/:id/replied_tweets
+  getUserReplies: (req, res, next) => {
+    return res.status(200).json({})
+  },
+  // No.6 - 查看某使用者點過like的推文 GET /api/users/:id/likes
+  getUserLikes: (req, res, next) => {
+    return res.status(200).json({})
   }
 }
 

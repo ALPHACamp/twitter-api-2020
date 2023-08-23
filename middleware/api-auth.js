@@ -23,4 +23,4 @@ const authenticatorAdmin = (req, res, next) => {
   })(req, res, next)
 }
 
-module.export = { authenticator, authenticatorAdmin }
+module.exports = { authenticator, authenticatorAdmin }
