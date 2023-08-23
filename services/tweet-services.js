@@ -49,9 +49,7 @@ const tweetServices = {
             .catch(err => cb(err))
     },
     postTweet: (req, cb) => {
-        // const { UserId } = req.user
-        // 因應登入機制相關問題，暫時使用固定的UserId
-        const UserId = 3
+        const UserId = req.user.dataValues.id
         const { description } = req.body
         if (!UserId) throw new Error('用戶不存在！')
         if (!description) throw new Error('內容不可空白')
