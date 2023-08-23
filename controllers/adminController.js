@@ -26,7 +26,6 @@ const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
-        where: { role: 'user' },
         attributes: ['id', 'name', 'account', 'avatar', 'cover',
           [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.followingId = User.id)'), 'follower'],
           [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.followerId = User.id)'), 'following'],
