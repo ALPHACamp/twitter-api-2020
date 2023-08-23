@@ -1,16 +1,20 @@
 'use strict'
+const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  const Reply = sequelize.define('Reply', {
+  class Reply extends Model {
+    static associate(models) {
+      Reply.belongsTo(models.User, { foreignKey: 'UserId' })
+      Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
+    }
+  }
+  Reply.init({
     userId: DataTypes.INTEGER,
     tweetId: DataTypes.INTEGER,
     comment: DataTypes.TEXT
   }, {
+    sequelize,
     modelName: 'Reply',
     tableName: 'Replies'
   })
-  Reply.associate = function (models) {
-    Reply.belongsTo(models.User, { foreignKey: 'UserId' })
-    Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
-  }
   return Reply
 }
