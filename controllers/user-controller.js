@@ -6,7 +6,6 @@ const userController = {
   },
   getUser: (req, res, next) => {
     userServices.getUser(req, (err, data) => err ? next(err) : res.status(200).json(data))
-    console.log(res.body)
   }
 }
 
