@@ -30,14 +30,6 @@ passport.use(
     }
   )
 )
-// serialize and deserialize user
-passport.serializeUser((user, cb) => {
-  cb(null, user.id)
-})
-passport.deserializeUser(async (id, cb) => {
-  const user = await User.findByPk(id)
-  return cb(null, user.toJSON())
-})
 
 // jwt
 const jwtOptions = {
