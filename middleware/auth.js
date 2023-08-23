@@ -1,12 +1,11 @@
-const passport = require('passport')
+const passport = require('../config/passport')
 
-function authenticated (req, res, next) {
+const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
-    if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
-
+    if (err || !user) return res.status(401).json({ status: 'error', message: '未經授權' })
     req.user = user
     next()
-  })(req, res, next) // invoke function
+  })(req, res, next)
 }
 
 module.exports = {
