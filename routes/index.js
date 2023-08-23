@@ -3,7 +3,7 @@ const router = express.Router()
 const admin = require('./modules/admin')
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
-const { authenticated, authenticatedAdmin, authenticatedUser} = require('../middleware/auth')
+const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
@@ -15,14 +15,20 @@ router.post('/api/users/login', userController.signIn)
 //user
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 
+
+
 // 推文
-router.post('/api/tweets', tweetController.postTweet)
-router.get('/api/tweets/:id', tweetController.getTweet)
-router.get('/api/tweets', tweetController.getTweets)
+router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
+router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet)
+router.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 
 // 留言
 router.post('/api/tweets/:TweetId/replies', replyController.postReply)
 router.get('/api/tweets/:TweetId/replies', replyController.getReplies)
+
+// 讚
+router.post('/api/tweets/:id/like', authenticated, authenticatedUser, tweetController.addLike)
+router.post('/api/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.removeLike)
 
 router.use('/', apiErrorHandler)
 
