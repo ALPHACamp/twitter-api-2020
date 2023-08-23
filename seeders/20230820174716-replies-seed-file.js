@@ -1,19 +1,19 @@
-'use strict';
+'use strict'
 
 const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
-      `SELECT * FROM Users WHERE role = 'user';`,
+      'SELECT * FROM Users WHERE role = \'user\';',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const tweets = await queryInterface.sequelize.query(
       'SELECT * FROM `Tweets`;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-    let list = []
-    for (let i in tweets) {
+    const list = []
+    for (const i in tweets) {
       for (let j = 0; j < 3; j++) {
         list.push(tweets[i].id)
       }
@@ -32,4 +32,4 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('replies', {})
   }
-};
+}

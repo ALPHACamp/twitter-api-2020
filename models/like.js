@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Like = sequelize.define('Like', {
     userId: DataTypes.INTEGER,
@@ -6,8 +6,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     modelName: 'Like',
     tableName: 'Likes'
-  });
-  Like.associate = function(models) {
-  };
-  return Like;
-};
+  })
+  Like.associate = function (models) {
+  }
+  return Like
+}

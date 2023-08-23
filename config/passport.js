@@ -8,10 +8,10 @@ const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET
 }
-passport.use(new JWTStrategy(jwtOptions, async(jwtPayload, cb) => {
-  try{
+passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
+  try {
     const user = await User.findByPk(jwtPayload.id, {
-      include:[
+      include: [
         Tweet,
         { model: Tweet, as: 'LikeTweets' },
         { model: User, as: 'Followings' },
@@ -19,10 +19,9 @@ passport.use(new JWTStrategy(jwtOptions, async(jwtPayload, cb) => {
       ]
     })
     cb(null, user)
-  }catch(err){
+  } catch (err) {
     cb(err)
   }
 }))
-
 
 module.exports = passport
