@@ -6,6 +6,7 @@ const sequelize = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { Op } = require('sequelize')
 const { getUser } = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -307,6 +308,32 @@ const userController = {
       })).sort((a, b) => b.isFollowed - a.isFollowed)
       res.status(200).json(data)
     } catch (err) { next(err) }
+  },
+
+  putUserProfile: async (req, res, next) => {
+    let { name, introduction } = req.body
+    name = name?.trim()
+    introduction = introduction?.trim()
+
+    if (name?.length > 50) return res.status(400).json({ status: 'error', message: '暱稱上限 50 字' })
+    if (introduction?.length > 160) return res.status(400).json({ status: 'error', message: '自我介紹上限 160 字' })
+
+    const avatar = req.files?.avatar?.[0] || null
+    const cover = req.files?.cover?.[0] || null
+    const [user, avatarFilePath, coverFilePath] = await Promise.all([User.findByPk(req.params.id),
+      imgurFileHandler(avatar),
+      imgurFileHandler(cover)
+    ])
+
+    if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+    const data = await user.update({
+      name,
+      introduction,
+      avatar: avatarFilePath || user.avatar,
+      cover: coverFilePath || user.cover
+    })
+    delete data.dataValues.password
+    return res.status(200).json(data)
   }
 }
 
