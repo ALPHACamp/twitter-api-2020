@@ -23,8 +23,8 @@ router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.
 router.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 
 // 留言
-router.post('/api/tweets/:TweetId/replies', replyController.postReply)
-router.get('/api/tweets/:TweetId/replies', replyController.getReplies)
+router.post('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
+router.get('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getReplies)
 
 // 讚
 router.post('/api/tweets/:id/like', authenticated, authenticatedUser, tweetController.addLike)
