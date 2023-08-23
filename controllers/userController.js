@@ -85,6 +85,35 @@ const userController = {
     }
   },
 
+  getUser: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const currentUserId = getUser(req).dataValues.id
+      const [user, tweetCount, followerCount, followingCount] = await Promise.all([
+        User.findByPk(id, { raw: true, nest: true }),
+        Tweet.count({ where: { UserId: id } }),
+        Followship.count({ where: { followingId: id } }),
+        Followship.count({ where: { followerId: id } })
+      ])
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      delete user.password
+      user.tweetCount = tweetCount
+      user.followerCount = followerCount
+      user.followingCount = followingCount
+
+      // 查看其他使用者是否有追蹤自己
+      if (Number(id) !== currentUserId) {
+        const currentUserFollowing = await Followship.findAll({
+          where: { followerId: currentUserId },
+          raw: true
+        })
+        user.isFollowed = currentUserFollowing.some(f => f.followingId === Number(id))
+      }
+
+      res.status(200).json(user)
+    } catch (err) { next(err) }
+  },
+
   getUserTweet: async (req, res, next) => {
     try {
       const id = req.params.id
@@ -126,6 +155,7 @@ const userController = {
       return next(err)
     }
   },
+
   getUserReply: async (req, res, next) => {
     try {
       const id = req.params.id
