@@ -49,6 +49,17 @@ const tweetController = {
         return res.json(data)
       })
       .catch(err => next(err))
+  },
+  postTweet: (req, res, next) => {
+    const { description } = req.body
+    if (!description) throw new Error('所有欄位都是必填！')
+    if (description.length > 140) throw new Error('推文字數超過上限。')
+    Tweet.create({
+      UserId: helpers.getUser(req).id,
+      description
+    })
+      .then(newTweet => res.json({ status: 'success', data: { tweet: newTweet } }))
+      .catch(err => next(err))
   }
 }
 
