@@ -142,7 +142,8 @@ const userServices = {
         include: [
           { model: Reply, attributes: ['id'] },
           { model: User, as: 'LikeUsers', attributes: ['id'] }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
       const tweetData = tweets.map(tweet => ({
         ...tweet.toJSON(),
