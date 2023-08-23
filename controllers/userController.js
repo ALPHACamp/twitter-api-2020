@@ -111,8 +111,10 @@ const userController = {
         user.isFollowed = currentUserFollowing.some(f => f.followingId === Number(id))
       }
 
-      res.status(200).json(user)
-    } catch (err) { next(err) }
+      return res.status(200).json(user)
+    } catch (err) {
+      return next(err)
+    }
   },
 
   getUserTweet: async (req, res, next) => {
@@ -195,8 +197,10 @@ const userController = {
         tweetOwnerName: r.tweetOwnerName,
         createdAt: r.createdAt
       }))
-      res.status(200).json(data)
-    } catch (err) { next(err) }
+      return res.status(200).json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
 
   getUserLike: async (req, res, next) => {
@@ -239,8 +243,10 @@ const userController = {
         likeCount: l.Tweet.likeCount,
         isLiked: Boolean(l.Tweet.isLiked)
       }))
-      res.status(200).json(data)
-    } catch (err) { next(err) }
+      return res.status(200).json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
 
   getUserfollowing: async (req, res, next) => {
@@ -274,8 +280,10 @@ const userController = {
         introduction: f.introduction,
         isFollowed: currentUserFollowing.includes(f.id)
       }))
-      res.status(200).json(data)
-    } catch (err) { next(err) }
+      return res.status(200).json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
 
   getUserFollower: async (req, res, next) => {
@@ -306,8 +314,10 @@ const userController = {
         introduction: f.introduction,
         isFollowed: currentUserFollowing.includes(f.id)
       })).sort((a, b) => b.isFollowed - a.isFollowed)
-      res.status(200).json(data)
-    } catch (err) { next(err) }
+      return res.status(200).json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
 
   putUserProfile: async (req, res, next) => {
@@ -334,6 +344,41 @@ const userController = {
     })
     delete data.dataValues.password
     return res.status(200).json(data)
+  },
+
+  updateUserAccount: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      // 反查 account 與 email 是否有被註冊過
+      const foundUser = await User.findOne({
+        where: {
+          id: { [Op.ne]: [req.params.id] },
+          [Op.or]: [{ account: req.body.account }, { email: req.body.email }]
+        },
+        raw: true,
+        nest: true
+      })
+
+      if (foundUser?.account === req.body.account) return res.status(400).json({ status: 'error', message: [{ path: 'account', msg: 'account 已重複註冊！' }] })
+      if (foundUser?.email === req.body.email) return res.status(400).json({ status: 'error', message: [{ path: 'email', msg: 'email 已重複註冊！' }] })
+
+      const hash = await bcrypt.hash(req.body.password, 10)
+
+      await user.update({
+        name: req.body.name,
+        account: req.body.account,
+        email: req.body.email,
+        password: hash
+      })
+      await user.save()
+      return res.status(200).json({
+        status: 'success',
+        message: '更新成功'
+      })
+    } catch (err) {
+      return next(err)
+    }
   }
 }
 

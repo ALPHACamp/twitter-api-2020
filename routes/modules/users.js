@@ -23,5 +23,6 @@ router.get('/:id/followings', authenticated, isAuthUser, userController.getUserf
 router.get('/:id/followers', authenticated, isAuthUser, userController.getUserFollower)
 router.get('/:id', authenticated, isAuthUser, userController.getUser)
 router.put('/:id', authenticated, isAuthUser, cpUpload, userController.putUserProfile)
+router.patch('/:id', signUpValidator, authenticated, isAuthUser, userController.updateUserAccount)
 
 module.exports = router
