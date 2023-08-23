@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const { User, Tweet, Followship } = require('../models')
+const { User, Tweet, Followship, Reply, Like } = require('../models')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
   signIn: async (req, cb) => {
@@ -86,8 +87,74 @@ const userServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  putUser: async (req, cb) => {
+    try {
+      const { name, introduction } = req.body
+      const { id } = req.params
+      const { files } = req
+      if (!id === req.user.id) {
+        const err = new Error('無權修改')
+        err.status = 403
+        throw err
+      }
+      const user = await User.findByPk(id)
+      if (!user) {
+        const err = new Error('使用者不存在')
+        err.status = 404
+        throw err
+      }
+      if (name.length >= 50) {
+        const err = new Error('名稱不可超過50字')
+        err.status = 400
+        throw err
+      }
+      if (introduction.length >= 160) {
+        const err = new Error('名稱不可超過50字')
+        err.status = 400
+        throw err
+      }
+      const filePath = await imgurFileHandler(files)
+      const updateUser = await user.update({
+        name,
+        introduction,
+        avatar: filePath[0] || user.avatar,
+        banner: filePath[1] || user.banner
+      })
+      const userData = updateUser.toJSON()
+      delete userData.password
+      cb(null, userData)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getUserTweets: async (req, cb) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+      if (!user) {
+        const err = new Error('使用者不存在')
+        err.status = 404
+        throw err
+      }
+      const tweets = await Tweet.findAll({
+        where: { userId: id },
+        include: [
+          { model: Reply, attributes: ['id'] },
+          { model: User, as: 'LikeUsers', attributes: ['id'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      const tweetData = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        RepliesCount: tweet.Replies.length,
+        LikeCount: tweet.LikeUsers.length
+      }))
+      cb(null, tweetData)
+    } catch (err) {
+      cb(err)
+    }
   }
-
 }
 
 module.exports = userServices
