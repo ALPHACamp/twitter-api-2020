@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+const { Tweet, User } = require('../models')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -22,6 +23,22 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      include: [
+        // 查詢 password 欄位以外的 user 資料
+        { model: User, attributes: { exclude: ['password'] } }
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(tweets => {
+        res.json(tweets)
+      })
+      .catch(err => next(err))
   }
 }
 
