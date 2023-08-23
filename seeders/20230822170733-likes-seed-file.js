@@ -25,7 +25,7 @@ module.exports = {
         })
       }
     }
-    // 去重複: 利用Map去除UserID和TweetId同時一致的
+    // 去重複: 去除UserID和TweetId同時一致的 (先把物件字串化，再利用Map索引去重複的特性)
     const uniqLikes = [...new Map(likes.map(v => [JSON.stringify([v.UserId, v.TweetId]), v])).values()]
 
     await queryInterface.bulkInsert('Likes', uniqLikes)
