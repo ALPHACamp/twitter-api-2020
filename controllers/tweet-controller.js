@@ -79,6 +79,26 @@ const tweetController = {
         return res.json(replies)
       })
       .catch(err => next(err))
+  },
+  postTweetReply: (req, res, next) => {
+    const { comment } = req.body
+    if (!comment) throw new Error('所有欄位都是必填！')
+    if (comment.length > 140) throw new Error('留言字數超過上限。')
+    Tweet.findByPk(req.params.tweet_id)
+      .then(tweet => {
+        if (!tweet) {
+          const err = new Error('推文不存在！')
+          err.status = 404
+          throw err
+        }
+        return Reply.create({
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.tweet_id,
+          comment
+        })
+      })
+      .then(newReply => res.json({ status: 'success', data: { reply: newReply } }))
+      .catch(err => next(err))
   }
 }
 
