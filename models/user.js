@@ -1,8 +1,8 @@
-'use strict';
+'use strict'
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
-  }, {});
-  User.associate = function(models) {
+  }, {})
+  User.associate = function (models) {
     User.hasMany(models.Tweet, { foreignKey: 'userId' })
     User.hasMany(models.Reply, { foreignKey: 'userId' })
     User.hasMany(models.Like, { foreignKey: 'userId' })
@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'followerId',
       as: 'Followings'// 注意名稱與上面不同
     })
-  };
+  }
   User.init({
     email: DataTypes.STRING,
     password: DataTypes.STRING,
@@ -24,10 +24,11 @@ module.exports = (sequelize, DataTypes) => {
     avatar: DataTypes.STRING,
     introduction: DataTypes.STRING,
     role: DataTypes.STRING,
+    account: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',
     tableName: 'Users'
   })
-  return User;
-};
+  return User
+}
