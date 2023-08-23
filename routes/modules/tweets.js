@@ -4,4 +4,6 @@ const tweetController = require('../../controllers/tweet-controller')
 
 router.get('/:tweet_id', tweetController.getTweet)
 
+router.get('/', tweetController.getTweets)
+
 module.exports = router

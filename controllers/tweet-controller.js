@@ -24,6 +24,31 @@ const tweetController = {
         return res.json(tweet)
       })
       .catch(err => next(err))
+  },
+  getTweets: (req, res, next) => {
+    const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.id) : []
+    Tweet.findAll({
+      include: [
+        { model: User, attributes: { exclude: 'password' } },
+        Like,
+        Reply
+      ],
+      order: [['createdAt', 'DESC']],
+      nest: true
+    })
+      .then(tweets => {
+        const data = tweets.map(tweet => {
+          tweet = tweet.toJSON()
+          tweet.likesCount = tweet.Likes.length
+          tweet.repliesCount = tweet.Replies.length
+          tweet.isLiked = likedTweetsId.includes(tweet.id)
+          delete tweet.Likes
+          delete tweet.Replies
+          return tweet
+        })
+        return res.json(data)
+      })
+      .catch(err => next(err))
   }
 }
 
