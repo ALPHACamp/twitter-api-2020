@@ -7,9 +7,11 @@ const session = require('express-session')
 const passport = require('./config/passport')
 const { getUser } = require('./helpers/auth-helpers')
 const apis = require('./routes')
+const cors = require('cors')
 
 const app = express()
 const port = process.env.PORT || 3000
+app.use(cors())
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
