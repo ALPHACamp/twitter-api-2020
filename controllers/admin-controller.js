@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
-const { Tweet, User } = require('../models')
+const { Tweet, User, Like } = require('../models')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -54,6 +54,43 @@ const adminController = {
       })
       .then(tweet => {
         res.json({ status: 'success', data: { tweet } })
+      })
+      .catch(err => next(err))
+  },
+
+  getUsers: (req, res, next) => {
+    const likesCount = array => {
+      let sum = 0
+      for (const i of array) {
+        sum += i.Likes.length
+      }
+      return sum
+    }
+
+    return User.findAll({
+      // where: { role: 'user' },
+      attributes: { exclude: ['password'] },
+      include: [
+        { model: Tweet, include: Like },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+      .then(users => {
+        const result = users.map(user => ({
+          ...user.toJSON(),
+          tweetsCount: user.Tweets.length,
+          getLikesCount: likesCount(user.Tweets),
+          followersCount: user.Followers.length,
+          followingsCount: user.Followings.length
+        }))
+        result.forEach(item => {
+          delete item.Tweets
+          delete item.Followers
+          delete item.Followings
+        })
+
+        res.json(result)
       })
       .catch(err => next(err))
   }
