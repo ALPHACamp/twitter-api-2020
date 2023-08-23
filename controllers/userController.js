@@ -3,7 +3,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { Op } = require('sequelize')
 const { getUser } = require('../_helpers')
 
@@ -207,6 +207,41 @@ const userController = {
         replyCount: l.Tweet.replyCount,
         likeCount: l.Tweet.likeCount,
         isLiked: Boolean(l.Tweet.isLiked)
+      }))
+      res.status(200).json(data)
+    } catch (err) { next(err) }
+  },
+
+  getUserfollowing: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const currentUserId = getUser(req).dataValues.id
+      const [user, following] = await Promise.all([
+        User.findByPk(id, {
+          include: {
+            model: User,
+            as: 'Followings'
+          },
+          order: [[sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']]
+        }),
+        // 目前登入者的追蹤資料
+        Followship.findAll({
+          where: { followerId: currentUserId },
+          raw: true
+        })
+      ])
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      if (!user.Followings.length) return res.status(200).json({ status: 'success', message: '無追蹤其他使用者' })
+
+      const currentUserFollowing = following.map(f => f.followingId)
+      const data = user.Followings.map(f => ({
+        followingId: f.id,
+        UserId: f.id,
+        account: f.account,
+        name: f.name,
+        avatar: f.avatar,
+        introduction: f.introduction,
+        isFollowed: currentUserFollowing.includes(f.id)
       }))
       res.status(200).json(data)
     } catch (err) { next(err) }
