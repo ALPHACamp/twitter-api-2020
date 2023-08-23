@@ -73,8 +73,8 @@ const tweetServices = {
       return Like.create({ UserId, TweetId })
     })
       .then(data => cb(null, {
-        data,
-        status: '已成功按讚！',
+        message: '已成功按讚！',
+        data
       }))
       .catch(err => cb(err))
   },
@@ -91,8 +91,8 @@ const tweetServices = {
       return like.destroy()
     })
       .then(data => cb(null, {
-        data,
-        status: '已成功收回讚！',
+        message: '已成功收回讚！',
+        data
       }))
       .catch(err => cb(err))
   }
