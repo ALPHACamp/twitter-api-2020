@@ -15,6 +15,7 @@ router.use('/api/admin', admin)
 // router.get('/api/users', userController.getUsers)
 // router.get('/api/signup', userController.signUpPage)
 router.post('/api/signup', userController.signUp)
+router.get('/api/users/:id', userController.getUser)
 
 // api/tweets
 router.get('/api/tweets/:tweet_id', tweetContorller.getTweet)
