@@ -7,9 +7,10 @@ const userController = require('../controllers/apis/user-controller')
 const tweetContorller = require('../controllers/apis/tweet-controller')
 
 const { apiErrorHandler } = require('../middleware/error-handler')
+const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 
 // api/admin
-router.use('/api/admin', admin)
+router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 
 // api/users
 // router.get('/api/users', userController.getUsers)

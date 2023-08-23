@@ -1,13 +1,13 @@
-// if (process.NODE_ENV !== 'production') {
-//   require('dotenv').config()
-// }
-require('dotenv').config()
+if (process.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+// require('dotenv').config()
 const express = require('express')
 const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
 const session = require('express-session')
 const routes = require('./routes')
-const passport = require('./config/passport') // 增加這行，引入 Passport
+const passport = require('./config/passport')
 
 const app = express()
 
