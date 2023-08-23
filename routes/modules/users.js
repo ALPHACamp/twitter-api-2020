@@ -15,5 +15,6 @@ router.post('/', signUpValidator, userController.signUp)
 
 // user
 router.get('/:id/tweets', authenticated, isAuthUser, userController.getUserTweet)
+router.get('/:id/replied_tweets', authenticated, isAuthUser, userController.getUserReply)
 
 module.exports = router

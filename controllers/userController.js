@@ -3,7 +3,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const { Op } = require('sequelize')
 const { getUser } = require('../_helpers')
 
@@ -125,6 +125,48 @@ const userController = {
     } catch (err) {
       return next(err)
     }
+  },
+
+  getUserReply: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const [user, replies] = await Promise.all([
+        User.findByPk(id, { raw: true, nest: true }),
+        Reply.findAll({
+          where: { UserId: id },
+          include: [
+            { model: Tweet, attributes: [] }
+          ],
+          attributes: {
+            include: [
+              [sequelize.literal('(SELECT id FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerId'],
+              [sequelize.literal('(SELECT account FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerAccount'],
+              [sequelize.literal('(SELECT name FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerName']
+            ]
+          },
+          order: [['createdAt', 'DESC']],
+          raw: true,
+          nest: true
+        })
+      ])
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      if (!replies.length) return res.status(200).json({ status: 'success', message: '無回覆資料' })
+
+      const data = replies.map(r => ({
+        reaplyId: r.id,
+        comment: r.comment,
+        replyerId: user.id,
+        replyerAccount: user.account,
+        replyerName: user.name,
+        replyerAvatar: user.avatar,
+        TweetId: r.TweetId,
+        tweetOwnerId: r.tweetOwnerId,
+        tweetOwnerAccount: r.tweetOwnerAccount,
+        tweetOwnerName: r.tweetOwnerName,
+        createdAt: r.createdAt
+      }))
+      res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 
