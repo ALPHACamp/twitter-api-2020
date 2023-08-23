@@ -3,7 +3,7 @@
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { getUser } = require('../_helpers')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 
 const adminController = {
   login: async (req, res, next) => {
@@ -41,6 +41,20 @@ const adminController = {
       if (!users.length) return res.status(200).json({ status: 'success', message: '無User資料' })
 
       res.status(200).json(users)
+    } catch (err) {
+      next(err)
+    }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const tweet = await Tweet.findByPk(id)
+      if (!tweet) return res.status(404).json({ status: 'error', messages: '推文不存在' })
+      await tweet.destroy()
+      await Reply.destroy({ where: { TweetId: id } })
+      await Like.destroy({ where: { TweetId: id } })
+
+      res.status(200).json({ status: 'success', message: '成功刪除推文' })
     } catch (err) {
       next(err)
     }
