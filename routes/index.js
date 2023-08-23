@@ -4,7 +4,7 @@ const users = require('./modules/users')
 const admin = require('./modules/admin')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const passport = require('passport')
-const adminController = require('../../controllers/adminController')
+const adminController = require('../controllers/adminController')
 const { isAdmin } = require('../middleware/role-check')
 
 router.post('/admin/login', passport.authenticate('local', { session: false }), isAdmin, adminController.login)

@@ -1,8 +1,10 @@
 'use strict'
 
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const { Op } = require('sequelize')
+const { getUser } = require('../_helpers')
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -55,6 +57,27 @@ const userController = {
       return res.status(200).json({
         status: 'success',
         message: '註冊成功'
+      })
+    } catch (err) {
+      return next(err)
+    }
+  },
+
+  signIn: async (req, res, next) => {
+    try {
+      // get user data
+      const userData = getUser(req)?.toJSON()
+      const tokenData = Object.assign({}, { id: userData.id })
+
+      delete userData.password
+      // sign token
+      const token = jwt.sign(tokenData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      return res.json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
       })
     } catch (err) {
       return next(err)

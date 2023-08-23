@@ -51,4 +51,29 @@ const signUpValidator = [
   }
 ]
 
-module.exports = { signUpValidator }
+const signInValidator = [
+  body('account')
+    .trim()
+    .notEmpty().withMessage('帳號為必填項目'),
+
+  body('password')
+    .trim()
+    .notEmpty().withMessage('密碼為必填項目'),
+
+  (req, res, next) => {
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+      const errors = result.errors.map(e => ({
+        path: e.path,
+        msg: e.msg
+      }))
+      return res.status(400).json({ status: 'error', message: errors })
+    }
+    next()
+  }
+]
+
+module.exports = {
+  signUpValidator,
+  signInValidator
+}
