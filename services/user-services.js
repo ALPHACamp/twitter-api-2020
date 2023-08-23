@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const { User, Tweet, Followship } = require('../models')
+const { User, Tweet, Followship, Reply, Like } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
@@ -121,8 +121,36 @@ const userServices = {
         avatar: filePath[0] || user.avatar,
         banner: filePath[1] || user.banner
       })
-      delete updateUser.password
-      cb(null, updateUser)
+      const userData = updateUser.toJSON()
+      delete userData.password
+      cb(null, userData)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getUserTweets: async (req, cb) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+      if (!user) {
+        const err = new Error('使用者不存在')
+        err.status = 404
+        throw err
+      }
+      const tweets = await Tweet.findAll({
+        where: { userId: id },
+        include: [
+          { model: Reply, attributes: ['id'] },
+          { model: User, as: 'LikeUsers', attributes: ['id'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      const tweetData = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        RepliesCount: tweet.Replies.length,
+        LikeCount: tweet.LikeUsers.length
+      }))
+      cb(null, tweetData)
     } catch (err) {
       cb(err)
     }
