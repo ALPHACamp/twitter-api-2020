@@ -60,6 +60,25 @@ const tweetController = {
     })
       .then(newTweet => res.json({ status: 'success', data: { tweet: newTweet } }))
       .catch(err => next(err))
+  },
+  getTweetReplies: (req, res, next) => {
+    Promise.all([
+      Tweet.findByPk(req.params.tweet_id),
+      Reply.findAll({
+        where: { TweetId: req.params.tweet_id },
+        include: { model: User, attributes: { exclude: 'password' } },
+        nest: true
+      })
+    ])
+      .then(([tweet, replies]) => {
+        if (!tweet) {
+          const err = new Error('推文不存在！')
+          err.status = 404
+          throw err
+        }
+        return res.json(replies)
+      })
+      .catch(err => next(err))
   }
 }
 
