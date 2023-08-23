@@ -14,24 +14,25 @@ passport.use(new LocalStrategy(
     passReqToCallback: true
   },
   // authenticate user
-  (req, email, password, cb) => {
+  (req, account, password, cb) => {
     User.findOne({ where: { account } })
       // 如果找不到帳號
       .then(user => {
         if (!user) {
-          const err = new Error("帳號不存在！")
+          const err = new Error('帳號不存在！')
           err.status = 401
           throw err
         }
-        bcrypt.compare(password, user.password).then(res => {
+        bcrypt.compare(password, user.password).then(match => {
           // 如果密碼錯誤也提示帳號不存在
-          if (!user) {
-            const err = new Error("帳號不存在！")
+          if (!match) {
+            const err = new Error('帳號不存在！')
             err.status = 401
             throw err
           }
           return cb(null, user)
         })
+          .catch(err => cb(err))
       })
       .catch(err => cb(err))
   }
