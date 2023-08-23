@@ -1,6 +1,7 @@
 const db = require('../../models')
 const { User, Tweet, Like } = db
 // const bcrypt = require('bcrypt-nodejs')
+const jwt = require('jsonwebtoken')
 
 const adminController = {
   // Admin 取得所有使用者
@@ -95,9 +96,23 @@ const adminController = {
       )
   },
   // Admin 登入
-  signIn: (req, res) => {
-    // 未完成
-    const { email, password } = req.body
+  signIn: (req, res, next) => {
+    try {
+      const userData = req.user.toJSON()
+      const token = jwt.sign(userData, process.env.JWT_SECRET, {
+        expiresIn: '30d'
+      })
+      res.json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+      })
+    } catch (err) {
+      console.log(err.message)
+      // next(err);
+    }
   }
 }
 
