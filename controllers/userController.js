@@ -2,7 +2,8 @@
 
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const sequelize = require('sequelize')
+const { User, Tweet } = require('../models')
 const { Op } = require('sequelize')
 const { getUser } = require('../_helpers')
 
@@ -79,6 +80,48 @@ const userController = {
           user: userData
         }
       })
+    } catch (err) {
+      return next(err)
+    }
+  },
+
+  getUserTweet: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const currentUserId = getUser(req).dataValues.id
+      const [user, tweets] = await Promise.all([
+        User.findByPk(id, { raw: true }),
+        Tweet.findAll({
+          where: { UserId: id },
+          order: [['createdAt', 'DESC']],
+          attributes: {
+            include: [
+              [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+              [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+                'replyCount'],
+              [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${currentUserId} AND TweetId = Tweet.id)`), 'isLiked']
+            ]
+          },
+          raw: true,
+          nest: true
+        })
+      ])
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      if (!tweets.length) return res.status(200).json({ status: 'success', message: '無推文資料' })
+
+      const data = tweets.map(tweet => ({
+        TweetId: tweet.id,
+        tweetOwnerId: user.id,
+        tweetOwnerAccount: user.account,
+        tweetOwnerName: user.name,
+        tweetOwnerAvatar: user.avatar,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        replyCount: tweet.replyCount,
+        likeCount: tweet.likeCount,
+        isLiked: Boolean(tweet.isLiked)
+      }))
+      return res.status(200).json(data)
     } catch (err) {
       return next(err)
     }
