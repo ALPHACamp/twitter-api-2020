@@ -68,7 +68,6 @@ const adminController = {
     }
 
     return User.findAll({
-      // where: { role: 'user' },
       attributes: { exclude: ['password'] },
       include: [
         { model: Tweet, include: Like },
