@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { Op } = require('sequelize')
 
 const { User } = require('../models')
 
@@ -8,7 +7,8 @@ const userController = {
   signIn: (req, res, next) => {
     try {
       const userData = req.user.toJSON()
-      if (userData.role !== 'user') throw new Error('no such user(角色錯誤)') // 角色若不是user則不發給token
+      // 角色若不是user則不發給token
+      if (userData.role !== 'user') throw new Error('no such user(角色錯誤)', { cause: { accountErrMsg: '帳號不存在！', passwordErrMsg: '' } })
 
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
@@ -25,24 +25,52 @@ const userController = {
   },
   signUp: async (req, res, next) => {
     try {
-      const { account, name, email, password, checkPassword } = req.body
-      if (password !== checkPassword) throw new Error('Passwords do not match!')
+      const { account, name, email, password, checkPassword, introduction, avatar, banner } = req.body
+      const cause = { // 定義不同的錯誤訊息，以便前端顯示之用
+        accountErrMsg: '',
+        nameErrMsg: '',
+        emailErrMsg: '',
+        passwordErrMsg: '',
+        checkPasswordErrMsg: ''
+      }
 
-      // 確認name是否在50字之內
-      if (name.length > 50) throw new Error('Name is over 50 chars!')
+      // 確認必填值是否為空
+      if (!account) cause.accountErrMsg += '此為必填欄位。'
+      if (!name) cause.nameErrMsg += '此為必填欄位。'
+      if (!email) cause.emailErrMsg += '此為必填欄位。'
+      if (!password) cause.passwordErrMsg += '此為必填欄位。'
+      if (!checkPassword) cause.checkPasswordErrMsg += '此為必填欄位。'
+      if (cause.accountErrMsg || cause.nameErrMsg || cause.emailErrMsg || cause.passwordErrMsg || cause.checkPasswordErrMsg) {
+        throw new Error('Empty input value!', { cause })
+      }
+
+      // 確認checkPassword是否相符 & name是否在50字之內
+      if (password !== checkPassword) cause.checkPasswordErrMsg += '確認密碼不相符。'
+      if (name.length > 50) cause.nameErrMsg += '名稱不得超過50字。'
 
       // 確認account或email是否重複
-      let user = await User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
-      if (user) throw new Error('Account or Email already exists!')
+      const [user1, user2] = await Promise.all([
+        User.findOne({ where: { account } }),
+        User.findOne({ where: { email } })
+      ])
+      if (user1) cause.accountErrMsg += 'account 已重複註冊！'
+      if (user2) cause.emailErrMsg += 'email 已重複註冊！'
 
+      if (cause.accountErrMsg || cause.nameErrMsg || cause.emailErrMsg || cause.passwordErrMsg || cause.checkPasswordErrMsg) {
+        throw new Error('Inproper input value!', { cause })
+      }
+
+      // 若無錯誤則建立新帳號
       const hash = await bcrypt.hash(password, 10)
-      user = await User.create({
+      const user = await User.create({
         account,
         name,
         email,
         password: hash,
-        role: 'user',
-        banner: 'https://images.unsplash.com/photo-1580436541340-36b8d0c60bae'
+        introduction: introduction || '',
+        avatar: avatar || 'https://via.placeholder.com/224',
+        banner: banner || 'https://images.unsplash.com/photo-1580436541340-36b8d0c60bae',
+        role: 'user'
       })
 
       const userData = user.toJSON()
