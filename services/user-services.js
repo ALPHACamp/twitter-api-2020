@@ -121,8 +121,9 @@ const userServices = {
         avatar: filePath[0] || user.avatar,
         banner: filePath[1] || user.banner
       })
-      delete updateUser.password
-      cb(null, updateUser)
+      const userData = updateUser.toJSON()
+      delete userData.password
+      cb(null, userData)
     } catch (err) {
       cb(err)
     }
