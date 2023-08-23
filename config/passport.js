@@ -1,10 +1,14 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
+const passportJWT = require('passport-jwt')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Like, Tweet } = require('../models')
+
+const JWTStrategy = passportJWT.Strategy
+const ExtractJWT = passportJWT.ExtractJwt
 
 // 本地驗證
-passport.use(new LocalStrategy({ usernameField: 'account', session: false }, (account, password, cb) => {
+passport.use(new LocalStrategy({ usernameField: 'account' }, (account, password, cb) => {
   User.findOne({ where: { account } })
     .then(user => {
       if (!user) {
@@ -22,16 +26,23 @@ passport.use(new LocalStrategy({ usernameField: 'account', session: false }, (ac
     .catch(err => cb(err, false))
 }))
 
-// 序列化、反序列化
-passport.serializeUser((user, cb) => {
-  cb(null, user.id)
-})
-passport.deserializeUser((id, cb) => {
-  User.findByPk(id)
-    .then(user => {
-      user = user.toJSON()
-      return cb(null, user)
-    })
-})
+// 利用 jwtPayload 到資料庫找出 user 並傳入 req.user 供後續使用
+const jwtOptions = {
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET
+}
+passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
+  User.findByPk(jwtPayload.id, {
+    include: [
+      { model: Like, include: Tweet },
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ],
+    raw: true,
+    nest: true
+  })
+    .then(user => cb(null, user))
+    .catch(err => cb(err, false))
+}))
 
 module.exports = passport
