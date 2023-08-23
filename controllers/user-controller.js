@@ -58,7 +58,7 @@ const userController = {
       const userData = user.toJSON()
       delete userData.password
 
-      return res.status(200).json({ status: 'success', data: userData })
+      return res.status(200).json({ success: true, data: userData })
     } catch (err) {
       return next(err)
     }
@@ -73,7 +73,7 @@ const userController = {
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       return res.status(200).json({
-        status: 'success',
+        success: true,
         data: {
           token,
           user: userData
@@ -88,7 +88,7 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      let tweets = await Tweet.findAll({ where: { UserId }, include: [User], nest: true })
+      let tweets = await Tweet.findAll({ where: { UserId }, order: [['createdAt', 'DESC']], include: [User], nest: true })
 
       tweets = tweets.map(tweet => tweet.toJSON())
       tweets.forEach(tweet => delete tweet.User.password)

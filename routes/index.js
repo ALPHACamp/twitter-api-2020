@@ -17,7 +17,7 @@ router.get('/users/:id/tweets', authenticator, userController.getUserTweets) // 
 // router.get('/api/users/:id/replied_tweets', authenticator, userController.getUserReplies) // No.5 - 查看某使用者發過的回覆
 // router.get('/api/users/:id/likes', authenticator, userController.getUserLikes) // No.6 - 查看某使用者點過like的推文
 
-router.use('/', (req, res) => res.status(500).json({ status: 'error', message: 'no such api' })) // fallback路由
+router.use('/', (req, res) => res.status(500).json({ success: false, message: 'no such api' })) // fallback路由
 router.use('/', apiErrorHandler) // 錯誤處理
 
 module.exports = router
