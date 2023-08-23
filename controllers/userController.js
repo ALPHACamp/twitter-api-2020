@@ -245,6 +245,38 @@ const userController = {
       }))
       res.status(200).json(data)
     } catch (err) { next(err) }
+  },
+
+  getUserFollower: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const currentUserId = getUser(req).dataValues.id
+      const [user, following] = await Promise.all([
+        User.findByPk(id, {
+          include: { model: User, as: 'Followers' },
+          order: [[sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']]
+        }),
+        Followship.findAll({
+          where: { followerId: currentUserId },
+          raw: true
+        })
+      ])
+
+      if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      if (!user.Followers.length) return res.status(200).json({ status: 'success', message: '無跟隨者資料' })
+
+      const currentUserFollowing = following.map(f => f.followingId)
+      const data = user.Followers.map(f => ({
+        followerId: f.id,
+        UserId: f.id,
+        account: f.account,
+        name: f.name,
+        avatar: f.avatar,
+        introduction: f.introduction,
+        isFollowed: currentUserFollowing.includes(f.id)
+      })).sort((a, b) => b.isFollowed - a.isFollowed)
+      res.status(200).json(data)
+    } catch (err) { next(err) }
   }
 }
 
