@@ -39,6 +39,23 @@ const adminController = {
         res.json(tweets)
       })
       .catch(err => next(err))
+  },
+
+  deleteTweet: (req, res, next) => {
+    return Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) {
+          const err = new Error('推文不存在!')
+          err.status = 404
+          throw err
+        }
+
+        return tweet.destroy()
+      })
+      .then(tweet => {
+        res.json({ status: 'success', data: { tweet } })
+      })
+      .catch(err => next(err))
   }
 }
 
