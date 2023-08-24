@@ -128,11 +128,11 @@ const userController = {
         Reply.findAll({
           where: { UserId: userId },
           include: [
-            { model: User, as: 'userreply', attributes: { exclude: ['password'] } },
+            { model: User, as: 'replier', attributes: { exclude: ['password'] } },
             {
               model: Tweet,
-              as: 'usertweets',
-              include: [{ model: User, as: 'author', attributes: ['account'] }]
+              as: 'tweetreply',
+              include: [{ model: User, as: 'author', attributes: ['account', 'name'] }]
             }
           ],
           // attributes: {
@@ -154,15 +154,16 @@ const userController = {
         replierAvatar: user.avatar,
         replierAccount: user.account,
         createdAt: reply.createdAt,
-        tweetId: reply.TweetId
-        // tweetBelongerName: reply.tweetBelongerName,
-        // tweetBelongerAccount: reply.tweetBelongerAccount
+        tweetId: reply.TweetId,
+        tweetBelongerName: reply.tweetreply.author.name,
+        tweetBelongerAccount: reply.tweetreply.author.account
       }))
 
       console.log(userRepliesResult)
 
       res.status(200).json(userRepliesResult)
     } catch (err) {
+      console.error(err)
       next(err)
     }
   }
