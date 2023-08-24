@@ -21,6 +21,7 @@ router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, us
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // api/tweets
+router.post('/api/tweets/:tweet_id/like', authenticated, authenticatedUser, tweetContorller.likeTweet)
 router.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetContorller.getTweet)
 router.get('/api/tweets', authenticated, authenticatedUser, tweetContorller.getTweets)
 
