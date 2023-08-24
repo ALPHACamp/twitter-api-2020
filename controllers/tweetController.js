@@ -64,6 +64,55 @@ const tweetController = {
     } catch (err) {
       return next(err)
     }
+  },
+
+  postTweet: async (req, res, next) => {
+    try {
+      const user = helpers.getUser(req)
+      const { description } = req.body
+      const UserId = user.id
+
+      // check if description is whitespace
+      if (!description.trim().length) {
+        return res.status(404).json({
+          status: 'error',
+          message: '內容不可為空白'
+        })
+      }
+
+      // check if description is more than 140 characters
+      if (description.trim().length > 140) {
+        return res.status(404).json({
+          status: 'error',
+          message: '字數超過限制, 請輸入少於140個字'
+        })
+      }
+
+      // create a new tweet
+      const newTweet = await Tweet.create({
+        UserId,
+        description
+      })
+
+      const replyCount = await Reply.count({ where: { TweetId: newTweet.id } })
+      const likeCount = await Like.count({ where: { TweetId: newTweet.id } })
+
+      const data = {
+        TweetId: newTweet.id,
+        description: newTweet.description,
+        tweetOwnerId: user.id,
+        tweetOwnerName: user.name,
+        tweetOwnerAccount: user.account,
+        tweetOwnerAvatar: user.avatar,
+        createdAt: newTweet.createdAt,
+        replyCount,
+        likeCount,
+        isLiked: false
+      }
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
