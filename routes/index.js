@@ -21,8 +21,8 @@ router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, us
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // api/tweets
-router.get('/api/tweets/:tweet_id', tweetContorller.getTweet)
-router.get('/api/tweets', tweetContorller.getTweets)
+router.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetContorller.getTweet)
+router.get('/api/tweets', authenticated, authenticatedUser, tweetContorller.getTweets)
 
 router.use('/', apiErrorHandler)
 
