@@ -5,7 +5,7 @@ const usersSeeds = require('./seeds/usersSeeds.json')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    // 處理要存入userSeeds資料
+    // 處理要存入的userSeeds資料
     const usersToInsert = usersSeeds.map(user => ({
       account: user.account,
       email: user.email,
