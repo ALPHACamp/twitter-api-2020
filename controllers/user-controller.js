@@ -120,6 +120,32 @@ const userController = {
         return res.json(result)
       })
       .catch(err => next(err))
+  },
+
+  getUserReplies: (req, res, next) => {
+    const UserId = req.params.id
+
+    return Promise.all([
+      User.findByPk(UserId),
+      Reply.findAll({
+        where: { UserId },
+        include: [
+          { model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }] }
+        ],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, replies]) => {
+        if (!user) {
+          const err = new Error('使用者不存在！')
+          err.status = 404
+          throw err
+        }
+
+        res.json(replies)
+      })
+      .catch(err => next(err))
   }
 }
 
