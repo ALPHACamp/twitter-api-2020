@@ -1,16 +1,35 @@
 const { User, Tweet, Reply } = require('../models')
 const helper = require('../_helpers')
+const { relativeTimeFormat } = require('../helpers/day-helpers')
 
 const replyServices = {
   getReplies: (req, cb) => {
     const TweetId = req.params.tweet_id
-    Reply.findAll({
-      where: { TweetId },
-      raw: true,
-      nest: true,
-      order: [['createdAt', 'DESC']]
+    return Promise.all([
+      Tweet.findOne({
+        where: { id: TweetId },
+        raw: true,
+        nest: true,
+        include: [{ model: User, attributes: ['name'] }]
+      }),
+      Reply.findAll({
+        where: { TweetId },
+        raw: true,
+        nest: true,
+        include: [
+          { model: User, attributes: ['avatar', 'name', 'account'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+    ]).then(([tweet, replies]) => {
+      if (!tweet) throw new Error('貼文不存在！')
+      const data = replies.map(reply => ({
+        ...reply,
+        createdAt: relativeTimeFormat(reply.createdAt),
+        poster: tweet.User.name
+      }))
+      cb(null, data)
     })
-      .then(replies => cb(null, replies))
       .catch(err => cb(err))
   },
   postReply: (req, cb) => {
