@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -83,6 +83,40 @@ const userController = {
         }
         delete result.Followers
         delete result.Followings
+        return res.json(result)
+      })
+      .catch(err => next(err))
+  },
+
+  getUserTweets: (req, res, next) => {
+    const UserId = req.params.id
+    const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
+
+    return Tweet.findAll({
+      where: { UserId },
+      include: [
+        { model: User, attributes: { exclude: ['password'] } },
+        Like,
+        Reply
+      ]
+    })
+      .then(tweets => {
+        if (!tweets) {
+          const err = new Error('使用者不存在！')
+          err.status = 404
+          throw err
+        }
+
+        const result = tweets.map(tweet => ({
+          ...tweet.toJSON(),
+          likesCount: tweet.Likes.length,
+          repliesCount: tweet.Replies.length,
+          isLiked: likedTweetsId.includes(tweet.id)
+        }))
+        result.forEach(item => {
+          delete item.Likes
+          delete item.Replies
+        })
         return res.json(result)
       })
       .catch(err => next(err))
