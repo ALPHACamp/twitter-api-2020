@@ -55,10 +55,13 @@ const userController = {
         role: 'user'
       })
 
-      const userData = user.toJSON()
-      delete userData.password
+      if (!user) throw new Error('建立帳號失敗！')
+      req.user = user
+      return next() // 先不回應，向後交給signin繼續處理
 
-      return res.status(200).json({ success: true, data: userData })
+      // const userData = user.toJSON()
+      // delete userData.password
+      // return res.status(200).json({ success: true, data: userData })
     } catch (err) {
       return next(err)
     }
@@ -72,12 +75,10 @@ const userController = {
 
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+
       return res.status(200).json({
         success: true,
-        data: {
-          token,
-          user: userData
-        }
+        data: { token, user: userData }
       })
     } catch (err) {
       return next(err)
@@ -88,12 +89,20 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      let tweets = await Tweet.findAll({ where: { UserId }, order: [['createdAt', 'DESC']], include: [User], nest: true })
+      let tweets = await Tweet.findAll({
+        where: { UserId },
+        order: [['createdAt', 'DESC']],
+        include: [User],
+        nest: true
+      })
 
       tweets = tweets.map(tweet => tweet.toJSON())
       tweets.forEach(tweet => delete tweet.User.password)
 
-      return res.status(200).json({ success: true, data: { tweets } })
+      return res.status(200).json({
+        success: true,
+        data: { tweets }
+      })
     } catch (err) {
       return next(err)
     }

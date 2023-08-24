@@ -7,7 +7,7 @@ const { authenticator, authenticatorAdmin } = require('../middleware/api-auth')
 
 const userController = require('../controllers/user-controller')
 
-router.post('/users', userController.signUp) // No.1 - 註冊帳號
+router.post('/users', userController.signUp, userController.signIn) // No.1 - 註冊帳號
 router.post('/users/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn) // No.2 - 登入前台帳號
 
 // users相關路由
