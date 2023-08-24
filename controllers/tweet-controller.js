@@ -1,11 +1,11 @@
 const { Tweet, User, Like, sequelize } = require('../models')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 
 const tweetController = {
   // 瀏覽所有推文
   getTweets: async (req, res, next) => {
     try {
-      const userId = getUser(req).id
+      const userId = helpers.getUser(req).id
       const [tweets, likes] = await Promise.all([
         Tweet.findAll({
           order: [['createdAt', 'desc']],
@@ -46,7 +46,7 @@ const tweetController = {
   // 瀏覽特定推文
   getTweet: async (req, res, next) => {
     try {
-      const userId = getUser(req).id
+      const userId = helpers.getUser(req).id
       const [tweet, likes] = await Promise.all([
         Tweet.findByPk(req.params.id, {
           order: [['createdAt', 'desc']],
@@ -83,7 +83,7 @@ const tweetController = {
   // 發佈一則推文
   postTweet: async (req, res, next) => {
     try {
-      const userId = getUser(req).id
+      const userId = helpers.getUser(req).id
       const { description } = req.body
       if (!description) {
         throw new Error('內容不可空白')
