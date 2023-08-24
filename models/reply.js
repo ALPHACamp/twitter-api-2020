@@ -12,8 +12,6 @@ module.exports = (sequelize, DataTypes) => {
 
       Reply.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
       Reply.belongsTo(models.User, { foreignKey: 'userId', as: 'replier' })
-
-
     }
   }
   Reply.init(
