@@ -99,7 +99,7 @@ const userController = {
         })
       ])
 
-      if (!user) res.status(401).json({ status: 'error', message: 'This user does not exist' })
+      if (!user) return res.status(401).json({ status: 'error', message: 'This user does not exist' })
 
       delete user.password
       user.tweetCount = tweetCount
@@ -113,10 +113,6 @@ const userController = {
         })
         user.isFollowed = checkUserFollowing.some(follow => follow.followingId === Number(id))
       }
-
-      if (Number(id) === currentUserId) res.status(400).json({ status: 'error', message: '使用者無法追蹤自己！' })
-
-      // console.log(user)
 
       res.status(200).json(user)
     } catch (err) {
