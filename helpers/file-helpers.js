@@ -1,20 +1,19 @@
 const imgur = require('imgur')
 imgur.setClientId(process.env.IMGUR_CLIENTID)
 
-imgur.setClientId(process.env.IMGUR_CLIENT_ID)
-const imgurFileHandler = (files) => {
+const imgurFileHandler = async (files) => {
+  const uploadPromises = []
   const images = [files?.avatar?.[0]?.path, files?.banner?.[0]?.path]
-  const uploadPromises = images.map(file => {
-    return new Promise((resolve, reject) => {
-      if (!file) return resolve(null)
-      return imgur.uploadFile(file)
-        .then(img => {
-          resolve(img?.link || null)
-        })
-        .catch(err => reject(err))
-    })
-  })
-  return Promise.all(uploadPromises)
+  try {
+    for (const file of images) {
+      if (!file) return uploadPromises.push(null)
+      const img = await imgur.uploadFile(file)
+      uploadPromises.push(img?.link || null)
+    }
+  } catch (err) {
+    console.log(err.message)
+  }
+  return uploadPromises
 }
 module.exports = {
   imgurFileHandler
