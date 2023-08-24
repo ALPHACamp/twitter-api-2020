@@ -1,10 +1,9 @@
-const { getUser } = require('../_helpers')
 const bcrypt = require('bcrypt')
 const { User } = require('../models')
 
 const userSignIn = async (req, res, next) => {
   try {
-    const { account, password } = getUser(req).body
+    const { account, password } = req.body
     if (!account || !password) throw new Error('帳號與密碼皆為必填!')
     // 在資料庫中尋找user
     const user = await User.findOne({ where: { account } })
