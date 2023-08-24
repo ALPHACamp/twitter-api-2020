@@ -9,8 +9,7 @@ const tweetContorller = {
       })
       if (!tweets) throw new Error("Tweet didn't exist!")
       res.json({
-        status: 'success',
-        data: tweets
+        tweets
       })
     } catch (err) {
       next(err)
