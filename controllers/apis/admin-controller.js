@@ -98,7 +98,7 @@ const adminController = {
   // Admin 登入
   signIn: (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
+      const userData = req.user
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
