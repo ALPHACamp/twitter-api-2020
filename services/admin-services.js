@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
+const { relativeTimeFormat } = require('../helpers/day-helpers')
 const { User, Tweet, Reply } = require('../models')
 
 const adminServices = {
@@ -67,15 +69,23 @@ const adminServices = {
   getAdminTweets: async (req, cb) => {
     try {
       const tweets = await Tweet.findAll({
-        include: [
-          User,
-          Reply,
-          { model: User, as: 'LikeUsers' }
+        attributes: [
+          'UserId',
+          'description',
+          'createdAt',
+          [
+            sequelize.literal('(SELECT name FROM Users WHERE Users.id = userId)'),
+            'userName'
+          ]
         ],
         raw: true,
         nest: true
       })
-      cb(null, tweets)
+      const tweetsData = await tweets.map(tweet => ({
+        ...tweet,
+        createdAt: relativeTimeFormat(tweet.createdAt)
+      }))
+      cb(null, tweetsData)
     } catch (err) {
       cb(err)
     }
