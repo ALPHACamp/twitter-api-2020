@@ -14,7 +14,7 @@ router.post('/api/users/signin', passport.authenticate('local', { session: false
 router.post('/api/users', userController.signUp)
 
 router.post('/api/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn)
-router.use('/api/admin', authenticated, authenticatedAdmin, admin)
+router.use('/api/admin', authenticatedAdmin, admin)
 
 router.use('/api/tweets', authenticatedUser, tweets)
 
