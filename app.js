@@ -7,7 +7,7 @@ const session = require('express-session')
 const cors = require('cors')
 
 const passport = require('./config/passport')
-const { getUser } = require('./helpers/auth-helpers')
+const { getUser } = require('./_helpers')
 const apis = require('./routes')
 
 const app = express()
