@@ -8,7 +8,6 @@ module.exports = {
     const userData = await User.findAll({
       raw: true,
       nest: true,
-      // where: { role: 'user' },
       attributes: ['id']
     })
     const tweetData = await Tweet.findAll({
