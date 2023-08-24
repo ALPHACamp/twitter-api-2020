@@ -99,10 +99,11 @@ const userController = {
       tweets = tweets.map(tweet => tweet.toJSON())
       tweets.forEach(tweet => delete tweet.User.password)
 
-      return res.status(200).json({
-        success: true,
-        data: { tweets }
-      })
+      return res.status(200).json(tweets)
+      // return res.status(200).json({ // 這種回傳形式過不了過測試
+      //   success: true,
+      //   data: { tweets }
+      // })
     } catch (err) {
       return next(err)
     }
