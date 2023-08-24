@@ -16,21 +16,21 @@ const tweetServices = {
       ]
     })
       .then(tweets => {
-        let Count = (value, arr) => arr.reduce((t, c) => c === value ? t + 1 : t, 0)
+        const count = (value, arr) => arr.reduce((t, c) => c === value ? t + 1 : t, 0)
         const replyList = []
         const likeList = []
         tweets.map(tweet => {
-          replyList.push(tweet["Replies.tweetId"])
-          likeList.push(tweet["Likes.tweetId"])
+          replyList.push(tweet['Replies.tweetId'])
+          likeList.push(tweet['Likes.tweetId'])
         })
         const data = tweets.map(tweet => {
-          let subDescription = tweet.description.length > 80 ? tweet.description.substring(0, 80) + '...' : tweet.description
+          const subDescription = tweet.description.length > 80 ? tweet.description.substring(0, 80) + '...' : tweet.description
           return {
             ...tweet,
             description: subDescription,
             createdAt: relativeTimeFormat(tweet.createdAt),
-            replyCount: Count(tweet.id, replyList),
-            likeCount: Count(tweet.id, likeList)
+            replyCount: count(tweet.id, replyList),
+            likeCount: count(tweet.id, likeList)
           }
         })
         return cb(null, data)
@@ -39,13 +39,16 @@ const tweetServices = {
   },
   getTweet: (req, cb) => {
     const { id } = req.params
-    Tweet.findByPk(id, { raw: true }).then(tweet => {
-      if (!tweet) {
-        const err = new Error('推文不存在！')
-        err.status = 404
-        throw err
+    Tweet.findByPk(id, {
+      raw: true,
+      include: [{ model: User, attributes: ['avatar', 'name', 'account'] }]
+    }).then(tweet => {
+      if (!tweet) throw new Error('推文不存在！')
+      const data = {
+        ...tweet,
+        createdAt: relativeTimeFormat(tweet.createdAt)
       }
-      return cb(null, tweet)
+      return cb(null, data)
     })
       .catch(err => cb(err))
   },
