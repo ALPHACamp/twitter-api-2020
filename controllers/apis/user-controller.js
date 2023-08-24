@@ -1,9 +1,11 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../../models')
+const { getUser } = require('../../_helpers')
 
-const { User, Tweet, Reply } = db
+const { User, Tweet, Reply, Followship } = db
 const { Op } = require('sequelize')
+const sequelize = require('sequelize')
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -80,12 +82,43 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id)
-      if (!user) throw new Error('This user does not exist')
-      delete user.password
-      const userData = user.toJSON()
+      const { id } = req.params
+      const currentUserId = getUser(req).dataValues.id
+      console.log(currentUserId)
 
-      res.status(200).json(userData)
+      const [user, tweetCount, followerCount, followingCount] = await Promise.all([
+        User.findByPk(id, { raw: true, nest: true }),
+        Tweet.count({
+          where: { UserId: id }
+        }),
+        Followship.count({
+          where: { followerId: id }
+        }),
+        Followship.count({
+          where: { followingId: id }
+        })
+      ])
+
+      if (!user) res.status(401).json({ status: 'error', message: 'This user does not exist' })
+
+      delete user.password
+      user.tweetCount = tweetCount
+      user.followerCount = followerCount
+      user.followingCount = followingCount
+
+      if (Number(id) !== currentUserId) {
+        const checkUserFollowing = await Followship.findAll({
+          where: { followerId: currentUserId },
+          raw: true
+        })
+        user.isFollowed = checkUserFollowing.some(follow => follow.followingId === Number(id))
+      }
+
+      if (Number(id) === currentUserId) res.status(400).json({ status: 'error', message: '使用者無法追蹤自己！' })
+
+      // console.log(user)
+
+      res.status(200).json(user)
     } catch (err) {
       next(err)
     }
@@ -93,21 +126,45 @@ const userController = {
   getUserReplies: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const replies = await Reply.findAll({
-        where: { UserId: userId },
-        include: [
-          { model: User, as: 'userreply', attributes: { exclude: ['password'] } },
-          {
-            model: Tweet,
-            as: 'usertweets',
-            include: [{ model: User, as: 'author', attributes: ['account'] }]
-          }
-        ],
-        order: [['createdAt', 'DESC']],
-        nest: true
-      })
 
-      const userRepliesResult = replies.map(reply => reply.toJSON())
+      const [user, replies] = await Promise.all([
+        User.findByPk(userId, { raw: true, nest: true }),
+        Reply.findAll({
+          where: { UserId: userId },
+          include: [
+            { model: User, as: 'userreply', attributes: { exclude: ['password'] } },
+            {
+              model: Tweet,
+              as: 'usertweets',
+              include: [{ model: User, as: 'author', attributes: ['account'] }]
+            }
+          ],
+          // attributes: {
+          //   include: [[sequelize.literal('(SELECT name FROM Users WHERE Users.id = Tweet.user_id)'), 'tweetBelongerName'],
+          //     [sequelize.literal('(SELECT account FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetBelongerAccount']
+          //   ]
+          // },
+          order: [['createdAt', 'DESC']],
+          nest: true
+        }
+        )])
+
+      console.log(user, replies)
+      const userRepliesResult = replies.map(reply => ({
+        replyId: reply.id,
+        comment: reply.comment,
+        replierId: user.id,
+        replierName: user.name,
+        replierAvatar: user.avatar,
+        replierAccount: user.account,
+        createdAt: reply.createdAt,
+        tweetId: reply.TweetId
+        // tweetBelongerName: reply.tweetBelongerName,
+        // tweetBelongerAccount: reply.tweetBelongerAccount
+      }))
+
+      console.log(userRepliesResult)
+
       res.status(200).json(userRepliesResult)
     } catch (err) {
       next(err)
