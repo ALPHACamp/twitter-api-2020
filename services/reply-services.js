@@ -1,5 +1,5 @@
 const { User, Tweet, Reply } = require('../models')
-const { getUser } = require('../_helpers')
+const helper = require('../_helpers')
 
 const replyServices = {
   getReplies: (req, cb) => {
@@ -10,11 +10,11 @@ const replyServices = {
       nest: true,
       order: [['createdAt', 'DESC']]
     })
-      .then(replies => cb(null, { replies }))
+      .then(replies => cb(null, replies))
       .catch(err => cb(err))
   },
   postReply: (req, cb) => {
-    const UserId = getUser(req).id
+    const UserId = helper.getUser(req).id
     const TweetId = req.params.tweet_id
     const { comment } = req.body
     Promise.all([
