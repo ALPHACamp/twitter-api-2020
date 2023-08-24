@@ -1,5 +1,5 @@
 const { Tweet, User, Reply, Like } = require('../models')
-const { getUser } = require('../_helpers')
+const helper = require('../_helpers')
 const { relativeTimeFormat } = require('../helpers/day-helpers')
 
 const tweetServices = {
@@ -45,13 +45,13 @@ const tweetServices = {
         err.status = 404
         throw err
       }
-      return cb(null, { tweet })
+      return cb(null, tweet)
     })
       .catch(err => cb(err))
   },
   postTweet: (req, cb) => {
     // const UserId = req.user.dataValues.id
-    const UserId = getUser(req).id
+    const UserId = helper.getUser(req).id
     const { description } = req.body
     if (!UserId) throw new Error('用戶不存在！')
     if (!description) throw new Error('內容不可空白')
@@ -61,7 +61,7 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   addLike: (req, cb) => {
-    const UserId = getUser(req).id
+    const UserId = helper.getUser(req).id
     const TweetId = req.params.id
     if (!UserId) throw new Error('用戶不存在！')
     return Promise.all([
@@ -79,7 +79,7 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   removeLike: (req, cb) => {
-    const UserId = getUser(req).id
+    const UserId = helper.getUser(req).id
     const TweetId = req.params.id
     if (!UserId) throw new Error('用戶不存在！')
     return Promise.all([

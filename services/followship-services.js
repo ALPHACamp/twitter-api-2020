@@ -1,10 +1,13 @@
 const { Followship, User } = require('../models')
-const { getUser } = require('../_helpers')
+// const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 
-const followshipController = {
+const followshipServices = {
     addFollowing: (req, cb) => {
-        const followerId = getUser(req).id
-        const { followingId } = req.body
+        // const followerId = getUser(req).id
+        const followerId = helpers.getUser(req).id
+        // const { followingId } = req.body
+        const followingId = req.body.id
         if (!followerId) throw new Error('用戶不存在！')
         return Promise.all([
             User.findByPk(followingId),
@@ -20,7 +23,8 @@ const followshipController = {
             .catch(err => cb(err))
     },
     removeFollowing: (req, cb) => {
-        const followerId = getUser(req).id
+        // const followerId = getUser(req).id
+        const followerId = helpers.getUser(req).id
         const { followingId } = req.params
         if (!followerId) throw new Error('用戶不存在！')
         return Promise.all([
@@ -36,4 +40,4 @@ const followshipController = {
     }
 }
 
-module.exports = followshipController
+module.exports = followshipServices
