@@ -11,7 +11,6 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../mid
 
 // api/admin
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
-// router.use("/api/admin", admin);
 
 // api/users
 // router.get('/api/users', userController.getUsers)
@@ -21,8 +20,10 @@ router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, us
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // api/tweets
-router.get('/api/tweets/:tweet_id', tweetContorller.getTweet)
-router.get('/api/tweets', tweetContorller.getTweets)
+router.post('/api/tweets/:tweet_id/like', authenticated, authenticatedUser, tweetContorller.likeTweet)
+router.post('/api/tweets/:tweet_id/unlike', authenticated, authenticatedUser, tweetContorller.unlikeTweet)
+router.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetContorller.getTweet)
+router.get('/api/tweets', authenticated, authenticatedUser, tweetContorller.getTweets)
 
 router.use('/', apiErrorHandler)
 

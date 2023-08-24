@@ -1,23 +1,93 @@
-const { Tweet } = require('../../models')
+const { Tweet, Like } = require('../../models')
+const helpers = require('../../_helpers')
 
 const tweetContorller = {
-  getTweets: (req, res, next) => {
-    return Tweet.findAll({
-      raw: true
-    })
-      .then(tweets => {
-        res.json(tweets)
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        raw: true
       })
-      .catch(err => next(err))
+      if (!tweets) throw new Error("Tweet didn't exist!")
+      res.json({
+        tweets
+      })
+    } catch (err) {
+      next(err)
+    }
   },
-  getTweet: (req, res, next) => {
-    const TweetId = req.params.tweet_id
+  getTweet: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweet_id
+      const tweet = await Tweet.findByPk(tweetId)
 
-    return Tweet.findByPk(TweetId)
-      .then(tweet => {
-        res.json(tweet)
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      res.json({
+        status: 'success',
+        data: tweet
       })
-      .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
+  },
+  likeTweet: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweet_id
+      const getUser = helpers.getUser(req)
+      const userId = getUser.id
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(tweetId),
+        Like.findOne({
+          where: {
+            userId,
+            tweetId
+          }
+        })
+      ])
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      if (like) throw new Error('You have liked this tweet!')
+      const createdLike = await Like.create({
+        userId,
+        tweetId
+      })
+      res.json({
+        status: 'success',
+        data: createdLike,
+        Boolean: true
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweet_id
+      const getUser = helpers.getUser(req)
+      const userId = getUser.id
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(tweetId),
+        Like.findOne({
+          where: {
+            userId,
+            tweetId
+          }
+        })
+      ])
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      if (!like) throw new Error("You haven't liked this tweet!")
+      const unlike = await Like.destroy({
+        where: {
+          userId,
+          tweetId
+        }
+      })
+      res.json({
+        status: 'success',
+        data: unlike,
+        Boolean: false
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 

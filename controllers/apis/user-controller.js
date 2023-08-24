@@ -5,7 +5,6 @@ const { getUser } = require('../../_helpers')
 
 const { User, Tweet, Reply, Followship } = db
 const { Op } = require('sequelize')
-const sequelize = require('sequelize')
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -99,7 +98,7 @@ const userController = {
         })
       ])
 
-      if (!user) res.status(401).json({ status: 'error', message: 'This user does not exist' })
+      if (!user) return res.status(401).json({ status: 'error', message: 'This user does not exist' })
 
       delete user.password
       user.tweetCount = tweetCount
@@ -113,10 +112,6 @@ const userController = {
         })
         user.isFollowed = checkUserFollowing.some(follow => follow.followingId === Number(id))
       }
-
-      if (Number(id) === currentUserId) res.status(400).json({ status: 'error', message: '使用者無法追蹤自己！' })
-
-      // console.log(user)
 
       res.status(200).json(user)
     } catch (err) {
@@ -132,18 +127,13 @@ const userController = {
         Reply.findAll({
           where: { UserId: userId },
           include: [
-            { model: User, as: 'userreply', attributes: { exclude: ['password'] } },
+            { model: User, as: 'replier', attributes: { exclude: ['password'] } },
             {
               model: Tweet,
-              as: 'usertweets',
-              include: [{ model: User, as: 'author', attributes: ['account'] }]
+              as: 'tweetreply',
+              include: [{ model: User, as: 'author', attributes: ['account', 'name'] }]
             }
           ],
-          // attributes: {
-          //   include: [[sequelize.literal('(SELECT name FROM Users WHERE Users.id = Tweet.user_id)'), 'tweetBelongerName'],
-          //     [sequelize.literal('(SELECT account FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetBelongerAccount']
-          //   ]
-          // },
           order: [['createdAt', 'DESC']],
           nest: true
         }
@@ -158,15 +148,16 @@ const userController = {
         replierAvatar: user.avatar,
         replierAccount: user.account,
         createdAt: reply.createdAt,
-        tweetId: reply.TweetId
-        // tweetBelongerName: reply.tweetBelongerName,
-        // tweetBelongerAccount: reply.tweetBelongerAccount
+        tweetId: reply.TweetId,
+        tweetBelongerName: reply.tweetreply.author.name,
+        tweetBelongerAccount: reply.tweetreply.author.account
       }))
 
       console.log(userRepliesResult)
 
       res.status(200).json(userRepliesResult)
     } catch (err) {
+      console.error(err)
       next(err)
     }
   }
