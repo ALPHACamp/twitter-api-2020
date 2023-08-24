@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 
 const adminServices = {
   signIn: async (req, cb) => {
