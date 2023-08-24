@@ -83,6 +83,8 @@ const adminController = {
           followersCount: user.Followers.length,
           followingsCount: user.Followings.length
         }))
+          .sort((a, b) => b.tweetsCount - a.tweetsCount)
+
         result.forEach(item => {
           delete item.Tweets
           delete item.Followers
