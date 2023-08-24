@@ -18,6 +18,7 @@ router.post('/api/users/login', userController.signIn)
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 router.put('/api/users/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), authenticated, authenticatedUser, userController.putUser)
 router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
+router.post('/api/users', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), userController.signUp)
 
 // 推文
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)

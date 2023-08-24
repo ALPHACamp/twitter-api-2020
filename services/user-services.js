@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const { User, Tweet, Followship, Reply, Like } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
@@ -38,6 +38,56 @@ const userServices = {
         token,
         user: userData
       })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  signUp: async (req, cb) => {
+    try {
+      const { name, account, email, password, checkPassword } = req.body
+      const { files } = req
+      if (!email || !password || !checkPassword || !name || !account) {
+        const err = new Error('所有欄位皆為必填')
+        err.status = 400
+        throw err
+      }
+      if (!password === checkPassword) {
+        const err = new Error('密碼與確認密碼不一致')
+        err.status = 400
+        throw err
+      }
+      if (name.length >= 50) {
+        const err = new Error('字數超出上限！')
+        err.status = 400
+        throw err
+      }
+      const reuseEmail = await User.findOne({ where: { email } })
+      const reuseAccount = await User.findOne({ where: { account } })
+      if (reuseEmail) {
+        const err = new Error('email 已重複註冊！')
+        err.status = 400
+        throw err
+      }
+      if (reuseAccount) {
+        const err = new Error('account 已重複註冊！')
+        err.status = 400
+        throw err
+      }
+      const [filePath, passwordSalt] = await Promise.all([
+        imgurFileHandler(files),
+        bcrypt.hash(password, 10)
+      ])
+      const user = await User.create({
+        email,
+        password: passwordSalt,
+        name,
+        account,
+        avatar: filePath[0] || null,
+        banner: filePath[1] || null
+      })
+      const userData = user.toJSON()
+      delete userData.password
+      cb(null, userData)
     } catch (err) {
       cb(err)
     }
