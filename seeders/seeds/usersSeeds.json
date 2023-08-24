@@ -1,0 +1,38 @@
+[
+{
+"account": "root",
+"email": "root@example.com",
+"password": "12345678",
+"role": "admin"
+},
+{
+"account": "user1",
+"email": "user1@example.com",
+"password": "12345678",
+"role": "user"
+},
+{
+"account": "user2",
+"email": "user2@example.com",
+"password": "12345678",
+"role": "user"
+},
+{
+"account": "user3",
+"email": "user3@example.com",
+"password": "12345678",
+"role": "user"
+},
+{
+"account": "user4",
+"email": "user4@example.com",
+"password": "12345678",
+"role": "user"
+},
+{
+"account": "user5",
+"email": "user5@example.com",
+"password": "12345678",
+"role": "user"
+}
+]
