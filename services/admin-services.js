@@ -76,6 +76,10 @@ const adminServices = {
           [
             sequelize.literal('(SELECT name FROM Users WHERE Users.id = userId)'),
             'userName'
+          ],
+          [
+            sequelize.literal('(SELECT account FROM Users WHERE Users.id = userId)'),
+            'userAccount'
           ]
         ],
         raw: true,
@@ -83,6 +87,7 @@ const adminServices = {
       })
       const tweetsData = await tweets.map(tweet => ({
         ...tweet,
+        description: tweet.description.length > 80 ? tweet.description.substring(0, 80) + '...' : tweet.description,
         createdAt: relativeTimeFormat(tweet.createdAt)
       }))
       cb(null, tweetsData)
