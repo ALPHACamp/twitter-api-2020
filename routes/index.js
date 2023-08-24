@@ -6,7 +6,7 @@ const { apiErrorHandler } = require('../../middleware/error-handler')
 const userController = require('../controllers/user-controller')
 const { userSignIn } = require('../middleware/login-handler')
 
-router.post('/signin', userSignIn, userController.signIn)
+router.post('/users/signin', userSignIn, userController.signIn)
 
 router.use('/', apiErrorHandler)
 module.exports = router
