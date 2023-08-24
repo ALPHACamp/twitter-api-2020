@@ -55,6 +55,37 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+
+  getUser: (req, res, next) => {
+    const UserId = req.params.id
+    const isFollowed = helpers.getUser(req).Followings.some(f => f.id.toString() === UserId)
+
+    return User.findByPk(UserId, {
+      attributes: { exclude: ['password'] },
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+      .then(user => {
+        if (!user) {
+          const err = new Error('使用者不存在！')
+          err.status = 404
+          throw err
+        }
+
+        const result = {
+          ...user.toJSON(),
+          followersCount: user.Followers.length,
+          followingsCount: user.Followings.length,
+          isFollowed
+        }
+        delete result.Followers
+        delete result.Followings
+        return res.json(result)
+      })
+      .catch(err => next(err))
   }
 }
 
