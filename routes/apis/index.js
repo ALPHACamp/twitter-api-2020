@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const passport = require('../../config/passport')
 const admin = require('./modules/admin')
 const userController = require('../../controllers/user-controller')
 const tweetController = require('../../controllers/tweet-controller')
@@ -19,7 +20,6 @@ const followshipController = require('../../controllers/followship-controller')
 // router.post('/login', userController)
 // router.post('/users', userController)
 
-
 // router.get('/tweets/:tweetId/replies', tweetController)
 // router.post('/tweets/:tweetId/replies', tweetController)
 // router.post('/tweets/:id/like', tweetController)
@@ -31,4 +31,4 @@ const followshipController = require('../../controllers/followship-controller')
 // router.post('/followships', followshipController)
 // router.delete('/followships/:followingId', followshipController)
 
-// module.exports = router
+module.exports = router
