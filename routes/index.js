@@ -16,12 +16,12 @@ router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 // router.get('/api/users', userController.getUsers)
 router.post('/api/users', userController.signUp)
 router.post('/api/users/signin', userController.signIn)
+router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserReplies)
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // api/tweets
 router.get('/api/tweets/:tweet_id', tweetContorller.getTweet)
 router.get('/api/tweets', tweetContorller.getTweets)
-
 
 router.use('/', apiErrorHandler)
 
