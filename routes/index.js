@@ -21,6 +21,7 @@ router.get('/api/users/:id', authenticated, authenticatedUser, userController.ge
 
 // api/tweets
 router.post('/api/tweets/:tweet_id/like', authenticated, authenticatedUser, tweetContorller.likeTweet)
+router.post('/api/tweets/:tweet_id/unlike', authenticated, authenticatedUser, tweetContorller.unlikeTweet)
 router.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetContorller.getTweet)
 router.get('/api/tweets', authenticated, authenticatedUser, tweetContorller.getTweets)
 

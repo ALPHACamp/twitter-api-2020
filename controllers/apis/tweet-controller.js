@@ -52,7 +52,39 @@ const tweetContorller = {
       })
       res.json({
         status: 'success',
-        data: createdLike
+        data: createdLike,
+        Boolean: true
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweet_id
+      const getUser = helpers.getUser(req)
+      const userId = getUser.id
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(tweetId),
+        Like.findOne({
+          where: {
+            userId,
+            tweetId
+          }
+        })
+      ])
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      if (!like) throw new Error("You haven't liked this tweet!")
+      const unlike = await Like.destroy({
+        where: {
+          userId,
+          tweetId
+        }
+      })
+      res.json({
+        status: 'success',
+        data: unlike,
+        Boolean: false
       })
     } catch (err) {
       next(err)
