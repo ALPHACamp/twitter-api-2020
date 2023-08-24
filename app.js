@@ -16,8 +16,8 @@ const port = process.env.PORT || 3000
 // };
 
 app.use(passport.initialize())
-app.use(passport.session())
-
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 app.use('/api', router)
 
 app.get('/', (req, res) => res.send('Hello World!'))
