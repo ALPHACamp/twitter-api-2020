@@ -7,7 +7,11 @@ const tweetContorller = {
       const tweets = await Tweet.findAll({
         raw: true
       })
-      res.json(tweets)
+      if (!tweets) throw new Error("Tweet didn't exist!")
+      res.json({
+        status: 'success',
+        data: tweets
+      })
     } catch (err) {
       next(err)
     }
@@ -15,9 +19,13 @@ const tweetContorller = {
   getTweet: async (req, res, next) => {
     try {
       const tweetId = req.params.tweet_id
-
       const tweet = await Tweet.findByPk(tweetId)
-      res.json(tweet)
+
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      res.json({
+        status: 'success',
+        data: tweet
+      })
     } catch (err) {
       next(err)
     }
