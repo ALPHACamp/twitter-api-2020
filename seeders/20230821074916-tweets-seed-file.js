@@ -5,11 +5,6 @@ const User = db.User
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const users = await queryInterface.sequelize.query(
-      'SELECT id FROM Users WHERE role = "user";',
-      { type: queryInterface.sequelize.QueryTypes.SELECT }
-    )
-
     const data = []
     const userData = await User.findAll({
       raw: true,
@@ -20,14 +15,13 @@ module.exports = {
     Array.from({ length: 10 }).map((user, i) => {
       for (let j = 0; j < 10; ++j) {
         data.push({
-          User_id: user.id,
-          description: faker.lorem.text(Textmax),
+          description: faker.lorem.text(140),
           created_at: new Date(),
           updated_at: new Date(),
           User_id: userData[i].id
         })
       }
-    }
+    })
 
     await queryInterface.bulkInsert('Tweets', data)
   },
