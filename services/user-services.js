@@ -204,6 +204,42 @@ const userServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  getUserRepliedTweets: async (req, cb) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+      if (!user) {
+        const err = new Error('使用者不存在')
+        err.status = 404
+        throw err
+      }
+      const replies = await Reply.findAll({
+        where: { userId: id },
+        attributes: [
+          'userId',
+          'tweetId',
+          [
+            sequelize.literal('(SELECT name FROM Users WHERE Users.id = userId)'),
+            'respondentName'
+          ],
+          [
+            sequelize.literal('(SELECT account FROM Users WHERE Users.id = userId)'),
+            'respondentAccount'
+          ],
+          [
+            sequelize.literal('(SELECT account FROM Users WHERE Users.id IN (SELECT UserId FROM Tweets WHERE Tweets.id = tweetId))'),
+            'tweeterAccount'
+          ],
+          'comment'
+        ],
+        raw: true,
+        nest: true
+      })
+      cb(null, replies)
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 
