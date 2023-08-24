@@ -37,7 +37,11 @@ const adminController = {
       nest: true
     })
       .then(tweets => {
-        res.json(tweets)
+        const data = tweets.map(tweet => ({
+          ...tweet,
+          description: tweet.description.substring(0, 50)
+        }))
+        res.json(data)
       })
       .catch(err => next(err))
   },
