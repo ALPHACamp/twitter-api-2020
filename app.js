@@ -1,9 +1,8 @@
-// if (process.env.NODE_ENV !== 'production') {
-//   require('dotenv').config()
-// }
-require('dotenv').config()
+if (process.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+// require('dotenv').config()
 const express = require('express')
-const cors = require('cors')
 const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
 const session = require('express-session')
@@ -26,7 +25,6 @@ function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 }
 
-app.use(cors())
 app.use(routes)
 
 app.get('/', (req, res) => res.send('Hello World!'))

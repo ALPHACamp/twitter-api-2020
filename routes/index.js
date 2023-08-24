@@ -11,6 +11,7 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../mid
 
 // api/admin
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
+// router.use("/api/admin", admin);
 
 // api/users
 // router.get('/api/users', userController.getUsers)
