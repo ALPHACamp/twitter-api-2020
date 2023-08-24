@@ -17,6 +17,7 @@ router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 // router.get('/api/signup', userController.signUpPage)
 router.post('/api/signup', userController.signUp)
 router.get('/api/users/:id', userController.getUser)
+router.get('/api/users/:id/replied_tweets', userController.getUserReplies)
 
 // api/tweets
 router.get('/api/tweets/:tweet_id', tweetContorller.getTweet)

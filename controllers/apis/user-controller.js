@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const db = require('../../models')
-const { User } = db
+const { User, Tweet, Reply } = db
 
 const userController = {
   signUp: (req, res) => {
@@ -30,6 +30,30 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const replies = await Reply.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: User, as: 'userreply', attributes: { exclude: ['password'] } },
+          {
+            model: Tweet,
+            as: 'usertweets',
+            include: [{ model: User, as: 'author', attributes: ['account'] }]
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        nest: true
+      })
+
+      const userRepliesResult = replies.map(reply => reply.toJSON())
+      res.status(200).json(userRepliesResult)
+    } catch (err) {
+      next(err)
+    }
   }
 }
+
 module.exports = userController
