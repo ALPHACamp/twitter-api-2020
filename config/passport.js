@@ -6,6 +6,7 @@ const { User, Like, Tweet } = require('../models')
 
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
+const JWTSecret = process.env.JWT_SECRET || 'SECRET'
 
 // 本地驗證
 passport.use(new LocalStrategy({ usernameField: 'account' }, (account, password, cb) => {
@@ -29,7 +30,7 @@ passport.use(new LocalStrategy({ usernameField: 'account' }, (account, password,
 // 利用 jwtPayload 到資料庫找出 user 並傳入 req.user 供後續使用
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: JWTSecret
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
