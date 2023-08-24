@@ -9,7 +9,7 @@ module.exports = {
       avatar: 'https://images.newtalk.tw/resize_action2/800/album/news/549/604b088605df1.jpg',
       introduction: '沒有很可以但你惹不起',
       role: 'admin',
-      account: '乂瘋狂的小風乂',
+      account: 'root',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -19,7 +19,7 @@ module.exports = {
       avatar: 'https://shoplineimg.com/61662e5adfa523003edf1433/617678bf07ec314aa1093009/800x.webp?source_format=png',
       introduction: '愛用炫彩拉拉',
       role: 'user',
-      account: '拉拉',
+      account: 'user1',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -29,7 +29,7 @@ module.exports = {
       avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTulVFA93dDlbLUSgo6KfrPF-aX6v7uu6sihQ&usqp=CAU',
       introduction: '',
       role: 'user',
-      account: '老蔡',
+      account: 'user2',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
