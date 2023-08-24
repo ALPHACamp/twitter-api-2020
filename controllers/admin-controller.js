@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+const { Tweet, User, Like } = require('../models')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -22,6 +23,77 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      include: [
+        // 查詢 password 欄位以外的 user 資料
+        { model: User, attributes: { exclude: ['password'] } }
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(tweets => {
+        res.json(tweets)
+      })
+      .catch(err => next(err))
+  },
+
+  deleteTweet: (req, res, next) => {
+    return Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) {
+          const err = new Error('推文不存在!')
+          err.status = 404
+          throw err
+        }
+
+        return tweet.destroy()
+      })
+      .then(tweet => {
+        res.json({ status: 'success', data: { tweet } })
+      })
+      .catch(err => next(err))
+  },
+
+  getUsers: (req, res, next) => {
+    const likesCount = array => {
+      let sum = 0
+      for (const i of array) {
+        sum += i.Likes.length
+      }
+      return sum
+    }
+
+    return User.findAll({
+      attributes: { exclude: ['password'] },
+      include: [
+        { model: Tweet, include: Like },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+      .then(users => {
+        const result = users.map(user => ({
+          ...user.toJSON(),
+          tweetsCount: user.Tweets.length,
+          getLikesCount: likesCount(user.Tweets),
+          followersCount: user.Followers.length,
+          followingsCount: user.Followings.length
+        }))
+          .sort((a, b) => b.tweetsCount - a.tweetsCount)
+
+        result.forEach(item => {
+          delete item.Tweets
+          delete item.Followers
+          delete item.Followings
+        })
+
+        res.json(result)
+      })
+      .catch(err => next(err))
   }
 }
 
