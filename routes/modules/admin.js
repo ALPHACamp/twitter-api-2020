@@ -8,6 +8,7 @@ router.post(
   passport.authenticate('jwt', { session: false }),
   adminController.signIn
 )
+
 router.get('/users', adminController.getUsers)
 router.delete('/tweets/:id', adminController.deleteTweet)
 router.get('/tweets', adminController.getTweets)
