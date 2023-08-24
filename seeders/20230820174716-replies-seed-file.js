@@ -18,7 +18,7 @@ module.exports = {
         list.push(tweets[i].id)
       }
     }
-    await queryInterface.bulkInsert('replies',
+    await queryInterface.bulkInsert('Replies',
       Array.from({ length: tweets.length * 3 }, (_, index) => ({
         userId: users[Math.floor(Math.random() * users.length)].id,
         tweetId: list[index],
@@ -30,6 +30,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('replies', {})
+    await queryInterface.bulkDelete('Replies', {})
   }
 }
