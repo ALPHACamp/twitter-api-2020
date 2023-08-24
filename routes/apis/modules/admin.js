@@ -7,4 +7,4 @@ const adminController = require('../../../controllers/admin-controller')
 // router.delete('/tweets/:id', adminController)
 // router.get('/tweets', adminController)
 
-// module.exports = router
+module.exports = router
