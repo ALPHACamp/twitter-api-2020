@@ -5,7 +5,6 @@ const { getUser } = require('../../_helpers')
 
 const { User, Tweet, Reply, Followship } = db
 const { Op } = require('sequelize')
-const sequelize = require('sequelize')
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -135,11 +134,6 @@ const userController = {
               include: [{ model: User, as: 'author', attributes: ['account', 'name'] }]
             }
           ],
-          // attributes: {
-          //   include: [[sequelize.literal('(SELECT name FROM Users WHERE Users.id = Tweet.user_id)'), 'tweetBelongerName'],
-          //     [sequelize.literal('(SELECT account FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetBelongerAccount']
-          //   ]
-          // },
           order: [['createdAt', 'DESC']],
           nest: true
         }

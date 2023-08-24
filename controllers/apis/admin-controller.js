@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs')
 const db = require('../../models')
 const { User, Tweet, Like } = db
 // const bcrypt = require('bcrypt-nodejs')
@@ -11,13 +12,11 @@ const adminController = {
       attributes: {
         exclude: [
           'email',
-          'introduction',
           'password',
           'updatedAt',
           'createdAt'
         ]
-      },
-      where: { role: 'user' }
+      }
     }
     User.findAll(options)
       .then(users => {
@@ -25,6 +24,7 @@ const adminController = {
           if (user.introduction) {
             user.introduction = user.introduction.substring(0, 50)
           }
+          console.log(user)
         })
         res.status(200).json(users)
       })
@@ -96,10 +96,23 @@ const adminController = {
       )
   },
   // Admin 登入
-  signIn: (req, res, next) => {
+  signIn: async (req, res, next) => {
     try {
-      const userData = req.user
-      const token = jwt.sign(userData, process.env.JWT_SECRET, {
+      const { account, password } = req.body
+      if (!account || !password) throw new Error('Please enter account and password')
+
+      const userData = await User.findOne({ where: { account } })
+
+      if (!userData) throw new Error('User does not exist')
+      if (userData.role === 'user') throw new Error('user permission denied')
+      if (!bcrypt.compareSync(password, userData.password)) throw new Error('Incorrect password')
+
+      const payload = {
+        id: userData.id,
+        account: userData.account,
+        role: userData.role
+      }
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
       res.json({
@@ -110,8 +123,7 @@ const adminController = {
         }
       })
     } catch (err) {
-      console.log(err.message)
-      // next(err);
+      next(err)
     }
   }
 }
