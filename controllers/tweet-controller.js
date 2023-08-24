@@ -86,9 +86,9 @@ const tweetController = {
       const userId = getUser(req).id
       const { description } = req.body
       if (!description) {
-        throw new Error('此欄位不能空白！')
+        throw new Error('內容不可空白')
       } else if (description.length > 140) {
-        throw new Error('此欄位不能多餘140字！')
+        throw new Error('內容不能超過140字')
       }
       const newTweet = await Tweet.create({
         description,
