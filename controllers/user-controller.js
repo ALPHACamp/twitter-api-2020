@@ -36,6 +36,7 @@ const userController = {
   },
   signIn: (req, res, next) => {
     const userData = helpers.getUser(req).toJSON()
+    const JWTSecret = process.env.JWT_SECRET || 'SECRET'
     delete userData.password
     if (userData.role === 'admin') {
       const err = new Error('帳號不存在！')
@@ -43,7 +44,7 @@ const userController = {
       throw err
     }
     try {
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const token = jwt.sign(userData, JWTSecret, { expiresIn: '30d' })
       res.json({
         status: 'success',
         data: {
