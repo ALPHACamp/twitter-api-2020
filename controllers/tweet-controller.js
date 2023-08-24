@@ -3,7 +3,7 @@ const helpers = require('../_helpers')
 
 const tweetController = {
   getTweet: (req, res, next) => {
-    const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.id) : []
+    const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
     Tweet.findByPk(req.params.tweet_id, {
       include: [User, Like, Reply],
       nest: true
@@ -26,7 +26,7 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweets: (req, res, next) => {
-    const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.id) : []
+    const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
     Tweet.findAll({
       include: [
         { model: User, attributes: { exclude: 'password' } },
@@ -98,6 +98,44 @@ const tweetController = {
         })
       })
       .then(newReply => res.json({ status: 'success', data: { reply: newReply } }))
+      .catch(err => next(err))
+  },
+  likeTweet: (req, res, next) => {
+    const UserId = helpers.getUser(req).id
+    const TweetId = req.params.id
+    Promise.all([
+      Like.findOne({ where: { TweetId, UserId } }),
+      Tweet.findByPk(TweetId)
+    ])
+      .then(([like, tweet]) => {
+        if (!tweet) {
+          const err = new Error('推文不存在！')
+          err.status = 404
+          throw err
+        }
+        if (like) throw new Error('已經按過讚了！')
+        return Like.create({ UserId, TweetId })
+      })
+      .then(newLike => res.json({ status: 'success', data: { like: newLike } }))
+      .catch(err => next(err))
+  },
+  unlikeTweet: (req, res, next) => {
+    const TweetId = req.params.id
+    const UserId = helpers.getUser(req).id
+    Promise.all([
+      Like.findOne({ where: { TweetId, UserId } }),
+      Tweet.findByPk(TweetId)
+    ])
+      .then(([like, tweet]) => {
+        if (!tweet) {
+          const err = new Error('推文不存在！')
+          err.status = 404
+          throw err
+        }
+        if (!like) throw new Error('你還沒讚過這則推文！')
+        return like.destroy()
+      })
+      .then(deletedLike => res.json({ status: 'success', data: { like: deletedLike } }))
       .catch(err => next(err))
   }
 }
