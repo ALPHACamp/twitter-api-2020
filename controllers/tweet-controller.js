@@ -99,6 +99,25 @@ const tweetController = {
       })
       .then(newReply => res.json({ status: 'success', data: { reply: newReply } }))
       .catch(err => next(err))
+  },
+  likeTweet: (req, res, next) => {
+    const UserId = helpers.getUser(req).id
+    const TweetId = req.params.id
+    Promise.all([
+      Like.findOne({ where: { TweetId, UserId } }),
+      Tweet.findByPk(TweetId)
+    ])
+      .then(([like, tweet]) => {
+        if (!tweet) {
+          const err = new Error('推文不存在！')
+          err.status = 404
+          throw err
+        }
+        if (like) throw new Error('已經按過讚了！')
+        return Like.create({ UserId, TweetId })
+      })
+      .then(newLike => res.json({ status: 'success', data: { like: newLike } }))
+      .catch(err => next(err))
   }
 }
 
