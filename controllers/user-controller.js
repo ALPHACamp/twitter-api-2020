@@ -92,16 +92,19 @@ const userController = {
     const UserId = req.params.id
     const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
 
-    return Tweet.findAll({
-      where: { UserId },
-      include: [
-        { model: User, attributes: { exclude: ['password'] } },
-        Like,
-        Reply
-      ]
-    })
-      .then(tweets => {
-        if (!tweets) {
+    return Promise.all([
+      User.findByPk(UserId),
+      Tweet.findAll({
+        where: { UserId },
+        include: [
+          { model: User, attributes: { exclude: ['password'] } },
+          Like,
+          Reply
+        ]
+      })
+    ])
+      .then(([user, tweets]) => {
+        if (!user) {
           const err = new Error('使用者不存在！')
           err.status = 404
           throw err
