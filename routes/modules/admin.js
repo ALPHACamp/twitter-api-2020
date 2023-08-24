@@ -5,7 +5,7 @@ const passport = require('passport')
 
 router.post(
   '/login',
-  passport.authenticate('local', { session: false }),
+  passport.authenticate('jwt', { session: false }),
   adminController.signIn
 )
 router.get('/users', adminController.getUsers)
