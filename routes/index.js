@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const tweets = require('./modules/tweets')
+const followships = require('./modules/followships')
 const passport = require('../config/passport')
 const admin = require('./modules/admin')
 const users = require('./modules/users')
@@ -19,6 +20,8 @@ router.post('/api/admin/signin', passport.authenticate('local', { session: false
 router.use('/api/admin', authenticatedAdmin, admin)
 
 router.use('/api/tweets', authenticatedUser, tweets)
+
+router.use('/api/followships', authenticatedUser, followships)
 
 router.get('/', (req, res) => res.send('hello world'))
 
