@@ -122,7 +122,6 @@ const userController = {
     try {
       const UserId = req.params.id
       const currentUserId = helpers.getUser(req).id
-      // const currentUserId = 6
 
       // --資料提取--
       let tweets = await Tweet.findAll({
@@ -130,8 +129,8 @@ const userController = {
         order: [['createdAt', 'DESC']],
         include: [{
           model: User,
-          attributes: ['account', 'name', 'avatar'],
-          as: 'Author'
+          attributes: ['account', 'name', 'avatar']
+          // ,as: 'Author'
         }],
         nest: true,
         attributes: {
@@ -144,7 +143,7 @@ const userController = {
           ], [
             // sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id and UserId = ${currentUserId})`),
             sequelize.literal(`(SELECT EXISTS(SELECT * FROM Likes WHERE TweetId = Tweet.id and UserId = ${currentUserId}))`),
-            'isLikedByCurrentUser' // 目前使用者是否喜歡
+            'isLiked' // 目前使用者是否喜歡
           ]]
         }
       })
@@ -153,7 +152,7 @@ const userController = {
       tweets = tweets.map(tweet => tweet.toJSON())
       tweets = tweets.map(tweet => ({
         ...tweet,
-        isLikedByCurrentUser: Boolean(tweet.isLikedByCurrentUser),
+        isLiked: Boolean(tweet.isLiked),
         fromNow: dayjs(tweet.createdAt).fromNow()
       }))
 
@@ -172,9 +171,9 @@ const userController = {
         where: { UserId },
         order: [['createdAt', 'DESC']],
         include: [{
-          model: User,
-          attributes: ['account', 'name', 'avatar'],
-          as: 'Author' // Reply的作者基本屬性
+          model: User, // Reply的作者基本屬性
+          attributes: ['account', 'name', 'avatar']
+          // ,as: 'Author'
         }],
         attributes: {
           include: [[
@@ -210,8 +209,8 @@ const userController = {
           model: Tweet,
           include: [{
             model: User,
-            attributes: ['account', 'name', 'avatar'],
-            as: 'Author'
+            attributes: ['account', 'name', 'avatar']
+            // ,as: 'Author'
           }],
           attributes: {
             include: [[
@@ -233,7 +232,7 @@ const userController = {
         Tweet: {
           ...reply.Tweet,
           fromNow: dayjs(reply.Tweet.createdAt).fromNow(),
-          isLikedByCurrentUser: true
+          isLiked: true
         }
       }))
 
