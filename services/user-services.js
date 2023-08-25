@@ -247,6 +247,55 @@ const userServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  getUserLikedTweets: async (req, cb) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+      if (!user) {
+        const err = new Error('使用者不存在')
+        err.status = 404
+        throw err
+      }
+      const likes = await Like.findAll({
+        where: { UserId: user.id },
+        attributes: [
+          'UserId',
+          'TweetId',
+          [
+            sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweetId = Like.TweetId)'),
+            'repliesCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.TweetId = Like.TweetId)'),
+            'likeCount'
+          ],
+          [
+            sequelize.literal('(SELECT description FROM Tweets WHERE Tweets.id= Like.TweetId)'),
+            'description'
+          ],
+          [
+            sequelize.literal('(SELECT createdAt FROM Tweets WHERE Tweets.id= Like.TweetId)'),
+            'createdAt'
+          ]
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      if (likes.length === 0) {
+        const err = new Error('該名使用者沒有喜歡過任何推文')
+        err.status = 404
+        throw err
+      }
+      const likesData = likes.map(like => ({
+        ...like,
+        createdAt: relativeTimeFormat(like.createdAt)
+      }))
+      cb(null, likesData)
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 
