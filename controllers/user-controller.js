@@ -31,7 +31,8 @@ const userController = {
           email: req.body.email,
           password: hash,
           name: req.body.name,
-          account: req.body.account
+          account: req.body.account,
+          role: 'user'
         })
       })
       .then(user => {
@@ -57,7 +58,7 @@ const userController = {
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.status(200).json({
         status: 'success',
-        message: `${userData.account}已經成功登入!`,
+        message: `使用者${userData.account}已經成功登入!`,
         data: {
           token,
           user: {
