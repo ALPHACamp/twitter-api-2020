@@ -149,6 +149,50 @@ const userController = {
         res.json(replies)
       })
       .catch(err => next(err))
+  },
+
+  getUserLikes: (req, res, next) => {
+    const UserId = req.params.id
+    const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
+
+    return Promise.all([
+      User.findByPk(helpers.getUser(req).id, { include: [Reply] }),
+      User.findByPk(UserId),
+      Like.findAll({
+        where: { UserId },
+        include: [{
+          model: Tweet,
+          include: [
+            { model: User, attributes: { exclude: ['password'] } },
+            Like,
+            Reply
+          ]
+        }]
+      })
+    ])
+      .then(([currentUser, specificUser, likes]) => {
+        const RepliedTweetId = currentUser.toJSON().Replies.map(r => r.TweetId)
+
+        if (!specificUser) {
+          const err = new Error('使用者不存在！')
+          err.status = 404
+          throw err
+        }
+
+        const result = likes.map(like => {
+          like = like.toJSON()
+          like.Tweet.likesCount = like.Tweet.Likes.length
+          like.Tweet.repliesCount = like.Tweet.Replies.length
+          delete like.Tweet.Likes
+          delete like.Tweet.Replies
+          like.Tweet.isLiked = likedTweetsId.includes(like.TweetId)
+          like.Tweet.isReplyed = RepliedTweetId.includes(like.TweetId)
+          return like
+        })
+
+        res.json(result)
+      })
+      .catch(err => next(err))
   }
 }
 
