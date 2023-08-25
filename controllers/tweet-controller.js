@@ -1,4 +1,5 @@
-const { Tweet, User, Reply, Like, sequelize } = require('../models')
+const { Tweet, User, sequelize } = require('../models')
+const { getUser } = require('../_helpers')
 
 const tweetController = {
   getTweets: (req, res, next) => {
