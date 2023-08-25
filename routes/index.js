@@ -13,11 +13,11 @@ router.post('/users', userController.signUp, userController.signIn) // No.1 - �
 router.post('/users/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn) // No.2 - 登入前台帳號
 
 // users相關路由
-// No.3 - 查看某使用者的資料 GET /api/users/:id
-
+router.get('/users/:id', authenticator, userController.getUser) // No.3 - 查看某使用者的資料
 router.get('/users/:id/tweets', authenticator, userController.getUserTweets) // No.4 - 查看某使用者發過的推文
-// router.get('/api/users/:id/replied_tweets', authenticator, userController.getUserReplies) // No.5 - 查看某使用者發過的回覆
-// router.get('/api/users/:id/likes', authenticator, userController.getUserLikes) // No.6 - 查看某使用者點過like的推文
+router.get('/users/:id/replied_tweets', authenticator, userController.getUserReplies) // No.5 - 查看某使用者發過的回覆
+router.get('/users/:id/likes', authenticator, userController.getUserLikes) // No.6 - 查看某使用者點過like的推文
+router.get('/users', authenticator, userController.getUsers) // No.9 - 查看跟隨者數量排名(前10)的使用者資料
 
 router.use('/tweets', authenticator, tweets)
 
