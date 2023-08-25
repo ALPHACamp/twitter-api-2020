@@ -51,8 +51,10 @@ const userController = {
         email: req.body.email,
         password: hash,
         role: 'user',
-        avatar: 'https://i.imgur.com/q6bwDGO.png',
-        cover: 'https://i.imgur.com/1jDf2Me.png'
+        avatar: 'https://i.imgur.com/PiJ0HXw.png',
+        cover: 'https://i.imgur.com/xZoHPfC.png',
+        createdAt: new Date(),
+        updatedAt: new Date()
       })
 
       // 回傳訊息

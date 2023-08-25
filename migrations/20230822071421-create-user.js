@@ -22,10 +22,12 @@ module.exports = {
         type: Sequelize.STRING
       },
       avatar: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'https://i.imgur.com/PiJ0HXw.png'
       },
       cover: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'https://i.imgur.com/xZoHPfC.png'
       },
       role: {
         type: Sequelize.STRING,
