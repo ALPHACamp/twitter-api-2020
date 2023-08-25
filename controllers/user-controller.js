@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { Op } = require('sequelize')
 const { User, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-handler')
 const helpers = require('../_helpers')
@@ -158,6 +159,27 @@ const userController = {
           f.Follower.isFollowed = followingsId.some(id => id === f.Follower.id)
           return f
         })
+        return res.json(data)
+      })
+      .catch(err => next(err))
+  },
+  getTopUser: (req, res, next) => {
+    const followingsId = helpers.getUser(req).Followings.map(f => f.id)
+    User.findAll({
+      where: { id: { [Op.ne]: helpers.getUser(req).id } },
+      attributes: { exclude: 'password' },
+      include: { model: User, as: 'Followers' }
+    })
+      .then(users => {
+        const data = users.map(user => {
+          user = user.toJSON()
+          user.followersCount = user.Followers.length
+          user.isFollowed = followingsId.some(id => id === user.id)
+          delete user.Followers
+          return user
+        })
+          .sort((a, b) => b.followersCount - a.followersCount)
+          .slice(0, 10)
         return res.json(data)
       })
       .catch(err => next(err))

@@ -4,6 +4,8 @@ const upload = require('../../middleware/multer')
 
 const userController = require('../../controllers/user-controller')
 
+router.get('/top', userController.getTopUser)
+
 router.get('/:id/followings', userController.getFollowings)
 
 router.get('/:id/followers', userController.getFollowers)
