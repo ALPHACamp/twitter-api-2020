@@ -62,7 +62,6 @@ const tweetController = {
       const userId = helpers.getUser(req).id
       const [tweet, likes] = await Promise.all([
         Tweet.findByPk(req.params.id, {
-          order: [['createdAt', 'desc']],
           include: [{
             model: User,
             attributes: ['account', 'name', 'avatar']
