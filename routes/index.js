@@ -65,17 +65,18 @@ router.post(
   authenticatedUser,
   tweetController.unlikeTweet
 )
-router.post(
-  '/api/tweets/:tweet_id',
-  authenticated,
-  authenticatedUser,
-  tweetController.createTweet
-)
+
 router.get(
   '/api/tweets/:tweet_id',
   authenticated,
   authenticatedUser,
   tweetController.getTweet
+)
+router.post(
+  '/api/tweets',
+  authenticated,
+  authenticatedUser,
+  tweetController.createTweet
 )
 router.get(
   '/api/tweets',

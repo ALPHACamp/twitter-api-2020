@@ -1,6 +1,6 @@
 const passport = require('passport')
 const db = require('../models')
-const { User, Tweet, Reply, Followship } = db
+const { User } = db
 const passportJWT = require('passport-jwt')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
