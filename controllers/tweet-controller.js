@@ -117,6 +117,59 @@ const tweetController = {
     } catch (err) {
       return next(err)
     }
+  },
+  addLike: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(req.params.id),
+        Like.findOne({
+          where: {
+            UserId: helpers.getUser(req).id,
+            TweetId: tweetId
+          }
+        })
+      ])
+      if (!tweet) throw new Error('推文已不存在')
+      if (like) throw new Error('你已經按讚過此推文')
+      const liked = await Like.create({
+        UserId: helpers.getUser(req).id,
+        TweetId: tweetId
+      })
+      return res.status(200).json(liked)
+    } catch (err) {
+      return next(err)
+    }
+  },
+  removeLike: async (req, res, next) => {
+    try {
+      const like = await Like.findOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.id
+        }
+      })
+
+      if (!like) throw new Error('你尚未按讚此推文')
+      const unlike = await like.destroy()
+      return res.status(200).json(unlike)
+    } catch (err) {
+      return next(err)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      
+    } catch (err) {
+      return next(err)
+    }
+  },
+  postReply: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+    } catch (err) {
+      return next(err)
+    }
   }
 }
 
