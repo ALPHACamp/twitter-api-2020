@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
+const { relativeTimeFormat } = require('../helpers/day-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
@@ -231,12 +232,18 @@ const userServices = {
             sequelize.literal('(SELECT account FROM Users WHERE Users.id IN (SELECT UserId FROM Tweets WHERE Tweets.id = tweetId))'),
             'tweeterAccount'
           ],
-          'comment'
+          'comment',
+          'createdAt'
         ],
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
-      cb(null, replies)
+      const repliesData = replies.map(reply => ({
+        ...reply,
+        createdAt: relativeTimeFormat(reply.createdAt)
+      }))
+      cb(null, repliesData)
     } catch (err) {
       cb(err)
     }
