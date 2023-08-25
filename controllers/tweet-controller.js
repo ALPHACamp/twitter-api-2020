@@ -1,5 +1,15 @@
 const { Tweet, User, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
+const dayjs = require('dayjs')
+const utc = require('dayjs/plugin/utc') // 引入世界時間插件
+const timezone = require('dayjs/plugin/timezone') // // 引入時區插件
+const relativeTime = require('dayjs/plugin/relativeTime') // 引入相對時間差
+const zhTw = require('dayjs/locale/zh-tw') // 引入繁中
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(relativeTime)
+dayjs.locale(zhTw) // 設置本地為繁中
 
 const tweetController = {
   // 瀏覽所有推文
@@ -36,6 +46,9 @@ const tweetController = {
       ])
       const result = tweets.map(tweet => ({
         ...tweet,
+        updatedAt: dayjs(tweet.updatedAt)
+          .tz('Asia/Taipei')
+          .fromNow(),
         isLiked: likes.some(like => like.TweetId === tweet.id) // 若Like model中，登入者id = 推文id，代表登入者有點讚，回傳ture，反之false
       }))
       return res.status(200).json(result)
@@ -49,7 +62,6 @@ const tweetController = {
       const userId = helpers.getUser(req).id
       const [tweet, likes] = await Promise.all([
         Tweet.findByPk(req.params.id, {
-          order: [['createdAt', 'desc']],
           include: [{
             model: User,
             attributes: ['account', 'name', 'avatar']
@@ -75,6 +87,12 @@ const tweetController = {
       ])
       const tweetData = tweet.toJSON()
       tweetData.isLiked = likes.some(like => like.TweetId === tweet.id)
+      tweetData.createdAt = dayjs(tweetData.createdAt)
+        .tz('Asia/Taipei')
+        .format('A h:mm ‧ YYYY年M月D日')
+        .replace('AM', '上午')
+        .replace('PM', '下午')
+
       return res.status(200).json(tweetData)
     } catch (err) {
       return next(err)
