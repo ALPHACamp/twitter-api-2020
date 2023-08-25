@@ -26,7 +26,7 @@ const followshipController = require('../../controllers/followship-controller')
 // router.post('/tweets/:id/unlike', tweetController)
 // router.get('/tweets/:id', tweetController)
 // router.post('/tweets', tweetController)
-// router.get('/tweets', tweetController)
+router.get('/tweets', tweetController.getTweets)
 
 // router.post('/followships', followshipController)
 // router.delete('/followships/:followingId', followshipController)
