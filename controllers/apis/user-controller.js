@@ -11,19 +11,16 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
 
-      if (!account || !name || !email || !password || !checkPassword) throw new Error('all the blanks are required')
+      if (!account || !name || !email || !password || !checkPassword) {
+        throw new Error('all the blanks are required')
+      }
 
       // 檢查帳號是否重複
-      const user = await User.findOne(
-        {
-          where: {
-            [Op.or]: [
-              { email },
-              { account }
-            ]
-          }
+      const user = await User.findOne({
+        where: {
+          [Op.or]: [{ email }, { account }]
         }
-      )
+      })
 
       if (user) {
         if (user.account === account) throw new Error('account 已重複註冊！')
@@ -54,18 +51,24 @@ const userController = {
   signIn: async (req, res, next) => {
     try {
       const { account, password } = req.body
-      if (!account || !password) throw new Error('Please enter account and password')
+      if (!account || !password) {
+        throw new Error('Please enter account and password')
+      }
 
       const user = await User.findOne({ where: { account } })
       if (!user) throw new Error('User does not exist')
       if (user.role === 'admin') throw new Error('admin permission denied')
-      if (!bcrypt.compareSync(password, user.password)) throw new Error('Incorrect password')
+      if (!bcrypt.compareSync(password, user.password)) {
+        throw new Error('Incorrect password')
+      }
       const payload = {
         id: user.id,
         account: user.account,
         role: user.role
       }
-      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: '30d'
+      })
       const userData = user.toJSON()
 
       res.json({
@@ -85,20 +88,25 @@ const userController = {
       const currentUserId = getUser(req).dataValues.id
       console.log(currentUserId)
 
-      const [user, tweetCount, followerCount, followingCount] = await Promise.all([
-        User.findByPk(id, { raw: true, nest: true }),
-        Tweet.count({
-          where: { UserId: id }
-        }),
-        Followship.count({
-          where: { followerId: id }
-        }),
-        Followship.count({
-          where: { followingId: id }
-        })
-      ])
+      const [user, tweetCount, followerCount, followingCount] =
+        await Promise.all([
+          User.findByPk(id, { raw: true, nest: true }),
+          Tweet.count({
+            where: { UserId: id }
+          }),
+          Followship.count({
+            where: { followerId: id }
+          }),
+          Followship.count({
+            where: { followingId: id }
+          })
+        ])
 
-      if (!user) return res.status(401).json({ status: 'error', message: 'This user does not exist' })
+      if (!user) {
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'This user does not exist' })
+      }
 
       delete user.password
       user.tweetCount = tweetCount
@@ -110,9 +118,10 @@ const userController = {
           where: { followerId: currentUserId },
           raw: true
         })
-        user.isFollowed = checkUserFollowing.some(follow => follow.followingId === Number(id))
+        user.isFollowed = checkUserFollowing.some(
+          follow => follow.followingId === Number(id)
+        )
       }
-
       res.status(200).json(user)
     } catch (err) {
       next(err)
@@ -127,17 +136,23 @@ const userController = {
         Reply.findAll({
           where: { UserId: userId },
           include: [
-            { model: User, as: 'replier', attributes: { exclude: ['password'] } },
+            {
+              model: User,
+              as: 'replier',
+              attributes: { exclude: ['password'] }
+            },
             {
               model: Tweet,
               as: 'tweetreply',
-              include: [{ model: User, as: 'author', attributes: ['account', 'name'] }]
+              include: [
+                { model: User, as: 'author', attributes: ['account', 'name'] }
+              ]
             }
           ],
           order: [['createdAt', 'DESC']],
           nest: true
-        }
-        )])
+        })
+      ])
 
       console.log(user, replies)
       const userRepliesResult = replies.map(reply => ({

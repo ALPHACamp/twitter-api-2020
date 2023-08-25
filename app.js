@@ -3,9 +3,7 @@ if (process.NODE_ENV !== 'production') {
 }
 // require('dotenv').config()
 const express = require('express')
-const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
-const session = require('express-session')
 const routes = require('./routes')
 const passport = require('./config/passport')
 
