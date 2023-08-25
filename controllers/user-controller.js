@@ -100,7 +100,8 @@ const userController = {
           { model: User, attributes: { exclude: ['password'] } },
           Like,
           Reply
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, tweets]) => {
@@ -135,6 +136,7 @@ const userController = {
         include: [
           { model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }] }
         ],
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
@@ -167,7 +169,8 @@ const userController = {
             Like,
             Reply
           ]
-        }]
+        }],
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([currentUser, specificUser, likes]) => {
