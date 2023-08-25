@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { relativeTimeFormat } = require('../helpers/day-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
@@ -293,6 +293,41 @@ const userServices = {
         createdAt: relativeTimeFormat(like.createdAt)
       }))
       cb(null, likesData)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getUserFollowings: async (req, cb) => { // 用戶關注的人
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+      if (!user) {
+        const err = new Error('使用者不存在')
+        err.status = 404
+        throw err
+      }
+      const followings = await Followship.findAll({
+        where: { followerId: id },
+        attributes: [
+          'followingId',
+          [
+            sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.followingId)'),
+            'followingName'
+          ],
+          [
+            sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.followingId)'),
+            'followingIntroduction'
+          ],
+          [
+            sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.followingId)'),
+            'followingAvatar'
+          ]
+        ],
+        raw: true,
+        nest: true
+      })
+      console.log(followings)
+      cb(null, followings)
     } catch (err) {
       cb(err)
     }
