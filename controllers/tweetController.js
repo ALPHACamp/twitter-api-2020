@@ -3,6 +3,7 @@
 const helpers = require('../_helpers')
 const { User, Tweet, Reply, Like } = require('../models')
 const { Op } = require('sequelize')
+const sequelize = require('sequelize')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -108,6 +109,55 @@ const tweetController = {
         replyCount,
         likeCount,
         isLiked: false
+      }
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.tweet_id, ({
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id )'), 'likeCount']
+          ]
+        },
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          },
+          {
+            model: Reply
+          },
+          {
+            model: Like,
+            attributes: ['UserId']
+          }
+        ],
+        order: [[Tweet.associations.Replies, 'createdAt', 'DESC']],
+        nest: true
+      })
+      )
+      if (!tweet) return res.status(404).json({ status: 'error', message: '推文不存在' })
+
+      const { id, description, createdAt, replyCount, likeCount, Replies } = tweet
+      const currentUserLikes = tweet.Likes.map(l => l.TweetId)
+      const data = {
+        TweetId: id,
+        description,
+        tweetOwnerId: tweet.User.id,
+        tweetOwnerName: tweet.User.name,
+        tweetOwnerAccount: tweet.User.account,
+        tweetOwnerAvatar: tweet.User.avatar,
+        createdAt,
+        replyCount,
+        likeCount,
+        isLiked: currentUserLikes.includes(tweet.id),
+        Replies
       }
       return res.status(200).json(data)
     } catch (err) {
