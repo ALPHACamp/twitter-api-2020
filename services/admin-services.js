@@ -7,14 +7,14 @@ const { User, Tweet, Reply } = require('../models')
 const adminServices = {
   signIn: async (req, cb) => {
     try {
-      const { email, password } = req.body
-      if (!email || !password) {
+      const { account, password } = req.body
+      if (!account || !password) {
         const err = new Error('請輸入帳號密碼')
         err.status = 403
         throw err
       }
-      const user = await User.findOne({ where: { email } })
-      if (!email) {
+      const user = await User.findOne({ where: { account } })
+      if (!user) {
         const err = new Error('帳號密碼輸入錯誤')
         err.status = 403
         throw err
