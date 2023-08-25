@@ -1,5 +1,8 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+// const { imgurFileHandler } = require('../../helpers/file-helpers')
+// const imgur = require('imgur')
+
 const db = require('../../models')
 const { getUser } = require('../../_helpers')
 
@@ -85,8 +88,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const { id } = req.params
-      const currentUserId = getUser(req).dataValues.id
-      console.log(currentUserId)
+      const currentUserId = getUser(req).id
 
       const [user, tweetCount, followerCount, followingCount] =
         await Promise.all([
@@ -173,6 +175,57 @@ const userController = {
       res.status(200).json(userRepliesResult)
     } catch (err) {
       console.error(err)
+      next(err)
+    }
+  },
+  updateUser: async (req, res, next) => {
+    try {
+      const currentUserId = getUser(req).id
+      if (currentUserId.toString() !== req.params.id) {
+        throw new Error('Cannot edit other users profile')
+      }
+
+      const { account, name, email, password, introduction } = req.body
+      // const files = req.files || ''
+      if (name && name.length > 50) throw new Error('the length of name should less than 50 characters')
+      if (introduction && introduction.length > 160) { throw new Error('the length of introduction should less than 160 characters') }
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'This user does not exist' })
+      }
+
+      if (account) {
+        if (user.account === account) throw new Error('account 已重複註冊!')
+        if (user.email === email) throw new Error('email 已重複註冊!')
+      }
+
+      // const avatar = user.avatar || ''
+      // const cover = user.cover || ''
+
+      // if (files.avatar) {
+      //   const avatarBuffer = req.files.avatar[0].buffer
+      //   const avatarUrl = await uploadToImgur(avatarBuffer)
+      //   avatar = avatarUrl
+      // }
+
+      // if (files.cover) {
+      //   const coverBuffer = req.files.cover[0].buffer
+      //   const coverUrl = await uploadToImgur(coverBuffer)
+      //   cover = coverUrl
+      // }
+
+      await user.update({
+        name: name || user.name,
+        email: email || user.email,
+        account: account || user.account,
+        // password: password ? bcrypt.hashSync(password, 10) : user.password,
+        introduction: introduction || user.introduction
+        // avatar: ,
+        // cover:
+      })
+    } catch (err) {
       next(err)
     }
   }
