@@ -69,7 +69,7 @@ const tweetContorller = {
       ])
       if (!tweet) throw new Error("Tweet didn't exist!")
       if (!like) throw new Error("You haven't liked this tweet!")
-      const unlike = await Like.destroy({
+      await Like.destroy({
         where: {
           userId,
           tweetId
@@ -197,7 +197,7 @@ const tweetContorller = {
           ]
         })
       ])
-      console.log(likes)
+      // console.log(likes)
       if (!tweet) throw new Error("Tweet didn't exist!")
       if (!likes) throw new Error('NO ONE liked this tweet!')
       const likedData = likes.map(like => ({

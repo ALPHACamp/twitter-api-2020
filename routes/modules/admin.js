@@ -3,11 +3,7 @@ const router = express.Router()
 const adminController = require('../../controllers/apis/admin-controller')
 const passport = require('passport')
 
-router.post(
-  '/login',
-  passport.authenticate('jwt', { session: false }),
-  adminController.signIn
-)
+router.post('/login', passport.authenticate('jwt', { session: false }), adminController.signIn)
 
 router.get('/users', adminController.getUsers)
 router.delete('/tweets/:id', adminController.deleteTweet)
