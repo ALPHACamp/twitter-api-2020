@@ -163,6 +163,72 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+
+  getReplies: async (req, res, next) => {
+    try {
+      const { tweet_id: tweetId } = req.params
+      const tweet = await Tweet.findByPk(tweetId, {
+        attributes: ['id', 'description', 'createdAt'],
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'name', 'account']
+          }
+        ],
+        raw: true,
+        nest: true
+      })
+
+      if (!tweet) {
+        return res.status(404).json({ status: 'error', message: '推文不存在' })
+      }
+
+      const replies = await Reply.findAll({
+        attributes: [
+          'id',
+          'comment',
+          'createdAt',
+          [sequelize.col('User.id'), 'userId'],
+          [sequelize.col('User.name'), 'name'],
+          [sequelize.col('User.account'), 'account'],
+          [sequelize.col('User.avatar'), 'avatar']
+        ],
+        include: [
+          {
+            model: User,
+            attributes: []
+          }
+        ],
+        where: { TweetId: tweetId },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+
+      if (!replies) {
+        return res
+          .status(200)
+          .json({ status: 'success', message: '無回覆內容' })
+      }
+
+      const data = replies.map(reply => ({
+        replyId: reply.id,
+        comment: reply.comment,
+        replyOwnerId: reply.userId,
+        replyOwnerName: reply.name,
+        replyOwnerAccount: reply.account,
+        replyOwnerAvatar: reply.avatar,
+        createdAt: reply.createdAt,
+        tweetOwnerId: tweet.User.id,
+        tweetOwnerName: tweet.User.name,
+        tweetOwnerAccount: tweet.User.account
+      }))
+
+      return res.status(200).json(data)
+    } catch (err) {
+      return next(err)
+    }
   }
 }
 
