@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { getUser } = require('../_helpers')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const sequelize = require('sequelize')
 
 const adminController = {
@@ -46,6 +46,30 @@ const adminController = {
       })
 
       res.status(200).json(users)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatar']
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      // 擷取推文訊息50字
+      const data = tweets.map(tweet => ({
+        ...tweet,
+        description: tweet.description.substring(0, 50)
+      }))
+
+      res.status(200).json(data)
     } catch (err) {
       next(err)
     }
