@@ -6,11 +6,13 @@ const passport = require('../config/passport')
 // const admin = require('./modules/admin')
 const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 const userController = require('../controllers/user-controller')
+const adminController = require('../controllers/admin-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const tweet = require('./modules/tweet')
 
-
 // router.use('/admin', authenticated, authenticatedAdmin, admin)
+// admin
+router.post('/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn) // 管理者登入
 
 // users
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn) // 登入
