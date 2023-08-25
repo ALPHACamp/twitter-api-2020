@@ -221,15 +221,15 @@ const userServices = {
           'userId',
           'tweetId',
           [
-            sequelize.literal('(SELECT name FROM Users WHERE Users.id = userId)'),
+            sequelize.literal('(SELECT name FROM Users WHERE Users.id = Reply.userId)'),
             'respondentName'
           ],
           [
-            sequelize.literal('(SELECT account FROM Users WHERE Users.id = userId)'),
+            sequelize.literal('(SELECT account FROM Users WHERE Users.id = Reply.userId)'),
             'respondentAccount'
           ],
           [
-            sequelize.literal('(SELECT account FROM Users WHERE Users.id IN (SELECT UserId FROM Tweets WHERE Tweets.id = tweetId))'),
+            sequelize.literal('(SELECT account FROM Users WHERE Users.id IN (SELECT UserId FROM Tweets WHERE Tweets.id = Reply.tweetId))'),
             'tweeterAccount'
           ],
           'comment',
