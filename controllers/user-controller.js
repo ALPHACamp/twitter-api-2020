@@ -121,17 +121,44 @@ const userController = {
         }
         return Followship.findAll({
           where: { followerId: req.params.id },
-          include: { model: User, attributes: { exclude: 'password' } },
+          include: { model: User, as: 'Following', attributes: { exclude: 'password' } },
+          order: [['createdAt', 'DESC']],
           nest: true,
           raw: true
         })
       })
       .then(followships => {
         const data = followships.map(f => {
-          f.User.isFollowed = followingsId.some(id => id === f.User.id)
+          f.Following.isFollowed = followingsId.some(id => id === f.Following.id)
           return f
         })
-        res.json(data)
+        return res.json(data)
+      })
+      .catch(err => next(err))
+  },
+  getFollowers: (req, res, next) => {
+    const followingsId = helpers.getUser(req).Followings.map(f => f.id)
+    User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) {
+          const err = new Error('使用者不存在！')
+          err.status = 404
+          throw err
+        }
+        return Followship.findAll({
+          where: { followingId: req.params.id },
+          include: { model: User, as: 'Follower', attributes: { exclude: 'password' } },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      })
+      .then(followships => {
+        const data = followships.map(f => {
+          f.Follower.isFollowed = followingsId.some(id => id === f.Follower.id)
+          return f
+        })
+        return res.json(data)
       })
       .catch(err => next(err))
   }
