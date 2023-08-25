@@ -47,7 +47,7 @@ const tweetContorller = {
       res.json({
         status: "success",
         data: createdLike,
-        Boolean: true,
+        isLiked: true,
       });
     } catch (err) {
       next(err);
@@ -77,8 +77,7 @@ const tweetContorller = {
       });
       res.json({
         status: "success",
-        data: unlike,
-        Boolean: false,
+        isLiked: false,
       });
     } catch (err) {
       next(err);
@@ -148,11 +147,7 @@ const tweetContorller = {
         tweetBelongerName: reply.tweetreply.author.name,
         tweetBelongerAccount: reply.tweetreply.author.account,
       }));
-      // console.log(repliesData);
-      // res.json({
-      //   status: "success",
-      //   data: repliesData,
-      // });
+
       res.status(200).json(repliesData);
     } catch (err) {
       next(err);
@@ -185,7 +180,6 @@ const tweetContorller = {
   },
   getLikes: async (req, res, next) => {
     try {
-      // const getUser = helpers.getUser(req);
       const tweetId = req.params.tweet_id;
       const [tweet, likes] = await Promise.all([
         Tweet.findByPk(tweetId),
@@ -206,7 +200,7 @@ const tweetContorller = {
       console.log(likes);
       if (!tweet) throw new Error("Tweet didn't exist!");
       if (!likes) throw new Error("NO ONE liked this tweet!");
-      const dataLike = likes.map((like) => ({
+      const likedData = likes.map((like) => ({
         likedId: like.id,
         likedTweetId: like.tweetId,
         likedUserId: like.User.id,
@@ -217,7 +211,7 @@ const tweetContorller = {
       res.json({
         status: "success",
         message: "successfully get all the liked users",
-        dataLike,
+        likedData,
       });
     } catch (err) {
       next(err);
