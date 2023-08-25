@@ -19,6 +19,7 @@ router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userContro
 router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserRepliedTweets)
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 router.put('/api/users/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), authenticated, authenticatedUser, userController.putUser)
+router.get('/api/users/:id/likes', authenticated, authenticatedUser, userController.getUserLikedTweets)
 router.post('/api/users', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), userController.signUp)
 
 // 推文
