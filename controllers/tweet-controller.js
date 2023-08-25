@@ -103,6 +103,7 @@ const tweetController = {
     try {
       const userId = helpers.getUser(req).id
       const { description } = req.body
+
       if (!description) {
         throw new Error('內容不可空白')
       } else if (description.length > 140) {
@@ -130,8 +131,10 @@ const tweetController = {
           }
         })
       ])
+
       if (!tweet) throw new Error('推文已不存在')
       if (like) throw new Error('你已經按讚過此推文')
+
       const liked = await Like.create({
         UserId: helpers.getUser(req).id,
         TweetId: tweetId
@@ -168,6 +171,7 @@ const tweetController = {
         raw: true,
         nest: true
       })
+
       if (!replies) throw new Error('目前沒有任何回覆')
       return res.status(200).json(replies)
     } catch (err) {
@@ -176,7 +180,16 @@ const tweetController = {
   },
   postReply: async (req, res, next) => {
     try {
-      
+      const { comment } = req.body
+      const newReply = await Reply.create({
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.id,
+        comment
+      })
+
+      if (!comment) throw new Error('內容不可空白')
+
+      return res.status(200).json(newReply)
     } catch (err) {
       return next(err)
     }
