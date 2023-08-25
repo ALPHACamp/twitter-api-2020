@@ -227,14 +227,19 @@ const userController = {
 
       // --資料整理--
       likes = likes.map(reply => reply.toJSON())
-      likes = likes.map(reply => ({ // 追加兩個屬性fromNow & isLiked
-        ...reply,
-        Tweet: {
-          ...reply.Tweet,
-          fromNow: dayjs(reply.Tweet.createdAt).fromNow(),
-          isLiked: true
-        }
+      likes = likes.map(reply => ({ // 拆掉最外層結構，並追加兩個屬性fromNow & isLiked
+        ...reply.Tweet,
+        fromNow: dayjs(reply.Tweet.createdAt).fromNow(),
+        isLiked: true
       }))
+      // likes = likes.map(reply => ({
+      //   ...reply,
+      //   Tweet: {
+      //     ...reply.Tweet,
+      //     fromNow: dayjs(reply.Tweet.createdAt).fromNow(),
+      //     isLiked: true
+      //   }
+      // }))
 
       return res.status(200).json(likes)
     } catch (err) {
