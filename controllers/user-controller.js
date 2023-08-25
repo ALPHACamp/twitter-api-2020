@@ -9,7 +9,7 @@ dayjs.locale('zh-tw') // 默認使用繁中
 
 const helpers = require('../_helpers')
 const { Op } = require('sequelize')
-const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 
 const userController = {
   // No.1 - 註冊帳號 POST /api/users
@@ -151,12 +151,13 @@ const userController = {
       })
 
       // --資料整理--
-      tweets = tweets.map(tweet => tweet.toJSON())
-      tweets = tweets.map(tweet => ({
-        ...tweet,
-        isLiked: Boolean(tweet.isLiked),
-        fromNow: dayjs(tweet.createdAt).fromNow()
-      }))
+      tweets = tweets
+        .map(tweet => tweet.toJSON())
+        .map(tweet => ({
+          ...tweet,
+          isLiked: Boolean(tweet.isLiked),
+          fromNow: dayjs(tweet.createdAt).fromNow()
+        }))
 
       return res.status(200).json(tweets)
     } catch (err) {
@@ -187,11 +188,12 @@ const userController = {
       })
 
       // --資料整理--
-      replies = replies.map(reply => reply.toJSON())
-      replies = replies.map(reply => ({
-        ...reply,
-        fromNow: dayjs(reply.createdAt).fromNow()
-      }))
+      replies = replies
+        .map(reply => reply.toJSON())
+        .map(reply => ({
+          ...reply,
+          fromNow: dayjs(reply.createdAt).fromNow()
+        }))
 
       return res.status(200).json(replies)
     } catch (err) {
@@ -202,6 +204,7 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const UserId = req.params.id
+      const currentUserId = helpers.getUser(req).id
 
       // --資料提取--
       let likes = await Like.findAll({
@@ -221,6 +224,9 @@ const userController = {
             ], [
               sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id)'),
               'likesNum' // 被喜歡的總數
+            ], [
+              sequelize.literal(`(SELECT EXISTS(SELECT * FROM Likes WHERE TweetId = Tweet.id AND UserId = ${currentUserId}))`),
+              'isLiked' // 目前的使用者是否追蹤
             ]]
           }
         }],
@@ -228,13 +234,13 @@ const userController = {
       })
 
       // --資料整理--
-      likes = likes.map(reply => reply.toJSON())
-      likes = likes.map(reply => ({ // 拆掉最外層結構，並追加兩個屬性fromNow & isLiked
-        ...reply.Tweet,
-        TweetId: reply.TweetId, // 多做一個屬性應付測試檔檢查
-        fromNow: dayjs(reply.Tweet.createdAt).fromNow(),
-        isLiked: true
-      }))
+      likes = likes
+        .map(reply => reply.toJSON())
+        .map(reply => ({ // 拆掉最外層結構，並追加屬性fromNow
+          ...reply.Tweet,
+          TweetId: reply.TweetId, // 多做一個屬性應付測試檔檢查
+          fromNow: dayjs(reply.Tweet.createdAt).fromNow()
+        }))
       // likes = likes.map(reply => ({
       //   ...reply,
       //   Tweet: {
@@ -249,11 +255,83 @@ const userController = {
       return next(err)
     }
   },
+  // No.7 - 查看某使用者追蹤中的人 GET /api/users/:id/followings
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+      const currentUserId = helpers.getUser(req).id
+
+      // --資料提取--
+      let followings = await Followship.findAll({
+        where: { followerId: UserId },
+        order: [['createdAt', 'DESC']],
+        include: [{
+          model: User,
+          as: 'Following',
+          attributes: {
+            exclude: ['password'],
+            include: [[
+              sequelize.literal(`(SELECT EXISTS(SELECT * FROM Followships WHERE FollowingId = Following.id and FollowerId = ${currentUserId}))`),
+              'isFollowed' // 目前的使用者是否追蹤
+            ]]
+          }
+        }],
+        nest: true
+      })
+
+      // --資料整理--
+      followings = followings
+        .map(reply => reply.toJSON())
+        .map(reply => ({ // 拆掉最外層結構
+          ...reply.Following
+        }))
+
+      return res.status(200).json(followings)
+    } catch (err) {
+      return next(err)
+    }
+  },
+  // No.8 - 查看某使用者的追隨者 GET /api/users/:id/followers
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+      // const currentUserId = helpers.getUser(req).id
+      const currentUserId = 6
+
+      // --資料提取--
+      let followers = await Followship.findAll({
+        where: { followingId: UserId },
+        order: [['createdAt', 'DESC']],
+        include: [{
+          model: User,
+          as: 'Follower',
+          attributes: {
+            exclude: ['password'],
+            include: [[
+              sequelize.literal(`(SELECT EXISTS(SELECT * FROM Followships WHERE FollowingId = Follower.id and FollowerId = ${currentUserId}))`),
+              'isFollowed' // 目前的使用者是否追蹤
+            ]]
+          }
+        }],
+        nest: true
+      })
+
+      // --資料整理--
+      followers = followers
+        .map(reply => reply.toJSON())
+        .map(reply => ({ // 拆掉最外層結構
+          ...reply.Follower
+        }))
+
+      return res.status(200).json(followers)
+    } catch (err) {
+      return next(err)
+    }
+  },
   // No.9 - GET /api/users? {limit=10} 查看跟隨者數量排名(前10)的使用者資料
   getUsers: async (req, res, next) => {
     try {
       const limit = Number(req.query.limit) || 10 // 若使用者未指定，預設為10筆
-      console.log(helpers.getUser(req))
       const currentUserId = helpers.getUser(req).id
 
       // --資料提取--
@@ -263,10 +341,10 @@ const userController = {
           exclude: ['password'],
           include: [[
             sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'),
-            'followerNum'
+            'followerNum' // 追隨者總數
           ], [
             sequelize.literal(`(SELECT EXISTS(SELECT * FROM Followships WHERE FollowingId = User.id and FollowerId = ${currentUserId}))`),
-            'isFollowed'
+            'isFollowed' // 目前使用者是否追蹤
           ]]
         },
         limit,
@@ -275,6 +353,20 @@ const userController = {
       })
 
       return res.status(200).json(users)
+    } catch (err) {
+      return next(err)
+    }
+  },
+  // No.10 - 編輯使用者資料 PUT /api/users/:id
+  putUser: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+
+      // --資料提取--
+
+      // --資料整理--
+
+      return res.status(200).json()
     } catch (err) {
       return next(err)
     }
