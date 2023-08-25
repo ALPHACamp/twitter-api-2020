@@ -326,8 +326,41 @@ const userServices = {
         raw: true,
         nest: true
       })
-      console.log(followings)
       cb(null, followings)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getUserFollowers: async (req, cb) => { // 用戶的粉絲
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+      if (!user) {
+        const err = new Error('使用者不存在')
+        err.status = 404
+        throw err
+      }
+      const followers = await Followship.findAll({
+        where: { followingId: id },
+        attributes: [
+          'followerId',
+          [
+            sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.followerId)'),
+            'followerName'
+          ],
+          [
+            sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.followerId)'),
+            'followerIntroduction'
+          ],
+          [
+            sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.followerId)'),
+            'followerAvatar'
+          ]
+        ],
+        raw: true,
+        nest: true
+      })
+      cb(null, followers)
     } catch (err) {
       cb(err)
     }
