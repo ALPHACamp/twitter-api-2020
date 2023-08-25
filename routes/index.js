@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 
+const tweets = require('./modules/tweets')
+
 const passport = require('../config/passport')
 const apiErrorHandler = require('../middleware/error-handler')
 const { authenticator, authenticatorAdmin } = require('../middleware/api-auth')
@@ -16,6 +18,8 @@ router.get('/users/:id/tweets', authenticator, userController.getUserTweets) // 
 router.get('/users/:id/replied_tweets', authenticator, userController.getUserReplies) // No.5 - 查看某使用者發過的回覆
 router.get('/users/:id/likes', authenticator, userController.getUserLikes) // No.6 - 查看某使用者點過like的推文
 router.get('/users', authenticator, userController.getUsers) // No.9 - 查看跟隨者數量排名(前10)的使用者資料
+
+router.use('/tweets', authenticator, tweets)
 
 router.use('/', (req, res) => res.status(500).json({ success: false, message: 'no such api' })) // fallback路由
 router.use('/', apiErrorHandler) // 錯誤處理
