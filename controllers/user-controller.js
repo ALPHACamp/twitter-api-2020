@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-handler')
 const helpers = require('../_helpers')
 
@@ -109,6 +109,31 @@ const userController = {
     } catch (err) {
       return next(err)
     }
+  },
+  getFollowings: (req, res, next) => {
+    const followingsId = helpers.getUser(req).Followings.map(fs => fs.id)
+    User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) {
+          const err = new Error('使用者不存在！')
+          err.status = 404
+          throw err
+        }
+        return Followship.findAll({
+          where: { followerId: req.params.id },
+          include: { model: User, attributes: { exclude: 'password' } },
+          nest: true,
+          raw: true
+        })
+      })
+      .then(followships => {
+        const data = followships.map(f => {
+          f.User.isFollowed = followingsId.some(id => id === f.User.id)
+          return f
+        })
+        res.json(data)
+      })
+      .catch(err => next(err))
   }
 }
 
