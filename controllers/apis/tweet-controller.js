@@ -88,6 +88,30 @@ const tweetContorller = {
     } catch (err) {
       next(err)
     }
+  },
+  createTweet: async (req, res, next) => {
+    try {
+    } catch (err) {
+      next(err)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+    } catch (err) {
+      next(err)
+    }
+  },
+  createReply: async (req, res, next) => {
+    try {
+    } catch (err) {
+      next(err)
+    }
+  },
+  getLikes: async (req, res, next) => {
+    try {
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
