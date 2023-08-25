@@ -8,5 +8,5 @@ const { isUser, isAuthUser } = require('../../middleware/role-check')
 
 router.get('/', authenticated, tweetController.getTweets)
 router.post('/', authenticated, isUser, isAuthUser, tweetController.postTweet)
-
+router.get('/:tweet_id', authenticated, isUser, tweetController.getTweet)
 module.exports = router
