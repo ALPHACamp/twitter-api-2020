@@ -6,14 +6,16 @@ const express = require('express')
 const helpers = require('./_helpers')
 const routes = require('./routes')
 
-
 const app = express()
 const port = process.env.PORT || 3000
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-
+app.use((req, res, next) => {
+  res.locals.user = helpers.getUser(req)
+  next()
+})
 
 app.use(routes)
 
