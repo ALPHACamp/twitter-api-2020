@@ -231,6 +231,7 @@ const userController = {
       likes = likes.map(reply => reply.toJSON())
       likes = likes.map(reply => ({ // 拆掉最外層結構，並追加兩個屬性fromNow & isLiked
         ...reply.Tweet,
+        TweetId: reply.TweetId, // 多做一個屬性應付測試檔檢查
         fromNow: dayjs(reply.Tweet.createdAt).fromNow(),
         isLiked: true
       }))
