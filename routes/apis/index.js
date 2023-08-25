@@ -8,6 +8,7 @@ const followshipController = require('../../controllers/followship-controller')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 
+router.use('/admin/login', passport.authenticate('local', { session: false }), authenticatedAdmin, userController.login)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 // router.get('/users/:id/tweets', userController)
@@ -20,7 +21,7 @@ router.use('/admin', authenticated, authenticatedAdmin, admin)
 // router.put('/users/:id', userController)
 // router.get('/users/top', userController)
 router.post('/users', userController.signUp)
-router.post('/login', passport.authenticate('local', { session: false }), userController.login)
+router.post('/login', passport.authenticate('local', { session: false }), authenticatedUser, userController.login)
 
 // router.get('/tweets/:tweetId/replies', tweetController)
 // router.post('/tweets/:tweetId/replies', tweetController)
