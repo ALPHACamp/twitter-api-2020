@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
+const { relativeTimeFormat } = require('../helpers/day-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
@@ -220,23 +221,78 @@ const userServices = {
           'userId',
           'tweetId',
           [
-            sequelize.literal('(SELECT name FROM Users WHERE Users.id = userId)'),
+            sequelize.literal('(SELECT name FROM Users WHERE Users.id = Reply.userId)'),
             'respondentName'
           ],
           [
-            sequelize.literal('(SELECT account FROM Users WHERE Users.id = userId)'),
+            sequelize.literal('(SELECT account FROM Users WHERE Users.id = Reply.userId)'),
             'respondentAccount'
           ],
           [
-            sequelize.literal('(SELECT account FROM Users WHERE Users.id IN (SELECT UserId FROM Tweets WHERE Tweets.id = tweetId))'),
+            sequelize.literal('(SELECT account FROM Users WHERE Users.id IN (SELECT UserId FROM Tweets WHERE Tweets.id = Reply.tweetId))'),
             'tweeterAccount'
           ],
-          'comment'
+          'comment',
+          'createdAt'
         ],
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
-      cb(null, replies)
+      const repliesData = replies.map(reply => ({
+        ...reply,
+        createdAt: relativeTimeFormat(reply.createdAt)
+      }))
+      cb(null, repliesData)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getUserLikedTweets: async (req, cb) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id)
+      if (!user) {
+        const err = new Error('使用者不存在')
+        err.status = 404
+        throw err
+      }
+      const likes = await Like.findAll({
+        where: { UserId: user.id },
+        attributes: [
+          'UserId',
+          'TweetId',
+          [
+            sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweetId = Like.TweetId)'),
+            'repliesCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.TweetId = Like.TweetId)'),
+            'likeCount'
+          ],
+          [
+            sequelize.literal('(SELECT description FROM Tweets WHERE Tweets.id= Like.TweetId)'),
+            'description'
+          ],
+          [
+            sequelize.literal('(SELECT createdAt FROM Tweets WHERE Tweets.id= Like.TweetId)'),
+            'createdAt'
+          ]
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      if (likes.length === 0) {
+        const err = new Error('該名使用者沒有喜歡過任何推文')
+        err.status = 404
+        throw err
+      }
+      const likesData = likes.map(like => ({
+        ...like,
+        createdAt: relativeTimeFormat(like.createdAt)
+      }))
+      cb(null, likesData)
     } catch (err) {
       cb(err)
     }
