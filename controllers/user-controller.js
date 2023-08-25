@@ -2,11 +2,13 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
-dayjs.extend(relativeTime) // 外掛相對時間模組
 require('dayjs/locale/zh-tw')
+
+dayjs.extend(relativeTime) // 外掛相對時間模組
 dayjs.locale('zh-tw') // 默認使用繁中
 
 const helpers = require('../_helpers')
+const { Op } = require('sequelize')
 const { User, Tweet, Reply, Like, sequelize } = require('../models')
 
 const userController = {
@@ -101,6 +103,7 @@ const userController = {
         raw: true,
         nest: true,
         attributes: {
+          exclude: ['password'],
           include: [[ // 使用sequelize.literal把追蹤者、追隨者各做成一個屬性
             sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE followerId = ${UserId})`),
             'followingNum' // 追隨者總數
@@ -110,7 +113,6 @@ const userController = {
           ]]
         }
       })
-      delete user.password
 
       return res.status(200).json(user)
     } catch (err) {
@@ -242,6 +244,36 @@ const userController = {
       // }))
 
       return res.status(200).json(likes)
+    } catch (err) {
+      return next(err)
+    }
+  },
+  // No.9 - GET /api/users? {limit=10} 查看跟隨者數量排名(前10)的使用者資料
+  getUsers: async (req, res, next) => {
+    try {
+      const limit = Number(req.query.limit) || 10 // 若使用者未指定，預設為10筆
+      console.log(helpers.getUser(req))
+      const currentUserId = helpers.getUser(req).id
+
+      // --資料提取--
+      const users = await User.findAll({
+        where: { id: { [Op.not]: currentUserId }, role: 'user' },
+        attributes: {
+          exclude: ['password'],
+          include: [[
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'),
+            'followerNum'
+          ], [
+            sequelize.literal(`(SELECT EXISTS(SELECT * FROM Followships WHERE FollowingId = User.id and FollowerId = ${currentUserId}))`),
+            'isFollowed'
+          ]]
+        },
+        limit,
+        order: [[sequelize.literal('followerNum'), 'DESC']],
+        raw: true
+      })
+
+      return res.status(200).json(users)
     } catch (err) {
       return next(err)
     }
