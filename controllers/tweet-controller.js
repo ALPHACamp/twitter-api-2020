@@ -1,4 +1,4 @@
-const { Tweet, User, Like, sequelize } = require('../models')
+const { Tweet, User, Like, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const dayjs = require('dayjs')
 const utc = require('dayjs/plugin/utc') // 引入世界時間插件
@@ -159,14 +159,24 @@ const tweetController = {
   },
   getReplies: async (req, res, next) => {
     try {
-      
+      const replies = await Reply.findAll({
+        where: { TweetId: req.params.id },
+        include: [{
+          model: User,
+          attributes: ['account', 'name', 'avatar']
+        }],
+        raw: true,
+        nest: true
+      })
+      if (!replies) throw new Error('目前沒有任何回覆')
+      return res.status(200).json(replies)
     } catch (err) {
       return next(err)
     }
   },
   postReply: async (req, res, next) => {
     try {
-      const userId = helpers.getUser(req).id
+      
     } catch (err) {
       return next(err)
     }
