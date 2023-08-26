@@ -406,7 +406,7 @@ const userController = {
       }
 
       // 上傳檔案(非同步) - avatar: req.files.avatar[0], banner: req.files.banner[0]
-      const [filePath1, filePath2] = await Promise.all([imgurFileHandler(req.files.avatar?.[0] || null), imgurFileHandler(req.files.banner?.[0] || null)])
+      const [filePath1, filePath2] = await Promise.all([imgurFileHandler(req.files?.avatar?.[0] || null), imgurFileHandler(req.files?.banner?.[0] || null)])
 
       // 欄位更新:若有新值則給定新值，無新值則使用舊值
       const newUser = await user.update({
