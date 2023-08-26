@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Like, Reply } = require('../models')
+
+const { User, Tweet, Like, Reply, Followship } = require('../models')
+const { Op } = require('sequelize')
+const { imgurFileHandler } = require('../helpers/file-handler')
 const helpers = require('../_helpers')
 
 const userController = {
@@ -56,7 +59,6 @@ const userController = {
       next(err)
     }
   },
-
   getUser: (req, res, next) => {
     const UserId = req.params.id
     const isFollowed = helpers.getUser(req).Followings.some(f => f.id.toString() === UserId)
@@ -87,7 +89,6 @@ const userController = {
       })
       .catch(err => next(err))
   },
-
   getUserTweets: (req, res, next) => {
     const UserId = req.params.id
     const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
@@ -110,7 +111,7 @@ const userController = {
           err.status = 404
           throw err
         }
-
+      
         const result = tweets.map(tweet => ({
           ...tweet.toJSON(),
           likesCount: tweet.Likes.length,
@@ -147,7 +148,6 @@ const userController = {
           err.status = 404
           throw err
         }
-
         res.json(replies)
       })
       .catch(err => next(err))
@@ -190,6 +190,132 @@ const userController = {
         })
 
         res.json(result)
+      })
+      .catch(err => next(err))
+  },
+  putUser: async (req, res, next) => {
+    try {
+      if (helpers.getUser(req).id !== Number(req.params.id)) throw new Error('只能編輯自己的使用者資料！')
+      let { name, account, email, password, checkPassword, introduction } = req.body
+      const avatar = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
+      const banner = req.files?.banner ? await imgurFileHandler(req.files.banner[0]) : null
+
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
+      if (name) {
+        if (name.length > 50) throw new Error('使用者暱稱上限為50字！')
+      }
+      if (introduction) {
+        if (introduction.length > 160) throw new Error('自我介紹上限為160字！')
+      }
+      if (password) {
+        password = await bcrypt.hash(password, 10)
+      }
+      const userA = await User.findByPk(req.params.id)
+      if (!userA) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      // 81~86行，如果使用者輸入的 email 和原本一樣，就不用再去檢查 email 是否存在，不然會顯示 email 已重複註冊
+      if (email) {
+        if (userA.email !== email) {
+          const userB = await User.findOne({ where: { email } })
+          if (userB) throw new Error('email已重複註冊！')
+        }
+      }
+      // 同80行註解
+      if (account) {
+        if (userA.account !== account) {
+          const userC = await User.findOne({ where: { account } })
+          if (userC) throw new Error('account已重複註冊！')
+        }
+      }
+      let updatedUser = await userA.update({
+        name: name || userA.name,
+        account: account || userA.account,
+        email: email || userA.email,
+        password: password || userA.password,
+        introduction: introduction || userA.introduction,
+        avatar: avatar || userA.avatar,
+        banner: banner || userA.banner
+      })
+      updatedUser = updatedUser.toJSON()
+      delete updatedUser.password
+      return res.json({ status: 'success', data: { user: updatedUser } })
+    } catch (err) {
+      return next(err)
+    }
+  },
+  getFollowings: (req, res, next) => {
+    const followingsId = helpers.getUser(req).Followings.map(fs => fs.id)
+    User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) {
+          const err = new Error('使用者不存在！')
+          err.status = 404
+          throw err
+        }
+        return Followship.findAll({
+          where: { followerId: req.params.id },
+          include: { model: User, as: 'Following', attributes: { exclude: 'password' } },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      })
+      .then(followships => {
+        const data = followships.map(f => {
+          f.Following.isFollowed = followingsId.some(id => id === f.Following.id)
+          return f
+        })
+        return res.json(data)
+      })
+      .catch(err => next(err))
+  },
+  getFollowers: (req, res, next) => {
+    const followingsId = helpers.getUser(req).Followings.map(f => f.id)
+    User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) {
+          const err = new Error('使用者不存在！')
+          err.status = 404
+          throw err
+        }
+        return Followship.findAll({
+          where: { followingId: req.params.id },
+          include: { model: User, as: 'Follower', attributes: { exclude: 'password' } },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      })
+      .then(followships => {
+        const data = followships.map(f => {
+          f.Follower.isFollowed = followingsId.some(id => id === f.Follower.id)
+          return f
+        })
+        return res.json(data)
+      })
+      .catch(err => next(err))
+  },
+  getTopUser: (req, res, next) => {
+    const followingsId = helpers.getUser(req).Followings.map(f => f.id)
+    User.findAll({
+      where: { id: { [Op.ne]: helpers.getUser(req).id } },
+      attributes: { exclude: 'password' },
+      include: { model: User, as: 'Followers' }
+    })
+      .then(users => {
+        const data = users.map(user => {
+          user = user.toJSON()
+          user.followersCount = user.Followers.length
+          user.isFollowed = followingsId.some(id => id === user.id)
+          delete user.Followers
+          return user
+        })
+          .sort((a, b) => b.followersCount - a.followersCount)
+          .slice(0, 10)
+        return res.json(data)
       })
       .catch(err => next(err))
   }
