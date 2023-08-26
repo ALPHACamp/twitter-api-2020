@@ -172,7 +172,8 @@ const tweetController = {
         nest: true
       })
 
-      if (!replies) throw new Error('目前沒有任何回覆')
+      if (!replies) return res.status(200).json([])
+
       return res.status(200).json(replies)
     } catch (err) {
       return next(err)
