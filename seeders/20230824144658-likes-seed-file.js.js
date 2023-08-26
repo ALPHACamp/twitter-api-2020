@@ -16,7 +16,7 @@ module.exports = {
 
     tweets.forEach(tweet => {
       likes.push(
-        ...Array.from({ length: 5 }, () => ({
+        ...Array.from({ length: 2 }, () => ({
           User_id: users[Math.floor(Math.random() * users.length)].id,
           Tweet_id: tweet.id,
           created_at: new Date(),

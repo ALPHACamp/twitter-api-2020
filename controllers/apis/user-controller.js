@@ -5,7 +5,7 @@ const { imgurFileHandler } = require('../../helpers/file-helpers')
 const db = require('../../models')
 const { getUser } = require('../../_helpers')
 
-const { User, Tweet, Reply, Followship } = db
+const { User, Tweet, Reply, Followship, Like } = db
 const { Op } = require('sequelize')
 
 const userController = {
@@ -244,6 +244,46 @@ const userController = {
         message: 'Successfully update user.',
         data: user
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id, { raw: true, nest: true })
+      if (!user) throw new Error('User does not exist')
+
+      const likeTweets = await Like.findAll({
+        where: { userId: id },
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: Tweet,
+            as: 'likedTweet',
+            attributes: { exclude: ['password'] },
+            include: [
+              { model: User, as: 'author', attributes: ['account', 'name', 'avatar'] }
+            ]
+          }
+        ],
+        nest: true
+      })
+
+      if (likeTweets.length === 0) throw new Error('the user did not like any tweet')
+
+      const likeTweetsData = likeTweets.map(like => ({
+        TweetId: like.likedTweet.id,
+        tweetBelongerName: like.likedTweet.author.name,
+        tweetBelongerAccount: like.likedTweet.author.account,
+        tweetBelongerAvatar: like.likedTweet.author.avatar,
+        tweetLikeCount: like.likedTweet.likeCount,
+        tweetReplyCount: like.likedTweet.replyCount,
+        tweetContent: like.likedTweet.description,
+        createdAt: like.createdAt
+      }))
+
+      res.json(likeTweetsData)
     } catch (err) {
       next(err)
     }
