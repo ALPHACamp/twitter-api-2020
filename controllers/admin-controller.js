@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { getUser } = require('../_helpers')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 
 const adminController = {
@@ -10,12 +10,10 @@ const adminController = {
       const userData = getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+
       res.json({
-        status: 'success',
-        data: {
-          token,
-          user: userData
-        }
+        token,
+        user: userData
       })
     } catch (err) {
       next(err)
@@ -72,6 +70,25 @@ const adminController = {
       }))
 
       res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (!tweet) throw new Error('此推文不存在！')
+
+      // 刪除推文時連同該則推文底下的留言及喜歡都一起刪除
+      await tweet.destroy()
+      await Reply.destroy({ where: { TweetId: tweet.id } })
+      await Like.destroy({ where: { TweetId: tweet.id } })
+
+      res.status(200).json({
+        status: 'success',
+        message: '成功刪除推文！',
+        tweet
+      })
     } catch (err) {
       next(err)
     }
