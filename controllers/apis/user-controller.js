@@ -1,9 +1,10 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
 
 const db = require('../../models')
-const { getUser } = require('../../_helpers')
+const helpers = require('../../_helpers')
 
 const { User, Tweet, Reply, Followship, Like } = db
 const { Op } = require('sequelize')
@@ -324,8 +325,11 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const { id } = req.params
+      // const currentUserId = helpers.getUser(req).id
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
+
+      const currentUserId = helpers.getUser(req).id
 
       const followers = await Followship.findAll({
         where: { followingId: id },
@@ -336,12 +340,34 @@ const userController = {
             as: 'follower',
             attributes: { exclude: ['password'] }
           }
-        ]
+        ],
+        attributes: [
+          'followerId',
+          'followingId',
+          'createdAt',
+          'updatedAt',
+          [sequelize.literal(`(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`), 'isFollowed']
+        ],
+        raw: true,
+        nest: true
       })
 
-      console.log(followers)
+      const userFollowersData = followers.map(follower => {
+        return {
+          ...follower
+        }
+      })
 
-      res.json(followers)
+      res.status(200).json(userFollowersData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id, { raw: true, nest: true })
+      if (!user) throw new Error('User does not exist')
     } catch (err) {
       next(err)
     }
