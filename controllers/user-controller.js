@@ -245,8 +245,9 @@ const userController = {
         .map(like => like.toJSON())
         .map(like => ({ // 拆掉最外層結構，並追加屬性fromNow
           ...like.Tweet,
-          TweetId: like.TweetId, // 多做一個屬性應付測試檔檢查
-          fromNow: dayjs(like.Tweet.createdAt).fromNow()
+          isLiked: Boolean(like.Tweet.isLiked),
+          fromNow: dayjs(like.Tweet.createdAt).fromNow(),
+          TweetId: like.TweetId // 多做一個屬性應付測試檔檢查
         }))
 
       return res.status(200).json(likes)
@@ -285,6 +286,7 @@ const userController = {
         .map(followship => followship.toJSON())
         .map(followship => ({ // 拆掉最外層結構
           ...followship.Following,
+          isFollowed: Boolean(followship.Following.isFollowed),
           followingId: followship.followingId // 多做一個屬性應付測試檔檢查
         }))
 
@@ -324,6 +326,7 @@ const userController = {
         .map(followship => followship.toJSON())
         .map(followship => ({ // 拆掉最外層結構
           ...followship.Follower,
+          isFollowed: Boolean(followship.Follower.isFollowed),
           followerId: followship.followerId // 多做一個屬性應付測試檔檢查
         }))
 
@@ -339,7 +342,7 @@ const userController = {
       const currentUserId = helpers.getUser(req).id
 
       // --資料提取--
-      const users = await User.findAll({
+      let users = await User.findAll({
         where: { id: { [Op.not]: currentUserId }, role: 'user' },
         attributes: {
           exclude: ['password'],
@@ -357,6 +360,12 @@ const userController = {
       })
 
       if (!users) throw new Error('使用者排行讀取失敗')
+
+      // --資料整理--
+      users = users.map(user => ({
+        ...user,
+        isFollowed: Boolean(user.isFollowed)
+      }))
 
       return res.status(200).json(users)
     } catch (err) {
