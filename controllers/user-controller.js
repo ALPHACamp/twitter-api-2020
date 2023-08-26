@@ -1,7 +1,15 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const dayjs = require('dayjs')
+const relativeTime = require('dayjs/plugin/relativeTime')
+require('dayjs/locale/zh-tw')
 
-const { User, Tweet, Reply, Like } = require('../models')
+dayjs.extend(relativeTime) // 外掛相對時間模組
+dayjs.locale('zh-tw') // 默認使用繁中
+
+const helpers = require('../_helpers')
+const { Op } = require('sequelize')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 
 const userController = {
   // No.1 - 註冊帳號 POST /api/users
@@ -17,11 +25,11 @@ const userController = {
       }
 
       // 確認必填值是否為空
-      if (!account) cause.accountErrMsg += '此為必填欄位。'
-      if (!name) cause.nameErrMsg += '此為必填欄位。'
-      if (!email) cause.emailErrMsg += '此為必填欄位。'
-      if (!password) cause.passwordErrMsg += '此為必填欄位。'
-      if (!checkPassword) cause.checkPasswordErrMsg += '此為必填欄位。'
+      if (!account) cause.accountErrMsg += 'account 為必填欄位。'
+      if (!name) cause.nameErrMsg += 'name 為必填欄位。'
+      if (!email) cause.emailErrMsg += 'email 為必填欄位。'
+      if (!password) cause.passwordErrMsg += 'password 為必填欄位。'
+      if (!checkPassword) cause.checkPasswordErrMsg += 'checkPassword 為必填欄位。'
       if (cause.accountErrMsg || cause.nameErrMsg || cause.emailErrMsg || cause.passwordErrMsg || cause.checkPasswordErrMsg) {
         throw new Error('Empty input value!', { cause })
       }
@@ -85,36 +93,191 @@ const userController = {
     }
   },
   // No.3 - 查看某使用者的資料 GET /api/users/:id
+  getUser: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+
+      // --資料提取--
+      const user = await User.findByPk(UserId, {
+        where: { id: UserId },
+        raw: true,
+        nest: true,
+        attributes: {
+          exclude: ['password'],
+          include: [[ // 使用sequelize.literal把追蹤者、追隨者各做成一個屬性
+            sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE followerId = ${UserId})`),
+            'followingNum' // 追隨者總數
+          ], [
+            sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE followingId = ${UserId})`),
+            'followerNum' // 追蹤者總數
+          ]]
+        }
+      })
+
+      return res.status(200).json(user)
+    } catch (err) {
+      return next(err)
+    }
+  },
   // No.4 - 查看某使用者發過的推文 GET /api/users/:id/tweets
   getUserTweets: async (req, res, next) => {
     try {
       const UserId = req.params.id
+      const currentUserId = helpers.getUser(req).id
+
+      // --資料提取--
       let tweets = await Tweet.findAll({
         where: { UserId },
         order: [['createdAt', 'DESC']],
-        include: [User],
-        nest: true
+        include: [{
+          model: User,
+          attributes: ['account', 'name', 'avatar']
+          // ,as: 'Author'
+        }],
+        nest: true,
+        attributes: {
+          include: [[
+            sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'),
+            'repliesNum' // 被回覆的總數
+          ], [
+            sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id)'),
+            'likesNum' // 被喜歡的總數
+          ], [
+            // sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id and UserId = ${currentUserId})`),
+            sequelize.literal(`(SELECT EXISTS(SELECT * FROM Likes WHERE TweetId = Tweet.id and UserId = ${currentUserId}))`),
+            'isLiked' // 目前使用者是否喜歡
+          ]]
+        }
       })
 
+      // --資料整理--
       tweets = tweets.map(tweet => tweet.toJSON())
-      tweets.forEach(tweet => delete tweet.User.password)
+      tweets = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: Boolean(tweet.isLiked),
+        fromNow: dayjs(tweet.createdAt).fromNow()
+      }))
 
       return res.status(200).json(tweets)
-      // return res.status(200).json({ // 這種回傳形式過不了過測試
-      //   success: true,
-      //   data: { tweets }
-      // })
     } catch (err) {
       return next(err)
     }
   },
   // No.5 - 查看某使用者發過的回覆 GET /api/users/:id/replied_tweets
-  getUserReplies: (req, res, next) => {
-    return res.status(200).json({})
+  getUserReplies: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+
+      // --資料提取--
+      let replies = await Reply.findAll({
+        where: { UserId },
+        order: [['createdAt', 'DESC']],
+        include: [{
+          model: User, // Reply的作者基本屬性
+          attributes: ['account', 'name', 'avatar']
+          // ,as: 'Author'
+        }],
+        attributes: {
+          include: [[
+            sequelize.literal('(SELECT account FROM Users WHERE UserId = Users.id)'),
+            'repliedTo' // 回覆給那一個作者
+          ]]
+        },
+        nest: true
+      })
+
+      // --資料整理--
+      replies = replies.map(reply => reply.toJSON())
+      replies = replies.map(reply => ({
+        ...reply,
+        fromNow: dayjs(reply.createdAt).fromNow()
+      }))
+
+      return res.status(200).json(replies)
+    } catch (err) {
+      return next(err)
+    }
   },
   // No.6 - 查看某使用者點過like的推文 GET /api/users/:id/likes
-  getUserLikes: (req, res, next) => {
-    return res.status(200).json({})
+  getUserLikes: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+
+      // --資料提取--
+      let likes = await Like.findAll({
+        where: { UserId },
+        order: [['createdAt', 'DESC']],
+        include: [{
+          model: Tweet,
+          include: [{
+            model: User,
+            attributes: ['account', 'name', 'avatar']
+            // ,as: 'Author'
+          }],
+          attributes: {
+            include: [[
+              sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'),
+              'repliesNum' // 被回覆的總數
+            ], [
+              sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id)'),
+              'likesNum' // 被喜歡的總數
+            ]]
+          }
+        }],
+        nest: true
+      })
+
+      // --資料整理--
+      likes = likes.map(reply => reply.toJSON())
+      likes = likes.map(reply => ({ // 拆掉最外層結構，並追加兩個屬性fromNow & isLiked
+        ...reply.Tweet,
+        TweetId: reply.TweetId, // 多做一個屬性應付測試檔檢查
+        fromNow: dayjs(reply.Tweet.createdAt).fromNow(),
+        isLiked: true
+      }))
+      // likes = likes.map(reply => ({
+      //   ...reply,
+      //   Tweet: {
+      //     ...reply.Tweet,
+      //     fromNow: dayjs(reply.Tweet.createdAt).fromNow(),
+      //     isLiked: true
+      //   }
+      // }))
+
+      return res.status(200).json(likes)
+    } catch (err) {
+      return next(err)
+    }
+  },
+  // No.9 - GET /api/users? {limit=10} 查看跟隨者數量排名(前10)的使用者資料
+  getUsers: async (req, res, next) => {
+    try {
+      const limit = Number(req.query.limit) || 10 // 若使用者未指定，預設為10筆
+      console.log(helpers.getUser(req))
+      const currentUserId = helpers.getUser(req).id
+
+      // --資料提取--
+      const users = await User.findAll({
+        where: { id: { [Op.not]: currentUserId }, role: 'user' },
+        attributes: {
+          exclude: ['password'],
+          include: [[
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'),
+            'followerNum'
+          ], [
+            sequelize.literal(`(SELECT EXISTS(SELECT * FROM Followships WHERE FollowingId = User.id and FollowerId = ${currentUserId}))`),
+            'isFollowed'
+          ]]
+        },
+        limit,
+        order: [[sequelize.literal('followerNum'), 'DESC']],
+        raw: true
+      })
+
+      return res.status(200).json(users)
+    } catch (err) {
+      return next(err)
+    }
   }
 }
 
