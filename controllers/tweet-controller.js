@@ -6,9 +6,16 @@ const tweetController = {
     try {
       const tweets = await Tweet.findAll({
         include: [
-          { model: User },
+          {
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatar']
+          },
           { model: Reply },
-          { model: User, as: 'LikedUsers' }
+          {
+            model: User,
+            as: 'LikedUsers',
+            attributes: ['id', 'account', 'name']
+          }
         ],
         order: [['createdAt', 'DESC']]
       })
