@@ -1,7 +1,8 @@
 if (process.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
-// require('dotenv').config()
+
+const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 const routes = require('./routes')
@@ -15,6 +16,8 @@ app.use(bodyParser.json())
 // passport 初始化
 app.use(passport.initialize())
 app.use(passport.session())
+
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 const port = process.env.PORT || 3000
 

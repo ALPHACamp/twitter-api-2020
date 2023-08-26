@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-// const { imgurFileHandler } = require('../../helpers/file-helpers')
-// const imgur = require('imgur')
+const { imgurFileHandler } = require('../../helpers/file-helpers')
 
 const db = require('../../models')
 const { getUser } = require('../../_helpers')
@@ -180,16 +179,11 @@ const userController = {
   },
   updateUser: async (req, res, next) => {
     try {
-      const currentUserId = getUser(req).id
-      if (currentUserId.toString() !== req.params.id) {
-        throw new Error('Cannot edit other users profile')
-      }
-
+      const { id } = req.params
       const { account, name, email, password, introduction } = req.body
-      // const files = req.files || ''
-      if (name && name.length > 50) throw new Error('the length of name should less than 50 characters')
-      if (introduction && introduction.length > 160) { throw new Error('the length of introduction should less than 160 characters') }
-      const user = await User.findByPk(req.params.id)
+
+      const user = await User.findByPk(id)
+
       if (!user) {
         return res.status(401).json({
           status: 'error',
@@ -197,36 +191,53 @@ const userController = {
         })
       }
 
+      const currentUserId = getUser(req).id
+
+      if (!currentUserId) {
+        throw new Error('Current user ID is missing')
+      }
+      console.log(currentUserId, Number(id))
+
+      if (currentUserId !== Number(id)) {
+        throw new Error('Cannot edit other users profile')
+      }
+      // console.log(currentUserId, Number(id))
+
+      // console.log('File object:', files)
+
+      if (name && name.length > 50) throw new Error('the length of name should less than 50 characters')
+      if (introduction && introduction.length > 160) { throw new Error('the length of introduction should less than 160 characters') }
+
       if (account) {
+        const user = await User.findOne({ where: { account } })
         if (user.account === account) throw new Error('account 已重複註冊!')
       }
 
       if (email) {
+        const user = await User.findOne({ where: { email } })
         if (user.email === email) throw new Error('email 已重複註冊!')
       }
-      // const avatar = user.avatar || ''
-      // const cover = user.cover || ''
 
-      // if (files.avatar) {
-      //   const avatarBuffer = req.files.avatar[0].buffer
-      //   const avatarUrl = await uploadToImgur(avatarBuffer)
-      //   avatar = avatarUrl
-      // }
+      const { files } = req
 
-      // if (files.cover) {
-      //   const coverBuffer = req.files.cover[0].buffer
-      //   const coverUrl = await uploadToImgur(coverBuffer)
-      //   cover = coverUrl
-      // }
+      let newAvatar = ''
+      let newCover = ''
+
+      if (files.avatar && files.avatar[0].fieldname === 'avatar') {
+        newAvatar = await imgurFileHandler(files.avatar[0])
+      }
+      if (files.cover && files.cover[0].fieldname === 'cover') {
+        newCover = await imgurFileHandler(files.cover[0])
+      }
 
       await user.update({
         name: name || user.name,
         email: email || user.email,
         account: account || user.account,
         password: password ? bcrypt.hashSync(password, 10) : user.password,
-        introduction: introduction || user.introduction
-        // avatar: ,
-        // cover:
+        introduction: introduction || user.introduction,
+        avatar: newAvatar || user.avatar,
+        cover: newCover || user.cover
       })
       res.status(200).json({
         status: 'success',
