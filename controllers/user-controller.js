@@ -105,10 +105,10 @@ const userController = {
           exclude: ['password'],
           include: [[ // 使用sequelize.literal把追蹤者、追隨者各做成一個屬性
             sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE followerId = ${UserId})`),
-            'followingNum' // 追隨者總數
+            'followingsNum' // 追隨者總數
           ], [
             sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE followingId = ${UserId})`),
-            'followerNum' // 追蹤者總數
+            'followersNum' // 追蹤者總數
           ]]
         }
       })
@@ -348,14 +348,14 @@ const userController = {
           exclude: ['password'],
           include: [[
             sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'),
-            'followerNum' // 追隨者總數
+            'followersNum' // 追隨者總數
           ], [
             sequelize.literal(`(SELECT EXISTS(SELECT * FROM Followships WHERE FollowingId = User.id and FollowerId = ${currentUserId}))`),
             'isFollowed' // 目前使用者是否追蹤
           ]]
         },
         limit,
-        order: [[sequelize.literal('followerNum'), 'DESC']],
+        order: [[sequelize.literal('followersNum'), 'DESC']],
         raw: true
       })
 

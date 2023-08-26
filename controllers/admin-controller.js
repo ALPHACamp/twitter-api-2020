@@ -25,6 +25,24 @@ const adminController = {
   // No.21 - 取得所有使用者清單 GET /api/admin/users
   getUsers: (req, res, next) => {
     try {
+      // --資料提取--
+      // const users = User.findAll({
+      //   where: { role: 'user' },
+      //   attributes: {
+      //     exclude: ['password'],
+      //     include: [[
+      //       sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'),
+      //       'tweetsNum'
+      //     ]]
+      //   },
+      //   nest: true
+      // })
+
+      // --資料整理--
+
+
+
+
       return res.status(200).json({})
     } catch (err) {
       return next(err)
