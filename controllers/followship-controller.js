@@ -30,7 +30,7 @@ const followeshipController = {
   removeFollowing: async (req, res, next) => {
     try {
       const userId = helpers.getUser(req).id
-      const followingId = req.params.followingId // 依照測試檔命名
+      const followingId = parseInt(req.params.followingId) // 依照測試檔命名
       const [user, followship] = await Promise.all([
         User.findByPk(userId),
         Followship.findOne({
