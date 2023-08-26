@@ -92,22 +92,29 @@ const userController = {
     try {
       const id = req.params.id
       const currentUserId = getUser(req).dataValues.id
-      const [user, tweetCount, followerCount, followingCount, currentUserFollowing] = await Promise.all([
-        User.findByPk(id, { raw: true, nest: true }),
-        Tweet.count({ where: { UserId: id } }),
-        Followship.count({ where: { followingId: id } }),
-        Followship.count({ where: { followerId: id } }),
-        // 查看其他使用者是否有追蹤自己
-        Followship.count({ where: { [Op.and]: [{ followerId: currentUserId }, { followingId: id }] } })
+
+      if (id.toString() === ':id') return res.status(404).json({ status: 'error', message: '無輸入 params id' })
+
+      const [user] = await Promise.all([
+        User.findByPk(id, {
+          attributes: {
+            include: [
+              [sequelize.literal(`(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = ${id})`), 'tweetCount'],
+              [sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = ${id})`), 'followerCount'],
+              [sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${id})`), 'followingCount'],
+              // 查看其他使用者是否有追蹤目前的使用者
+              [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE Followships.followerId = ${currentUserId} AND Followships.followingId = ${id})`), 'isFollowed']
+            ]
+          },
+          raw: true,
+          nest: true
+        })
       ])
 
       if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
 
       delete user.password
-      user.tweetCount = tweetCount
-      user.followerCount = followerCount
-      user.followingCount = followingCount
-      user.isFollowed = currentUserFollowing ? 'true' : 'false'
+      user.isFollowed = user.isFollowed ? 'true' : 'false'
 
       return res.status(200).json(user)
     } catch (err) {
