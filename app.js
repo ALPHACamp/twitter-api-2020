@@ -7,8 +7,15 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const routes = require('./routes')
 const passport = require('./config/passport')
+const cors = require('cors')
 
 const app = express()
+
+const corsOptions = {
+  origin: 'https://mighty-temple-45104-0d6672fb07d0.herokuapp.com'
+}
+
+app.use(cors(corsOptions))
 
 // bodyparser設定
 app.use(bodyParser.urlencoded({ extended: true }))
