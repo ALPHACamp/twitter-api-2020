@@ -2,7 +2,7 @@ const { Tweet, User, Like, Reply, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const tweetController = {
-  getTweets: (req, res, next) => { // 當下登入使用者能取得的頁面
+  getTweets: (req, res, next) => {
     const loginUser = getUser(req).toJSON().id
 
     return Tweet.findAll({
@@ -24,11 +24,17 @@ const tweetController = {
     .catch(err => next(err))
   },
   postTweet: (req, res, next) => {
-    const loginUser = getUser(req).id
+    const limitWords = 140
+    const { description } = req.body
+    const userId = getUser(req).id
 
-    return Tweet.findAll({
-      nest: true,
-      raw: true,
+    if (!userId) throw new Error('帳號不存在！')
+    if (!description.trim()) throw new Error('內容不可空白')
+    if (description.length > limitWords ) throw new Error(`字數不能大於 ${limitWords} 字`)
+    
+    return Tweet.create({
+      description,
+      userId
     })
     .then(tweet => {
       console.log(tweet)
