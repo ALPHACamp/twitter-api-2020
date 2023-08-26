@@ -22,10 +22,14 @@ const tweetController = {
       ],
       order: [['createdAt', 'DESC']]
     })
-    .then(data => data.map(tweet => ({
+
+    .then(data => {
+      return data.map(tweet => ({
         ...tweet,
-      createdAt : relativeTime(tweet.createdAt)
-    })))
+        createdAt : relativeTimeFromNow(tweet.createdAt)
+      }))
+    })
+
     .then(tweet => res.status(200).json(tweet))
     .catch(err => next(err))
   },
@@ -35,6 +39,8 @@ const tweetController = {
     const { description } = req.body
 
     const loginUserId = getUser(req).id
+
+
     if (!loginUserId) throw new Error('帳號不存在！')
     if (!description.trim()) throw new Error('內容不可空白')
     if (description.length > limitWords ) throw new Error(`字數不能大於 ${limitWords} 字`)
@@ -43,8 +49,10 @@ const tweetController = {
       description,
       UserId: loginUserId
     })
-    .then(tweet => {
-      res.status(200).json(tweet)
+
+    .then( tweet => {
+      return res.status(200).json(tweet)
+
     })
     .catch(err => next(err))
   },
@@ -77,9 +85,38 @@ const tweetController = {
           message: '推文不存在',
         })
       }
-    console.log(simpleTime(tweet.createdAt))
+
       tweet.createdAt = simpleTime(tweet.createdAt) + ' • ' + simpleDate(Tweet.createdAt)
       return res.status(200).json(tweet)   
+    })
+    .catch(err => next(err))
+  },
+  likeTweet: (req, res, next) => {
+    const { id } = req.params
+    console.log(id)
+    const UserId = getUser(req).toJSON().id
+
+    return Promise.all([
+      Tweet.findByPk(id),
+      Like.findOrCreate({
+        where: { UserId, TweetId: id }
+      })
+    ])
+    .then(([tweet, like]) => {
+        if (!tweet) {
+          return res.status(404).json({
+            status:'error',
+            message: '推文不存在'
+          })
+        }
+        if (!like[1]) {
+        return res.status(422).json({
+          status: 'error',
+          message: '已表示喜歡'
+          })
+        }
+        return res.status(200).json({ status: 'success' })
+
     })
     .catch(err => next(err))
   }
