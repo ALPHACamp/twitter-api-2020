@@ -14,10 +14,7 @@ const port = process.env.PORT || 3000
 // set CORS
 app.use(cors())
 const corsOptions = {
-  origin: [
-    'https://young-waters-15158-8b230f0b0919.herokuapp.com',
-    'http://localhost:3000'
-  ],
+  origin: ['*'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: ['Content-Type', 'Authorization']
 }
