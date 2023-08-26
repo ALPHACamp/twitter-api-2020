@@ -6,6 +6,7 @@ const express = require('express')
 const helpers = require('./_helpers')
 const passport = require('passport')
 const router = require('./routes')
+const cors = require('cors')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -15,6 +16,7 @@ const port = process.env.PORT || 3000
 // passport.authenticate('jwt', { ses...
 // };
 
+app.use(cors())
 app.use(passport.initialize())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
