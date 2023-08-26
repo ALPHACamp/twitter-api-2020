@@ -4,7 +4,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
 // const admin = require('./modules/admin')
-const { authenticated, authenticatedCurrentUser } = require('../middleware/api-auth')
+
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
@@ -19,7 +19,7 @@ router.post('/users/signin', passport.authenticate('local', { session: false }),
 router.post('/users/', userController.signUp) // 註冊
 
 // modules
-router.use('/tweets', authenticated, authenticatedCurrentUser, tweet)
+router.use('/tweets', tweet)
 
 router.use('/', apiErrorHandler)
 module.exports = router
