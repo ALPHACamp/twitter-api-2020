@@ -172,8 +172,6 @@ const tweetController = {
         nest: true
       })
 
-      if (!replies) return res.status(200).json([])
-
       return res.status(200).json(replies)
     } catch (err) {
       return next(err)
