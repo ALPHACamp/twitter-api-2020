@@ -191,16 +191,19 @@ const userController = {
       if (introduction && introduction.length > 160) { throw new Error('the length of introduction should less than 160 characters') }
       const user = await User.findByPk(req.params.id)
       if (!user) {
-        return res
-          .status(401)
-          .json({ status: 'error', message: 'This user does not exist' })
+        return res.status(401).json({
+          status: 'error',
+          message: 'This user does not exist'
+        })
       }
 
       if (account) {
         if (user.account === account) throw new Error('account 已重複註冊!')
-        if (user.email === email) throw new Error('email 已重複註冊!')
       }
 
+      if (email) {
+        if (user.email === email) throw new Error('email 已重複註冊!')
+      }
       // const avatar = user.avatar || ''
       // const cover = user.cover || ''
 
@@ -220,10 +223,15 @@ const userController = {
         name: name || user.name,
         email: email || user.email,
         account: account || user.account,
-        // password: password ? bcrypt.hashSync(password, 10) : user.password,
+        password: password ? bcrypt.hashSync(password, 10) : user.password,
         introduction: introduction || user.introduction
         // avatar: ,
         // cover:
+      })
+      res.status(200).json({
+        status: 'success',
+        message: 'Successfully update user.',
+        data: user
       })
     } catch (err) {
       next(err)

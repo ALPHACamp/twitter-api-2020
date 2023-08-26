@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const multer = require('multer')
+// const multer = require('multer')
 // const storage = multer.memoryStorage()
 // const upload = multer({ storage })
 
@@ -19,7 +19,7 @@ router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 
 router.post('/api/users', userController.signUp)
 router.post('/api/users/signin', userController.signIn)
-// router.put('/api/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.updateUser)
+router.put('/api/users/:id', authenticated, authenticatedUser, userController.updateUser)
 router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserReplies)
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 
