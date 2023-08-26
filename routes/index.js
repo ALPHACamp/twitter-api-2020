@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
+const followships = require('./modules/followships')
 const tweets = require('./modules/tweets')
 
 const passport = require('../config/passport')
@@ -19,6 +20,7 @@ router.get('/users/:id/replied_tweets', authenticator, userController.getUserRep
 router.get('/users/:id/likes', authenticator, userController.getUserLikes) // No.6 - 查看某使用者點過like的推文
 router.get('/users', authenticator, userController.getUsers) // No.9 - 查看跟隨者數量排名(前10)的使用者資料
 
+router.use('/followships', authenticator, followships)
 router.use('/tweets', authenticator, tweets)
 
 router.use('/', (req, res) => res.status(500).json({ success: false, message: 'no such api' })) // fallback路由
