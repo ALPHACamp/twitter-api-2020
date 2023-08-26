@@ -29,7 +29,7 @@ router.post('/login', passport.authenticate('local', { session: false }), authen
 // router.post('/tweets/:id/unlike', tweetController)
 // router.get('/tweets/:id', tweetController)
 // router.post('/tweets', tweetController)
-// router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
+router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 
 // router.post('/followships', followshipController)
 // router.delete('/followships/:followingId', followshipController)
