@@ -1,116 +1,116 @@
-const express = require("express");
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
 // const multer = require('multer')
 // const storage = multer.memoryStorage()
 // const upload = multer({ storage })
 
-const admin = require("./modules/admin");
+const admin = require('./modules/admin')
 
-const userController = require("../controllers/apis/user-controller");
-const tweetController = require("../controllers/apis/tweet-controller");
-const followshipController = require("../controllers/apis/followship-controller");
+const userController = require('../controllers/apis/user-controller')
+const tweetController = require('../controllers/apis/tweet-controller')
+const followshipController = require('../controllers/apis/followship-controller')
 
-const { apiErrorHandler } = require("../middleware/error-handler");
+const { apiErrorHandler } = require('../middleware/error-handler')
 const {
   authenticated,
   authenticatedAdmin,
-  authenticatedUser,
-} = require("../middleware/api-auth");
+  authenticatedUser
+} = require('../middleware/api-auth')
 
 // api/admin
-router.use("/api/admin", authenticated, authenticatedAdmin, admin);
+router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 
 // api/users
-router.post("/api/users", userController.signUp);
-router.post("/api/users/signin", userController.signIn);
+router.post('/api/users', userController.signUp)
+router.post('/api/users/signin', userController.signIn)
 router.put(
-  "/api/users/:id",
+  '/api/users/:id',
   authenticated,
   authenticatedUser,
   userController.updateUser
-);
+)
 router.get(
-  "/api/users/:id/replied_tweets",
+  '/api/users/:id/replied_tweets',
   authenticated,
   authenticatedUser,
   userController.getUserReplies
-);
+)
 router.get(
-  "/api/users/:id",
+  '/api/users/:id',
   authenticated,
   authenticatedUser,
   userController.getUser
-);
+)
 
 // api/tweets
 router.get(
-  "/api/tweets/:tweet_id/replies",
+  '/api/tweets/:tweet_id/replies',
   authenticated,
   authenticatedUser,
   tweetController.getReplies
-);
+)
 router.post(
-  "/api/tweets/:tweet_id/replies",
+  '/api/tweets/:tweet_id/replies',
   authenticated,
   authenticatedUser,
   tweetController.createReply
-);
+)
 router.get(
-  "/api/tweets/:tweet_id/likes",
+  '/api/tweets/:tweet_id/likes',
   authenticated,
   authenticatedUser,
   tweetController.getLikes
-);
+)
 router.post(
-  "/api/tweets/:tweet_id/like",
+  '/api/tweets/:tweet_id/like',
   authenticated,
   authenticatedUser,
   tweetController.likeTweet
-);
+)
 router.post(
-  "/api/tweets/:tweet_id/unlike",
+  '/api/tweets/:tweet_id/unlike',
   authenticated,
   authenticatedUser,
   tweetController.unlikeTweet
-);
+)
 router.get(
-  "/api/tweets/:tweet_id",
+  '/api/tweets/:tweet_id',
   authenticated,
   authenticatedUser,
   tweetController.getTweet
-);
+)
 router.post(
-  "/api/tweets",
+  '/api/tweets',
   authenticated,
   authenticatedUser,
   tweetController.createTweet
-);
+)
 router.get(
-  "/api/tweets",
+  '/api/tweets',
   authenticated,
   authenticatedUser,
   tweetController.getTweets
-);
+)
 
 // api/followship
 router.delete(
-  "/api/followships/:following_id",
+  '/api/followships/:following_id',
   authenticated,
   authenticatedUser,
   followshipController.unfollowUser
-);
+)
 router.get(
-  "/api/followships/top10",
+  '/api/followships/top10',
   authenticated,
   authenticatedUser,
   followshipController.getTop10
-);
+)
 router.post(
-  "/api/followships",
+  '/api/followships',
   authenticated,
   authenticatedUser,
   followshipController.followUser
-);
-router.use("/", apiErrorHandler);
+)
+router.use('/', apiErrorHandler)
 
-module.exports = router;
+module.exports = router
