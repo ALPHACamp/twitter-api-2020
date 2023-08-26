@@ -8,5 +8,6 @@ const { isAuthUser } = require('../../middleware/role-check')
 
 router.post('/', authenticated, isAuthUser, followshipController.addFollowing)
 router.delete('/:followingId', authenticated, isAuthUser, followshipController.removeFollowing)
+router.get('/topFollowers', authenticated, isAuthUser, followshipController.getTopFollower)
 
 module.exports = router

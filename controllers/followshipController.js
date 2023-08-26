@@ -1,6 +1,7 @@
 'use strict'
 
 const { Followship, User } = require('../models')
+const sequelize = require('sequelize')
 const helpers = require('../_helpers')
 
 const followshipController = {
@@ -44,6 +45,42 @@ const followshipController = {
         status: 'success',
         message: '成功取消追蹤此使用者'
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTopFollower: async (req, res, next) => {
+    try {
+      const currentUser = helpers.getUser(req)
+
+      const data = await User.findAll({
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          'cover',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+            ),
+            'FollowingCount'
+          ],
+          [
+            sequelize.literal(
+              `EXISTS(SELECT followerId FROM Followships WHERE followingId = User.id AND followerId = ${currentUser.id})`
+            ),
+            'isFollowed'
+          ]
+        ],
+        where: sequelize.literal(`role != 'admin' AND id != '${currentUser.id}'`),
+        order: [[sequelize.literal('FollowingCount'), 'DESC'], ['createdAt']],
+        limit: 10,
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
