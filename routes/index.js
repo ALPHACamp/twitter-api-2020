@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
+const followships = require('./modules/followships')
 const tweets = require('./modules/tweets')
 const users = require('./modules/users')
 const admin = require('./modules/admin')
@@ -17,6 +18,7 @@ router.post('/users', userController.signUp, userController.signIn) // No.1 - �
 router.post('/users/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn) // No.2 - 登入前台帳號
 
 router.use('/users', authenticator, users)
+router.use('/followships', authenticator, followships)
 router.use('/tweets', authenticator, tweets)
 
 router.post('/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn) // No.20 - 登入後台帳號
