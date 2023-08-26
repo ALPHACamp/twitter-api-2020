@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const { relativeTimeFormat } = require('../helpers/day-helpers')
+const { relativeTimeFormat, absoluteTimeFormat } = require('../helpers/day-helpers')
 const { User, Tweet, Reply } = require('../models')
 
 const adminServices = {
@@ -70,6 +70,7 @@ const adminServices = {
     try {
       const tweets = await Tweet.findAll({
         attributes: [
+          'id',
           'UserId',
           'description',
           'createdAt',
@@ -82,6 +83,7 @@ const adminServices = {
             'userAccount'
           ]
         ],
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
       })
