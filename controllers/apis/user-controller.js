@@ -320,6 +320,31 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id, { raw: true, nest: true })
+      if (!user) throw new Error('User does not exist')
+
+      const followers = await Followship.findAll({
+        where: { followingId: id },
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: User,
+            as: 'follower',
+            attributes: { exclude: ['password'] }
+          }
+        ]
+      })
+
+      console.log(followers)
+
+      res.json(followers)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
