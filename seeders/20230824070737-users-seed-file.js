@@ -10,6 +10,7 @@ module.exports = {
       account: user.account,
       email: user.email,
       password: bcrypt.hashSync(user.password, 10),
+      name: user.account,
       role: user.role,
       avatar: faker.image.avatar(),
       cover: 'https://i.imgur.com/xwLLnZh.png',
