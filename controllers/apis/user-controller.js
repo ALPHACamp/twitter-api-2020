@@ -88,7 +88,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const { id } = req.params
-      const currentUserId = getUser(req).id
+      const currentUserId = helpers.getUser(req).id
 
       const [user, tweetCount, followerCount, followingCount] =
         await Promise.all([
@@ -192,7 +192,7 @@ const userController = {
         })
       }
 
-      const currentUserId = getUser(req).id
+      const currentUserId = helpers.getUser(req).id
 
       if (!currentUserId) {
         throw new Error('Current user ID is missing')
@@ -224,10 +224,10 @@ const userController = {
       let newAvatar = ''
       let newCover = ''
 
-      if (files.avatar && files.avatar[0].fieldname === 'avatar') {
+      if (files && files.avatar && files.avatar[0].fieldname === 'avatar') {
         newAvatar = await imgurFileHandler(files.avatar[0])
       }
-      if (files.cover && files.cover[0].fieldname === 'cover') {
+      if (files && files.cover && files.cover[0].fieldname === 'cover') {
         newCover = await imgurFileHandler(files.cover[0])
       }
 
@@ -395,8 +395,6 @@ const userController = {
           ...follower
         }
       })
-      console.log(currentUserId)
-      console.log(id)
 
       res.status(200).json(userFollowersData)
     } catch (err) {
