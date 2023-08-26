@@ -24,6 +24,7 @@ router.post('/api/users', userController.signUp)
 router.post('/api/users/signin', userController.signIn)
 router.put('/api/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.updateUser)
 router.get('/api/users/:id/likes', authenticated, authenticatedUser, userController.getUserLikes)
+router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserReplies)
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 

@@ -266,8 +266,7 @@ const userController = {
               { model: User, as: 'author', attributes: ['account', 'name', 'avatar'] }
             ]
           }
-        ],
-        nest: true
+        ]
       })
 
       if (likeTweets.length === 0) throw new Error('the user did not like any tweet')
@@ -284,6 +283,40 @@ const userController = {
       }))
 
       res.json(likeTweetsData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id, { raw: true, nest: true })
+      if (!user) throw new Error('User does not exist')
+
+      const userTweets = await Tweet.findAll({
+        where: { userId: id },
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: User,
+            as: 'author',
+            attributes: { exclude: ['password'] }
+          }
+        ]
+      })
+
+      const userTweetsData = userTweets.map(tweet => ({
+        TweetId: tweet.id,
+        tweetBelongerName: tweet.author.name,
+        tweetBelongerAccount: tweet.author.account,
+        tweetBelongerAvatar: tweet.author.avatar,
+        tweetLikeCount: tweet.likeCount,
+        tweetReplyCount: tweet.replyCount,
+        description: tweet.description,
+        createdAt: tweet.createdAt
+      }))
+
+      res.json(userTweetsData)
     } catch (err) {
       next(err)
     }
