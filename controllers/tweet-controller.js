@@ -6,7 +6,6 @@ const tweetController = {
   // 看所有貼文
   getTweets: (req, res, next) => {
     const loginUserId = getUser(req).toJSON().id
-
     return Tweet.findAll({
       nest: true,
       raw: true,
@@ -34,8 +33,8 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const limitWords = 140
     const { description } = req.body
-    const loginUserId = getUser(req).id
 
+    const loginUserId = getUser(req).id
     if (!loginUserId) throw new Error('帳號不存在！')
     if (!description.trim()) throw new Error('內容不可空白')
     if (description.length > limitWords ) throw new Error(`字數不能大於 ${limitWords} 字`)
