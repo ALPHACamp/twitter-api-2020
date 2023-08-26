@@ -5,7 +5,7 @@ const admin = require('./modules/admin')
 const adminController = require('../controllers/admin-controller')
 const userController = require('../controllers/user-controller')
 
-const { authenticated, authenticatedAdmin } = require('../middleware/auth')
+const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { adminSignIn, userSignIn } = require('../middleware/login-handler')
 
