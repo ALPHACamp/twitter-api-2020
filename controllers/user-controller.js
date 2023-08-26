@@ -158,7 +158,6 @@ const userController = {
     const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
 
     return Promise.all([
-      User.findByPk(helpers.getUser(req).id, { include: [Reply] }),
       User.findByPk(UserId),
       Like.findAll({
         where: { UserId },
@@ -173,10 +172,8 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
     ])
-      .then(([currentUser, specificUser, likes]) => {
-        const RepliedTweetId = currentUser.toJSON().Replies.map(r => r.TweetId)
-
-        if (!specificUser) {
+      .then(([User, likes]) => {
+        if (!User) {
           const err = new Error('使用者不存在！')
           err.status = 404
           throw err
@@ -189,7 +186,6 @@ const userController = {
           delete like.Tweet.Likes
           delete like.Tweet.Replies
           like.Tweet.isLiked = likedTweetsId.includes(like.TweetId)
-          like.Tweet.isReplyed = RepliedTweetId.includes(like.TweetId)
           return like
         })
 
