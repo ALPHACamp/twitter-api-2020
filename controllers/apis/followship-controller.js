@@ -5,20 +5,20 @@ const helpers = require('../../_helpers')
 const followshipController = {
   followUser: async (req, res, next) => {
     try {
-      const followedUserId = req.body.id
+      const followingId = req.body.id
       const getUser = helpers.getUser(req)
       const userId = getUser.id
       const [user, followship] = await Promise.all([
         User.findByPk(userId),
         Followship.findOne({
-          where: { followerId: followedUserId, followingId: userId }
+          where: { followerId: userId, followingId }
         })
       ])
       if (!user) throw new Error("User didn't exist!")
       if (followship) throw new Error("You've are already followed this user!")
       Followship.create({
-        followerId: followedUserId,
-        followingId: userId
+        followerId: userId,
+        followingId
       })
       res.json({
         status: 'success',
@@ -30,19 +30,19 @@ const followshipController = {
   },
   unfollowUser: async (req, res, next) => {
     try {
-      const followedUserId = req.params.following_id
+      const followingId = req.params.following_id
       const getUser = helpers.getUser(req)
       const userId = getUser.id
       const [user, followship] = await Promise.all([
         User.findByPk(userId),
         Followship.findOne({
-          where: { followerId: followedUserId, followingId: userId }
+          where: { followerId: userId, followingId }
         })
       ])
       if (!user) throw new Error("User didn't exist!")
       if (!followship) throw new Error("You haven't followed this user!")
       Followship.destroy({
-        where: { followerId: followedUserId, followingId: userId }
+        where: { followerId: userId, followingId }
       })
       res.json({
         status: 'success',
