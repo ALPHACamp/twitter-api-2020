@@ -5,6 +5,7 @@ const tweets = require('./modules/tweets')
 
 const passport = require('../config/passport')
 const apiErrorHandler = require('../middleware/error-handler')
+const upload = require('../middleware/multer')
 const { authenticator, authenticatorAdmin } = require('../middleware/api-auth')
 
 const userController = require('../controllers/user-controller')
@@ -18,9 +19,9 @@ router.get('/users/:id/tweets', authenticator, userController.getUserTweets) // 
 router.get('/users/:id/replied_tweets', authenticator, userController.getUserReplies) // No.5 - 查看某使用者發過的回覆
 router.get('/users/:id/likes', authenticator, userController.getUserLikes) // No.6 - 查看某使用者點過like的推文
 router.get('/users/:id/followings', authenticator, userController.getUserFollowings) // No.7 - 查看某使用者追蹤中的人
-router.get('/users/:id/followers', userController.getUserFollowers) // No.8 - 查看某使用者的追隨者
+router.get('/users/:id/followers', authenticator, userController.getUserFollowers) // No.8 - 查看某使用者的追隨者
 router.get('/users', authenticator, userController.getUsers) // No.9 - 查看跟隨者數量排名(前10)的使用者資料
-router.put('/users/:id', userController.putUser) // No.10 - 編輯使用者資料
+router.put('/users/:id', authenticator, upload.fields([{ name: 'avatar' }, { name: 'banner' }]), userController.putUser) // No.10 - 編輯使用者資料
 
 router.use('/tweets', authenticator, tweets)
 

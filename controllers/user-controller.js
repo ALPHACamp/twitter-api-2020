@@ -7,8 +7,10 @@ require('dayjs/locale/zh-tw')
 dayjs.extend(relativeTime) // 外掛相對時間模組
 dayjs.locale('zh-tw') // 默認使用繁中
 
-const helpers = require('../_helpers')
 const { Op } = require('sequelize')
+const helpers = require('../_helpers')
+const imgurFileHandler = require('../helpers/file-helpers')
+
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 
 const userController = {
@@ -295,8 +297,7 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      // const currentUserId = helpers.getUser(req).id
-      const currentUserId = 6
+      const currentUserId = helpers.getUser(req).id
 
       // --資料提取--
       let followers = await Followship.findAll({
@@ -360,13 +361,56 @@ const userController = {
   // No.10 - 編輯使用者資料 PUT /api/users/:id
   putUser: async (req, res, next) => {
     try {
-      const UserId = req.params.id
+      // 確認有權限修改
+      const UserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+
+      if (currentUserId !== Number(UserId)) {
+        const error = new Error('permission denied')
+        error.status = 403
+        throw error
+      }
 
       // --資料提取--
+      const user = await User.findByPk(UserId)
+      if (!user) throw new Error('不存在的使用者')
 
-      // --資料整理--
+      // 檢查各欄位是否符合規定
+      const { account, name, email, password, checkPassword, introduction } = req.body
+      if (password !== checkPassword) throw new Error('確認密碼不相符！')
+      if (name > 50) throw new Error('名稱不能超過50字')
+      if (introduction > 160) throw new Error('自我介紹不能超過160字')
 
-      return res.status(200).json()
+      // 檢查新的帳密是否存在(但要排除未修改的狀況，否則所有request都會被擋)
+      const promises = []
+      const promise1 = User.findOne({ where: { account } })
+      const promise2 = User.findOne({ where: { email } })
+
+      if (account && account !== user.account) promises.push(promise1)
+      if (email && email !== user.email) promises.push(promise2)
+      const users = await Promise.all(promises)
+      if (users.some(user => user)) throw new Error('account或email已經存在')
+
+      // 上傳檔案(非同步) - avatar: req.files.avatar[0], banner: req.files.banner[0]
+      const [filePath1, filePath2] = await Promise.all([imgurFileHandler(req.files.avatar?.[0] || null), imgurFileHandler(req.files.banner?.[0] || null)])
+
+      console.log([filePath1, filePath2])
+
+      // 欄位更新:若有新值則給定新值，無新值則使用舊值
+      const hash = password ? await bcrypt.hash(password, 10) : null
+      const newUser = await user.update({
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        password: hash || user.password,
+        introduction: introduction || user.introduction,
+        avatar: filePath1 || user.avatar || 'https://via.placeholder.com/224',
+        banner: filePath2 || user.banner || 'https://images.unsplash.com/photo-1580436541340-36b8d0c60bae'
+      })
+
+      if (!newUser) throw new Error('資料更新失敗')
+
+      return res.status(200).json(newUser)
     } catch (err) {
       return next(err)
     }
