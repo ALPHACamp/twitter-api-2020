@@ -15,11 +15,24 @@ passport.use(new LocalStrategy(
   },
   // authenticate user
   (req, account, password, cb) => {
+    // 檢查請求路徑是否是前台或後台登入
+    const isUserLogin = req.path.includes('users')
+    const isAdminLogin = req.path.includes('admin')
     User.findOne({ where: { account } })
       // 如果找不到帳號
       .then(user => {
         if (!user) {
           const err = new Error('帳號不存在！')
+          err.status = 401
+          throw err
+        }
+        if (isUserLogin && user.role !== 'user') {
+          const err = new Error('不可用後台帳號登入前台！')
+          err.status = 401
+          throw err
+        }
+        if (isAdminLogin && user.role !== 'admin') {
+          const err = new Error('不可用前台帳號登入後台！')
           err.status = 401
           throw err
         }
@@ -56,18 +69,18 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
 
 // API版本不會走序列化與反序列化
 // 序列化
-passport.serializeUser((user, cb) => {
-  cb(null, user.id)
-})
-// 反序列化
-passport.deserializeUser((id, cb) => {
-  return User.findByPk(id, {
-    include: [
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
-    ]
-  })
-    .then(user => cb(null, user.toJSON()))
-    .catch(err => cb(err))
-})
+// passport.serializeUser((user, cb) => {
+//   cb(null, user.id)
+// })
+// // 反序列化
+// passport.deserializeUser((id, cb) => {
+//   return User.findByPk(id, {
+//     include: [
+//       { model: User, as: 'Followers' },
+//       { model: User, as: 'Followings' }
+//     ]
+//   })
+//     .then(user => cb(null, user.toJSON()))
+//     .catch(err => cb(err))
+// })
 module.exports = passport

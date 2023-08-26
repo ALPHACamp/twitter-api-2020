@@ -3,7 +3,6 @@ const { getUser } = require('../_helpers')
 
 const tweetController = {
   getTweets: (req, res, next) => {
-
     const loginUser = getUser(req).toJSON().id
 
     return Tweet.findAll({
@@ -38,9 +37,8 @@ const tweetController = {
       userId
     })
     .then(tweet => {
-      res.status(200).json(tweet)
+      console.log(tweet)
     })
-    .catch(err => next(err))
   }
 }
 
