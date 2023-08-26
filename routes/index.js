@@ -3,6 +3,7 @@ const router = express.Router()
 
 const tweets = require('./modules/tweets')
 const users = require('./modules/users')
+const admin = require('./modules/admin')
 
 const passport = require('../config/passport')
 const apiErrorHandler = require('../middleware/error-handler')
@@ -16,6 +17,7 @@ router.post('/users/signin', passport.authenticate('local', { session: false, fa
 
 router.use('/users', authenticator, users)
 router.use('/tweets', authenticator, tweets)
+router.use('/admin', authenticatorAdmin, admin)
 
 router.use('/', (req, res) => res.status(500).json({ success: false, message: 'no such api' })) // fallback路由
 router.use('/', apiErrorHandler) // 錯誤處理
