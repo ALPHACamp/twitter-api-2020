@@ -19,6 +19,7 @@ const tweetController = {
       .then(tweets => {
         const data = tweets
         return res.json({
+          status: 'success',
           data: data
         })
       })
