@@ -2,10 +2,11 @@ const express = require('express')
 const router = express.Router()
 
 const admin = require('./modules/admin')
+const tweet = require('./modules/tweet')
 const adminController = require('../controllers/admin-controller')
 const userController = require('../controllers/user-controller')
 
-const { authenticated, authenticatedAdmin } = require('../middleware/auth')
+const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { adminSignIn, userSignIn } = require('../middleware/login-handler')
 
@@ -16,6 +17,8 @@ router.post('/users', userController.signUp)
 router.post('/admin/signin', adminSignIn, adminController.signIn)
 // admin其他路由
 router.use('/admin', authenticated, authenticatedAdmin, admin)
+// tweet相關路由
+router.use('/tweets', authenticated, authenticatedUser, tweet)
 
 router.use('/', apiErrorHandler)
 
