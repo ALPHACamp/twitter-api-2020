@@ -67,6 +67,7 @@ const tweetController = {
       Reply.findAll({
         where: { TweetId: req.params.tweet_id },
         include: { model: User, attributes: { exclude: 'password' } },
+        order: [['createdAt', 'DESC']],
         nest: true
       })
     ])

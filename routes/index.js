@@ -6,14 +6,16 @@ const tweets = require('./modules/tweets')
 const followships = require('./modules/followships')
 const admin = require('./modules/admin')
 const passport = require('../config/passport')
+
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
-const { generalErrorHandler } = require('../middleware/error-handler')
 
+const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
 
 router.post('/api/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/api/users', userController.signUp)
+router.use('/api/users', authenticatedUser, users)
 
 router.post('/api/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn)
 router.use('/api/admin', authenticatedAdmin, admin)
