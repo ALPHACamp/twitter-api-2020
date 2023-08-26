@@ -229,7 +229,7 @@ const userController = {
       }
       // 同上註解
       if (account) {
-        if (account.length > 50) throw new Error('帳號字數超出上限！')
+        if (account.length > 30) throw new Error('帳號字數超出上限！')
         if (userA.account !== account) {
           const userC = await User.findOne({ where: { account } })
           if (userC) throw new Error('account已重複註冊！')
