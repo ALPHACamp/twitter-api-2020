@@ -4,7 +4,10 @@ const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class Followship extends Model { }
 
-  Followship.associate = function (models) { }
+  Followship.associate = function (models) {
+    Followship.belongsTo(models.User, { foreignKey: 'FollowerId', as: 'Follower' })
+    Followship.belongsTo(models.User, { foreignKey: 'FollowingId', as: 'Following' })
+  }
 
   Followship.init({
     followerId: DataTypes.INTEGER,
