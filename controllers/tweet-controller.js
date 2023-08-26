@@ -1,4 +1,4 @@
-const { Tweet, User, Like, sequelize } = require('../models')
+const { Tweet, User, Like, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const dayjs = require('dayjs')
 const utc = require('dayjs/plugin/utc') // 引入世界時間插件
@@ -103,6 +103,7 @@ const tweetController = {
     try {
       const userId = helpers.getUser(req).id
       const { description } = req.body
+
       if (!description) {
         throw new Error('內容不可空白')
       } else if (description.length > 140) {
@@ -114,6 +115,80 @@ const tweetController = {
       })
       const tweetData = newTweet.toJSON()
       return res.status(200).json(tweetData)
+    } catch (err) {
+      return next(err)
+    }
+  },
+  addLike: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(req.params.id),
+        Like.findOne({
+          where: {
+            UserId: helpers.getUser(req).id,
+            TweetId: tweetId
+          }
+        })
+      ])
+
+      if (!tweet) throw new Error('推文已不存在')
+      if (like) throw new Error('你已經按讚過此推文')
+
+      const liked = await Like.create({
+        UserId: helpers.getUser(req).id,
+        TweetId: tweetId
+      })
+      return res.status(200).json(liked)
+    } catch (err) {
+      return next(err)
+    }
+  },
+  removeLike: async (req, res, next) => {
+    try {
+      const like = await Like.findOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.id
+        }
+      })
+
+      if (!like) throw new Error('你尚未按讚此推文')
+      const unlike = await like.destroy()
+      return res.status(200).json(unlike)
+    } catch (err) {
+      return next(err)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const replies = await Reply.findAll({
+        where: { TweetId: req.params.id },
+        include: [{
+          model: User,
+          attributes: ['account', 'name', 'avatar']
+        }],
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(replies)
+    } catch (err) {
+      return next(err)
+    }
+  },
+  postReply: async (req, res, next) => {
+    try {
+      const { comment } = req.body
+      const newReply = await Reply.create({
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.id,
+        comment
+      })
+
+      if (!comment) throw new Error('內容不可空白')
+
+      return res.status(200).json(newReply)
     } catch (err) {
       return next(err)
     }
