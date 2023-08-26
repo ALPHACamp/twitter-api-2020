@@ -67,11 +67,8 @@ const userController = {
 
       if (!user) throw new Error('建立帳號失敗！')
       req.user = user
-      return next() // 先不回應，向後交給signin繼續處理
 
-      // const userData = user.toJSON()
-      // delete userData.password
-      // return res.status(200).json({ success: true, data: userData })
+      return next() // 先不回應，向後交給signin繼續處理
     } catch (err) {
       return next(err)
     }
@@ -116,6 +113,8 @@ const userController = {
         }
       })
 
+      if (!user) throw new Error('使用者讀取失敗')
+
       return res.status(200).json(user)
     } catch (err) {
       return next(err)
@@ -152,6 +151,8 @@ const userController = {
         }
       })
 
+      if (!tweets) throw new Error('推文讀取失敗')
+
       // --資料整理--
       tweets = tweets
         .map(tweet => tweet.toJSON())
@@ -182,12 +183,14 @@ const userController = {
         }],
         attributes: {
           include: [[
-            sequelize.literal('(SELECT account FROM Users WHERE UserId = Users.id)'),
+            sequelize.literal('(SELECT account FROM Users JOIN Tweets ON Tweets.UserId = Users.id WHERE TweetId = Tweets.id)'),
             'repliedTo' // 回覆給那一個作者
           ]]
         },
         nest: true
       })
+
+      if (!replies) throw new Error('回覆讀取失敗')
 
       // --資料整理--
       replies = replies
@@ -235,22 +238,16 @@ const userController = {
         nest: true
       })
 
+      if (!likes) throw new Error('喜歡讀取失敗')
+
       // --資料整理--
       likes = likes
-        .map(reply => reply.toJSON())
-        .map(reply => ({ // 拆掉最外層結構，並追加屬性fromNow
-          ...reply.Tweet,
-          TweetId: reply.TweetId, // 多做一個屬性應付測試檔檢查
-          fromNow: dayjs(reply.Tweet.createdAt).fromNow()
+        .map(like => like.toJSON())
+        .map(like => ({ // 拆掉最外層結構，並追加屬性fromNow
+          ...like.Tweet,
+          TweetId: like.TweetId, // 多做一個屬性應付測試檔檢查
+          fromNow: dayjs(like.Tweet.createdAt).fromNow()
         }))
-      // likes = likes.map(reply => ({
-      //   ...reply,
-      //   Tweet: {
-      //     ...reply.Tweet,
-      //     fromNow: dayjs(reply.Tweet.createdAt).fromNow(),
-      //     isLiked: true
-      //   }
-      // }))
 
       return res.status(200).json(likes)
     } catch (err) {
@@ -264,7 +261,7 @@ const userController = {
       const currentUserId = helpers.getUser(req).id
 
       // --資料提取--
-      let followings = await Followship.findAll({
+      const followships = await Followship.findAll({
         where: { followerId: UserId },
         order: [['createdAt', 'DESC']],
         include: [{
@@ -281,11 +278,14 @@ const userController = {
         nest: true
       })
 
+      if (!followships) throw new Error('追蹤者讀取失敗')
+
       // --資料整理--
-      followings = followings
-        .map(reply => reply.toJSON())
-        .map(reply => ({ // 拆掉最外層結構
-          ...reply.Following
+      const followings = followships
+        .map(followship => followship.toJSON())
+        .map(followship => ({ // 拆掉最外層結構
+          ...followship.Following,
+          followingId: followship.followingId // 多做一個屬性應付測試檔檢查
         }))
 
       return res.status(200).json(followings)
@@ -300,7 +300,7 @@ const userController = {
       const currentUserId = helpers.getUser(req).id
 
       // --資料提取--
-      let followers = await Followship.findAll({
+      const followships = await Followship.findAll({
         where: { followingId: UserId },
         order: [['createdAt', 'DESC']],
         include: [{
@@ -317,11 +317,14 @@ const userController = {
         nest: true
       })
 
+      if (!followships) throw new Error('追隨者讀取失敗')
+
       // --資料整理--
-      followers = followers
-        .map(reply => reply.toJSON())
-        .map(reply => ({ // 拆掉最外層結構
-          ...reply.Follower
+      const followers = followships
+        .map(followship => followship.toJSON())
+        .map(followship => ({ // 拆掉最外層結構
+          ...followship.Follower,
+          followerId: followship.followerId // 多做一個屬性應付測試檔檢查
         }))
 
       return res.status(200).json(followers)
@@ -353,6 +356,8 @@ const userController = {
         raw: true
       })
 
+      if (!users) throw new Error('使用者排行讀取失敗')
+
       return res.status(200).json(users)
     } catch (err) {
       return next(err)
@@ -382,27 +387,24 @@ const userController = {
       if (introduction > 160) throw new Error('自我介紹不能超過160字')
 
       // 檢查新的帳密是否存在(但要排除未修改的狀況，否則所有request都會被擋)
-      const promises = []
-      const promise1 = User.findOne({ where: { account } })
-      const promise2 = User.findOne({ where: { email } })
-
-      if (account && account !== user.account) promises.push(promise1)
-      if (email && email !== user.email) promises.push(promise2)
-      const users = await Promise.all(promises)
-      if (users.some(user => user)) throw new Error('account或email已經存在')
+      if (account && account !== user.account) {
+        const user1 = await User.findOne({ where: { account } })
+        if (user1) throw new Error('account已經存在')
+      }
+      if (email && email !== user.email) {
+        const user1 = await User.findOne({ where: { email } })
+        if (user1) throw new Error('email已經存在')
+      }
 
       // 上傳檔案(非同步) - avatar: req.files.avatar[0], banner: req.files.banner[0]
       const [filePath1, filePath2] = await Promise.all([imgurFileHandler(req.files.avatar?.[0] || null), imgurFileHandler(req.files.banner?.[0] || null)])
 
-      console.log([filePath1, filePath2])
-
       // 欄位更新:若有新值則給定新值，無新值則使用舊值
-      const hash = password ? await bcrypt.hash(password, 10) : null
       const newUser = await user.update({
         account: account || user.account,
         name: name || user.name,
         email: email || user.email,
-        password: hash || user.password,
+        password: password ? await bcrypt.hash(password, 10) : user.password,
         introduction: introduction || user.introduction,
         avatar: filePath1 || user.avatar || 'https://via.placeholder.com/224',
         banner: filePath2 || user.banner || 'https://images.unsplash.com/photo-1580436541340-36b8d0c60bae'
