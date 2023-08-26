@@ -1,12 +1,11 @@
 const { Tweet, User, Like, Reply, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
-const { relativeTime, simpleDate, simpleTime } = require('../helpers/datetime-helper')
+const { relativeTimeFromNow, simpleDate, simpleTime } = require('../helpers/datetime-helper')
 
 const tweetController = {
   // 看所有貼文
   getTweets: (req, res, next) => {
     const loginUserId = getUser(req).toJSON().id
-
     return Tweet.findAll({
       nest: true,
       raw: true,
@@ -16,7 +15,7 @@ const tweetController = {
       },
       attributes: [
         'id',
-        'description'
+        'description',
         [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
         [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
         [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${loginUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
@@ -24,7 +23,7 @@ const tweetController = {
       order: [['createdAt', 'DESC']]
     })
     .then(data => data.map(tweet => ({
-      ...tweet,
+        ...tweet,
       createdAt : relativeTime(tweet.createdAt)
     })))
     .then(tweet => res.status(200).json(tweet))
@@ -42,7 +41,7 @@ const tweetController = {
     
     return Tweet.create({
       description,
-      userId
+      UserId: loginUserId
     })
     .then(tweet => {
       res.status(200).json(tweet)
