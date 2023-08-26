@@ -1,5 +1,5 @@
 function getUser (req) {
-  return req.user || null
+  return req.user
 }
 
 module.exports = {
