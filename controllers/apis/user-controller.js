@@ -325,7 +325,6 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const { id } = req.params
-      // const currentUserId = helpers.getUser(req).id
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
 
@@ -368,6 +367,38 @@ const userController = {
       const { id } = req.params
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
+      const currentUserId = helpers.getUser(req).id
+
+      const following = await Followship.findAll({
+        where: { followerId: id },
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: User,
+            as: 'following',
+            attributes: { exclude: ['password'] }
+          }
+        ],
+        attributes: [
+          'followerId',
+          'followingId',
+          'createdAt',
+          'updatedAt',
+          [sequelize.literal(`(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`), 'isFollowed']
+        ],
+        raw: true,
+        nest: true
+      })
+
+      const userFollowersData = following.map(follower => {
+        return {
+          ...follower
+        }
+      })
+      console.log(currentUserId)
+      console.log(id)
+
+      res.status(200).json(userFollowersData)
     } catch (err) {
       next(err)
     }
