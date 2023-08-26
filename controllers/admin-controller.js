@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 const { getUser } = require('../_helpers')
 const { User, Tweet } = require('../models')
-const sequelize = require('sequelize')
+const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -66,7 +67,8 @@ const adminController = {
       // 擷取推文訊息50字
       const data = tweets.map(tweet => ({
         ...tweet,
-        description: tweet.description.substring(0, 50)
+        description: tweet.description.substring(0, 50),
+        createdAt: relativeTimeFromNow(tweet.createdAt)
       }))
 
       res.status(200).json(data)
