@@ -79,9 +79,36 @@ const tweetController = {
           message: '推文不存在',
         })
       }
-    console.log(simpleTime(tweet.createdAt))
       tweet.createdAt = simpleTime(tweet.createdAt) + ' • ' + simpleDate(Tweet.createdAt)
       return res.status(200).json(tweet)   
+    })
+    .catch(err => next(err))
+  },
+  likeTweet: (req, res, next) => {
+    const { id } = req.params
+    console.log(id)
+    const UserId = getUser(req).toJSON().id
+
+    return Promise.all([
+      Tweet.findByPk(id),
+      Like.findOrCreate({
+        where: { UserId, TweetId: id }
+      })
+    ])
+    .then(([tweet, like]) => {
+        if (!tweet) {
+          return res.status(404).json({
+            status:'error',
+            message: '推文不存在'
+          })
+        }
+        if (!like[1]) {
+        return res.status(422).json({
+          status: 'error',
+          message: '已表示喜歡'
+          })
+        }
+        return res.status(200).json({ status: 'success' })
     })
     .catch(err => next(err))
   }

@@ -19,7 +19,7 @@ router.post('/users/signin', passport.authenticate('local', { session: false }),
 router.post('/users/', userController.signUp) // 註冊
 
 // modules
-router.use('/tweets', authenticated, authenticatedCurrentUser, tweet)
+router.use('/tweets', authenticated, tweet)
 
 router.use('/', apiErrorHandler)
 module.exports = router
