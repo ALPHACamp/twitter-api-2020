@@ -11,7 +11,10 @@ const userController = {
     const { name, account, email, password, checkPassword } = req.body
     if (!name || !account || !email || !password || !checkPassword) throw new Error('所有欄位皆為必填！')
     if (name.length > 50) throw new Error('暱稱字數超出上限！')
+    if (account.length > 30) throw new Error('帳號字數超出上限！')
+    if (password.length < 5 || password.length > 20) throw new Error('請設定 5 到 20 字的密碼！')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
+
     return Promise.all([
       User.findOne({ where: { email } }),
       User.findOne({ where: { account } })
@@ -111,7 +114,7 @@ const userController = {
           err.status = 404
           throw err
         }
-      
+
         const result = tweets.map(tweet => ({
           ...tweet.toJSON(),
           likesCount: tweet.Likes.length,
@@ -200,14 +203,15 @@ const userController = {
       const avatar = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
       const banner = req.files?.banner ? await imgurFileHandler(req.files.banner[0]) : null
 
-      if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
       if (name) {
-        if (name.length > 50) throw new Error('使用者暱稱上限為50字！')
+        if (name.length > 50) throw new Error('暱稱字數超出上限！')
       }
       if (introduction) {
-        if (introduction.length > 160) throw new Error('自我介紹上限為160字！')
+        if (introduction.length > 160) throw new Error('自我介紹字數超出上限！')
       }
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
       if (password) {
+        if (password.length < 5 || password.length > 20) throw new Error('請設定 5 到 20 字的密碼')
         password = await bcrypt.hash(password, 10)
       }
       const userA = await User.findByPk(req.params.id)
@@ -216,15 +220,16 @@ const userController = {
         err.status = 404
         throw err
       }
-      // 81~86行，如果使用者輸入的 email 和原本一樣，就不用再去檢查 email 是否存在，不然會顯示 email 已重複註冊
+      // 如果使用者輸入的 email 和原本一樣，就不用再去檢查 email 是否存在，不然會顯示 email 已重複註冊
       if (email) {
         if (userA.email !== email) {
           const userB = await User.findOne({ where: { email } })
           if (userB) throw new Error('email已重複註冊！')
         }
       }
-      // 同80行註解
+      // 同上註解
       if (account) {
+        if (account.length > 30) throw new Error('帳號字數超出上限！')
         if (userA.account !== account) {
           const userC = await User.findOne({ where: { account } })
           if (userC) throw new Error('account已重複註冊！')
