@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
 const jwt = require('jsonwebtoken')
-const { User, Followship } = require('../models')
+
+const { User, Followship, Tweet  } = require('../models')
 const dayjs = require('dayjs')
 const utc = require('dayjs/plugin/utc') // 引入 UTC 套件
 const timezone = require('dayjs/plugin/timezone') // 引入時區套件
@@ -112,6 +113,28 @@ const userController = {
           }
         })
       })
+      .catch(err => next(err))
+
+  },
+  getUserTweets: (req, res, next) => {
+    // 取得該使用者的所有推文
+    const paramsUserId = Number(req.params.id)
+    Promise.all([
+      User.findByPk(paramsUserId),
+      Tweet.findAll({
+        where: { UserId: paramsUserId },
+        raw: true
+      })
+    ])
+      .then(([user, tweets]) => {
+        if (!user) {
+          const err = new Error('使用者不存在！')
+          err.status = 404
+          throw err
+        }
+        return tweets.map(tweet => ({ ...tweet }))
+      })
+      .then(tweets => res.status(200).json(tweets))
       .catch(err => next(err))
   }
 }
