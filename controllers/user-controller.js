@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
-const { User } = require('../models')
+const { User, Reply, Tweet, Like } = require('../models')
+const { relativeTimeFromNow, formatDate, formatTime } = require('../helpers/dayjs-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
@@ -154,8 +155,48 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id // 被查看的使用者 ID
+      const user = await User.findByPk(userId)
+      // 取tw
+      const tweets = await Tweet.findAll({
+        where: { UserId: user.id },
+        include: [
+          {
+            model: User,
+            attributes: { exclude: ['password'] }
+          },
+          { model: Reply },
+          {
+            model: User,
+            as: 'LikedUsers'
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
 
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      if (!tweets) throw new Error('目前沒有任何推文。')
+      const isLiked = tweets.LikedUsers?.some(liked => liked.UserId === helpers.getUser(req).id) || false
+      // const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
+      const data = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        createdAt: relativeTimeFromNow(tweet.createdAt),
+        repliedAmount: tweet.Replies.length || 0,
+        likedAmount: tweet.LikedUsers.length || 0,
+        isLiked
+      }))
+      return res.json(data)
+    } catch (err) {
+      next(err)
+    }
+  }
 }
 
 module.exports = userController
