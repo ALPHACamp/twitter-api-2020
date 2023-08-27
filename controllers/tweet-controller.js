@@ -1,5 +1,6 @@
 const { Tweet, User, Reply } = require('../models')
 const { relativeTimeFromNow, formatDate, formatTime } = require('../helpers/dayjs-helpers')
+const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -76,6 +77,27 @@ const tweetController = {
       }
 
       return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  postTweet: async (req, res, next) => {
+    try {
+      const { description } = req.body
+
+      if (!description) throw new Error('推文內容不可空白！')
+      if (description.length > 140) throw new Error('推文字數不可超過140字！')
+
+      const tweet = await Tweet.create({
+        description,
+        UserId: helpers.getUser(req).id
+      })
+
+      return res.status(200).json({
+        status: 'success',
+        message: '成功發佈推文！',
+        tweet
+      })
     } catch (err) {
       next(err)
     }
