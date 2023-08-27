@@ -21,7 +21,7 @@ const followshipController = {
         followerId: userId,
         followingId
       })
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: 'successfully follow user!'
       })

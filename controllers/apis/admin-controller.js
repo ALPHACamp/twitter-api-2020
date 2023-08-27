@@ -19,7 +19,6 @@ const adminController = {
           if (user.introduction) {
             user.introduction = user.introduction.substring(0, 50)
           }
-          console.log(user)
         })
         res.status(200).json(users)
       })

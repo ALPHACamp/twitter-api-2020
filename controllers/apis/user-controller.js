@@ -156,7 +156,6 @@ const userController = {
         })
       ])
 
-      console.log(user, replies)
       const userRepliesResult = replies.map(reply => ({
         replyId: reply.id,
         comment: reply.comment,
@@ -170,11 +169,8 @@ const userController = {
         tweetBelongerAccount: reply.tweetreply.author.account
       }))
 
-      console.log(userRepliesResult)
-
       res.status(200).json(userRepliesResult)
     } catch (err) {
-      console.error(err)
       next(err)
     }
   },
@@ -197,14 +193,10 @@ const userController = {
       if (!currentUserId) {
         throw new Error('Current user ID is missing')
       }
-      console.log(currentUserId, Number(id))
 
       if (currentUserId !== Number(id)) {
         throw new Error('Cannot edit other users profile')
       }
-      // console.log(currentUserId, Number(id))
-
-      // console.log('File object:', files)
 
       if (name && name.length > 50) { throw new Error('the length of name should less than 50 characters') }
       if (introduction && introduction.length > 160) {
@@ -214,13 +206,14 @@ const userController = {
       }
 
       if (account) {
-        const user = await User.findOne({ where: { account } })
-        if (user.account === account) throw new Error('account 已重複註冊!')
+        const userByAccount = await User.findOne({ where: { account }, raw: true, nest: true })
+
+        if (userByAccount && userByAccount.account === account) throw new Error('account 已重複註冊!')
       }
 
       if (email) {
-        const user = await User.findOne({ where: { email } })
-        if (user.email === email) throw new Error('email 已重複註冊!')
+        const userByEmail = await User.findOne({ where: { email } })
+        if (userByEmail && userByEmail.email === email) throw new Error('email 已重複註冊!')
       }
 
       const { files } = req
