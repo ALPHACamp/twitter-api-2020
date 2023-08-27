@@ -11,13 +11,6 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       User.hasMany(models.Tweet, { foreignKey: 'userId', as: 'author' })
       User.hasMany(models.Reply, { foreignKey: 'userId', as: 'replier' })
-
-      // User.belongsTo(models.Tweet, { foreignKey: "userId", as: "likedTweets" });
-      // User.belongsTo(models.Tweet, {
-      //   foreignKey: "userId",
-      //   as: "likedReplies",
-      // });
-
       User.hasMany(models.Like, { foreignKey: 'userId' })
       User.belongsToMany(models.User, {
         through: models.Followship,

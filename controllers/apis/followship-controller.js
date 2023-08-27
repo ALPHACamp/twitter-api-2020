@@ -1,6 +1,7 @@
 const db = require('../../models')
 const { User, Followship } = db
 const helpers = require('../../_helpers')
+const sequelize = require('sequelize')
 
 const followshipController = {
   followUser: async (req, res, next) => {
@@ -52,7 +53,57 @@ const followshipController = {
       next(err)
     }
   },
-  getTop10: (req, res, next) => {}
+  getTop10: async (req, res, next) => {
+    try {
+      const getUser = helpers.getUser(req)
+      const currentUserId = getUser.id
+      if (!currentUserId) throw new Error("User didn't exist!")
+
+      const top10UsersWithFollowStatus = await User.findAll({
+        where: {
+          role: 'user',
+          id: { [sequelize.Op.not]: currentUserId }
+        },
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'avatar',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(DISTINCT id) FROM Followships WHERE following_id = User.id)'
+            ),
+            'totalFollowers'
+          ],
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Followships WHERE following_id = User.id AND follower_Id = ${currentUserId})`
+            ),
+            'isFollowed'
+          ]
+        ],
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: [],
+            through: { attributes: [] }
+          }
+        ],
+        order: [[sequelize.literal('totalFollowers'), 'DESC']],
+        limit: 10,
+        subQuery: false, // 避免因查詢多張表造成limit失常
+        raw: true,
+        nest: true
+      })
+
+      res.json({
+        top10UsersWithFollowStatus
+      })
+    } catch (err) {
+      next(err)
+    }
+  }
 }
 
 module.exports = followshipController
