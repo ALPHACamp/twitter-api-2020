@@ -11,4 +11,5 @@ module.exports = {
   relativeTimeFromNow: a => dayjs(a).fromNow(),
   simpleTime: a => dayjs(a).format('A hh:mm'),
   simpleDate: a => dayjs(a).format('YYYY年MM月DD日')
+
 }

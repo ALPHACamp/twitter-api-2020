@@ -4,10 +4,11 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
 // const admin = require('./modules/admin')
-const { authenticated, authenticatedCurrentUser } = require('../middleware/api-auth')
+
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
+const { authenticated } = require('../middleware/api-auth')
 const tweet = require('./modules/tweet')
 
 // router.use('/admin', authenticated, authenticatedAdmin, admin)

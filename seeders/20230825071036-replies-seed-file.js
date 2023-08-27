@@ -27,10 +27,10 @@ module.exports = {
         })
       }
     })
-    await queryInterface.bulkInsert('replies', replies
+    await queryInterface.bulkInsert('Replies', replies
     )
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('replies', {})
+    await queryInterface.bulkDelete('Replies', {})
   }
 }
