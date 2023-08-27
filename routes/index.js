@@ -13,6 +13,9 @@ const adminController = require('../controllers/admin-controller')
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
 
+router.get('/api/auth/test-token', authenticatedUser, userController.getAuth)
+router.get('/api/auth/test-token-admin', authenticatedAdmin, adminController.getAuth)
+
 router.post('/api/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/api/users', userController.signUp)
 router.use('/api/users', authenticatedUser, users)

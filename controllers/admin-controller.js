@@ -99,6 +99,9 @@ const adminController = {
         res.json(result)
       })
       .catch(err => next(err))
+  },
+  getAuth: (req, res, next) => {
+    helpers.getUser(req) ? res.json({ status: 'success', message: `User role is ${helpers.getUser(req).role}` }) : res.status(401).json({ status: 'error', message: 'unauthorized' })
   }
 }
 
