@@ -11,6 +11,7 @@ router.post('/:id/like', tweetController.likeTweet)
 
 // reply tweet function
 router.get('/:id/replies', tweetController.getReplies)
+router.post('/:id/replies', tweetController.postReply)
 
 // tweets function 
 router.get('/:id', tweetController.getTweet)
