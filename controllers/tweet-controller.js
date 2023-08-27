@@ -26,6 +26,7 @@ const tweetController = {
       const data = tweets.map(tweet => ({
         ...tweet.toJSON(),
         createdAt: relativeTimeFromNow(tweet.createdAt), // 推文的時間以 相對時間 為概念
+        isLiked: tweet.LikedUsers?.some(lu => lu.id === helpers.getUser(req).id) || false, // 辨識該則貼文是否有被登入的使用者liked
         repliedAmount: tweet.Replies.length || 0,
         likedAmount: tweet.LikedUsers.length || 0
       }))
@@ -72,6 +73,7 @@ const tweetController = {
         createdAtDate: formatDate(tweet.createdAt), // 提供推文需要的日期格式
         createdAtTime: formatTime(tweet.createdAt), // 提供推文需要的時間格式
         Replies: repliesData,
+        isLiked: tweet.LikedUsers?.some(lu => lu.id === helpers.getUser(req).id) || false, // 辨識該則貼文是否有被登入的使用者liked
         repliedAmount: tweet.Replies.length || 0,
         likedAmount: tweet.LikedUsers.length || 0
       }
