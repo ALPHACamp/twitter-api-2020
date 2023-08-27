@@ -74,7 +74,6 @@ const adminController = {
         ...tweet,
         description: tweet.description.substring(0, 50),
         updatedAt: dayjs(tweet.updatedAt)
-          .tz('Asia/Taipei')
           .fromNow()
       }))
       return res.status(200).json(result)

@@ -47,7 +47,6 @@ const tweetController = {
       const result = tweets.map(tweet => ({
         ...tweet,
         updatedAt: dayjs(tweet.updatedAt)
-          .tz('Asia/Taipei')
           .fromNow(),
         isLiked: likes.some(like => like.TweetId === tweet.id) // 若Like model中，登入者id = 推文id，代表登入者有點讚，回傳ture，反之false
       }))
