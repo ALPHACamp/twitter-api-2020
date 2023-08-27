@@ -3,7 +3,6 @@ const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: (req, res, next) => {
-    console.log('userId:', helpers.getUser(req).id)
     return Tweet.findAll({
       order: [['createdAt', 'DESC']],
       include: [
@@ -82,13 +81,16 @@ const tweetController = {
       description,
       userId
     })
-      // .then(() => {
-      //   return res.json({
-      //     status: 'success'
-      //   })
-      // })
-      // .catch(err => next(err))
-  }
+      .then(tweet => {
+        return res.json({
+          status: 'success',
+          tweet
+        })
+        // res.status(200).json(postTweet)
+      })
+      .catch(err => next(err))
+  },
+  postTweetReply: (req, res, next)
 }
 
 module.exports = tweetController
