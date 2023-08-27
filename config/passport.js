@@ -53,36 +53,20 @@ passport.use(new LocalStrategy(
 // JWT
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: process.env.JWT_SECRET,
+  passReqToCallback: true
 }
 // JWT
-passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
-    include: [
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
-    ]
+passport.use(
+  new JWTStrategy(jwtOptions, (req, jwtPayload, cb) => {
+    User.findByPk(jwtPayload.id, {
+      attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }
+    })
+      .then(user => {
+        req.user = user
+        cb(null, user)
+      })
+      .catch(err => cb(err))
   })
-  //  user通過認證之後，產生的user會是 Sequelize 模型，現為了避免衝突先不動，後續refactor再轉換為 JavaScript 簡單物件
-  //  .then(user => cb(null, user.toJSON()))
-    .then(user => cb(null, user)) // 這個user是 Sequelize 模型 (複雜物件)
-    .catch(err => cb(err))
-}))
-
-// API版本不會走序列化與反序列化
-// 序列化
-// passport.serializeUser((user, cb) => {
-//   cb(null, user.id)
-// })
-// // 反序列化
-// passport.deserializeUser((id, cb) => {
-//   return User.findByPk(id, {
-//     include: [
-//       { model: User, as: 'Followers' },
-//       { model: User, as: 'Followings' }
-//     ]
-//   })
-//     .then(user => cb(null, user.toJSON()))
-//     .catch(err => cb(err))
-// })
+)
 module.exports = passport

@@ -1,11 +1,12 @@
 const { Tweet, User, Like, Reply, sequelize } = require('../models')
-const { getUser } = require('../_helpers')
+// const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const { relativeTimeFromNow, simpleDate, simpleTime } = require('../helpers/datetime-helper')
 
 const tweetController = {
   // 看所有貼文
   getTweets: (req, res, next) => {
-    const loginUserId = getUser(req).toJSON().id
+    const loginUserId = helpers.getUser(req).id
     return Tweet.findAll({
       nest: true,
       raw: true,
@@ -42,7 +43,7 @@ const tweetController = {
     const limitWords = 140
     const { description } = req.body
 
-    const loginUserId = getUser(req).id
+    const loginUserId = helpers.getUser(req).id
 
 
     if (!loginUserId) throw new Error('帳號不存在！')
@@ -62,7 +63,7 @@ const tweetController = {
   },
   // 瀏覽一筆貼文
   getTweet: (req, res, next) => {
-    const loginUserId = getUser(req).toJSON().id
+    const loginUserId = helpers.getUser(req).id
     if (!loginUserId) throw new Error('帳號不存在！')
 
     return Tweet.findByPk(req.params.id, {
@@ -98,7 +99,7 @@ const tweetController = {
   // 按讚一筆貼文
   likeTweet: (req, res, next) => {
     const TweetId = req.params.id
-    const UserId = getUser(req).toJSON().id
+    const UserId = helpers.getUser(req).id
 
     return Promise.all([
       Tweet.findByPk(TweetId),
@@ -146,7 +147,7 @@ const tweetController = {
   },
   // 對一筆貼文收回讚
   unlikeTweet: (req, res, next) => {
-    const UserId = helper.getUser(req).id
+    const UserId = helpers.getUser(req).id
     const TweetId = req.params.id
 
     Tweet.findByPk(TweetId)
@@ -175,7 +176,7 @@ const tweetController = {
       .catch(err => next(err))
       // way 2
     // const TweetId = req.params.id
-    // const UserId = getUser(req).toJSON().id
+    // const UserId = getUser(req).id
 
     // return Tweet.findByPk(TweetId, {
     //   attributes: {
@@ -217,7 +218,7 @@ const tweetController = {
   postReply: (req, res, next) => {
     const limitWords = 140
     const TweetId = req.params.id
-    const UserId = getUser(req).toJSON().id
+    const UserId = helpers.getUser(req).id
     const { comment } = req.body
 
     return Tweet.findByPk(TweetId, {
