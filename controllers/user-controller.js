@@ -58,6 +58,21 @@ const userController = {
         })
       })
       .catch(err => next(err))
+  },
+  getCurrentUser: (req, res, next) => {
+    User.findByPk(getUser(req).id, {
+      raw: true
+    })
+      .then(user => {
+        if (!user) throw new Error('使用者不存在！')
+        delete user.password
+        delete user.role
+        res.json({
+          status: 'success',
+          ...user
+        })
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = userController

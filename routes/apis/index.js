@@ -11,6 +11,7 @@ const { apiErrorHandler } = require('../../middleware/error-handler')
 router.use('/admin/login', passport.authenticate('local', { session: false }), authenticatedAdmin, userController.login)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 
+router.get('/users/current', authenticated, authenticatedUser, userController.getCurrentUser)
 // router.get('/users/top', userController)
 // router.get('/users/:id/tweets', userController)
 // router.get('/users/:id/replied_tweets', userController)
