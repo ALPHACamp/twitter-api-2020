@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const { User } = require('../models')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -23,13 +24,14 @@ const userController = {
       if (!name || !account || !email || !password || !checkPassword) throw new Error('所有欄位皆為必填！')
       if (name.length > 50) throw new Error('名稱字數超出上限！')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
-      const [userEmail, userName] = await Promise.all([
+      if (password.length < 5 || password.length > 20) throw new Error('請設定 5 到 20 位密碼')
+
+      const [userEmail, userAccount] = await Promise.all([
         User.findOne({ where: { email } }),
         User.findOne({ where: { account } })
       ])
       if (userEmail) throw new Error('email已重複註冊！')
-      if (userName) throw new Error('account已重複註冊！')
-
+      if (userAccount) throw new Error('account已重複註冊！')
 
       const hash = await bcrypt.hash(password, 10)
       const newUser = await User.create({
@@ -80,7 +82,78 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  editUser: async (req, res, next) => {
+    try {
+      const UserId = req.params.id // 被查看的使用者 ID
+      const currentUserId = helpers.getUser(req).id.toString() // 用戶 ID
+      const isCurrentUser = currentUserId === UserId // 判斷是否是使用者本人
+      if (!isCurrentUser) throw new Error('使用者非本人！')
+
+      const user = await User.findByPk(UserId, {
+        attributes: { exclude: ['password'] }
+      })
+      if (!user || user.role === 'admin') {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+
+      const { account, name, email, password, checkPassword, introduction } = req.body // 拿取前端回傳資料
+      const avatarPath = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
+      const coverPath = req.files?.cover ? await imgurFileHandler(req.files.cover[0]) : null
+
+      if (account && name && email && password && checkPassword) { // EDIT
+        if (name.length > 50) throw new Error('名稱字數超出上限！')
+        if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
+        if (introduction.length > 160) throw new Error('自我介紹字數超出上限！')
+
+        const [userEmail, userAccount] = await Promise.all([
+          User.findOne({ where: { email } }),
+          User.findOne({ where: { account } })
+        ])
+
+        if (userEmail && userEmail.id !== currentUserId) throw new Error('email已重複註冊！') // 除了自己以外的 email
+        if (userAccount && userAccount.id !== currentUserId) throw new Error('account已重複註冊！') // 除了自己以外的 account
+
+        const hash = await bcrypt.hash(password, 10)
+        await User.update(
+          {
+            name,
+            account,
+            email,
+            password: hash
+          },
+          { where: { id: UserId } }
+        )
+      } else if (name && (introduction || avatarPath || coverPath)) { // SETTING
+        // Setting 回傳值(須包含 name + 其他至少一項)
+        await User.update({
+          name,
+          introduction,
+          avatar: avatarPath || null,
+          cover: coverPath || null
+        },
+        { where: { id: UserId } }
+        )
+      } else {
+        throw new Error('必填欄位需填上！')
+      }
+
+      // 更新後的用戶資料
+      const updatedUser = await User.findByPk(UserId, {
+        attributes: { exclude: ['password'] }
+      })
+      return res.json({
+        status: 'success',
+        message: account ? 'Edit成功' : 'Setting成功',
+        data: { user: updatedUser.toJSON() }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
+
 }
 
 module.exports = userController
