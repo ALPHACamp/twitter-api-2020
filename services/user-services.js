@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
-const { relativeTimeFormat } = require('../helpers/day-helpers')
+const { relativeTimeFormat, absoluteTimeFormat } = require('../helpers/day-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
@@ -198,6 +198,7 @@ const userServices = {
       })
       const tweetData = tweets.map(tweet => ({
         ...tweet.toJSON(),
+        createdAt: relativeTimeFormat(tweet.createdAt),
         RepliesCount: tweet.Replies.length,
         LikeCount: tweet.LikeUsers.length
       }))
@@ -218,6 +219,7 @@ const userServices = {
       const replies = await Reply.findAll({
         where: { userId: id },
         attributes: [
+          'id',
           'userId',
           'tweetId',
           [
@@ -260,6 +262,7 @@ const userServices = {
       const likes = await Like.findAll({
         where: { UserId: user.id },
         attributes: [
+          'id',
           'UserId',
           'TweetId',
           [
@@ -309,6 +312,7 @@ const userServices = {
       const followings = await Followship.findAll({
         where: { followerId: id },
         attributes: [
+          'id',
           'followingId',
           [
             sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.followingId)'),
@@ -343,6 +347,7 @@ const userServices = {
       const followers = await Followship.findAll({
         where: { followingId: id },
         attributes: [
+          'id',
           'followerId',
           [
             sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.followerId)'),
