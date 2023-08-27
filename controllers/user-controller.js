@@ -306,7 +306,7 @@ const userController = {
   getTopUser: (req, res, next) => {
     const followingsId = helpers.getUser(req).Followings.map(f => f.id)
     User.findAll({
-      where: { id: { [Op.ne]: helpers.getUser(req).id } },
+      where: { id: { [Op.ne]: helpers.getUser(req).id }, role: 'user' },
       attributes: { exclude: 'password' },
       include: { model: User, as: 'Followers' }
     })
