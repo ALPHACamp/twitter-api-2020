@@ -53,19 +53,22 @@ passport.use(new LocalStrategy(
 // JWT
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: process.env.JWT_SECRET,
+  passReqToCallback: true
 }
 // JWT
-passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
-    include: [
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
-    ]
+passport.use(
+  new JWTStrategy(jwtOptions, (req, jwtPayload, cb) => {
+    User.findByPk(jwtPayload.id, {
+      attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }
+    })
+      .then(user => {
+        req.user = user
+        cb(null, user)
+      })
+      .catch(err => cb(err))
   })
-    .then(user => cb(null, user))
-    .catch(err => cb(err))
-}))
+)
 
 // API版本不會走序列化與反序列化
 // 序列化

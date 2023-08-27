@@ -1,11 +1,11 @@
 const { Tweet, User, Like, Reply, sequelize } = require('../models')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 const { relativeTimeFromNow, simpleDate, simpleTime } = require('../helpers/datetime-helper')
 
 const tweetController = {
   // 看所有貼文
   getTweets: (req, res, next) => {
-    const loginUserId = getUser(req).toJSON().id
+    const loginUserId =  helpers.getUser(req).id
     return Tweet.findAll({
       nest: true,
       raw: true,
@@ -35,7 +35,7 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const limitWords = 140
     const { description } = req.body
-    const loginUserId = getUser(req).id
+    const loginUserId = helpers.getUser(req).id
 
     if (!loginUserId) throw new Error('帳號不存在！')
     if (!description.trim()) throw new Error('內容不可空白')
@@ -52,7 +52,7 @@ const tweetController = {
   },
   // 瀏覽一筆貼文
   getTweet: (req, res, next) => {
-    const loginUserId = getUser(req).toJSON().id
+    const loginUserId = helpers.getUser(req).id
     if (!loginUserId) throw new Error('帳號不存在！')
 
     return Tweet.findByPk(req.params.id, {
@@ -86,7 +86,7 @@ const tweetController = {
   },
   likeTweet: (req, res, next) => {
     const TweetId = req.params.id
-    const UserId = getUser(req).toJSON().id
+    const UserId = helpers.getUser(req).id
 
     return Promise.all([
       Tweet.findByPk(TweetId),
@@ -133,7 +133,7 @@ const tweetController = {
   },
   unlikeTweet: (req, res, next) => {
     const TweetId = req.params.id
-    const UserId = getUser(req).toJSON().id
+    const UserId = helpers.getUser(req).id
 
     return Tweet.findByPk(TweetId, {
       attributes: {
@@ -146,8 +146,8 @@ const tweetController = {
       if (!tweet) throw new Error('推文不存在')
       if (!tweet.isLiked) throw new Error("未表示喜歡")
       Like.destroy({ where: { TweetId, UserId }})
-      return res.status(200).json({ status: 'success' })
     })
+    .then(() => res.status(200).json({ status: 'success' }))
     .catch(err => next(err))
   },
   getReplies: (req, res, next) => {
