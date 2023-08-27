@@ -12,6 +12,7 @@ const { adminSignIn, userSignIn } = require('../middleware/login-handler')
 
 // user登入
 router.post('/users/signin', userSignIn, userController.signIn)
+router.post('/users', userController.signUp)
 // admin登入
 router.post('/admin/signin', adminSignIn, adminController.signIn)
 // admin其他路由
