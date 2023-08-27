@@ -21,7 +21,7 @@ const followshipController = {
         followerId: userId,
         followingId
       })
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: 'successfully follow user!'
       })
@@ -45,7 +45,7 @@ const followshipController = {
       Followship.destroy({
         where: { followerId: userId, followingId }
       })
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: 'successfully unfollow user!'
       })
@@ -97,7 +97,7 @@ const followshipController = {
         nest: true
       })
 
-      res.json({
+      res.status(200).json({
         top10UsersWithFollowStatus
       })
     } catch (err) {

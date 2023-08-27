@@ -5,10 +5,11 @@ const tweetContorller = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
-        raw: true
+        raw: true,
+        order: [['createdAt', 'DESC']]
       })
       if (!tweets) throw new Error("Tweet didn't exist!")
-      res.json(tweets)
+      res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
@@ -19,7 +20,7 @@ const tweetContorller = {
       const tweet = await Tweet.findByPk(tweetId)
 
       if (!tweet) throw new Error("Tweet didn't exist!")
-      res.json(tweet)
+      res.status(200).json(tweet)
     } catch (err) {
       next(err)
     }
@@ -44,7 +45,7 @@ const tweetContorller = {
         userId,
         tweetId
       })
-      res.json({
+      res.status(200).json({
         status: 'success',
         data: createdLike,
         isLiked: true
@@ -75,7 +76,7 @@ const tweetContorller = {
           tweetId
         }
       })
-      res.json({
+      res.status(200).json({
         status: 'success',
         isLiked: false
       })
@@ -89,6 +90,7 @@ const tweetContorller = {
       const getUser = helpers.getUser(req)
       const userId = getUser.id
       if (!description) throw new Error('文章內容不可為空白')
+      if (description.length > 140) throw new Error('文章內容不可超過 140 字')
       const createdTweet = await Tweet.create({
         userId,
         description,
@@ -118,7 +120,6 @@ const tweetContorller = {
           {
             model: Tweet,
             as: 'tweetreply',
-
             include: [
               {
                 model: User,
@@ -130,7 +131,6 @@ const tweetContorller = {
         ],
         order: [['createdAt', 'DESC']],
         nest: true
-        // raw: true // 為何設true就無法取資料？
       })
 
       if (!replies) throw new Error('This tweet has no replies')
@@ -169,7 +169,7 @@ const tweetContorller = {
         updatedAt: new Date()
       })
 
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: 'successfully created reply',
         replyData
@@ -197,7 +197,7 @@ const tweetContorller = {
           ]
         })
       ])
-      // console.log(likes)
+
       if (!tweet) throw new Error("Tweet didn't exist!")
       if (!likes) throw new Error('NO ONE liked this tweet!')
       const likedData = likes.map(like => ({
@@ -208,7 +208,7 @@ const tweetContorller = {
         likedUserAccount: like.User.account,
         likedUserAvatar: like.User.avatar
       }))
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: 'successfully get all the liked users',
         likedData
