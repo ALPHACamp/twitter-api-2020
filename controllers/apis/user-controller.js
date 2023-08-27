@@ -1,12 +1,12 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-// const { imgurFileHandler } = require('../../helpers/file-helpers')
-// const imgur = require('imgur')
+const sequelize = require('sequelize')
+const { imgurFileHandler } = require('../../helpers/file-helpers')
 
 const db = require('../../models')
-const { getUser } = require('../../_helpers')
+const helpers = require('../../_helpers')
 
-const { User, Tweet, Reply, Followship } = db
+const { User, Tweet, Reply, Followship, Like } = db
 const { Op } = require('sequelize')
 
 const userController = {
@@ -88,7 +88,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const { id } = req.params
-      const currentUserId = getUser(req).id
+      const currentUserId = helpers.getUser(req).id
 
       const [user, tweetCount, followerCount, followingCount] =
         await Promise.all([
@@ -180,16 +180,11 @@ const userController = {
   },
   updateUser: async (req, res, next) => {
     try {
-      const currentUserId = getUser(req).id
-      if (currentUserId.toString() !== req.params.id) {
-        throw new Error('Cannot edit other users profile')
-      }
-
+      const { id } = req.params
       const { account, name, email, password, introduction } = req.body
-      // const files = req.files || ''
-      if (name && name.length > 50) throw new Error('the length of name should less than 50 characters')
-      if (introduction && introduction.length > 160) { throw new Error('the length of introduction should less than 160 characters') }
-      const user = await User.findByPk(req.params.id)
+
+      const user = await User.findByPk(id)
+
       if (!user) {
         return res.status(401).json({
           status: 'error',
@@ -197,42 +192,211 @@ const userController = {
         })
       }
 
+      const currentUserId = helpers.getUser(req).id
+
+      if (!currentUserId) {
+        throw new Error('Current user ID is missing')
+      }
+      console.log(currentUserId, Number(id))
+
+      if (currentUserId !== Number(id)) {
+        throw new Error('Cannot edit other users profile')
+      }
+      // console.log(currentUserId, Number(id))
+
+      // console.log('File object:', files)
+
+      if (name && name.length > 50) throw new Error('the length of name should less than 50 characters')
+      if (introduction && introduction.length > 160) { throw new Error('the length of introduction should less than 160 characters') }
+
       if (account) {
+        const user = await User.findOne({ where: { account } })
         if (user.account === account) throw new Error('account 已重複註冊!')
       }
 
       if (email) {
+        const user = await User.findOne({ where: { email } })
         if (user.email === email) throw new Error('email 已重複註冊!')
       }
-      // const avatar = user.avatar || ''
-      // const cover = user.cover || ''
 
-      // if (files.avatar) {
-      //   const avatarBuffer = req.files.avatar[0].buffer
-      //   const avatarUrl = await uploadToImgur(avatarBuffer)
-      //   avatar = avatarUrl
-      // }
+      const { files } = req
 
-      // if (files.cover) {
-      //   const coverBuffer = req.files.cover[0].buffer
-      //   const coverUrl = await uploadToImgur(coverBuffer)
-      //   cover = coverUrl
-      // }
+      let newAvatar = ''
+      let newCover = ''
+
+      if (files && files.avatar && files.avatar[0].fieldname === 'avatar') {
+        newAvatar = await imgurFileHandler(files.avatar[0])
+      }
+      if (files && files.cover && files.cover[0].fieldname === 'cover') {
+        newCover = await imgurFileHandler(files.cover[0])
+      }
 
       await user.update({
         name: name || user.name,
         email: email || user.email,
         account: account || user.account,
         password: password ? bcrypt.hashSync(password, 10) : user.password,
-        introduction: introduction || user.introduction
-        // avatar: ,
-        // cover:
+        introduction: introduction || user.introduction,
+        avatar: newAvatar || user.avatar,
+        cover: newCover || user.cover
       })
       res.status(200).json({
         status: 'success',
         message: 'Successfully update user.',
         data: user
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id, { raw: true, nest: true })
+      if (!user) throw new Error('User does not exist')
+
+      const likeTweets = await Like.findAll({
+        where: { userId: id },
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: Tweet,
+            as: 'likedTweet',
+            attributes: { exclude: ['password'] },
+            include: [
+              { model: User, as: 'author', attributes: ['account', 'name', 'avatar'] }
+            ]
+          }
+        ]
+      })
+
+      if (likeTweets.length === 0) throw new Error('the user did not like any tweet')
+
+      const likeTweetsData = likeTweets.map(like => ({
+        TweetId: like.likedTweet.id,
+        tweetBelongerName: like.likedTweet.author.name,
+        tweetBelongerAccount: like.likedTweet.author.account,
+        tweetBelongerAvatar: like.likedTweet.author.avatar,
+        tweetLikeCount: like.likedTweet.likeCount,
+        tweetReplyCount: like.likedTweet.replyCount,
+        tweetContent: like.likedTweet.description,
+        createdAt: like.createdAt
+      }))
+
+      res.json(likeTweetsData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id, { raw: true, nest: true })
+      if (!user) throw new Error('User does not exist')
+
+      const userTweets = await Tweet.findAll({
+        where: { userId: id },
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: User,
+            as: 'author',
+            attributes: { exclude: ['password'] }
+          }
+        ]
+      })
+
+      const userTweetsData = userTweets.map(tweet => ({
+        TweetId: tweet.id,
+        tweetBelongerName: tweet.author.name,
+        tweetBelongerAccount: tweet.author.account,
+        tweetBelongerAvatar: tweet.author.avatar,
+        tweetLikeCount: tweet.likeCount,
+        tweetReplyCount: tweet.replyCount,
+        description: tweet.description,
+        createdAt: tweet.createdAt
+      }))
+
+      res.json(userTweetsData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id, { raw: true, nest: true })
+      if (!user) throw new Error('User does not exist')
+
+      const currentUserId = helpers.getUser(req).id
+
+      const followers = await Followship.findAll({
+        where: { followingId: id },
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: User,
+            as: 'follower',
+            attributes: { exclude: ['password'] }
+          }
+        ],
+        attributes: [
+          'followerId',
+          'followingId',
+          'createdAt',
+          'updatedAt',
+          [sequelize.literal(`(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`), 'isFollowed']
+        ],
+        raw: true,
+        nest: true
+      })
+
+      const userFollowersData = followers.map(follower => {
+        return {
+          ...follower
+        }
+      })
+
+      res.status(200).json(userFollowersData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const user = await User.findByPk(id, { raw: true, nest: true })
+      if (!user) throw new Error('User does not exist')
+      const currentUserId = helpers.getUser(req).id
+
+      const following = await Followship.findAll({
+        where: { followerId: id },
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: User,
+            as: 'following',
+            attributes: { exclude: ['password'] }
+          }
+        ],
+        attributes: [
+          'followerId',
+          'followingId',
+          'createdAt',
+          'updatedAt',
+          [sequelize.literal(`(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`), 'isFollowed']
+        ],
+        raw: true,
+        nest: true
+      })
+
+      const userFollowersData = following.map(follower => {
+        return {
+          ...follower
+        }
+      })
+
+      res.status(200).json(userFollowersData)
     } catch (err) {
       next(err)
     }
