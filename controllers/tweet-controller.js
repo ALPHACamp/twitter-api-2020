@@ -120,28 +120,29 @@ const tweetController = {
     .catch(err => next(err))
 
     // way 2
-      Tweet.findByPk(TweetId, {
-        attributes: {
-          include: [[sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${UserId} AND Likes.TweetId = ${TweetId})`), 'isLiked']],
-          exclude: ['description', 'createdAt', 'updatedAt']
-        },
-        raw: true
-      })
-      .then(tweet => {
-        if (!tweet) throw new Error('推文不存在')
-        if (tweet.isLiked) throw new Error('You have liked this tweet!')
-        return Like.create({
-        UserId,
-        TweetId
-        })
-      })
-      .then(tweet => {tweet.isLiked = 1
-        res.status(200).json(tweet)
-      })
+      // Tweet.findByPk(TweetId, {
+      //   attributes: {
+      //     include: [[sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${UserId} AND Likes.TweetId = ${TweetId})`), 'isLiked']],
+      //     exclude: ['description', 'createdAt', 'updatedAt']
+      //   },
+      //   raw: true
+      // })
+      // .then(tweet => {
+      //   if (!tweet) throw new Error('推文不存在')
+      //   if (tweet.isLiked) throw new Error('You have liked this tweet!')
+      //   return Like.create({
+      //   UserId,
+      //   TweetId
+      //   })
+      // })
+      // .then(tweet => {tweet.isLiked = 1
+      //   res.status(200).json(tweet)
+      // })
   },
   unlikeTweet: (req, res, next) => {
     const TweetId = req.params.id
     const UserId = getUser(req).toJSON().id
+
     return Tweet.findByPk(TweetId, {
       attributes: {
         include: [[sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${UserId} AND Likes.TweetId = ${TweetId})`), 'isLiked']],
@@ -156,6 +157,26 @@ const tweetController = {
       return res.status(200).json({ status: 'success' })
     })
     .catch(err => next(err))
+  },
+  getReplies: (req, res, next) => {
+      const TweetId = req.params.id
+      return Reply.findAll({
+          raw: true,
+          nest: true,
+          where: { TweetId },
+          attributes: ['id', 'comment', 'createdAt'],
+          include: {
+            model: User,
+            attributes: ['id', 'avatar', 'account', 'name']
+          },
+          order: [['createdAt', 'DESC'], ['id', 'ASC']]
+        })
+      .then(replies => replies.map( reply => ({
+        ...reply,
+        createdAt: relativeTimeFromNow(reply.createdAt)
+      })))
+      .then((data) => res.status(200).json(data))
+      .catch(err => next(err))
   }
 }
 

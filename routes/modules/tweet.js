@@ -9,6 +9,9 @@ router.delete('/:id/like', tweetController.unlikeTweet)
 
 router.post('/:id/like', tweetController.likeTweet)
 
+// reply tweet function
+router.get('/:id/replies', tweetController.getReplies)
+
 // tweets function 
 router.get('/:id', tweetController.getTweet)
 router.post('/', tweetController.postTweet)
