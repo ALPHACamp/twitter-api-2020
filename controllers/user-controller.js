@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const sequelize = require('sequelize')
 const { User } = require('../models')
 const { getUser } = require('../_helpers')
 const userController = {
@@ -20,8 +21,8 @@ const userController = {
     }
   },
   signUp: (req, res, next) => {
-    const { account, email, password, passwordCheck } = req.body
-    if (password !== passwordCheck) throw new Error('密碼不相符!')
+    const { account, email, password, checkPassword } = req.body
+    if (password !== checkPassword) throw new Error('密碼不相符!')
     Promise.all([
       User.findOne({ where: { account } }),
       User.findOne({ where: { email } })
