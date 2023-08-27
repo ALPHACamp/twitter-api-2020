@@ -46,6 +46,29 @@ const userController = {
         })
       })
       .catch(err => next(err))
+  },
+  getUser: (req, res, next) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'Followers' }
+      ],
+      attributes: ['id', 'name', 'account', 'email', 'avatar', 'introduction',
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id )'), 'followerCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id )'), 'followingCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.user_id = User.id )'), 'tweetCount']
+      ],
+      nest: true
+    })
+      .then(user => {
+        if (!user) throw new Error('使用者不存在')
+        const data = {
+          ...user.toJSON(),
+          isFollowed: user.Followers.some(f => f.id === req.user.id)
+        }
+        delete data.Followers
+        res.json(data)
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = userController
