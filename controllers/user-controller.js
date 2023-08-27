@@ -30,14 +30,15 @@ const userController = {
       if (userEmail) throw new Error('email已重複註冊！')
       if (userName) throw new Error('account已重複註冊！')
 
-
       const hash = await bcrypt.hash(password, 10)
       const newUser = await User.create({
         name,
         account,
         email,
         role: 'user',
-        password: hash
+        password: hash,
+        avatar: 'htps://i.imgur.com/uSgVo9G.png',
+        cover: 'https://i.imgur.com/7uwf8kO.png'
       })
       const userData = newUser.toJSON()
       delete userData.password
