@@ -52,6 +52,35 @@ const tweetController = {
         })
       })
       .catch(err => next(err))
+  },
+  getTweetReplies: (req, res, next) => {
+    const tweetId = req.params.tweetId
+    console.log('userId:', getUser(req))
+    Promise.all([
+      Reply.findAll({
+        where: { tweetId: tweetId },
+        order: [['createdAt', 'ASC']],
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        raw: true,
+        nest: true
+      }),
+      Tweet.findByPk(tweetId, {
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([replies, tweet]) => {
+        const data = {
+          replies,
+          tweetUserAccount: tweet.User.account
+        }
+        return res.json({
+          status: 'success',
+          data: data
+        })
+      })
+      .catch(err => next(err))
   }
 }
 
