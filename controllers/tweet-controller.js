@@ -81,25 +81,6 @@ const tweetController = {
         })
       })
       .catch(err => next(err))
-  },
-  postTweet: async (req, res, next) => {
-    const { description } = req.body
-    const userId = getUser(req).id
-    console.log('userId:', userId)
-    console.log('description:', description)
-    if (!description) throw new Error('內容不可空白')
-    if (description.length > 140) throw new Error('內容不可超過 140 字')
-    return User.findByPk(userId)
-      .then(userId => {
-        Tweet.create({
-          description,
-          userId
-        })
-        return res.json({
-          status: 'success'
-        })
-      })
-      .catch(err => next(err))
   }
 }
 
