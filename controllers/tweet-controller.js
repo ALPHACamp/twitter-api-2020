@@ -22,12 +22,14 @@ const tweetController = {
       ],
       order: [['createdAt', 'DESC']]
     })
+
     .then(data => {
       return data.map(tweet => ({
         ...tweet,
         createdAt : relativeTimeFromNow(tweet.createdAt)
       }))
     })
+
     .then(tweet => res.status(200).json(tweet))
     .catch(err => next(err))
   },
@@ -35,7 +37,9 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const limitWords = 140
     const { description } = req.body
+
     const loginUserId = getUser(req).id
+
 
     if (!loginUserId) throw new Error('帳號不存在！')
     if (!description.trim()) throw new Error('內容不可空白')
@@ -45,8 +49,10 @@ const tweetController = {
       description,
       UserId: loginUserId
     })
+
     .then( tweet => {
       return res.status(200).json(tweet)
+
     })
     .catch(err => next(err))
   },
@@ -79,6 +85,7 @@ const tweetController = {
           message: '推文不存在',
         })
       }
+
       tweet.createdAt = simpleTime(tweet.createdAt) + ' • ' + simpleDate(Tweet.createdAt)
       return res.status(200).json(tweet)   
     })
@@ -108,6 +115,7 @@ const tweetController = {
           })
         }
         return res.status(200).json({ status: 'success' })
+
     })
     .catch(err => next(err))
 
