@@ -22,8 +22,6 @@ const tweetContorller = {
       if (!tweet) throw new Error("Tweet didn't exist!")
 
       res.status(200).json(tweet)
-
-
     } catch (err) {
       next(err)
     }
