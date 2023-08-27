@@ -160,7 +160,7 @@ const userController = {
     try {
       const userId = req.params.id // 被查看的使用者 ID
       const user = await User.findByPk(userId)
-      // 取tw
+      // 取tweets及其關聯
       const tweets = await Tweet.findAll({
         where: { UserId: user.id },
         include: [
@@ -184,7 +184,6 @@ const userController = {
       }
       if (!tweets) throw new Error('目前沒有任何推文。')
       const isLiked = tweets.LikedUsers?.some(liked => liked.UserId === helpers.getUser(req).id) || false
-      // const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
       const data = tweets.map(tweet => ({
         ...tweet.toJSON(),
         createdAt: relativeTimeFromNow(tweet.createdAt),
@@ -193,6 +192,39 @@ const userController = {
         isLiked
       }))
       return res.json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const userId = req.params.id // 被查看的使用者 ID
+      const user = await User.findByPk(userId)
+      // 取replies及其關聯
+      const replies = await Reply.findAll({
+        where: { UserId: user.id },
+        include: [
+          {
+            model: User,
+            attributes: { exclude: ['password'] }// 回傳 ser本人
+          },
+          {
+            model: Tweet, include: [{ model: User, attributes: ['id', 'account'] }]// 回傳這篇推文主人的id、account
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      const data = replies.map(reply => ({
+        ...reply.toJSON(),
+        createdAt: relativeTimeFromNow(reply.createdAt)
+      }))
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
