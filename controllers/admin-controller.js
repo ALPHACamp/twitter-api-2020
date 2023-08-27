@@ -1,15 +1,10 @@
 
 const jwt = require('jsonwebtoken')
-const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const dayjs = require('dayjs')
-const utc = require('dayjs/plugin/utc')
-const timezone = require('dayjs/plugin/timezone')
 const relativeTime = require('dayjs/plugin/relativeTime')
 const zhTw = require('dayjs/locale/zh-tw')
 
-dayjs.extend(utc)
-dayjs.extend(timezone)
 dayjs.extend(relativeTime)
 dayjs.locale(zhTw)
 
