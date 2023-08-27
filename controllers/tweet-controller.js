@@ -22,6 +22,7 @@ const tweetController = {
           tweets
         }
         return res.json({
+          status: 'success',
           data: data
         })
       })
