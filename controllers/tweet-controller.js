@@ -1,4 +1,4 @@
-const { Tweet, User, sequelize } = require('../models')
+const { Tweet, User, Reply, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 
 const tweetController = {
@@ -17,7 +17,10 @@ const tweetController = {
       nest: true
     })
       .then(tweets => {
-        const data = tweets
+        const data = {
+          status: 'success',
+          tweets
+        }
         return res.json({
           status: 'success',
           data: data

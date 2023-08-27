@@ -5,6 +5,6 @@ const tweetController = require('../../../controllers/tweet-controller')
 
 // router.get('/users', adminController)
 // router.delete('/tweets/:id', adminController)
-// router.get('/tweets', tweetController.getTweets)
+router.get('/tweets', adminController.getTweets)
 
 module.exports = router
