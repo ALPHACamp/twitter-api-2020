@@ -338,12 +338,12 @@ const userController = {
   // No.9 - GET /api/users? {limit=10} 查看跟隨者數量排名(前10)的使用者資料
   getUsers: async (req, res, next) => {
     try {
-      const limit = Number(req.query.limit) || 10 // 若使用者未指定，預設為10筆
+      const limit = parseInt(req.query.limit) || 10 // 若使用者未指定，預設為10筆
       const currentUserId = helpers.getUser(req).id
 
       // --資料提取--
       let users = await User.findAll({
-        where: { id: { [Op.not]: currentUserId }, role: 'user' },
+        where: { id: { [Op.not]: currentUserId }, role: 'user' }, // 排除目前使用者
         attributes: {
           exclude: ['password'],
           include: [[
@@ -376,10 +376,10 @@ const userController = {
   putUser: async (req, res, next) => {
     try {
       // 確認有權限修改
-      const UserId = Number(req.params.id)
+      const UserId = parseInt(req.params.id)
       const currentUserId = helpers.getUser(req).id
 
-      if (currentUserId !== Number(UserId)) {
+      if (currentUserId !== UserId) {
         const error = new Error('permission denied')
         error.status = 403
         throw error
