@@ -12,7 +12,9 @@ const cors = require('cors')
 const app = express()
 
 const corsOptions = {
-  origin: 'https://mighty-temple-45104-0d6672fb07d0.herokuapp.com'
+  origin: '＊',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization']
 }
 
 app.use(cors(corsOptions))
