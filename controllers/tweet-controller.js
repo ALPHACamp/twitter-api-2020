@@ -1,9 +1,9 @@
 const { Tweet, User, Reply, sequelize } = require('../models')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: (req, res, next) => {
-    console.log('userId:', getUser(req).id)
+    console.log('userId:', helpers.getUser(req).id)
     return Tweet.findAll({
       order: [['createdAt', 'DESC']],
       include: [
@@ -18,14 +18,9 @@ const tweetController = {
       nest: true
     })
       .then(tweets => {
-        const data = {
-          status: 'success',
+        return res.json(
           tweets
-        }
-        return res.json({
-          status: 'success',
-          data: data
-        })
+        )
       })
       .catch(err => next(err))
   },
@@ -44,13 +39,9 @@ const tweetController = {
       nest: true
     })
       .then(tweet => {
-        const data = {
+        return res.json(
           tweet
-        }
-        return res.json({
-          status: 'success',
-          data: data
-        })
+        )
       })
       .catch(err => next(err))
   },
@@ -81,6 +72,22 @@ const tweetController = {
         })
       })
       .catch(err => next(err))
+  },
+  postTweet: async (req, res, next) => {
+    const { description } = req.body
+    const userId = helpers.getUser(req).id
+    if (!description) throw new Error('內容不可空白')
+    if (description.length > 140) throw new Error('內容不可超過 140 字')
+    return Tweet.create({
+      description,
+      userId
+    })
+      // .then(() => {
+      //   return res.json({
+      //     status: 'success'
+      //   })
+      // })
+      // .catch(err => next(err))
   }
 }
 
