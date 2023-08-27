@@ -11,10 +11,8 @@ const userController = {
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
         status: 'success',
-        data: {
-          token,
-          user: userData
-        }
+        token,
+        ...userData
       })
     } catch (err) {
       next(err)
@@ -42,7 +40,7 @@ const userController = {
         res.json({
           status: 'success',
           message: '成功註冊帳號！',
-          data: newUser
+          ...newUser
         })
       })
       .catch(err => next(err))
@@ -66,7 +64,10 @@ const userController = {
           isFollowed: user.Followers.some(f => f.id === req.user.id)
         }
         delete data.Followers
-        res.json(data)
+        res.json({
+          status: 'success',
+          ...data
+        })
       })
       .catch(err => next(err))
   }
