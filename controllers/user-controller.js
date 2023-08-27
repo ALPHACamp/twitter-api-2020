@@ -54,7 +54,7 @@ const userController = {
   },
   signIn: (req, res, next) => {
     try {
-      const userData = helper.getUser(req)
+      const userData = helper.getUser(req).toJSON()
       delete userData.password // 刪除密碼
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.status(200).json({
