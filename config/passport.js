@@ -63,7 +63,9 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
       { model: User, as: 'Followings' }
     ]
   })
-    .then(user => cb(null, user))
+  //  user通過認證之後，產生的user會是 Sequelize 模型，現為了避免衝突先不動，後續refactor再轉換為 JavaScript 簡單物件
+  //  .then(user => cb(null, user.toJSON()))
+    .then(user => cb(null, user)) // 這個user是 Sequelize 模型 (複雜物件)
     .catch(err => cb(err))
 }))
 
