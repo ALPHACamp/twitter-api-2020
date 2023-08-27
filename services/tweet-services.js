@@ -6,31 +6,22 @@ const sequelize = require('sequelize')
 const tweetServices = {
   getTweets: (req, cb) => {
     Tweet.findAll({
-      raw: true,
-      nest: true,
       include: [
         { model: User, attributes: ['avatar', 'name', 'account'] },
-        { model: Reply, attributes: ['tweetId'] },
-        { model: Like, attributes: ['tweetId'] }
+        { model: Reply, attributes: ['id', 'TweetId'] },
+        { model: Like, attributes: ['id', 'tweetId'] }
       ],
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
-        const count = (value, arr) => arr.reduce((t, c) => c === value ? t + 1 : t, 0)
-        const replyList = []
-        const likeList = []
-        tweets.map(tweet => {
-          replyList.push(tweet.Replies.tweetId)
-          likeList.push(tweet.Likes.tweetId)
-        })
         const data = tweets.map(tweet => {
           const subDescription = tweet.description.length > 80 ? tweet.description.substring(0, 80) + '...' : tweet.description
           return {
-            ...tweet,
+            ...tweet.dataValues,
             description: subDescription,
             createdAt: relativeTimeFormat(tweet.createdAt),
-            replyCount: count(tweet.id, replyList),
-            likeCount: count(tweet.id, likeList)
+            replyCount: tweet.Replies.length,
+            likeCount: tweet.Likes.length
           }
         })
         return cb(null, data)
