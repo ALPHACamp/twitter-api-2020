@@ -27,7 +27,7 @@ const adminController = {
     try {
       // --資料提取--
       const users = await User.findAll({
-        where: { role: 'user' },
+        // where: { role: 'user' }, // 測試檔清單不排除admin
         attributes: {
           exclude: ['password'],
           include: [[
