@@ -37,6 +37,7 @@ const userController = {
         name,
         account,
         email,
+        role: 'user',
         password: hash
       })
       const userData = newUser.toJSON()
