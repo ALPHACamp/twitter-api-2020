@@ -46,9 +46,9 @@ const tweetController = {
       ])
       const result = tweets.map(tweet => ({
         ...tweet,
-        updatedAt: dayjs(tweet.updatedAt)
-          .fromNow(),
-        isLiked: likes.some(like => like.TweetId === tweet.id) // 若Like model中，登入者id = 推文id，代表登入者有點讚，回傳ture，反之false
+        isLiked: likes.some(like => like.TweetId === tweet.id), // 若Like model中，登入者id = 推文id，代表登入者有點讚，回傳ture，反之false
+        fromNow: dayjs(tweet.updatedAt)
+          .fromNow()
       }))
       return res.status(200).json(result)
     } catch (err) {
