@@ -266,7 +266,7 @@ const userController = {
     try {
       const userId = req.params.id // 被查看的使用者 ID
       const currentUserId = helpers.getUser(req).id
-      // 取Followships及其關聯
+      // 取User(引入Followings)
       const [user, followings] = await Promise.all([
         User.findByPk(userId, {
           include: {
@@ -295,6 +295,51 @@ const userController = {
       const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
       const data = user.Followings.map(u => ({
         followingId: u.id,
+        UserId: u.id,
+        account: u.account,
+        name: u.name,
+        avatar: u.avatar,
+        introduction: u.introduction,
+        isFollowed: currentUserFollowing.includes(u.id)
+      }))
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const userId = req.params.id // 被查看的使用者 ID
+      const currentUserId = helpers.getUser(req).id
+      // 取User(引入Followers)
+      const [user, followings] = await Promise.all([
+        User.findByPk(userId, {
+          include: {
+            model: User,
+            as: 'Followers'
+          },
+          order: [[sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']]
+        }),
+        // 目前登入者的追蹤資料
+        Followship.findAll({
+          where: { followerId: currentUserId },
+          raw: true
+        })
+      ])
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      if (!user.Followers.length) {
+        return res.status(200).json({
+          status: 'success',
+          message: '使用者無追隨者!'
+        })
+      }
+      const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
+      const data = user.Followers.map(u => ({
+        followerId: u.id,
         UserId: u.id,
         account: u.account,
         name: u.name,
