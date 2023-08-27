@@ -8,7 +8,8 @@
     "dev": "cross-env NODE_ENV=development nodemon app.js",
     "lint": "eslint \"**/*.js\" --fix",
     "test": "mocha test --exit --recursive --timeout 5000",
-    "w-test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000"
+    "w-test": "set \"NODE_ENV=test\" && mocha test --exit --recursive --timeout 5000",
+    "seed": "npx sequelize db:seed:all"
   },
   "author": "",
   "license": "ISC",

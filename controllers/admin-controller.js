@@ -1,15 +1,10 @@
 
 const jwt = require('jsonwebtoken')
-const helpers = require('../_helpers')
-const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const dayjs = require('dayjs')
-const utc = require('dayjs/plugin/utc')
-const timezone = require('dayjs/plugin/timezone')
 const relativeTime = require('dayjs/plugin/relativeTime')
 const zhTw = require('dayjs/locale/zh-tw')
 
-dayjs.extend(utc)
-dayjs.extend(timezone)
 dayjs.extend(relativeTime)
 dayjs.locale(zhTw)
 
@@ -33,27 +28,40 @@ const adminController = {
     }
   },
   // No.21 - 取得所有使用者清單 GET /api/admin/users
-  getUsers: (req, res, next) => {
+  getUsers: async (req, res, next) => {
     try {
       // --資料提取--
-      // const users = User.findAll({
-      //   where: { role: 'user' },
-      //   attributes: {
-      //     exclude: ['password'],
-      //     include: [[
-      //       sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'),
-      //       'tweetsNum'
-      //     ]]
-      //   },
-      //   nest: true
-      // })
+      const users = await User.findAll({
+        // where: { role: 'user' }, // 測試檔清單不排除admin
+        attributes: {
+          exclude: ['password'],
+          include: [[
+            sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'),
+            'tweetsNum'
+          ], [
+            sequelize.literal('(SELECT COUNT(*) FROM Likes JOIN Tweets on Likes.TweetId = Tweets.id WHERE Tweets.UserId = User.id)'),
+            'likesNum'
+          ], [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followerId = User.id)'),
+            'followingsNum'
+          ], [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'),
+            'followersNum'
+          ]]
+        },
+        order: [
+          [sequelize.literal('tweetsNum'), 'DESC'],
+          [sequelize.literal('likesNum'), 'DESC'],
+          [sequelize.literal('followersNum'), 'DESC'],
+          [sequelize.literal('followingsNum'), 'DESC']
+        ],
+        nest: true,
+        raw: true
+      })
 
-      // --資料整理--
+      // --資料整理-- (此處不需整理，提供實際數字，前端可自行用numeral.js等套件格式化)
 
-
-
-
-      return res.status(200).json({})
+      return res.status(200).json(users)
     } catch (err) {
       return next(err)
     }
