@@ -48,6 +48,38 @@ const userController = {
     } catch (err) {
       return next(err)
     }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const UserId = req.params.id // 被查看的使用者ID
+      const user = await User.findByPk(UserId, {
+        attributes: { exclude: ['password'] },
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      })
+      if (!user) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      const isFollowed = user.Followings.some(f => f.id.toString() === UserId) // 檢查用戶是否有被使用者追蹤
+      const currentUserId = getUser(req).id.toString() // 用戶ID
+      const isCurrentUser = currentUserId === UserId // 判斷是否是使用者本人
+      const result = {
+        ...user.toJSON(),
+        followersCount: user.Followers.length,
+        followingsCount: user.Followings.length,
+        isCurrentUser,
+        isFollowed
+      }
+      delete result.Followers
+      delete result.Followings
+      return res.json(result)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
