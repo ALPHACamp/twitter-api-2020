@@ -69,4 +69,5 @@ passport.use(
       .catch(err => cb(err))
   })
 )
+
 module.exports = passport
