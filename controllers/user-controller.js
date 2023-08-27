@@ -306,7 +306,7 @@ const userController = {
   getTopUser: (req, res, next) => {
     const followingsId = helpers.getUser(req).Followings.map(f => f.id)
     User.findAll({
-      where: { id: { [Op.ne]: helpers.getUser(req).id } },
+      where: { id: { [Op.ne]: helpers.getUser(req).id }, role: 'user' },
       attributes: { exclude: 'password' },
       include: { model: User, as: 'Followers' }
     })
@@ -323,6 +323,9 @@ const userController = {
         return res.json(data)
       })
       .catch(err => next(err))
+  },
+  getAuth: (req, res, next) => {
+    helpers.getUser(req) ? res.json({ status: 'success', message: `User role is ${helpers.getUser(req).role}` }) : res.status(401).json({ status: 'error', message: 'unauthorized' })
   }
 }
 
