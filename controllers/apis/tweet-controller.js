@@ -20,7 +20,10 @@ const tweetContorller = {
       const tweet = await Tweet.findByPk(tweetId)
 
       if (!tweet) throw new Error("Tweet didn't exist!")
+
       res.status(200).json(tweet)
+
+
     } catch (err) {
       next(err)
     }
@@ -45,7 +48,9 @@ const tweetContorller = {
         userId,
         tweetId
       })
+
       res.status(200).json({
+
         status: 'success',
         data: createdLike,
         isLiked: true

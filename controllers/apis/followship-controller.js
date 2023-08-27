@@ -77,7 +77,7 @@ const followshipController = {
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT 1 FROM Followships WHERE following_id = User.id AND follower_Id = ${currentUserId})`
+              `(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE following_id = User.id AND follower_Id = ${currentUserId}) THEN TRUE ELSE FALSE END)`
             ),
             'isFollowed'
           ]

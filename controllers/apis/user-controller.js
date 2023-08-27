@@ -198,8 +198,12 @@ const userController = {
         throw new Error('Cannot edit other users profile')
       }
 
-      if (name && name.length > 50) throw new Error('the length of name should less than 50 characters')
-      if (introduction && introduction.length > 160) { throw new Error('the length of introduction should less than 160 characters') }
+      if (name && name.length > 50) { throw new Error('the length of name should less than 50 characters') }
+      if (introduction && introduction.length > 160) {
+        throw new Error(
+          'the length of introduction should less than 160 characters'
+        )
+      }
 
       if (account) {
         const userByAccount = await User.findOne({ where: { account }, raw: true, nest: true })
@@ -257,13 +261,17 @@ const userController = {
             as: 'likedTweet',
             attributes: { exclude: ['password'] },
             include: [
-              { model: User, as: 'author', attributes: ['account', 'name', 'avatar'] }
+              {
+                model: User,
+                as: 'author',
+                attributes: ['account', 'name', 'avatar']
+              }
             ]
           }
         ]
       })
 
-      if (likeTweets.length === 0) throw new Error('the user did not like any tweet')
+      if (likeTweets.length === 0) { throw new Error('the user did not like any tweet') }
 
       const likeTweetsData = likeTweets.map(like => ({
         TweetId: like.likedTweet.id,
@@ -338,7 +346,12 @@ const userController = {
           'followingId',
           'createdAt',
           'updatedAt',
-          [sequelize.literal(`(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`), 'isFollowed']
+          [
+            sequelize.literal(
+              `(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`
+            ),
+            'isFollowed'
+          ]
         ],
         raw: true,
         nest: true
@@ -377,7 +390,12 @@ const userController = {
           'followingId',
           'createdAt',
           'updatedAt',
-          [sequelize.literal(`(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`), 'isFollowed']
+          [
+            sequelize.literal(
+              `(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`
+            ),
+            'isFollowed'
+          ]
         ],
         raw: true,
         nest: true
