@@ -206,7 +206,7 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: { exclude: ['password'] }// 回傳 ser本人
+            attributes: { exclude: ['password'] }// 回傳 User本人
           },
           {
             model: Tweet, include: [{ model: User, attributes: ['id', 'account'] }]// 回傳這篇推文主人的id、account
@@ -223,6 +223,38 @@ const userController = {
       const data = replies.map(reply => ({
         ...reply.toJSON(),
         createdAt: relativeTimeFromNow(reply.createdAt)
+      }))
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const userId = req.params.id // 被查看的使用者 ID
+      const user = await User.findByPk(userId)
+      // 取Likes及其關聯
+      const likes = await Like.findAll({
+        where: { UserId: user.id },
+        include: [
+          {
+            model: Tweet, include: [{ model: User, attributes: ['id', 'account'] }, Reply, Like]// 回傳這篇推文主人的id、account、及回覆數
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      const data = likes.map(like => ({
+        ...like.toJSON(),
+        createdAt: relativeTimeFromNow(like.createdAt),
+        repliedAmount: like.Tweet.Replies.length || 0,
+        likedAmount: like.Tweet.Likes.length || 0,
+        isLiked: true
       }))
       return res.status(200).json(data)
     } catch (err) {
