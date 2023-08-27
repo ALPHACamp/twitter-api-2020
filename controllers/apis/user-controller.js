@@ -1,33 +1,33 @@
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const sequelize = require('sequelize')
-const { imgurFileHandler } = require('../../helpers/file-helpers')
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const sequelize = require("sequelize");
+const { imgurFileHandler } = require("../../helpers/file-helpers");
 
-const db = require('../../models')
-const helpers = require('../../_helpers')
+const db = require("../../models");
+const helpers = require("../../_helpers");
 
-const { User, Tweet, Reply, Followship, Like } = db
-const { Op } = require('sequelize')
+const { User, Tweet, Reply, Followship, Like } = db;
+const { Op } = require("sequelize");
 
 const userController = {
   signUp: async (req, res, next) => {
     try {
-      const { account, name, email, password, checkPassword } = req.body
+      const { account, name, email, password, checkPassword } = req.body;
 
       if (!account || !name || !email || !password || !checkPassword) {
-        throw new Error('all the blanks are required')
+        throw new Error("all the blanks are required");
       }
 
       // 檢查帳號是否重複
       const user = await User.findOne({
         where: {
-          [Op.or]: [{ email }, { account }]
-        }
-      })
+          [Op.or]: [{ email }, { account }],
+        },
+      });
 
       if (user) {
-        if (user.account === account) throw new Error('account 已重複註冊！')
-        if (user.email === email) throw new Error('email 已重複註冊！')
+        if (user.account === account) throw new Error("account 已重複註冊！");
+        if (user.email === email) throw new Error("email 已重複註冊！");
       }
 
       const createdUser = await User.create({
@@ -35,103 +35,103 @@ const userController = {
         email,
         account,
         password: bcrypt.hashSync(password, 10),
-        avatar: 'https://picsum.photos/100/100',
-        cover: 'https://picsum.photos/id/237/700/400',
-        role: 'user',
+        avatar: "https://picsum.photos/100/100",
+        cover: "https://picsum.photos/id/237/700/400",
+        role: "user",
         createdAt: new Date(),
-        updatedAt: new Date()
-      })
+        updatedAt: new Date(),
+      });
 
       res.status(200).json({
-        status: 'success',
-        message: 'Successfully create user.',
-        data: createdUser
-      })
+        status: "success",
+        message: "Successfully create user.",
+        data: createdUser,
+      });
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
   signIn: async (req, res, next) => {
     try {
-      const { account, password } = req.body
+      const { account, password } = req.body;
       if (!account || !password) {
-        throw new Error('Please enter account and password')
+        throw new Error("Please enter account and password");
       }
 
-      const user = await User.findOne({ where: { account } })
-      if (!user) throw new Error('User does not exist')
-      if (user.role === 'admin') throw new Error('admin permission denied')
+      const user = await User.findOne({ where: { account } });
+      if (!user) throw new Error("User does not exist");
+      if (user.role === "admin") throw new Error("admin permission denied");
       if (!bcrypt.compareSync(password, user.password)) {
-        throw new Error('Incorrect password')
+        throw new Error("Incorrect password");
       }
       const payload = {
         id: user.id,
         account: user.account,
-        role: user.role
-      }
+        role: user.role,
+      };
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: '30d'
-      })
-      const userData = user.toJSON()
+        expiresIn: "30d",
+      });
+      const userData = user.toJSON();
 
-      res.json({
-        status: 'success',
+      res.status(200).json({
+        status: "success",
         data: {
           token,
-          user: userData
-        }
-      })
+          user: userData,
+        },
+      });
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
   getUser: async (req, res, next) => {
     try {
-      const { id } = req.params
-      const currentUserId = helpers.getUser(req).id
+      const { id } = req.params;
+      const currentUserId = helpers.getUser(req).id;
 
       const [user, tweetCount, followerCount, followingCount] =
         await Promise.all([
           User.findByPk(id, { raw: true, nest: true }),
           Tweet.count({
-            where: { UserId: id }
+            where: { UserId: id },
           }),
           Followship.count({
-            where: { followerId: id }
+            where: { followerId: id },
           }),
           Followship.count({
-            where: { followingId: id }
-          })
-        ])
+            where: { followingId: id },
+          }),
+        ]);
 
       if (!user) {
         return res
           .status(401)
-          .json({ status: 'error', message: 'This user does not exist' })
+          .json({ status: "error", message: "This user does not exist" });
       }
 
-      delete user.password
-      user.tweetCount = tweetCount
-      user.followerCount = followerCount
-      user.followingCount = followingCount
+      delete user.password;
+      user.tweetCount = tweetCount;
+      user.followerCount = followerCount;
+      user.followingCount = followingCount;
 
       if (Number(id) !== currentUserId) {
         const checkUserFollowing = await Followship.findAll({
           where: { followerId: currentUserId },
-          raw: true
-        })
+          raw: true,
+        });
         user.isFollowed = checkUserFollowing.some(
-          follow => follow.followingId === Number(id)
-        )
+          (follow) => follow.followingId === Number(id)
+        );
       }
-      res.status(200).json(user)
+      res.status(200).json(user);
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
   getUserReplies: async (req, res, next) => {
     try {
-      const userId = req.params.id
+      const userId = req.params.id;
 
       const [user, replies] = await Promise.all([
         User.findByPk(userId, { raw: true, nest: true }),
@@ -140,24 +140,24 @@ const userController = {
           include: [
             {
               model: User,
-              as: 'replier',
-              attributes: { exclude: ['password'] }
+              as: "replier",
+              attributes: { exclude: ["password"] },
             },
             {
               model: Tweet,
-              as: 'tweetreply',
+              as: "tweetreply",
               include: [
-                { model: User, as: 'author', attributes: ['account', 'name'] }
-              ]
-            }
+                { model: User, as: "author", attributes: ["account", "name"] },
+              ],
+            },
           ],
-          order: [['createdAt', 'DESC']],
-          nest: true
-        })
-      ])
+          order: [["createdAt", "DESC"]],
+          nest: true,
+        }),
+      ]);
 
-      console.log(user, replies)
-      const userRepliesResult = replies.map(reply => ({
+      console.log(user, replies);
+      const userRepliesResult = replies.map((reply) => ({
         replyId: reply.id,
         comment: reply.comment,
         replierId: user.id,
@@ -167,68 +167,73 @@ const userController = {
         createdAt: reply.createdAt,
         tweetId: reply.TweetId,
         tweetBelongerName: reply.tweetreply.author.name,
-        tweetBelongerAccount: reply.tweetreply.author.account
-      }))
+        tweetBelongerAccount: reply.tweetreply.author.account,
+      }));
 
-      console.log(userRepliesResult)
+      console.log(userRepliesResult);
 
-      res.status(200).json(userRepliesResult)
+      res.status(200).json(userRepliesResult);
     } catch (err) {
-      console.error(err)
-      next(err)
+      console.error(err);
+      next(err);
     }
   },
   updateUser: async (req, res, next) => {
     try {
-      const { id } = req.params
-      const { account, name, email, password, introduction } = req.body
+      const { id } = req.params;
+      const { account, name, email, password, introduction } = req.body;
 
-      const user = await User.findByPk(id)
+      const user = await User.findByPk(id);
 
       if (!user) {
         return res.status(401).json({
-          status: 'error',
-          message: 'This user does not exist'
-        })
+          status: "error",
+          message: "This user does not exist",
+        });
       }
 
-      const currentUserId = helpers.getUser(req).id
+      const currentUserId = helpers.getUser(req).id;
 
       if (!currentUserId) {
-        throw new Error('Current user ID is missing')
+        throw new Error("Current user ID is missing");
       }
-      console.log(currentUserId, Number(id))
+      console.log(currentUserId, Number(id));
 
       if (currentUserId !== Number(id)) {
-        throw new Error('Cannot edit other users profile')
+        throw new Error("Cannot edit other users profile");
       }
       // console.log(currentUserId, Number(id))
 
       // console.log('File object:', files)
 
-      if (name && name.length > 50) throw new Error('the length of name should less than 50 characters')
-      if (introduction && introduction.length > 160) { throw new Error('the length of introduction should less than 160 characters') }
+      if (name && name.length > 50)
+        throw new Error("the length of name should less than 50 characters");
+      if (introduction && introduction.length > 160) {
+        throw new Error(
+          "the length of introduction should less than 160 characters"
+        );
+      }
 
       if (account) {
-        const user = await User.findOne({ where: { account } })
-        if (user.account === account) throw new Error('account 已重複註冊!')
+        const user = await User.findOne({ where: { account } });
+        if (user.account === account) throw new Error("account 已重複註冊!");
       }
 
       if (email) {
-        const user = await User.findOne({ where: { email } })
-        if (user.email === email) throw new Error('email 已重複註冊!')
+        const user = await User.findOne({ where: { email } });
+        if (user.email === email) throw new Error("email 已重複註冊!");
       }
 
-      const { files } = req
+      const { files } = req;
 
-      let newAvatar = ''
-      let newCover = ''
+      let newAvatar = "";
+      let newCover = "";
 
-      if (files && files.avatar && files.avatar[0].fieldname === 'avatar') {
-        newAvatar = await imgurFileHandler(files.avatar[0])
+      if (files && files.avatar && files.avatar[0].fieldname === "avatar") {
+        newAvatar = await imgurFileHandler(files.avatar[0]);
       }
-      if (files && files.cover && files.cover[0].fieldname === 'cover') {
-        newCover = await imgurFileHandler(files.cover[0])
+      if (files && files.cover && files.cover[0].fieldname === "cover") {
+        newCover = await imgurFileHandler(files.cover[0]);
       }
 
       await user.update({
@@ -238,41 +243,46 @@ const userController = {
         password: password ? bcrypt.hashSync(password, 10) : user.password,
         introduction: introduction || user.introduction,
         avatar: newAvatar || user.avatar,
-        cover: newCover || user.cover
-      })
+        cover: newCover || user.cover,
+      });
       res.status(200).json({
-        status: 'success',
-        message: 'Successfully update user.',
-        data: user
-      })
+        status: "success",
+        message: "Successfully update user.",
+        data: user,
+      });
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
   getUserLikes: async (req, res, next) => {
     try {
-      const { id } = req.params
-      const user = await User.findByPk(id, { raw: true, nest: true })
-      if (!user) throw new Error('User does not exist')
+      const { id } = req.params;
+      const user = await User.findByPk(id, { raw: true, nest: true });
+      if (!user) throw new Error("User does not exist");
 
       const likeTweets = await Like.findAll({
         where: { userId: id },
-        order: [['createdAt', 'DESC']],
+        order: [["createdAt", "DESC"]],
         include: [
           {
             model: Tweet,
-            as: 'likedTweet',
-            attributes: { exclude: ['password'] },
+            as: "likedTweet",
+            attributes: { exclude: ["password"] },
             include: [
-              { model: User, as: 'author', attributes: ['account', 'name', 'avatar'] }
-            ]
-          }
-        ]
-      })
+              {
+                model: User,
+                as: "author",
+                attributes: ["account", "name", "avatar"],
+              },
+            ],
+          },
+        ],
+      });
 
-      if (likeTweets.length === 0) throw new Error('the user did not like any tweet')
+      if (likeTweets.length === 0)
+        throw new Error("the user did not like any tweet");
 
-      const likeTweetsData = likeTweets.map(like => ({
+      const likeTweetsData = likeTweets.map((like) => ({
         TweetId: like.likedTweet.id,
         tweetBelongerName: like.likedTweet.author.name,
         tweetBelongerAccount: like.likedTweet.author.account,
@@ -280,33 +290,33 @@ const userController = {
         tweetLikeCount: like.likedTweet.likeCount,
         tweetReplyCount: like.likedTweet.replyCount,
         tweetContent: like.likedTweet.description,
-        createdAt: like.createdAt
-      }))
+        createdAt: like.createdAt,
+      }));
 
-      res.json(likeTweetsData)
+      res.status(200).json(likeTweetsData);
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
   getUserTweets: async (req, res, next) => {
     try {
-      const { id } = req.params
-      const user = await User.findByPk(id, { raw: true, nest: true })
-      if (!user) throw new Error('User does not exist')
+      const { id } = req.params;
+      const user = await User.findByPk(id, { raw: true, nest: true });
+      if (!user) throw new Error("User does not exist");
 
       const userTweets = await Tweet.findAll({
         where: { userId: id },
-        order: [['createdAt', 'DESC']],
+        order: [["createdAt", "DESC"]],
         include: [
           {
             model: User,
-            as: 'author',
-            attributes: { exclude: ['password'] }
-          }
-        ]
-      })
+            as: "author",
+            attributes: { exclude: ["password"] },
+          },
+        ],
+      });
 
-      const userTweetsData = userTweets.map(tweet => ({
+      const userTweetsData = userTweets.map((tweet) => ({
         TweetId: tweet.id,
         tweetBelongerName: tweet.author.name,
         tweetBelongerAccount: tweet.author.account,
@@ -314,93 +324,103 @@ const userController = {
         tweetLikeCount: tweet.likeCount,
         tweetReplyCount: tweet.replyCount,
         description: tweet.description,
-        createdAt: tweet.createdAt
-      }))
+        createdAt: tweet.createdAt,
+      }));
 
-      res.json(userTweetsData)
+      res.status(200).json(userTweetsData);
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      const { id } = req.params
-      const user = await User.findByPk(id, { raw: true, nest: true })
-      if (!user) throw new Error('User does not exist')
+      const { id } = req.params;
+      const user = await User.findByPk(id, { raw: true, nest: true });
+      if (!user) throw new Error("User does not exist");
 
-      const currentUserId = helpers.getUser(req).id
+      const currentUserId = helpers.getUser(req).id;
 
       const followers = await Followship.findAll({
         where: { followingId: id },
-        order: [['createdAt', 'DESC']],
+        order: [["createdAt", "DESC"]],
         include: [
           {
             model: User,
-            as: 'follower',
-            attributes: { exclude: ['password'] }
-          }
+            as: "follower",
+            attributes: { exclude: ["password"] },
+          },
         ],
         attributes: [
-          'followerId',
-          'followingId',
-          'createdAt',
-          'updatedAt',
-          [sequelize.literal(`(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`), 'isFollowed']
+          "followerId",
+          "followingId",
+          "createdAt",
+          "updatedAt",
+          [
+            sequelize.literal(
+              `(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`
+            ),
+            "isFollowed",
+          ],
         ],
         raw: true,
-        nest: true
-      })
+        nest: true,
+      });
 
-      const userFollowersData = followers.map(follower => {
+      const userFollowersData = followers.map((follower) => {
         return {
-          ...follower
-        }
-      })
+          ...follower,
+        };
+      });
 
-      res.status(200).json(userFollowersData)
+      res.status(200).json(userFollowersData);
     } catch (err) {
-      next(err)
+      next(err);
     }
   },
   getUserFollowings: async (req, res, next) => {
     try {
-      const { id } = req.params
-      const user = await User.findByPk(id, { raw: true, nest: true })
-      if (!user) throw new Error('User does not exist')
-      const currentUserId = helpers.getUser(req).id
+      const { id } = req.params;
+      const user = await User.findByPk(id, { raw: true, nest: true });
+      if (!user) throw new Error("User does not exist");
+      const currentUserId = helpers.getUser(req).id;
 
       const following = await Followship.findAll({
         where: { followerId: id },
-        order: [['createdAt', 'DESC']],
+        order: [["createdAt", "DESC"]],
         include: [
           {
             model: User,
-            as: 'following',
-            attributes: { exclude: ['password'] }
-          }
+            as: "following",
+            attributes: { exclude: ["password"] },
+          },
         ],
         attributes: [
-          'followerId',
-          'followingId',
-          'createdAt',
-          'updatedAt',
-          [sequelize.literal(`(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`), 'isFollowed']
+          "followerId",
+          "followingId",
+          "createdAt",
+          "updatedAt",
+          [
+            sequelize.literal(
+              `(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`
+            ),
+            "isFollowed",
+          ],
         ],
         raw: true,
-        nest: true
-      })
+        nest: true,
+      });
 
-      const userFollowersData = following.map(follower => {
+      const userFollowersData = following.map((follower) => {
         return {
-          ...follower
-        }
-      })
+          ...follower,
+        };
+      });
 
-      res.status(200).json(userFollowersData)
+      res.status(200).json(userFollowersData);
     } catch (err) {
-      next(err)
+      next(err);
     }
-  }
-}
+  },
+};
 
-module.exports = userController
+module.exports = userController;
