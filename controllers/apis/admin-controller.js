@@ -10,12 +10,7 @@ const adminController = {
     const options = {
       raw: true,
       attributes: {
-        exclude: [
-          'email',
-          'password',
-          'updatedAt',
-          'createdAt'
-        ]
+        exclude: ['email', 'password', 'updatedAt', 'createdAt']
       }
     }
     User.findAll(options)
@@ -99,13 +94,13 @@ const adminController = {
   signIn: async (req, res, next) => {
     try {
       const { account, password } = req.body
-      if (!account || !password) throw new Error('Please enter account and password')
+      if (!account || !password) { throw new Error('Please enter account and password') }
 
       const userData = await User.findOne({ where: { account } })
 
       if (!userData) throw new Error('User does not exist')
       if (userData.role === 'user') throw new Error('user permission denied')
-      if (!bcrypt.compareSync(password, userData.password)) throw new Error('Incorrect password')
+      if (!bcrypt.compareSync(password, userData.password)) { throw new Error('Incorrect password') }
 
       const payload = {
         id: userData.id,
@@ -115,7 +110,7 @@ const adminController = {
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
-      res.json({
+      return res.status(200).json({
         status: 'success',
         data: {
           token,
