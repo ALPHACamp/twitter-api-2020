@@ -146,23 +146,51 @@ const tweetController = {
   },
   // 對一筆貼文收回讚
   unlikeTweet: (req, res, next) => {
+    const UserId = helper.getUser(req).id
     const TweetId = req.params.id
-    const UserId = getUser(req).toJSON().id
 
-    return Tweet.findByPk(TweetId, {
-      attributes: {
-        include: [[sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${UserId} AND Likes.TweetId = ${TweetId})`), 'isLiked']],
-        exclude: ['description', 'createdAt', 'updatedAt']
-      },
-      raw: true
-    })
-    .then(tweet => {
-      if (!tweet) throw new Error('推文不存在')
-      if (!tweet.isLiked) throw new Error("未表示喜歡")
-      Like.destroy({ where: { TweetId, UserId }})
-      return res.status(200).json({ status: 'success' })
-    })
-    .catch(err => next(err))
+    Tweet.findByPk(TweetId)
+      .then(tweet => {
+        if (!tweet) {
+          return res.status(404).json({
+            status: 'error',
+            message: '推文不存在！'
+          })
+        }
+
+        Like.destroy({ where: { UserId, TweetId } })
+          .then(like => {
+            if (!like) {
+              return res.status(404).json({
+                status: 'error',
+                message: '未表示喜歡'
+              })
+            }
+            return res.status(200).json({ status: 'success' })
+          })
+          .catch(err => {
+            next(err)
+          })
+      })
+      .catch(err => next(err))
+      // way 2
+    // const TweetId = req.params.id
+    // const UserId = getUser(req).toJSON().id
+
+    // return Tweet.findByPk(TweetId, {
+    //   attributes: {
+    //     include: [[sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${UserId} AND Likes.TweetId = ${TweetId})`), 'isLiked']],
+    //     exclude: ['description', 'createdAt', 'updatedAt']
+    //   },
+    //   raw: true
+    // })
+    // .then(tweet => {
+    //   if (!tweet) throw new Error('推文不存在')
+    //   if (!tweet.isLiked) throw new Error("未表示喜歡")
+    //   Like.destroy({ where: { TweetId, UserId }})
+    //   return res.status(200).json({ status: 'success' })
+    // })
+    // .catch(err => next(err))
   },
   // 看貼文全部回覆
   getReplies: (req, res, next) => {
