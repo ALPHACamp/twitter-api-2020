@@ -70,20 +70,4 @@ passport.use(
   })
 )
 
-// API版本不會走序列化與反序列化
-// 序列化
-// passport.serializeUser((user, cb) => {
-//   cb(null, user.id)
-// })
-// // 反序列化
-// passport.deserializeUser((id, cb) => {
-//   return User.findByPk(id, {
-//     include: [
-//       { model: User, as: 'Followers' },
-//       { model: User, as: 'Followings' }
-//     ]
-//   })
-//     .then(user => cb(null, user.toJSON()))
-//     .catch(err => cb(err))
-// })
 module.exports = passport

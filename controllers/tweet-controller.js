@@ -1,11 +1,12 @@
 const { Tweet, User, Like, Reply, sequelize } = require('../models')
+// const { getUser } = require('../_helpers')
 const helpers = require('../_helpers')
 const { relativeTimeFromNow, simpleDate, simpleTime } = require('../helpers/datetime-helper')
 
 const tweetController = {
   // 看所有貼文
   getTweets: (req, res, next) => {
-    const loginUserId =  helpers.getUser(req).id
+    const loginUserId = helpers.getUser(req).id
     return Tweet.findAll({
       nest: true,
       raw: true,
@@ -22,20 +23,28 @@ const tweetController = {
       ],
       order: [['createdAt', 'DESC']]
     })
+
     .then(data => {
       return data.map(tweet => ({
         ...tweet,
         createdAt : relativeTimeFromNow(tweet.createdAt)
       }))
     })
-    .then(tweet => res.status(200).json(tweet))
+
+    .then(tweet => res.status(200).json({
+      tweet,
+      status: 'error',
+      message: '推文不存在',
+    }))
     .catch(err => next(err))
   },
   // 新增一筆貼文
   postTweet: (req, res, next) => {
     const limitWords = 140
     const { description } = req.body
+
     const loginUserId = helpers.getUser(req).id
+
 
     if (!loginUserId) throw new Error('帳號不存在！')
     if (!description.trim()) throw new Error('內容不可空白')
@@ -45,8 +54,10 @@ const tweetController = {
       description,
       UserId: loginUserId
     })
+
     .then( tweet => {
       return res.status(200).json(tweet)
+
     })
     .catch(err => next(err))
   },
@@ -79,6 +90,7 @@ const tweetController = {
           message: '推文不存在',
         })
       }
+
       tweet.createdAt = simpleTime(tweet.createdAt) + ' • ' + simpleDate(Tweet.createdAt)
       return res.status(200).json(tweet)   
     })
@@ -109,6 +121,7 @@ const tweetController = {
           })
         }
         return res.status(200).json({ status: 'success' })
+
     })
     .catch(err => next(err))
 
@@ -160,32 +173,48 @@ const tweetController = {
             next(err)
           })
       })
-      .catch(err => {
-        next(err)
-      })
-  },
-   // 看貼文全部回覆
-  getReplies: (req, res, next) => {
-      const TweetId = req.params.id
-      return Reply.findAll({
-          raw: true,
-          nest: true,
-          where: { TweetId },
-          attributes: ['id', 'comment', 'createdAt'],
-          include: {
-            model: User,
-            attributes: ['id', 'avatar', 'account', 'name']
-          },
-          order: [['createdAt', 'DESC'], ['id', 'ASC']]
-        })
-      .then(replies => replies.map( reply => ({
-        ...reply,
-        createdAt: relativeTimeFromNow(reply.createdAt)
-      })))
-      .then((data) => res.status(200).json(data))
       .catch(err => next(err))
+      // way 2
+    // const TweetId = req.params.id
+    // const UserId = getUser(req).id
+
+    // return Tweet.findByPk(TweetId, {
+    //   attributes: {
+    //     include: [[sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${UserId} AND Likes.TweetId = ${TweetId})`), 'isLiked']],
+    //     exclude: ['description', 'createdAt', 'updatedAt']
+    //   },
+    //   raw: true
+    // })
+    // .then(tweet => {
+    //   if (!tweet) throw new Error('推文不存在')
+    //   if (!tweet.isLiked) throw new Error("未表示喜歡")
+    //   Like.destroy({ where: { TweetId, UserId }})
+    //   return res.status(200).json({ status: 'success' })
+    // })
+    // .catch(err => next(err))
   },
-   // 回覆一筆貼文
+  // 看貼文全部回覆
+  getReplies: (req, res, next) => {
+    const TweetId = req.params.id 
+    return Reply.findAll({
+        raw: true,
+        nest: true,
+        where: { TweetId },
+        attributes: ['id', 'comment', 'createdAt'],
+        include: {
+          model: User,
+          attributes: ['id', 'avatar', 'account', 'name']
+        },
+        order: [['createdAt', 'DESC'], ['id', 'ASC']]
+      })
+    .then(replies => replies.map( reply => ({
+      ...reply,
+      createdAt: relativeTimeFromNow(reply.createdAt)
+    })))
+    .then((data) => res.status(200).json(data))
+    .catch(err => next(err))
+  },
+  // 回覆一筆貼文
   postReply: (req, res, next) => {
     const limitWords = 140
     const TweetId = req.params.id
@@ -210,6 +239,5 @@ const tweetController = {
     .catch(err => next(err))
   }
 }
-
 
 module.exports = tweetController

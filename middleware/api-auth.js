@@ -1,15 +1,15 @@
 const passport = require('../config/passport') // 引入 passport
 const helpers = require('../helpers/auth-helpers')
+
 // authenticated 驗證使用者的登入狀況，如果登入了才給予通過，錯誤處理移動到controller
-// const authenticated = passport.authenticate('jwt', { session: false })
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
-    if (!user)
-      return res.status(401).json({ status: 'error', message: 'Unauthorized' })
+    if (!user) { return res.status(401).json({ status: 'error', message: 'Unauthorized' }) }
     if (err) return next(err)
     next()
   })(req, res, next)
 }
+
 // authenticatedAdmin 確認使用者是否為admin，如果是才給予通過
 const authenticatedAdmin = (req, res, next) => {
   if (req.user && req.user.isAdmin) return next()
@@ -24,6 +24,7 @@ const authenticatedCurrentUser = (req, res, next) => {
     message: '只能編輯自己的資料!'
   })
 }
+
 module.exports = {
   authenticated,
   authenticatedAdmin,
