@@ -39,7 +39,9 @@ const userController = {
         account,
         email,
         role: 'user',
-        password: hash
+        password: hash,
+        avatar: 'htps://i.imgur.com/uSgVo9G.png',
+        cover: 'https://i.imgur.com/7uwf8kO.png'
       })
       const userData = newUser.toJSON()
       delete userData.password

@@ -13,7 +13,7 @@ module.exports = {
       name: user.account,
       role: user.role,
       avatar: faker.image.avatar(),
-      cover: 'https://i.imgur.com/xwLLnZh.png',
+      cover: 'https://i.imgur.com/7uwf8kO.png',
       introduction: faker.string.alphanumeric({ length: { min: 1, max: 160 } }),
       createdAt: new Date(),
       updatedAt: new Date()
