@@ -92,14 +92,13 @@ const tweetController = {
     .catch(err => next(err))
   },
   likeTweet: (req, res, next) => {
-    const { id } = req.params
-    console.log(id)
+    const TweetId = req.params.id
     const UserId = getUser(req).toJSON().id
 
     return Promise.all([
-      Tweet.findByPk(id),
-      Like.findOrCreate({
-        where: { UserId, TweetId: id }
+      Tweet.findByPk(TweetId),
+      Like.findOrCreate({ // 陣列第 1 項回傳 true or false`, 沒資料就建立
+        where: { UserId, TweetId}
       })
     ])
     .then(([tweet, like]) => {
@@ -117,6 +116,44 @@ const tweetController = {
         }
         return res.status(200).json({ status: 'success' })
 
+    })
+    .catch(err => next(err))
+
+    // way 2
+      Tweet.findByPk(TweetId, {
+        attributes: {
+          include: [[sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${UserId} AND Likes.TweetId = ${TweetId})`), 'isLiked']],
+          exclude: ['description', 'createdAt', 'updatedAt']
+        },
+        raw: true
+      })
+      .then(tweet => {
+        if (!tweet) throw new Error('推文不存在')
+        if (tweet.isLiked) throw new Error('You have liked this tweet!')
+        return Like.create({
+        UserId,
+        TweetId
+        })
+      })
+      .then(tweet => {tweet.isLiked = 1
+        res.status(200).json(tweet)
+      })
+  },
+  unlikeTweet: (req, res, next) => {
+    const TweetId = req.params.id
+    const UserId = getUser(req).toJSON().id
+    return Tweet.findByPk(TweetId, {
+      attributes: {
+        include: [[sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${UserId} AND Likes.TweetId = ${TweetId})`), 'isLiked']],
+        exclude: ['description', 'createdAt', 'updatedAt']
+      },
+      raw: true
+    })
+    .then(tweet => {
+      if (!tweet) throw new Error('推文不存在')
+      if (!tweet.isLiked) throw new Error("未表示喜歡")
+      Like.destroy({ where: { TweetId, UserId }})
+      return res.status(200).json({ status: 'success' })
     })
     .catch(err => next(err))
   }
