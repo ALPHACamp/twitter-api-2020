@@ -2,7 +2,10 @@ const express = require('express')
 const router = express.Router()
 
 const tweetController = require('../../controllers/tweet-controller')
+const replyController = require('../../controllers/reply-controller')
 
+// 發佈回覆
+router.post('/:tweetId/replies', replyController.postReply)
 // 取得特定推文
 router.get('/:tweetId', tweetController.getTweet)
 // 取得全部推文
