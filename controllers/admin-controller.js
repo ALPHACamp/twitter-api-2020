@@ -20,6 +20,7 @@ const adminController = {
           data: data
         })
       })
+      .catch(err => next(err))
   }
 }
 

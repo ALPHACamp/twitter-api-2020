@@ -26,6 +26,7 @@ const tweetController = {
           data: data
         })
       })
+      .catch(err => next(err))
   }
 }
 
