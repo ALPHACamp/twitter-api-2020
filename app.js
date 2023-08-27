@@ -12,7 +12,7 @@ const cors = require('cors')
 const app = express()
 
 const corsOptions = {
-  origin: '＊',
+  origin: '*',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: ['Content-Type', 'Authorization']
 }
@@ -29,11 +29,6 @@ app.use(passport.session())
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 const port = process.env.PORT || 3000
-
-// use helpers.getUser(req) to replace req.user
-function authenticated (req, res, next) {
-  // passport.authenticate('jwt', { ses...
-}
 
 app.use(routes)
 
