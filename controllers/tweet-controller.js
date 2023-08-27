@@ -31,11 +31,7 @@ const tweetController = {
       }))
     })
 
-    .then(tweet => res.status(200).json({
-      tweet,
-      status: 'error',
-      message: '推文不存在',
-    }))
+    .then(tweet => res.status(200).json(tweet))
     .catch(err => next(err))
   },
   // 新增一筆貼文
