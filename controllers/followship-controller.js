@@ -3,11 +3,9 @@ const helpers = require('../_helpers')
 
 const followshipController = {
   addFollowing: (req, res, next) => {
-    // const followingId = req.body.userId
-    const followingId = 2
-    // const followerId = helpers.getUser(req)
-    console.log('follower:', helpers.getUser(req))
-    const followerId = 3
+    // const followingId = req.body.id
+    const followingId = 1
+    const followerId = helpers.getUser(req).id
     Promise.all([
       User.findByPk(followerId),
       Followship.findOne({
@@ -27,20 +25,19 @@ const followshipController = {
   },
   removeFollowing: (req, res, next) => {
     const followingId = req.params.followingId
-    const followerId = helpers.getUser(req)
-    return Followship.find({
+    const followerId = helpers.getUser(req).id
+    return Followship.findOne({
       where: {
-        followingId,
-        followerId
+        followingId: followingId,
+        followerId: followerId
       }
     })
       .then(followship => {
         if (!followship) throw new Error("You haven't followed this user!")
         return followship.destroy()
       })
-      .then(() => res.json('status: "success'))
+      .then(() => res.json({ status: 'success' }))
       .catch(err => next(err))
   }
-
 }
 module.exports = followshipController
