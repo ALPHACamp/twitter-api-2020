@@ -80,7 +80,7 @@ const tweetController = {
     if (!loginUserId) {
       return res.status(404).JSON({
           status: 'error',
-          message: '帳號不存在！',
+          message: '帳號不存在',
         })
     }
 
@@ -153,7 +153,7 @@ const tweetController = {
         if (!tweet) {
           return res.status(404).json({
             status: 'error',
-            message: '推文不存在！'
+            message: '推文不存在'
           })
         }
 
@@ -209,7 +209,7 @@ const tweetController = {
       if (!tweet) {
           return res.status(404).json({
             status: 'error',
-            message: '推文不存在！'
+            message: '推文不存在'
           })
         }
 

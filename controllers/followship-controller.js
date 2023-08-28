@@ -18,7 +18,7 @@ const followshipController = {
     if (followingId === UserId) {
         return res.status(422).json({
           status: 'error',
-          message: '使用者不可以追蹤自己.'
+          message: '使用者不可以追蹤自己'
         })
       }
 
@@ -37,7 +37,7 @@ const followshipController = {
       if (!user || user.role === 'admin') {
         return res.status(404).json({
           status: 'error',
-          message: '使用者不存在.'
+          message: '使用者不存在'
         })
       }
 
@@ -45,7 +45,7 @@ const followshipController = {
       if (followship) {
         return res.status(422).json({
           status: 'error',
-          message: '你已經追蹤過了!'
+          message: '你已經追蹤過了'
         })
       }
 
@@ -67,7 +67,7 @@ const followshipController = {
     if (followingId === UserId) {
         return res.status(422).json({
           status: 'error',
-          message: '使用者不可以取消追蹤自己.'
+          message: '使用者不可以取消追蹤自己'
         })
       }
 
@@ -86,7 +86,7 @@ const followshipController = {
     if (!user || user.role === 'admin') {
       return res.status(404).json({
         status: 'error',
-        message: '使用者不存在.'
+        message: '使用者不存在'
       })
     }
     
@@ -94,7 +94,7 @@ const followshipController = {
     if (!followship) {
         return res.status(422).json({
           status: 'error',
-          message: '你還沒追蹤喔!.'
+          message: '你還沒追蹤喔'
         })
       }
     return followship.destroy()
