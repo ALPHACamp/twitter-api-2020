@@ -72,13 +72,13 @@ const userController = {
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
-      const userData = user.toJSON()
+      const userId = user.toJSON().id
 
       res.status(200).json({
         status: 'success',
         data: {
           token,
-          user: userData
+          userId
         }
       })
     } catch (err) {
@@ -198,7 +198,9 @@ const userController = {
         throw new Error('Cannot edit other users profile')
       }
 
-      if (name && name.length > 50) { throw new Error('the length of name should less than 50 characters') }
+      if (name && name.length > 50) {
+        throw new Error('the length of name should less than 50 characters')
+      }
       if (introduction && introduction.length > 160) {
         throw new Error(
           'the length of introduction should less than 160 characters'
@@ -206,14 +208,22 @@ const userController = {
       }
 
       if (account) {
-        const userByAccount = await User.findOne({ where: { account }, raw: true, nest: true })
+        const userByAccount = await User.findOne({
+          where: { account },
+          raw: true,
+          nest: true
+        })
 
-        if (userByAccount && userByAccount.account === account) throw new Error('account 已重複註冊!')
+        if (userByAccount && userByAccount.account === account) {
+          throw new Error('account 已重複註冊!')
+        }
       }
 
       if (email) {
         const userByEmail = await User.findOne({ where: { email } })
-        if (userByEmail && userByEmail.email === email) throw new Error('email 已重複註冊!')
+        if (userByEmail && userByEmail.email === email) {
+          throw new Error('email 已重複註冊!')
+        }
       }
 
       const { files } = req
@@ -271,7 +281,9 @@ const userController = {
         ]
       })
 
-      if (likeTweets.length === 0) { throw new Error('the user did not like any tweet') }
+      if (likeTweets.length === 0) {
+        throw new Error('the user did not like any tweet')
+      }
 
       const likeTweetsData = likeTweets.map(like => ({
         TweetId: like.likedTweet.id,
@@ -298,12 +310,22 @@ const userController = {
       const userTweets = await Tweet.findAll({
         where: { userId: id },
         order: [['createdAt', 'DESC']],
+        // attributes:['id','description', [
+        //   sequelize.literal(
+        //     '(SELECT COUNT(DISTINCT id) FROM Like WHERE user_id = User.id)'
+        //   ),
+        //   'totalFollowers'
+        // ],]
         include: [
           {
             model: User,
             as: 'author',
             attributes: { exclude: ['password'] }
           }
+          // {
+          //   model:Like,
+          //   as
+          // }
         ]
       })
 

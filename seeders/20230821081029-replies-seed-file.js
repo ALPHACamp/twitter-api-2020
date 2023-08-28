@@ -18,7 +18,7 @@ module.exports = {
 
     await queryInterface.bulkInsert(
       'Replies',
-      Array.from({ length: 150 }).map((d, i) => {
+      Array.from({ length: 50 }).map((d, i) => {
         const tweet = {
           Tweet_id: tweetData[Math.floor(i / 3)].id,
           User_id: userData[Math.floor(Math.random() * userData.length)].id,

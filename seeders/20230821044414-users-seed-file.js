@@ -25,7 +25,7 @@ module.exports = {
     }
     data.push(admin)
 
-    for (let i = 1; i <= 50; i++) {
+    for (let i = 1; i <= 20; i++) {
       const user = {
         id: i + 1,
         email: `user${i}@example.com`,

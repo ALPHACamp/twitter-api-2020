@@ -3,7 +3,7 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
-      'SELECT id FROM Users;',
+      'SELECT id FROM Users  ;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
 
