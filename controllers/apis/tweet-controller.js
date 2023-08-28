@@ -133,9 +133,10 @@ const tweetContorller = {
           }
         ],
         order: [['createdAt', 'DESC']],
-        nest: true
+        nest: true,
+        raw: true
       })
-
+      console.log(replies)
       if (!replies) throw new Error('This tweet has no replies')
       console.log(replies)
       const repliesData = replies.map(reply => ({

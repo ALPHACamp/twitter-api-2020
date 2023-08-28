@@ -1,33 +1,33 @@
-"use strict";
+'use strict'
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
-      "SELECT id FROM Users  ;",
+      'SELECT id FROM Users;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
-    );
+    )
 
     const tweets = await queryInterface.sequelize.query(
-      "SELECT id FROM Tweets;",
+      'SELECT id FROM Tweets;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
-    );
+    )
 
-    const likes = [];
+    const likes = []
 
-    tweets.forEach((tweet) => {
+    tweets.forEach(tweet => {
       likes.push(
         ...Array.from({ length: 2 }, () => ({
           User_id: users[Math.floor(Math.random() * users.length)].id,
           Tweet_id: tweet.id,
           created_at: new Date(),
-          updated_at: new Date(),
+          updated_at: new Date()
         }))
-      );
-    });
-    await queryInterface.bulkInsert("Likes", likes);
+      )
+    })
+    await queryInterface.bulkInsert('Likes', likes)
   },
 
   down: async (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete("Likes", null, {});
-  },
-};
+    return queryInterface.bulkDelete('Likes', null, {})
+  }
+}
