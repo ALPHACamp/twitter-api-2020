@@ -271,6 +271,41 @@ const tweetController = {
     } catch (err) {
       return next(err)
     }
+  },
+
+  addLike: async (req, res, next) => {
+    try {
+      // get tweet information
+      const { tweet_id: tweetId } = req.params
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) {
+        return res.status(404).json({ status: 'error', message: '推文不存在' })
+      }
+
+      // get user id
+      const user = helpers.getUser(req)
+      const UserId = user.id
+
+      const like = await Like.findOne({
+        where: {
+          UserId: UserId,
+          TweetId: tweetId
+        }
+      })
+      if (like) {
+        return res.status(404).json({ status: 'error', message: '你已經喜歡過這則推文' })
+      }
+
+      await Like.create({
+        UserId: UserId,
+        TweetId: tweetId,
+        isLiked: true
+      })
+
+      return res.status(200).json({ status: 'success', message: '你已成功喜歡這則貼文' })
+    } catch (err) {
+      return next(err)
+    }
   }
 }
 
