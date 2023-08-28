@@ -3,14 +3,14 @@ const helpers = require('../_helpers')
 
 const followshipController = {
   addFollowing: (req, res, next) => {
-    const followingId = Number(req.body.id) // 當下按的使用者
-    const UserId = helpers.getUser(req).id // 登入使用者 ID
+    const followingId = Number(req.body.id) // 當下按鈕所按的使用者
+    const UserId = helpers.getUser(req).id // 登入使用者的 ID
     
     // 確認被追蹤使用者是否存在
     if (!followingId) {
-        return res.status(400).json({
+        return res.status(404).json({
           status: 'error',
-          message: 'Following id is required!'
+          message: '查無此使用者'
         })
       }
 
@@ -91,7 +91,12 @@ const followshipController = {
     }
     
     // 確認是否尚未按過追蹤
-    if (!followship) throw new Error('你還沒追蹤喔!')
+    if (!followship) {
+        return res.status(422).json({
+          status: 'error',
+          message: '你還沒追蹤喔!.'
+        })
+      }
     return followship.destroy()
     })
     
