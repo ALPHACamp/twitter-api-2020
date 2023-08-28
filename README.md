@@ -119,4 +119,5 @@ MYSQL_DATABASE_URL=<MySQL連線字串>
 
 * [**江祐敏**](https://github.com/AlanChiangg)
 * [**Eric Huang**](https://github.com/erikku54) 
-* 前端專案： [**葉明荃**](https://github.com/u88872625)、[**YunJong**](https://github.com/Yunj0ng)
+
+前端專案合作： [**葉明荃**](https://github.com/u88872625)、[**YunJong**](https://github.com/Yunj0ng)
