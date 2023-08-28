@@ -22,8 +22,7 @@ function authenticated(req, res, next){
 const corsOptions = {
   origin: [
     'http://localhost:3000',
-    'https://github.com/kotjy/ac-twitter',
-    'https://quiet-brook-57490-c9dd61813879.herokuapp.com'
+    'https://github.com/kotjy/ac-twitter'
   ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: ['Content-Type', 'Authorization']

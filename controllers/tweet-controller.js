@@ -42,9 +42,26 @@ const tweetController = {
     const loginUserId = helpers.getUser(req).id
 
 
-    if (!loginUserId) throw new Error('帳號不存在！')
-    if (!description.trim()) throw new Error('內容不可空白')
-    if (description.length > limitWords ) throw new Error(`字數不能大於 ${limitWords} 字`)
+    if (!loginUserId) {
+      return res.status(404).JSON({
+          status: 'error',
+          message: '帳號不存在',
+        })
+    }
+
+    if (!description.trim())  {
+      return res.status(400).JSON({
+          status: 'error',
+          message: '內容不可空白',
+        })
+    }
+
+    if (description.length > limitWords ) {
+      return res.status(413).JSON({
+          status: 'error',
+          message: `字數不能大於 ${limitWords} 字`,
+        })
+    }
     
     return Tweet.create({
       description,
@@ -60,7 +77,12 @@ const tweetController = {
   // 瀏覽一筆貼文
   getTweet: (req, res, next) => {
     const loginUserId = helpers.getUser(req).id
-    if (!loginUserId) throw new Error('帳號不存在！')
+    if (!loginUserId) {
+      return res.status(404).JSON({
+          status: 'error',
+          message: '帳號不存在！',
+        })
+    }
 
     return Tweet.findByPk(req.params.id, {
       include: 
@@ -120,26 +142,6 @@ const tweetController = {
 
     })
     .catch(err => next(err))
-
-    // way 2
-      // Tweet.findByPk(TweetId, {
-      //   attributes: {
-      //     include: [[sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${UserId} AND Likes.TweetId = ${TweetId})`), 'isLiked']],
-      //     exclude: ['description', 'createdAt', 'updatedAt']
-      //   },
-      //   raw: true
-      // })
-      // .then(tweet => {
-      //   if (!tweet) throw new Error('推文不存在')
-      //   if (tweet.isLiked) throw new Error('You have liked this tweet!')
-      //   return Like.create({
-      //   UserId,
-      //   TweetId
-      //   })
-      // })
-      // .then(tweet => {tweet.isLiked = 1
-      //   res.status(200).json(tweet)
-      // })
   },
   // 對一筆貼文收回讚
   unlikeTweet: (req, res, next) => {
@@ -158,7 +160,7 @@ const tweetController = {
         Like.destroy({ where: { UserId, TweetId } })
           .then(like => {
             if (!like) {
-              return res.status(404).json({
+              return res.status(422).json({
                 status: 'error',
                 message: '未表示喜歡'
               })
@@ -170,24 +172,6 @@ const tweetController = {
           })
       })
       .catch(err => next(err))
-      // way 2
-    // const TweetId = req.params.id
-    // const UserId = getUser(req).id
-
-    // return Tweet.findByPk(TweetId, {
-    //   attributes: {
-    //     include: [[sequelize.literal(`EXISTS(SELECT true FROM Likes WHERE Likes.UserId = ${UserId} AND Likes.TweetId = ${TweetId})`), 'isLiked']],
-    //     exclude: ['description', 'createdAt', 'updatedAt']
-    //   },
-    //   raw: true
-    // })
-    // .then(tweet => {
-    //   if (!tweet) throw new Error('推文不存在')
-    //   if (!tweet.isLiked) throw new Error("未表示喜歡")
-    //   Like.destroy({ where: { TweetId, UserId }})
-    //   return res.status(200).json({ status: 'success' })
-    // })
-    // .catch(err => next(err))
   },
   // 看貼文全部回覆
   getReplies: (req, res, next) => {
@@ -222,9 +206,27 @@ const tweetController = {
       nest: true,
     })
     .then(tweet => {
-      if (!tweet) throw new Error('推文不存在')
-      if (!comment.trim()) throw new Error('內容不可空白')
-      if (comment.length > limitWords) throw new Error(`字數不能大於 ${limitWords} 字`)
+      if (!tweet) {
+          return res.status(404).json({
+            status: 'error',
+            message: '推文不存在！'
+          })
+        }
+
+      if (!comment.trim()) {
+      return res.status(400).JSON({
+          status: 'error',
+          message: '內容不可空白',
+        })
+    }
+
+      if (comment.length > limitWords)  {
+      return res.status(413).JSON({
+          status: 'error',
+          message: `字數不能大於 ${limitWords} 字`,
+        })
+    }
+
       return Reply.create({
           comment,
           UserId,
