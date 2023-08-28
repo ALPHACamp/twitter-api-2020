@@ -40,7 +40,8 @@ const adminController = {
             ),
             'likeCount'
           ]
-        ]
+        ],
+        order: [[sequelize.col('tweetCount'), 'DESC'], ['createdAt']]
       }
       const users = await User.findAll(options)
       // console.log("usersbeforeforeach", users);
