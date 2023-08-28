@@ -1,15 +1,49 @@
 const { Tweet, Like, Reply, User } = require("../../models");
 const helpers = require("../../_helpers");
+// const defaultLimit = 10
 
 const tweetContorller = {
   getTweets: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll({
-        raw: true,
-        order: [["createdAt", "DESC"]],
-      });
-      if (!tweets) throw new Error("Tweet didn't exist!");
-      res.status(200).json(tweets);
+      const getUser = helpers.getUser(req);
+      const userId = getUser.id;
+      const options = {
+        attributes: [
+          "id",
+          "description",
+          "likeCount",
+          "replyCount",
+          "createdAt",
+        ],
+        order: [["createdAt", "desc"]],
+        subQuery: false,
+        include: [
+          {
+            model: User,
+            attributes: ["id", "account", "name", "avatar"],
+            as: "author",
+            where: { role: "user" },
+          },
+          {
+            model: Like,
+            attributes: ["userId"],
+          },
+        ],
+      };
+      const tweets = await Tweet.findAll(options);
+      console.log(tweets);
+      const dataTweets = tweets.map((tweet) => ({
+        id: tweet.id,
+        authorId: tweet.author.id,
+        authorAccount: tweet.author.account,
+        authorName: tweet.author.name,
+        authorAvatar: tweet.author.avatar,
+        description: tweet.description.substring(0, 140),
+        likeCount: tweet.likeCount,
+        replyCount: tweet.replyCount,
+        isLiked: tweet.Likes.some((i) => i.userId === userId),
+      }));
+      res.status(200).json(dataTweets);
     } catch (err) {
       next(err);
     }
