@@ -31,7 +31,7 @@ router.get('/tweets/:id', authenticated, authenticatedUser, tweetController.getT
 // router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 
-// router.post('/followships', followshipController)
-// router.delete('/followships/:followingId', followshipController)
+router.post('/followships', followshipController.addFollowing)
+// router.delete('/followships/:followingId', followshipController.removeFollowing)
 router.use('/', apiErrorHandler)
 module.exports = router
