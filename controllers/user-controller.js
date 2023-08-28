@@ -183,14 +183,18 @@ const userController = {
         err.status = 404
         throw err
       }
-      if (!tweets) throw new Error('目前沒有任何推文。')
-      const isLiked = tweets.LikedUsers?.some(liked => liked.UserId === helpers.getUser(req).id) || false
+      if (!tweets.length) {
+        return res.status(200).json({
+          status: 'success',
+          message: '使用者無推文!'
+        })
+      }
       const data = tweets.map(tweet => ({
         ...tweet.toJSON(),
         createdAt: relativeTimeFromNow(tweet.createdAt),
         repliedAmount: tweet.Replies.length || 0,
         likedAmount: tweet.LikedUsers.length || 0,
-        isLiked
+        isLiked: tweets.LikedUsers?.some(liked => liked.UserId === helpers.getUser(req).id) || false
       }))
       return res.json(data)
     } catch (err) {
@@ -221,6 +225,12 @@ const userController = {
         err.status = 404
         throw err
       }
+      if (!replies.length) {
+        return res.status(200).json({
+          status: 'success',
+          message: '使用者無回覆!'
+        })
+      }
       const data = replies.map(reply => ({
         ...reply.toJSON(),
         createdAt: relativeTimeFromNow(reply.createdAt)
@@ -233,29 +243,44 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const userId = req.params.id // 被查看的使用者 ID
+      const currentUserId = helpers.getUser(req).id // 當前使用者 ID
       const user = await User.findByPk(userId)
       // 取Likes及其關聯
-      const likes = await Like.findAll({
-        where: { UserId: user.id },
-        include: [
-          {
-            model: Tweet, include: [{ model: User, attributes: ['id', 'account'] }, Reply, Like]// 回傳這篇推文主人的id、account、及回覆數
-          }
-        ],
-        order: [['createdAt', 'DESC']]
-      })
+      const [likes, myLikes] = await Promise.all([
+        Like.findAll({
+          where: { UserId: user.id },
+          include: [
+            {
+              model: Tweet, include: [{ model: User, attributes: ['id', 'account'] }, Reply, Like]// 回傳這篇推文主人的id、account、及回覆數
+            }
+          ],
+          order: [['createdAt', 'DESC']]
+        }),
+        // 當前使用者的喜愛清單
+        Like.findAll({
+          where: { UserId: currentUserId },
+          raw: true
+        })
+      ])
 
       if (!user || (user.role === 'admin')) {
         const err = new Error('使用者不存在！')
         err.status = 404
         throw err
       }
+      if (!likes.length) {
+        return res.status(200).json({
+          status: 'success',
+          message: '使用者無回覆!'
+        })
+      }
+      const currentUserLikes = myLikes.map(l => l.TweetId) || [] // 當前使用者的喜愛推文清單 ID陣列
       const data = likes.map(like => ({
         ...like.toJSON(),
         createdAt: relativeTimeFromNow(like.createdAt),
         repliedAmount: like.Tweet.Replies.length || 0,
         likedAmount: like.Tweet.Likes.length || 0,
-        isLiked: true
+        isLiked: currentUserLikes?.includes(like.Tweet.id)
       }))
       return res.status(200).json(data)
     } catch (err) {
@@ -295,12 +320,11 @@ const userController = {
       const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
       const data = user.Followings.map(u => ({
         followingId: u.id,
-        UserId: u.id,
         account: u.account,
         name: u.name,
         avatar: u.avatar,
         introduction: u.introduction,
-        isFollowed: currentUserFollowing.includes(u.id)
+        isFollowed: currentUserFollowing?.includes(u.id)
       }))
       return res.status(200).json(data)
     } catch (err) {
@@ -340,12 +364,11 @@ const userController = {
       const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
       const data = user.Followers.map(u => ({
         followerId: u.id,
-        UserId: u.id,
         account: u.account,
         name: u.name,
         avatar: u.avatar,
         introduction: u.introduction,
-        isFollowed: currentUserFollowing.includes(u.id)
+        isFollowed: currentUserFollowing?.includes(u.id)
       }))
       return res.status(200).json(data)
     } catch (err) {
