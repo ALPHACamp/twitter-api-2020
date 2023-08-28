@@ -8,6 +8,7 @@ const authenticated = (req, res, next) => {
     next()
   })(req, res, next)
 }
+
 // 驗證只有是管理者身分才能進入後台
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req) && helpers.getUser(req).role === 'admin') return next()
