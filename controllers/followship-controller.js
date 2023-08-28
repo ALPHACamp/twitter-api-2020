@@ -25,6 +25,22 @@ const followshipController = {
       .then(() => res.json('status: "success'))
       .catch(err => next(err))
   },
-  
+  removeFollowing: (req, res, next) => {
+    const followingId = req.params.followingId
+    const followerId = helpers.getUser(req)
+    return Followship.find({
+      where: {
+        followingId,
+        followerId
+      }
+    })
+      .then(followship => {
+        if (!followship) throw new Error("You haven't followed this user!")
+        return followship.destroy()
+      })
+      .then(() => res.json('status: "success'))
+      .catch(err => next(err))
+  }
+
 }
 module.exports = followshipController
