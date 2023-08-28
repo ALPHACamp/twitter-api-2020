@@ -31,13 +31,7 @@ const adminController = {
       const options = {
         raw: true,
         nest: true,
-        attributes: [
-          'id',
-          'description',
-          'replyCount',
-          'likeCount',
-          'createdAt'
-        ],
+        attributes: ['id', 'description', 'createdAt'],
         include: [
           {
             model: User,
