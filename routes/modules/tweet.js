@@ -7,6 +7,7 @@ const { authenticated } = require('../../middleware/auth')
 const { isUser, isAuthUser } = require('../../middleware/role-check')
 
 router.get('/:tweet_id/replies', authenticated, isUser, tweetController.getReplies)
+router.post('/:tweet_id/replies', authenticated, isUser, isAuthUser, tweetController.postReply)
 router.get('/:tweet_id', authenticated, isUser, tweetController.getTweet)
 router.get('/', authenticated, tweetController.getTweets)
 router.post('/', authenticated, isUser, isAuthUser, tweetController.postTweet)
