@@ -3,8 +3,7 @@ const helpers = require('../_helpers')
 
 const followshipController = {
   addFollowing: (req, res, next) => {
-    // const followingId = req.body.id
-    const followingId = 1
+    const followingId = req.body.id
     const followerId = helpers.getUser(req).id
     Promise.all([
       User.findByPk(followerId),
@@ -13,8 +12,8 @@ const followshipController = {
       })
     ])
       .then(([user, followship]) => {
-        if (!user) throw new Error("User did't exist!")
-        if (followship) throw new Error('You are already following this user!')
+        if (!user) throw new Error("找不到這位使用者")
+        if (followship) throw new Error('你已追蹤這位使用者')
         return Followship.create({
           followingId,
           followerId
@@ -33,7 +32,7 @@ const followshipController = {
       }
     })
       .then(followship => {
-        if (!followship) throw new Error("You haven't followed this user!")
+        if (!followship) throw new Error("你尚未追蹤這位使用者")
         return followship.destroy()
       })
       .then(() => res.json({ status: 'success' }))
