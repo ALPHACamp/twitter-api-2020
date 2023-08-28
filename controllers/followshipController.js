@@ -56,7 +56,7 @@ const followshipController = {
     try {
       const currentUser = helpers.getUser(req)
 
-      const data = await User.findAll({
+      const users = await User.findAll({
         attributes: [
           'id',
           'name',
@@ -77,11 +77,21 @@ const followshipController = {
           ]
         ],
         where: sequelize.literal(`role != 'admin' AND id != '${currentUser.id}'`),
-        order: [[sequelize.literal('FollowingCount'), 'DESC'], ['createdAt']],
+        order: [[sequelize.literal('FollowingCount'), 'DESC']],
         limit: 10,
         raw: true,
         nest: true
       })
+
+      const data = users.map(user => ({
+        FollowerId: user.id,
+        FollowerName: user.name,
+        FollowerAccount: user.account,
+        FollowerAvatar: user.avatar,
+        FollowerCover: user.cover,
+        FollowingCount: user.FollowingCount,
+        isFollowed: Boolean(user.isFollowed)
+      }))
 
       return res.status(200).json(data)
     } catch (err) {
