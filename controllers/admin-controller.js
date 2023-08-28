@@ -15,10 +15,9 @@ const adminController = {
           ...t,
           description: t.description.substring(0, 50)
         }))
-        return res.json({
-          status: 'success',
-          data: data
-        })
+        return res.json(
+          data
+        )
       })
       .catch(err => next(err))
   }
