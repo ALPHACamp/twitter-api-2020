@@ -1,7 +1,5 @@
 const { Tweet, Like, Reply, User } = require('../../models')
 const helpers = require('../../_helpers')
-// const defaultLimit = 10
-const sequelize = require('sequelize')
 
 const tweetContorller = {
   getTweets: async (req, res, next) => {
@@ -15,17 +13,6 @@ const tweetContorller = {
           'likeCount',
           'replyCount',
           'createdAt'
-          // [
-          //   sequelize.literal(
-          //     '(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'
-          //   ),
-          //   'likeCount'
-          // ][
-          //   (sequelize.literal(
-          //     '(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'
-          //   ),
-          //   'replyCount')
-          // ]
         ],
         order: [['createdAt', 'desc']],
         subQuery: false,
@@ -37,8 +24,11 @@ const tweetContorller = {
             where: { role: 'user' }
           },
           {
-            model: Like,
-            attributes: ['userId']
+            model: Like
+          },
+          {
+            model: Reply,
+            as: 'replies'
           }
         ]
       }
@@ -52,8 +42,8 @@ const tweetContorller = {
         authorName: tweet.author.name,
         authorAvatar: tweet.author.avatar,
         description: tweet.description.substring(0, 140),
-        likeCount: tweet.likeCount,
-        replyCount: tweet.replyCount,
+        likeCount: tweet.Likes.length,
+        replyCount: tweet.replies.length,
         isLiked: tweet.Likes.some(i => i.userId === userId),
         createdAt: tweet.createdAt
       }))
