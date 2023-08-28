@@ -121,18 +121,18 @@ const adminController = {
         throw new Error('Please enter account and password')
       }
 
-      const userData = await User.findOne({ where: { account } })
+      const user = await User.findOne({ where: { account } })
 
-      if (!userData) throw new Error('User does not exist')
-      if (userData.role === 'user') throw new Error('user permission denied')
-      if (!bcrypt.compareSync(password, userData.password)) {
+      if (!user) throw new Error('User does not exist')
+      if (user.role === 'user') throw new Error('user permission denied')
+      if (!bcrypt.compareSync(password, user.password)) {
         throw new Error('Incorrect password')
       }
 
       const payload = {
-        id: userData.id,
-        account: userData.account,
-        role: userData.role
+        id: user.id,
+        account: user.account,
+        role: user.role
       }
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: '30d'
@@ -141,7 +141,7 @@ const adminController = {
         status: 'success',
         data: {
           token,
-          user: userData
+          user
         }
       })
     } catch (err) {
