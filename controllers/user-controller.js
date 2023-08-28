@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
-const { User } = require('../models')
+const { User, Reply, Tweet, Like, Followship } = require('../models')
+const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const sequelize = require('sequelize')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -151,6 +153,224 @@ const userController = {
         message: account ? 'Edit成功' : 'Setting成功',
         data: { user: updatedUser.toJSON() }
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id // 被查看的使用者 ID
+      const user = await User.findByPk(userId)
+      // 取tweets及其關聯
+      const tweets = await Tweet.findAll({
+        where: { UserId: user.id },
+        include: [
+          {
+            model: User,
+            attributes: { exclude: ['password'] }
+          },
+          { model: Reply },
+          {
+            model: User,
+            as: 'LikedUsers'
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      if (!tweets.length) {
+        return res.status(200).json({
+          status: 'success',
+          message: '使用者無推文!'
+        })
+      }
+      const data = tweets.map(tweet => ({
+        ...tweet.toJSON(),
+        createdAt: relativeTimeFromNow(tweet.createdAt),
+        repliedAmount: tweet.Replies.length || 0,
+        likedAmount: tweet.LikedUsers.length || 0,
+        isLiked: tweets.LikedUsers?.some(liked => liked.UserId === helpers.getUser(req).id) || false
+      }))
+      return res.json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const userId = req.params.id // 被查看的使用者 ID
+      const user = await User.findByPk(userId)
+      // 取replies及其關聯
+      const replies = await Reply.findAll({
+        where: { UserId: user.id },
+        include: [
+          {
+            model: User,
+            attributes: { exclude: ['password'] }// 回傳 User本人
+          },
+          {
+            model: Tweet, include: [{ model: User, attributes: ['id', 'account'] }]// 回傳這篇推文主人的id、account
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      if (!replies.length) {
+        return res.status(200).json({
+          status: 'success',
+          message: '使用者無回覆!'
+        })
+      }
+      const data = replies.map(reply => ({
+        ...reply.toJSON(),
+        createdAt: relativeTimeFromNow(reply.createdAt)
+      }))
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const userId = req.params.id // 被查看的使用者 ID
+      const currentUserId = helpers.getUser(req).id // 當前使用者 ID
+      const user = await User.findByPk(userId)
+      // 取Likes及其關聯
+      const [likes, myLikes] = await Promise.all([
+        Like.findAll({
+          where: { UserId: user.id },
+          include: [
+            {
+              model: Tweet, include: [{ model: User, attributes: ['id', 'account'] }, Reply, Like]// 回傳這篇推文主人的id、account、及回覆數
+            }
+          ],
+          order: [['createdAt', 'DESC']]
+        }),
+        // 當前使用者的喜愛清單
+        Like.findAll({
+          where: { UserId: currentUserId },
+          raw: true
+        })
+      ])
+
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      if (!likes.length) {
+        return res.status(200).json({
+          status: 'success',
+          message: '使用者無回覆!'
+        })
+      }
+      const currentUserLikes = myLikes.map(l => l.TweetId) || [] // 當前使用者的喜愛推文清單 ID陣列
+      const data = likes.map(like => ({
+        ...like.toJSON(),
+        createdAt: relativeTimeFromNow(like.createdAt),
+        repliedAmount: like.Tweet.Replies.length || 0,
+        likedAmount: like.Tweet.Likes.length || 0,
+        isLiked: currentUserLikes?.includes(like.Tweet.id)
+      }))
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const userId = req.params.id // 被查看的使用者 ID
+      const currentUserId = helpers.getUser(req).id
+      // 取User(引入Followings)
+      const [user, followings] = await Promise.all([
+        User.findByPk(userId, {
+          include: {
+            model: User,
+            as: 'Followings'
+          },
+          order: [[sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']]
+        }),
+        // 目前登入者的追蹤資料
+        Followship.findAll({
+          where: { followerId: currentUserId },
+          raw: true
+        })
+      ])
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      if (!user.Followings.length) {
+        return res.status(200).json({
+          status: 'success',
+          message: '使用者無追隨中的用戶!'
+        })
+      }
+      const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
+      const data = user.Followings.map(u => ({
+        followingId: u.id,
+        account: u.account,
+        name: u.name,
+        avatar: u.avatar,
+        introduction: u.introduction,
+        isFollowed: currentUserFollowing?.includes(u.id)
+      }))
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const userId = req.params.id // 被查看的使用者 ID
+      const currentUserId = helpers.getUser(req).id
+      // 取User(引入Followers)
+      const [user, followings] = await Promise.all([
+        User.findByPk(userId, {
+          include: {
+            model: User,
+            as: 'Followers'
+          },
+          order: [[sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']]
+        }),
+        // 目前登入者的追蹤資料
+        Followship.findAll({
+          where: { followerId: currentUserId },
+          raw: true
+        })
+      ])
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      if (!user.Followers.length) {
+        return res.status(200).json({
+          status: 'success',
+          message: '使用者無追隨者!'
+        })
+      }
+      const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
+      const data = user.Followers.map(u => ({
+        followerId: u.id,
+        account: u.account,
+        name: u.name,
+        avatar: u.avatar,
+        introduction: u.introduction,
+        isFollowed: currentUserFollowing?.includes(u.id)
+      }))
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
