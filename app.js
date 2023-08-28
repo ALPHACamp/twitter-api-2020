@@ -10,7 +10,7 @@ const session = require('express-session')
 const app = express()
 const port = process.env.PORT || 3000
 const apis = require('./routes')
-
+const cors = require('cors')
 const SESSION_SECRET = 'secret'
 // use helpers.getUser(req) to replace req.user
 /*
@@ -18,6 +18,18 @@ function authenticated(req, res, next){
   // passport.authenticate('jwt', { ses...
 };
 */
+
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'https://github.com/kotjy/ac-twitter',
+    'https://quiet-brook-57490-c9dd61813879.herokuapp.com'
+  ],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
+
+app.use(cors(corsOptions))
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())

@@ -9,6 +9,7 @@ const adminController = require('../controllers/admin-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated } = require('../middleware/api-auth')
 const tweet = require('./modules/tweet')
+const followship = require('./modules/followship')
 
 // router.use('/admin', authenticated, authenticatedAdmin, admin)
 // admin
@@ -26,6 +27,7 @@ router.get('/users/:id/followers', authenticated, userController.getUserFollower
 router.get('/users/:id', authenticated, userController.getUserProfile) // 個人資料頁面
 
 // modules
+router.use('/followships', authenticated, followship)
 router.use('/tweets', authenticated, tweet)
 
 router.use('/', apiErrorHandler)
