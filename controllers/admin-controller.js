@@ -28,6 +28,7 @@ const adminController = {
           'account',
           'avatar',
           'cover',
+          'role',
           [
             sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetsAmount'
           ],
@@ -40,6 +41,10 @@ const adminController = {
           [
             sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerAmount'
           ]
+        ],
+        order: [
+          [sequelize.literal('tweetsAmount DESC')], // 依推文數量降冪排序
+          ['role', 'DESC'] // admin排最後
         ],
         raw: true
       })
