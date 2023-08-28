@@ -66,7 +66,7 @@ const tweetController = {
           return reply
         })
         return res.json(
-          [replies]
+          replies
         )
       })
       .catch(err => next(err))
@@ -105,7 +105,8 @@ const tweetController = {
           .then(reply => {
             return res.json({
               status: 'success',
-              message: '成功貼出留言'
+              message: '成功貼出留言',
+              reply
             })
           })
       })
