@@ -44,34 +44,34 @@ const tweetController = {
       })
       .catch(err => next(err))
   },
+  // 資料格式未確認
   getTweetReplies: (req, res, next) => {
     const tweetId = req.params.tweetId
     Promise.all([
       Reply.findAll({
-        where: { tweetId: tweetId },
+        where: { tweetId },
         order: [['createdAt', 'ASC']],
         include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        raw: true,
-        nest: true
       }),
       Tweet.findByPk(tweetId, {
         include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        raw: true,
-        nest: true
       })
     ])
       .then(([replies, tweet]) => {
-        const data = {
-          replies,
-          tweetUserAccount: tweet.User.account
-        }
-        return res.json({
-          status: 'success',
-          data: data
+        replies = replies.map(reply => {
+          reply = {
+            ...reply.toJSON(),
+            repliesAccount: tweet.User.account
+          }
+          return reply
         })
+        return res.json(
+          [replies]
+        )
       })
       .catch(err => next(err))
   },
+  // 資料格式未確認
   postTweet: async (req, res, next) => {
     const { description } = req.body
     const userId = helpers.getUser(req).id
@@ -86,11 +86,31 @@ const tweetController = {
           status: 'success',
           tweet
         })
-        // res.status(200).json(postTweet)
       })
       .catch(err => next(err))
   },
-  postTweetReply: (req, res, next)
+  // 資料格式未確認
+  postTweetReply: (req, res, next) => {
+    const { tweetId } = req.params
+    const userId = helpers.getUser(req)
+    const { comment } = req.body
+    return Tweet.findByPk(tweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error('Tweet not found.')
+        return Reply.create({
+          comment,
+          user_id: userId,
+          tweet_id: tweet.id
+        })
+          .then(reply => {
+            return res.json({
+              status: 'success',
+              message: '成功貼出留言'
+            })
+          })
+      })
+      .catch(err => next(err))
+  }
 }
 
 module.exports = tweetController
