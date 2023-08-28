@@ -32,7 +32,7 @@ const followshipController = {
       }
     })
       .then(followship => {
-        if (!followship) throw new Error("你尚未追蹤這位使用者")
+        if (!followship) throw new Error('你尚未追蹤這位使用者')
         return followship.destroy()
       })
       .then(() => res.json({ status: 'success' }))

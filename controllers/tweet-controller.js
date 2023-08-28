@@ -3,6 +3,7 @@ const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: (req, res, next) => {
+    const userId = helpers.getUser(req).id
     return Tweet.findAll({
       order: [['createdAt', 'DESC']],
       include: [
@@ -11,7 +12,8 @@ const tweetController = {
       attributes: [
         'id', 'description', 'createdAt', 'updatedAt', 'userId',
         [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
-        [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCount']
+        [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCount'],
+        [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${userId} > 0)`), 'isLiked']
       ],
       raw: true,
       nest: true
@@ -24,6 +26,7 @@ const tweetController = {
       .catch(err => next(err))
   },
   getTweet: (req, res, next) => {
+    const userId = helpers.getUser(req).id
     const tweetId = req.params.id
     return Tweet.findByPk(tweetId, {
       include: [
@@ -32,7 +35,8 @@ const tweetController = {
       attributes: [
         'id', 'description', 'createdAt', 'updatedAt', 'userId',
         [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
-        [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCount']
+        [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCount'],
+        [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${userId} > 0)`), 'isLiked']
       ],
       raw: true,
       nest: true
