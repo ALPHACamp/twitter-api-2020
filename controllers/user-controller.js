@@ -1,3 +1,4 @@
+const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { User } = require('../models')
@@ -18,24 +19,28 @@ const userController = {
     }
   },
   signUp: (req, res, next) => {
-    const { account, email, password, checkPassword } = req.body
-    if (password !== checkPassword) throw new Error('密碼不相符!')
-    Promise.all([
+    const { account, name, email, password, checkPassword } = req.body
+    if (!account || !email || !name || !password) throw new Error('帳戶、暱稱、信箱和密碼不得為空！')
+    if (password !== checkPassword) throw new Error('密碼不相符！')
+    if (name.length > 50) throw new Error('超過暱稱字數上限 50 字！')
+    return Promise.all([
       User.findOne({ where: { account } }),
       User.findOne({ where: { email } })
     ])
       .then(([user1, user2]) => {
         if (user1) throw new Error('account 已重複註冊！')
         if (user2) throw new Error('email 已重複註冊！')
-        return bcrypt.hash(req.body.password, 10)
+        return bcrypt.hash(password, 10)
       })
       .then(hash => User.create({
-        account: req.body.account,
-        name: req.body.name,
-        email: req.body.email,
+        account,
+        name,
+        email,
         password: hash
       }))
       .then(newUser => {
+        newUser = newUser.toJSON()
+        delete newUser.password
         res.json({
           status: 'success',
           message: '成功註冊帳號！',
@@ -45,7 +50,7 @@ const userController = {
       .catch(err => next(err))
   },
   getUser: (req, res, next) => {
-    User.findByPk(req.params.id, {
+    return User.findByPk(req.params.id, {
       raw: true
     })
       .then(user => {
@@ -60,7 +65,7 @@ const userController = {
       .catch(err => next(err))
   },
   getCurrentUser: (req, res, next) => {
-    User.findByPk(getUser(req).id, {
+    return User.findByPk(getUser(req).id, {
       raw: true
     })
       .then(user => {
@@ -69,6 +74,58 @@ const userController = {
         delete user.role
         res.json({
           status: 'success',
+          ...user
+        })
+      })
+      .catch(err => next(err))
+  },
+  putUserAccount: (req, res, next) => {
+    const id = req.params.id
+    if (Number(id) !== Number(getUser(req).id)) throw new Error('只能編輯本人帳戶資料！')
+    const { account, name, email, password, checkPassword } = req.body
+    if (!account || !email || !name) throw new Error('帳戶、暱稱和信箱不得為空！')
+    if (password !== checkPassword) throw new Error('密碼不相符！')
+    if (name.length > 50) throw new Error('超過暱稱字數上限 50 字！')
+    return User.findByPk(id)
+      .then(async user => {
+        if (!user) throw new Error('使用者不存在！')
+        // 現在要更改的 account 在資料庫中不能有除了目前使用者以外相同的 account
+        const user1 = await User.findOne({
+          where: {
+            [Op.and]: [
+              { account },
+              { account: { [Op.ne]: user.account } }
+            ]
+          }
+        })
+        // 現在要更改的 email 在資料庫中不能有除了目前使用者以外相同的 email
+        const user2 = await User.findOne({
+          where: {
+            [Op.and]: [
+              { email },
+              { email: { [Op.ne]: user.email } }
+            ]
+          }
+        })
+        return [user1, user2, user]
+      })
+      .then(([user1, user2, user]) => {
+        if (user1) throw new Error('account 已存在！')
+        if (user2) throw new Error('email 已存在！')
+        return user.update({
+          account,
+          name,
+          email,
+          password: password ? bcrypt.hashSync(password, 10) : user.password
+        })
+      })
+      .then(user => {
+        user = user.toJSON()
+        delete user.password
+        delete user.role
+        res.json({
+          status: 'success',
+          message: '成功編輯帳號！',
           ...user
         })
       })

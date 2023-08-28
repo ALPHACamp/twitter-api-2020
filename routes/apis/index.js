@@ -18,9 +18,9 @@ router.get('/users/current', authenticated, authenticatedUser, userController.ge
 // router.get('/users/:id/likes', userController)
 // router.get('/users/:id/followers', userController)
 // router.get('/users/:id/followings', userController)
-// router.put('/users/:id/account', userController)
+router.put('/users/:id/account', authenticated, authenticatedUser, userController.putUserAccount)
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
-// router.put('/users/:id', userController)
+// router.put('/users/:id', userController.putUserProfile)
 router.post('/users', userController.signUp)
 router.post('/login', passport.authenticate('local', { session: false }), authenticatedUser, userController.login)
 
