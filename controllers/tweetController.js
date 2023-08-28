@@ -229,6 +229,48 @@ const tweetController = {
     } catch (err) {
       return next(err)
     }
+  },
+
+  postReply: async (req, res, next) => {
+    try {
+      // check if comment is whitespace
+      const { comment } = req.body
+      if (comment.trim().length === 0) {
+        return res.status(404).json({ error: '內容不可為空白' })
+      }
+
+      // get tweet information
+      const { tweet_id: tweetId } = req.params
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) {
+        return res.status(404).json({ error: '推文不存在' })
+      }
+      const tweetOwner = await User.findByPk(tweet.UserId)
+
+      // get current user information
+      const user = helpers.getUser(req)
+
+      // create new reply
+      const newReply = await Reply.create({
+        comment,
+        UserId: user.id,
+        TweetId: tweetId
+      })
+
+      return res.status(200).json({
+        TweetId: tweet.id,
+        tweetOwnerId: tweetOwner.id,
+        tweetOwnerName: tweetOwner.name,
+        tweetOwnerAccount: tweetOwner.account,
+        replyOwnerId: user.id,
+        replyOwnerName: user.name,
+        replyOwnerAvatar: user.avatar,
+        comment: newReply.comment,
+        createdAt: newReply.createdAt
+      })
+    } catch (err) {
+      return next(err)
+    }
   }
 }
 
