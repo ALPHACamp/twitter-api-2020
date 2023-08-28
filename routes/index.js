@@ -1,6 +1,5 @@
 const express = require('express')
-// 待確認，passport.authenticate 是他內建的，不是載入這個config裡的
-// const { authenticate } = require('../config/passport')
+
 const router = express.Router()
 const passport = require('../config/passport')
 // const admin = require('./modules/admin')
@@ -20,7 +19,10 @@ router.post('/users/signin', passport.authenticate('local', { session: false }),
 router.post('/users/', userController.signUp) // 註冊
 
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets) // 取得該使用者的所有推文
-
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies) // 瀏覽某使用者回覆過的留言
+router.get('/users/:id/likes', authenticated, userController.getUserLikes) // 瀏覽某使用者點過的 Like
+router.get('/users/:id/followings', authenticated, userController.getUserFollowings) // 瀏覽某使用者跟隨中的人
+router.get('/users/:id/followers', authenticated, userController.getUserFollowers) // 瀏覽某使用者的跟隨者
 router.get('/users/:id', authenticated, userController.getUserProfile) // 個人資料頁面
 
 // modules
