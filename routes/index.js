@@ -6,10 +6,11 @@ const passport = require('../config/passport')
 
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
-const { apiErrorHandler } = require('../middleware/error-handler')
-const { authenticated } = require('../middleware/api-auth')
 const tweet = require('./modules/tweet')
 const followship = require('./modules/followship')
+const { apiErrorHandler } = require('../middleware/error-handler')
+const { authenticated } = require('../middleware/api-auth')
+
 
 // router.use('/admin', authenticated, authenticatedAdmin, admin)
 // admin
