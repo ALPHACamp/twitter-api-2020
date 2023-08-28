@@ -1,4 +1,4 @@
-const { Tweet, User, Reply } = require('../models')
+const { Tweet, User, Reply, Like } = require('../models')
 const { relativeTimeFromNow, formatDate, formatTime } = require('../helpers/dayjs-helpers')
 const helpers = require('../_helpers')
 
@@ -99,6 +99,35 @@ const tweetController = {
         status: 'success',
         message: '成功發佈推文！',
         tweet
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  addLike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.tweetId
+      const UserId = helpers.getUser(req).id
+
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(TweetId),
+        Like.findOne({
+          where: { UserId, TweetId }
+        })
+      ])
+
+      if (!tweet) throw new Error('推文不存在！')
+      if (like) throw new Error('你已經喜歡過這則推文！')
+
+      await Like.create({
+        UserId,
+        TweetId
+      })
+
+      return res.status(200).json({
+        status: 'success',
+        message: '成功新增該則貼文至喜歡的內容！',
+        likedTweet: tweet
       })
     } catch (err) {
       next(err)
