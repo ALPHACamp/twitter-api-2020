@@ -2,15 +2,45 @@ const bcrypt = require('bcryptjs')
 const db = require('../../models')
 const { User, Tweet, Like } = db
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 
 const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const options = {
         raw: true,
-        attributes: {
-          exclude: ['email', 'password', 'updatedAt', 'createdAt']
-        }
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'introduction',
+          'avatar',
+          'cover',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(DISTINCT id) FROM Tweets WHERE Tweets.user_id = User.id)'
+            ),
+            'tweetCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.following_id = User.id)'
+            ),
+            'followerCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.follower_id = User.id)'
+            ),
+            'followingCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.user_id = User.id)'
+            ),
+            'likeCount'
+          ]
+        ]
       }
       const users = await User.findAll(options)
       // console.log("usersbeforeforeach", users);
