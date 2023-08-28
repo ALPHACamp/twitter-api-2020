@@ -11,9 +11,8 @@ module.exports = {
       nest: true,
       attributes: ['id']
     })
-    // eslint-disable-next-line array-callback-return
-    Array.from({ length: 10 }).map((user, i) => {
-      for (let j = 0; j < 10; ++j) {
+    Array.from({ length: 10 }).map((el, i) => {
+      for (let j = 0; j < 5; ++j) {
         data.push({
           description: faker.lorem.text(140),
           created_at: new Date(),
