@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
-const { Tweet, User, Like } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -55,10 +55,14 @@ const adminController = {
           throw err
         }
 
-        return tweet.destroy()
+        return Promise.all([
+          tweet.destroy(),
+          Reply.destroy({ where: { TweetId: req.params.id } }),
+          Like.destroy({ where: { TweetId: req.params.id } })
+        ])
       })
-      .then(tweet => {
-        res.json({ status: 'success', data: { tweet } })
+      .then(([deletedTweet, deletedReplies, deleteLikes]) => {
+        res.json({ status: 'success', data: { deletedTweet } })
       })
       .catch(err => next(err))
   },
