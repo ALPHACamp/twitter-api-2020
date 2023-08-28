@@ -10,6 +10,8 @@ router.get('/:tweetId/replies', replyController.getTweetReplies)
 router.post('/:tweetId/replies', replyController.postReply)
 // 喜歡特定推文
 router.post('/:tweetId/like', tweetController.addLike)
+// 取消喜歡特定推文
+router.post('/:tweetId/unlike', tweetController.removeLike)
 // 取得特定推文
 router.get('/:tweetId', tweetController.getTweet)
 // 取得全部推文

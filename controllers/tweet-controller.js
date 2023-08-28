@@ -132,6 +132,32 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  removeLike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.tweetId
+      const UserId = helpers.getUser(req).id
+
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(TweetId),
+        Like.findOne({
+          where: { UserId, TweetId }
+        })
+      ])
+
+      if (!tweet) throw new Error('推文不存在！')
+      if (!like) throw new Error('你尚未喜歡過這則推文！')
+
+      await like.destroy() // 採取刪除like column策略
+
+      return res.status(200).json({
+        status: 'success',
+        message: '成功從喜歡的內容移除該則貼文！',
+        unlikedTweet: tweet
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
