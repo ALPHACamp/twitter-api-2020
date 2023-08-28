@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { User } = require('../models')
 const { getUser } = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
   login: (req, res, next) => {
     try {
@@ -126,6 +127,42 @@ const userController = {
         res.json({
           status: 'success',
           message: '成功編輯帳號！',
+          ...user
+        })
+      })
+      .catch(err => next(err))
+  },
+  putUserProfile: (req, res, next) => {
+    const id = req.params.id
+    if (Number(id) !== Number(getUser(req).id)) throw new Error('只能編輯本人主頁資料！')
+    const { name, introduction } = req.body
+    const { avatar, cover } = req.files
+    if (!name) throw new Error('暱稱不得為空！')
+    if (name.length > 50) throw new Error('超過暱稱字數上限 50 字！')
+    if (introduction.length > 160) throw new Error('超過自介自數上限 160 字！')
+    const avatarFile = avatar ? avatar[0] : null
+    const coverFile = cover ? cover[0] : null
+    return Promise.all([
+      User.findByPk(id),
+      imgurFileHandler(avatarFile),
+      imgurFileHandler(coverFile)
+    ])
+      .then(([user, avatarPath, coverPath]) => {
+        if (!user) throw new Error('使用者不存在！')
+        return user.update({
+          name,
+          introduction,
+          avatar: avatarPath || user.avatar,
+          cover: coverPath || user.cover
+        })
+      })
+      .then(user => {
+        user = user.toJSON()
+        delete user.password
+        delete user.role
+        res.json({
+          status: 'success',
+          message: '成功編輯主頁！',
           ...user
         })
       })

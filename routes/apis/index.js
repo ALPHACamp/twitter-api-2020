@@ -1,12 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const passport = require('../../config/passport')
+const upload = require('../../middleware/multer')
 const admin = require('./modules/admin')
 const userController = require('../../controllers/user-controller')
 const tweetController = require('../../controllers/tweet-controller')
 const followshipController = require('../../controllers/followship-controller')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
+const uploadImages = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 
 router.use('/admin/login', passport.authenticate('local', { session: false }), authenticatedAdmin, userController.login)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
@@ -20,7 +22,7 @@ router.get('/users/current', authenticated, authenticatedUser, userController.ge
 // router.get('/users/:id/followings', userController)
 router.put('/users/:id/account', authenticated, authenticatedUser, userController.putUserAccount)
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
-// router.put('/users/:id', userController.putUserProfile)
+router.put('/users/:id', authenticated, authenticatedUser, uploadImages, userController.putUserProfile)
 router.post('/users', userController.signUp)
 router.post('/login', passport.authenticate('local', { session: false }), authenticatedUser, userController.login)
 
