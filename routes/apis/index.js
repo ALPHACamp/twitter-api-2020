@@ -26,8 +26,8 @@ router.post('/login', passport.authenticate('local', { session: false }), authen
 
 router.get('/tweets/:tweetId/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
 router.post('/tweets/:tweetId/replies', authenticated, authenticatedUser, tweetController.postTweetReply)
-// router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController)
-// router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController)
+router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.postTweetLike)
+// router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.postTweetUnlike)
 router.get('/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet)
 router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)

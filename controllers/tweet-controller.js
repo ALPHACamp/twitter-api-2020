@@ -1,4 +1,4 @@
-const { Tweet, User, Reply, sequelize } = require('../models')
+const { Tweet, User, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -110,6 +110,31 @@ const tweetController = {
             })
           })
       })
+      .catch(err => next(err))
+  },
+  postTweetLike: (req, res, next) => {
+    const { id } = req.params
+    const userId = helpers.getUser(req).id
+    Promise.all([
+      Tweet.findByPk(id, {
+        raw: true,
+        nest: true
+      }),
+      Like.findOne({
+        where: { tweetId: id, userId },
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error('這篇貼文不存在')
+        if (like) throw new Error('你已按讚這篇貼文')
+        return Like.create({
+          tweetId: id,
+          userId
+        })
+      })
+      .then(() => res.json('status: "success'))
       .catch(err => next(err))
   }
 }
