@@ -13,4 +13,6 @@ router.get('/:id/followers', userController.getUserFollowers)
 router.get('/:id', userController.getUser)
 // 變更使用者資料
 router.put('/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.editUser)
+// 取得前?名追蹤數最高的使用者
+router.get('/', userController.getTopUsers)
 module.exports = router

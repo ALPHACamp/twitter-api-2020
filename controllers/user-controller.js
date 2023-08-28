@@ -42,7 +42,7 @@ const userController = {
         email,
         role: 'user',
         password: hash,
-        avatar: 'htps://i.imgur.com/uSgVo9G.png',
+        avatar: 'https://i.imgur.com/uSgVo9G.png',
         cover: 'https://i.imgur.com/7uwf8kO.png'
       })
       const userData = newUser.toJSON()
@@ -370,6 +370,47 @@ const userController = {
         introduction: u.introduction,
         isFollowed: currentUserFollowing?.includes(u.id)
       }))
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTopUsers: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const topNumber = Number(req.query.top)
+      // 取User(引入Followers)
+      const [users, followings] = await Promise.all([
+        User.findAll({
+          attributes: ['id', 'account', 'name', 'avatar', 'role'],
+          include: [{ model: User, as: 'Followers', attributes: ['id', 'account'] }],
+          raw: true
+        }),
+        // 目前登入者的追蹤資料
+        Followship.findAll({
+          where: { followerId: currentUserId },
+          raw: true
+        })
+      ])
+      if (!users) {
+        const err = new Error('不存在使用者')
+        err.status = 404
+        throw err
+      }
+
+      const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
+      const data = users
+        .filter(user => user.role === 'user') // 過濾admin
+        .map(user => ({
+          id: user.id,
+          account: user.account,
+          name: user.name,
+          avatar: user.avatar,
+          followerCount: user.Followers?.length || 0,
+          isFollowed: currentUserFollowing?.includes(user.id)
+        }))
+        .sort((a, b) => b.followerCount - a.followerCount)
+        .slice(0, topNumber)
       return res.status(200).json(data)
     } catch (err) {
       next(err)
