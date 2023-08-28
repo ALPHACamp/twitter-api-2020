@@ -74,7 +74,7 @@ const tweetController = {
   // 資料格式未確認
   postTweet: async (req, res, next) => {
     const { description } = req.body
-    const userId = helpers.getUser(req).id
+    const userId = Number(helpers.getUser(req).id)
     if (!description) throw new Error('內容不可空白')
     if (description.length > 140) throw new Error('內容不可超過 140 字')
     return Tweet.create({
