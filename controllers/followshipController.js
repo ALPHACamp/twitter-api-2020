@@ -9,14 +9,18 @@ const followshipController = {
     try {
       const followerId = helpers.getUser(req).id
       const followingId = req.body.id
-      const user = await User.findByPk(followingId)
+
+      const user = await User.findOne({
+        where: sequelize.literal(`role != 'admin' AND id = '${followingId}'`)
+      })
+
       const followship = await Followship.findOne({
         where: { followerId, followingId }
       })
 
       if (followerId === followingId) return res.status(400).json({ status: 'error', message: '你不能追蹤自己' })
-      if (followship) return res.status(400).json({ status: 'error', message: '你已經追蹤此使用者' })
       if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      if (followship) return res.status(400).json({ status: 'error', message: '你已經追蹤此使用者' })
 
       await Followship.create({ followerId, followingId })
       return res.status(200).json({
@@ -36,9 +40,8 @@ const followshipController = {
         where: { followerId, followingId }
       })
 
-      if (followerId === followingId) return res.status(400).json({ status: 'error', message: '你不能取消追蹤自己' })
-      if (!followship) return res.status(400).json({ status: 'error', message: '你沒有追蹤此使用者' })
       if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
+      if (!followship) return res.status(400).json({ status: 'error', message: '你沒有追蹤此使用者' })
 
       await followship.destroy()
       return res.status(200).json({
