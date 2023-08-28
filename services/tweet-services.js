@@ -34,8 +34,8 @@ const tweetServices = {
       raw: true,
       nest: true,
       attributes: ['id', 'description', 'createdAt',
-        [sequelize.literal('(SELECT COUNT(*) FROM replies WHERE Replies.TweetId = Tweet.id)'), 'ReplyCount'],
-        [sequelize.literal('(SELECT COUNT(*) FROM likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount']
       ],
       include: [
         { model: User, attributes: ['avatar', 'name', 'account'] }
