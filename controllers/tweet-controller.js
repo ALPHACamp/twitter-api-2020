@@ -136,6 +136,33 @@ const tweetController = {
       })
       .then(() => res.json('status: "success'))
       .catch(err => next(err))
+  },
+  postTweetUnlike: (req, res, next) => {
+    const { id } = req.params
+    const userId = helpers.getUser(req).id
+    Promise.all([
+      Tweet.findByPk(id, {
+        raw: true,
+        nest: true
+      }),
+      Like.findOne({
+        where: { tweetId: id, userId },
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error('這篇貼文不存在')
+        if (!like) throw new Error('你沒有按讚這篇貼文')
+        return Like.destroy({
+          where: {
+            tweetId: id,
+            userId
+          }
+        })
+      })
+      .then(() => res.json('status: "success'))
+      .catch(err => next(err))
   }
 }
 
