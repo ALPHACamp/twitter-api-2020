@@ -9,7 +9,7 @@ const adminController = require('../controllers/admin-controller')
 const tweet = require('./modules/tweet')
 const followship = require('./modules/followship')
 const { apiErrorHandler } = require('../middleware/error-handler')
-
+const tweetController = require('../controllers/tweet-controller')
 const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 
 // router.use('/admin', authenticated, authenticatedAdmin, admin)
@@ -17,6 +17,8 @@ const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 router.post('/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn) // 管理者登入
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers) // 看見站內所有的使用者
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet) // 刪除使用者的推文
+router.get('/admin/tweets', authenticated, authenticatedAdmin, tweetController.getTweets) // 看見所有推文
+
 // users 後續會移進module裡面，怕有更多衝突要解，因此目前還是先放外面等到重構時再移
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn) // 使用者登入
 router.post('/users/', userController.signUp) // 註冊
