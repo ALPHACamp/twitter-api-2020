@@ -173,7 +173,7 @@ const userController = {
     const userId = req.params.id
     return Like.findAll({
       where: { userId },
-      order: [['createdAt', 'DESC']],
+      order: [['createdAt', 'DESC']]
       // include: [{
       //   model: Tweet,
       //   include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
@@ -184,9 +184,10 @@ const userController = {
       //     ]
       //   }
       // }],
-      raw: true
+      // raw: true
     })
       .then(likes => {
+        console.log(likes)
         res.json(likes)
       })
       .catch(err => next(err))
