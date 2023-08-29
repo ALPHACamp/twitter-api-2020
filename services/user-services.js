@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
-const { relativeTimeFormat, absoluteTimeFormat } = require('../helpers/day-helpers')
+const { relativeTimeFormat } = require('../helpers/day-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
@@ -191,6 +191,7 @@ const userServices = {
       const tweets = await Tweet.findAll({
         where: { userId: id },
         include: [
+          { model: User, attributes: ['avatar', 'name', 'account'] },
           { model: Reply, attributes: ['id'] },
           { model: User, as: 'LikeUsers', attributes: ['id'] }
         ],
@@ -200,7 +201,8 @@ const userServices = {
         ...tweet.toJSON(),
         createdAt: relativeTimeFormat(tweet.createdAt),
         RepliesCount: tweet.Replies.length,
-        LikeCount: tweet.LikeUsers.length
+        LikeCount: tweet.LikeUsers.length,
+        tweetsCount: tweets.length
       }))
       cb(null, tweetData)
     } catch (err) {
