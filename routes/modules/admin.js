@@ -9,6 +9,6 @@ router.get('/users', adminController.getUsers)
 router.delete('/tweets/:id', adminController.deleteTweet)
 router.get('/tweets', adminController.getTweets)
 
-router.use('/', (req, res) => res.redirect('api/admin/users'))
+// router.use('/', (req, res) => res.redirect('api/admin/users'))
 
 module.exports = router

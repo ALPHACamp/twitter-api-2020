@@ -7,10 +7,16 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const routes = require('./routes')
 const passport = require('./config/passport')
-const { CORSHeader } = require('./middleware/CORS-header')
+const cors = require('cors')
+const corsOptions = {
+  origin: '＊',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
 
 const app = express()
 
+app.use(cors(corsOptions))
 // bodyparser設定
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
@@ -22,7 +28,7 @@ app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 const port = process.env.PORT || 3000
 
-app.use('/', CORSHeader, routes)
+app.use('/api', routes)
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
