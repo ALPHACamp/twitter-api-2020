@@ -1,7 +1,8 @@
 const { Op } = require('sequelize')
+const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, sequelize } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
