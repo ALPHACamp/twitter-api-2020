@@ -42,7 +42,7 @@ const userController = {
         email,
         role: 'user',
         password: hash,
-        avatar: 'htps://i.imgur.com/uSgVo9G.png',
+        avatar: 'https://i.imgur.com/uSgVo9G.png',
         cover: 'https://i.imgur.com/7uwf8kO.png'
       })
       const userData = newUser.toJSON()
@@ -205,6 +205,12 @@ const userController = {
     try {
       const userId = req.params.id // 被查看的使用者 ID
       const user = await User.findByPk(userId)
+
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
       // 取replies及其關聯
       const replies = await Reply.findAll({
         where: { UserId: user.id },
@@ -220,11 +226,6 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
 
-      if (!user || (user.role === 'admin')) {
-        const err = new Error('使用者不存在！')
-        err.status = 404
-        throw err
-      }
       if (!replies.length) {
         return res.status(200).json({
           status: 'success',
@@ -245,6 +246,12 @@ const userController = {
       const userId = req.params.id // 被查看的使用者 ID
       const currentUserId = helpers.getUser(req).id // 當前使用者 ID
       const user = await User.findByPk(userId)
+
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
       // 取Likes及其關聯
       const [likes, myLikes] = await Promise.all([
         Like.findAll({
@@ -263,15 +270,10 @@ const userController = {
         })
       ])
 
-      if (!user || (user.role === 'admin')) {
-        const err = new Error('使用者不存在！')
-        err.status = 404
-        throw err
-      }
       if (!likes.length) {
         return res.status(200).json({
           status: 'success',
-          message: '使用者無回覆!'
+          message: '使用者無喜愛推文!'
         })
       }
       const currentUserLikes = myLikes.map(l => l.TweetId) || [] // 當前使用者的喜愛推文清單 ID陣列
@@ -370,6 +372,39 @@ const userController = {
         introduction: u.introduction,
         isFollowed: currentUserFollowing?.includes(u.id)
       }))
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTopUsers: async (req, res, next) => {
+    try {
+      const topNumber = Number(req.query.top)
+      const followings = helpers.getUser(req).Followings // 目前登入者的追蹤資料
+      const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
+      // 取User(引入Followers)
+      const users = await User.findAll({
+        attributes: ['id', 'account', 'name', 'avatar', 'role'],
+        include: [{ model: User, as: 'Followers', attributes: ['id', 'account'] }],
+        raw: true
+      })
+      if (!users) {
+        const err = new Error('不存在使用者')
+        err.status = 404
+        throw err
+      }
+      const data = users
+        .filter(user => user.role === 'user') // 過濾admin
+        .map(user => ({
+          id: user.id,
+          account: user.account,
+          name: user.name,
+          avatar: user.avatar,
+          followerCount: user.Followers?.length || 0,
+          isFollowed: currentUserFollowing?.includes(user.id) || false
+        }))
+        .sort((a, b) => b.followerCount - a.followerCount)
+        .slice(0, topNumber)
       return res.status(200).json(data)
     } catch (err) {
       next(err)
