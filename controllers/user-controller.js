@@ -271,7 +271,7 @@ const userController = {
       if (!likes.length) {
         return res.status(200).json({
           status: 'success',
-          message: '使用者無回覆!'
+          message: '使用者無喜愛推文!'
         })
       }
       const currentUserLikes = myLikes.map(l => l.TweetId) || [] // 當前使用者的喜愛推文清單 ID陣列
