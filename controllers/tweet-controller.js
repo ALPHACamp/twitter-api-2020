@@ -88,12 +88,13 @@ const tweetController = {
 
       const tweetData = tweet.toJSON()
       tweetData.isLiked = likes.some(like => like.TweetId === tweet.id)
-      tweetData.fromNow = dayjs(tweetData.createdAt)
+      tweetData.createdAt = dayjs(tweetData.createdAt)
         .tz('Asia/Taipei')
         .format('A h:mm ‧ YYYY年M月D日')
         .replace('AM', '上午')
         .replace('PM', '下午')
-
+      tweetData.fromNow = dayjs(tweetData.updatedAt)
+        .fromNow()
       return res.status(200).json(tweetData)
     } catch (err) {
       return next(err)
