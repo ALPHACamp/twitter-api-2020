@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { Tweet, User, Like, Reply } = require('../models')
+const Sequelize = require('sequelize')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -26,24 +27,29 @@ const adminController = {
     }
   },
 
-  getTweets: (req, res, next) => {
-    return Tweet.findAll({
-      include: [
-        // 查詢 password 欄位以外的 user 資料
-        { model: User, attributes: { exclude: ['password'] } }
-      ],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(tweets => {
-        const data = tweets.map(tweet => ({
-          ...tweet,
-          description: tweet.description.substring(0, 50)
-        }))
-        res.json(data)
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        attributes: [
+          'id',
+          'UserId',
+          // 使用 SQL 語法抓出 description 前 50 個字
+          [Sequelize.literal('SUBSTRING(description, 1, 50)'), 'description'],
+          'createdAt',
+          'updatedAt'
+        ],
+        include: [
+          { model: User, attributes: { exclude: ['password'] } }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
-      .catch(err => next(err))
+
+      return res.json(tweets)
+    } catch (err) {
+      return next(err)
+    }
   },
 
   deleteTweet: (req, res, next) => {
