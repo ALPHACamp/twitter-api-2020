@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const { relativeTimeFormat, absoluteTimeFormat } = require('../helpers/day-helpers')
+const { relativeTimeFormat } = require('../helpers/day-helpers')
 const { User, Tweet, Reply } = require('../models')
 
 const adminServices = {
