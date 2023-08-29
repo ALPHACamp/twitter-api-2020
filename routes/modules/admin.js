@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const adminController = require('../../controllers/apis/admin-controller')
-// const passport = require('passport')
-const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
+const passport = require('passport')
+const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 // router.post('/login', passport.authenticate('jwt', { session: false }), adminController.signIn)
 
 router.get(

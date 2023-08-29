@@ -8,6 +8,7 @@ const bodyParser = require('body-parser')
 const routes = require('./routes')
 const passport = require('./config/passport')
 const cors = require('cors')
+
 const corsOptions = {
   origin: '＊',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -29,7 +30,6 @@ app.use('/upload', express.static(path.join(__dirname, 'upload')))
 const port = process.env.PORT || 3001
 
 app.use('/api', routes)
-app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
