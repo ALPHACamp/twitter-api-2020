@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
 const jwt = require('jsonwebtoken')
-
+const { localFilesHandler } = require('../helpers/file-helpers')
 const { User, Followship, Tweet, Reply, Like } = require('../models')
 const dayjs = require('dayjs')
 const utc = require('dayjs/plugin/utc') // 引入 UTC 套件
@@ -107,8 +107,8 @@ const userController = {
           updatedAt: dayjs(user.updatedAt).tz('Asia/Taipei').format('YYYY-MM-DD HH:mm:ss'),
           createdAt: dayjs(user.createdAt).tz('Asia/Taipei').format('YYYY-MM-DD HH:mm:ss'),
           banner: user.banner,
-          FollowersCount: user.Followings.length, // 追蹤數
-          FollowingsCount: user.Followers.length // 被追蹤數
+          followingCounts: user.Followings.length, // 追蹤數
+          followerCounts: user.Followers.length // 被追蹤數
         })
       })
       .catch(err => next(err))
@@ -289,6 +289,119 @@ const userController = {
         }))
       })
       .catch(err => next(err))
+  },
+  putUserProfile: (req, res, next) => {
+    // 編輯個人資料
+    const paramsUserId = Number(req.params.id)
+    const { name, introduction } = req.body // 這邊用name，而不是account ，account是setting的部分
+    const { files } = req // 如果前端沒有傳入檔案，這邊會是undefined
+    const loginUserId = helper.getUser(req).id
+    if (paramsUserId !== loginUserId) {
+      const err = new Error('只能編輯自己的資料！')
+      err.status = 403
+      throw err
+    }
+    if (!name || !name.trim()) throw new Error('名稱是必須的！')
+    if (name.length > 50) throw new Error('名稱字數超出上限!')
+    if (introduction.length > 160) throw new Error('自我介紹字數超出上限!')
+    // 以下三行是為了因應測試檔所做的改動，先確認files有東西，並將裡面的東西放進fileHandlers陣列裡，在Promise.all中展開使用
+    const fileHandlers = []
+    if (files && files.avatar) fileHandlers.push(localFilesHandler(files.avatar)) // 處理 avatar 的檔案
+    if (files && files.banner) fileHandlers.push(localFilesHandler(files.banner)) // 處理 banner 的檔案
+    return Promise.all([
+      User.findByPk(paramsUserId),
+      ...fileHandlers
+    ])
+      .then(([user, avatarFilePath, bannerFilePath]) => {
+        if (!user) throw new Error('使用者不存在!')
+        return user.update({
+          name: name || user.name,
+          introduction: introduction,
+          avatar: avatarFilePath ? avatarFilePath[0] : user.avatar,
+          banner: bannerFilePath ? bannerFilePath[0] : user.banner
+        })
+      })
+      .then(() => {
+        return res.status(200).json({
+          status: 'success',
+          message: '個人資料編輯完成!'
+        })
+      })
+      .catch(err => next(err))
+  },
+  getUserSetting: (req, res, next) => {
+    // 瀏覽設定頁面
+    const paramsUserId = Number(req.params.id)
+    const loginUserId = helper.getUser(req).id
+    if (paramsUserId !== loginUserId) {
+      const err = new Error('只能查看自己的資料！')
+      err.status = 403
+      throw err
+    }
+    return User.findByPk(paramsUserId)
+      .then(user => {
+        if (!user) throw new Error('使用者不存在!')
+        res.json({
+          account: user.account,
+          name: user.name,
+          email: user.email
+        })
+      })
+  },
+  putUserSetting: (req, res, next) => {
+    // 編輯設定頁面
+    const { account, name, email, password, checkPassword } = req.body
+    const paramsUserId = Number(req.params.id)
+    const loginUserId = helper.getUser(req).id
+    if (paramsUserId !== loginUserId) {
+      const err = new Error('只能編輯自己的資料！')
+      err.status = 403
+      throw err
+    }
+    if (!account || !account.trim()) throw new Error('帳號是必須的！')
+    if (!name || !name.trim()) throw new Error('名稱是必須的！')
+    if (name.length > 50) throw new Error('名稱字數超出上限!')
+    if (!email || !email.trim()) throw new Error('email是必須的!')
+    if (password !== checkPassword) throw new Error('二次輸入密碼不符合!')
+    let updateData = {}
+    // 查找是否有該帳戶或email
+    Promise.all([
+      User.findOne({ where: { account: account } }),
+      User.findOne({ where: { email: email } }),
+      bcrypt.hash(password, 10)
+    ])
+      .then(([checkAccount, checkEmail, hash]) => {
+        // 如果有一樣的account或email，丟錯告知前端
+        if (checkAccount) throw new Error('account 已重複註冊！')
+        if (checkEmail) throw new Error('email 已重複註冊！')
+        // 如果檢查ok，將使用者要更新的資料存進updateData
+        updateData = {
+          email: email,
+          password: hash,
+          name: name,
+          account: account,
+          updatedAt: new Date()
+        }
+        return User.findByPk(paramsUserId)
+      })
+      .then(user => {
+        return user.update(updateData)
+      })
+      .then(user => {
+        res.status(200).json({
+          status: 'success',
+          message: `${account}已經成功修改資料!`,
+          user: {
+            id: user.id,
+            email: user.email,
+            account: user.account,
+            name: user.name,
+            updatedAt: dayjs(user.updatedAt).tz('Asia/Taipei').format('YYYY-MM-DD HH:mm:ss'),
+            createdAt: dayjs(user.createdAt).tz('Asia/Taipei').format('YYYY-MM-DD HH:mm:ss')
+          }
+        })
+      })
+      .catch(err => next(err)) // 接住前面拋出的錯誤，呼叫專門做錯誤處理的 middleware
   }
 }
 
