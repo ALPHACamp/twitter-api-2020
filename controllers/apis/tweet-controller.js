@@ -66,8 +66,11 @@ const tweetContorller = {
             as: 'author'
           },
           {
-            model: Like,
-            attributes: ['userId']
+            model: Like
+          },
+          {
+            model: Reply,
+            as: 'replies'
           }
         ]
       })
@@ -81,8 +84,8 @@ const tweetContorller = {
         authorAccount: t.author.account,
         authorAvatar: t.author.avatar,
         description: t.description,
-        likeCount: t.likeCount,
-        replyCount: t.replyCount,
+        likeCount: tweet.Likes.length,
+        replyCount: tweet.replies.length,
         isLiked: t.Likes.some(i => i.userId === userId),
         createdAt: t.createdAt
       }))
