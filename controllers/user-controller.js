@@ -81,7 +81,7 @@ const userController = {
       if (userData.role !== 'user') throw new Error('no such user(角色錯誤)', { cause: { accountErrMsg: '帳號不存在！', passwordErrMsg: '' } })
 
       delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      const token = jwt.sign(userData, process.env.JWT_SECRET || 'SecretTime', { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
 
       return res.status(200).json({
         success: true,
@@ -414,7 +414,7 @@ const userController = {
         name: name || user.name,
         email: email || user.email,
         password: password ? await bcrypt.hash(password, 10) : user.password,
-        introduction: (introduction !== undefined) ? introduction : user.introduction, // 有傳入但留空-->會更新而非保留原設定
+        introduction: introduction || user.introduction,
         avatar: filePath1 || user.avatar || 'https://via.placeholder.com/224',
         banner: filePath2 || user.banner || 'https://images.unsplash.com/photo-1580436541340-36b8d0c60bae'
       })
