@@ -22,7 +22,8 @@ const followshipController = {
       const data = await Followship.create({ followerId, followingId })
       return res.status(200).json({
         message: '跟隨成功!',
-        data
+        followship: data,
+        user
       })
     } catch (err) {
       next(err)
@@ -45,10 +46,11 @@ const followshipController = {
       if (!followship) throw new Error('未跟隨該使用者!')
 
       const data = followship
-      await Followship.destroy({ where: { followerId, followingId } })
+      await followship.destroy()
       return res.status(200).json({
         message: '取消跟隨成功!',
-        data
+        followship: data,
+        user
       })
     } catch (err) {
       next(err)
