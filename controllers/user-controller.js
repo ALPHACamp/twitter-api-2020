@@ -170,7 +170,6 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  // 資料格式未確認
   getUserTweets: (req, res, next) => {
     const { id } = req.params
     return Tweet.findAll({
@@ -212,6 +211,7 @@ const userController = {
       })
       .catch(err => (err))
   },
+  // 未完成
   getFollowers: (req, res, next) => {
     const { id } = req.params
     // const user = helpers.getUser(req)
