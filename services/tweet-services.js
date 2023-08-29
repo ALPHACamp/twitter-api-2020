@@ -9,7 +9,7 @@ const tweetServices = {
       include: [
         { model: User, attributes: ['avatar', 'name', 'account'] },
         { model: Reply, attributes: ['id', 'TweetId'] },
-        { model: Like, attributes: ['id', 'tweetId'] }
+        { model: Like, attributes: ['id', 'tweetId', 'userId'] }
       ],
       order: [['createdAt', 'DESC']]
     })
