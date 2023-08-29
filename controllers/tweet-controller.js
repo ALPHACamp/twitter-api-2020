@@ -97,15 +97,15 @@ const tweetController = {
   // 資料格式未確認
   postTweetReply: (req, res, next) => {
     const { tweetId } = req.params
-    const userId = helpers.getUser(req)
+    const userId = helpers.getUser(req).id
     const { comment } = req.body
     return Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) throw new Error('找不到這篇 tweet')
         return Reply.create({
           comment,
-          user_id: userId,
-          tweet_id: tweet.id
+          userId,
+          tweetId
         })
           .then(reply => {
             return res.json({
@@ -139,7 +139,7 @@ const tweetController = {
           userId
         })
       })
-      .then(() => res.json('status: "success'))
+      .then(() => res.json('status: "success"'))
       .catch(err => next(err))
   },
   postTweetUnlike: (req, res, next) => {
@@ -166,7 +166,7 @@ const tweetController = {
           }
         })
       })
-      .then(() => res.json('status: "success'))
+      .then(() => res.json('status: "success"'))
       .catch(err => next(err))
   }
 }

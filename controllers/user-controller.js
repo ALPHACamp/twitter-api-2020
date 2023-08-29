@@ -2,7 +2,7 @@ const { Op } = require('sequelize')
 const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
@@ -191,6 +191,48 @@ const userController = {
     })
       .then(likes => {
         res.json(likes)
+      })
+      .catch(err => next(err))
+  },
+  // 資料格式未確認
+  getUserTweets: (req, res, next) => {
+    const { id } = req.params
+    return Tweet.findAll({
+      where: { userId: id },
+      order: [['createdAt', 'DESC']],
+      attributes: [
+        'id', 'description', 'createdAt', 'updatedAt',
+        [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCount'],
+        [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${id} > 0)`), 'isLiked']
+      ],
+      raw: true,
+      nest: true
+    })
+      .then(tweets => {
+        return res.json(
+          tweets
+        )
+      })
+      .catch(err => next(err))
+  },
+  // 資料格式未確認
+  getUserReplies: (req, res, next) => {
+    const { id } = req.params
+    return Reply.findAll({
+      where: { userId: id },
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Tweet, include: [{ model: User, attributes: ['id', 'account', 'name'] }], attributes: ['id', 'description'] }
+      ],
+      raw: true,
+      nest: true
+    })
+      .then(replies => {
+        return res.json(
+          replies
+        )
       })
       .catch(err => next(err))
   }
