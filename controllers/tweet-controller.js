@@ -84,9 +84,11 @@ const tweetController = {
         }),
         Like.findAll({ where: { UserId: userId } })
       ])
+      if (!tweet) throw Error('查無此推文')
+
       const tweetData = tweet.toJSON()
       tweetData.isLiked = likes.some(like => like.TweetId === tweet.id)
-      tweetData.createdAt = dayjs(tweetData.createdAt)
+      tweetData.fromNow = dayjs(tweetData.createdAt)
         .tz('Asia/Taipei')
         .format('A h:mm ‧ YYYY年M月D日')
         .replace('AM', '上午')
@@ -113,6 +115,8 @@ const tweetController = {
         UserId: userId
       })
       const tweetData = newTweet.toJSON()
+      tweetData.fromNow = dayjs(tweetData.updatedAt)
+        .fromNow()
       return res.status(200).json(tweetData)
     } catch (err) {
       return next(err)
@@ -166,12 +170,15 @@ const tweetController = {
         include: [{
           model: User,
           attributes: ['account', 'name', 'avatar']
-        }],
-        raw: true,
-        nest: true
+        }]
       })
 
-      return res.status(200).json(replies)
+      const repliesData = replies.map(reply => ({
+        ...reply.toJSON(),
+        fromNow: dayjs(reply.updatedAt)
+          .fromNow()
+      }))
+      return res.status(200).json(repliesData)
     } catch (err) {
       return next(err)
     }
@@ -184,10 +191,12 @@ const tweetController = {
         TweetId: req.params.id,
         comment
       })
-
       if (!comment) throw new Error('內容不可空白')
 
-      return res.status(200).json(newReply)
+      const newReplyData = newReply.toJSON()
+      newReplyData.fromNow = dayjs(newReply.updatedAt)
+        .fromNow()
+      return res.status(200).json(newReplyData)
     } catch (err) {
       return next(err)
     }
