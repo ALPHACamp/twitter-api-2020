@@ -1,5 +1,5 @@
 const passport = require('../config/passport') // 引入 passport
-const helpers = require('../helpers/auth-helpers')
+const helpers = require('../_helpers')
 
 // authenticated 驗證使用者的登入狀況，如果登入了才給予通過，錯誤處理移動到controller
 const authenticated = (req, res, next) => {
@@ -12,7 +12,7 @@ const authenticated = (req, res, next) => {
 
 // authenticatedAdmin 確認使用者是否為admin，如果是才給予通過
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user && req.user.isAdmin) return next()
+  if (helpers.getUser(req) && helpers.getUser(req).role === 'admin') return next()
   return res.status(403).json({ status: 'error', message: '沒有admin權限' })
 }
 
