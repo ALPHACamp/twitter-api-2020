@@ -252,8 +252,8 @@ const tweetContorller = {
         Tweet.findOne({
           where: { id: tweetId },
           attributes: ['id'],
-          // next: true,
-          // raw: true,
+          nest: true,
+          raw: true,
           include: {
             model: User,
             as: 'author',
@@ -261,16 +261,8 @@ const tweetContorller = {
           }
         })
       ])
-      // const replyData = await Reply.create({
-      //   tweetId,
-      //   userId,
-      //   comment,
-      //   createdAt: new Date(),
-      //   updatedAt: new Date(),
-      // });
       console.log(reply, currentUser, tweet)
-
-      const replyDatas = {
+      const replyData = {
         id: reply.dataValues.id,
         tweetId,
         userId,
@@ -282,11 +274,11 @@ const tweetContorller = {
         createdAt,
         updatedAt
       }
-      console.log(replyDatas)
+      console.log(replyData)
       res.status(200).json({
         status: 'success',
         message: 'successfully created reply',
-        replyDatas
+        replyData
       })
     } catch (err) {
       next(err)
