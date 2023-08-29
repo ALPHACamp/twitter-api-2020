@@ -9,7 +9,9 @@ const adminController = require('../controllers/admin-controller')
 const tweet = require('./modules/tweet')
 const followship = require('./modules/followship')
 const { apiErrorHandler } = require('../middleware/error-handler')
+const upload = require('../middleware/multer')
 const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
+
 
 // router.use('/admin', authenticated, authenticatedAdmin, admin)
 // admin
@@ -29,6 +31,7 @@ router.get('/users/:id/setting', authenticated, userController.getUserSetting) /
 router.get('/users/:id', authenticated, userController.getUserProfile) // 個人資料頁面(name, introduction, avatar, banner)
 router.put('/users/:id/setting', authenticated, userController.putUserSetting) // 編輯設定(account, name, email, password)
 router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), userController.putUserProfile) // 編輯個人資料
+
 // modules
 router.use('/followships', authenticated, followship)
 router.use('/tweets', authenticated, tweet)
