@@ -1,13 +1,13 @@
 const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, sequelize } = require('../models')
-const { getUser } = require('../_helpers')
+const { User, Tweet, Reply, sequelize } = require('../models')
+const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
   login: (req, res, next) => {
     try {
-      const userData = getUser(req).toJSON()
+      const userData = helpers.getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
       res.json({
@@ -66,7 +66,7 @@ const userController = {
       .catch(err => next(err))
   },
   getCurrentUser: (req, res, next) => {
-    return User.findByPk(getUser(req).id, {
+    return User.findByPk(helpers.getUser(req).id, {
       raw: true
     })
       .then(user => {
@@ -82,7 +82,7 @@ const userController = {
   },
   putUserAccount: (req, res, next) => {
     const id = req.params.id
-    if (Number(id) !== Number(getUser(req).id)) throw new Error('只能編輯本人帳戶資料！')
+    if (Number(id) !== Number(helpers.getUser(req).id)) throw new Error('只能編輯本人帳戶資料！')
     const { account, name, email, password, checkPassword } = req.body
     if (!account || !email || !name) throw new Error('帳戶、暱稱和信箱不得為空！')
     if (password !== checkPassword) throw new Error('密碼不相符！')
@@ -134,7 +134,7 @@ const userController = {
   },
   putUserProfile: (req, res, next) => {
     const id = req.params.id
-    if (Number(id) !== Number(getUser(req).id)) throw new Error('只能編輯本人主頁資料！')
+    if (Number(id) !== Number(helpers.getUser(req).id)) throw new Error('只能編輯本人主頁資料！')
     const { name, introduction } = req.body
     const { avatar, cover } = req.files
     if (!name) throw new Error('暱稱不得為空！')
@@ -188,6 +188,25 @@ const userController = {
         )
       })
       .catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    const { id } = req.params
+    return Reply.findAll({
+      where: { userId: id },
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Tweet, include: [{ model: User, attributes: ['id', 'account', 'name'] }], attributes: ['id', 'description'] }
+      ],
+      raw: true,
+      nest: true
+    })
+      .then(replies => {
+        return res.json(
+          replies
+        )
+      })
+      .catch(err => (err))
   }
 }
 module.exports = userController
