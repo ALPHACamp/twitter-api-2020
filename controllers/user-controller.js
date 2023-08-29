@@ -171,6 +171,7 @@ const userController = {
   },
   getUserLikes: (req, res, next) => {
     const userId = req.params.id
+    const currentUserId = helpers.getUser(req).id
     return Like.findAll({
       where: { userId },
       order: [['createdAt', 'DESC']],
@@ -180,7 +181,8 @@ const userController = {
         attributes: {
           include: [
             [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweet_id = Tweet.id )'), 'replyCount'],
-            [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id )'), 'likedCount']
+            [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id )'), 'likedCount'],
+            [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.user_id = ${currentUserId} > 0)`), 'isLiked']
           ]
         }
       }],
