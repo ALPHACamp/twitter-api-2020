@@ -19,8 +19,8 @@ const {
 
 // api/admin
 router.post('/api/admin/signin', adminController.signIn)
-router.use('/api/admin', authenticated, authenticatedAdmin, admin)
-
+// router.use('/api/admin', authenticated, authenticatedAdmin, admin)
+router.use('/api/admin', admin)
 // api/users
 router.post('/api/users', userController.signUp)
 router.post('/api/users/signin', userController.signIn)

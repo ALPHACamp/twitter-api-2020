@@ -65,8 +65,11 @@ const tweetContorller = {
             as: 'author'
           },
           {
-            model: Like,
-            attributes: ['userId']
+            model: Like
+          },
+          {
+            model: Reply,
+            as: 'replies'
           }
         ]
       })
@@ -80,8 +83,8 @@ const tweetContorller = {
         authorAccount: t.author.account,
         authorAvatar: t.author.avatar,
         description: t.description,
-        likeCount: t.likeCount,
-        replyCount: t.replyCount,
+        likeCount: tweet.Likes.length,
+        replyCount: tweet.replies.length,
         isLiked: t.Likes.some(i => i.userId === userId),
         createdAt: t.createdAt
       }))
@@ -226,16 +229,51 @@ const tweetContorller = {
       const { comment } = req.body
       const getUser = helpers.getUser(req)
       const userId = getUser.id
+      const createdAt = new Date()
+      const updatedAt = new Date()
 
       if (!comment) throw new Error('回覆內容不可為空白')
-      const replyData = await Reply.create({
+      const [reply, currentUser, tweet] = await Promise.all([
+        Reply.create({
+          tweetId,
+          userId,
+          comment,
+          createdAt,
+          updatedAt
+        }),
+        User.findOne({
+          where: { id: userId },
+          attributes: ['name', 'account', 'avatar'],
+          raw: true,
+          nest: true
+        }),
+
+        Tweet.findOne({
+          where: { id: tweetId },
+          attributes: ['id'],
+          nest: true,
+          raw: true,
+          include: {
+            model: User,
+            as: 'author',
+            attributes: ['account']
+          }
+        })
+      ])
+      console.log(reply, currentUser, tweet)
+      const replyData = {
+        id: reply.dataValues.id,
         tweetId,
         userId,
+        userAvatar: currentUser.avatar,
+        userName: currentUser.name,
+        userAccount: currentUser.account,
+        authorAccount: tweet.author.account,
         comment,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-
+        createdAt,
+        updatedAt
+      }
+      console.log(replyData)
       res.status(200).json({
         status: 'success',
         message: 'successfully created reply',
