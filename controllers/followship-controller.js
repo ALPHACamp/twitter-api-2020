@@ -23,7 +23,7 @@ const followshipController = {
       .catch(err => next(err))
   },
   removeFollowing: (req, res, next) => {
-    const { followingId } = req.paramsd
+    const { followingId } = req.params
     const followerId = helpers.getUser(req).id
     return Followship.findOne({
       where: {

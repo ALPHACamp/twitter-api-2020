@@ -1,7 +1,7 @@
 const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
 const { getUser } = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
@@ -165,6 +165,27 @@ const userController = {
           message: '成功編輯主頁！',
           ...user
         })
+      })
+      .catch(err => next(err))
+  },
+  getUserTweets: (req, res, next) => {
+    const { id } = req.params
+    return Tweet.findAll({
+      where: { userId: id },
+      order: [['createdAt', 'DESC']],
+      attributes: [
+        'id', 'description', 'createdAt', 'updatedAt',
+        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCount'],
+        [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${id} > 0)`), 'isLiked']
+      ],
+      raw: true,
+      nest: true
+    })
+      .then(tweets => {
+        return res.json(
+          tweets
+        )
       })
       .catch(err => next(err))
   }

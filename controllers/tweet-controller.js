@@ -138,7 +138,7 @@ const tweetController = {
           userId
         })
       })
-      .then(() => res.json('status: "success'))
+      .then(() => res.json('status: "success"'))
       .catch(err => next(err))
   },
   postTweetUnlike: (req, res, next) => {
@@ -165,7 +165,7 @@ const tweetController = {
           }
         })
       })
-      .then(() => res.json('status: "success'))
+      .then(() => res.json('status: "success"'))
       .catch(err => next(err))
   }
 }
