@@ -414,7 +414,7 @@ const userController = {
         name: name || user.name,
         email: email || user.email,
         password: password ? await bcrypt.hash(password, 10) : user.password,
-        introduction: introduction || user.introduction,
+        introduction: (introduction !== undefined) ? introduction : user.introduction, // 有傳入但留空-->會更新而非保留原設定
         avatar: filePath1 || user.avatar || 'https://via.placeholder.com/224',
         banner: filePath2 || user.banner || 'https://images.unsplash.com/photo-1580436541340-36b8d0c60bae'
       })

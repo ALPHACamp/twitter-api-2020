@@ -1,7 +1,7 @@
 # Simple Twitter API
 
 * 一個簡易的twitter專案，提供使用者發文、回覆，以及喜歡和追蹤等和其他使用者互動的方式，並提供後台管理功能。
-* 本專案為後端API部份，和Simple Twitter React前端專案共同使用才是完整專案。
+* 本專案為後端API部份，和Simple Twitter React[前端專案](https://github.com/u88872625/simple-twitter)共同使用才是完整專案。
 
 ## 功能說明
 
@@ -119,3 +119,5 @@ MYSQL_DATABASE_URL=<MySQL連線字串>
 
 * [**江祐敏**](https://github.com/AlanChiangg)
 * [**Eric Huang**](https://github.com/erikku54) 
+
+前端專案合作： [**葉明荃**](https://github.com/u88872625)、[**YunJong**](https://github.com/Yunj0ng)
