@@ -205,6 +205,12 @@ const userController = {
     try {
       const userId = req.params.id // 被查看的使用者 ID
       const user = await User.findByPk(userId)
+
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
       // 取replies及其關聯
       const replies = await Reply.findAll({
         where: { UserId: user.id },
@@ -220,11 +226,6 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
 
-      if (!user || (user.role === 'admin')) {
-        const err = new Error('使用者不存在！')
-        err.status = 404
-        throw err
-      }
       if (!replies.length) {
         return res.status(200).json({
           status: 'success',
@@ -245,6 +246,12 @@ const userController = {
       const userId = req.params.id // 被查看的使用者 ID
       const currentUserId = helpers.getUser(req).id // 當前使用者 ID
       const user = await User.findByPk(userId)
+
+      if (!user || (user.role === 'admin')) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
       // 取Likes及其關聯
       const [likes, myLikes] = await Promise.all([
         Like.findAll({
@@ -263,11 +270,6 @@ const userController = {
         })
       ])
 
-      if (!user || (user.role === 'admin')) {
-        const err = new Error('使用者不存在！')
-        err.status = 404
-        throw err
-      }
       if (!likes.length) {
         return res.status(200).json({
           status: 'success',
