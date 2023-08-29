@@ -6,7 +6,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGERㄈ
+        type: Sequelize.INTEGER
       },
       follower_id: {
         type: Sequelize.INTEGER
