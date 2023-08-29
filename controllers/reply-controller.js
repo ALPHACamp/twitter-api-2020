@@ -20,7 +20,12 @@ const replyController = {
         ]
       })
       if (!tweet) throw new Error('推文不存在！')
-      if (!replies) throw new Error('此篇推文目前沒有回覆。')
+      if (!replies.length) {
+        return res.status(200).json({
+          status: 'success',
+          message: '此篇推文目前沒有回覆。'
+        })
+      }
 
       const data = replies.map(reply => ({
         ...reply.toJSON(),
