@@ -1,21 +1,14 @@
 const express = require('express')
 const router = express.Router()
-// const storage = multer.memoryStorage()
 const upload = require('../middleware/multer')
-
 const admin = require('./modules/admin')
-
 const userController = require('../controllers/apis/user-controller')
 const tweetController = require('../controllers/apis/tweet-controller')
 const followshipController = require('../controllers/apis/followship-controller')
 const adminController = require('../controllers/apis/admin-controller')
 
 const { apiErrorHandler } = require('../middleware/error-handler')
-const {
-  authenticated,
-  authenticatedAdmin,
-  authenticatedUser
-} = require('../middleware/api-auth')
+const { authenticated, authenticatedUser } = require('../middleware/api-auth')
 
 // api/admin
 router.post('/api/admin/signin', adminController.signIn)

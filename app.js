@@ -9,15 +9,15 @@ const routes = require('./routes')
 const passport = require('./config/passport')
 const cors = require('cors')
 
-const corsOptions = {
-  origin: '＊',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  allowedHeaders: ['Content-Type', 'Authorization']
-}
+// const corsOptions = {
+//   origin: '＊',
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }
 
 const app = express()
 
-app.use(cors(corsOptions))
+app.use(cors())
 // bodyparser設定
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
