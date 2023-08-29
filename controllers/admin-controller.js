@@ -4,7 +4,7 @@ const { Tweet, User, Like, Reply } = require('../models')
 
 const adminController = {
   signIn: (req, res, next) => {
-    const userData = helpers.getUser(req).toJSON()
+    const userData = helpers.getUser(req)
     const JWTSecret = process.env.JWT_SECRET || 'SECRET'
     delete userData.password
     if (userData.role === 'user') {

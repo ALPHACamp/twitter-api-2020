@@ -41,7 +41,8 @@ const userController = {
       .catch(err => next(err))
   },
   signIn: (req, res, next) => {
-    const userData = helpers.getUser(req).toJSON()
+    const userData = helpers.getUser(req)
+    console.log(userData)
     const JWTSecret = process.env.JWT_SECRET || 'SECRET'
     delete userData.password
     if (userData.role === 'admin') {
