@@ -64,25 +64,25 @@ const tweetController = {
       return next(err)
     }
   },
-  getTweetReplies: (req, res, next) => {
-    Promise.all([
-      Tweet.findByPk(req.params.tweet_id),
-      Reply.findAll({
-        where: { TweetId: req.params.tweet_id },
-        include: { model: User, attributes: { exclude: 'password' } },
-        order: [['createdAt', 'DESC']],
+  getTweetReplies: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.tweet_id, {
+        include: {
+          model: Reply,
+          include: { model: User, attributes: { exclude: 'password' } },
+          order: [['createdAt', 'DESC']]
+        },
         nest: true
       })
-    ])
-      .then(([tweet, replies]) => {
-        if (!tweet) {
-          const err = new Error('推文不存在！')
-          err.status = 404
-          throw err
-        }
-        return res.json(replies)
-      })
-      .catch(err => next(err))
+      if (!tweet) {
+        const err = new Error('推文不存在！')
+        err.status = 404
+        throw err
+      }
+      return res.json(tweet.Replies)
+    } catch (err) {
+      return next(err)
+    }
   },
   postTweetReply: (req, res, next) => {
     const { comment } = req.body
