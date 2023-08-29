@@ -1,7 +1,8 @@
 const { Op } = require('sequelize')
+const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet, Like } = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
@@ -165,6 +166,28 @@ const userController = {
           message: '成功編輯主頁！',
           ...user
         })
+      })
+      .catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+    const userId = req.params.id
+    return Like.findAll({
+      where: { userId },
+      order: [['createdAt', 'DESC']],
+      // include: [{
+      //   model: Tweet,
+      //   include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+      //   attributes: {
+      //     include: [
+      //       [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweet_id = Tweet.id )'), 'replyCount'],
+      //       [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id )'), 'likedCount']
+      //     ]
+      //   }
+      // }],
+      raw: true
+    })
+      .then(likes => {
+        res.json(likes)
       })
       .catch(err => next(err))
   }

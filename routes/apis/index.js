@@ -17,7 +17,7 @@ router.get('/users/current', authenticated, authenticatedUser, userController.ge
 // router.get('/users/top', userController)
 // router.get('/users/:id/tweets', userController)
 // router.get('/users/:id/replied_tweets', userController)
-// router.get('/users/:id/likes', userController)
+router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getUserLikes)
 // router.get('/users/:id/followers', userController)
 // router.get('/users/:id/followings', userController)
 router.put('/users/:id/account', authenticated, authenticatedUser, userController.putUserAccount)
