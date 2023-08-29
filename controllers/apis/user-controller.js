@@ -124,6 +124,7 @@ const userController = {
           follow => follow.followingId === Number(id)
         )
       }
+      console.log(user)
       res.status(200).json(user)
     } catch (err) {
       next(err)
