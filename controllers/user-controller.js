@@ -220,7 +220,12 @@ const userController = {
         if (password.length < 5 || password.length > 20) throw new Error('請設定 5 到 20 字的密碼')
         password = await bcrypt.hash(password, 10)
       }
-      const userA = await User.findByPk(req.params.id)
+      const userA = await User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ]
+      })
       if (!userA) {
         const err = new Error('使用者不存在！')
         err.status = 404
@@ -251,6 +256,11 @@ const userController = {
         banner: banner || userA.banner
       })
       updatedUser = updatedUser.toJSON()
+      updatedUser.tweetsCount = await Tweet.count({ where: { UserId: req.params.id } })
+      updatedUser.followersCount = updatedUser.Followers.length
+      updatedUser.followingsCount = updatedUser.Followings.length
+      delete updatedUser.Followers
+      delete updatedUser.Followings
       delete updatedUser.password
       return res.json({ status: 'success', data: { user: updatedUser } })
     } catch (err) {
