@@ -53,7 +53,14 @@ const userController = {
       .catch(err => next(err))
   },
   getUser: (req, res, next) => {
-    return User.findByPk(req.params.id, {
+    const id = req.params.id
+    return User.findByPk(id, {
+      attributes: ['id', 'account', 'name', 'email', 'introduction', 'avatar', 'cover',
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id )'), 'followerCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id )'), 'followingCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.user_id = User.id )'), 'tweetCount']
+      ],
+      nest: true,
       raw: true
     })
       .then(user => {
@@ -62,13 +69,21 @@ const userController = {
         delete user.role
         res.json({
           status: 'success',
-          ...user
+          ...user,
+          isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
         })
       })
       .catch(err => next(err))
   },
   getCurrentUser: (req, res, next) => {
-    return User.findByPk(helpers.getUser(req).id, {
+    const id = helpers.getUser(req).id
+    return User.findByPk(id, {
+      attributes: ['id', 'account', 'name', 'email', 'introduction', 'avatar', 'cover',
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id )'), 'followerCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id )'), 'followingCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.user_id = User.id )'), 'tweetCount']
+      ],
+      nest: true,
       raw: true
     })
       .then(user => {
@@ -138,12 +153,11 @@ const userController = {
     const id = req.params.id
     if (Number(id) !== Number(helpers.getUser(req).id)) throw new Error('只能編輯本人主頁資料！')
     const { name, introduction } = req.body
-    const { avatar, cover } = req.files
     if (!name) throw new Error('暱稱不得為空！')
     if (name.length > 50) throw new Error('超過暱稱字數上限 50 字！')
     if (introduction.length > 160) throw new Error('超過自介自數上限 160 字！')
-    const avatarFile = avatar ? avatar[0] : null
-    const coverFile = cover ? cover[0] : null
+    const avatarFile = req.files?.avatar ? req.files.avatar[0] : null
+    const coverFile = req.files?.cover ? req.files.cover[0] : null
     return Promise.all([
       User.findByPk(id),
       imgurFileHandler(avatarFile),
@@ -170,6 +184,32 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  getUserLikes: (req, res, next) => {
+    const userId = req.params.id
+    const currentUserId = helpers.getUser(req).id
+    return Like.findAll({
+      where: { userId },
+      order: [['createdAt', 'DESC']],
+      include: [{
+        model: Tweet,
+        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweet_id = Tweet.id )'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id )'), 'likedCount'],
+            [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.user_id = ${currentUserId} > 0)`), 'isLiked']
+          ]
+        }
+      }],
+      raw: true,
+      nest: true
+    })
+      .then(likes => {
+        res.json(likes)
+      })
+      .catch(err => next(err))
+  },
+  // 資料格式未確認
   getUserTweets: (req, res, next) => {
     const { id } = req.params
     return Tweet.findAll({
@@ -191,7 +231,6 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  // 資料格式未確認
   getUserReplies: (req, res, next) => {
     const { id } = req.params
     return Reply.findAll({
