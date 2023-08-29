@@ -10,7 +10,7 @@ const replyServices = {
         where: { id: TweetId },
         raw: true,
         nest: true,
-        include: [{ model: User, attributes: ['name'] }]
+        include: [{ model: User, attributes: ['account'] }]
       }),
       Reply.findAll({
         where: { TweetId },
@@ -26,7 +26,7 @@ const replyServices = {
       const data = replies.map(reply => ({
         ...reply,
         createdAt: relativeTimeFormat(reply.createdAt),
-        poster: tweet.User.name
+        poster: tweet.User.account
       }))
       cb(null, data)
     })
