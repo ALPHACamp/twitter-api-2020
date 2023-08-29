@@ -8,7 +8,6 @@ const admin = require('./modules/admin')
 const userController = require('../controllers/apis/user-controller')
 const tweetController = require('../controllers/apis/tweet-controller')
 const followshipController = require('../controllers/apis/followship-controller')
-const adminController = require('../controllers/apis/admin-controller')
 
 const { apiErrorHandler } = require('../middleware/error-handler')
 const {

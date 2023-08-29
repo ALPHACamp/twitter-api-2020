@@ -21,7 +21,7 @@ app.use(passport.session())
 
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
-const port = process.env.PORT || 3001
+const port = process.env.PORT || 3000
 
 app.use(routes)
 
