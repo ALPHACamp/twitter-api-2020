@@ -173,21 +173,21 @@ const userController = {
     const userId = req.params.id
     return Like.findAll({
       where: { userId },
-      order: [['createdAt', 'DESC']]
-      // include: [{
-      //   model: Tweet,
-      //   include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
-      //   attributes: {
-      //     include: [
-      //       [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweet_id = Tweet.id )'), 'replyCount'],
-      //       [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id )'), 'likedCount']
-      //     ]
-      //   }
-      // }],
-      // raw: true
+      order: [['createdAt', 'DESC']],
+      include: [{
+        model: Tweet,
+        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweet_id = Tweet.id )'), 'replyCount'],
+            [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id )'), 'likedCount']
+          ]
+        }
+      }],
+      raw: true,
+      nest: true
     })
       .then(likes => {
-        console.log(likes)
         res.json(likes)
       })
       .catch(err => next(err))
