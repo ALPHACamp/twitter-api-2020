@@ -12,7 +12,7 @@ const followshipController = {
       })
     ])
       .then(([user, followship]) => {
-        if (!user) throw new Error("找不到這位使用者")
+        if (!user) throw new Error('找不到這位使用者')
         if (followship) throw new Error('你已追蹤這位使用者')
         return Followship.create({
           followingId,
@@ -23,7 +23,7 @@ const followshipController = {
       .catch(err => next(err))
   },
   removeFollowing: (req, res, next) => {
-    const followingId = req.params.followingId
+    const { followingId } = req.paramsd
     const followerId = helpers.getUser(req).id
     return Followship.findOne({
       where: {
@@ -32,7 +32,7 @@ const followshipController = {
       }
     })
       .then(followship => {
-        if (!followship) throw new Error("你尚未追蹤這位使用者")
+        if (!followship) throw new Error('你尚未追蹤這位使用者')
         return followship.destroy()
       })
       .then(() => res.json({ status: 'success' }))
