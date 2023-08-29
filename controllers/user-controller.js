@@ -379,28 +379,20 @@ const userController = {
   },
   getTopUsers: async (req, res, next) => {
     try {
-      const currentUserId = helpers.getUser(req).id
       const topNumber = Number(req.query.top)
+      const followings = helpers.getUser(req).Followings // 目前登入者的追蹤資料
+      const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
       // 取User(引入Followers)
-      const [users, followings] = await Promise.all([
-        User.findAll({
-          attributes: ['id', 'account', 'name', 'avatar', 'role'],
-          include: [{ model: User, as: 'Followers', attributes: ['id', 'account'] }],
-          raw: true
-        }),
-        // 目前登入者的追蹤資料
-        Followship.findAll({
-          where: { followerId: currentUserId },
-          raw: true
-        })
-      ])
+      const users = await User.findAll({
+        attributes: ['id', 'account', 'name', 'avatar', 'role'],
+        include: [{ model: User, as: 'Followers', attributes: ['id', 'account'] }],
+        raw: true
+      })
       if (!users) {
         const err = new Error('不存在使用者')
         err.status = 404
         throw err
       }
-
-      const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
       const data = users
         .filter(user => user.role === 'user') // 過濾admin
         .map(user => ({
@@ -409,7 +401,7 @@ const userController = {
           name: user.name,
           avatar: user.avatar,
           followerCount: user.Followers?.length || 0,
-          isFollowed: currentUserFollowing?.includes(user.id)
+          isFollowed: currentUserFollowing?.includes(user.id) || false
         }))
         .sort((a, b) => b.followerCount - a.followerCount)
         .slice(0, topNumber)
