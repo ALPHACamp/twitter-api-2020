@@ -12,7 +12,7 @@ const adminController = {
       delete userData.password
 
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.status(200).json({
+      return res.status(200).json({
         status: 'success',
         data: {
           token,
@@ -20,9 +20,10 @@ const adminController = {
         }
       })
     } catch (err) {
-      next(err)
+      return next(err)
     }
   },
+
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
@@ -39,11 +40,46 @@ const adminController = {
 
       if (!users.length) return res.status(200).json({ status: 'success', message: '無User資料' })
 
-      res.status(200).json(users)
+      return res.status(200).json(users)
     } catch (err) {
-      next(err)
+      return next(err)
     }
   },
+
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        include: [
+          {
+            model: User,
+            attributes: { exclude: ['password'] }
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+
+      if (!tweets.length) throw new Error('找不到tweets資料！')
+
+      const data = tweets.map(tweet => {
+        return {
+          TweetId: tweet.id,
+          description: tweet.description,
+          tweetOwnerId: tweet.User.id,
+          tweetOwnerName: tweet.User.name,
+          tweetOwnerAccount: tweet.User.account,
+          tweetOwnerAvatar: tweet.User.avatar,
+          createdAt: tweet.createdAt
+        }
+      })
+
+      return res.status(200).json(data)
+    } catch (err) {
+      return next(err)
+    }
+  },
+
   deleteTweet: async (req, res, next) => {
     try {
       const { id } = req.params
@@ -53,9 +89,9 @@ const adminController = {
       await Reply.destroy({ where: { TweetId: id } })
       await Like.destroy({ where: { TweetId: id } })
 
-      res.status(200).json({ status: 'success', message: '成功刪除推文' })
+      return res.status(200).json({ status: 'success', message: '成功刪除推文' })
     } catch (err) {
-      next(err)
+      return next(err)
     }
   }
 }
