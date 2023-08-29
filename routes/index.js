@@ -13,7 +13,6 @@ const adminController = require('../controllers/apis/admin-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const {
   authenticated,
-  authenticatedAdmin,
   authenticatedUser
 } = require('../middleware/api-auth')
 
