@@ -66,14 +66,19 @@ const userController = {
     const UserId = req.params.id
     const isFollowed = helpers.getUser(req).Followings.some(f => f.id.toString() === UserId)
 
-    return User.findByPk(UserId, {
-      attributes: { exclude: ['password'] },
-      include: [
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ]
-    })
-      .then(user => {
+    return Promise.all([
+      User.findByPk(UserId, {
+        attributes: { exclude: ['password'] },
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      }),
+      Tweet.count({
+        where: { UserId }
+      })
+    ])
+      .then(([user, tweetsCount]) => {
         if (!user) {
           const err = new Error('使用者不存在！')
           err.status = 404
@@ -84,7 +89,8 @@ const userController = {
           ...user.toJSON(),
           followersCount: user.Followers.length,
           followingsCount: user.Followings.length,
-          isFollowed
+          isFollowed,
+          tweetsCount
         }
         delete result.Followers
         delete result.Followings
@@ -229,7 +235,7 @@ const userController = {
       }
       // 同上註解
       if (account) {
-        if (account.length > 50) throw new Error('帳號字數超出上限！')
+        if (account.length > 30) throw new Error('帳號字數超出上限！')
         if (userA.account !== account) {
           const userC = await User.findOne({ where: { account } })
           if (userC) throw new Error('account已重複註冊！')
@@ -305,8 +311,9 @@ const userController = {
   },
   getTopUser: (req, res, next) => {
     const followingsId = helpers.getUser(req).Followings.map(f => f.id)
+    const excludeId = followingsId.concat(helpers.getUser(req).id)
     User.findAll({
-      where: { id: { [Op.ne]: helpers.getUser(req).id } },
+      where: { id: { [Op.notIn]: excludeId }, role: 'user' },
       attributes: { exclude: 'password' },
       include: { model: User, as: 'Followers' }
     })
