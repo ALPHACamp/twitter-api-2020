@@ -70,43 +70,28 @@ const adminController = {
     }
   },
 
-  getUsers: (req, res, next) => {
-    const likesCount = array => {
-      let sum = 0
-      for (const i of array) {
-        sum += i.Likes.length
-      }
-      return sum
-    }
-
-    return User.findAll({
-      attributes: { exclude: ['password'] },
-      include: [
-        { model: Tweet, include: Like },
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ]
-    })
-      .then(users => {
-        const result = users.map(user => ({
-          ...user.toJSON(),
-          tweetsCount: user.Tweets.length,
-          getLikesCount: likesCount(user.Tweets),
-          followersCount: user.Followers.length,
-          followingsCount: user.Followings.length
-        }))
-          .sort((a, b) => b.tweetsCount - a.tweetsCount)
-
-        result.forEach(item => {
-          delete item.Tweets
-          delete item.Followers
-          delete item.Followings
-        })
-
-        res.json(result)
+  getUsers: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        attributes: {
+          exclude: ['password'],
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` IN (SELECT `id` FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`))'), 'getLikesCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followerId` = `User`.`id`)'), 'followingsCount']
+          ]
+        },
+        order: [[Sequelize.literal('tweetsCount'), 'DESC']],
+        raw: true
       })
-      .catch(err => next(err))
+
+      res.json(users)
+    } catch (err) {
+      return next(err)
+    }
   },
+
   getAuth: (req, res, next) => {
     helpers.getUser(req) ? res.json({ status: 'success', message: `User role is ${helpers.getUser(req).role}` }) : res.status(401).json({ status: 'error', message: 'unauthorized' })
   }
