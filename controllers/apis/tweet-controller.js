@@ -230,20 +230,63 @@ const tweetContorller = {
       const { comment } = req.body
       const getUser = helpers.getUser(req)
       const userId = getUser.id
+      const createdAt = new Date()
+      const updatedAt = new Date()
 
       if (!comment) throw new Error('回覆內容不可為空白')
-      const replyData = await Reply.create({
+      const [reply, currentUser, tweet] = await Promise.all([
+        Reply.create({
+          tweetId,
+          userId,
+          comment,
+          createdAt,
+          updatedAt
+        }),
+        User.findOne({
+          where: { id: userId },
+          attributes: ['name', 'account', 'avatar'],
+          raw: true,
+          nest: true
+        }),
+
+        Tweet.findOne({
+          where: { id: tweetId },
+          attributes: ['id'],
+          // next: true,
+          // raw: true,
+          include: {
+            model: User,
+            as: 'author',
+            attributes: ['account']
+          }
+        })
+      ])
+      // const replyData = await Reply.create({
+      //   tweetId,
+      //   userId,
+      //   comment,
+      //   createdAt: new Date(),
+      //   updatedAt: new Date(),
+      // });
+      console.log(reply, currentUser, tweet)
+
+      const replyDatas = {
+        id: reply.dataValues.id,
         tweetId,
         userId,
+        userAvatar: currentUser.avatar,
+        userName: currentUser.name,
+        userAccount: currentUser.account,
+        authorAccount: tweet.author.account,
         comment,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-
+        createdAt,
+        updatedAt
+      }
+      console.log(replyDatas)
       res.status(200).json({
         status: 'success',
         message: 'successfully created reply',
-        replyData
+        replyDatas
       })
     } catch (err) {
       next(err)
