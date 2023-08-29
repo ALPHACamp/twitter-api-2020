@@ -1,10 +1,11 @@
 const { Op } = require('sequelize')
-const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like } = require('../models')
+const sequelize = require('sequelize')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const { link } = require('../app')
 const userController = {
   login: (req, res, next) => {
     try {
@@ -230,7 +231,6 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  // 資料格式未確認
   getUserReplies: (req, res, next) => {
     const { id } = req.params
     return Reply.findAll({
@@ -247,6 +247,32 @@ const userController = {
         return res.json(
           replies
         )
+      })
+      .catch(err => (err))
+  },
+  // 未完成
+  getFollowers: (req, res, next) => {
+    const { id } = req.params
+    // const user = helpers.getUser(req)
+    User.findByPk(id, {
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: ['id', 'name', 'avatar', 'introduction']
+      }],
+      attributes: [
+        'id',
+        [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.user_id = User.id)'), 'postCount']
+      ],
+      raw: true,
+      nest: true
+    })
+      .then(userWithFollowers => {
+        // followers = followers.map(follower => ({
+        //   ...follower,
+        //   isFollowed: user.Followings.some(f => f.id === follower.id)
+        // }))
+        return res.json(userWithFollowers)
       })
       .catch(err => next(err))
   }

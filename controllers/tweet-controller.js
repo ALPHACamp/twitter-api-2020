@@ -49,7 +49,6 @@ const tweetController = {
       })
       .catch(err => next(err))
   },
-  // 資料格式未確認
   getTweetReplies: (req, res, next) => {
     const tweetId = req.params.tweetId
     Promise.all([
@@ -76,7 +75,6 @@ const tweetController = {
       })
       .catch(err => next(err))
   },
-  // 資料格式未確認
   postTweet: async (req, res, next) => {
     const { description } = req.body
     const userId = helpers.getUser(req).id
@@ -94,7 +92,6 @@ const tweetController = {
       })
       .catch(err => next(err))
   },
-  // 資料格式未確認
   postTweetReply: (req, res, next) => {
     const { tweetId } = req.params
     const userId = helpers.getUser(req).id

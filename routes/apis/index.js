@@ -18,6 +18,8 @@ router.get('/users/current', authenticated, authenticatedUser, userController.ge
 router.get('/users/current', authenticated, authenticatedUser, userController.getCurrentUser)
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserReplies)
+// router.get('/users/:id/likes', authenticated, authenticatedUser, userController)
+router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getFollowers)
 router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getUserLikes)
 // router.get('/users/:id/followers', authenticated, authenticatedUser, userController)
 // router.get('/users/:id/followings', authenticated, authenticatedUser, userController)
