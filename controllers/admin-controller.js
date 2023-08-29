@@ -17,7 +17,7 @@ const adminController = {
       if (userData.role !== 'admin') throw new Error('no such user(角色錯誤)', { cause: { accountErrMsg: '帳號不存在！', passwordErrMsg: '' } })
 
       delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
+      const token = jwt.sign(userData, process.env.JWT_SECRET || 'SecretTime', { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
 
       return res.status(200).json({
         success: true,
