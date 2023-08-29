@@ -282,31 +282,30 @@ const userController = {
       return next(err)
     }
   },
-  getFollowers: (req, res, next) => {
+  getFollowers: async (req, res, next) => {
     const followingsId = helpers.getUser(req).Followings.map(f => f.id)
-    User.findByPk(req.params.id)
-      .then(user => {
-        if (!user) {
-          const err = new Error('使用者不存在！')
-          err.status = 404
-          throw err
-        }
-        return Followship.findAll({
-          where: { followingId: req.params.id },
-          include: { model: User, as: 'Follower', attributes: { exclude: 'password' } },
-          order: [['createdAt', 'DESC']],
-          nest: true,
-          raw: true
-        })
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      const followships = await Followship.findAll({
+        where: { FollowingId: req.params.id },
+        include: { model: User, as: 'Follower', attributes: { exclude: 'password' } },
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
       })
-      .then(followships => {
-        const data = followships.map(f => {
-          f.Follower.isFollowed = followingsId.some(id => id === f.Follower.id)
-          return f
-        })
-        return res.json(data)
+      const data = followships.map(f => {
+        f.Follower.isFollowed = followingsId.some(id => id === f.Follower.id)
+        return f
       })
-      .catch(err => next(err))
+      return res.json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
   getTopUser: (req, res, next) => {
     const followingsId = helpers.getUser(req).Followings.map(f => f.id)
