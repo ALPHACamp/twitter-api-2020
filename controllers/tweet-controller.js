@@ -21,7 +21,12 @@ const tweetController = {
         order: [['createdAt', 'DESC']]
       })
 
-      if (!tweets) throw new Error('目前沒有任何推文。')
+      if (!tweets.length) {
+        return res.status(200).json({
+          status: 'success',
+          message: '目前沒有任何推文。'
+        })
+      }
 
       const data = tweets.map(tweet => ({
         ...tweet.toJSON(),
