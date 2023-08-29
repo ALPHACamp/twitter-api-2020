@@ -1,7 +1,5 @@
 const { Tweet, Like, Reply, User } = require('../../models')
 const helpers = require('../../_helpers')
-// const defaultLimit = 10
-const sequelize = require('sequelize')
 
 const tweetContorller = {
   getTweets: async (req, res, next) => {
@@ -15,17 +13,6 @@ const tweetContorller = {
           'likeCount',
           'replyCount',
           'createdAt'
-          // [
-          //   sequelize.literal(
-          //     '(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.tweet_id = Tweet.id)'
-          //   ),
-          //   'likeCount'
-          // ][
-          //   (sequelize.literal(
-          //     '(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.tweet_id = Tweet.id)'
-          //   ),
-          //   'replyCount')
-          // ]
         ],
         order: [['createdAt', 'desc']],
         subQuery: false,
@@ -37,8 +24,11 @@ const tweetContorller = {
             where: { role: 'user' }
           },
           {
-            model: Like,
-            attributes: ['userId']
+            model: Like
+          },
+          {
+            model: Reply,
+            as: 'replies'
           }
         ]
       }
@@ -51,8 +41,8 @@ const tweetContorller = {
         authorName: tweet.author.name,
         authorAvatar: tweet.author.avatar,
         description: tweet.description.substring(0, 140),
-        likeCount: tweet.likeCount,
-        replyCount: tweet.replyCount,
+        likeCount: tweet.Likes.length,
+        replyCount: tweet.replies.length,
         isLiked: tweet.Likes.some(i => i.userId === userId),
         createdAt: tweet.createdAt
       }))
@@ -64,11 +54,38 @@ const tweetContorller = {
   getTweet: async (req, res, next) => {
     try {
       const tweetId = req.params.tweet_id
-      const tweet = await Tweet.findByPk(tweetId)
+      const getUser = helpers.getUser(req)
+      const userId = getUser.id
+      const tweet = await Tweet.findOne({
+        where: { id: tweetId },
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatar'],
+            as: 'author'
+          },
+          {
+            model: Like,
+            attributes: ['userId']
+          }
+        ]
+      })
 
       if (!tweet) throw new Error("Tweet didn't exist!")
+      console.log(tweet)
 
-      res.status(200).json(tweet)
+      const tweetData = [tweet].map(t => ({
+        id: t.id,
+        authorName: t.author.name,
+        authorAccount: t.author.account,
+        authorAvatar: t.author.avatar,
+        description: t.description,
+        likeCount: t.likeCount,
+        replyCount: t.replyCount,
+        isLiked: t.Likes.some(i => i.userId === userId),
+        createdAt: t.createdAt
+      }))
+      res.status(200).json(tweetData)
     } catch (err) {
       next(err)
     }
