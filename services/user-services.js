@@ -201,8 +201,8 @@ const userServices = {
       const tweetData = tweets.map(tweet => ({
         ...tweet.toJSON(),
         createdAt: relativeTimeFormat(tweet.createdAt),
-        RepliesCount: tweet.Replies.length,
-        LikeCount: tweet.LikeUsers.length,
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.LikeUsers.length,
         tweetsCount: tweets.length
       }))
       cb(null, tweetData)
