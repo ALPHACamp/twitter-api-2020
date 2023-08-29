@@ -52,25 +52,22 @@ const adminController = {
     }
   },
 
-  deleteTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.id)
-      .then(tweet => {
-        if (!tweet) {
-          const err = new Error('推文不存在!')
-          err.status = 404
-          throw err
-        }
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (!tweet) {
+        const err = new Error('推文不存在!')
+        err.status = 404
+        throw err
+      }
+      const deletedTweet = await tweet.destroy()
+      await Reply.destroy({ where: { TweetId: req.params.id } })
+      await Like.destroy({ where: { TweetId: req.params.id } })
 
-        return Promise.all([
-          tweet.destroy(),
-          Reply.destroy({ where: { TweetId: req.params.id } }),
-          Like.destroy({ where: { TweetId: req.params.id } })
-        ])
-      })
-      .then(([deletedTweet, deletedReplies, deleteLikes]) => {
-        res.json({ status: 'success', data: { deletedTweet } })
-      })
-      .catch(err => next(err))
+      return res.json({ status: 'success', data: { deletedTweet } })
+    } catch (err) {
+      return next(err)
+    }
   },
 
   getUsers: (req, res, next) => {
