@@ -4,6 +4,7 @@ const sequelize = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { relativeTimeFormat } = require('../helpers/day-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const { includes } = require('lodash')
 
 const userServices = {
   signIn: async (req, cb) => {
@@ -220,28 +221,9 @@ const userServices = {
       }
       const replies = await Reply.findAll({
         where: { userId: id },
-        attributes: [
-          'id',
-          'userId',
-          'tweetId',
-          [
-            sequelize.literal('(SELECT name FROM Users WHERE Users.id = Reply.userId)'),
-            'respondentName'
-          ],
-          [
-            sequelize.literal('(SELECT account FROM Users WHERE Users.id = Reply.userId)'),
-            'respondentAccount'
-          ],
-          [
-            sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Reply.userId)'),
-            'respondentAvatar'
-          ],
-          [
-            sequelize.literal('(SELECT account FROM Users WHERE Users.id IN (SELECT UserId FROM Tweets WHERE Tweets.id = Reply.tweetId))'),
-            'tweeterAccount'
-          ],
-          'comment',
-          'createdAt'
+        include: [
+          { model: User, attributes: ['avatar', 'name', 'account'] },
+          { model: Tweet, include: User }
         ],
         order: [['createdAt', 'DESC']],
         raw: true,
@@ -249,7 +231,8 @@ const userServices = {
       })
       const repliesData = replies.map(reply => ({
         ...reply,
-        createdAt: relativeTimeFormat(reply.createdAt)
+        createdAt: relativeTimeFormat(reply.createdAt),
+        poster: reply.Tweet.User.account
       }))
       cb(null, repliesData)
     } catch (err) {
