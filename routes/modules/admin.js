@@ -17,7 +17,12 @@ router.delete(
   authenticatedAdmin,
   adminController.deleteTweet
 )
-router.get('/tweets', adminController.getTweets)
+router.get(
+  '/tweets',
+  authenticated,
+  authenticatedAdmin,
+  adminController.getTweets
+)
 
 // router.use('/', (req, res) => res.redirect('api/admin/users'))
 
