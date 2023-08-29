@@ -26,7 +26,6 @@ const imgurFileHandler = file => {
 }
 
 
-
 const localFilesHandler = async files => {
   if (!files) return
   const filePromises = files.map(async file => {
