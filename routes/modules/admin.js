@@ -7,6 +7,8 @@ const {
   authenticatedAdmin
 } = require('../../middleware/api-auth')
 
+router.post('/signin', adminController.signIn)
+
 router.get(
   '/users',
   authenticated,
