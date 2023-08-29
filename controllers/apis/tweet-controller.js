@@ -34,6 +34,7 @@ const tweetContorller = {
       }
       const tweets = await Tweet.findAll(options)
       console.log(tweets)
+
       const dataTweets = tweets.map(tweet => ({
         id: tweet.id,
         authorId: tweet.author.id,
