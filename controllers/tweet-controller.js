@@ -55,10 +55,10 @@ const tweetController = {
       Reply.findAll({
         where: { tweetId },
         order: [['createdAt', 'ASC']],
-        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       }),
       Tweet.findByPk(tweetId, {
-        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       })
     ])
       .then(([replies, tweet]) => {
@@ -96,15 +96,15 @@ const tweetController = {
   // 資料格式未確認
   postTweetReply: (req, res, next) => {
     const { tweetId } = req.params
-    const userId = helpers.getUser(req)
+    const userId = helpers.getUser(req).id
     const { comment } = req.body
     return Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) throw new Error('找不到這篇 tweet')
         return Reply.create({
           comment,
-          user_id: userId,
-          tweet_id: tweet.id
+          userId,
+          tweetId
         })
           .then(reply => {
             return res.json({

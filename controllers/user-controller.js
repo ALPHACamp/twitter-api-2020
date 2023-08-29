@@ -168,6 +168,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  // 資料格式未確認
   getUserTweets: (req, res, next) => {
     const { id } = req.params
     return Tweet.findAll({
@@ -175,8 +176,8 @@ const userController = {
       order: [['createdAt', 'DESC']],
       attributes: [
         'id', 'description', 'createdAt', 'updatedAt',
-        [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
-        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
+        [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCount'],
         [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${id} > 0)`), 'isLiked']
       ],
       raw: true,
@@ -189,6 +190,7 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  // 資料格式未確認
   getUserReplies: (req, res, next) => {
     const { id } = req.params
     return Reply.findAll({
