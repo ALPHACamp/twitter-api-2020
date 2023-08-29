@@ -1,5 +1,6 @@
-const { User, Followship } = require('../models')
+const { User, Followship, sequelize } = require('../models')
 const helpers = require('../_helpers')
+const { Op } = require('sequelize')
 
 const followshipController = {
   addFollowing: (req, res, next) => {
@@ -102,6 +103,43 @@ const followshipController = {
     
     .then(() => res.status(200).json({
       status: 'success'
+    }))
+    .catch(err => next(err))
+  },
+  getTopFollow: (req, res, next) => {
+    const DEFAULT_LIMIT = 10
+    const UserId = helpers.getUser(req).id // 登入使用者 ID
+
+    return User.findAll({
+      limit: DEFAULT_LIMIT,
+      attributes: [
+        'id', 'name', 'account', 'avatar',
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE followingId = User.id)'), 'followerCount'],
+        [sequelize.literal(`EXISTS(SELECT true FROM Followships WHERE Followships.followingId = ${UserId} AND Followships.followingId = User.id)`), 'isFollowed']
+      ],
+      where: {
+        id: {
+          [Op.not]: req.user.toJSON().id
+        },
+        role: {
+          [Op.not]: 'admin'
+        }
+      },
+      exclude: [
+            'introduction',
+            'password',
+            'updatedAt',
+            'createdAt'
+      ],
+      // order: [[sequelize.literal('followerCount'), 'DESC'], ['id', 'ASC']],
+      raw: true,
+      nest: true
+    })
+    .then(users => res.status(200).json({
+      status: 'success',
+      data: {
+            usersData: [...users]
+      }
     }))
     .catch(err => next(err))
   }

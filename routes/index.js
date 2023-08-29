@@ -10,7 +10,7 @@ const tweet = require('./modules/tweet')
 const followship = require('./modules/followship')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated } = require('../middleware/api-auth')
-const upload = require('../../middleware/multer')
+const upload = require('../middleware/multer')
 
 // router.use('/admin', authenticated, authenticatedAdmin, admin)
 // admin
@@ -26,7 +26,7 @@ router.get('/users/:id/likes', authenticated, userController.getUserLikes) // �
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings) // 瀏覽某使用者跟隨中的人
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers) // 瀏覽某使用者的跟隨者
 router.get('/users/:id', authenticated, userController.getUserProfile) // 個人資料頁面
-router.put('/:id', authenticatedCurrentUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUserProfile)
+
 
 
 // modules
