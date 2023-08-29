@@ -17,6 +17,7 @@ const tweetController = {
       attributes: [
         'id',
         'description',
+        'UserId',
         [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
         [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
         [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${loginUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
@@ -65,7 +66,7 @@ const tweetController = {
     
     return Tweet.create({
       description,
-      UserId: loginUserId
+      UserId: loginUserId,
     })
 
     .then( tweet => {
@@ -92,6 +93,7 @@ const tweetController = {
         },
       attributes: [
           'id',
+          'UserId',
           'createdAt',
           'description',
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
@@ -120,7 +122,13 @@ const tweetController = {
     const UserId = helpers.getUser(req).id
 
     return Promise.all([
-      Tweet.findByPk(TweetId),
+      Tweet.findByPk(TweetId, {
+        attributes: [
+          'id',
+          'UserId',
+          'createdAt'
+        ]
+      }),
       Like.findOrCreate({ // 陣列第 1 項回傳 true or false`, 沒資料就建立
         where: { UserId, TweetId}
       })
@@ -138,7 +146,8 @@ const tweetController = {
           message: '已表示喜歡'
           })
         }
-        return res.status(200).json({ status: 'success' })
+        
+        return res.status(200).json(tweet)
 
     })
     .catch(err => next(err))
@@ -148,7 +157,13 @@ const tweetController = {
     const UserId = helpers.getUser(req).id
     const TweetId = req.params.id
 
-    Tweet.findByPk(TweetId)
+    Tweet.findByPk(TweetId, {
+      attributes: [
+        'id',
+        'UserId',
+        'createdAt'
+      ]
+    })
       .then(tweet => {
         if (!tweet) {
           return res.status(404).json({
@@ -165,11 +180,9 @@ const tweetController = {
                 message: '未表示喜歡'
               })
             }
-            return res.status(200).json({ status: 'success' })
+            return res.status(200).json(tweet)
           })
-          .catch(err => {
-            next(err)
-          })
+          .catch(err => next(err))
       })
       .catch(err => next(err))
   },
@@ -180,7 +193,7 @@ const tweetController = {
         raw: true,
         nest: true,
         where: { TweetId },
-        attributes: ['id', 'comment', 'createdAt'],
+        attributes: ['id', 'comment', 'createdAt', 'UserId', 'TweetId'],
         include: {
           model: User,
           attributes: ['id', 'avatar', 'account', 'name']
@@ -203,7 +216,7 @@ const tweetController = {
 
     return Tweet.findByPk(TweetId, {
       raw: true,
-      nest: true,
+      nest: true
     })
     .then(tweet => {
       if (!tweet) {

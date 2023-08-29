@@ -55,8 +55,8 @@ const followshipController = {
         followingId
         })
       })
-      .then(() => res.status(200).json({
-        status: 'success'
+      .then((followship) => res.status(200).json({
+        ...followship.toJSON()
       }))
       .catch(err => next(err))
   },
@@ -135,12 +135,9 @@ const followshipController = {
       raw: true,
       nest: true
     })
-    .then(users => res.status(200).json({
-      status: 'success',
-      data: {
-            usersData: [...users]
-      }
-    }))
+    .then(users => res.status(200).json(
+      users
+    ))
     .catch(err => next(err))
   }
 }
