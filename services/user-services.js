@@ -233,6 +233,10 @@ const userServices = {
             'respondentAccount'
           ],
           [
+            sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Reply.userId)'),
+            'respondentAvatar'
+          ],
+          [
             sequelize.literal('(SELECT account FROM Users WHERE Users.id IN (SELECT UserId FROM Tweets WHERE Tweets.id = Reply.tweetId))'),
             'tweeterAccount'
           ],
