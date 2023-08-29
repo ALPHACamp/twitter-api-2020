@@ -9,7 +9,8 @@ const adminController = require('../controllers/admin-controller')
 const tweet = require('./modules/tweet')
 const followship = require('./modules/followship')
 const { apiErrorHandler } = require('../middleware/error-handler')
-const upload = require('../../middleware/multer')
+const upload = require('../middleware/multer')
+
 const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 
 

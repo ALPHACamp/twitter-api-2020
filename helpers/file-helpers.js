@@ -13,6 +13,7 @@ const localFileHandler = file => { // file 是 multer 處理完的檔案
   })
 }
 
+
 const imgurFileHandler = file => {
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null)
@@ -23,6 +24,7 @@ const imgurFileHandler = file => {
     .catch(err => reject(err))
   })
 }
+
 
 const localFilesHandler = async files => {
   if (!files) return
@@ -40,5 +42,5 @@ const localFilesHandler = async files => {
 module.exports = {
   localFileHandler,
   localFilesHandler, // 處理多個檔案
-  imgurFileHandler
+  imgurFileHandler 
 }
