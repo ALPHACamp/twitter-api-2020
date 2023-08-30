@@ -131,12 +131,14 @@ const userController = {
           { where: { id: UserId } }
         )
       } else if (name && (introduction || avatarPath || coverPath)) { // SETTING
+        if (name.length > 50) throw new Error('名稱字數超出上限！')
+        if (introduction.length > 160) throw new Error('自我介紹字數超出上限！')
         // Setting 回傳值(須包含 name + 其他至少一項)
         await User.update({
           name,
           introduction,
-          avatar: avatarPath || null,
-          cover: coverPath || null
+          avatar: avatarPath || 'https://i.imgur.com/uSgVo9G.png',
+          cover: coverPath || 'https://i.imgur.com/7uwf8kO.png'
         },
         { where: { id: UserId } }
         )
