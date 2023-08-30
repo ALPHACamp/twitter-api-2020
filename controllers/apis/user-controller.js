@@ -311,34 +311,33 @@ const userController = {
       const userTweets = await Tweet.findAll({
         where: { userId: id },
         order: [['createdAt', 'DESC']],
-        // attributes:['id','description', [
-        //   sequelize.literal(
-        //     '(SELECT COUNT(DISTINCT id) FROM Like WHERE user_id = User.id)'
-        //   ),
-        //   'totalFollowers'
-        // ],]
         include: [
           {
             model: User,
             as: 'author',
             attributes: { exclude: ['password'] }
+          },
+          {
+            model: Like
+          },
+          {
+            model: Reply,
+            as: 'replies'
           }
-          // {
-          //   model:Like,
-          //   as
-          // }
         ]
       })
-
+      console.log(userTweets)
       const userTweetsData = userTweets.map(tweet => ({
         TweetId: tweet.id,
         tweetBelongerName: tweet.author.name,
         tweetBelongerAccount: tweet.author.account,
         tweetBelongerAvatar: tweet.author.avatar,
-        tweetLikeCount: tweet.likeCount,
-        tweetReplyCount: tweet.replyCount,
+        // tweetLikeCount: tweet.likeCount,
+        // tweetReplyCount: tweet.replyCount,
         description: tweet.description,
-        createdAt: tweet.createdAt
+        createdAt: tweet.createdAt,
+        replyCount: tweet.Likes.length,
+        likeCount: tweet.replies.length
       }))
 
       res.status(200).json(userTweetsData)
@@ -379,14 +378,10 @@ const userController = {
         raw: true,
         nest: true
       })
-
-      const userFollowersData = followers.map(follower => {
-        return {
-          ...follower
-        }
+      followers.forEach(follower => {
+        follower.isFollowed = !!follower.isFollowed
       })
-
-      res.status(200).json(userFollowersData)
+      res.status(200).json(followers)
     } catch (err) {
       next(err)
     }
