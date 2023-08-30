@@ -276,8 +276,7 @@ const userController = {
         [sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.follower_id)'), 'name'],
         [sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.follower_id)'), 'avatar'],
         [sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.follower_id)'), 'introduction']
-      ],
-      through: { attributes: ['createdAt'] }
+      ]
     })
       .then(data => {
         const followers = data.map(follower => ({
@@ -298,8 +297,7 @@ const userController = {
         [sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.following_id)'), 'name'],
         [sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.following_id)'), 'avatar'],
         [sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.following_id)'), 'introduction']
-      ],
-      through: { attributes: ['createdAt'] }
+      ]
     })
       .then(data => {
         const followings = data.map(following => ({

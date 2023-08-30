@@ -14,6 +14,7 @@ const followshipController = {
       .then(([user, followship]) => {
         if (!user) throw new Error('找不到這位使用者')
         if (followship) throw new Error('你已追蹤這位使用者')
+        if (user === followerId) throw new Error('你不能追蹤自己')
         return Followship.create({
           followingId,
           followerId
