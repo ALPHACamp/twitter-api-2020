@@ -418,14 +418,10 @@ const userController = {
         raw: true,
         nest: true
       })
-
-      const userFollowersData = following.map(follower => {
-        return {
-          ...follower
-        }
+      following.forEach(following => {
+        following.isFollowed = !!following.isFollowed
       })
-
-      res.status(200).json(userFollowersData)
+      res.status(200).json(following)
     } catch (err) {
       next(err)
     }
