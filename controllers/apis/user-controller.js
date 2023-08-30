@@ -270,12 +270,21 @@ const userController = {
           {
             model: Tweet,
             as: 'likedTweet',
+            raw: true,
+            nest: true,
             attributes: { exclude: ['password'] },
             include: [
               {
                 model: User,
                 as: 'author',
                 attributes: ['account', 'name', 'avatar']
+              },
+              {
+                model: Like
+              },
+              {
+                model: Reply,
+                as: 'replies'
               }
             ]
           }
@@ -285,16 +294,16 @@ const userController = {
       if (likeTweets.length === 0) {
         throw new Error('the user did not like any tweet')
       }
-
+      console.log(likeTweets)
       const likeTweetsData = likeTweets.map(like => ({
         TweetId: like.likedTweet.id,
         tweetBelongerName: like.likedTweet.author.name,
         tweetBelongerAccount: like.likedTweet.author.account,
         tweetBelongerAvatar: like.likedTweet.author.avatar,
-        tweetLikeCount: like.likedTweet.likeCount,
-        tweetReplyCount: like.likedTweet.replyCount,
         tweetContent: like.likedTweet.description,
-        createdAt: like.createdAt
+        createdAt: like.createdAt,
+        replyCount: like.likedTweet.Likes.length,
+        likeCount: like.likedTweet.replies.length
       }))
 
       res.status(200).json(likeTweetsData)
@@ -332,8 +341,6 @@ const userController = {
         tweetBelongerName: tweet.author.name,
         tweetBelongerAccount: tweet.author.account,
         tweetBelongerAvatar: tweet.author.avatar,
-        // tweetLikeCount: tweet.likeCount,
-        // tweetReplyCount: tweet.replyCount,
         description: tweet.description,
         createdAt: tweet.createdAt,
         replyCount: tweet.Likes.length,
