@@ -28,30 +28,29 @@ const tweetController = {
       return next(err)
     }
   },
-  getTweets: (req, res, next) => {
-    const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
-    Tweet.findAll({
-      include: [
-        { model: User, attributes: { exclude: 'password' } },
-        Like,
-        Reply
-      ],
-      order: [['createdAt', 'DESC']],
-      nest: true
-    })
-      .then(tweets => {
-        const data = tweets.map(tweet => {
-          tweet = tweet.toJSON()
-          tweet.likesCount = tweet.Likes.length
-          tweet.repliesCount = tweet.Replies.length
-          tweet.isLiked = likedTweetsId.includes(tweet.id)
-          delete tweet.Likes
-          delete tweet.Replies
-          return tweet
-        })
-        return res.json(data)
+  getTweets: async (req, res, next) => {
+    try {
+      const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
+      const tweets = await Tweet.findAll({
+        include: { model: User, attributes: { exclude: 'password' } },
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'), 'likesCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`TweetId` = `Tweet`.`id`)'), 'repliesCount']
+          ]
+        },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
-      .catch(err => next(err))
+      const data = tweets.map(tweet => {
+        tweet.isLiked = likedTweetsId.some(id => id === tweet.id)
+        return tweet
+      })
+      return res.json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
   postTweet: async (req, res, next) => {
     try {
