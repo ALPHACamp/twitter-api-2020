@@ -105,6 +105,7 @@ const userServices = {
           'name',
           'avatar',
           'banner',
+          'introduction',
           [
             sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
             'followersCount'
@@ -254,6 +255,18 @@ const userServices = {
           'id',
           'UserId',
           'TweetId',
+          [
+            sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Like.UserId)'),
+            'avatar'
+          ],
+          [
+            sequelize.literal('(SELECT name FROM Users WHERE Users.id = Like.UserId)'),
+            'name'
+          ],
+          [
+            sequelize.literal('(SELECT account FROM Users WHERE Users.id = Like.UserId)'),
+            'account'
+          ],
           [
             sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweetId = Like.TweetId)'),
             'repliesCount'
