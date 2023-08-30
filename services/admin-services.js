@@ -79,6 +79,10 @@ const adminServices = {
             'userName'
           ],
           [
+            sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = userId)'),
+            'userAvatar'
+          ],
+          [
             sequelize.literal('(SELECT account FROM Users WHERE Users.id = userId)'),
             'userAccount'
           ]
