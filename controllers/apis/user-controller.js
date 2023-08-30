@@ -14,8 +14,8 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
 
-      if (!account || !name || !email || !password || !checkPassword) {
-        throw new Error('all the blanks are required')
+      if (!account || !email || !password || !checkPassword) {
+        throw new Error('Please enter account, email, password and checkPassword')
       }
 
       // 檢查帳號是否重複
@@ -31,7 +31,7 @@ const userController = {
       }
 
       const createdUser = await User.create({
-        name,
+        name: name || account,
         email,
         account,
         password: bcrypt.hashSync(password, 10),
