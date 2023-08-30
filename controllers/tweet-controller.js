@@ -1,29 +1,32 @@
 const { Tweet, User, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
+const Sequelize = require('sequelize')
 
 const tweetController = {
-  getTweet: (req, res, next) => {
-    const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
-    Tweet.findByPk(req.params.tweet_id, {
-      include: [User, Like, Reply],
-      nest: true
-    })
-      .then(tweet => {
-        if (!tweet) {
-          const err = new Error('推文不存在！')
-          err.status = 404
-          throw err
-        }
-        tweet = tweet.toJSON()
-        tweet.likesCount = tweet.Likes.length
-        tweet.repliesCount = tweet.Replies.length
-        tweet.isLiked = likedTweetsId.includes(tweet.id)
-        delete tweet.Likes
-        delete tweet.Replies
-        delete tweet.User.password
-        return res.json(tweet)
+  getTweet: async (req, res, next) => {
+    try {
+      const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
+      const tweet = await Tweet.findByPk(req.params.tweet_id, {
+        include: { model: User, attributes: { exclude: 'password' } },
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'), 'likesCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`TweetId` = `Tweet`.`id`)'), 'repliesCount']
+          ]
+        },
+        raw: true,
+        nest: true
       })
-      .catch(err => next(err))
+      if (!tweet) {
+        const err = new Error('推文不存在！')
+        err.status = 404
+        throw err
+      }
+      tweet.isLiked = likedTweetsId.some(id => id === tweet.id)
+      return res.json(tweet)
+    } catch (err) {
+      return next(err)
+    }
   },
   getTweets: (req, res, next) => {
     const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
