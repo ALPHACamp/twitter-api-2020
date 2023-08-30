@@ -125,9 +125,62 @@ const tweetController = {
   },
   addLike: async (req, res, next) => {
     try {
-      const tweetId = req.params.id
+      const tweetId = parseInt(req.params.id)
       const [tweet, like] = await Promise.all([
-        Tweet.findByPk(req.params.id),
+        Tweet.findByPk(req.params.id, {
+          attributes: {
+            include: [
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'
+                ),
+                'likesNum'
+              ]
+            ]
+          },
+          nest: true,
+          raw: true
+        }),
+        Like.findOne({
+          where: {
+            UserId: helpers.getUser(req).id,
+            TweetId: tweetId
+          }
+        })
+      ])
+      if (!tweet) throw new Error('推文已不存在')
+      if (like) throw new Error('你已經按讚過此推文')
+
+      const liked = await Like.create({
+        UserId: helpers.getUser(req).id,
+        TweetId: tweetId
+      })
+      const likedData = liked.toJSON()
+      likedData.likesNum = tweet.likesNum + 1 // 包含現在按的所以+1
+      likedData.isLiked = true
+      return res.status(200).json(likedData)
+    } catch (err) {
+      return next(err)
+    }
+  },
+  removeLike: async (req, res, next) => {
+    try {
+      const tweetId = parseInt(req.params.id)
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(req.params.id, {
+          attributes: {
+            include: [
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'
+                ),
+                'likesNum'
+              ]
+            ]
+          },
+          nest: true,
+          raw: true
+        }),
         Like.findOne({
           where: {
             UserId: helpers.getUser(req).id,
@@ -136,30 +189,12 @@ const tweetController = {
         })
       ])
 
-      if (!tweet) throw new Error('推文已不存在')
-      if (like) throw new Error('你已經按讚過此推文')
-
-      const liked = await Like.create({
-        UserId: helpers.getUser(req).id,
-        TweetId: tweetId
-      })
-      return res.status(200).json(liked)
-    } catch (err) {
-      return next(err)
-    }
-  },
-  removeLike: async (req, res, next) => {
-    try {
-      const like = await Like.findOne({
-        where: {
-          UserId: helpers.getUser(req).id,
-          TweetId: req.params.id
-        }
-      })
-
       if (!like) throw new Error('你尚未按讚此推文')
       const unlike = await like.destroy()
-      return res.status(200).json(unlike)
+      const unlikeData = unlike.toJSON()
+      unlikeData.likesNum = tweet.likesNum - 1 // 包含現在收回的讚所以-1
+      unlikeData.isLiked = false
+      return res.status(200).json(unlikeData)
     } catch (err) {
       return next(err)
     }
