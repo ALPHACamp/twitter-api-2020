@@ -17,8 +17,8 @@ module.exports = {
           description: faker.lorem.text(140),
           created_at: new Date(),
           updated_at: new Date(),
-          like_count: faker.random.number(),
-          reply_count: faker.random.number(),
+          like_count: faker.datatype.number(),
+          reply_count: faker.datatype.number(),
           User_id: userData[i].id
         })
       }
