@@ -23,6 +23,7 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
+      if (!/^[a-zA-Z0-9]+$/.test(account)) throw new Error('帳號只能包含英文字母和數字！')
       if (!name || !account || !email || !password || !checkPassword) throw new Error('所有欄位皆為必填！')
       if (name.length > 50) throw new Error('名稱字數超出上限！')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
@@ -107,7 +108,8 @@ const userController = {
       const avatarPath = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
       const coverPath = req.files?.cover ? await imgurFileHandler(req.files.cover[0]) : null
 
-      if (account && name && email && password && checkPassword) { // EDIT
+      if (account && name && email && password && checkPassword) { // Setting
+        if (!/^[a-zA-Z0-9]+$/.test(account)) throw new Error('帳號只能包含英文字母和數字！')
         if (name.length > 50) throw new Error('名稱字數超出上限！')
         if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
         if (introduction.length > 160) throw new Error('自我介紹字數超出上限！')
@@ -130,7 +132,7 @@ const userController = {
           },
           { where: { id: UserId } }
         )
-      } else if (name && (introduction || avatarPath || coverPath)) { // SETTING
+      } else if (name && (introduction || avatarPath || coverPath)) { // Edit
         if (name.length > 50) throw new Error('名稱字數超出上限！')
         if (introduction.length > 160) throw new Error('自我介紹字數超出上限！')
         // Setting 回傳值(須包含 name + 其他至少一項)
@@ -152,7 +154,7 @@ const userController = {
       })
       return res.json({
         status: 'success',
-        message: account ? 'Edit成功' : 'Setting成功',
+        message: account ? 'Setting成功' : 'Edit成功',
         data: { user: updatedUser.toJSON() }
       })
     } catch (err) {
