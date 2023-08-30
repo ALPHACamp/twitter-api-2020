@@ -14,7 +14,7 @@ router.use('/admin/login', passport.authenticate('local', { session: false }), a
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 router.get('/users/current', authenticated, authenticatedUser, userController.getCurrentUser)
-// router.get('/users/top', authenticated, authenticatedUser, userController)
+router.get('/users/top', authenticated, authenticatedUser, userController.getTopTenUsers)
 router.get('/users/current', authenticated, authenticatedUser, userController.getCurrentUser)
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUserReplies)

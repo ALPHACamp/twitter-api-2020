@@ -5,15 +5,13 @@ const sequelize = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
-// const { link } = require('../app')
-const order = require('eslint-plugin-import/lib/rules/order')
 const userController = {
   login: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' }) // 簽發 JWT，效期為 30 天
-      res.json({
+      return res.json({
         status: 'success',
         token,
         ...userData
@@ -45,7 +43,7 @@ const userController = {
       .then(newUser => {
         newUser = newUser.toJSON()
         delete newUser.password
-        res.json({
+        return res.json({
           status: 'success',
           message: '成功註冊帳號！',
           ...newUser
@@ -68,7 +66,7 @@ const userController = {
         if (!user) throw new Error('使用者不存在！')
         delete user.password
         delete user.role
-        res.json({
+        return res.json({
           status: 'success',
           ...user,
           isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
@@ -91,7 +89,7 @@ const userController = {
         if (!user) throw new Error('使用者不存在！')
         delete user.password
         delete user.role
-        res.json({
+        return res.json({
           status: 'success',
           ...user
         })
@@ -142,7 +140,7 @@ const userController = {
         user = user.toJSON()
         delete user.password
         delete user.role
-        res.json({
+        return res.json({
           status: 'success',
           message: '成功編輯帳號！',
           ...user
@@ -177,7 +175,7 @@ const userController = {
         user = user.toJSON()
         delete user.password
         delete user.role
-        res.json({
+        return res.json({
           status: 'success',
           message: '成功編輯主頁！',
           ...user
@@ -194,19 +192,18 @@ const userController = {
       include: [{
         model: Tweet,
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
-        attributes: {
-          include: [
-            [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweet_id = Tweet.id )'), 'replyCount'],
-            [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id )'), 'likedCount'],
-            [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.user_id = ${currentUserId} > 0)`), 'isLiked']
-          ]
-        }
+        attributes: [
+          'id', 'description', 'createdAt', 'updatedAt',
+          [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweet_id = Tweet.id )'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id )'), 'likedCount'],
+          [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.user_id = ${currentUserId} > 0)`), 'isLiked']
+        ]
       }],
       raw: true,
       nest: true
     })
       .then(likes => {
-        res.json(likes)
+        return res.json(likes)
       })
       .catch(err => next(err))
   },
@@ -249,6 +246,28 @@ const userController = {
         )
       })
       .catch(err => (err))
+  },
+  getTopTenUsers: (req, res, next) => {
+    return User.findAll({
+      attributes: [
+        'id', 'name', 'account', 'avatar',
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount']
+      ],
+      order: [
+        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id)'), 'DESC']
+      ],
+      limit: 10,
+      raw: true,
+      nest: true
+    })
+      .then(users => {
+        users = users.map(user => ({
+          ...user,
+          isFollowed: req.user.Followings.some(f => f.id === user.id)
+        }))
+        return res.json(users)
+      })
+      .catch(err => next(err))
   },
   getFollowers: (req, res, next) => {
     const { id } = req.params
@@ -316,4 +335,3 @@ const userController = {
   }
 }
 module.exports = userController
-
