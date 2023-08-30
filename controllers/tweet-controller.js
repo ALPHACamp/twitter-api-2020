@@ -96,6 +96,7 @@ const tweetController = {
     const { tweetId } = req.params
     const userId = helpers.getUser(req).id
     const { comment } = req.body
+    if (!comment) throw new Error('留言不得為空白')
     return Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) throw new Error('找不到這篇 tweet')
