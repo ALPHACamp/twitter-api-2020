@@ -384,13 +384,16 @@ const userController = {
   getTopUsers: async (req, res, next) => {
     try {
       const topNumber = Number(req.query.top)
+      const currentUser = helpers.getUser(req).id // 目前登入者的id
       const followings = helpers.getUser(req).Followings // 目前登入者的追蹤資料
       const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
       // 取User(引入Followers)
       const users = await User.findAll({
-        attributes: ['id', 'account', 'name', 'avatar', 'role'],
-        include: [{ model: User, as: 'Followers', attributes: ['id', 'account'] }],
-        raw: true
+        where: {
+          id: { [sequelize.Op.ne]: currentUser }, role: 'user'// 比對userid非本人 且role為user
+        },
+        attributes: { exclude: 'password' },
+        include: { model: User, as: 'Followers' }
       })
       if (!users) {
         const err = new Error('不存在使用者')
@@ -398,7 +401,6 @@ const userController = {
         throw err
       }
       const data = users
-        .filter(user => user.role === 'user') // 過濾admin
         .map(user => ({
           id: user.id,
           account: user.account,
