@@ -21,7 +21,7 @@ const userController = {
     ])
       .then(([userA, userB]) => {
         if (userA) throw new Error('email已重複註冊！')
-        if (userB) throw new Error('account已重複註冊！')
+        if (userB) throw new Error('帳號已重複註冊！')
         return bcrypt.hash(password, 10)
       })
       .then(hash => User.create({
@@ -243,7 +243,7 @@ const userController = {
         if (account.length > 30) throw new Error('帳號字數超出上限！')
         if (userA.account !== account) {
           const userC = await User.findOne({ where: { account } })
-          if (userC) throw new Error('account已重複註冊！')
+          if (userC) throw new Error('帳號已重複註冊！')
         }
       }
       let updatedUser = await userA.update({
