@@ -105,6 +105,7 @@ const userServices = {
           'name',
           'avatar',
           'banner',
+          'introduction',
           [
             sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
             'followersCount'
