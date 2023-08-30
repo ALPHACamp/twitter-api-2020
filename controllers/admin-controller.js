@@ -1,4 +1,4 @@
-const { Tweet, User } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 const sequelize = require('sequelize')
 
 const adminController = {
@@ -30,7 +30,7 @@ const adminController = {
         [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.follower_id = User.id)'), 'followingCount'],
         [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount'],
         [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.user_id = User.id)'), 'followerCount'],
-        [sequelize.literal('(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.tweet_id WHERE tweets.user_id = User.id)'), 'tweetLikeCount']
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.tweet_id WHERE Tweets.user_id = User.id)'), 'tweetLikeCount']
       ],
       order: [
         [sequelize.literal('tweetCount'), 'DESC']
@@ -40,6 +40,29 @@ const adminController = {
     })
       .then(users => {
         return res.json(users)
+      })
+      .catch(err => next(err))
+  },
+  deleteTweet: (req, res, next) => {
+    const id = req.params.id
+    Tweet.findByPk(id)
+      .then(tweet => {
+        if (!tweet) throw new Error('推文不存在！')
+        return Promise.all([
+          tweet.destroy(),
+          Like.destroy({
+            where: { tweetId: id }
+          }),
+          Reply.destroy({
+            where: { tweetId: id }
+          })
+        ])
+      })
+      .then(() => {
+        return res.json({
+          status: 'success',
+          message: '成功刪除此貼文'
+        })
       })
       .catch(err => next(err))
   }
