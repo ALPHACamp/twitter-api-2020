@@ -378,10 +378,12 @@ const userController = {
         raw: true,
         nest: true
       })
-      followers.forEach(follower => {
-        follower.isFollowed = !!follower.isFollowed
-      })
-      res.status(200).json(followers)
+      const followersData = followers.map(item => ({
+        ...item,
+        isFollowed: item.isFollowed === 1
+      }))
+
+      res.status(200).json(followersData)
     } catch (err) {
       next(err)
     }
@@ -418,10 +420,13 @@ const userController = {
         raw: true,
         nest: true
       })
-      following.forEach(following => {
-        following.isFollowed = !!following.isFollowed
-      })
-      res.status(200).json(following)
+
+      const followings = following.map(item => ({
+        ...item,
+        isFollowed: item.isFollowed === 1
+      }))
+      console.log(followings)
+      res.status(200).json(followings)
     } catch (err) {
       next(err)
     }
