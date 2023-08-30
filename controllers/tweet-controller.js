@@ -107,24 +107,23 @@ const tweetController = {
       return next(err)
     }
   },
-  likeTweet: (req, res, next) => {
-    const UserId = helpers.getUser(req).id
-    const TweetId = req.params.id
-    Promise.all([
-      Like.findOne({ where: { TweetId, UserId } }),
-      Tweet.findByPk(TweetId)
-    ])
-      .then(([like, tweet]) => {
-        if (!tweet) {
-          const err = new Error('推文不存在！')
-          err.status = 404
-          throw err
-        }
-        if (like) throw new Error('已經按過讚了！')
-        return Like.create({ UserId, TweetId })
-      })
-      .then(newLike => res.json({ status: 'success', data: { like: newLike } }))
-      .catch(err => next(err))
+  likeTweet: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
+        const err = new Error('推文不存在！')
+        err.status = 404
+        throw err
+      }
+      const like = await Like.findOne({ where: { UserId, TweetId } })
+      if (like) throw new Error('已經按過讚了！')
+      const newLike = await Like.create({ UserId, TweetId })
+      return res.json({ status: 'success', data: { like: newLike } })
+    } catch (err) {
+      return next(err)
+    }
   },
   unlikeTweet: (req, res, next) => {
     const TweetId = req.params.id
