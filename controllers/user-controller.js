@@ -102,7 +102,7 @@ const userController = {
     const { account, name, email, password, checkPassword } = req.body
     if (!account || !email || !name) throw new Error('帳戶、暱稱和信箱不得為空！')
     if (password !== checkPassword) throw new Error('密碼不相符！')
-    if (name.length > 50) throw new Error('超過暱稱字數上限 50 字！')
+    if (name.length > 50) throw new Error('字數超出上限！')
     return User.findByPk(id)
       .then(async user => {
         if (!user) throw new Error('使用者不存在！')
@@ -127,8 +127,8 @@ const userController = {
         return [user1, user2, user]
       })
       .then(([user1, user2, user]) => {
-        if (user1) throw new Error('account 已存在！')
-        if (user2) throw new Error('email 已存在！')
+        if (user1) throw new Error('account 已重複註冊！')
+        if (user2) throw new Error('email 已重複註冊！')
         return user.update({
           account,
           name,
@@ -153,8 +153,8 @@ const userController = {
     if (Number(id) !== Number(helpers.getUser(req).id)) throw new Error('只能編輯本人主頁資料！')
     const { name, introduction } = req.body
     if (!name) throw new Error('暱稱不得為空！')
-    if (name.length > 50) throw new Error('超過暱稱字數上限 50 字！')
-    if (introduction.length > 160) throw new Error('超過自介自數上限 160 字！')
+    if (name.length > 50) throw new Error('字數超出上限！')
+    if (introduction.length > 160) throw new Error('字數超出上限！')
     const avatarFile = req.files?.avatar ? req.files.avatar[0] : null
     const coverFile = req.files?.cover ? req.files.cover[0] : null
     return Promise.all([
@@ -194,17 +194,15 @@ const userController = {
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
         attributes: [
           'id', 'description', 'createdAt', 'updatedAt',
-          [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweet_id = Tweet.id )'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id )'), 'likedCount'],
+          [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.tweet_id = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.tweet_id = Tweet.id)'), 'likedCount'],
           [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.user_id = ${currentUserId} > 0)`), 'isLiked']
         ]
       }],
       raw: true,
       nest: true
     })
-      .then(likes => {
-        return res.json(likes)
-      })
+      .then(likes => res.json(likes))
       .catch(err => next(err))
   },
   // 資料格式未確認
@@ -255,7 +253,7 @@ const userController = {
         [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id)'), 'followerCount']
       ],
       order: [
-        [sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.following_id = User.id)'), 'DESC']
+        [sequelize.literal('followerCount'), 'DESC']
       ],
       limit: 10,
       raw: true,
