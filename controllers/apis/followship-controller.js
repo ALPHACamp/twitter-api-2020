@@ -9,18 +9,21 @@ const followshipController = {
       const followingId = req.body.id
       const getUser = helpers.getUser(req)
       const userId = getUser.id
-      const [user, followship] = await Promise.all([
-        User.findByPk(userId),
-        Followship.findOne({
-          where: { followerId: userId, followingId }
-        })
-      ])
+      const user = await User.findByPk(userId)
       if (!user) throw new Error("User didn't exist!")
-      if (followship) throw new Error("You've are already followed this user!")
-      Followship.create({
-        followerId: userId,
-        followingId
+      const followship = await Followship.findOrCreate({
+        raw: true,
+        nest: true,
+        where: {
+          followerId: userId,
+          followingId
+        }
       })
+
+      if (!followship[1]) {
+        throw new Error("You've are already followed this user!")
+      }
+      console.log(followship)
       res.status(200).json({
         status: 'success',
         message: 'successfully follow user!'

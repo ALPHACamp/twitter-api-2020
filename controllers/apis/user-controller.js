@@ -263,33 +263,6 @@ const userController = {
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
 
-      // const likeTweets = await Like.findAll({
-      //   where: { userId: id },
-      //   order: [["createdAt", "DESC"]],
-      //   include: [
-      //     {
-      //       model: Tweet,
-      //       as: "likedTweet",
-      //       raw: true,
-      //       nest: true,
-      //       attributes: { exclude: ["password"] },
-      //       include: [
-      //         {
-      //           model: User,
-      //           as: "author",
-      //           attributes: ["account", "name", "avatar"],
-      //         },
-      //         {
-      //           model: Like,
-      //         },
-      //         {
-      //           model: Reply,
-      //           as: "replies",
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // });
       const likedTweets = await Tweet.findAll({
         where: { userId: id },
         order: [['createdAt', 'DESC']],
