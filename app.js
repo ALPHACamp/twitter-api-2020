@@ -27,14 +27,12 @@ const corsOptions = {
     'https://kotjy.github.io/ac-twitter',
     'https://kotjy.github.io'
 
- 
-
   ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: ['Content-Type', 'Authorization']
 }
 
-app.use(cors(corsOptions))
+app.use(cors())
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -43,7 +41,7 @@ app.use(passport.initialize()) // 初始化 Passport
 app.use(passport.session()) // 啟動Passport 存入session
 
 app.use('/api', apis)
-app.get('/', (req, res) => res.send('Hello World!'))
+app.get('/', (req, res) => res.send('API server started!'))
 // app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 app.listen(port, () => console.log(`http://localhost:${port}`))
 module.exports = app
