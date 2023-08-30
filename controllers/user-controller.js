@@ -257,7 +257,8 @@ const userController = {
       include: [{
         model: User,
         as: 'Followers',
-        attributes: ['id', 'name', 'avatar', 'introduction']
+        attributes: ['id', 'name', 'avatar', 'introduction'],
+        through: { attributes: ['createdAt'] }
       }],
       attributes: [
         'id', 'name',
@@ -288,7 +289,8 @@ const userController = {
       include: [{
         model: User,
         as: 'Followings',
-        attributes: ['id', 'name', 'avatar', 'introduction']
+        attributes: ['id', 'name', 'avatar', 'introduction'],
+        through: { attributes: ['createdAt'] }
       }],
       attributes: [
         'id', 'name',
