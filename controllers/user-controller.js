@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 
 const { User, Tweet, Like, Reply, Followship } = require('../models')
 const { Op } = require('sequelize')
+const Sequelize = require('sequelize')
 const { imgurFileHandler } = require('../helpers/file-handler')
 const helpers = require('../_helpers')
 
@@ -21,7 +22,7 @@ const userController = {
     ])
       .then(([userA, userB]) => {
         if (userA) throw new Error('email已重複註冊！')
-        if (userB) throw new Error('account已重複註冊！')
+        if (userB) throw new Error('帳號已重複註冊！')
         return bcrypt.hash(password, 10)
       })
       .then(hash => User.create({
@@ -239,7 +240,7 @@ const userController = {
         if (account.length > 30) throw new Error('帳號字數超出上限！')
         if (userA.account !== account) {
           const userC = await User.findOne({ where: { account } })
-          if (userC) throw new Error('account已重複註冊！')
+          if (userC) throw new Error('帳號已重複註冊！')
         }
       }
       let updatedUser = await userA.update({
@@ -313,27 +314,27 @@ const userController = {
       return next(err)
     }
   },
-  getTopUser: (req, res, next) => {
-    const followingsId = helpers.getUser(req).Followings.map(f => f.id)
-    const excludeId = followingsId.concat(helpers.getUser(req).id)
-    User.findAll({
-      where: { id: { [Op.notIn]: excludeId }, role: 'user' },
-      attributes: { exclude: 'password' },
-      include: { model: User, as: 'Followers' }
-    })
-      .then(users => {
-        const data = users.map(user => {
-          user = user.toJSON()
-          user.followersCount = user.Followers.length
-          user.isFollowed = followingsId.some(id => id === user.id)
-          delete user.Followers
-          return user
-        })
-          .sort((a, b) => b.followersCount - a.followersCount)
-          .slice(0, 10)
-        return res.json(data)
+  getTopUser: async (req, res, next) => {
+    try {
+      const followingsId = helpers.getUser(req).Followings.map(f => f.id)
+      const users = await User.findAll({
+        raw: true,
+        where: { id: { [Op.ne]: helpers.getUser(req).id }, role: 'user' },
+        attributes: {
+          exclude: ['password'],
+          include: [[Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount']],
+          order: [['followersCount', 'DESC']],
+          limit: 10
+        }
       })
-      .catch(err => next(err))
+      const data = users.map(u => {
+        u.isFollowed = followingsId.some(id => id === u.id)
+        return u
+      })
+      return res.json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
   getAuth: (req, res, next) => {
     helpers.getUser(req) ? res.json({ status: 'success', message: `User role is ${helpers.getUser(req).role}` }) : res.status(401).json({ status: 'error', message: 'unauthorized' })
