@@ -54,7 +54,7 @@ const tweetController = {
     Promise.all([
       Reply.findAll({
         where: { tweetId },
-        order: [['createdAt', 'ASC']],
+        order: [['createdAt', 'DESC']],
         include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       }),
       Tweet.findByPk(tweetId, {
