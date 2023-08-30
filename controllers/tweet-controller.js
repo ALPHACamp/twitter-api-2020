@@ -75,6 +75,7 @@ const tweetController = {
       }))
       const data = {
         ...tweet.toJSON(),
+        createdAt: relativeTimeFromNow(tweet.createdAt), // 提供推文modal需要的相對時間格式
         createdAtDate: formatDate(tweet.createdAt), // 提供推文需要的日期格式
         createdAtTime: formatTime(tweet.createdAt), // 提供推文需要的時間格式
         Replies: repliesData,
