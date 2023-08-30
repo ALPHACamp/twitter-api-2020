@@ -218,10 +218,13 @@ const userController = {
       }
       if (password) password = await bcrypt.hash(password, 10)
       const userA = await User.findByPk(req.params.id, {
-        include: [
-          { model: User, as: 'Followings' },
-          { model: User, as: 'Followers' }
-        ]
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followerId` = `User`.`id`)'), 'followingsCount']
+          ]
+        }
       })
       if (!userA) {
         const err = new Error('使用者不存在！')
@@ -253,11 +256,6 @@ const userController = {
         banner: banner || userA.banner
       })
       updatedUser = updatedUser.toJSON()
-      updatedUser.tweetsCount = await Tweet.count({ where: { UserId: req.params.id } })
-      updatedUser.followersCount = updatedUser.Followers.length
-      updatedUser.followingsCount = updatedUser.Followings.length
-      delete updatedUser.Followers
-      delete updatedUser.Followings
       delete updatedUser.password
       return res.json({ status: 'success', data: { user: updatedUser } })
     } catch (err) {
