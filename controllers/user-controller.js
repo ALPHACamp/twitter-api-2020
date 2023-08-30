@@ -207,7 +207,6 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  // 資料格式未確認
   getUserTweets: (req, res, next) => {
     const { id } = req.params
     return Tweet.findAll({
@@ -270,29 +269,67 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  // 未完成
   getFollowers: (req, res, next) => {
     const { id } = req.params
-    // const user = helpers.getUser(req)
+    const user = helpers.getUser(req)
     User.findByPk(id, {
       include: [{
         model: User,
         as: 'Followers',
-        attributes: ['id', 'name', 'avatar', 'introduction']
+        attributes: ['id', 'name', 'avatar', 'introduction'],
+        through: { attributes: ['createdAt'] }
       }],
       attributes: [
-        'id',
-        [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.user_id = User.id)'), 'postCount']
-      ],
-      raw: true,
-      nest: true
+        'id', 'name',
+        [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetCount']
+      ]
     })
-      .then(userWithFollowers => {
-        // followers = followers.map(follower => ({
-        //   ...follower,
-        //   isFollowed: user.Followings.some(f => f.id === follower.id)
-        // }))
-        return res.json(userWithFollowers)
+      .then(data => {
+        const followerData = data.Followers
+        const userData = {
+          id: data.id,
+          name: data.name,
+          tweetCount: data.dataValues.tweetCount,
+          followers: followerData
+            .map(follower => ({
+              ...follower.toJSON(),
+              isFollowed: user.Followings.some(f => f.id === follower.id)
+            }))
+            .sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
+        }
+        return res.json(userData)
+      })
+      .catch(err => next(err))
+  },
+  getFollowings: (req, res, next) => {
+    const { id } = req.params
+    const user = helpers.getUser(req)
+    User.findByPk(id, {
+      include: [{
+        model: User,
+        as: 'Followings',
+        attributes: ['id', 'name', 'avatar', 'introduction'],
+        through: { attributes: ['createdAt'] }
+      }],
+      attributes: [
+        'id', 'name',
+        [sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE Tweets.User_id = User.id)'), 'tweetCount']
+      ]
+    })
+      .then(data => {
+        const followingData = data.Followings
+        const userData = {
+          id: data.id,
+          name: data.name,
+          tweetCount: data.dataValues.tweetCount,
+          followings: followingData
+            .map(following => ({
+              ...following.toJSON(),
+              isFollowed: user.Followings.some(f => f.id === following.id)
+            }))
+            .sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
+        }
+        return res.json(userData)
       })
       .catch(err => next(err))
   }
