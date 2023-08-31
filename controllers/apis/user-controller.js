@@ -132,7 +132,7 @@ const userController = {
       next(err)
     }
   },
-  getUserReplies: async (req, res, next) => {
+  getUserRepliedTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
 
@@ -156,6 +156,9 @@ const userController = {
           ],
           order: [['createdAt', 'DESC']],
           nest: true
+        }),
+        Like.findAll({
+          where: { userId }
         })
       ])
 
@@ -265,24 +268,25 @@ const userController = {
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
 
-      const likedTweets = await Tweet.findAll({
-        where: { userId: id },
-        order: [['createdAt', 'DESC']],
-        include: [
-          {
-            model: User,
-            as: 'author',
-            attributes: { exclude: ['password'] }
-          },
-          {
-            model: Like
-          },
-          {
-            model: Reply,
-            as: 'replies'
-          }
-        ]
-      })
+      const [likedTweets, likeCount, replyCount] = await Promise.all([
+        Tweet.findAll({
+          where: { userId: id },
+          order: [['createdAt', 'DESC']],
+          include: [
+            {
+              model: User,
+              as: 'author',
+              attributes: { exclude: ['password'] }
+            }
+          ]
+        }),
+        Like.findAll({
+          where: { userId: id }
+        }),
+        Reply.findAll({
+          where: { userId: id }
+        })
+      ])
       if (likedTweets.length === 0) {
         throw new Error('the user did not like any tweet')
       }
@@ -294,8 +298,8 @@ const userController = {
         tweetBelongerAvatar: tweet.author.avatar,
         tweetContent: tweet.description,
         createdAt: tweet.createdAt,
-        replyCount: tweet.Likes.length,
-        likeCount: tweet.replies.length
+        replyCount: replyCount.length,
+        likeCount: likeCount.length
       }))
       res.status(200).json(likedTweetsData)
     } catch (err) {
@@ -308,24 +312,25 @@ const userController = {
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
 
-      const userTweets = await Tweet.findAll({
-        where: { userId: id },
-        order: [['createdAt', 'DESC']],
-        include: [
-          {
-            model: User,
-            as: 'author',
-            attributes: { exclude: ['password'] }
-          },
-          {
-            model: Like
-          },
-          {
-            model: Reply,
-            as: 'replies'
-          }
-        ]
-      })
+      const [userTweets, likeCount, replyCount] = await Promise.all([
+        Tweet.findAll({
+          where: { userId: id },
+          order: [['createdAt', 'DESC']],
+          include: [
+            {
+              model: User,
+              as: 'author',
+              attributes: { exclude: ['password'] }
+            }
+          ]
+        }),
+        Like.findAll({
+          where: { userId: id }
+        }),
+        Reply.findAll({
+          where: { userId: id }
+        })
+      ])
       console.log(userTweets)
       const userTweetsData = userTweets.map(tweet => ({
         TweetId: tweet.id,
@@ -334,8 +339,8 @@ const userController = {
         tweetBelongerAvatar: tweet.author.avatar,
         description: tweet.description,
         createdAt: tweet.createdAt,
-        replyCount: tweet.Likes.length,
-        likeCount: tweet.replies.length
+        replyCount: replyCount.length,
+        likeCount: likeCount.length
       }))
 
       res.status(200).json(userTweetsData)
