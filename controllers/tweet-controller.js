@@ -75,32 +75,28 @@ const tweetController = {
       })
       .catch(err => next(err))
   },
-  postTweet: async (req, res, next) => {
+  postTweet: (req, res, next) => {
     const { description } = req.body
     const userId = helpers.getUser(req).id
-    try {
-      if (!description) throw new Error('你沒有輸入任何內容')
-      if (!description.trim()) throw new Error('內容不可為空白')
-      if (description.length > 140) throw new Error('內容不可超過 140 字')
-      return Tweet.create({
-        description,
-        userId
-      })
-        .then(tweet => {
-          return res.json({
-            status: 'success',
-            message: '成功發出貼文',
-            tweet
-          })
+    if (!description) throw new Error('內容不可空白')
+    if (description.length > 140) throw new Error('內容不可超過 140 字')
+    return Tweet.create({
+      description,
+      userId
+    })
+      .then(tweet => {
+        return res.json({
+          status: 'success',
+          tweet
         })
-    } catch (err) { next(err) }
+      })
+      .catch(err => next(err))
   },
   postTweetReply: (req, res, next) => {
     const { tweetId } = req.params
     const userId = helpers.getUser(req).id
     const { comment } = req.body
-    if (!comment) throw new Error('你沒有輸入任何內容')
-    if (!comment.trim()) throw new Error('留言不得為空白')
+    if (!comment) throw new Error('留言不得為空白')
     return Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) throw new Error('找不到這篇 tweet')
