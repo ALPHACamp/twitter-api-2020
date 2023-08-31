@@ -203,10 +203,17 @@ const tweetController = {
     try {
       const replies = await Reply.findAll({
         where: { TweetId: req.params.id },
+        order: [['createdAt', 'DESC']],
         include: [{
           model: User,
           attributes: ['account', 'name', 'avatar']
-        }]
+        }],
+        attributes: {
+          include: [[
+            sequelize.literal('(SELECT account FROM Users JOIN Tweets ON Tweets.UserId = Users.id WHERE TweetId = Tweets.id)'),
+            'repliedTo' // 回覆給那一個作者
+          ]]
+        }
       })
 
       const repliesData = replies.map(reply => ({
