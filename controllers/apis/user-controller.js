@@ -287,9 +287,8 @@ const userController = {
           where: { userId: id }
         })
       ])
-      if (likedTweets.length === 0) {
-        throw new Error('the user did not like any tweet')
-      }
+      if (likedTweets.length === 0) return res.status(200).json({ status: 'success', message: 'No likes' })
+      
       console.log(likedTweets)
       const likedTweetsData = likedTweets.map(tweet => ({
         TweetId: tweet.id,
@@ -391,7 +390,8 @@ const userController = {
         followerAccount: follower.account,
         followerName: follower.name,
         followerAvatar: follower.avatar,
-        isFollowed: followingIds.includes(follower.id)
+        isFollowed: followingIds.includes(follower.id),
+        follower
       }))
 
       res.status(200).json(followersData)
@@ -425,7 +425,8 @@ const userController = {
         followingAccount: following.account,
         followingName: following.name,
         followingAvatar: following.avatar,
-        isFollowed: followingIds.includes(following.id)
+        isFollowed: followingIds.includes(following.id),
+        following
       }))
 
       res.status(200).json(followingsData)
