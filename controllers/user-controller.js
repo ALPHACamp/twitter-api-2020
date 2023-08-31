@@ -277,14 +277,14 @@ const userController = {
         [sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.follower_id)'), 'name'],
         [sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.follower_id)'), 'avatar'],
         [sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.follower_id)'), 'introduction']
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(data => {
         const followers = data.map(follower => ({
           ...follower.toJSON(),
           isFollowed: user.Followings.some(f => f.id === follower.followerId)
         }))
-        followers.sort((a, b) => b.createdAt - a.createdAt)
         return res.json(followers)
       })
       .catch(err => next(err))
@@ -298,14 +298,14 @@ const userController = {
         [sequelize.literal('(SELECT name FROM Users WHERE Users.id = Followship.following_id)'), 'name'],
         [sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Followship.following_id)'), 'avatar'],
         [sequelize.literal('(SELECT introduction FROM Users WHERE Users.id = Followship.following_id)'), 'introduction']
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(data => {
         const followings = data.map(following => ({
           ...following.toJSON(),
           isFollowed: user.Followings.some(f => f.id === following.followingId)
         }))
-        followings.sort((a, b) => b.createdAt - a.createdAt)
         return res.json(followings)
       })
       .catch(err => next(err))

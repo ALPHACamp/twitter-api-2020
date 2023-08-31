@@ -3,8 +3,8 @@ const helpers = require('../_helpers')
 
 const followshipController = {
   addFollowing: (req, res, next) => {
-    const followingId = req.body.id
-    const followerId = helpers.getUser(req).id
+    const followingId = req.body.id // 要被追蹤的人
+    const followerId = helpers.getUser(req).id // 要去追蹤的人（登入者）
     Promise.all([
       User.findByPk(followerId),
       Followship.findOne({
