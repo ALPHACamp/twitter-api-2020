@@ -1,12 +1,11 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
 const jwt = require('jsonwebtoken')
-const { localFilesHandler } = require('../helpers/file-helpers')
 const { User, Followship, Tweet, Reply, Like } = require('../models')
 const dayjs = require('dayjs')
 const utc = require('dayjs/plugin/utc') // 引入 UTC 套件
 const timezone = require('dayjs/plugin/timezone') // 引入時區套件
 const helper = require('../_helpers')
-
+const { Op } = require('sequelize')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 dayjs.extend(utc) // 使用 UTC 套件
@@ -309,8 +308,8 @@ const userController = {
     if (introduction.length > 160) throw new Error('自我介紹字數超出上限!')
     // 以下三行是為了因應測試檔所做的改動，先確認files有東西，並將裡面的東西放進fileHandlers陣列裡，在Promise.all中展開使用
     const fileHandlers = []
-    if (files && files.avatar) fileHandlers.push(localFilesHandler(files.avatar)) // 處理 avatar 的檔案
-    if (files && files.banner) fileHandlers.push(localFilesHandler(files.banner)) // 處理 banner 的檔案
+    if (files && files.avatar) fileHandlers.push(imgurFileHandler(files.avatar[0])) // 處理 avatar 的檔案
+    if (files && files.banner) fileHandlers.push(imgurFileHandler(files.banner[0])) // 處理 banner 的檔案
     return Promise.all([
       User.findByPk(paramsUserId),
       ...fileHandlers
@@ -320,8 +319,8 @@ const userController = {
         return user.update({
           name: name || user.name,
           introduction: introduction,
-          avatar: avatarFilePath ? avatarFilePath[0] : user.avatar,
-          banner: bannerFilePath ? bannerFilePath[0] : user.banner
+          avatar: avatarFilePath || user.avatar,
+          banner: bannerFilePath || user.banner
         })
       })
       .then(() => {
@@ -362,6 +361,7 @@ const userController = {
       throw err
     }
     if (!account || !account.trim()) throw new Error('帳號是必須的！')
+    if (!password || !password.trim() || !checkPassword || !checkPassword.trim()) throw new Error('密碼是必須的！')
     if (!name || !name.trim()) throw new Error('名稱是必須的！')
     if (name.length > 50) throw new Error('名稱字數超出上限!')
     if (!email || !email.trim()) throw new Error('email是必須的!')
@@ -369,14 +369,28 @@ const userController = {
     let updateData = {}
     // 查找是否有該帳戶或email
     Promise.all([
-      User.findOne({ where: { account: account } }),
-      User.findOne({ where: { email: email } }),
+      User.findOne({
+        where: {
+          [Op.or]: [
+            { account: account },
+            { email: email }
+          ],
+          id: {
+            [Op.ne]: paramsUserId
+          }
+        }
+      }),
       bcrypt.hash(password, 10)
     ])
-      .then(([checkAccount, checkEmail, hash]) => {
+      .then(([existingUser, hash]) => {
         // 如果有一樣的account或email，丟錯告知前端
-        if (checkAccount) throw new Error('account 已重複註冊！')
-        if (checkEmail) throw new Error('email 已重複註冊！')
+        if (existingUser) {
+          if (existingUser.account === account) {
+            throw new Error('該account 已有人使用！')
+          } else if (existingUser.email === email) {
+            throw new Error('該email 已有人使用！')
+          }
+        }
         // 如果檢查ok，將使用者要更新的資料存進updateData
         updateData = {
           email: email,
