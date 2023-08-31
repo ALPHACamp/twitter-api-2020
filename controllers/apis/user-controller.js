@@ -311,11 +311,32 @@ const userController = {
       const { id } = req.params
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
-
-      const [userTweets, likeCount, replyCount] = await Promise.all([
+      const [userTweets] = await Promise.all([
         Tweet.findAll({
           where: { userId: id },
           order: [['createdAt', 'DESC']],
+          attributes: [
+            'id',
+            'description',
+            'createdAt',
+            'updatedAt',
+            [
+              sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM Likes
+            WHERE Likes.tweet_id = tweet.id
+          )`),
+              'likeCount'
+            ],
+            [
+              sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM Replies
+            WHERE Replies.tweet_id = tweet.id
+          )`),
+              'replyCount'
+            ]
+          ],
           include: [
             {
               model: User,
@@ -323,12 +344,6 @@ const userController = {
               attributes: { exclude: ['password'] }
             }
           ]
-        }),
-        Like.findAll({
-          where: { userId: id }
-        }),
-        Reply.findAll({
-          where: { userId: id }
         })
       ])
       console.log(userTweets)
@@ -339,8 +354,8 @@ const userController = {
         tweetBelongerAvatar: tweet.author.avatar,
         description: tweet.description,
         createdAt: tweet.createdAt,
-        replyCount: replyCount.length,
-        likeCount: likeCount.length
+        replyCount: 999,
+        likeCount: 999
       }))
 
       res.status(200).json(userTweetsData)
