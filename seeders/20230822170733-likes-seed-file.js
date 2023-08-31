@@ -1,5 +1,5 @@
 'use strict'
-const NumOfLikePerUser = 20 // 每個User隨機產生Like數
+const NumOfLikePerUser = 2 // 每個User隨機產生Like數
 
 const { QueryTypes } = require('sequelize')
 

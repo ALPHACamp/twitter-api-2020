@@ -1,5 +1,5 @@
 'use strict'
-const NumOfFollowingPerUser = 8 // 每個User隨機產生Follow數
+const NumOfFollowingPerUser = 2 // 每個User隨機產生Follow數
 
 const { QueryTypes } = require('sequelize')
 
