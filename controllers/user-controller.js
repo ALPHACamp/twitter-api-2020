@@ -95,6 +95,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const UserId = req.params.id
+      const currentUserId = helpers.getUser(req).id
 
       // --資料提取--
       const user = await User.findByPk(UserId, {
@@ -109,11 +110,15 @@ const userController = {
           ], [
             sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE followingId = ${UserId})`),
             'followersNum' // 追蹤者總數
+          ], [
+            sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${currentUserId} AND followingId = ${UserId})`),
+            'isFollowed'
           ]]
         }
       })
 
       if (!user) throw new Error('使用者讀取失敗')
+      if (user.isFollowed) { user.isFollowed = true } else { user.isFollowed = false }
 
       return res.status(200).json(user)
     } catch (err) {
