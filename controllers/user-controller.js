@@ -388,7 +388,7 @@ const userController = {
       const topNumber = Number(req.query.top)
       const currentUser = helpers.getUser(req).id // 目前登入者的id
       const followings = helpers.getUser(req).Followings // 目前登入者的追蹤資料
-      const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
+      const currentUserFollowing = followings.map(f => f.id) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
       // 取User(引入Followers)
       const users = await User.findAll({
         where: {
