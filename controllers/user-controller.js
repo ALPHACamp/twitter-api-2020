@@ -284,7 +284,7 @@ const userController = {
           ...follower.toJSON(),
           isFollowed: user.Followings.some(f => f.id === follower.followerId)
         }))
-        followers.sort((a, b) => b.createdAt - a.createdAt)
+          .sort((a, b) => b.createdAt - a.createdAt)
         return res.json(followers)
       })
       .catch(err => next(err))
