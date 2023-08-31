@@ -100,7 +100,7 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      const likedTweetsId = helpers.getUser(req).Likes.map(l => l.TweetId)
+      const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
 
       const user = await User.findByPk(UserId)
       if (!user) {
@@ -163,7 +163,7 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      const likedTweetsId = helpers.getUser(req).Likes.map(l => l.TweetId)
+      const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
 
       const user = await User.findByPk(UserId)
       if (!user) {
