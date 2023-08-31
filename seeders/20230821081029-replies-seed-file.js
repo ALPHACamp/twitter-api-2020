@@ -22,7 +22,7 @@ module.exports = {
         const tweet = {
           Tweet_id: tweetData[Math.floor(i / 3)].id,
           User_id: userData[Math.floor(Math.random() * userData.length)].id,
-          comment: faker.lorem.text(),
+          comment: faker.lorem.text(20),
           created_at: new Date(),
           updated_at: new Date()
         }
