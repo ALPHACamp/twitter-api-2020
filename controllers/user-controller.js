@@ -42,7 +42,7 @@ const userController = {
       .catch(err => next(err))
   },
   signIn: (req, res, next) => {
-    const userData = helpers.getUser(req).toJSON()
+    const userData = helpers.getUser(req)
     const JWTSecret = process.env.JWT_SECRET || 'SECRET'
     delete userData.password
     if (userData.role === 'admin') {
@@ -312,6 +312,7 @@ const userController = {
       return next(err)
     }
   },
+
   getTopUser: async (req, res, next) => {
     try {
       const followingsId = helpers.getUser(req).Followings.map(f => f.id)
