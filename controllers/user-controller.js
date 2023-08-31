@@ -134,12 +134,17 @@ const userController = {
     }
   },
 
-  getUserReplies: (req, res, next) => {
-    const UserId = req.params.id
+  getUserReplies: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
 
-    return Promise.all([
-      User.findByPk(UserId),
-      Reply.findAll({
+      const user = await User.findByPk(UserId)
+      if (!user) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      const replies = await Reply.findAll({
         where: { UserId },
         include: [
           { model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }] }
@@ -148,16 +153,11 @@ const userController = {
         raw: true,
         nest: true
       })
-    ])
-      .then(([user, replies]) => {
-        if (!user) {
-          const err = new Error('使用者不存在！')
-          err.status = 404
-          throw err
-        }
-        res.json(replies)
-      })
-      .catch(err => next(err))
+
+      return res.json(replies)
+    } catch (err) {
+      return next(err)
+    }
   },
 
   getUserLikes: (req, res, next) => {
