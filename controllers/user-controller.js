@@ -23,7 +23,7 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
-      if (!/^[a-zA-Z0-9]+$/.test(account)) throw new Error('帳號只能包含英文字母和數字！')
+      if (!/^[a-zA-Z0-9]+$/.test(account) || account.length > 50) throw new Error('字數上限50字，只能輸入英文字母、數字')
       if (!name || !account || !email || !password || !checkPassword) throw new Error('所有欄位皆為必填！')
       if (name.length > 50) throw new Error('名稱字數超出上限！')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
@@ -109,10 +109,10 @@ const userController = {
       const coverPath = req.files?.cover ? await imgurFileHandler(req.files.cover[0]) : null
 
       if (account && name && email && password && checkPassword) { // Setting
-        if (!/^[a-zA-Z0-9]+$/.test(account)) throw new Error('帳號只能包含英文字母和數字！')
+        if (!/^[a-zA-Z0-9]+$/.test(account) || account.length > 50) throw new Error('字數上限50字，只能輸入英文字母、數字')
         if (name.length > 50) throw new Error('名稱字數超出上限！')
         if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
-        if (introduction.length > 160) throw new Error('自我介紹字數超出上限！')
+        if (password.length < 5 || password.length > 20) throw new Error('請設定 5 到 20 位密碼')
 
         const [userEmail, userAccount] = await Promise.all([
           User.findOne({ where: { email } }),
