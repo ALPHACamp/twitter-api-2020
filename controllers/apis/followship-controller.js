@@ -100,14 +100,12 @@ const followshipController = {
         raw: true,
         nest: true
       })
-      const top10UsersWithFollowStatus
-      top10UsersWithFollowStatus = top10.map(item => ({
+      const top10UsersWithFollowStatus = top10.map(item => ({
         ...item,
         isFollowed: item.isFollowed === 1
       }))
       res.status(200).json({
         top10UsersWithFollowStatus
-top10UsersWithFollowStatus
       })
     } catch (err) {
       next(err)
