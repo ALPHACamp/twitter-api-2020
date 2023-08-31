@@ -112,7 +112,7 @@ const userController = {
         if (!/^[a-zA-Z0-9]+$/.test(account) || account.length > 50) throw new Error('字數上限50字，只能輸入英文字母、數字')
         if (name.length > 50) throw new Error('名稱字數超出上限！')
         if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
-        if (password.length < 8 || password.length > 20) throw new Error('字數上限20字、最少請輸入8個字')
+        if (password.length < 5 || password.length > 20) throw new Error('請設定 5 到 20 位密碼')
 
         const [userEmail, userAccount] = await Promise.all([
           User.findOne({ where: { email } }),
