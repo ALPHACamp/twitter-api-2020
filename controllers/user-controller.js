@@ -176,7 +176,8 @@ const userController = {
           { model: Reply },
           {
             model: User,
-            as: 'LikedUsers'
+            as: 'LikedUsers',
+            attributes: ['id']
           }
         ],
         order: [['createdAt', 'DESC']]
@@ -198,7 +199,7 @@ const userController = {
         createdAt: relativeTimeFromNow(tweet.createdAt),
         repliedAmount: tweet.Replies.length || 0,
         likedAmount: tweet.LikedUsers.length || 0,
-        isLiked: tweets.LikedUsers?.some(liked => liked.UserId === helpers.getUser(req).id) || false
+        isLiked: tweet.LikedUsers?.some(liked => liked.id === helpers.getUser(req).id) || false
       }))
       return res.json(data)
     } catch (err) {
@@ -262,7 +263,7 @@ const userController = {
           where: { UserId: user.id },
           include: [
             {
-              model: Tweet, include: [{ model: User, attributes: ['id', 'account'] }, Reply, Like]// 回傳這篇推文主人的id、account、及回覆數
+              model: Tweet, include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }, Reply, Like]// 回傳這篇推文主人的id、account、及回覆數
             }
           ],
           order: [['createdAt', 'DESC']]
@@ -286,6 +287,7 @@ const userController = {
         createdAt: relativeTimeFromNow(like.createdAt),
         repliedAmount: like.Tweet.Replies.length || 0,
         likedAmount: like.Tweet.Likes.length || 0,
+        tweetCreatedAt: relativeTimeFromNow(like.Tweet.createdAt),
         isLiked: currentUserLikes?.includes(like.Tweet.id)
       }))
       return res.status(200).json(data)
