@@ -100,7 +100,7 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
+      const likedTweetsId = helpers.getUser(req).Likes.map(l => l.TweetId)
 
       const user = await User.findByPk(UserId)
       if (!user) {
@@ -160,46 +160,46 @@ const userController = {
     }
   },
 
-  getUserLikes: (req, res, next) => {
-    const UserId = req.params.id
-    const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
+  getUserLikes: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+      const likedTweetsId = helpers.getUser(req).Likes.map(l => l.TweetId)
 
-    return Promise.all([
-      User.findByPk(UserId),
-      Like.findAll({
+      const user = await User.findByPk(UserId)
+      if (!user) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      const likes = await Like.findAll({
         where: { UserId },
         include: [{
           model: Tweet,
+          attributes: {
+            include: [
+              [Sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'), 'likesCount'],
+              [Sequelize.literal('(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`TweetId` = `Tweet`.`id`)'), 'repliesCount']
+            ]
+          },
           include: [
-            { model: User, attributes: { exclude: ['password'] } },
-            Like,
-            Reply
+            { model: User, attributes: { exclude: ['password'] } }
           ]
         }],
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
-    ])
-      .then(([User, likes]) => {
-        if (!User) {
-          const err = new Error('使用者不存在！')
-          err.status = 404
-          throw err
-        }
 
-        const result = likes.map(like => {
-          like = like.toJSON()
-          like.Tweet.likesCount = like.Tweet.Likes.length
-          like.Tweet.repliesCount = like.Tweet.Replies.length
-          delete like.Tweet.Likes
-          delete like.Tweet.Replies
-          like.Tweet.isLiked = likedTweetsId.includes(like.TweetId)
-          return like
-        })
-
-        res.json(result)
-      })
-      .catch(err => next(err))
+      const data = likes.map(like => ({
+        ...like,
+        isLiked: likedTweetsId.some(id => id === like.TweetId)
+      }))
+      return res.json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
+
   putUser: async (req, res, next) => {
     try {
       if (helpers.getUser(req).id !== Number(req.params.id)) throw new Error('只能編輯自己的使用者資料！')
