@@ -365,40 +365,33 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      const { id } = req.params
-      const user = await User.findByPk(id, { raw: true, nest: true })
+      const { id } = req.params // 18 target
+      const user = await User.findByPk(id, {
+        include: {
+          model: User,
+          as: 'Followers'
+        }
+      }
+      )
+
       if (!user) throw new Error('User does not exist')
+      if (!user.Followers) return res.status(200).json({ status: 'success', message: 'No followers' })
 
       const currentUserId = helpers.getUser(req).id
 
-      const followers = await Followship.findAll({
-        where: { followingId: id },
-        order: [['createdAt', 'DESC']],
-        include: [
-          {
-            model: User,
-            as: 'follower',
-            attributes: { exclude: ['password'] }
-          }
-        ],
-        attributes: [
-          'followerId',
-          'followingId',
-          'createdAt',
-          'updatedAt',
-          [
-            sequelize.literal(
-              `(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`
-            ),
-            'isFollowed'
-          ]
-        ],
-        raw: true,
-        nest: true
+      const currentUserFollowingId = await Followship.findAll({
+        where: { followerId: currentUserId },
+        raw: true
       })
-      const followersData = followers.map(item => ({
-        ...item,
-        isFollowed: item.isFollowed === 1
+
+      const followingIds = currentUserFollowingId.map(item => item.followingId)
+
+      const followersData = user.Followers.map(follower => ({
+        followerId: follower.id,
+        followerAccount: follower.account,
+        followerName: follower.name,
+        followerAvatar: follower.avatar,
+        isFollowed: followingIds.includes(follower.id)
       }))
 
       res.status(200).json(followersData)
@@ -409,42 +402,33 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       const { id } = req.params
-      const user = await User.findByPk(id, { raw: true, nest: true })
+      const user = await User.findByPk(id, {
+        include: {
+          model: User,
+          as: 'Followings'
+        }
+      })
       if (!user) throw new Error('User does not exist')
+      if (!user.Followings) return res.status(200).json({ status: 'success', message: 'No followings' })
+
       const currentUserId = helpers.getUser(req).id
 
-      const following = await Followship.findAll({
-        where: { followerId: id },
-        order: [['createdAt', 'DESC']],
-        include: [
-          {
-            model: User,
-            as: 'following',
-            attributes: { exclude: ['password'] }
-          }
-        ],
-        attributes: [
-          'followerId',
-          'followingId',
-          'createdAt',
-          'updatedAt',
-          [
-            sequelize.literal(
-              `(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`
-            ),
-            'isFollowed'
-          ]
-        ],
-        raw: true,
-        nest: true
+      const currentUserFollowingId = await Followship.findAll({
+        where: { followerId: currentUserId },
+        raw: true
       })
-      console.log(following)
-      const followings = following.map(item => ({
-        ...item,
-        isFollowed: item.isFollowed === 1
+
+      const followingIds = currentUserFollowingId.map(item => item.followingId)
+
+      const followingsData = user.Followings.map(following => ({
+        followingId: following.id,
+        followingAccount: following.account,
+        followingName: following.name,
+        followingAvatar: following.avatar,
+        isFollowed: followingIds.includes(following.id)
       }))
-      console.log(followings)
-      res.status(200).json(followings)
+
+      res.status(200).json(followingsData)
     } catch (err) {
       next(err)
     }
