@@ -15,7 +15,9 @@ const userController = {
       const { account, name, email, password, checkPassword } = req.body
 
       if (!account || !email || !password || !checkPassword) {
-        throw new Error('Please enter account, email, password and checkPassword')
+        throw new Error(
+          'Please enter account, email, password and checkPassword'
+        )
       }
 
       // 檢查帳號是否重複
@@ -130,7 +132,7 @@ const userController = {
       next(err)
     }
   },
-  getUserReplies: async (req, res, next) => {
+  getUserRepliedTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
 
@@ -154,6 +156,9 @@ const userController = {
           ],
           order: [['createdAt', 'DESC']],
           nest: true
+        }),
+        Like.findAll({
+          where: { userId }
         })
       ])
 
@@ -263,51 +268,25 @@ const userController = {
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
 
-      // const likeTweets = await Like.findAll({
-      //   where: { userId: id },
-      //   order: [["createdAt", "DESC"]],
-      //   include: [
-      //     {
-      //       model: Tweet,
-      //       as: "likedTweet",
-      //       raw: true,
-      //       nest: true,
-      //       attributes: { exclude: ["password"] },
-      //       include: [
-      //         {
-      //           model: User,
-      //           as: "author",
-      //           attributes: ["account", "name", "avatar"],
-      //         },
-      //         {
-      //           model: Like,
-      //         },
-      //         {
-      //           model: Reply,
-      //           as: "replies",
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // });
-      const likedTweets = await Tweet.findAll({
-        where: { userId: id },
-        order: [['createdAt', 'DESC']],
-        include: [
-          {
-            model: User,
-            as: 'author',
-            attributes: { exclude: ['password'] }
-          },
-          {
-            model: Like
-          },
-          {
-            model: Reply,
-            as: 'replies'
-          }
-        ]
-      })
+      const [likedTweets, likeCount, replyCount] = await Promise.all([
+        Tweet.findAll({
+          where: { userId: id },
+          order: [['createdAt', 'DESC']],
+          include: [
+            {
+              model: User,
+              as: 'author',
+              attributes: { exclude: ['password'] }
+            }
+          ]
+        }),
+        Like.findAll({
+          where: { userId: id }
+        }),
+        Reply.findAll({
+          where: { userId: id }
+        })
+      ])
       if (likedTweets.length === 0) {
         throw new Error('the user did not like any tweet')
       }
@@ -319,8 +298,8 @@ const userController = {
         tweetBelongerAvatar: tweet.author.avatar,
         tweetContent: tweet.description,
         createdAt: tweet.createdAt,
-        replyCount: tweet.Likes.length,
-        likeCount: tweet.replies.length
+        replyCount: replyCount.length,
+        likeCount: likeCount.length
       }))
       res.status(200).json(likedTweetsData)
     } catch (err) {
@@ -332,25 +311,41 @@ const userController = {
       const { id } = req.params
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
-
-      const userTweets = await Tweet.findAll({
-        where: { userId: id },
-        order: [['createdAt', 'DESC']],
-        include: [
-          {
-            model: User,
-            as: 'author',
-            attributes: { exclude: ['password'] }
-          },
-          {
-            model: Like
-          },
-          {
-            model: Reply,
-            as: 'replies'
-          }
-        ]
-      })
+      const [userTweets] = await Promise.all([
+        Tweet.findAll({
+          where: { userId: id },
+          order: [['createdAt', 'DESC']],
+          attributes: [
+            'id',
+            'description',
+            'createdAt',
+            'updatedAt',
+            [
+              sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM Likes
+            WHERE Likes.tweet_id = Tweet.id
+          )`),
+              'likeCount'
+            ],
+            [
+              sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM Replies
+            WHERE Replies.tweet_id = Tweet.id
+          )`),
+              'replyCount'
+            ]
+          ],
+          include: [
+            {
+              model: User,
+              as: 'author',
+              attributes: { exclude: ['password'] }
+            }
+          ]
+        })
+      ])
       console.log(userTweets)
       const userTweetsData = userTweets.map(tweet => ({
         TweetId: tweet.id,
@@ -359,8 +354,8 @@ const userController = {
         tweetBelongerAvatar: tweet.author.avatar,
         description: tweet.description,
         createdAt: tweet.createdAt,
-        replyCount: tweet.Likes.length,
-        likeCount: tweet.replies.length
+        replyCount: tweet.replyCount,
+        likeCount: tweet.likeCount
       }))
 
       res.status(200).json(userTweetsData)

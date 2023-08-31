@@ -9,18 +9,21 @@ const followshipController = {
       const followingId = req.body.id
       const getUser = helpers.getUser(req)
       const userId = getUser.id
-      const [user, followship] = await Promise.all([
-        User.findByPk(userId),
-        Followship.findOne({
-          where: { followerId: userId, followingId }
-        })
-      ])
+      const user = await User.findByPk(userId)
       if (!user) throw new Error("User didn't exist!")
-      if (followship) throw new Error("You've are already followed this user!")
-      Followship.create({
-        followerId: userId,
-        followingId
+      const followship = await Followship.findOrCreate({
+        raw: true,
+        nest: true,
+        where: {
+          followerId: userId,
+          followingId
+        }
       })
+
+      if (!followship[1]) {
+        throw new Error("You've are already followed this user!")
+      }
+      console.log(followship)
       res.status(200).json({
         status: 'success',
         message: 'successfully follow user!'
@@ -31,20 +34,21 @@ const followshipController = {
   },
   unfollowUser: async (req, res, next) => {
     try {
-      const followingId = req.params.following_id
+      const followingId = req.params.following_id // 我要取消追蹤的對象
       const getUser = helpers.getUser(req)
-      const userId = getUser.id
-      const [user, followship] = await Promise.all([
-        User.findByPk(userId),
-        Followship.findOne({
-          where: { followerId: userId, followingId }
-        })
-      ])
+      const userId = getUser.id // 現在使用者本人
+      const user = await User.findByPk(userId)
       if (!user) throw new Error("User didn't exist!")
-      if (!followship) throw new Error("You haven't followed this user!")
-      Followship.destroy({
-        where: { followerId: userId, followingId }
+      const followship = await Followship.destroy({
+        where: {
+          followerId: userId,
+          followingId
+        }
       })
+
+      if (!followship[1]) {
+        throw new Error("You haven't followed this user!")
+      }
       res.status(200).json({
         status: 'success',
         message: 'successfully unfollow user!'
@@ -59,7 +63,7 @@ const followshipController = {
       const currentUserId = getUser.id
       if (!currentUserId) throw new Error("User didn't exist!")
 
-      const top10UsersWithFollowStatus = await User.findAll({
+      const top10 = await User.findAll({
         where: {
           role: 'user',
           id: { [sequelize.Op.not]: currentUserId }
@@ -97,6 +101,13 @@ const followshipController = {
         nest: true
       })
 
+      const top10UsersWithFollowStatus = []
+      top10.forEach(item => {
+        top10UsersWithFollowStatus.push({
+          ...item,
+          isFollowed: item.isFollowed === 1
+        })
+      })
       res.status(200).json({
         top10UsersWithFollowStatus
       })

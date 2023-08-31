@@ -8,10 +8,7 @@ const followshipController = require('../controllers/apis/followship-controller'
 
 const { apiErrorHandler } = require('../middleware/error-handler')
 
-const {
-  authenticated,
-  authenticatedUser
-} = require('../middleware/api-auth')
+const { authenticated, authenticatedUser } = require('../middleware/api-auth')
 
 // api/admin
 router.use('/api/admin', admin)
@@ -57,7 +54,7 @@ router.get(
   '/api/users/:id/replied_tweets',
   authenticated,
   authenticatedUser,
-  userController.getUserReplies
+  userController.getUserRepliedTweets
 )
 router.get(
   '/api/users/:id',

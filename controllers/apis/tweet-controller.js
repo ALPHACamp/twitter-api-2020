@@ -164,11 +164,12 @@ const tweetContorller = {
       const userId = getUser.id
       if (!description) throw new Error('文章內容不可為空白')
       if (description.length > 140) throw new Error('文章內容不可超過 140 字')
+
       const createdTweet = await Tweet.create({
         userId,
-        description,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        description
+        // createdAt: date,
+        // updatedAt: date,
       })
       res.status(200).json({
         status: 'success',
