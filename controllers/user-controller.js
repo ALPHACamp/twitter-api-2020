@@ -93,46 +93,45 @@ const userController = {
       }
       return res.json(data)
     } catch (err) {
-      next(err)
+      return next(err)
     }
   },
 
-  getUserTweets: (req, res, next) => {
-    const UserId = req.params.id
-    const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
+  getUserTweets: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+      const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
 
-    return Promise.all([
-      User.findByPk(UserId),
-      Tweet.findAll({
+      const user = await User.findByPk(UserId)
+      if (!user) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      const tweets = await Tweet.findAll({
         where: { UserId },
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'), 'likesCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`TweetId` = `Tweet`.`id`)'), 'repliesCount']
+          ]
+        },
         include: [
-          { model: User, attributes: { exclude: ['password'] } },
-          Like,
-          Reply
+          { model: User, attributes: { exclude: ['password'] } }
         ],
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
-    ])
-      .then(([user, tweets]) => {
-        if (!user) {
-          const err = new Error('使用者不存在！')
-          err.status = 404
-          throw err
-        }
 
-        const result = tweets.map(tweet => ({
-          ...tweet.toJSON(),
-          likesCount: tweet.Likes.length,
-          repliesCount: tweet.Replies.length,
-          isLiked: likedTweetsId.includes(tweet.id)
-        }))
-        result.forEach(item => {
-          delete item.Likes
-          delete item.Replies
-        })
-        return res.json(result)
-      })
-      .catch(err => next(err))
+      const data = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: likedTweetsId.some(id => id === tweet.id)
+      }))
+      return res.json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
 
   getUserReplies: (req, res, next) => {
