@@ -5,7 +5,7 @@ const Sequelize = require('sequelize')
 
 const adminController = {
   signIn: (req, res, next) => {
-    const userData = helpers.getUser(req).toJSON()
+    const userData = helpers.getUser(req)
     const JWTSecret = process.env.JWT_SECRET || 'SECRET'
     delete userData.password
     if (userData.role === 'user') {
@@ -30,14 +30,10 @@ const adminController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
-        attributes: [
-          'id',
-          'UserId',
-          // 使用 SQL 語法抓出 description 前 50 個字
-          [Sequelize.literal('SUBSTRING(description, 1, 50)'), 'description'],
-          'createdAt',
-          'updatedAt'
-        ],
+        attributes: {
+          exclude: 'description',
+          include: [[Sequelize.literal('SUBSTRING(description, 1, 50)'), 'description']]
+        },
         include: [
           { model: User, attributes: { exclude: ['password'] } }
         ],

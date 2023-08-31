@@ -42,7 +42,7 @@ const userController = {
       .catch(err => next(err))
   },
   signIn: (req, res, next) => {
-    const userData = helpers.getUser(req).toJSON()
+    const userData = helpers.getUser(req)
     const JWTSecret = process.env.JWT_SECRET || 'SECRET'
     delete userData.password
     if (userData.role === 'admin') {
@@ -259,8 +259,8 @@ const userController = {
     }
   },
   getFollowings: async (req, res, next) => {
-    const followingsId = helpers.getUser(req).Followings.map(fs => fs.id)
     try {
+      const followingsId = helpers.getUser(req).Followings.map(fs => fs.id)
       const user = await User.findByPk(req.params.id)
       if (!user) {
         const err = new Error('使用者不存在！')
@@ -284,8 +284,8 @@ const userController = {
     }
   },
   getFollowers: async (req, res, next) => {
-    const followingsId = helpers.getUser(req).Followings.map(f => f.id)
     try {
+      const followingsId = helpers.getUser(req).Followings.map(f => f.id)
       const user = await User.findByPk(req.params.id)
       if (!user) {
         const err = new Error('使用者不存在！')
