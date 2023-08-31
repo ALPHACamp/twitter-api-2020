@@ -90,8 +90,8 @@ const userController = {
   },
   editUser: async (req, res, next) => {
     try {
-      const UserId = req.params.id // 被查看的使用者 ID
-      const currentUserId = helpers.getUser(req).id.toString() // 用戶 ID
+      const UserId = Number(req.params.id) // 被查看的使用者 ID
+      const currentUserId = helpers.getUser(req).id // 用戶 ID
       const isCurrentUser = currentUserId === UserId // 判斷是否是使用者本人
       if (!isCurrentUser) throw new Error('使用者非本人！')
 
