@@ -63,42 +63,40 @@ const userController = {
       next(err)
     }
   },
-  getUser: (req, res, next) => {
-    const UserId = req.params.id
-    const isFollowed = helpers.getUser(req).Followings.some(f => f.id.toString() === UserId)
 
-    return Promise.all([
-      User.findByPk(UserId, {
-        attributes: { exclude: ['password'] },
-        include: [
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
-        ]
-      }),
-      Tweet.count({
-        where: { UserId }
-      })
-    ])
-      .then(([user, tweetsCount]) => {
-        if (!user) {
-          const err = new Error('使用者不存在！')
-          err.status = 404
-          throw err
-        }
+  getUser: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+      const isFollowed = helpers.getUser(req).Followings.some(f => f.id.toString() === UserId)
 
-        const result = {
-          ...user.toJSON(),
-          followersCount: user.Followers.length,
-          followingsCount: user.Followings.length,
-          isFollowed,
-          tweetsCount
-        }
-        delete result.Followers
-        delete result.Followings
-        return res.json(result)
+      const user = await User.findByPk(UserId, {
+        attributes: {
+          exclude: ['password'],
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followerId` = `User`.`id`)'), 'followingsCount']
+          ]
+        },
+        raw: true
       })
-      .catch(err => next(err))
+      if (!user) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      const tweetsCount = await Tweet.count({ where: { UserId } })
+
+      const data = {
+        ...user,
+        isFollowed,
+        tweetsCount
+      }
+      return res.json(data)
+    } catch (err) {
+      next(err)
+    }
   },
+
   getUserTweets: (req, res, next) => {
     const UserId = req.params.id
     const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
