@@ -353,7 +353,9 @@ const userController = {
         tweetBelongerAccount: tweet.author.account,
         tweetBelongerAvatar: tweet.author.avatar,
         description: tweet.description,
-        createdAt: tweet.createdAt
+        createdAt: tweet.createdAt,
+        replyCount: tweet.replyCount,
+        likeCount: tweet.likeCount
       }))
 
       res.status(200).json(userTweetsData)
