@@ -87,7 +87,7 @@ const userController = {
 
       const data = {
         ...user,
-        isFollowed,
+        isFollowed
       }
       return res.json(data)
     } catch (err) {
