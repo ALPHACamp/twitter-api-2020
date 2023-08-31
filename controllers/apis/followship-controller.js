@@ -100,10 +100,14 @@ const followshipController = {
         raw: true,
         nest: true
       })
-      const top10UsersWithFollowStatus = top10.map(item => ({
-        ...item,
-        isFollowed: item.isFollowed === 1
-      }))
+
+      const top10UsersWithFollowStatus = []
+      top10.forEach(item => {
+        top10UsersWithFollowStatus.push({
+          ...item,
+          isFollowed: item.isFollowed === 1
+        })
+      })
       res.status(200).json({
         top10UsersWithFollowStatus
       })
