@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 
 const { User, Tweet, Like, Reply, Followship } = require('../models')
 const { Op } = require('sequelize')
+const Sequelize = require('sequelize')
 const { imgurFileHandler } = require('../helpers/file-handler')
 const helpers = require('../_helpers')
 
@@ -209,22 +210,21 @@ const userController = {
       const avatar = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
       const banner = req.files?.banner ? await imgurFileHandler(req.files.banner[0]) : null
 
-      if (name) {
-        if (name.length > 50) throw new Error('暱稱字數超出上限！')
-      }
-      if (introduction) {
-        if (introduction.length > 160) throw new Error('自我介紹字數超出上限！')
-      }
+      if (name?.length > 50) throw new Error('暱稱字數超出上限！')
+      if (introduction?.length > 160) throw new Error('自我介紹字數超出上限！')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
-      if (password) {
-        if (password.length < 5 || password.length > 20) throw new Error('請設定 5 到 20 字的密碼')
-        password = await bcrypt.hash(password, 10)
+      if (password?.length < 5 || password?.length > 20) {
+        throw new Error('請設定 5 到 20 字的密碼')
       }
+      if (password) password = await bcrypt.hash(password, 10)
       const userA = await User.findByPk(req.params.id, {
-        include: [
-          { model: User, as: 'Followings' },
-          { model: User, as: 'Followers' }
-        ]
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followerId` = `User`.`id`)'), 'followingsCount']
+          ]
+        }
       })
       if (!userA) {
         const err = new Error('使用者不存在！')
@@ -256,89 +256,84 @@ const userController = {
         banner: banner || userA.banner
       })
       updatedUser = updatedUser.toJSON()
-      updatedUser.tweetsCount = await Tweet.count({ where: { UserId: req.params.id } })
-      updatedUser.followersCount = updatedUser.Followers.length
-      updatedUser.followingsCount = updatedUser.Followings.length
-      delete updatedUser.Followers
-      delete updatedUser.Followings
       delete updatedUser.password
       return res.json({ status: 'success', data: { user: updatedUser } })
     } catch (err) {
       return next(err)
     }
   },
-  getFollowings: (req, res, next) => {
-    const followingsId = helpers.getUser(req).Followings.map(fs => fs.id)
-    User.findByPk(req.params.id)
-      .then(user => {
-        if (!user) {
-          const err = new Error('使用者不存在！')
-          err.status = 404
-          throw err
-        }
-        return Followship.findAll({
-          where: { followerId: req.params.id },
-          include: { model: User, as: 'Following', attributes: { exclude: 'password' } },
-          order: [['createdAt', 'DESC']],
-          nest: true,
-          raw: true
-        })
+  getFollowings: async (req, res, next) => {
+    try {
+      const followingsId = helpers.getUser(req).Followings.map(fs => fs.id)
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      const followships = await Followship.findAll({
+        where: { followerId: req.params.id },
+        include: { model: User, as: 'Following', attributes: { exclude: 'password' } },
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
       })
-      .then(followships => {
-        const data = followships.map(f => {
-          f.Following.isFollowed = followingsId.some(id => id === f.Following.id)
-          return f
-        })
-        return res.json(data)
+      const data = followships.map(f => {
+        f.Following.isFollowed = followingsId.some(id => id === f.Following.id)
+        return f
       })
-      .catch(err => next(err))
+      return res.json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
-  getFollowers: (req, res, next) => {
-    const followingsId = helpers.getUser(req).Followings.map(f => f.id)
-    User.findByPk(req.params.id)
-      .then(user => {
-        if (!user) {
-          const err = new Error('使用者不存在！')
-          err.status = 404
-          throw err
-        }
-        return Followship.findAll({
-          where: { followingId: req.params.id },
-          include: { model: User, as: 'Follower', attributes: { exclude: 'password' } },
-          order: [['createdAt', 'DESC']],
-          nest: true,
-          raw: true
-        })
+  getFollowers: async (req, res, next) => {
+    try {
+      const followingsId = helpers.getUser(req).Followings.map(f => f.id)
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        const err = new Error('使用者不存在！')
+        err.status = 404
+        throw err
+      }
+      const followships = await Followship.findAll({
+        where: { FollowingId: req.params.id },
+        include: { model: User, as: 'Follower', attributes: { exclude: 'password' } },
+        order: [['createdAt', 'DESC']],
+        nest: true,
+        raw: true
       })
-      .then(followships => {
-        const data = followships.map(f => {
-          f.Follower.isFollowed = followingsId.some(id => id === f.Follower.id)
-          return f
-        })
-        return res.json(data)
+      const data = followships.map(f => {
+        f.Follower.isFollowed = followingsId.some(id => id === f.Follower.id)
+        return f
       })
-      .catch(err => next(err))
+      return res.json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
-  getTopUser: (req, res, next) => {
-    const followingsId = helpers.getUser(req).Followings.map(f => f.id)
-    User.findAll({
-      where: { id: { [Op.ne]: helpers.getUser(req).id }, role: 'user' },
-      attributes: { exclude: 'password' },
-      include: { model: User, as: 'Followers' }
-    })
-      .then(users => {
-        const data = users.map(user => {
-          user = user.toJSON()
-          user.followersCount = user.Followers.length
-          user.isFollowed = followingsId.some(id => id === user.id)
-          delete user.Followers
-          return user
-        })
-          .sort((a, b) => b.followersCount - a.followersCount)
-          .slice(0, 10)
-        return res.json(data)
+
+  getTopUser: async (req, res, next) => {
+    try {
+      const followingsId = helpers.getUser(req).Followings.map(f => f.id)
+      const users = await User.findAll({
+        raw: true,
+        where: { id: { [Op.ne]: helpers.getUser(req).id }, role: 'user' },
+        attributes: {
+          exclude: ['password'],
+          include: [[Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount']],
+          order: [['followersCount', 'DESC']],
+          limit: 10
+        }
       })
-      .catch(err => next(err))
+      const data = users.map(u => {
+        u.isFollowed = followingsId.some(id => id === u.id)
+        return u
+      })
+      return res.json(data)
+    } catch (err) {
+      return next(err)
+    }
   },
   getAuth: (req, res, next) => {
     helpers.getUser(req) ? res.json({ status: 'success', message: `User role is ${helpers.getUser(req).role}` }) : res.status(401).json({ status: 'error', message: 'unauthorized' })
