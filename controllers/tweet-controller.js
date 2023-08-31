@@ -78,6 +78,7 @@ const tweetController = {
   // 瀏覽一筆貼文
   getTweet: (req, res, next) => {
     const loginUserId = helpers.getUser(req).id
+    const TweetId = Number(req.params.id)
     if (!loginUserId) {
       return res.status(404).JSON({
           status: 'error',
@@ -85,7 +86,7 @@ const tweetController = {
         })
     }
 
-    return Tweet.findByPk(req.params.id, {
+    return Tweet.findByPk(TweetId, {
       include: 
         {
           model: User,
