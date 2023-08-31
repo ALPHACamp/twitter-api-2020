@@ -263,8 +263,8 @@ const userController = {
     }
   },
   getFollowings: async (req, res, next) => {
-    const followingsId = helpers.getUser(req).Followings.map(fs => fs.id)
     try {
+      const followingsId = helpers.getUser(req).Followings.map(fs => fs.id)
       const user = await User.findByPk(req.params.id)
       if (!user) {
         const err = new Error('使用者不存在！')
@@ -288,8 +288,8 @@ const userController = {
     }
   },
   getFollowers: async (req, res, next) => {
-    const followingsId = helpers.getUser(req).Followings.map(f => f.id)
     try {
+      const followingsId = helpers.getUser(req).Followings.map(f => f.id)
       const user = await User.findByPk(req.params.id)
       if (!user) {
         const err = new Error('使用者不存在！')
