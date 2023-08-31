@@ -19,7 +19,9 @@ const followshipController = {
           followingId
         }
       })
-
+      // const Newfollowship = followship[0].followingId;
+      // console.log(Newfollowship);
+      // console.log(followship);
       if (!followship[1]) {
         throw new Error("You've are already followed this user!")
       }
@@ -46,7 +48,7 @@ const followshipController = {
         }
       })
 
-      if (!followship[1]) {
+      if (followship[1]) {
         throw new Error("You haven't followed this user!")
       }
       res.status(200).json({
