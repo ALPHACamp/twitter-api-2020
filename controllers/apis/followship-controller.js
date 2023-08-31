@@ -37,17 +37,18 @@ const followshipController = {
       const followingId = req.params.following_id
       const getUser = helpers.getUser(req)
       const userId = getUser.id
-      const [user, followship] = await Promise.all([
-        User.findByPk(userId),
-        Followship.findOne({
-          where: { followerId: userId, followingId }
-        })
-      ])
+      const user = await User.findByPk(userId)
       if (!user) throw new Error("User didn't exist!")
-      if (!followship) throw new Error("You haven't followed this user!")
-      Followship.destroy({
-        where: { followerId: userId, followingId }
+      const followship = await Followship.destroy({
+        where: {
+          followerId: userId,
+          followingId
+        }
       })
+
+      if (!followship[1]) {
+        throw new Error("You've are already followed this user!")
+      }
       res.status(200).json({
         status: 'success',
         message: 'successfully unfollow user!'

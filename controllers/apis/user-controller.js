@@ -15,7 +15,9 @@ const userController = {
       const { account, name, email, password, checkPassword } = req.body
 
       if (!account || !email || !password || !checkPassword) {
-        throw new Error('Please enter account, email, password and checkPassword')
+        throw new Error(
+          'Please enter account, email, password and checkPassword'
+        )
       }
 
       // 檢查帳號是否重複
@@ -416,7 +418,7 @@ const userController = {
         raw: true,
         nest: true
       })
-
+      console.log(following)
       const followings = following.map(item => ({
         ...item,
         isFollowed: item.isFollowed === 1
