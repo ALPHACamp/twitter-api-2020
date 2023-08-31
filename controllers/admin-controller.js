@@ -7,7 +7,6 @@ const adminController = {
   signIn: (req, res, next) => {
     const userData = helpers.getUser(req)
     const JWTSecret = process.env.JWT_SECRET || 'SECRET'
-    delete userData.password
     if (userData.role === 'user') {
       const err = new Error('帳號不存在！')
       err.status = 404
