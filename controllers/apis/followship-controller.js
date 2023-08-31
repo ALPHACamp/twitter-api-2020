@@ -63,7 +63,7 @@ const followshipController = {
       const currentUserId = getUser.id
       if (!currentUserId) throw new Error("User didn't exist!")
 
-      const top10UsersWithFollowStatus = await User.findAll({
+      const top10 = await User.findAll({
         where: {
           role: 'user',
           id: { [sequelize.Op.not]: currentUserId }
@@ -100,12 +100,14 @@ const followshipController = {
         raw: true,
         nest: true
       })
-      const top10 = top10UsersWithFollowStatus.map(item => ({
+      const top10UsersWithFollowStatus
+      top10UsersWithFollowStatus = top10.map(item => ({
         ...item,
         isFollowed: item.isFollowed === 1
       }))
       res.status(200).json({
-        top10
+        top10UsersWithFollowStatus
+top10UsersWithFollowStatus
       })
     } catch (err) {
       next(err)
