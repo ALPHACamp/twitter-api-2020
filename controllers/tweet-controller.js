@@ -126,36 +126,33 @@ const tweetController = {
   addLike: async (req, res, next) => {
     try {
       const tweetId = parseInt(req.params.id)
-      const [tweet, like] = await Promise.all([
-        Tweet.findByPk(req.params.id, {
-          attributes: {
-            include: [
-              [
-                sequelize.literal(
-                  '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'
-                ),
-                'likesNum'
-              ]
+      const tweet = await Tweet.findByPk(req.params.id, {
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'
+              ),
+              'likesNum'
             ]
-          },
-          nest: true,
-          raw: true
-        }),
-        Like.findOne({
-          where: {
-            UserId: helpers.getUser(req).id,
-            TweetId: tweetId
-          }
-        })
-      ])
-      if (!tweet) throw new Error('推文已不存在')
-      if (like) throw new Error('你已經按讚過此推文')
-
-      const liked = await Like.create({
-        UserId: helpers.getUser(req).id,
-        TweetId: tweetId
+          ]
+        },
+        nest: true,
+        raw: true
       })
-      const likedData = liked.toJSON()
+      if (!tweet) throw new Error('推文已不存在')
+
+      const [createdLike, created] = await Like.findOrCreate({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId: tweetId
+        }
+      })
+
+      if (!created) {
+        throw new Error('你已經點讚過此推文')
+      }
+      const likedData = createdLike.toJSON()
       likedData.likesNum = tweet.likesNum + 1 // 包含現在按的所以+1
       likedData.isLiked = true
       return res.status(200).json(likedData)
