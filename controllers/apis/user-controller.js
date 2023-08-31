@@ -14,8 +14,10 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
 
-      if (!account || !name || !email || !password || !checkPassword) {
-        throw new Error('all the blanks are required')
+      if (!account || !email || !password || !checkPassword) {
+        throw new Error(
+          'Please enter account, email, password and checkPassword'
+        )
       }
 
       // 檢查帳號是否重複
@@ -31,7 +33,7 @@ const userController = {
       }
 
       const createdUser = await User.create({
-        name,
+        name: name || account,
         email,
         account,
         password: bcrypt.hashSync(password, 10),
@@ -130,7 +132,7 @@ const userController = {
       next(err)
     }
   },
-  getUserReplies: async (req, res, next) => {
+  getUserRepliedTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
 
@@ -154,6 +156,9 @@ const userController = {
           ],
           order: [['createdAt', 'DESC']],
           nest: true
+        }),
+        Like.findAll({
+          where: { userId }
         })
       ])
 
@@ -263,41 +268,40 @@ const userController = {
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
 
-      const likeTweets = await Like.findAll({
-        where: { userId: id },
-        order: [['createdAt', 'DESC']],
-        include: [
-          {
-            model: Tweet,
-            as: 'likedTweet',
-            attributes: { exclude: ['password'] },
-            include: [
-              {
-                model: User,
-                as: 'author',
-                attributes: ['account', 'name', 'avatar']
-              }
-            ]
-          }
-        ]
-      })
-
-      if (likeTweets.length === 0) {
+      const [likedTweets, likeCount, replyCount] = await Promise.all([
+        Tweet.findAll({
+          where: { userId: id },
+          order: [['createdAt', 'DESC']],
+          include: [
+            {
+              model: User,
+              as: 'author',
+              attributes: { exclude: ['password'] }
+            }
+          ]
+        }),
+        Like.findAll({
+          where: { userId: id }
+        }),
+        Reply.findAll({
+          where: { userId: id }
+        })
+      ])
+      if (likedTweets.length === 0) {
         throw new Error('the user did not like any tweet')
       }
-
-      const likeTweetsData = likeTweets.map(like => ({
-        TweetId: like.likedTweet.id,
-        tweetBelongerName: like.likedTweet.author.name,
-        tweetBelongerAccount: like.likedTweet.author.account,
-        tweetBelongerAvatar: like.likedTweet.author.avatar,
-        tweetLikeCount: like.likedTweet.likeCount,
-        tweetReplyCount: like.likedTweet.replyCount,
-        tweetContent: like.likedTweet.description,
-        createdAt: like.createdAt
+      console.log(likedTweets)
+      const likedTweetsData = likedTweets.map(tweet => ({
+        TweetId: tweet.id,
+        tweetBelongerName: tweet.author.name,
+        tweetBelongerAccount: tweet.author.account,
+        tweetBelongerAvatar: tweet.author.avatar,
+        tweetContent: tweet.description,
+        createdAt: tweet.createdAt,
+        replyCount: replyCount.length,
+        likeCount: likeCount.length
       }))
-
-      res.status(200).json(likeTweetsData)
+      res.status(200).json(likedTweetsData)
     } catch (err) {
       next(err)
     }
@@ -307,38 +311,51 @@ const userController = {
       const { id } = req.params
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
-
-      const userTweets = await Tweet.findAll({
-        where: { userId: id },
-        order: [['createdAt', 'DESC']],
-        // attributes:['id','description', [
-        //   sequelize.literal(
-        //     '(SELECT COUNT(DISTINCT id) FROM Like WHERE user_id = User.id)'
-        //   ),
-        //   'totalFollowers'
-        // ],]
-        include: [
-          {
-            model: User,
-            as: 'author',
-            attributes: { exclude: ['password'] }
-          }
-          // {
-          //   model:Like,
-          //   as
-          // }
-        ]
-      })
-
+      const [userTweets] = await Promise.all([
+        Tweet.findAll({
+          where: { userId: id },
+          order: [['createdAt', 'DESC']],
+          attributes: [
+            'id',
+            'description',
+            'createdAt',
+            'updatedAt',
+            [
+              sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM Likes
+            WHERE Likes.tweet_id = Tweet.id
+          )`),
+              'likeCount'
+            ],
+            [
+              sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM Replies
+            WHERE Replies.tweet_id = Tweet.id
+          )`),
+              'replyCount'
+            ]
+          ],
+          include: [
+            {
+              model: User,
+              as: 'author',
+              attributes: { exclude: ['password'] }
+            }
+          ]
+        })
+      ])
+      console.log(userTweets)
       const userTweetsData = userTweets.map(tweet => ({
         TweetId: tweet.id,
         tweetBelongerName: tweet.author.name,
         tweetBelongerAccount: tweet.author.account,
         tweetBelongerAvatar: tweet.author.avatar,
-        tweetLikeCount: tweet.likeCount,
-        tweetReplyCount: tweet.replyCount,
         description: tweet.description,
-        createdAt: tweet.createdAt
+        createdAt: tweet.createdAt,
+        replyCount: tweet.replyCount,
+        likeCount: tweet.likeCount
       }))
 
       res.status(200).json(userTweetsData)
@@ -348,45 +365,36 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      const { id } = req.params
-      const user = await User.findByPk(id, { raw: true, nest: true })
+      const { id } = req.params // 18 target
+      const user = await User.findByPk(id, {
+        include: {
+          model: User,
+          as: 'Followers'
+        }
+      }
+      )
+
       if (!user) throw new Error('User does not exist')
+      if (!user.Followers) return res.status(200).json({ status: 'success', message: 'No followers' })
 
       const currentUserId = helpers.getUser(req).id
 
-      const followers = await Followship.findAll({
-        where: { followingId: id },
-        order: [['createdAt', 'DESC']],
-        include: [
-          {
-            model: User,
-            as: 'follower',
-            attributes: { exclude: ['password'] }
-          }
-        ],
-        attributes: [
-          'followerId',
-          'followingId',
-          'createdAt',
-          'updatedAt',
-          [
-            sequelize.literal(
-              `(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`
-            ),
-            'isFollowed'
-          ]
-        ],
-        raw: true,
-        nest: true
+      const currentUserFollowingId = await Followship.findAll({
+        where: { followerId: currentUserId },
+        raw: true
       })
 
-      const userFollowersData = followers.map(follower => {
-        return {
-          ...follower
-        }
-      })
+      const followingIds = currentUserFollowingId.map(item => item.followingId)
 
-      res.status(200).json(userFollowersData)
+      const followersData = user.Followers.map(follower => ({
+        followerId: follower.id,
+        followerAccount: follower.account,
+        followerName: follower.name,
+        followerAvatar: follower.avatar,
+        isFollowed: followingIds.includes(follower.id)
+      }))
+
+      res.status(200).json(followersData)
     } catch (err) {
       next(err)
     }
@@ -394,43 +402,33 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       const { id } = req.params
-      const user = await User.findByPk(id, { raw: true, nest: true })
-      if (!user) throw new Error('User does not exist')
-      const currentUserId = helpers.getUser(req).id
-
-      const following = await Followship.findAll({
-        where: { followerId: id },
-        order: [['createdAt', 'DESC']],
-        include: [
-          {
-            model: User,
-            as: 'following',
-            attributes: { exclude: ['password'] }
-          }
-        ],
-        attributes: [
-          'followerId',
-          'followingId',
-          'createdAt',
-          'updatedAt',
-          [
-            sequelize.literal(
-              `(CASE WHEN EXISTS (SELECT 1 FROM Followships WHERE follower_id = ${currentUserId} AND following_id = ${id}) THEN TRUE ELSE FALSE END)`
-            ),
-            'isFollowed'
-          ]
-        ],
-        raw: true,
-        nest: true
-      })
-
-      const userFollowersData = following.map(follower => {
-        return {
-          ...follower
+      const user = await User.findByPk(id, {
+        include: {
+          model: User,
+          as: 'Followings'
         }
       })
+      if (!user) throw new Error('User does not exist')
+      if (!user.Followings) return res.status(200).json({ status: 'success', message: 'No followings' })
 
-      res.status(200).json(userFollowersData)
+      const currentUserId = helpers.getUser(req).id
+
+      const currentUserFollowingId = await Followship.findAll({
+        where: { followerId: currentUserId },
+        raw: true
+      })
+
+      const followingIds = currentUserFollowingId.map(item => item.followingId)
+
+      const followingsData = user.Followings.map(following => ({
+        followingId: following.id,
+        followingAccount: following.account,
+        followingName: following.name,
+        followingAvatar: following.avatar,
+        isFollowed: followingIds.includes(following.id)
+      }))
+
+      res.status(200).json(followingsData)
     } catch (err) {
       next(err)
     }

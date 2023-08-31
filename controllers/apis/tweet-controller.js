@@ -20,8 +20,7 @@ const tweetContorller = {
           {
             model: User,
             attributes: ['id', 'account', 'name', 'avatar'],
-            as: 'author',
-            where: { role: 'user' }
+            as: 'author'
           },
           {
             model: Like
@@ -33,20 +32,23 @@ const tweetContorller = {
         ]
       }
       const tweets = await Tweet.findAll(options)
-      console.log(tweets)
+
+      if (!tweets) throw new Error("Tweet didn't exist!")
 
       const dataTweets = tweets.map(tweet => ({
-        id: tweet.id,
+        UserId: tweet.userId,
+        TweetId: tweet.id,
         authorId: tweet.author.id,
         authorAccount: tweet.author.account,
         authorName: tweet.author.name,
         authorAvatar: tweet.author.avatar,
-        description: tweet.description.substring(0, 140),
+        description: tweet.description,
         likeCount: tweet.Likes.length,
         replyCount: tweet.replies.length,
         isLiked: tweet.Likes.some(i => i.userId === userId),
         createdAt: tweet.createdAt
       }))
+
       res.status(200).json(dataTweets)
     } catch (err) {
       next(err)
@@ -76,19 +78,20 @@ const tweetContorller = {
       })
 
       if (!tweet) throw new Error("Tweet didn't exist!")
-      console.log(tweet)
 
-      const tweetData = [tweet].map(t => ({
-        id: t.id,
-        authorName: t.author.name,
-        authorAccount: t.author.account,
-        authorAvatar: t.author.avatar,
-        description: t.description,
+      const tweetData = {
+        id: tweet.id,
+        authorId: tweet.author.id,
+        authorAccount: tweet.author.account,
+        authorName: tweet.author.name,
+        authorAvatar: tweet.author.avatar,
+        description: tweet.description.substring(0, 140),
         likeCount: tweet.Likes.length,
         replyCount: tweet.replies.length,
-        isLiked: t.Likes.some(i => i.userId === userId),
-        createdAt: t.createdAt
-      }))
+        isLiked: tweet.Likes.some(i => i.userId === userId),
+        createdAt: tweet.createdAt
+      }
+
       res.status(200).json(tweetData)
     } catch (err) {
       next(err)
@@ -161,11 +164,12 @@ const tweetContorller = {
       const userId = getUser.id
       if (!description) throw new Error('文章內容不可為空白')
       if (description.length > 140) throw new Error('文章內容不可超過 140 字')
+
       const createdTweet = await Tweet.create({
         userId,
-        description,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        description
+        // createdAt: date,
+        // updatedAt: date,
       })
       res.status(200).json({
         status: 'success',
