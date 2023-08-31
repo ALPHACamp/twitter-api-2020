@@ -20,7 +20,7 @@ const followshipController = {
           followerId
         })
       })
-      .then(() => res.json('status: "success'))
+      .then(() => res.json({ status: 'success' }))
       .catch(err => next(err))
   },
   removeFollowing: (req, res, next) => {
