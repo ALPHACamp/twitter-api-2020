@@ -10,7 +10,7 @@ module.exports = {
     users.forEach(user => {
       for (let i = 0; i < 10; i++) {
         tweetDada.push({
-          User_id: user.id,
+          user_id: user.id,
           description: faker.lorem.text().substring(0, 140),
           created_at: new Date(),
           updated_at: new Date()
