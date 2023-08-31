@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
+const { Op } = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { relativeTimeFormat } = require('../helpers/day-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -143,12 +144,32 @@ const userServices = {
   },
   putUser: async (req, cb) => {
     try {
-      const { name, introduction } = req.body
+      const { name, email, account, password, checkPassword, introduction } = req.body
       const { id } = req.params
       const { files } = req
       if (!id === req.user.id) {
         const err = new Error('無權修改')
         err.status = 403
+        throw err
+      }
+      if (password !== checkPassword) {
+        const err = new Error('密碼跟確認密碼不符')
+        err.status = 403
+        throw err
+      }
+      const allUsers = await User.findAll({
+        where: { id: { [Op.ne]: id } }
+      })
+      const existingAccount = allUsers.find(user => user.account === account)
+      const existingEmail = allUsers.find(user => user.email === email)
+      if (existingAccount) {
+        const err = new Error('帳號重複')
+        err.status = 400
+        throw err
+      }
+      if (existingEmail) {
+        const err = new Error('email重複')
+        err.status = 400
         throw err
       }
       const user = await User.findByPk(id)
@@ -167,10 +188,16 @@ const userServices = {
         err.status = 400
         throw err
       }
-      const filePath = await imgurFileHandler(files)
+      const [filePath, passwordSalt] = await Promise.all([
+        imgurFileHandler(files),
+        password ? bcrypt.hash(password, 10) : null
+      ])
       const updateUser = await user.update({
         name,
         introduction,
+        email,
+        account,
+        password: passwordSalt || user.password,
         avatar: filePath[0] || user.avatar,
         banner: filePath[1] || user.banner
       })
