@@ -74,7 +74,8 @@ const userController = {
           exclude: ['password'],
           include: [
             [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount'],
-            [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followerId` = `User`.`id`)'), 'followingsCount']
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followerId` = `User`.`id`)'), 'followingsCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `Tweets` WHERE `Tweets`.`UserId` = `User`.`id`)'), 'tweetsCount']
           ]
         },
         raw: true
@@ -84,12 +85,10 @@ const userController = {
         err.status = 404
         throw err
       }
-      const tweetsCount = await Tweet.count({ where: { UserId } })
 
       const data = {
         ...user,
         isFollowed,
-        tweetsCount
       }
       return res.json(data)
     } catch (err) {
