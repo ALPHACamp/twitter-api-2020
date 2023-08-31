@@ -9,10 +9,12 @@ const followshipController = {
       if (followingId === followerId) throw new Error('無法跟隨自己!')
 
       const [user, followship] = await Promise.all([
-        User.findByPk(followingId),
+        User.findByPk(followingId, {
+          attributes: { exclude: ['password'] }
+        }),
         Followship.findOne({ where: { followerId, followingId } })
       ])
-      if (!user) {
+      if (!user || user.admin === 'admin') {
         const err = new Error('特定使用者不存在!')
         err.status = 404
         throw err
@@ -35,10 +37,12 @@ const followshipController = {
       const followerId = helpers.getUser(req).id // 使用者本人
 
       const [user, followship] = await Promise.all([
-        User.findByPk(followingId),
+        User.findByPk(followingId, {
+          attributes: { exclude: ['password'] }
+        }),
         Followship.findOne({ where: { followerId, followingId } })
       ])
-      if (!user) {
+      if (!user || user.admin === 'admin') {
         const err = new Error('特定使用者不存在!')
         err.status = 404
         throw err

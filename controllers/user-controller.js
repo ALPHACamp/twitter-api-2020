@@ -23,6 +23,7 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
+      if (!/^[a-zA-Z0-9]+$/.test(account) || account.length > 50) throw new Error('字數上限50字，只能輸入英文字母、數字')
       if (!name || !account || !email || !password || !checkPassword) throw new Error('所有欄位皆為必填！')
       if (name.length > 50) throw new Error('名稱字數超出上限！')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
@@ -89,8 +90,8 @@ const userController = {
   },
   editUser: async (req, res, next) => {
     try {
-      const UserId = req.params.id // 被查看的使用者 ID
-      const currentUserId = helpers.getUser(req).id.toString() // 用戶 ID
+      const UserId = Number(req.params.id) // 被查看的使用者 ID
+      const currentUserId = helpers.getUser(req).id // 用戶 ID
       const isCurrentUser = currentUserId === UserId // 判斷是否是使用者本人
       if (!isCurrentUser) throw new Error('使用者非本人！')
 
@@ -107,10 +108,11 @@ const userController = {
       const avatarPath = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
       const coverPath = req.files?.cover ? await imgurFileHandler(req.files.cover[0]) : null
 
-      if (account && name && email && password && checkPassword) { // EDIT
+      if (account && name && email && password && checkPassword) { // Setting
+        if (!/^[a-zA-Z0-9]+$/.test(account) || account.length > 50) throw new Error('字數上限50字，只能輸入英文字母、數字')
         if (name.length > 50) throw new Error('名稱字數超出上限！')
         if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
-        if (introduction.length > 160) throw new Error('自我介紹字數超出上限！')
+        if (password.length < 5 || password.length > 20) throw new Error('請設定 5 到 20 位密碼')
 
         const [userEmail, userAccount] = await Promise.all([
           User.findOne({ where: { email } }),
@@ -130,13 +132,15 @@ const userController = {
           },
           { where: { id: UserId } }
         )
-      } else if (name && (introduction || avatarPath || coverPath)) { // SETTING
+      } else if (name && (introduction || avatarPath || coverPath)) { // Edit
+        if (name.length > 50) throw new Error('名稱字數超出上限！')
+        if (introduction.length > 160) throw new Error('自我介紹字數超出上限！')
         // Setting 回傳值(須包含 name + 其他至少一項)
         await User.update({
           name,
           introduction,
-          avatar: avatarPath || null,
-          cover: coverPath || null
+          avatar: avatarPath || 'https://i.imgur.com/uSgVo9G.png',
+          cover: coverPath || 'https://i.imgur.com/7uwf8kO.png'
         },
         { where: { id: UserId } }
         )
@@ -150,7 +154,7 @@ const userController = {
       })
       return res.json({
         status: 'success',
-        message: account ? 'Edit成功' : 'Setting成功',
+        message: account ? 'Setting成功' : 'Edit成功',
         data: { user: updatedUser.toJSON() }
       })
     } catch (err) {
@@ -172,7 +176,8 @@ const userController = {
           { model: Reply },
           {
             model: User,
-            as: 'LikedUsers'
+            as: 'LikedUsers',
+            attributes: ['id']
           }
         ],
         order: [['createdAt', 'DESC']]
@@ -194,7 +199,7 @@ const userController = {
         createdAt: relativeTimeFromNow(tweet.createdAt),
         repliedAmount: tweet.Replies.length || 0,
         likedAmount: tweet.LikedUsers.length || 0,
-        isLiked: tweets.LikedUsers?.some(liked => liked.UserId === helpers.getUser(req).id) || false
+        isLiked: tweet.LikedUsers?.some(liked => liked.id === helpers.getUser(req).id) || false
       }))
       return res.json(data)
     } catch (err) {
@@ -258,7 +263,7 @@ const userController = {
           where: { UserId: user.id },
           include: [
             {
-              model: Tweet, include: [{ model: User, attributes: ['id', 'account'] }, Reply, Like]// 回傳這篇推文主人的id、account、及回覆數
+              model: Tweet, include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }, Reply, Like]// 回傳這篇推文主人的id、account、及回覆數
             }
           ],
           order: [['createdAt', 'DESC']]
@@ -282,6 +287,7 @@ const userController = {
         createdAt: relativeTimeFromNow(like.createdAt),
         repliedAmount: like.Tweet.Replies.length || 0,
         likedAmount: like.Tweet.Likes.length || 0,
+        tweetCreatedAt: relativeTimeFromNow(like.Tweet.createdAt),
         isLiked: currentUserLikes?.includes(like.Tweet.id)
       }))
       return res.status(200).json(data)
@@ -380,13 +386,16 @@ const userController = {
   getTopUsers: async (req, res, next) => {
     try {
       const topNumber = Number(req.query.top)
+      const currentUser = helpers.getUser(req).id // 目前登入者的id
       const followings = helpers.getUser(req).Followings // 目前登入者的追蹤資料
-      const currentUserFollowing = followings.map(f => f.followingId) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
+      const currentUserFollowing = followings.map(f => f.id) // 使用者本人追蹤的名單陣列(裡面含追蹤者id)
       // 取User(引入Followers)
       const users = await User.findAll({
-        attributes: ['id', 'account', 'name', 'avatar', 'role'],
-        include: [{ model: User, as: 'Followers', attributes: ['id', 'account'] }],
-        raw: true
+        where: {
+          id: { [sequelize.Op.ne]: currentUser }, role: 'user'// 比對userid非本人 且role為user
+        },
+        attributes: { exclude: 'password' },
+        include: { model: User, as: 'Followers' }
       })
       if (!users) {
         const err = new Error('不存在使用者')
@@ -394,7 +403,6 @@ const userController = {
         throw err
       }
       const data = users
-        .filter(user => user.role === 'user') // 過濾admin
         .map(user => ({
           id: user.id,
           account: user.account,

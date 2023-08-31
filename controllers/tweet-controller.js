@@ -75,6 +75,7 @@ const tweetController = {
       }))
       const data = {
         ...tweet.toJSON(),
+        createdAt: relativeTimeFromNow(tweet.createdAt), // 提供推文modal需要的相對時間格式
         createdAtDate: formatDate(tweet.createdAt), // 提供推文需要的日期格式
         createdAtTime: formatTime(tweet.createdAt), // 提供推文需要的時間格式
         Replies: repliesData,
@@ -115,7 +116,13 @@ const tweetController = {
       const UserId = helpers.getUser(req).id
 
       const [tweet, like] = await Promise.all([
-        Tweet.findByPk(TweetId),
+        Tweet.findByPk(TweetId, {
+          include: {
+            model: User,
+            as: 'LikedUsers',
+            attributes: ['id']
+          }
+        }),
         Like.findOne({
           where: { UserId, TweetId }
         })
@@ -128,6 +135,10 @@ const tweetController = {
         UserId,
         TweetId
       })
+
+      tweet.dataValues.isLiked = true // 提供前端當前使用者已喜歡的判斷
+      tweet.dataValues.likedAmount = tweet.dataValues.LikedUsers?.length + 1 || 1 // 取得本篇貼文總喜歡數(含此次新增的喜歡)
+      delete tweet.dataValues.LikedUsers // 刪除多餘關聯資料
 
       return res.status(200).json({
         status: 'success',
@@ -144,7 +155,13 @@ const tweetController = {
       const UserId = helpers.getUser(req).id
 
       const [tweet, like] = await Promise.all([
-        Tweet.findByPk(TweetId),
+        Tweet.findByPk(TweetId, {
+          include: {
+            model: User,
+            as: 'LikedUsers',
+            attributes: ['id']
+          }
+        }),
         Like.findOne({
           where: { UserId, TweetId }
         })
@@ -154,6 +171,10 @@ const tweetController = {
       if (!like) throw new Error('你尚未喜歡過這則推文！')
 
       await like.destroy() // 採取刪除like column策略
+
+      tweet.dataValues.isLiked = false // 提供前端當前使用者取消喜歡的判斷
+      tweet.dataValues.likedAmount = tweet.dataValues.LikedUsers?.length - 1 || 0 // 取得本篇貼文總喜歡數(扣掉此次取消的喜歡)
+      delete tweet.dataValues.LikedUsers // 刪除多餘關聯資料
 
       return res.status(200).json({
         status: 'success',
