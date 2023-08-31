@@ -9,7 +9,9 @@ const followshipController = {
       if (followingId === followerId) throw new Error('無法跟隨自己!')
 
       const [user, followship] = await Promise.all([
-        User.findByPk(followingId),
+        User.findByPk(followingId, {
+          attributes: { exclude: ['password'] }
+        }),
         Followship.findOne({ where: { followerId, followingId } })
       ])
       if (!user || user.admin === 'admin') {
@@ -19,7 +21,6 @@ const followshipController = {
       }
       if (followship) throw new Error('已跟隨該使用者!')
 
-      delete user.password
       const data = await Followship.create({ followerId, followingId })
       return res.status(200).json({
         message: '跟隨成功!',
@@ -36,7 +37,9 @@ const followshipController = {
       const followerId = helpers.getUser(req).id // 使用者本人
 
       const [user, followship] = await Promise.all([
-        User.findByPk(followingId),
+        User.findByPk(followingId, {
+          attributes: { exclude: ['password'] }
+        }),
         Followship.findOne({ where: { followerId, followingId } })
       ])
       if (!user || user.admin === 'admin') {
@@ -46,7 +49,6 @@ const followshipController = {
       }
       if (!followship) throw new Error('未跟隨該使用者!')
 
-      delete user.password
       const data = followship
       await followship.destroy()
       return res.status(200).json({
