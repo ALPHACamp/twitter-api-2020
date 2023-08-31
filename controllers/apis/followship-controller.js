@@ -34,9 +34,9 @@ const followshipController = {
   },
   unfollowUser: async (req, res, next) => {
     try {
-      const followingId = req.params.following_id
+      const followingId = req.params.following_id // 我要取消追蹤的對象
       const getUser = helpers.getUser(req)
-      const userId = getUser.id
+      const userId = getUser.id // 現在使用者本人
       const user = await User.findByPk(userId)
       if (!user) throw new Error("User didn't exist!")
       const followship = await Followship.destroy({
@@ -47,7 +47,7 @@ const followshipController = {
       })
 
       if (!followship[1]) {
-        throw new Error("You've are already followed this user!")
+        throw new Error("You haven't followed this user!")
       }
       res.status(200).json({
         status: 'success',
