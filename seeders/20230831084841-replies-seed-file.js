@@ -11,13 +11,11 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const replyData = []
-    console.log(users)
     tweets.forEach(tweet => {
-      const userData = users
+      const userData = users.slice()
       for (let i = 0; i < 3; i++) {
         const index = Math.floor(Math.random() * userData.length)
         const user = userData.splice(index, 1)[0]
-        console.log(user)
         replyData.push({
           user_id: user.id,
           tweet_id: tweet.id,
