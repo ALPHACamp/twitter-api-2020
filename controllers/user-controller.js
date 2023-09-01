@@ -138,21 +138,23 @@ const userController = {
     try {
       const UserId = req.params.id
 
-      const user = await User.findByPk(UserId)
+      const [user, replies] = await Promise.all([
+        User.findByPk(UserId),
+        Reply.findAll({
+          where: { UserId },
+          include: [
+            { model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }] }
+          ],
+          order: [['createdAt', 'DESC']],
+          raw: true,
+          nest: true
+        })
+      ])
       if (!user) {
         const err = new Error('使用者不存在！')
         err.status = 404
         throw err
       }
-      const replies = await Reply.findAll({
-        where: { UserId },
-        include: [
-          { model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }] }
-        ],
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
-      })
 
       return res.json(replies)
     } catch (err) {
