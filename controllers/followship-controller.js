@@ -31,13 +31,15 @@ const followshipController = {
       const followingId = req.params.followingId
       const followerId = helpers.getUser(req).id
 
-      const user = await User.findByPk(followingId)
+      const [user, followship] = await Promise.all([
+        User.findByPk(followingId),
+        Followship.findOne({ where: { followerId, followingId } })
+      ])
       if (!user) {
         const err = new Error('使用者不存在!')
         err.status = 404
         throw err
       }
-      const followship = await Followship.findOne({ where: { followerId, followingId } })
       if (!followship) throw new Error('沒有跟隨過此使用者!')
 
       const deletedFollowship = await followship.destroy()
