@@ -30,8 +30,8 @@ const adminController = {
         attributes: ['id', 'name', 'account', 'avatar', 'cover',
           [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.followingId = User.id)'), 'follower'],
           [sequelize.literal('(SELECT COUNT(id) FROM Followships WHERE Followships.followerId = User.id)'), 'following'],
-          [sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.UserId = user.id)'), 'tweetCount'],
-          [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.UserId = user.id and Likes.isLiked = true)'), 'likeCount']
+          [sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'],
+          [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.UserId = User.id and Likes.isLiked = true)'), 'likeCount']
         ],
         order: [[sequelize.literal('tweetCount'), 'DESC']],
         raw: true,
