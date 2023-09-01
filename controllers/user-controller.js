@@ -285,19 +285,21 @@ const userController = {
   getFollowers: async (req, res, next) => {
     try {
       const followingsId = helpers.getUser(req).Followings.map(f => f.id)
-      const user = await User.findByPk(req.params.id)
+      const [user, followships] = await Promise.all([
+        User.findByPk(req.params.id),
+        Followship.findAll({
+          where: { FollowingId: req.params.id },
+          include: { model: User, as: 'Follower', attributes: { exclude: 'password' } },
+          order: [['createdAt', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
       if (!user) {
         const err = new Error('使用者不存在！')
         err.status = 404
         throw err
       }
-      const followships = await Followship.findAll({
-        where: { FollowingId: req.params.id },
-        include: { model: User, as: 'Follower', attributes: { exclude: 'password' } },
-        order: [['createdAt', 'DESC']],
-        nest: true,
-        raw: true
-      })
       const data = followships.map(f => {
         f.Follower.isFollowed = followingsId.some(id => id === f.Follower.id)
         return f
