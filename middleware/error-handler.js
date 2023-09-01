@@ -5,18 +5,6 @@ module.exports = {
         status: 'error',
         message: `${err.name}: ${err.message}`
       })
-      // if (err.message === "帳號不存在") {
-      //   return res.status(200).json({
-      //     status: "error",
-      //     statusCode: "404",
-      //     message: `${err.message}`,
-      //   });
-      // }
-      // res.status(200).json({
-      //   status: "error",
-      //   statusCode: "400",
-      //   message: `${err.message}`,
-      // });
     } else {
       res.status(500).json({
         status: 'error',
@@ -25,4 +13,24 @@ module.exports = {
     }
     next(err)
   }
+
+  // apiErrorHandler (err, req, res, next) {
+  //   if (err instanceof Error) {
+  //     res.status(err.status).json({
+  //       status: 'error',
+  //       message: err.message
+  //     })
+  //   } else if (err instanceof Error) {
+  //     res.status(500).json({
+  //       status: 'error',
+  //       message: `${err.name}: ${err.message}`
+  //     })
+  //   } else {
+  //     res.status(500).json({
+  //       status: 'error',
+  //       message: `${err}`
+  //     })
+  //   }
+  //   next(err)
+  // }
 }

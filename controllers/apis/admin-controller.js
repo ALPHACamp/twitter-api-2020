@@ -44,14 +44,13 @@ const adminController = {
         order: [[sequelize.col('tweetCount'), 'DESC'], ['createdAt']]
       }
       const users = await User.findAll(options)
-      // console.log("usersbeforeforeach", users);
+
       users.forEach(user => {
         if (user.introduction) {
           user.introduction = user.introduction.substring(0, 50)
         }
       })
 
-      // console.log(users);
       res.status(200).json(users)
     } catch (error) {
       next(error)
@@ -81,7 +80,7 @@ const adminController = {
     }
   },
 
-  deleteTweet: async (req, res) => {
+  deleteTweet: async (req, res, next) => {
     try {
       const [tweet] = await Promise.all([
         Tweet.destroy({
@@ -97,37 +96,35 @@ const adminController = {
       ])
 
       if (!tweet) {
-        throw new Error(
-          '此貼文不存在，可能是 Parameters 的資料錯誤或已經被刪除'
-        )
+        return res.status(400).json({ status: 'error', message: '此貼文不存在, 可能是 Parameters 的資料錯誤或已經被刪除' })
       }
 
       return res.status(200).json({
         status: 'success',
         message: 'Successfully delete tweet.'
       })
-    } catch (error) {
-      return res.status(500).json({
-        status: 'error',
-        message: error.message
-      })
+    } catch (err) {
+      next(err)
     }
   },
 
   signIn: async (req, res, next) => {
     try {
       const { account, password } = req.body
-      if (!account || !password) {
-        throw new Error('Please enter account and password')
-      }
+      if (!account || !password) return res.status(400).json({ status: 'error', message: 'please enter account and password' })
 
       const user = await User.findOne({ where: { account } })
 
-      if (!user) throw new Error('User does not exist')
-      if (user.role === 'user') throw new Error('user permission denied')
-      if (!bcrypt.compareSync(password, user.password)) {
-        throw new Error('Incorrect password')
+      if (!user) return res.status(400).json({ status: 'error', message: 'invalid account or password' })
+
+      if (user.role === 'user') {
+        return res.status(403).json({
+          status: 'error',
+          message: 'user permission denied'
+        })
       }
+
+      if (!bcrypt.compareSync(password, user.password)) return res.status(400).json({ status: 'error', message: 'incorrect password' })
 
       const payload = {
         id: user.id,

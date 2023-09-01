@@ -28,8 +28,16 @@ const userController = {
       })
 
       if (user) {
-        if (user.account === account) throw new Error('account 已重複註冊！')
-        if (user.email === email) throw new Error('email 已重複註冊！')
+        if (user.account === account) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'account 已重複註冊!'
+          })
+        }
+      }
+
+      if (user) {
+        if (user.email === email) return res.status(400).json({ status: 'error', message: 'email 已重複註冊!' })
       }
 
       const createdUser = await User.create({
@@ -37,7 +45,9 @@ const userController = {
         email,
         account,
         password: bcrypt.hashSync(password, 10),
-        avatar: 'https://picsum.photos/100/100',
+        avatar: `https://loremflickr.com/150/150/cat/?random=${
+          Math.random() * 100
+        }`,
         cover: 'https://picsum.photos/id/237/700/400',
         role: 'user',
         createdAt: new Date(),
@@ -56,24 +66,27 @@ const userController = {
   signIn: async (req, res, next) => {
     try {
       const { account, password } = req.body
-      if (!account || !password) {
-        throw new Error('Please enter account and password')
-      }
+
+      if (!account || !password) return res.status(400).json({ status: 'error', message: 'please enter account and password' })
 
       const user = await User.findOne({ where: { account } })
-      if (!user) throw new Error('User does not exist')
-      if (user.role === 'admin') throw new Error('admin permission denied')
-      if (!bcrypt.compareSync(password, user.password)) {
-        throw new Error('Incorrect password')
-      }
+
+      if (!user) return res.status(400).json({ status: 'error', message: 'invalid account or password' })
+
+      if (user.role === 'admin') return res.status(403).json({ status: 'error', message: 'admin permission denied' })
+
+      if (!bcrypt.compareSync(password, user.password)) return res.status(400).json({ status: 'error', message: 'incorrect password' })
+
       const payload = {
         id: user.id,
         account: user.account,
         role: user.role
       }
+
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
+
       const userId = user.toJSON().id
 
       res.status(200).json({
@@ -84,6 +97,7 @@ const userController = {
         }
       })
     } catch (err) {
+      console.error('Error caught in signIn:', err)
       next(err)
     }
   },
@@ -126,7 +140,7 @@ const userController = {
           follow => follow.followingId === Number(id)
         )
       }
-      console.log(user)
+
       res.status(200).json(user)
     } catch (err) {
       next(err)
@@ -197,38 +211,49 @@ const userController = {
       const currentUserId = helpers.getUser(req).id
 
       if (!currentUserId) {
-        throw new Error('Current user ID is missing')
+        return res.status(401).json({
+          status: 'error',
+          message: 'Please login first'
+        })
       }
 
       if (currentUserId !== Number(id)) {
-        throw new Error('Cannot edit other users profile')
+        return res.status(403).json({
+          status: 'error',
+          message: 'You are not allowed to edit other users'
+        })
       }
 
       if (name && name.length > 50) {
-        throw new Error('the length of name should less than 50 characters')
+        return res.status(400).json({
+          status: 'error',
+          message: 'the length of name should less than 50 characters'
+        })
       }
       if (introduction && introduction.length > 160) {
-        throw new Error(
-          'the length of introduction should less than 160 characters'
-        )
+        return res.status(400).json({
+          status: 'error',
+          message: 'the length of introduction should less than 160 characters'
+        })
       }
 
-      if (account) {
-        const userByAccount = await User.findOne({
-          where: { account },
-          raw: true,
-          nest: true
-        })
-
+      if (user.account) {
+        const userByAccount = await User.findOne({ where: { account } })
         if (userByAccount && userByAccount.account === account) {
-          throw new Error('account 已重複註冊!')
+          return res.status(400).json({
+            status: 'error',
+            message: 'account 已重複註冊!'
+          })
         }
       }
 
-      if (email) {
+      if (user.email) {
         const userByEmail = await User.findOne({ where: { email } })
         if (userByEmail && userByEmail.email === email) {
-          throw new Error('email 已重複註冊!')
+          return res.status(400).json({
+            status: 'error',
+            message: 'email 已重複註冊!'
+          })
         }
       }
 
@@ -264,41 +289,69 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const { id } = req.params
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
+      const likes = await Like.findAll({
+        where: { userId: id },
+        raw: true,
+        nest: true,
+        include: [
+          // {
+          //   model: User,
+          //   attributes: { exclude: ["password"] },
+          // },
+          {
+            model: Tweet,
+            as: 'likedTweet',
+            attributes: [
+              'id',
+              'UserId',
+              'description',
+              'createdAt',
+              'updatedAt',
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(DISTINCT id) FROM Replies WHERE tweet_id = likedTweet.id)'
+                ),
+                'replyCount'
+              ],
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(DISTINCT id) FROM Likes WHERE tweet_id = likedTweet.id)'
+                ),
+                'likeCount'
+              ],
+              [
+                sequelize.literal(
+                  `(CASE WHEN EXISTS (SELECT 1 FROM Likes WHERE tweet_id = likedTweet.id AND user_id = ${currentUserId}) THEN TRUE ELSE FALSE END)`
+                ),
+                'isLiked'
+              ]
+            ],
+            include: [
+              { model: User, as: 'author' }
+              // { model: Reply, as: "replies" },
+            ]
+          }
+        ]
+      })
 
-      const [likedTweets, likeCount, replyCount] = await Promise.all([
-        Tweet.findAll({
-          where: { userId: id },
-          order: [['createdAt', 'DESC']],
-          include: [
-            {
-              model: User,
-              as: 'author',
-              attributes: { exclude: ['password'] }
-            }
-          ]
-        }),
-        Like.findAll({
-          where: { userId: id }
-        }),
-        Reply.findAll({
-          where: { userId: id }
-        })
-      ])
-      if (likedTweets.length === 0) return res.status(200).json({ status: 'success', message: 'No likes' })
-      
-      console.log(likedTweets)
-      const likedTweetsData = likedTweets.map(tweet => ({
-        TweetId: tweet.id,
-        tweetBelongerName: tweet.author.name,
-        tweetBelongerAccount: tweet.author.account,
-        tweetBelongerAvatar: tweet.author.avatar,
-        tweetContent: tweet.description,
-        createdAt: tweet.createdAt,
-        replyCount: replyCount.length,
-        likeCount: likeCount.length
+      if (likes.length === 0) {
+        return res.status(200).json({ status: 'success', message: 'No likes' })
+      }
+
+      const likedTweetsData = likes.map(like => ({
+        TweetId: like.likedTweet.id,
+        tweetBelongerName: like.likedTweet.author.name,
+        tweetBelongerAccount: like.likedTweet.author.account,
+        tweetBelongerAvatar: like.likedTweet.author.avatar,
+        tweetContent: like.likedTweet.description,
+        createdAt: like.likedTweet.createdAt,
+        replyCount: like.likedTweet.replyCount,
+        likeCount: like.likedTweet.likeCount,
+        isLiked: like.likedTweet.isLiked === 1
       }))
       res.status(200).json(likedTweetsData)
     } catch (err) {
@@ -345,7 +398,7 @@ const userController = {
           ]
         })
       ])
-      console.log(userTweets)
+
       const userTweetsData = userTweets.map(tweet => ({
         TweetId: tweet.id,
         tweetBelongerName: tweet.author.name,
@@ -364,7 +417,7 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      const { id } = req.params // 18 target
+      const { id } = req.params
       const user = await User.findByPk(id, {
         include: {
           model: User,
@@ -373,7 +426,8 @@ const userController = {
       }
       )
 
-      if (!user) throw new Error('User does not exist')
+      if (!user) return res.status(400).json({ status: 'error', message: 'User does not exist' })
+
       if (!user.Followers) return res.status(200).json({ status: 'success', message: 'No followers' })
 
       const currentUserId = helpers.getUser(req).id
@@ -408,7 +462,8 @@ const userController = {
           as: 'Followings'
         }
       })
-      if (!user) throw new Error('User does not exist')
+      if (!user) return res.status(400).json({ status: 'error', message: 'User does not exist' })
+
       if (!user.Followings) return res.status(200).json({ status: 'success', message: 'No followings' })
 
       const currentUserId = helpers.getUser(req).id
