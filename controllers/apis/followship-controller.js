@@ -88,14 +88,6 @@ const followshipController = {
             'isFollowed'
           ]
         ],
-        include: [
-          {
-            model: User,
-            as: 'Followers',
-            attributes: [],
-            through: { attributes: [] }
-          }
-        ],
         order: [[sequelize.literal('totalFollowers'), 'DESC']],
         limit: 10,
         subQuery: false, // 避免因查詢多張表造成limit失常
