@@ -328,7 +328,7 @@ const userController = {
         createdAt: like.likedTweet.createdAt,
         replyCount: like.likedTweet.replyCount,
         likeCount: like.likedTweet.likeCount,
-        isLiked: like.likedTweet.isLiked,
+        isLiked: like.likedTweet.isLiked === 1,
       }));
       res.status(200).json(likedTweetsData);
     } catch (err) {
