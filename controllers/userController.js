@@ -92,8 +92,12 @@ const userController = {
     try {
       const id = req.params.id
       const currentUserId = getUser(req).dataValues.id
-
       if (id.toString() === ':id') return res.status(404).json({ status: 'error', message: '無輸入 params id' })
+
+      const isAdminUser = await User.findOne({
+        where: sequelize.literal(`role != 'admin' AND id = '${id}'`)
+      })
+      if (!isAdminUser) return res.status(404).json({ status: 'error', message: '使用者不存在' })
 
       const [user] = await Promise.all([
         User.findByPk(id, {
@@ -110,7 +114,6 @@ const userController = {
           nest: true
         })
       ])
-
       if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
 
       delete user.password
