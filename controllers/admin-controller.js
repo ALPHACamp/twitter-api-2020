@@ -5,9 +5,8 @@ const Sequelize = require('sequelize')
 
 const adminController = {
   signIn: (req, res, next) => {
-    const userData = helpers.getUser(req).toJSON()
+    const userData = helpers.getUser(req)
     const JWTSecret = process.env.JWT_SECRET || 'SECRET'
-    delete userData.password
     if (userData.role === 'user') {
       const err = new Error('帳號不存在！')
       err.status = 404
@@ -30,14 +29,10 @@ const adminController = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
-        attributes: [
-          'id',
-          'UserId',
-          // 使用 SQL 語法抓出 description 前 50 個字
-          [Sequelize.literal('SUBSTRING(description, 1, 50)'), 'description'],
-          'createdAt',
-          'updatedAt'
-        ],
+        attributes: {
+          exclude: 'description',
+          include: [[Sequelize.literal('SUBSTRING(description, 1, 50)'), 'description']]
+        },
         include: [
           { model: User, attributes: { exclude: ['password'] } }
         ],
@@ -60,10 +55,13 @@ const adminController = {
         err.status = 404
         throw err
       }
-      const deletedTweet = await tweet.destroy()
-      await Reply.destroy({ where: { TweetId: req.params.id } })
-      await Like.destroy({ where: { TweetId: req.params.id } })
 
+      const deleted = await Promise.all([
+        tweet.destroy(),
+        Reply.destroy({ where: { TweetId: req.params.id } }),
+        Like.destroy({ where: { TweetId: req.params.id } })
+      ])
+      const deletedTweet = deleted[0]
       return res.json({ status: 'success', data: { deletedTweet } })
     } catch (err) {
       return next(err)
