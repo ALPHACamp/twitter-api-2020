@@ -97,7 +97,6 @@ const userController = {
         }
       })
     } catch (err) {
-      console.error('Error caught in signIn:', err)
       next(err)
     }
   },
@@ -164,7 +163,12 @@ const userController = {
               model: Tweet,
               as: 'tweetreply',
               include: [
-                { model: User, as: 'author', attributes: ['account', 'name'] }
+                {
+                  model: User,
+                  as: 'author',
+                  attributes: ['account', 'name']
+                  // where: { role: "user" },
+                }
               ]
             }
           ],
@@ -179,10 +183,10 @@ const userController = {
       const userRepliesResult = replies.map(reply => ({
         replyId: reply.id,
         comment: reply.comment,
-        replierId: user.id,
-        replierName: user.name,
-        replierAvatar: user.avatar,
-        replierAccount: user.account,
+        replierId: reply.replier.id,
+        replierName: reply.replier.name,
+        replierAvatar: reply.replier.avatar,
+        replierAccount: reply.replier.account,
         createdAt: reply.createdAt,
         tweetId: reply.TweetId,
         tweetBelongerName: reply.tweetreply.author.name,
@@ -423,8 +427,14 @@ const userController = {
           model: User,
           as: 'Followers'
         }
+      })
+
+      if (!user) throw new Error('User does not exist')
+      if (!user.Followers) {
+        return res
+          .status(200)
+          .json({ status: 'success', message: 'No followers' })
       }
-      )
 
       if (!user) return res.status(400).json({ status: 'error', message: 'User does not exist' })
 
@@ -437,7 +447,9 @@ const userController = {
         raw: true
       })
 
-      const followingIds = currentUserFollowingId.map(item => item.followingId)
+      const followingIds = currentUserFollowingId.map(
+        item => item.followingId
+      )
 
       const followersData = user.Followers.map(follower => ({
         followerId: follower.id,
@@ -473,7 +485,9 @@ const userController = {
         raw: true
       })
 
-      const followingIds = currentUserFollowingId.map(item => item.followingId)
+      const followingIds = currentUserFollowingId.map(
+        item => item.followingId
+      )
 
       const followingsData = user.Followings.map(following => ({
         followingId: following.id,
