@@ -8,6 +8,7 @@ const helpers = require('../../_helpers')
 
 const { User, Tweet, Reply, Followship, Like } = db
 const { Op } = require('sequelize')
+const like = require('../../models/like')
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -267,38 +268,64 @@ const userController = {
       const { id } = req.params
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
+      const likes = await Like.findAll({
+        where: { userId: id },
+        raw: true,
+        nest: true,
+        include: [
+          // {
+          //   model: User,
+          //   attributes: { exclude: ["password"] },
+          // },
+          {
+            model: Tweet,
+            as: 'likedTweet',
+            attributes: [
+              'id',
+              'UserId',
+              'description',
+              'createdAt',
+              'updatedAt',
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(DISTINCT id) FROM Replies WHERE tweet_id = likedTweet.id)'
+                ),
+                'replyCount'
+              ],
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(DISTINCT id) FROM Likes WHERE tweet_id = likedTweet.id)'
+                ),
+                'likeCount'
+              ],
+              [
+                sequelize.literal(
+                  `(CASE WHEN EXISTS (SELECT 1 FROM Likes WHERE tweet_id = likedTweet.id AND user_id = ${id}) THEN TRUE ELSE FALSE END)`
+                ),
+                'isLiked'
+              ]
+            ],
+            include: [
+              { model: User, as: 'author' }
+              // { model: Reply, as: "replies" },
+            ]
+          }
+        ]
+      })
+      console.log(likes)
 
-      const [likedTweets, likeCount, replyCount] = await Promise.all([
-        Tweet.findAll({
-          where: { userId: id },
-          order: [['createdAt', 'DESC']],
-          include: [
-            {
-              model: User,
-              as: 'author',
-              attributes: { exclude: ['password'] }
-            }
-          ]
-        }),
-        Like.findAll({
-          where: { userId: id }
-        }),
-        Reply.findAll({
-          where: { userId: id }
-        })
-      ])
-      if (likedTweets.length === 0) return res.status(200).json({ status: 'success', message: 'No likes' })
-      
-      console.log(likedTweets)
-      const likedTweetsData = likedTweets.map(tweet => ({
-        TweetId: tweet.id,
-        tweetBelongerName: tweet.author.name,
-        tweetBelongerAccount: tweet.author.account,
-        tweetBelongerAvatar: tweet.author.avatar,
-        tweetContent: tweet.description,
-        createdAt: tweet.createdAt,
-        replyCount: replyCount.length,
-        likeCount: likeCount.length
+      if (likes.length === 0) { return res.status(200).json({ status: 'success', message: 'No likes' }) }
+
+      const likedTweetsData = likes.map(like => ({
+        TweetId: like.likedTweet.id,
+        tweetBelongerName: like.likedTweet.author.name,
+        tweetBelongerAccount: like.likedTweet.author.account,
+        tweetBelongerAvatar: like.likedTweet.author.avatar,
+        tweetContent: like.likedTweet.description,
+        createdAt: like.likedTweet.createdAt,
+        replyCount: like.likedTweet.replyCount,
+        likeCount: like.likedTweet.likeCount,
+        isLiked: like.likedTweet.isLiked
       }))
       res.status(200).json(likedTweetsData)
     } catch (err) {
@@ -370,11 +397,14 @@ const userController = {
           model: User,
           as: 'Followers'
         }
-      }
-      )
+      })
 
       if (!user) throw new Error('User does not exist')
-      if (!user.Followers) return res.status(200).json({ status: 'success', message: 'No followers' })
+      if (!user.Followers) {
+        return res
+          .status(200)
+          .json({ status: 'success', message: 'No followers' })
+      }
 
       const currentUserId = helpers.getUser(req).id
 
@@ -383,7 +413,9 @@ const userController = {
         raw: true
       })
 
-      const followingIds = currentUserFollowingId.map(item => item.followingId)
+      const followingIds = currentUserFollowingId.map(
+        item => item.followingId
+      )
 
       const followersData = user.Followers.map(follower => ({
         followerId: follower.id,
@@ -409,7 +441,11 @@ const userController = {
         }
       })
       if (!user) throw new Error('User does not exist')
-      if (!user.Followings) return res.status(200).json({ status: 'success', message: 'No followings' })
+      if (!user.Followings) {
+        return res
+          .status(200)
+          .json({ status: 'success', message: 'No followings' })
+      }
 
       const currentUserId = helpers.getUser(req).id
 
@@ -418,7 +454,9 @@ const userController = {
         raw: true
       })
 
-      const followingIds = currentUserFollowingId.map(item => item.followingId)
+      const followingIds = currentUserFollowingId.map(
+        item => item.followingId
+      )
 
       const followingsData = user.Followings.map(following => ({
         followingId: following.id,
