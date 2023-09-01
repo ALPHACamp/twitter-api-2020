@@ -194,7 +194,7 @@ const userServices = {
       ])
       const updateUser = await user.update({
         name,
-        introduction,
+        introduction: introduction || user.introduction,
         email,
         account,
         password: passwordSalt || user.password,
