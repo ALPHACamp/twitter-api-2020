@@ -79,6 +79,7 @@ npm run dev
 
 ```
 Server running on port:3000!
+<...sequelize message...>
 yes re-sync done!
 ```
 
