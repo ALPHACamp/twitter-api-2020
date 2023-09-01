@@ -93,7 +93,7 @@ const tweetController = {
     try {
       const { description } = req.body
 
-      if (!description) throw new Error('推文內容不可空白！')
+      if (!description.trim().length) throw new Error('推文內容不可空白！')
       if (description.length > 140) throw new Error('推文字數不可超過140字！')
 
       const tweet = await Tweet.create({
