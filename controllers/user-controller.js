@@ -134,7 +134,7 @@ const userController = {
         )
       } else if (name && (introduction || avatarPath || coverPath)) { // Edit
         if (name.length > 50) throw new Error('名稱字數超出上限！')
-        if (introduction.length > 160) throw new Error('自我介紹字數超出上限！')
+        if (introduction?.length > 160) throw new Error('自我介紹字數超出上限！')
         // Setting 回傳值(須包含 name + 其他至少一項)
         await User.update({
           name,
