@@ -2,6 +2,7 @@ const { Followship, User } = require('../models')
 // const { getUser } = require('../_helpers')
 const helpers = require('../_helpers')
 const sequelize = require('sequelize')
+const { Op } = require('sequelize')
 
 const followshipServices = {
   addFollowing: (req, cb) => {
@@ -52,6 +53,7 @@ const followshipServices = {
   topUsers: async (req, cb) => {
     try {
       const topUser = await User.findAll({
+        where: { role: { [Op.ne]: ['admin'] } },
         attributes: [
           'id',
           'avatar',
