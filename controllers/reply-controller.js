@@ -43,7 +43,7 @@ const replyController = {
       const { comment } = req.body
       const TweetId = req.params.tweetId
 
-      if (!comment) throw new Error('回覆內容不可空白！')
+      if (!comment.trim().length) throw new Error('回覆內容不可空白！') // 排除傳送僅含有空格的內容
       if (comment.length > 140) throw new Error('回覆字數不可超過140字！')
 
       const tweet = await Tweet.findByPk(TweetId)
