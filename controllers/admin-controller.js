@@ -55,10 +55,13 @@ const adminController = {
         err.status = 404
         throw err
       }
-      const deletedTweet = await tweet.destroy()
-      await Reply.destroy({ where: { TweetId: req.params.id } })
-      await Like.destroy({ where: { TweetId: req.params.id } })
 
+      const deleted = await Promise.all([
+        tweet.destroy(),
+        Reply.destroy({ where: { TweetId: req.params.id } }),
+        Like.destroy({ where: { TweetId: req.params.id } })
+      ])
+      const deletedTweet = deleted[0]
       return res.json({ status: 'success', data: { deletedTweet } })
     } catch (err) {
       return next(err)
