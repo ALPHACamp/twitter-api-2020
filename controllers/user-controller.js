@@ -397,8 +397,8 @@ const userController = {
       // 檢查各欄位是否符合規定
       const { account, name, email, password, checkPassword, introduction } = req.body
       if (password !== checkPassword) throw new Error('確認密碼不相符！')
-      if (name.length > 50) throw new Error('名稱不能超過50字')
-      if (introduction.length > 160) throw new Error('自我介紹不能超過160字')
+      if (name?.length > 50) throw new Error('名稱不能超過50字')
+      if (introduction?.length > 160) throw new Error('自我介紹不能超過160字')
 
       // 檢查新的帳密是否存在(但要排除未修改的狀況，否則所有request都會被擋)
       if (account && account !== user.account) {
