@@ -8,13 +8,15 @@ const followshipController = {
       const followerId = helpers.getUser(req).id
       if (followingId === followerId) throw new Error('無法跟隨自己!')
 
-      const user = await User.findByPk(followingId)
+      const [user, followship] = await Promise.all([
+        User.findByPk(followingId),
+        Followship.findOne({ where: { followerId, followingId } })
+      ])
       if (!user) {
         const err = new Error('被跟隨者不存在!')
         err.status = 404
         throw err
       }
-      const followship = await Followship.findOne({ where: { followerId, followingId } })
       if (followship) throw new Error('已跟隨該使用者!')
 
       const newFollowship = await Followship.create({ followerId, followingId })
