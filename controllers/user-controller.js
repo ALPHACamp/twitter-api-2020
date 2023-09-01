@@ -207,6 +207,7 @@ const userController = {
   },
   getUserTweets: (req, res, next) => {
     const { id } = req.params
+    const currentUserId = helpers.getUser(req).id
     return Tweet.findAll({
       where: { userId: id },
       order: [['createdAt', 'DESC']],
@@ -215,7 +216,7 @@ const userController = {
         'id', 'description', 'createdAt', 'updatedAt',
         [sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'), 'replyCount'],
         [sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 'likedCount'],
-        [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${id} > 0)`), 'isLiked']
+        [sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.Tweet_id = Tweet.id AND Likes.User_id = ${currentUserId} > 0)`), 'isLiked']
       ],
       raw: true,
       nest: true
