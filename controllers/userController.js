@@ -3,7 +3,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { Op } = require('sequelize')
 const { getUser } = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
