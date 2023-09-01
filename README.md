@@ -139,5 +139,5 @@ password: 12345678 <br>
 
 ### 後端
 
-[kim1037](https://github.com/DannyHucc)<br>
+[DannyHucc](https://github.com/DannyHucc)<br>
 [muco0521](https://github.com/muco0521)
