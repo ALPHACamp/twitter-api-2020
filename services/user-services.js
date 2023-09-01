@@ -280,18 +280,17 @@ const userServices = {
         where: { UserId: user.id },
         attributes: [
           'id',
-          'UserId',
           'TweetId',
           [
-            sequelize.literal('(SELECT avatar FROM Users WHERE Users.id = Like.UserId)'),
+            sequelize.literal('(SELECT avatar FROM Users WHERE Users.id IN (SELECT UserId FROM Tweets WHERE Tweets.id = Like.TweetId))'),
             'avatar'
           ],
           [
-            sequelize.literal('(SELECT name FROM Users WHERE Users.id = Like.UserId)'),
+            sequelize.literal('(SELECT name FROM Users WHERE Users.id IN (SELECT UserId FROM Tweets WHERE Tweets.id = Like.TweetId))'),
             'name'
           ],
           [
-            sequelize.literal('(SELECT account FROM Users WHERE Users.id = Like.UserId)'),
+            sequelize.literal('(SELECT account FROM Users WHERE Users.id IN (SELECT UserId FROM Tweets WHERE Tweets.id = Like.TweetId))'),
             'account'
           ],
           [
