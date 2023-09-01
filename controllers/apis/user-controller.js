@@ -151,7 +151,12 @@ const userController = {
               model: Tweet,
               as: "tweetreply",
               include: [
-                { model: User, as: "author", attributes: ["account", "name"] },
+                {
+                  model: User,
+                  as: "author",
+                  attributes: ["account", "name"],
+                  // where: { role: "user" },
+                },
               ],
             },
           ],
@@ -166,10 +171,10 @@ const userController = {
       const userRepliesResult = replies.map((reply) => ({
         replyId: reply.id,
         comment: reply.comment,
-        replierId: user.id,
-        replierName: user.name,
-        replierAvatar: user.avatar,
-        replierAccount: user.account,
+        replierId: reply.replier.id,
+        replierName: reply.replier.name,
+        replierAvatar: reply.replier.avatar,
+        replierAccount: reply.replier.account,
         createdAt: reply.createdAt,
         tweetId: reply.TweetId,
         tweetBelongerName: reply.tweetreply.author.name,
