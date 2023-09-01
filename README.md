@@ -103,7 +103,7 @@
 
 ## 開發工具
 包含以下但不限於
-- Node.js @
+- Node.js @14.16.0
 - Express @4.16.4
 - mysql2 @1.6.4
 - sequelize: @6.18.0
