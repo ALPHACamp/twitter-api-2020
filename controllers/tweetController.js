@@ -144,7 +144,7 @@ const tweetController = {
       )
       if (!tweet) return res.status(404).json({ status: 'error', message: '推文不存在' })
 
-      const { id, description, createdAt, replyCount, likeCount, Replies } = tweet
+      const { id, description, createdAt, replyCount, likeCount, Replies } = tweet.toJSON()
       const currentUserLikes = tweet.Likes.map(l => l.TweetId)
       const data = {
         TweetId: id,
