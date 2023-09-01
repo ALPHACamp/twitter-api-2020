@@ -261,33 +261,38 @@ const userController = {
     try {
       const id = req.params.id
       const currentUserId = getUser(req).dataValues.id
-      const [user, following] = await Promise.all([
+
+      const [user] = await Promise.all([
         User.findByPk(id, {
+          attributes: { exclude: ['password'] },
           include: {
             model: User,
-            as: 'Followings'
+            as: 'Followings',
+            attributes: {
+              include: [
+                [sequelize.literal(`EXISTS (SELECT followingId FROM Followships WHERE Followships.followerId = ${currentUserId})`), 'isFollowed']
+              ],
+              exclude: ['password']
+            }
           },
           order: [[sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']]
-        }),
-        // 目前登入者的追蹤資料
-        Followship.findAll({
-          where: { followerId: currentUserId },
-          raw: true
         })
       ])
+
       if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
       if (!user.Followings.length) return res.status(200).json({ status: 'success', message: '無追蹤其他使用者' })
 
-      const currentUserFollowing = following.map(f => f.followingId)
-      const data = user.Followings.map(f => ({
+      const data = user.toJSON().Followings.map(f => ({
         followingId: f.id,
-        UserId: f.id,
+        UserId: id,
         account: f.account,
         name: f.name,
         avatar: f.avatar,
         introduction: f.introduction,
-        isFollowed: currentUserFollowing.includes(f.id)
+        isFollowed: Boolean(f.isFollowed)
       }))
+        .sort((a, b) => b.isFollowed - a.isFollowed)
+
       return res.status(200).json(data)
     } catch (err) {
       return next(err)
@@ -315,8 +320,6 @@ const userController = {
           order: [[sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']]
         })
       ])
-
-      console.log(user.toJSON())
 
       if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
       if (!user.Followers.length) return res.status(200).json({ status: 'success', message: '無跟隨者資料' })
