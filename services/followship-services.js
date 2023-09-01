@@ -50,29 +50,25 @@ const followshipServices = {
     })
       .catch(err => cb(err))
   },
-  topUsers: async (req, cb) => {
-    try {
-      const topUser = await User.findAll({
-        where: { role: { [Op.ne]: ['admin'] } },
-        attributes: [
-          'id',
-          'avatar',
-          'name',
-          'account',
-          [
-            sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE Followships.followingId = User.id )'),
-            'followingCount'
-          ]
-        ],
-        limit: 10,
-        order: [[sequelize.literal('followingCount'), 'DESC']],
-        raw: true,
-        nest: true
+  topFollowing: (req, cb) => {
+    User.findAll({
+      where: { role: 'user' },
+      limit: 10,
+      include: [{ model: User, attributes: ['id'], as: 'Followers' }]
+    })
+      .then(followships => {
+        const data = followships.map(followship => {
+          return {
+            ...followship.dataValues,
+            count: followship.Followers.length
+          }
+        })
+        data.sort(function (a, b) {
+          return b.count - a.count
+        })
+        cb(null, data)
       })
-      cb(null, topUser)
-    } catch (err) {
-      cb(err)
-    }
+      .catch(err => cb(err))
   }
 }
 
