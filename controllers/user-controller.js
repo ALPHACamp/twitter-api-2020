@@ -100,27 +100,29 @@ const userController = {
       const UserId = req.params.id
       const likedTweetsId = helpers.getUser(req)?.Likes ? helpers.getUser(req).Likes.map(l => l.TweetId) : []
 
-      const user = await User.findByPk(UserId)
+      const [user, tweets] = await Promise.all([
+        User.findByPk(UserId),
+        Tweet.findAll({
+          where: { UserId },
+          attributes: {
+            include: [
+              [Sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'), 'likesCount'],
+              [Sequelize.literal('(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`TweetId` = `Tweet`.`id`)'), 'repliesCount']
+            ]
+          },
+          include: [
+            { model: User, attributes: { exclude: ['password'] } }
+          ],
+          order: [['createdAt', 'DESC']],
+          raw: true,
+          nest: true
+        })
+      ])
       if (!user) {
         const err = new Error('使用者不存在！')
         err.status = 404
         throw err
       }
-      const tweets = await Tweet.findAll({
-        where: { UserId },
-        attributes: {
-          include: [
-            [Sequelize.literal('(SELECT COUNT(*) FROM `Likes` WHERE `Likes`.`TweetId` = `Tweet`.`id`)'), 'likesCount'],
-            [Sequelize.literal('(SELECT COUNT(*) FROM `Replies` WHERE `Replies`.`TweetId` = `Tweet`.`id`)'), 'repliesCount']
-          ]
-        },
-        include: [
-          { model: User, attributes: { exclude: ['password'] } }
-        ],
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
-      })
 
       const data = tweets.map(tweet => ({
         ...tweet,
