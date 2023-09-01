@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const { User, Tweet, Like, Reply, Followship } = require('../models')
 const { Op } = require('sequelize')
 const Sequelize = require('sequelize')
+const validator = require('validator')
 const { imgurFileHandler } = require('../helpers/file-handler')
 const helpers = require('../_helpers')
 
@@ -15,6 +16,7 @@ const userController = {
     if (account.length > 30) throw new Error('帳號字數超出上限！')
     if (password.length < 5 || password.length > 20) throw new Error('請設定 5 到 20 字的密碼！')
     if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
+    if (!validator.isEmail(email)) throw new Error('請輸入正確 email!')
 
     return Promise.all([
       User.findOne({ where: { email } }),
@@ -234,6 +236,7 @@ const userController = {
       }
       // 如果使用者輸入的 email 和原本一樣，就不用再去檢查 email 是否存在，不然會顯示 email 已重複註冊
       if (email) {
+        if (!validator.isEmail(email)) throw new Error('請輸入正確 email!')
         if (userA.email !== email) {
           const userB = await User.findOne({ where: { email } })
           if (userB) throw new Error('email已重複註冊！')
@@ -325,10 +328,10 @@ const userController = {
         where: { id: { [Op.ne]: helpers.getUser(req).id }, role: 'user' },
         attributes: {
           exclude: ['password'],
-          include: [[Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount']],
-          order: [['followersCount', 'DESC']],
-          limit: 10
-        }
+          include: [[Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount']]
+        },
+        order: [[Sequelize.literal('followersCount'), 'DESC']],
+        limit: 10
       })
       const data = users.map(u => {
         u.isFollowed = followingsId.some(id => id === u.id)
