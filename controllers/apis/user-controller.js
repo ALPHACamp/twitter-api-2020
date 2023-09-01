@@ -38,7 +38,7 @@ const userController = {
         email,
         account,
         password: bcrypt.hashSync(password, 10),
-        avatar: `https://picsum.photos/100/100/cat/?random=${
+        avatar: `https://loremflickr.com/150/150/cat/?random=${
           Math.random() * 100
         }`,
         cover: "https://picsum.photos/id/237/700/400",
