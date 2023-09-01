@@ -140,7 +140,7 @@ const userController = {
         user = user.toJSON()
         return tweets.map(tweet => ({
           ...tweet,
-          user: { ...user }
+          User: { ...user }
         }))
       })
       .then(tweets => res.status(200).json(tweets))
