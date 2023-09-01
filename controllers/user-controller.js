@@ -119,7 +119,7 @@ const userController = {
     // 取得該使用者的所有推文
     const paramsUserId = Number(req.params.id)
     Promise.all([
-      User.findByPk(paramsUserId),
+      User.findByPk(paramsUserId, { attributes: ['id', 'account', 'name', 'avatar', 'banner'] }),
       Tweet.findAll({
         where: { UserId: paramsUserId },
         raw: true
@@ -137,7 +137,11 @@ const userController = {
             message: '此使用者沒有任何推文'
           })
         }
-        return tweets.map(tweet => ({ ...tweet }))
+        user = user.toJSON()
+        return tweets.map(tweet => ({
+          ...tweet,
+          user: { ...user }
+        }))
       })
       .then(tweets => res.status(200).json(tweets))
       .catch(err => next(err))
@@ -146,11 +150,11 @@ const userController = {
     // 瀏覽某使用者回覆過的留言
     const paramsUserId = Number(req.params.id)
     Promise.all([
-      User.findByPk(paramsUserId),
+      User.findByPk(paramsUserId, { attributes: ['id', 'account', 'name', 'avatar', 'banner'] }),
       Reply.findAll({
         where: { UserId: paramsUserId },
         include: [
-          { model: Tweet }
+          { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] }
         ]
       })
     ])
@@ -166,6 +170,7 @@ const userController = {
             message: '此使用者沒有任何回覆'
           })
         }
+        user = user.toJSON()
         return res.status(200).json(replies)
       })
       .catch(err => next(err))
@@ -178,7 +183,7 @@ const userController = {
       Like.findAll({
         where: { UserId: paramsUserId },
         include: [
-          { model: Tweet }
+          { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] }
         ]
       })
     ])
