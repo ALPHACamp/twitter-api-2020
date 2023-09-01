@@ -298,30 +298,40 @@ const userController = {
     try {
       const id = req.params.id
       const currentUserId = getUser(req).dataValues.id
-      const [user, following] = await Promise.all([
+
+      const [user] = await Promise.all([
         User.findByPk(id, {
-          include: { model: User, as: 'Followers' },
+          attributes: { exclude: ['password'] },
+          include: {
+            model: User,
+            as: 'Followers',
+            attributes: {
+              include: [
+                [sequelize.literal(`EXISTS (SELECT followerId FROM Followships WHERE Followships.followerId = ${currentUserId})`), 'isFollowed']
+              ],
+              exclude: ['password']
+            }
+          },
           order: [[sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']]
-        }),
-        Followship.findAll({
-          where: { followerId: currentUserId },
-          raw: true
         })
       ])
+
+      console.log(user.toJSON())
 
       if (!user) return res.status(404).json({ status: 'error', message: '使用者不存在' })
       if (!user.Followers.length) return res.status(200).json({ status: 'success', message: '無跟隨者資料' })
 
-      const currentUserFollowing = following.map(f => f.followingId)
-      const data = user.Followers.map(f => ({
+      const data = user.toJSON().Followers.map(f => ({
         followerId: f.id,
-        UserId: f.id,
-        account: f.account,
+        UserId: id,
         name: f.name,
+        account: f.account,
         avatar: f.avatar,
         introduction: f.introduction,
-        isFollowed: currentUserFollowing.includes(f.id)
-      })).sort((a, b) => b.isFollowed - a.isFollowed)
+        isFollowed: Boolean(f.isFollowed)
+      }))
+        .sort((a, b) => b.isFollowed - a.isFollowed)
+
       return res.status(200).json(data)
     } catch (err) {
       return next(err)
