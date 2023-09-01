@@ -325,10 +325,10 @@ const userController = {
         where: { id: { [Op.ne]: helpers.getUser(req).id }, role: 'user' },
         attributes: {
           exclude: ['password'],
-          include: [[Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount']],
-          order: [['followersCount', 'DESC']],
-          limit: 10
-        }
+          include: [[Sequelize.literal('(SELECT COUNT(*) FROM `Followships` WHERE `Followships`.`followingId` = `User`.`id`)'), 'followersCount']]
+        },
+        order: [[Sequelize.literal('followersCount'), 'DESC']],
+        limit: 10
       })
       const data = users.map(u => {
         u.isFollowed = followingsId.some(id => id === u.id)
