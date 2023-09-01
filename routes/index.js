@@ -38,6 +38,7 @@ router.post('/api/tweets/:id/like', authenticated, authenticatedUser, tweetContr
 router.post('/api/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.removeLike)
 
 // 追蹤
+router.get('/api/followships/top10', authenticated, authenticatedUser, followshipController.topUsers)
 router.post('/api/followships', authenticated, authenticatedUser, followshipController.addFollowing)
 router.delete('/api/followships/:followingId', authenticated, authenticatedUser, followshipController.removeFollowing)
 
