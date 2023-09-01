@@ -1,5 +1,5 @@
 'use strict'
-const NumOfDummyUser = 15 // 隨機產生User數
+const NumOfDummyUser = 10 // 隨機產生User數
 
 // import { faker } from '@faker-js/faker'
 const { faker } = require('@faker-js/faker')
