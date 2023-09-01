@@ -7,8 +7,8 @@ const followshipController = {
   removeFollowing: (req, res, next) => {
     followshipServices.removeFollowing(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
-  topUsers: (req, res, next) => {
-    followshipServices.topUsers(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  topFollowing: (req, res, next) => {
+    followshipServices.topFollowing(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 
