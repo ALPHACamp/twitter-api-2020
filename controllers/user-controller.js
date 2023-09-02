@@ -402,12 +402,12 @@ const userController = {
       const user = await User.findByPk(UserId)
       if (!user) throw new Error('不存在的使用者')
 
-      // 檢查各欄位是否符合規定
+      // 檢查各欄位是否符合規定(未傳入、空字串不檢查)
       const { account, name, email, password, checkPassword, introduction } = req.body
-      if (!account.match(/^\S+$/)) throw new Error('account 不可包含空白。')
-      if (!email.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)) throw new Error('email 不符合格式。')
-      if (!password.match(/^\S+$/)) throw new Error('password 不可包含空白。')
-      if (!checkPassword.match(/^\S+$/)) throw new Error('checkPassword 不可包含空白。')
+      if (account && !account.match(/^\S+$/)) throw new Error('account 不可包含空白。')
+      if (email && !email.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)) throw new Error('email 不符合格式。')
+      if (password && !password.match(/^\S+$/)) throw new Error('password 不可包含空白。')
+      if (checkPassword && !checkPassword.match(/^\S+$/)) throw new Error('checkPassword 不可包含空白。')
 
       if (password !== checkPassword) throw new Error('確認密碼不相符！')
       if (name?.length > 50) throw new Error('名稱不能超過50字')
