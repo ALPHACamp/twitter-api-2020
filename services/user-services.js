@@ -183,7 +183,7 @@ const userServices = {
         throw err
       }
       if (introduction.length >= 160) {
-        const err = new Error('名稱不可超過50字')
+        const err = new Error('自我介紹不可超過160字')
         err.status = 400
         throw err
       }
