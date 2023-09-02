@@ -61,7 +61,7 @@ const followshipController = {
       .catch(err => next(err))
   },
   removeFollowing: (req, res, next) => {
-    const followingId = req.params.id // 當下按的使用者
+    const followingId = Numeber(req.params.id) // 當下按的使用者
     const UserId = helpers.getUser(req).id // 登入使用者 ID
 
     // 不能追蹤自己

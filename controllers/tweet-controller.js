@@ -119,7 +119,7 @@ const tweetController = {
   },
   // 按讚一筆貼文
   likeTweet: (req, res, next) => {
-    const TweetId = req.params.id
+    const TweetId = Number(req.params.id)
     const UserId = helpers.getUser(req).id
 
     return Promise.all([
@@ -156,7 +156,7 @@ const tweetController = {
   // 對一筆貼文收回讚
   unlikeTweet: (req, res, next) => {
     const UserId = helpers.getUser(req).id
-    const TweetId = req.params.id
+    const TweetId = Number(req.params.id)
 
     Tweet.findByPk(TweetId, {
       attributes: [
@@ -189,7 +189,7 @@ const tweetController = {
   },
   // 看貼文全部回覆
   getReplies: (req, res, next) => {
-    const TweetId = req.params.id 
+    const TweetId = Number(req.params.id)
     return Reply.findAll({
         raw: true,
         nest: true,
@@ -211,7 +211,7 @@ const tweetController = {
   // 回覆一筆貼文
   postReply: (req, res, next) => {
     const limitWords = 140
-    const TweetId = req.params.id
+    const TweetId = Number(req.params.id)
     const UserId = helpers.getUser(req).id
     const { comment } = req.body
 
