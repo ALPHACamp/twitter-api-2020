@@ -2,8 +2,8 @@
 - 這是一個類 Twtter 的社群網站，透過推文、回覆、喜歡、追蹤等功能與其他人進行互動
 - 本專案採用前後分離的開發模式，並透過 RESTful 風格進行設計
   - 後端成員：[Boxun](https://github.com/boxunw), [Jenny](https://github.com/yanyanyaa)
-  - 前端成員：[James](), [雅云]()
-  - [前端 repo]()
+  - 前端成員：[James](https://github.com/James-Lee-01), [雅云](https://github.com/Ya-Yun-Zheng)
+  - [前端 repo](https://github.com/James-Lee-01/simple-twitter)
 
 # 功能
 - 使用者可以註冊/登入帳號
@@ -24,8 +24,16 @@
 ```
 git clone https://github.com/boxunw/simple-twitter-api.git
 ```
-3. 參考 .env.example 檔案，建立 .env 檔案並設定環境變數
-4. 打開 /config/config.json 檔案，修改為資料庫使用的帳號密碼
+3. 打開專案資料夾
+```
+cd simple-twitter-api
+```
+5. 安裝 npm 套件
+```
+npm install
+```
+7. 參考 .env.example 檔案，建立 .env 檔案並設定環境變數
+8. 打開 /config/config.json 檔案，修改為資料庫使用的帳號密碼
 ```
 "development": {
   "username": "<your_mysql_workbench_name>",   // 修改此處
