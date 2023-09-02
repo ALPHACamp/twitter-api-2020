@@ -8,7 +8,6 @@ const helpers = require('../../_helpers')
 
 const { User, Tweet, Reply, Followship, Like } = db
 const { Op } = require('sequelize')
-const like = require('../../models/like')
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -138,37 +137,29 @@ const userController = {
   getUserRepliedTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
-
-      const [user, replies] = await Promise.all([
-        User.findByPk(userId, { raw: true, nest: true }),
-        Reply.findAll({
-          where: { UserId: userId },
-          include: [
-            {
-              model: User,
-              as: 'replier',
-              attributes: { exclude: ['password'] }
-            },
-            {
-              model: Tweet,
-              as: 'tweetreply',
-              include: [
-                {
-                  model: User,
-                  as: 'author',
-                  attributes: ['account', 'name']
-                  // where: { role: "user" },
-                }
-              ]
-            }
-          ],
-          order: [['createdAt', 'DESC']],
-          nest: true
-        }),
-        Like.findAll({
-          where: { userId }
-        })
-      ])
+      const replies = await Reply.findAll({
+        where: { UserId: userId },
+        include: [
+          {
+            model: User,
+            as: 'replier',
+            attributes: { exclude: ['password'] }
+          },
+          {
+            model: Tweet,
+            as: 'tweetreply',
+            include: [
+              {
+                model: User,
+                as: 'author',
+                attributes: ['account', 'name']
+              }
+            ]
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        nest: true
+      })
 
       const userRepliesResult = replies.map(reply => ({
         replyId: reply.id,
