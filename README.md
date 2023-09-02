@@ -28,12 +28,12 @@ git clone https://github.com/boxunw/simple-twitter-api.git
 ```
 cd simple-twitter-api
 ```
-5. 安裝 npm 套件
+4. 安裝 npm 套件
 ```
 npm install
 ```
-6. 參考 .env.example 檔案，建立 .env 檔案並設定環境變數
-7. 打開 /config/config.json 檔案，修改為資料庫使用的帳號密碼
+5. 參考 .env.example 檔案，建立 .env 檔案並設定環境變數
+6. 打開 /config/config.json 檔案，修改為資料庫使用的帳號密碼
 ```
 "development": {
   "username": "<your_mysql_workbench_name>",   // 修改此處
@@ -51,24 +51,24 @@ npm install
   "logging": false
 },
 ```
-8. 建立資料庫，可在 MyAQLWoerbencg 輸入以下指令
+7. 建立資料庫，可在 MyAQLWoerbencg 輸入以下指令
 ```
 create database ac_twitter_workspace;
 create database ac_twitter_workspace_test;
 ```
-9. 建立資料表
+8. 建立資料表
 ```
 npx sequelize db:migrate
 ```
-10. 建立種子資料
+9. 建立種子資料
 ```
 npx sequelize db:seed:all
 ```
-11. 啟動伺服器
+10. 啟動伺服器
 ```
 npm run dev
 ```
-12. 當終端機出現以下字樣，表示伺服器已成功啟動
+11. 當終端機出現以下字樣，表示伺服器已成功啟動
 ```
 Example app listening on port 3000!
 ```
