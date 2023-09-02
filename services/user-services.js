@@ -84,6 +84,7 @@ const userServices = {
         password: passwordSalt,
         name,
         account,
+        role: 'user',
         avatar: filePath[0] || null,
         banner: filePath[1] || null
       })
