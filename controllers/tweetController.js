@@ -118,7 +118,10 @@ const tweetController = {
 
   getTweet: async (req, res, next) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.tweet_id, ({
+      const tweetId = req.params.tweet_id
+      const currentUserId = helpers.getUser(req).id
+
+      const tweet = await Tweet.findByPk(tweetId, ({
         attributes: {
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'), 'replyCount'],
@@ -131,21 +134,18 @@ const tweetController = {
             attributes: ['id', 'name', 'account', 'avatar']
           },
           {
-            model: Reply
-          },
-          {
             model: Like,
-            attributes: ['UserId']
+            attributes: [
+              [sequelize.literal(`EXISTS(SELECT isLiked FROM Likes WHERE UserId = ${currentUserId} AND TweetId = Tweet.id )`), 'isLiked']
+            ]
           }
         ],
-        order: [[Tweet.associations.Replies, 'createdAt', 'DESC']],
         nest: true
       })
       )
       if (!tweet) return res.status(404).json({ status: 'error', message: '推文不存在' })
 
-      const { id, description, createdAt, replyCount, likeCount, Replies } = tweet.toJSON()
-      const currentUserLikes = tweet.Likes.map(l => l.TweetId)
+      const { id, description, createdAt, replyCount, likeCount, Likes } = tweet.toJSON()
       const data = {
         TweetId: id,
         description,
@@ -156,8 +156,7 @@ const tweetController = {
         createdAt,
         replyCount,
         likeCount,
-        isLiked: currentUserLikes.includes(tweet.id),
-        Replies
+        isLiked: Likes[0].isLiked
       }
       return res.status(200).json(data)
     } catch (err) {
