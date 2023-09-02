@@ -112,7 +112,7 @@ const tweetController = {
       }
       return res.status(200).json(data)
     } catch (err) {
-      next(err)
+      return next(err)
     }
   },
 
@@ -161,7 +161,7 @@ const tweetController = {
       }
       return res.status(200).json(data)
     } catch (err) {
-      next(err)
+      return next(err)
     }
   },
 

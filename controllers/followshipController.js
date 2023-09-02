@@ -28,7 +28,7 @@ const followshipController = {
         message: '成功追蹤使用者'
       })
     } catch (err) {
-      next(err)
+      return next(err)
     }
   },
   removeFollowing: async (req, res, next) => {
@@ -49,7 +49,7 @@ const followshipController = {
         message: '成功取消追蹤此使用者'
       })
     } catch (err) {
-      next(err)
+      return next(err)
     }
   },
   getTopFollower: async (req, res, next) => {
@@ -95,7 +95,7 @@ const followshipController = {
 
       return res.status(200).json(data)
     } catch (err) {
-      next(err)
+      return next(err)
     }
   }
 }
