@@ -83,7 +83,7 @@ const userController = {
     return User.findByPk(paramsUserId, {
       nest: true,
       // raw: true, 因為使用raw時 sequelize無法正確取得關聯資料，只能取得第一筆關聯資料
-      attributes: ['id', 'account', 'email', 'name', 'avatar', 'introduction', 'role', 'createdAt', 'updatedAt', 'banner'], // 不載入password
+      attributes: { exclude: ['password'] }, // 不載入password
       include: [
         { model: User, as: 'Followers', attributes: ['id'] },
         { model: User, as: 'Followings', attributes: ['id'] }
@@ -183,7 +183,8 @@ const userController = {
       Like.findAll({
         where: { UserId: paramsUserId },
         include: [
-          { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] }
+          { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] },
+          { model: Tweet, attributes: ['id', 'UserId', 'description'] }
         ]
       })
     ])
