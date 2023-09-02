@@ -28,7 +28,10 @@ const tweetController = {
     .then(data => {
       return data.map(tweet => ({
         ...tweet,
-        createdAt : relativeTimeFromNow(tweet.createdAt)
+        createdAt : relativeTimeFromNow(tweet.createdAt),
+        Tweet: {
+          ...tweet
+        }
       }))
     })
 
