@@ -125,19 +125,14 @@ const tweetController = {
         attributes: {
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE TweetId = Tweet.id)'), 'replyCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id )'), 'likeCount']
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE TweetId = Tweet.id )'), 'likeCount'],
+            [sequelize.literal(`EXISTS (SELECT isLiked FROM Likes WHERE Likes.UserId = ${currentUserId} AND Likes.TweetId = Tweet.id ) `), 'isLiked']
           ]
         },
         include: [
           {
             model: User,
             attributes: ['id', 'name', 'account', 'avatar']
-          },
-          {
-            model: Like,
-            attributes: [
-              [sequelize.literal(`EXISTS(SELECT isLiked FROM Likes WHERE UserId = ${currentUserId} AND TweetId = Tweet.id )`), 'isLiked']
-            ]
           }
         ],
         nest: true
@@ -145,7 +140,7 @@ const tweetController = {
       )
       if (!tweet) return res.status(404).json({ status: 'error', message: '推文不存在' })
 
-      const { id, description, createdAt, replyCount, likeCount, Likes } = tweet.toJSON()
+      const { id, description, createdAt, replyCount, likeCount, isLiked } = tweet.toJSON()
       const data = {
         TweetId: id,
         description,
@@ -156,7 +151,7 @@ const tweetController = {
         createdAt,
         replyCount,
         likeCount,
-        isLiked: Likes[0].isLiked
+        isLiked: Boolean(isLiked)
       }
       return res.status(200).json(data)
     } catch (err) {
