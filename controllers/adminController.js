@@ -65,7 +65,7 @@ const adminController = {
       const data = tweets.map(tweet => {
         return {
           TweetId: tweet.id,
-          description: tweet.description,
+          description: tweet.description.substring(0, 50),
           tweetOwnerId: tweet.User.id,
           tweetOwnerName: tweet.User.name,
           tweetOwnerAccount: tweet.User.account,
