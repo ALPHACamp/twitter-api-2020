@@ -1,0 +1,30 @@
+const express = require('express')
+const router = express.Router()
+
+const followships = require('./modules/followships')
+const tweets = require('./modules/tweets')
+const users = require('./modules/users')
+const admin = require('./modules/admin')
+
+const passport = require('../config/passport')
+const apiErrorHandler = require('../middleware/error-handler')
+const { authenticator, authenticatorAdmin } = require('../middleware/api-auth')
+
+const userController = require('../controllers/user-controller')
+const adminController = require('../controllers/admin-controller')
+
+// 註冊＆登入相關路由
+router.post('/users', userController.signUp, userController.signIn) // No.1 - 註冊帳號
+router.post('/users/signin', passport.authenticate('local', { session: false, failWithError: true }), userController.signIn) // No.2 - 登入前台帳號
+
+router.use('/users', authenticator, users)
+router.use('/followships', authenticator, followships)
+router.use('/tweets', authenticator, tweets)
+
+router.post('/admin/signin', passport.authenticate('local', { session: false, failWithError: true }), adminController.signIn) // No.20 - 登入後台帳號
+router.use('/admin', authenticatorAdmin, admin)
+
+router.use('/', (req, res) => res.status(500).json({ success: false, message: 'no such api' })) // fallback路由
+router.use('/', apiErrorHandler) // 錯誤處理
+
+module.exports = router
