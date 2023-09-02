@@ -140,7 +140,8 @@ const userController = {
         user = user.toJSON()
         return tweets.map(tweet => ({
           ...tweet,
-          User: { ...user }
+          User: { ...user },
+          Tweet: { ...tweet } // 這是為了配合前端所做的回傳
         }))
       })
       .then(tweets => res.status(200).json(tweets))
@@ -154,7 +155,8 @@ const userController = {
       Reply.findAll({
         where: { UserId: paramsUserId },
         include: [
-          { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] }
+          { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] },
+          { model: Tweet, attributes: ['id', 'UserId', 'description'] } // 這是為了配合前端所做的回傳
         ]
       })
     ])
