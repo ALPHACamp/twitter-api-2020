@@ -183,25 +183,27 @@ const userController = {
     try {
       const { id } = req.params
       const { account, name, email, password, introduction } = req.body
-
-      const user = await User.findByPk(id)
-
-      if (!user) {
-        return res.status(401).json({
+      const currentUserId = helpers.getUser(req).id
+      if (!id === currentUserId) {
+        return res.status(403).json({
           status: 'error',
-          message: 'This user does not exist'
+          message: 'You are not allowed to edit other users'
         })
       }
 
-      const currentUserId = helpers.getUser(req).id
+      const findUser = await User.findAll({
+        where: { id: { [Op.ne]: id } }
+      })
 
-      if (!currentUserId) {
-        throw new Error('Current user ID is missing')
-      }
+      const userByAccount = findUser.find(user => user.account === account)
+      const userByEmail = findUser.find(user => user.email === email)
 
-      if (currentUserId !== Number(id)) {
-        throw new Error('Cannot edit other users profile')
-      }
+      if (userByAccount) return res.status(400).json({ status: 'error', message: 'account 已重複註冊!' })
+      if (userByEmail) return res.status(400).json({ status: 'error', message: 'email 已重複註冊!' })
+
+      const user = await User.findByPk(id)
+
+      if (!user) return res.status(400).json({ status: 'error', message: 'User does not exist' })
 
       if (name && name.length > 50) {
         throw new Error('the length of name should less than 50 characters')
@@ -210,25 +212,6 @@ const userController = {
         throw new Error(
           'the length of introduction should less than 160 characters'
         )
-      }
-
-      if (account) {
-        const userByAccount = await User.findOne({
-          where: { account },
-          raw: true,
-          nest: true
-        })
-
-        if (userByAccount && userByAccount.account === account) {
-          throw new Error('account 已重複註冊!')
-        }
-      }
-
-      if (email) {
-        const userByEmail = await User.findOne({ where: { email } })
-        if (userByEmail && userByEmail.email === email) {
-          throw new Error('email 已重複註冊!')
-        }
       }
 
       const { files } = req
