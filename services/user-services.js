@@ -5,7 +5,6 @@ const { Op } = require('sequelize')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { relativeTimeFormat } = require('../helpers/day-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
-const { includes } = require('lodash')
 
 const userServices = {
   signIn: async (req, cb) => {
