@@ -122,7 +122,8 @@ const userController = {
       User.findByPk(paramsUserId, { attributes: ['id', 'account', 'name', 'avatar', 'banner'] }),
       Tweet.findAll({
         where: { UserId: paramsUserId },
-        raw: true
+        raw: true,
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, tweets]) => {
@@ -154,6 +155,7 @@ const userController = {
       User.findByPk(paramsUserId, { attributes: ['id', 'account', 'name', 'avatar', 'banner'] }),
       Reply.findAll({
         where: { UserId: paramsUserId },
+        order: [['createdAt', 'DESC']],
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] },
           { model: Tweet, attributes: ['id', 'UserId', 'description'] } // 這是為了配合前端所做的回傳
@@ -184,6 +186,7 @@ const userController = {
       User.findByPk(paramsUserId),
       Like.findAll({
         where: { UserId: paramsUserId },
+        order: [['createdAt', 'DESC']],
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] },
           { model: Tweet, attributes: ['id', 'UserId', 'description'] }
