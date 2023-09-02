@@ -32,8 +32,15 @@ const userController = {
       if (!email) cause.emailErrMsg += 'email 為必填欄位。'
       if (!password) cause.passwordErrMsg += 'password 為必填欄位。'
       if (!checkPassword) cause.checkPasswordErrMsg += 'checkPassword 為必填欄位。'
+
+      // 確認是否符合格式
+      if (!account.match(/^\S+$/)) cause.accountErrMsg += 'account 不可包含空白。'
+      if (!email.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)) cause.emailErrMsg += 'email 不符合格式。'
+      if (!password.match(/^\S+$/)) cause.passwordErrMsg += 'password 不可包含空白。'
+      if (!checkPassword.match(/^\S+$/)) cause.checkPasswordErrMsg += 'checkPassword 不可包含空白。'
+
       if (cause.accountErrMsg || cause.nameErrMsg || cause.emailErrMsg || cause.passwordErrMsg || cause.checkPasswordErrMsg) {
-        throw new Error('Empty input value!', { cause })
+        throw new Error('Empty / illegal input value!', { cause })
       }
 
       // 確認checkPassword是否相符 & name是否在50字之內
@@ -117,8 +124,9 @@ const userController = {
         }
       })
 
+      // --資料整理--
       if (!user) throw new Error('使用者讀取失敗')
-      if (user.isFollowed) { user.isFollowed = true } else { user.isFollowed = false }
+      user.isFollowed = Boolean(user.isFollowed)
 
       return res.status(200).json(user)
     } catch (err) {
@@ -396,6 +404,11 @@ const userController = {
 
       // 檢查各欄位是否符合規定
       const { account, name, email, password, checkPassword, introduction } = req.body
+      if (!account.match(/^\S+$/)) throw new Error('account 不可包含空白。')
+      if (!email.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)) throw new Error('email 不符合格式。')
+      if (!password.match(/^\S+$/)) throw new Error('password 不可包含空白。')
+      if (!checkPassword.match(/^\S+$/)) throw new Error('checkPassword 不可包含空白。')
+
       if (password !== checkPassword) throw new Error('確認密碼不相符！')
       if (name?.length > 50) throw new Error('名稱不能超過50字')
       if (introduction?.length > 160) throw new Error('自我介紹不能超過160字')
