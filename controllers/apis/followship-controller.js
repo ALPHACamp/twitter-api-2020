@@ -42,7 +42,7 @@ const followshipController = {
       const userId = getUser.id // 現在使用者本人
       const user = await User.findByPk(userId)
       if (!user) throw new Error("User didn't exist!")
-      
+
       const followship = await Followship.destroy({
         where: {
           followerId: userId,

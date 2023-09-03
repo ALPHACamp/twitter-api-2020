@@ -121,7 +121,7 @@ const userController = {
 
       if (Number(id) !== currentUserId) {
         const checkUserFollowing = await Followship.findAll({
-          where: { followerId: currentUserId },
+          where: { followingId: currentUserId },
           raw: true
         })
         user.isFollowed = checkUserFollowing.some(
@@ -198,12 +198,24 @@ const userController = {
       const userByAccount = findUser.find(user => user.account === account)
       const userByEmail = findUser.find(user => user.email === email)
 
-      if (userByAccount) return res.status(400).json({ status: 'error', message: 'account 已重複註冊!' })
-      if (userByEmail) return res.status(400).json({ status: 'error', message: 'email 已重複註冊!' })
+      if (userByAccount) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'account 已重複註冊!' })
+      }
+      if (userByEmail) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'email 已重複註冊!' })
+      }
 
       const user = await User.findByPk(id)
 
-      if (!user) return res.status(400).json({ status: 'error', message: 'User does not exist' })
+      if (!user) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'User does not exist' })
+      }
 
       if (name && name.length > 50) {
         throw new Error('the length of name should less than 50 characters')
@@ -295,7 +307,6 @@ const userController = {
           }
         ]
       })
-
 
       if (likes.length === 0) {
         return res.status(200).json({ status: 'success', message: 'No likes' })
