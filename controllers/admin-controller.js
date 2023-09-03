@@ -83,7 +83,8 @@ const adminController = {
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] }
       ],
-      next: true
+      next: true,
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         const resTweets = tweets.map(tweet => ({
