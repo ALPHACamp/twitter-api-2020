@@ -42,7 +42,7 @@ const adminController = {
         { model: Like, attributes: ['id'] }
       ],
       order: [
-        [Tweet, 'id', 'DESC'] // 根據推文數量由多至少排序
+        [Tweet, 'UserId', 'DESC'] // 根據推文數量由多至少排序
       ]
     })
       .then(users => {
