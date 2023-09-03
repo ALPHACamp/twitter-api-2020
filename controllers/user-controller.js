@@ -18,6 +18,7 @@ const userController = {
     if (req.body.password !== req.body.checkPassword) throw new Error('二次輸入密碼不符合!')
     // 檢查name字數，上限為50字
     if (req.body.name.length > 50) throw new Error('字數超出上限！')
+    if (req.body.account.length > 50) throw new Error('字數超出上限！')
     // 查找是否有該帳戶或email
     Promise.all([
       User.findOne({ where: { account: req.body.account } }),
@@ -418,6 +419,7 @@ const userController = {
     if (!account || !account.trim()) throw new Error('帳號是必須的！')
     if (!password || !password.trim() || !checkPassword || !checkPassword.trim()) throw new Error('密碼是必須的！')
     if (!name || !name.trim()) throw new Error('名稱是必須的！')
+    if (account.length > 50) throw new Error('帳號字數超出上限!')
     if (name.length > 50) throw new Error('名稱字數超出上限!')
     if (!email || !email.trim()) throw new Error('email是必須的!')
     if (password !== checkPassword) throw new Error('二次輸入密碼不符合!')

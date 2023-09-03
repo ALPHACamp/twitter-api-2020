@@ -27,12 +27,12 @@ passport.use(new LocalStrategy(
           throw err
         }
         if (isUserLogin && user.role !== 'user') {
-          const err = new Error('不可用後台帳號登入前台！')
+          const err = new Error('帳號不存在！')
           err.status = 401
           throw err
         }
         if (isAdminLogin && user.role !== 'admin') {
-          const err = new Error('不可用前台帳號登入後台！')
+          const err = new Error('帳號不存在！')
           err.status = 401
           throw err
         }
