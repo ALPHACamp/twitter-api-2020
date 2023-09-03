@@ -64,7 +64,7 @@ const userController = {
 
       const user = await User.findOne({ where: { account } })
       if (!user) throw new Error('User does not exist')
-      if (user.role === 'admin') throw new Error('admin permission denied')
+      if (user.role === 'admin') throw new Error('帳號不存在')
       if (!bcrypt.compareSync(password, user.password)) {
         throw new Error('Incorrect password')
       }
