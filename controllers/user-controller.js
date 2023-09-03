@@ -104,7 +104,7 @@ const userController = {
         throw err
       }
 
-      const { account, name, email, password, checkPassword, introduction } = req.body // 拿取前端回傳資料
+      const { account, name, email, password, checkPassword, introduction, avatar, cover } = req.body // 拿取前端回傳資料
       const avatarPath = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
       const coverPath = req.files?.cover ? await imgurFileHandler(req.files.cover[0]) : null
 
@@ -132,15 +132,15 @@ const userController = {
           },
           { where: { id: UserId } }
         )
-      } else if (name && (introduction || avatarPath || coverPath)) { // Edit
+      } else if (name && (introduction || avatarPath || coverPath || avatar || cover)) { // Edit
         if (name.length > 50) throw new Error('名稱字數超出上限！')
         if (introduction?.length > 160) throw new Error('自我介紹字數超出上限！')
         // Setting 回傳值(須包含 name + 其他至少一項)
         await User.update({
           name,
           introduction,
-          avatar: avatarPath || 'https://i.imgur.com/uSgVo9G.png',
-          cover: coverPath || 'https://i.imgur.com/7uwf8kO.png'
+          avatar: avatarPath || avatar || 'https://i.imgur.com/uSgVo9G.png',
+          cover: coverPath || cover || 'https://i.imgur.com/7uwf8kO.png'
         },
         { where: { id: UserId } }
         )
