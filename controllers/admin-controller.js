@@ -98,6 +98,12 @@ const adminController = {
             name: tweet.User.name,
             avatar: tweet.User.avatar,
             banner: tweet.User.banner
+          },
+          Tweet: {
+            id: tweet.id,
+            description: tweet.description,
+            UserId: tweet.userId,
+            createdAt: datetimeHelper.relativeTimeFromNow(tweet.createAt)
           }
         }))
         return resTweets
