@@ -4,6 +4,7 @@ const utc = require('dayjs/plugin/utc') // 引入 UTC 套件
 const timezone = require('dayjs/plugin/timezone') // 引入時區套件
 const helper = require('../_helpers')
 const { User, Tweet, Like } = require('../models')
+const datetimeHelper = require('../helpers/datetime-helper')
 dayjs.extend(utc) // 使用 UTC 套件
 dayjs.extend(timezone) // 使用時區套件
 
@@ -76,6 +77,31 @@ const adminController = {
         message: `id為 ${deletedTweet.id}的推文已被刪除!`
       }))
       .catch(err => next(err))
+  },
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] }
+      ],
+      next: true
+    })
+      .then(tweets => {
+        const resTweets = tweets.map(tweet => ({
+          id: tweet.id,
+          description: tweet.description,
+          UserId: tweet.userId,
+          createAt: datetimeHelper.relativeTimeFromNow(tweet.createAt),
+          User: {
+            id: tweet.User.id,
+            account: tweet.User.account,
+            name: tweet.User.name,
+            avatar: tweet.User.avatar,
+            banner: tweet.User.banner
+          }
+        }))
+        return resTweets
+      })
+      .then(resTweets => res.status(200).json(resTweets))
   }
 }
 module.exports = adminController
