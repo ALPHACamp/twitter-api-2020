@@ -91,7 +91,7 @@ const adminController = {
           id: tweet.id,
           description: tweet.description,
           UserId: tweet.userId,
-          createAt: datetimeHelper.relativeTimeFromNow(tweet.createAt),
+          createdAt: datetimeHelper.relativeTimeFromNow(tweet.createAt),
           User: {
             id: tweet.User.id,
             account: tweet.User.account,
