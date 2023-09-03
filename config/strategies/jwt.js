@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+
 const passportJWT = require('passport-jwt')
 const { User } = require('../../models')
 

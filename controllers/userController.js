@@ -1,5 +1,9 @@
 'use strict'
 
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
