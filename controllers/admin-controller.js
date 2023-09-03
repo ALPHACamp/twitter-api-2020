@@ -83,7 +83,7 @@ const adminController = {
   getTweets: (req, res, next) => {
     return Tweet.findAll({
       include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] }
+        { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner', 'createdAt'] }
       ],
       next: true,
       order: [['createdAt', 'DESC']]
