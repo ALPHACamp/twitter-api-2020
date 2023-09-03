@@ -40,6 +40,9 @@ const adminController = {
         { model: User, as: 'Followings', attributes: ['id'] },
         { model: Tweet, attributes: ['id'] },
         { model: Like, attributes: ['id'] }
+      ],
+      order: [
+        [Tweet, 'id', 'DESC'] // 根據推文數量由多至少排序
       ]
     })
       .then(users => {
