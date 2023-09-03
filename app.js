@@ -1,4 +1,4 @@
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production' || process.env.NODE_ENV !== 'travis' || process.env.NODE_ENV !== 'ghactions') {
   require('dotenv').config()
 }
 const express = require('express')
