@@ -94,7 +94,7 @@ const userController = {
       const { id } = req.params
       const currentUserId = helpers.getUser(req).id
 
-      const [user, tweetCount, followerCount, followingCount] =
+      const [user, tweetCount, followingCount, followerCount] =
         await Promise.all([
           User.findByPk(id, { raw: true, nest: true }),
           Tweet.count({
@@ -121,7 +121,7 @@ const userController = {
 
       if (Number(id) !== currentUserId) {
         const checkUserFollowing = await Followship.findAll({
-          where: { followingId: currentUserId },
+          where: { follerId: currentUserId },
           raw: true
         })
         user.isFollowed = checkUserFollowing.some(
