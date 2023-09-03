@@ -121,7 +121,7 @@ const userController = {
 
       if (Number(id) !== currentUserId) {
         const checkUserFollowing = await Followship.findAll({
-          where: { follerId: currentUserId },
+          where: { followerId: currentUserId },
           raw: true
         })
         user.isFollowed = checkUserFollowing.some(
