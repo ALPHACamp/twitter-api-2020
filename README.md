@@ -131,6 +131,18 @@
 
 20. 開啟應用程式，利用網址即可對其他網域提供 API 接口
 
+### 測試帳號
+
+   前台：
+   >- account: user1
+   >- email: user1@example.com
+   >- password: 12345678
+
+   後台：
+   >- account: root
+   >- email: root@example.com
+   >- password: 12345678
+
 
 ## 開發工具
 
