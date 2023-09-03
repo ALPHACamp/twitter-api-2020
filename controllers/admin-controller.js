@@ -103,6 +103,7 @@ const adminController = {
         return resTweets
       })
       .then(resTweets => res.status(200).json(resTweets))
+      .catch(err => next(err))
   }
 }
 module.exports = adminController
