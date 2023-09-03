@@ -4,6 +4,7 @@
   - 後端成員：[Boxun](https://github.com/boxunw), [Jenny](https://github.com/yanyanyaa)
   - 前端成員：[James](https://github.com/James-Lee-01), [雅云](https://github.com/Ya-Yun-Zheng)
   - [前端 repo](https://github.com/James-Lee-01/simple-twitter)
+  - [網站入口](https://james-lee-01.github.io/simple-twitter)
 
 # 功能
 - 使用者可以註冊/登入帳號
