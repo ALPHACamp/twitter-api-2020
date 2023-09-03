@@ -44,14 +44,13 @@ const adminController = {
         order: [[sequelize.col('tweetCount'), 'DESC'], ['createdAt']]
       }
       const users = await User.findAll(options)
-      // console.log("usersbeforeforeach", users);
+
       users.forEach(user => {
         if (user.introduction) {
           user.introduction = user.introduction.substring(0, 50)
         }
       })
 
-      // console.log(users);
       res.status(200).json(users)
     } catch (error) {
       next(error)

@@ -209,7 +209,7 @@ const tweetContorller = {
       })
 
       if (!replies) throw new Error('This tweet has no replies')
-      console.log(replies)
+
       const repliesData = replies.map(reply => ({
         replyId: reply.id,
         comment: reply.comment,
@@ -265,7 +265,7 @@ const tweetContorller = {
           }
         })
       ])
-      console.log(reply, currentUser, tweet)
+
       const replyData = {
         id: reply.dataValues.id,
         tweetId,
@@ -278,7 +278,7 @@ const tweetContorller = {
         createdAt,
         updatedAt
       }
-      console.log(replyData)
+
       res.status(200).json({
         status: 'success',
         message: 'successfully created reply',
@@ -299,6 +299,7 @@ const tweetContorller = {
           },
           nest: true,
           raw: true,
+          order: [['createdAt', 'DESC']],
           include: [
             {
               model: User,
