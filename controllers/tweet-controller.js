@@ -18,6 +18,7 @@ const tweetController = {
         'id',
         'description',
         'UserId',
+        'createdAt',
         [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
         [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
         [sequelize.literal(`EXISTS (SELECT id FROM Likes WHERE Likes.UserId = ${loginUserId} AND Likes.TweetId = Tweet.id)`), 'isLiked']
@@ -26,6 +27,7 @@ const tweetController = {
     })
 
     .then(data => {
+      // console.log(data)
       return data.map(tweet => ({
         ...tweet,
         createdAt : relativeTimeFromNow(tweet.createdAt)
