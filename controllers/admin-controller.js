@@ -93,7 +93,7 @@ const adminController = {
           id: tweet.id,
           description: tweet.description,
           UserId: tweet.userId,
-          createdAt: datetimeHelper.relativeTimeFromNow(tweet.createAt),
+          createdAt: datetimeHelper.relativeTimeFromNow(tweet.createdAt),
           User: {
             id: tweet.User.id,
             account: tweet.User.account,
@@ -105,7 +105,7 @@ const adminController = {
             id: tweet.id,
             description: tweet.description,
             UserId: tweet.userId,
-            createdAt: datetimeHelper.relativeTimeFromNow(tweet.createAt)
+            createdAt: datetimeHelper.relativeTimeFromNow(tweet.createdAt)
           }
         }))
         return resTweets
