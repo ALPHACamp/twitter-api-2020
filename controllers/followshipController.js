@@ -84,11 +84,11 @@ const followshipController = {
       })
 
       const data = users.map(user => ({
-        FollowerId: user.id,
-        FollowerName: user.name,
-        FollowerAccount: user.account,
-        FollowerAvatar: user.avatar,
-        FollowerCover: user.cover,
+        FollowingId: user.id,
+        FollowingName: user.name,
+        FollowingAccount: user.account,
+        FollowingAvatar: user.avatar,
+        FollowingCover: user.cover,
         FollowingCount: user.FollowingCount,
         isFollowed: Boolean(user.isFollowed)
       }))
