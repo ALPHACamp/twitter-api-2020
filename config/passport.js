@@ -53,7 +53,7 @@ passport.use(new LocalStrategy(
 // JWT
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
+  secretOrKey: process.env.JWT_SECRET || 'twitter',
   passReqToCallback: true
 }
 // JWT
