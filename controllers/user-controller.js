@@ -7,6 +7,7 @@ const timezone = require('dayjs/plugin/timezone') // 引入時區套件
 const helper = require('../_helpers')
 const { Op } = require('sequelize')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const datetimeHelper = require('../helpers/datetime-helper')
 
 dayjs.extend(utc) // 使用 UTC 套件
 dayjs.extend(timezone) // 使用時區套件
@@ -116,36 +117,79 @@ const userController = {
       .catch(err => next(err))
   },
   getUserTweets: (req, res, next) => {
-    // 取得該使用者的所有推文
     const paramsUserId = Number(req.params.id)
-    Promise.all([
-      User.findByPk(paramsUserId, { attributes: ['id', 'account', 'name', 'avatar', 'banner'] }),
-      Tweet.findAll({
-        where: { UserId: paramsUserId },
-        raw: true,
-        order: [['createdAt', 'DESC']]
-      })
-    ])
-      .then(([user, tweets]) => {
-        if (!user) {
-          const err = new Error('使用者不存在！')
-          err.status = 404
-          throw err
+
+    // 查詢特定使用者的所有推文
+    Tweet.findAll({
+      where: { UserId: paramsUserId },
+      attributes: ['id', 'description', 'createdAt'], // 根據您的需求選擇要返回的推文屬性
+      order: [['createdAt', 'DESC']],
+      include: [
+        {
+          model: Reply,
+          attributes: [],
+          duplicating: false // 這將防止回覆數被計算多次
+        },
+        {
+          model: Like,
+          attributes: [],
+          duplicating: false // 防止喜歡數被計算多次
+        },
+        {
+          model: User,
+          attributes: ['id', 'account', 'name', 'avatar', 'banner'],
+          duplicating: false // 防止喜歡數被計算多次
         }
+      ]
+    })
+      .then(tweets => {
         if (tweets.length === 0) {
           return res.status(200).json({
             status: 'success',
             message: '此使用者沒有任何推文'
           })
         }
-        user = user.toJSON()
-        return tweets.map(tweet => ({
-          ...tweet,
-          User: { ...user },
-          Tweet: { ...tweet } // 這是為了配合前端所做的回傳
-        }))
+
+        // 計算每個推文的回覆數和喜歡數
+        const tweetPromises = tweets.map(tweet => {
+          return Promise.all([
+            tweet,
+            Reply.count({ where: { TweetId: tweet.id } }),
+            Like.count({ where: { TweetId: tweet.id } })
+          ])
+        })
+
+        return Promise.all(tweetPromises)
       })
-      .then(tweets => res.status(200).json(tweets))
+      .then(tweetsWithCounts => {
+        const formattedTweets = tweetsWithCounts.map(([tweet, replyCount, likeCount]) => {
+          return {
+            id: tweet.id,
+            description: tweet.description,
+            createdAt: datetimeHelper.relativeTimeFromNow(tweet.createdAt),
+            replyCounts: replyCount,
+            likeCounts: likeCount,
+            UserId: tweet.User.id, // 推文的使用者 ID
+            User: {
+              id: tweet.User.id,
+              account: tweet.User.account,
+              name: tweet.User.name,
+              avatar: tweet.User.avatar,
+              banner: tweet.User.banner
+            },
+            Tweet: {
+              id: tweet.id,
+              description: tweet.description,
+              createdAt: datetimeHelper.relativeTimeFromNow(tweet.createdAt),
+              replyCounts: replyCount,
+              likeCounts: likeCount,
+              UserId: tweet.User.id
+            }
+          }
+        })
+
+        res.status(200).json(formattedTweets)
+      })
       .catch(err => next(err))
   },
   getUserReplies: (req, res, next) => {
