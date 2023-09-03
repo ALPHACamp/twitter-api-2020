@@ -40,9 +40,6 @@ const adminController = {
         { model: User, as: 'Followings', attributes: ['id'] },
         { model: Tweet, attributes: ['id'] },
         { model: Like, attributes: ['id'] }
-      ],
-      order: [
-        [Tweet, 'UserId', 'DESC'] // 根據推文數量由多至少排序
       ]
     })
       .then(users => {
@@ -59,6 +56,8 @@ const adminController = {
             followerCounts: user.Followers.length
           }
         })
+        // 根據 tweetCounts 數字由多至少排序
+        users.sort((a, b) => b.tweetCounts - a.tweetCounts)
         return users
       })
       .then(users => res.status(200).json(users))
