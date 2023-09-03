@@ -14,13 +14,13 @@ const followshipController = {
         }),
         Followship.findOne({ where: { followerId, followingId } })
       ])
-      if (!user || user.admin === 'admin') {
+      if (!user || user.role === 'admin') {
         const err = new Error('特定使用者不存在!')
         err.status = 404
         throw err
       }
       if (followship) throw new Error('已跟隨該使用者!')
-
+      user.dataValues.isFollowed = true // 提供前端當前使用者已追蹤的判斷
       const data = await Followship.create({ followerId, followingId })
       return res.status(200).json({
         message: '跟隨成功!',
@@ -42,13 +42,13 @@ const followshipController = {
         }),
         Followship.findOne({ where: { followerId, followingId } })
       ])
-      if (!user || user.admin === 'admin') {
+      if (!user || user.role === 'admin') {
         const err = new Error('特定使用者不存在!')
         err.status = 404
         throw err
       }
       if (!followship) throw new Error('未跟隨該使用者!')
-
+      user.dataValues.isFollowed = false // 提供前端當前使用者已追蹤的判斷
       const data = followship
       await followship.destroy()
       return res.status(200).json({

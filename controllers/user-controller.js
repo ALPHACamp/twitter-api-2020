@@ -59,7 +59,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const UserId = req.params.id // 被查看的使用者ID
-      const isFollowed = helpers.getUser(req).Followings.some(f => f.id.toString() === UserId) || [] // 檢查用戶是否有被使用者追蹤
+      const isFollowed = helpers.getUser(req).Followings.some(f => f.id.toString() === UserId) || false // 檢查用戶是否有被使用者追蹤
       const currentUserId = helpers.getUser(req).id.toString() // 用戶ID
       const isCurrentUser = currentUserId === UserId // 判斷是否是使用者本人
       const user = await User.findByPk(UserId, {
