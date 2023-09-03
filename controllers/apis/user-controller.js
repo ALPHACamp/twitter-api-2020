@@ -128,7 +128,7 @@ const userController = {
           follow => follow.followingId === Number(id)
         )
       }
-      console.log(user)
+
       res.status(200).json(user)
     } catch (err) {
       next(err)
@@ -252,6 +252,7 @@ const userController = {
       if (!user) throw new Error('User does not exist')
       const likes = await Like.findAll({
         where: { userId: id },
+        order: [['createdAt', 'DESC']],
         raw: true,
         nest: true,
         include: [
@@ -294,7 +295,7 @@ const userController = {
           }
         ]
       })
-      console.log(likes)
+
 
       if (likes.length === 0) {
         return res.status(200).json({ status: 'success', message: 'No likes' })
@@ -356,7 +357,7 @@ const userController = {
           ]
         })
       ])
-      console.log(userTweets)
+
       const userTweetsData = userTweets.map(tweet => ({
         TweetId: tweet.id,
         tweetBelongerName: tweet.author.name,
@@ -375,7 +376,7 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      const { id } = req.params // 18 target
+      const { id } = req.params
       const user = await User.findByPk(id, {
         include: {
           model: User,

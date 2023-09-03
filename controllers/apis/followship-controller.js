@@ -11,6 +11,7 @@ const followshipController = {
       const userId = getUser.id
       const user = await User.findByPk(userId)
       if (!user) throw new Error("User didn't exist!")
+      if (user.id === followingId) throw new Error('不能追蹤自己！')
       const followship = await Followship.findOrCreate({
         raw: true,
         nest: true,
@@ -25,7 +26,7 @@ const followshipController = {
       if (!followship[1]) {
         throw new Error("You've are already followed this user!")
       }
-      console.log(followship)
+
       res.status(200).json({
         status: 'success',
         message: 'successfully follow user!'
@@ -41,6 +42,7 @@ const followshipController = {
       const userId = getUser.id // 現在使用者本人
       const user = await User.findByPk(userId)
       if (!user) throw new Error("User didn't exist!")
+      
       const followship = await Followship.destroy({
         where: {
           followerId: userId,
