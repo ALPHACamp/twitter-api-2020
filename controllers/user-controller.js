@@ -221,27 +221,26 @@ const userController = {
         }
         // 格式化 createdAt 欄位
         const resReplies = replies.map(reply => ({
-          // id: reply.id,
-          // comment: reply.comment,
-          // UserId: reply.UserId,
-          // TweetId: reply.TweetId,
-          ...reply,
-          createdAt: datetimeHelper.relativeTimeFromNow(reply.createdAt)
-          // updatedAt: reply.updatedAt,
-          // userId: reply.userId,
-          // tweetId: reply.tweetId,
-          // User: {
-          //   id: reply.User.id,
-          //   account: reply.User.account,
-          //   name: reply.User.name,
-          //   avatar: reply.User.avatar,
-          //   banner: reply.User.banner
-          // },
-          // Tweet: {
-          //   id: reply.Tweet.id,
-          //   UserId: reply.Tweet.UserId,
-          //   description: reply.Tweet.description
-          // }
+          id: reply.id,
+          comment: reply.comment,
+          UserId: reply.UserId,
+          TweetId: reply.TweetId,
+          createdAt: datetimeHelper.relativeTimeFromNow(reply.createdAt),
+          updatedAt: reply.updatedAt,
+          userId: reply.userId,
+          tweetId: reply.tweetId,
+          User: {
+            id: reply.User.id,
+            account: reply.User.account,
+            name: reply.User.name,
+            avatar: reply.User.avatar,
+            banner: reply.User.banner
+          },
+          Tweet: {
+            id: reply.Tweet.id,
+            UserId: reply.Tweet.UserId,
+            description: reply.Tweet.description
+          }
         }))
         user = user.toJSON()
         return res.status(200).json(resReplies)
@@ -258,7 +257,7 @@ const userController = {
         order: [['createdAt', 'DESC']],
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar', 'banner'] },
-          { model: Tweet, attributes: ['id', 'UserId', 'description', [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCounts'], [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCounts']] }
+          { model: Tweet, attributes: ['id', 'UserId', 'description'] }
         ]
       })
     ])
@@ -274,33 +273,7 @@ const userController = {
             message: '此使用者沒有任何Like'
           })
         }
-        const resLikes = likes.map(like => ({
-          id: like.id,
-          comment: like.comment,
-          UserId: like.UserId,
-          TweetId: like.TweetId,
-          createdAt: datetimeHelper.relativeTimeFromNow(like.createdAt),
-          updatedAt: like.updatedAt,
-          replyCounts: like.Tweet.toJSON().replyCounts,
-          likeCounts: like.Tweet.toJSON().likeCounts,
-          userId: like.userId,
-          tweetId: like.tweetId,
-          User: {
-            id: like.User.id,
-            account: like.User.account,
-            name: like.User.name,
-            avatar: like.User.avatar,
-            banner: like.User.banner
-          },
-          Tweet: {
-            id: like.Tweet.id,
-            UserId: like.Tweet.UserId,
-            description: like.Tweet.description,
-            replyCounts: like.Tweet.toJSON().replyCounts,
-            likeCounts: like.Tweet.toJSON().likeCounts
-          }
-        }))
-        return res.status(200).json(resLikes)
+        return res.status(200).json(likes)
       })
       .catch(err => next(err))
   },
