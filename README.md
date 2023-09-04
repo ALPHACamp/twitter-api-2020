@@ -15,7 +15,7 @@
 
 ## 啟用專案
 1. 請確認本地端已安裝 Node.js、npm 和 MySQL
-2. 將此專案clone到本地端
+2. 將此專案 clone 到本地端
 3. 安裝相關套件
 ```
 npm install
