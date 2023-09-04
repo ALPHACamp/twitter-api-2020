@@ -393,14 +393,15 @@ const userController = {
           model: User,
           as: 'Followers',
           through: { attributes: ['createdAt'] },
-          order: [
-            [
-              { model: User, as: 'Followers' },
-              'Followship',
-              'createdAt',
-              'DESC'
-            ]
-          ]
+          order: [{ model: Followship, as: 'follower' }, 'createdAt', 'DESC']
+          // order: [
+          //   [
+          //     { model: User, as: "Followers" },
+          //     "Followship",
+          //     "createdAt",
+          //     "DESC",
+          //   ],
+          // ],
         }
       })
 
