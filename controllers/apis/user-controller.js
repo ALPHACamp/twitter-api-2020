@@ -392,7 +392,15 @@ const userController = {
         include: {
           model: User,
           as: 'Followers',
-          order: [['createdAt', 'DESC']]
+          through: { attributes: ['createdAt'] },
+          order: [
+            [
+              { model: User, as: 'Followers' },
+              'Followship',
+              'createdAt',
+              'DESC'
+            ]
+          ]
         }
       })
 
@@ -436,7 +444,15 @@ const userController = {
         include: {
           model: User,
           as: 'Followings',
-          order: [['createdAt', 'DESC']]
+          through: { attributes: ['createdAt'] },
+          order: [
+            [
+              { model: User, as: 'Followings' },
+              'Followship',
+              'createdAt',
+              'DESC'
+            ]
+          ]
         }
       })
       if (!user) throw new Error('User does not exist')
