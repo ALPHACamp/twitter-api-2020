@@ -16,6 +16,11 @@ const authenticatedAdmin = (req, res, next) => {
   return res.status(403).json({ status: 'error', message: '沒有admin權限' })
 }
 
+// authenticatedUser確認使用者是否為admin，如果是才給予通過
+const authenticatedUser = (req, res, next) => {
+  if (helpers.getUser(req) && helpers.getUser(req).role === 'user') return next()
+  return res.status(403).json({ status: 'error', message: '管理員不得使用前台功能' })
+}
 // authenticatedAdmin 確認當前使用者是否為登入者
 const authenticatedCurrentUser = (req, res, next) => {
   if (helpers.getUser(req).id === Number(req.params.id)) return next()
@@ -28,5 +33,6 @@ const authenticatedCurrentUser = (req, res, next) => {
 module.exports = {
   authenticated,
   authenticatedAdmin,
-  authenticatedCurrentUser
+  authenticatedCurrentUser,
+  authenticatedUser
 }
