@@ -406,7 +406,8 @@ const userController = {
 
       const currentUserFollowingId = await Followship.findAll({
         where: { followerId: currentUserId },
-        raw: true
+        raw: true,
+        order: [['createdAt', 'DESC']]
       })
 
       const followingIds = currentUserFollowingId.map(
@@ -446,6 +447,7 @@ const userController = {
       const currentUserId = helpers.getUser(req).id
 
       const currentUserFollowingId = await Followship.findAll({
+        order: [['createdAt', 'DESC']],
         where: { followerId: currentUserId },
         raw: true
       })
