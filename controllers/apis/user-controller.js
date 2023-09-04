@@ -392,7 +392,7 @@ const userController = {
         include: {
           model: User,
           as: 'Followers',
-          through: { attributes: ['createdAt'] },
+          // through: { attributes: ['createdAt'] },
           order: [{ model: Followship, as: 'follower' }, 'createdAt', 'DESC']
           // order: [
           //   [
@@ -445,7 +445,7 @@ const userController = {
         include: {
           model: User,
           as: 'Followings',
-          through: { attributes: ['createdAt'] },
+          // through: { attributes: ['createdAt'] },
           order: [
             [
               { model: User, as: 'Followings' },
