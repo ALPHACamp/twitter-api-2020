@@ -3,7 +3,7 @@ module.exports = {
     if (err instanceof Error) {
       res.status(err.status || 500).json({
         status: 'error',
-        message: `${err.name}: ${err.message}`
+        message: `${err.message}`
       })
       // if (err.message === "帳號不存在") {
       //   return res.status(200).json({

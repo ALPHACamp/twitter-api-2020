@@ -37,7 +37,9 @@ const userController = {
         email,
         account,
         password: bcrypt.hashSync(password, 10),
-        avatar: 'https://picsum.photos/100/100',
+        avatar: `https://loremflickr.com/150/150/cat/?random=${
+          Math.random() * 100
+        }`,
         cover: 'https://picsum.photos/id/237/700/400',
         role: 'user',
         createdAt: new Date(),
@@ -62,7 +64,7 @@ const userController = {
 
       const user = await User.findOne({ where: { account } })
       if (!user) throw new Error('User does not exist')
-      if (user.role === 'admin') throw new Error('admin permission denied')
+      if (user.role === 'admin') throw new Error('帳號不存在')
       if (!bcrypt.compareSync(password, user.password)) {
         throw new Error('Incorrect password')
       }
@@ -92,7 +94,7 @@ const userController = {
       const { id } = req.params
       const currentUserId = helpers.getUser(req).id
 
-      const [user, tweetCount, followerCount, followingCount] =
+      const [user, tweetCount, followingCount, followerCount] =
         await Promise.all([
           User.findByPk(id, { raw: true, nest: true }),
           Tweet.count({
@@ -126,7 +128,7 @@ const userController = {
           follow => follow.followingId === Number(id)
         )
       }
-      console.log(user)
+
       res.status(200).json(user)
     } catch (err) {
       next(err)
@@ -135,40 +137,37 @@ const userController = {
   getUserRepliedTweets: async (req, res, next) => {
     try {
       const userId = req.params.id
-
-      const [user, replies] = await Promise.all([
-        User.findByPk(userId, { raw: true, nest: true }),
-        Reply.findAll({
-          where: { UserId: userId },
-          include: [
-            {
-              model: User,
-              as: 'replier',
-              attributes: { exclude: ['password'] }
-            },
-            {
-              model: Tweet,
-              as: 'tweetreply',
-              include: [
-                { model: User, as: 'author', attributes: ['account', 'name'] }
-              ]
-            }
-          ],
-          order: [['createdAt', 'DESC']],
-          nest: true
-        }),
-        Like.findAll({
-          where: { userId }
-        })
-      ])
+      const replies = await Reply.findAll({
+        where: { UserId: userId },
+        include: [
+          {
+            model: User,
+            as: 'replier',
+            attributes: { exclude: ['password'] }
+          },
+          {
+            model: Tweet,
+            as: 'tweetreply',
+            include: [
+              {
+                model: User,
+                as: 'author',
+                attributes: ['account', 'name']
+              }
+            ]
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        nest: true
+      })
 
       const userRepliesResult = replies.map(reply => ({
         replyId: reply.id,
         comment: reply.comment,
-        replierId: user.id,
-        replierName: user.name,
-        replierAvatar: user.avatar,
-        replierAccount: user.account,
+        replierId: reply.replier.id,
+        replierName: reply.replier.name,
+        replierAvatar: reply.replier.avatar,
+        replierAccount: reply.replier.account,
         createdAt: reply.createdAt,
         tweetId: reply.TweetId,
         tweetBelongerName: reply.tweetreply.author.name,
@@ -184,24 +183,38 @@ const userController = {
     try {
       const { id } = req.params
       const { account, name, email, password, introduction } = req.body
+      const currentUserId = helpers.getUser(req).id
+      if (!id === currentUserId) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'You are not allowed to edit other users'
+        })
+      }
+
+      const findUser = await User.findAll({
+        where: { id: { [Op.ne]: id } }
+      })
+
+      const userByAccount = findUser.find(user => user.account === account)
+      const userByEmail = findUser.find(user => user.email === email)
+
+      if (userByAccount) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'account 已重複註冊!' })
+      }
+      if (userByEmail) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'email 已重複註冊!' })
+      }
 
       const user = await User.findByPk(id)
 
       if (!user) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'This user does not exist'
-        })
-      }
-
-      const currentUserId = helpers.getUser(req).id
-
-      if (!currentUserId) {
-        throw new Error('Current user ID is missing')
-      }
-
-      if (currentUserId !== Number(id)) {
-        throw new Error('Cannot edit other users profile')
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'User does not exist' })
       }
 
       if (name && name.length > 50) {
@@ -211,25 +224,6 @@ const userController = {
         throw new Error(
           'the length of introduction should less than 160 characters'
         )
-      }
-
-      if (account) {
-        const userByAccount = await User.findOne({
-          where: { account },
-          raw: true,
-          nest: true
-        })
-
-        if (userByAccount && userByAccount.account === account) {
-          throw new Error('account 已重複註冊!')
-        }
-      }
-
-      if (email) {
-        const userByEmail = await User.findOne({ where: { email } })
-        if (userByEmail && userByEmail.email === email) {
-          throw new Error('email 已重複註冊!')
-        }
       }
 
       const { files } = req
@@ -264,42 +258,70 @@ const userController = {
   },
   getUserLikes: async (req, res, next) => {
     try {
+      const currentUserId = helpers.getUser(req).id
       const { id } = req.params
       const user = await User.findByPk(id, { raw: true, nest: true })
       if (!user) throw new Error('User does not exist')
+      const likes = await Like.findAll({
+        where: { userId: id },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true,
+        include: [
+          // {
+          //   model: User,
+          //   attributes: { exclude: ["password"] },
+          // },
+          {
+            model: Tweet,
+            as: 'likedTweet',
+            attributes: [
+              'id',
+              'UserId',
+              'description',
+              'createdAt',
+              'updatedAt',
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(DISTINCT id) FROM Replies WHERE tweet_id = likedTweet.id)'
+                ),
+                'replyCount'
+              ],
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(DISTINCT id) FROM Likes WHERE tweet_id = likedTweet.id)'
+                ),
+                'likeCount'
+              ],
+              [
+                sequelize.literal(
+                  `(CASE WHEN EXISTS (SELECT 1 FROM Likes WHERE tweet_id = likedTweet.id AND user_id = ${currentUserId}) THEN TRUE ELSE FALSE END)`
+                ),
+                'isLiked'
+              ]
+            ],
+            include: [
+              { model: User, as: 'author' }
+              // { model: Reply, as: "replies" },
+            ]
+          }
+        ]
+      })
 
-      const [likedTweets, likeCount, replyCount] = await Promise.all([
-        Tweet.findAll({
-          where: { userId: id },
-          order: [['createdAt', 'DESC']],
-          include: [
-            {
-              model: User,
-              as: 'author',
-              attributes: { exclude: ['password'] }
-            }
-          ]
-        }),
-        Like.findAll({
-          where: { userId: id }
-        }),
-        Reply.findAll({
-          where: { userId: id }
-        })
-      ])
-      if (likedTweets.length === 0) {
-        throw new Error('the user did not like any tweet')
+      if (likes.length === 0) {
+        return res.status(200).json({ status: 'success', message: 'No likes' })
       }
-      console.log(likedTweets)
-      const likedTweetsData = likedTweets.map(tweet => ({
-        TweetId: tweet.id,
-        tweetBelongerName: tweet.author.name,
-        tweetBelongerAccount: tweet.author.account,
-        tweetBelongerAvatar: tweet.author.avatar,
-        tweetContent: tweet.description,
-        createdAt: tweet.createdAt,
-        replyCount: replyCount.length,
-        likeCount: likeCount.length
+
+      const likedTweetsData = likes.map(like => ({
+        TweetId: like.likedTweet.id,
+        tweetBelongerName: like.likedTweet.author.name,
+        tweetBelongerAccount: like.likedTweet.author.account,
+        tweetBelongerAvatar: like.likedTweet.author.avatar,
+        tweetContent: like.likedTweet.description,
+        createdAt: like.likedTweet.createdAt,
+        replyCount: like.likedTweet.replyCount,
+        likeCount: like.likedTweet.likeCount,
+        isLiked: like.likedTweet.isLiked === 1
       }))
       res.status(200).json(likedTweetsData)
     } catch (err) {
@@ -346,7 +368,7 @@ const userController = {
           ]
         })
       ])
-      console.log(userTweets)
+
       const userTweetsData = userTweets.map(tweet => ({
         TweetId: tweet.id,
         tweetBelongerName: tweet.author.name,
@@ -365,33 +387,50 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      const { id } = req.params // 18 target
+      const { id } = req.params
       const user = await User.findByPk(id, {
         include: {
           model: User,
-          as: 'Followers'
+          as: 'Followers',
+          // through: { attributes: ['createdAt'] },
+          order: [{ model: Followship, as: 'follower' }, 'createdAt', 'DESC']
+          // order: [
+          //   [
+          //     { model: User, as: "Followers" },
+          //     "Followship",
+          //     "createdAt",
+          //     "DESC",
+          //   ],
+          // ],
         }
-      }
-      )
+      })
 
       if (!user) throw new Error('User does not exist')
-      if (!user.Followers) return res.status(200).json({ status: 'success', message: 'No followers' })
+      if (!user.Followers) {
+        return res
+          .status(200)
+          .json({ status: 'success', message: 'No followers' })
+      }
 
       const currentUserId = helpers.getUser(req).id
 
       const currentUserFollowingId = await Followship.findAll({
         where: { followerId: currentUserId },
         raw: true
+        // order: [['createdAt', 'DESC']]
       })
 
-      const followingIds = currentUserFollowingId.map(item => item.followingId)
+      const followingIds = currentUserFollowingId.map(
+        item => item.followingId
+      )
 
       const followersData = user.Followers.map(follower => ({
         followerId: follower.id,
         followerAccount: follower.account,
         followerName: follower.name,
         followerAvatar: follower.avatar,
-        isFollowed: followingIds.includes(follower.id)
+        isFollowed: followingIds.includes(follower.id),
+        follower
       }))
 
       res.status(200).json(followersData)
@@ -405,27 +444,44 @@ const userController = {
       const user = await User.findByPk(id, {
         include: {
           model: User,
-          as: 'Followings'
+          as: 'Followings',
+          // through: { attributes: ['createdAt'] },
+          order: [
+            [
+              { model: User, as: 'Followings' },
+              'Followship',
+              'createdAt',
+              'DESC'
+            ]
+          ]
         }
       })
       if (!user) throw new Error('User does not exist')
-      if (!user.Followings) return res.status(200).json({ status: 'success', message: 'No followings' })
+      if (!user.Followings) {
+        return res
+          .status(200)
+          .json({ status: 'success', message: 'No followings' })
+      }
 
       const currentUserId = helpers.getUser(req).id
 
       const currentUserFollowingId = await Followship.findAll({
+        // order: [['createdAt', 'DESC']],
         where: { followerId: currentUserId },
         raw: true
       })
 
-      const followingIds = currentUserFollowingId.map(item => item.followingId)
+      const followingIds = currentUserFollowingId.map(
+        item => item.followingId
+      )
 
       const followingsData = user.Followings.map(following => ({
         followingId: following.id,
         followingAccount: following.account,
         followingName: following.name,
         followingAvatar: following.avatar,
-        isFollowed: followingIds.includes(following.id)
+        isFollowed: followingIds.includes(following.id),
+        following
       }))
 
       res.status(200).json(followingsData)

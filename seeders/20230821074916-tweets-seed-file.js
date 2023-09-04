@@ -12,7 +12,7 @@ module.exports = {
       attributes: ['id']
     })
     Array.from({ length: 10 }).map((el, i) => {
-      for (let j = 0; j < 5; ++j) {
+      for (let i = 0; i < 10; ++i) {
         data.push({
           description: faker.lorem.text(140),
           created_at: new Date(),

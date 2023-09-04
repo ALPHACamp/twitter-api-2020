@@ -13,10 +13,10 @@ module.exports = {
       role: 'admin',
       name: 'Admin',
       account: 'root',
-      avatar: `https://loremflickr.com/150/150/boy/?random=${
+      avatar: `https://loremflickr.com/150/150/cat/?random=${
         Math.random() * 100
       }`,
-      cover: `https://loremflickr.com/300/200/city/?random=${
+      cover: `https://loremflickr.com/1480/480/city/?random=${
         Math.random() * 100
       }`,
       introduction: faker.lorem.text().substring(0, 160),
@@ -33,7 +33,7 @@ module.exports = {
         role: 'user',
         name: `User${i}`,
         account: `user${i}`,
-        avatar: `https://loremflickr.com/320/240/man/?random=${
+        avatar: `https://loremflickr.com/150/150/cat/?random=${
           Math.random() * 100
         }`,
         cover: `https://loremflickr.com/1440/480/city/?random=${
