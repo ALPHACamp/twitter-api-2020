@@ -391,7 +391,8 @@ const userController = {
       const user = await User.findByPk(id, {
         include: {
           model: User,
-          as: 'Followers'
+          as: 'Followers',
+          order: [['createdAt', 'DESC']]
         }
       })
 
@@ -406,8 +407,8 @@ const userController = {
 
       const currentUserFollowingId = await Followship.findAll({
         where: { followerId: currentUserId },
-        raw: true,
-        order: [['createdAt', 'DESC']]
+        raw: true
+        // order: [['createdAt', 'DESC']]
       })
 
       const followingIds = currentUserFollowingId.map(
@@ -434,7 +435,8 @@ const userController = {
       const user = await User.findByPk(id, {
         include: {
           model: User,
-          as: 'Followings'
+          as: 'Followings',
+          order: [['createdAt', 'DESC']]
         }
       })
       if (!user) throw new Error('User does not exist')
@@ -447,7 +449,7 @@ const userController = {
       const currentUserId = helpers.getUser(req).id
 
       const currentUserFollowingId = await Followship.findAll({
-        order: [['createdAt', 'DESC']],
+        // order: [['createdAt', 'DESC']],
         where: { followerId: currentUserId },
         raw: true
       })
