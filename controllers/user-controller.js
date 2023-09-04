@@ -243,7 +243,7 @@ const userController = {
           }
         }))
         user = user.toJSON()
-        return res.status(200).json(resReplies)
+        return res.status(200).json(replies)
       })
       .catch(err => next(err))
   },
@@ -299,7 +299,7 @@ const userController = {
             likeCounts: like.Tweet.toJSON().likeCounts
           }
         }))
-        return res.status(200).json(resLikes)
+        return res.status(200).json(likes)
       })
       .catch(err => next(err))
   },
