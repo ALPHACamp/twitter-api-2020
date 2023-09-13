@@ -15,12 +15,6 @@ Mocking the basic functions as below:
 - popular users list
   <br><br>
 
-## Website
-
----
-
-[Visit our beautiful website!](https://liam67726978.github.io/simple-twitter)
-<br><br>
 
 ## API
 
