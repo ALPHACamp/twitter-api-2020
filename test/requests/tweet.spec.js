@@ -11,7 +11,7 @@ const passport = require('../../config/passport')
 describe('# tweet requests', () => {
 
   context('# POST ', () => {
-
+// solve here
     describe('POST /api/tweets', () => {
       before(async() => {
         // 清除測試資料庫資料
@@ -63,7 +63,7 @@ describe('# tweet requests', () => {
   });
 
   context('# GET ', () => {
-
+// solve here
     describe('GET /api/tweets', () => {
       before(async() => {
         // 清除測試資料庫資料
@@ -85,7 +85,7 @@ describe('# tweet requests', () => {
         await db.Reply.create({UserId: 1, TweetId: 1, comment: 'Tweet1 的 comment'})
       })
 
-      // GET /tweets - 所有推文，包括推文作者
+      // GET /tweets - 所有推文，包括推文作者 
       it(' - successfully', (done) => {
         request(app)
           .get('/api/tweets')
