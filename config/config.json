@@ -15,8 +15,7 @@
     "logging": false
   },
   "production": {
-    "use_env_variable": "MYSQL_DATABASE_URL",
-    "operatorsAliases": false
+    "use_env_variable": "MYSQL_DATABASE_URL"
   },
   "travis": {
     "username": "travis",
