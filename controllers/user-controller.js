@@ -216,10 +216,10 @@ const userController = {
       if (name?.length > 50) throw new Error('暱稱字數超出上限！')
       if (introduction?.length > 160) throw new Error('自我介紹字數超出上限！')
       if (password !== checkPassword) throw new Error('密碼與確認密碼不符合！')
-      if (password?.length < 5 || password?.length > 20) {
-        throw new Error('請設定 5 到 20 字的密碼')
+      if (password) {
+        if (password.length < 5 || password.length > 20) throw new Error('請設定 5 到 20 字的密碼')
+        password = await bcrypt.hash(password, 10)
       }
-      if (password) password = await bcrypt.hash(password, 10)
       const userA = await User.findByPk(req.params.id, {
         attributes: {
           include: [
