@@ -7,7 +7,8 @@
     "start": "cross-env NODE_ENV=development node app.js",
     "dev": "cross-env NODE_ENV=development nodemon app.js",
     "test": "mocha test --exit --recursive --timeout 5000",
-    "lint": "eslint \"**/*.js\" --fix"
+    "lint": "eslint \"**/*.js\" --fix",
+    "dbmigrate": "npx sequelize db:migrate && npx sequelize db:seed:all"
   },
   "author": "",
   "license": "ISC",
