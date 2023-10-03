@@ -30,6 +30,7 @@ app.use(passport.session())
 app.use(methodOverride('_method'))
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use('/api', apis)
+app.get('/', (req, res) => res.json({ status: 'success' }))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
