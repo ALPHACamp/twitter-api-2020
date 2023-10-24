@@ -10,7 +10,7 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../../
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const uploadImages = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 
-router.use('/admin/login', passport.authenticate('local', { session: false }), authenticatedAdmin, userController.login)
+router.post('/admin/login', passport.authenticate('local', { session: false }), authenticatedAdmin, userController.login)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 router.get('/users/current', authenticated, authenticatedUser, userController.getCurrentUser)
