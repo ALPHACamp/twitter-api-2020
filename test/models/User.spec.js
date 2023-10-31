@@ -1,6 +1,6 @@
 const chai = require('chai')
 const sinon = require('sinon')
-const proxyquire = require('proxyquire');
+const proxyquire = require('proxyquire')
 chai.use(require('sinon-chai'))
 
 const { expect } = require('chai')
@@ -37,7 +37,7 @@ describe('# User Model', () => {
     it('called User.init with the correct parameters', () => {
       expect(User.init).to.have.been.calledWithMatch(
         {
-          name: DataTypes.STRING,
+          name: DataTypes.STRING
         }
       )
     })
@@ -56,22 +56,22 @@ describe('# User Model', () => {
       User.associate({ User })
     })
 
-    it('should have many replies', (done) => {
+    it('should have many replies', done => {
       // 檢查是否有呼叫 hasMany(Reply)
       expect(User.hasMany).to.have.been.calledWith(Reply)
       done()
     })
-    it('should have many tweets', (done) => {
+    it('should have many tweets', done => {
       // 檢查是否有呼叫 hasMany(Tweet)
       expect(User.hasMany).to.have.been.calledWith(Tweet)
       done()
     })
-    it('should have many likes', (done) => {
+    it('should have many likes', done => {
       // 檢查是否有呼叫 hasMany(Like)
       expect(User.hasMany).to.have.been.calledWith(Like)
       done()
     })
-    it('should have many Users', (done) => {
+    it('should have many Users', done => {
       // 檢查是否有呼叫 belongsToMany(User)
       expect(User.belongsToMany).to.have.been.calledWith(User)
       done()
@@ -82,32 +82,32 @@ describe('# User Model', () => {
   context('action', () => {
     let data = null
     // 檢查 db.User 是否真的可以新增一筆資料
-    it('create', (done) => {
-      db.User.create({}).then((user) => {
+    it('create', done => {
+      db.User.create({}).then(user => {
         data = user
         done()
       })
     })
     // 檢查 db.User 是否真的可以讀取一筆資料
-    it('read', (done) => {
-      db.User.findByPk(data.id).then((user) => {
+    it('read', done => {
+      db.User.findByPk(data.id).then(user => {
         expect(data.id).to.be.equal(user.id)
         done()
       })
     })
     // 檢查 db.User 是否真的可以更新一筆資料
-    it('update', (done) => {
+    it('update', done => {
       db.User.update({}, { where: { id: data.id } }).then(() => {
-        db.User.findByPk(data.id).then((user) => {
+        db.User.findByPk(data.id).then(user => {
           expect(data.updatedAt).to.be.not.equal(user.updatedAt)
           done()
         })
       })
     })
     // 檢查 db.User 是否真的可以刪除一筆資料
-    it('delete', (done) => {
+    it('delete', done => {
       db.User.destroy({ where: { id: data.id } }).then(() => {
-        db.User.findByPk(data.id).then((user) => {
+        db.User.findByPk(data.id).then(user => {
           expect(user).to.be.equal(null)
           done()
         })
