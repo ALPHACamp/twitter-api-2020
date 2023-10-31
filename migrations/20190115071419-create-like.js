@@ -1,6 +1,6 @@
 'use strict';
 module.exports = {
-  up: (queryInterface, Sequelize) => {
+  up:  (queryInterface, Sequelize) => {
     return queryInterface.createTable('Likes', {
       id: {
         allowNull: false,
@@ -10,9 +10,19 @@ module.exports = {
       },
       UserId: {
         type: Sequelize.INTEGER
+        // allowNull: false,
+        // references: {
+        // model: 'Users',
+        // key: 'id'
+        // }
       },
       TweetId: {
         type: Sequelize.INTEGER
+        // allowNull: false,
+        // references: {
+        // model: 'Tweets',
+        // key: 'id'
+        // }
       },
       createdAt: {
         allowNull: false,
@@ -24,7 +34,7 @@ module.exports = {
       }
     });
   },
-  down: (queryInterface, Sequelize) => {
+  down:  (queryInterface, Sequelize) => {
     return queryInterface.dropTable('Likes');
   }
 };
