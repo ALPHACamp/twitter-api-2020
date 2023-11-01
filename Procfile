@@ -1,1 +1,1 @@
-web: NODE_ENV=development nodemon app.js
+web: NODE_ENV=production node app.js
