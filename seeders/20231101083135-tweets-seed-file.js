@@ -28,6 +28,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Tweets', null, {})
+    await queryInterface.bulkDelete('Tweets', {})
   }
 }
