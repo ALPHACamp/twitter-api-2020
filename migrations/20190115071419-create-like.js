@@ -9,16 +9,18 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       UserId: {
-        type: Sequelize.INTEGER
-        // allowNull: false,
+        type: Sequelize.INTEGER,
+        //allowNull: false,
+        //defaultValue: 1
         // references: {
         // model: 'Users',
         // key: 'id'
         // }
       },
       TweetId: {
-        type: Sequelize.INTEGER
-        // allowNull: false,
+        type: Sequelize.INTEGER,
+        //allowNull: false,
+        //defaultValue: 1
         // references: {
         // model: 'Tweets',
         // key: 'id'
