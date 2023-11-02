@@ -10,8 +10,13 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET
 }
 
-passport.use(new JWTStrategy(jwtOptions, (req, jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id)
+passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
+  User.findByPk(jwtPayload.id, {
+    include: [
+      { model: User, as: 'Followings' },
+      { model: User, as: 'Followers' }
+    ]
+  })
     .then(user => cb(null, user))
     .catch(err => cb(err))
 }))
