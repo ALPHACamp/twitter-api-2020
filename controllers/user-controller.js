@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 const userController = {
   signUp: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
+
     if (password !== checkPassword) {
       const err = new Error("Password don't match")
       err.status = 403
@@ -59,6 +60,17 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUser: (req, res, next) => {
+    const id = req.params.id
+    User.findByPk(id)
+      .then(user => {
+        if (!user) throw new Error("User doesn't exist.")
+
+        const userData = user.toJSON()
+        delete userData.password
+        return res.json({ status: 'success', user: userData })
+      })
   }
 }
 
