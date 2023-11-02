@@ -30,4 +30,6 @@ const adminSignin = async (req, res, next) => {
   }
 }
 
-module.exports = adminSignin
+module.exports = {
+  adminSignin
+}
