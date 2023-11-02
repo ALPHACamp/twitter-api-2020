@@ -6,6 +6,10 @@ const userController = require('../controllers/user-controller')
 
 const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
+// user signup and signin
+router.post('/api/users/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
+
 router.use('/', errorHandler)
+
 module.exports = router
