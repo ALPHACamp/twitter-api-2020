@@ -19,7 +19,7 @@ router.get('/api/users/:id', authenticated, userController.getUser)
 router.delete('/api/followship/:id', authenticated, followshipController.removeFollowing)
 router.post('/api/followship', authenticated, followshipController.addFollowing)
 
-// error hnadler
+// error handler
 router.post('/api/admin/signin', adminSignin, adminController.signIn) // admin登入
 router.use('/api/admin', authenticatedAdmin, admin) // admin其他3支路由
 router.use('/', errorHandler)
