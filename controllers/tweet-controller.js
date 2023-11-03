@@ -21,6 +21,28 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  postTweet: async (req, res, next) => {
+    try {
+      const { description } = req.body
+
+      if (!description) {
+        throw new Error('內容不可空白！')
+      } else if (description.length > 140) throw new Error('推文字數不可超過140字！')
+
+      const tweet = await Tweet.create({
+        description,
+        UserId: req.user.id
+      })
+
+      return res.status(200).json({
+        status: 'success',
+        message: '成功發佈推文！',
+        tweet
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
