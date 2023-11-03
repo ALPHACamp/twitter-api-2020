@@ -19,7 +19,7 @@
     "password": null,
     "host": "127.0.0.1",
     "dialect": "mysql",
-    "database" : "ac_twitter_workspace",
+    "database" : "railway",
     "use_env_variable": "MYSQL_DATABASE_URL"
   },
   "travis": {
