@@ -15,6 +15,7 @@
     "logging": false
   },
   "production": {
+    "database" : "ac_twitter_workspace",
     "use_env_variable": "MYSQL_DATABASE_URL"
   },
   "travis": {
