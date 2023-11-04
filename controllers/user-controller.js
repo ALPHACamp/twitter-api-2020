@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs')
 const { User } = require('../models')
 const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
+const helpers = require('../_helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signUp: (req, res, next) => {
@@ -71,6 +73,51 @@ const userController = {
         delete userData.password
         return res.json({ status: 'success', user: userData })
       })
+  },
+  editUser: async (req, res, next) => {
+    const userId = Number(req.params.id)
+    const currentUserId = helpers.getUser(req).id
+
+    if (userId !== currentUserId) throw new Error('You have no available to edit.')
+
+    const { account, name, email, password, checkPassword, introduction } = req.body
+    try {
+      let hash = ''
+      if (password && password === checkPassword) {
+        hash = await bcrypt.hash(password, 10)
+      } else if (password !== checkPassword) throw new Error("Password doesn't match.")
+
+      const user = await User.findByPk(userId)
+      const avatarLink = await imgurFileHandler(req.files.avatar ? req.files.avatar[0] : null)
+      const coverLink = await imgurFileHandler(req.files.cover ? req.files.cover[0] : null)
+
+      console.log('user: ', user.dataValues)
+      console.log('avatarLink: ', avatarLink)
+      console.log('coverLink: ', coverLink)
+
+      if (!user) {
+        const err = new Error("User doesn't exist.")
+        err.status(404)
+        throw err
+      }
+
+      const userData = {
+        account: account || user.dataValues.account,
+        name: name || user.dataValues.name,
+        email: email || user.dataValues.email,
+        password: hash,
+        introduction: introduction || user.dataValues.introduction,
+        avatar: avatarLink || user.dataValues.avatar,
+        cover: coverLink || user.dataValues.cover
+      }
+
+      await User.update({ userData }, { where: { id: currentUserId } })
+
+      delete userData.password
+      return res.status(200).json({ status: 'success', user: userData })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
