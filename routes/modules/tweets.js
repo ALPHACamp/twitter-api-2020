@@ -3,6 +3,7 @@ const router = express.Router()
 
 const tweetController = require('../../controllers/tweet-controller')
 
+router.get('/:id/replies', tweetController.getReplies) // User查看單筆Tweet的回覆
 router.post('/:id/like', tweetController.addLike) // User對單筆Tweet按Like
 router.post('/:id/unlike', tweetController.removeLike) // User對單筆Tweet取消Like
 router.get('/:id', tweetController.getTweet) // User查看單筆Tweet

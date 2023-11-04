@@ -30,7 +30,9 @@ const tweetController = {
 
       if (!description) {
         throw new Error('內容不可空白！')
-      } else if (description.length > 140) { throw new Error('推文字數不可超過140字！') }
+      } else if (description.length > 140) {
+        throw new Error('推文字數不可超過140字！')
+      }
 
       const tweet = await Tweet.create({
         description,
@@ -69,8 +71,8 @@ const tweetController = {
         ...tweet.toJSON(),
         createdAt: relativeTimeFromNow(tweet.createdAt),
         repliesAmount: tweet.Replies.length || 0,
-        likesAmount: tweet.LikedUsers.length || 0,
-      };
+        likesAmount: tweet.LikedUsers.length || 0
+      }
 
       res.status(200).json(data)
     } catch (err) {
@@ -128,6 +130,37 @@ const tweetController = {
         message: '成功取消對這則推文按下喜歡！',
         likedTweet: tweet
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+      const replies = await Reply.findAll({
+        where: { TweetId },
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      const tweet = await Tweet.findByPk(TweetId, {
+        include: [
+          { model: User, attributes: ['account'] } // 可得知回覆的推文是誰的
+        ]
+      })
+      if (!tweet || !replies) {
+        throw new Error(!tweet ? '推文不存在！' : '此篇推文目前沒有回覆。')
+      }
+
+      const data = replies.map(reply => ({
+        ...reply.toJSON(),
+        createdAt: relativeTimeFromNow(reply.createdAt),
+        tweet
+      }))
+
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
