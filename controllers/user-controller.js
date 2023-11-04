@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
@@ -115,6 +115,49 @@ const userController = {
 
       delete userData.password
       return res.status(200).json({ status: 'success', user: userData })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const currentUserId = helpers.getUser(req).id
+
+      const user = await User.findByPk(userId, {
+        raw: true,
+        nest: true,
+        attributes: { exclude: ['password'] }
+      })
+
+      if (!user) throw new Error("User doesn't exist.")
+
+      const tweets = await Tweet.findAll({
+        where: { userId },
+        include: [
+          { model: Reply },
+          {
+            model: User,
+            as: 'LikedUsers',
+            attributes: ['id']
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      const tweetData = tweets.map(tweet => {
+        return {
+          ...tweet.toJSON(),
+          likedUsersCount: tweet.LikedUsers.length,
+          repliesCount: tweet.Replies.length,
+          isLiked: tweet.LikedUsers.some(liked => liked.id === currentUserId)
+        }
+      })
+
+      res.status(200).json({
+        status: 'success',
+        data: tweetData
+      })
     } catch (err) {
       next(err)
     }
