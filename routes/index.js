@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const admin = require('./modules/admin')
 const tweets = require('./modules/tweets')
+const upload = require('../middleware/multer')
 
 const { errorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin } = require('../middleware/auth')
@@ -13,6 +14,7 @@ const adminController = require('../controllers/admin-controller')
 // user signup and signin
 router.post('/api/users/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
+router.put('/api/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.editUser)
 
 router.get('/api/users/:id', authenticated, userController.getUser)
 
