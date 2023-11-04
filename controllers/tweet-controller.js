@@ -1,4 +1,4 @@
-const { Tweet, User, Reply } = require('../models')
+const { Tweet, User, Reply, Like } = require('../models')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -72,6 +72,35 @@ const tweetController = {
       }
 
       res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  addLike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+      const UserId = req.user.id
+
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(TweetId),
+        Like.findOne({
+          where: { UserId, TweetId }
+        })
+      ])
+
+      if (!tweet) throw new Error('推文不存在！')
+      if (like) throw new Error('你已經對這則推文按過喜歡！')
+
+      await Like.create({
+        UserId,
+        TweetId
+      })
+
+      return res.status(200).json({
+        status: 'success',
+        message: '成功對這則推文按下喜歡！',
+        likedTweet: tweet
+      })
     } catch (err) {
       next(err)
     }
