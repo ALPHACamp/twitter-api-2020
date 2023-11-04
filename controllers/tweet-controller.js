@@ -28,7 +28,7 @@ const tweetController = {
 
       if (!description) {
         throw new Error('內容不可空白！')
-      } else if (description.length > 140) throw new Error('推文字數不可超過140字！')
+      } else if (description.length > 140) { throw new Error('推文字數不可超過140字！') }
 
       const tweet = await Tweet.create({
         description,
@@ -61,9 +61,7 @@ const tweetController = {
             attributes: ['id', 'account', 'name', 'avatar']
           }
         ],
-        order: [
-          [{ model: Reply }, 'createdAt', 'DESC']
-        ]
+        order: [[{ model: Reply }, 'createdAt', 'DESC']]
       })
       const data = {
         ...tweet.toJSON(),
@@ -104,7 +102,32 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  removeLike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+      const UserId = req.user.id
+
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(TweetId),
+        Like.findOne({
+          where: { UserId, TweetId }
+        })
+      ])
+
+      if (!tweet) throw new Error('推文不存在！')
+      if (!like) throw new Error('你尚未對這篇推文按下喜歡！')
+
+      await like.destroy()
+
+      return res.status(200).json({
+        status: 'success',
+        message: '成功取消對這則推文按下喜歡！',
+        likedTweet: tweet
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
-
 module.exports = tweetController
