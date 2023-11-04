@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const admin = require('./modules/admin')
+const tweets = require('./modules/tweets')
 
 const { errorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin } = require('../middleware/auth')
@@ -22,6 +23,7 @@ router.post('/api/followship', authenticated, followshipController.addFollowing)
 // error handler
 router.post('/api/admin/signin', adminSignin, adminController.signIn) // admin登入
 router.use('/api/admin', authenticatedAdmin, admin) // admin其他3支路由
+router.use('/api/tweets', authenticated, tweets) // tweets相關7支路由
 router.use('/', errorHandler)
 
 module.exports = router
