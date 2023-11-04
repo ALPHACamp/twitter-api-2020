@@ -43,6 +43,38 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id, {
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          {
+            model: Reply,
+            include: [
+              { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+            ]
+          },
+          {
+            model: User,
+            as: 'LikedUsers',
+            attributes: ['id', 'account', 'name', 'avatar']
+          }
+        ],
+        order: [
+          [{ model: Reply }, 'createdAt', 'DESC']
+        ]
+      })
+      const data = {
+        ...tweet.toJSON(),
+        repliesAmount: tweet.Replies.length || 0,
+        likesAmount: tweet.LikedUsers.length || 0
+      }
+
+      res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
