@@ -7,8 +7,8 @@ const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth
 const { apiErrorHandler } = require('../../middleware/error-handler')
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
-//const restController = require('../../controllers/apis/restaurant-controller')
-//router.get('/restaurants', restController.getRestaurants)
+router.post('/users', userController.signUp)
+
 router.use('/', apiErrorHandler)
 
 module.exports = router
