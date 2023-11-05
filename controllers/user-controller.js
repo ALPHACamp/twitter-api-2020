@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Followship } = require('../models')
 const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
@@ -161,6 +161,80 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUsersFollowings: async (req, res, next) => {
+    const userId = req.params.id
+    const currentUserId = helpers.getUser(req).id
+
+    const user = await User.findByPk(userId, {
+      include: [
+        { model: User, as: 'Followings' }
+      ]
+    })
+
+    const currenUserFolloings = await Followship.findAll({
+      where: { followerId: currentUserId },
+      nest: true,
+      raw: true
+    })
+
+    const userfollowings = user.toJSON().Followings.map(followingUser => {
+      return {
+        followingId: followingUser.id,
+        account: followingUser.account,
+        name: followingUser.name,
+        email: followingUser.email,
+        avatar: followingUser.avatar,
+        isFollowed: currenUserFolloings.some(f => f.followingId === followingUser.id)
+      }
+    })
+
+    const data = {
+      ...user.toJSON(),
+      userfollowings
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data
+    })
+  },
+  getUsersFollowers: async (req, res, next) => {
+    const userId = req.params.id
+    const currentUserId = helpers.getUser(req).id
+
+    const user = await User.findByPk(userId, {
+      include: [
+        { model: User, as: 'Followers' }
+      ]
+    })
+
+    const currenUserFolloings = await Followship.findAll({
+      where: { followerId: currentUserId },
+      nest: true,
+      raw: true
+    })
+
+    const userfollowers = user.toJSON().Followers.map(followerUser => {
+      return {
+        followerId: followerUser.id,
+        account: followerUser.account,
+        name: followerUser.name,
+        email: followerUser.email,
+        avatar: followerUser.avatar,
+        isFollowed: currenUserFolloings.some(f => f.followingId === followerUser.id)
+      }
+    })
+
+    const data = {
+      ...user.toJSON(),
+      userfollowers
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data
+    })
   }
 }
 
