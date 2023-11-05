@@ -16,8 +16,9 @@ router.post('/api/users/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
 router.put('/api/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.editUser)
 router.get('/api/users/:id/tweets', authenticated, userController.getUserTweets)
-
 router.get('/api/users/:id', authenticated, userController.getUser)
+router.get('/api/users/:id/followings', authenticated, userController.getUsersFollowings)
+router.get('/api/users/:id/followers', authenticated, userController.getUsersFollowers)
 
 // followship
 router.delete('/api/followship/:id', authenticated, followshipController.removeFollowing)
