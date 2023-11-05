@@ -71,50 +71,46 @@ const userController = {
 
         const userData = user.toJSON()
         delete userData.password
-        return res.json({ status: 'success', user: userData })
+        return res.status(200).json({ status: 'success', ...userData })
       })
   },
   editUser: async (req, res, next) => {
     const userId = Number(req.params.id)
     const currentUserId = helpers.getUser(req).id
 
-    if (userId !== currentUserId) throw new Error('You have no available to edit.')
+    if (userId !== currentUserId) throw new Error('You have no permission to edit.')
 
-    const { account, name, email, password, checkPassword, introduction } = req.body
     try {
-      let hash = ''
-      if (password && password === checkPassword) {
-        hash = await bcrypt.hash(password, 10)
-      } else if (password !== checkPassword) throw new Error("Password doesn't match.")
+      const { account, name, email, password, checkPassword, introduction } = req.body
+      if (name && name > 50) throw new Error("Name can't over 50 letter")
+
+      if (password !== checkPassword) throw new Error("Password doesn't match.")
 
       const user = await User.findByPk(userId)
-      const avatarLink = await imgurFileHandler(req.files.avatar ? req.files.avatar[0] : null)
-      const coverLink = await imgurFileHandler(req.files.cover ? req.files.cover[0] : null)
-
-      console.log('user: ', user.dataValues)
-      console.log('avatarLink: ', avatarLink)
-      console.log('coverLink: ', coverLink)
-
       if (!user) {
         const err = new Error("User doesn't exist.")
         err.status(404)
         throw err
       }
 
+      const avatarLink = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
+      const coverLink = req.files?.cover ? await imgurFileHandler(req.files.cover[0]) : null
+
+      console.log('user: ', user.toJSON())
+
       const userData = {
         account: account || user.dataValues.account,
         name: name || user.dataValues.name,
         email: email || user.dataValues.email,
-        password: hash,
+        password: password ? bcrypt.hashSync(password, 10) : user.dataValues.password,
         introduction: introduction || user.dataValues.introduction,
         avatar: avatarLink || user.dataValues.avatar,
         cover: coverLink || user.dataValues.cover
       }
 
-      await User.update({ userData }, { where: { id: currentUserId } })
-
+      await user.update({ ...userData })
       delete userData.password
-      return res.status(200).json({ status: 'success', user: userData })
+      return res.status(200).json({ status: 'success', userData })
     } catch (err) {
       next(err)
     }
@@ -154,10 +150,7 @@ const userController = {
         }
       })
 
-      res.status(200).json({
-        status: 'success',
-        data: tweetData
-      })
+      res.status(200).json(tweetData)
     } catch (err) {
       next(err)
     }
@@ -189,15 +182,7 @@ const userController = {
       }
     })
 
-    const data = {
-      ...user.toJSON(),
-      userfollowings
-    }
-
-    res.status(200).json({
-      status: 'success',
-      data
-    })
+    res.status(200).json(userfollowings)
   },
   getUsersFollowers: async (req, res, next) => {
     const userId = req.params.id
@@ -226,15 +211,7 @@ const userController = {
       }
     })
 
-    const data = {
-      ...user.toJSON(),
-      userfollowers
-    }
-
-    res.status(200).json({
-      status: 'success',
-      data
-    })
+    res.status(200).json(userfollowers)
   }
 }
 
