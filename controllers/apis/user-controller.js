@@ -5,13 +5,10 @@ const { Op } = require("sequelize");
 
 const userController = {
   signUp: (req, res, next) => {
-    console.log("7777",req.body,"7777")
-    if (req.body.password !== req.body.passwordCheck) throw new Error('Passwords do not match!')
+    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
     User.findOne( { where: { [Op.or]: [{email: req.body.email} , {account: req.body.account}] } } )
     .then(user => {
-        console.log("6666",user,"6666")
         if(user===null) user=[]
-        console.log("5555",user,"5555")
           
           if (user.account===req.body.account) throw new Error('account 已重複註冊！')
           else if (user.email===req.body.email) throw new Error('email 已重複註冊！')
@@ -52,6 +49,7 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  }
+  },
+
 }
 module.exports = userController
