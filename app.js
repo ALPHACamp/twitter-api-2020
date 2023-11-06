@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const express = require('express')
+const cors = require('cors')
 const passport = require('./config/passport')
 //const helpers = require('./_helpers')
 const { getUser } = require('./_helpers')
@@ -15,6 +16,9 @@ app.use(express.json())
 
 app.use(passport.initialize())
 // use helpers.getUser(req) to replace req.user
+
+app.use(cors())
+
 app.use((req, res, next) => {
   //res.locals.success_messages = req.flash('success_messages')
   //res.locals.error_messages = req.flash('error_messages')
