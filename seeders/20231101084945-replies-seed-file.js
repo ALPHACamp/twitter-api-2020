@@ -1,5 +1,5 @@
 'use strict'
-
+const { faker } = require('@faker-js/faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     // 找到所有推文
@@ -22,7 +22,9 @@ module.exports = {
         const replyData = {
           UserId: commentUserId.id, // 留言者的用戶 ID
           TweetId: tweet.id, // 推文的 ID
-          comment: `Comment by User ${commentUserId.id} on Tweet ${tweet.id}`, // 預設留言內容
+          comment: faker.string.alphanumeric({
+            length: { min: 1, max: 140 }
+          }), // 預設留言內容
           createdAt: new Date(),
           updatedAt: new Date()
         }
