@@ -50,6 +50,9 @@ const userController = {
       next(err)
     }
   },
+  getUser: (req, res, next) => {
+    
+  }
 
 }
 module.exports = userController
