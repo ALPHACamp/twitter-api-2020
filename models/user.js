@@ -2,7 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
   }, {});
-  User.associate = function(models) {
+  User.associate = function (models) {
     User.hasMany(models.Reply, { foreignKey: 'UserId' })
     User.hasMany(models.Tweet, { foreignKey: 'UserId' })
     User.hasMany(models.Like, { foreignKey: 'UserId' })
@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     avatar: DataTypes.STRING,
     introduction: DataTypes.TEXT,
     role: DataTypes.STRING,
+    banner: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',
