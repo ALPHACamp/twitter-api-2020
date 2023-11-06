@@ -6,6 +6,9 @@ const adminController = {
   signIn: (req, res, next) => {
     try {
       const userData = req.user.toJSON()
+      if (userData.role !== 'admin') {
+        throw new Error('帳號不存在')
+      }
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: '30d'
@@ -24,7 +27,6 @@ const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
-        where: { role: 'user' },
         attributes: [
           'id',
           'name',
