@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet, Reply, Followship } = require('../models')
 const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
@@ -71,53 +71,147 @@ const userController = {
 
         const userData = user.toJSON()
         delete userData.password
-        return res.json({ status: 'success', user: userData })
+        return res.status(200).json({ status: 'success', ...userData })
       })
   },
   editUser: async (req, res, next) => {
     const userId = Number(req.params.id)
     const currentUserId = helpers.getUser(req).id
 
-    if (userId !== currentUserId) throw new Error('You have no available to edit.')
+    if (userId !== currentUserId) throw new Error('You have no permission to edit.')
 
-    const { account, name, email, password, checkPassword, introduction } = req.body
     try {
-      let hash = ''
-      if (password && password === checkPassword) {
-        hash = await bcrypt.hash(password, 10)
-      } else if (password !== checkPassword) throw new Error("Password doesn't match.")
+      const { account, name, email, password, checkPassword, introduction } = req.body
+      if (name && name > 50) throw new Error("Name can't over 50 letter")
+
+      if (password !== checkPassword) throw new Error("Password doesn't match.")
 
       const user = await User.findByPk(userId)
-      const avatarLink = await imgurFileHandler(req.files.avatar ? req.files.avatar[0] : null)
-      const coverLink = await imgurFileHandler(req.files.cover ? req.files.cover[0] : null)
-
-      console.log('user: ', user.dataValues)
-      console.log('avatarLink: ', avatarLink)
-      console.log('coverLink: ', coverLink)
-
       if (!user) {
         const err = new Error("User doesn't exist.")
         err.status(404)
         throw err
       }
 
+      const avatarLink = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
+      const coverLink = req.files?.cover ? await imgurFileHandler(req.files.cover[0]) : null
+
+      console.log('user: ', user.toJSON())
+
       const userData = {
         account: account || user.dataValues.account,
         name: name || user.dataValues.name,
         email: email || user.dataValues.email,
-        password: hash,
+        password: password ? bcrypt.hashSync(password, 10) : user.dataValues.password,
         introduction: introduction || user.dataValues.introduction,
         avatar: avatarLink || user.dataValues.avatar,
         cover: coverLink || user.dataValues.cover
       }
 
-      await User.update({ userData }, { where: { id: currentUserId } })
-
+      await user.update({ ...userData })
       delete userData.password
-      return res.status(200).json({ status: 'success', user: userData })
+      return res.status(200).json({ status: 'success', userData })
     } catch (err) {
       next(err)
     }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const currentUserId = helpers.getUser(req).id
+
+      const user = await User.findByPk(userId, {
+        raw: true,
+        nest: true,
+        attributes: { exclude: ['password'] }
+      })
+
+      if (!user) throw new Error("User doesn't exist.")
+
+      const tweets = await Tweet.findAll({
+        where: { userId },
+        include: [
+          { model: Reply },
+          {
+            model: User,
+            as: 'LikedUsers',
+            attributes: ['id']
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      const tweetData = tweets.map(tweet => {
+        return {
+          ...tweet.toJSON(),
+          likedUsersCount: tweet.LikedUsers.length,
+          repliesCount: tweet.Replies.length,
+          isLiked: tweet.LikedUsers.some(liked => liked.id === currentUserId)
+        }
+      })
+
+      res.status(200).json(tweetData)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUsersFollowings: async (req, res, next) => {
+    const userId = req.params.id
+    const currentUserId = helpers.getUser(req).id
+
+    const user = await User.findByPk(userId, {
+      include: [
+        { model: User, as: 'Followings' }
+      ]
+    })
+
+    const currenUserFolloings = await Followship.findAll({
+      where: { followerId: currentUserId },
+      nest: true,
+      raw: true
+    })
+
+    const userfollowings = user.toJSON().Followings.map(followingUser => {
+      return {
+        followingId: followingUser.id,
+        account: followingUser.account,
+        name: followingUser.name,
+        email: followingUser.email,
+        avatar: followingUser.avatar,
+        isFollowed: currenUserFolloings.some(f => f.followingId === followingUser.id)
+      }
+    })
+
+    res.status(200).json(userfollowings)
+  },
+  getUsersFollowers: async (req, res, next) => {
+    const userId = req.params.id
+    const currentUserId = helpers.getUser(req).id
+
+    const user = await User.findByPk(userId, {
+      include: [
+        { model: User, as: 'Followers' }
+      ]
+    })
+
+    const currenUserFolloings = await Followship.findAll({
+      where: { followerId: currentUserId },
+      nest: true,
+      raw: true
+    })
+
+    const userfollowers = user.toJSON().Followers.map(followerUser => {
+      return {
+        followerId: followerUser.id,
+        account: followerUser.account,
+        name: followerUser.name,
+        email: followerUser.email,
+        avatar: followerUser.avatar,
+        isFollowed: currenUserFolloings.some(f => f.followingId === followerUser.id)
+      }
+    })
+
+    res.status(200).json(userfollowers)
   }
 }
 
