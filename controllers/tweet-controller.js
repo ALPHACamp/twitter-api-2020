@@ -1,5 +1,9 @@
 const { Tweet, User, Reply, Like } = require('../models')
-const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
+const {
+  relativeTimeFromNow,
+  formatDate,
+  formatTime
+} = require('../helpers/dayjs-helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -70,7 +74,8 @@ const tweetController = {
       const data = {
         ...tweet.toJSON(),
         createdAt: relativeTimeFromNow(tweet.createdAt),
-        repliesAmount: tweet.Replies.length || 0,
+        createdAtDate: formatDate(tweet.createdAt),
+        createdAtTime: formatTime(tweet.createdAt),
         likesAmount: tweet.LikedUsers.length || 0
       }
 
