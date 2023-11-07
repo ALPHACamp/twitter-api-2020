@@ -85,6 +85,7 @@ const tweetController = {
         Replies: repliesData,
         isLiked:
           tweet.LikedUsers?.some(like => like.TweetId === tweet.id) || false,
+        repliesAmount: tweet.Replies.length || 0,
         likesAmount: tweet.LikedUsers.length || 0
       }
 
