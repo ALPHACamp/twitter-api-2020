@@ -4,6 +4,7 @@ const {
   formatDate,
   formatTime
 } = require('../helpers/dayjs-helpers')
+const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -95,7 +96,7 @@ const tweetController = {
   addLike: async (req, res, next) => {
     try {
       const TweetId = req.params.id
-      const UserId = req.user.id
+      const UserId = helpers.getUser(req).id
 
       const [tweet, like] = await Promise.all([
         Tweet.findByPk(TweetId),
@@ -134,7 +135,7 @@ const tweetController = {
   removeLike: async (req, res, next) => {
     try {
       const TweetId = req.params.id
-      const UserId = req.user.id
+      const UserId = helpers.getUser(req).id
 
       const [tweet, like] = await Promise.all([
         Tweet.findByPk(TweetId),
