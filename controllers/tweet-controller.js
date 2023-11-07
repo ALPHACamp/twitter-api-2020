@@ -42,7 +42,7 @@ const tweetController = {
 
       const tweet = await Tweet.create({
         description,
-        UserId: req.user.id
+        UserId: helpers.getUser(req).id
       })
 
       return res.status(200).json({
@@ -171,7 +171,7 @@ const tweetController = {
 
       const tweet = await Tweet.findByPk(TweetId, {
         include: [
-          { model: User, attributes: ['account'] } // 可得知回覆的推文是誰的
+          { model: User, attributes: ['account'] }
         ]
       })
       if (!tweet || !replies) {
@@ -208,7 +208,7 @@ const tweetController = {
       const reply = await Reply.create({
         comment,
         TweetId: tweetId,
-        UserId: req.user.id
+        UserId: helpers.getUser(req).id
       })
 
       return res.status(200).json({
