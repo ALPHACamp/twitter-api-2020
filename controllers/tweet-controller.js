@@ -34,10 +34,10 @@ const tweetController = {
     try {
       const { description } = req.body
 
-      if (!description) {
+      if (!description.trim()) {
         throw new Error('內容不可空白')
       } else if (description.length > 140) {
-        throw new Error('推文字數不可超過140字！')
+        throw new Error('字數不可超過140字')
       }
 
       const tweet = await Tweet.create({
@@ -85,6 +85,7 @@ const tweetController = {
         Replies: repliesData,
         isLiked:
           tweet.LikedUsers?.some(like => like.TweetId === tweet.id) || false,
+        repliesAmount: tweet.Replies.length || 0,
         likesAmount: tweet.LikedUsers.length || 0
       }
 
@@ -194,11 +195,8 @@ const tweetController = {
       const tweetId = req.params.id
       const { comment } = req.body
 
-      if (!comment || comment.length > 140) {
-        throw new Error(
-          !comment ? '內容不可空白' : '回覆字數不可超過140字！'
-        )
-      }
+      if (!comment.trim()) throw new Error('內容不可空白')
+      if (comment.length > 140) throw new Error('字數不可超過140字')
 
       const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) {
