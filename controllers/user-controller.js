@@ -45,6 +45,7 @@ const userController = {
       const user = await User.findOne({ where: { account } })
 
       if (!user) throw new Error('帳號不存在')
+      if (user.role !== 'user') throw new Error("User doesn't exist.")
       if (!bcrypt.compareSync(password, user.password)) throw new Error('密碼不正確')
 
       const userData = user.toJSON()
@@ -212,6 +213,78 @@ const userController = {
     })
 
     res.status(200).json(userfollowers)
+  },
+  getUserTop10: async (req, res, next) => {
+    const currentUserId = helpers.getUser(req).id
+    console.log('currentUserId: ', currentUserId)
+
+    const users = await User.findAll({
+      include: [
+        {
+          model: User,
+          as: 'Followers'
+        }
+      ],
+      where: {
+        id: { [Op.not]: [currentUserId] },
+        role: 'user'
+      }
+    })
+
+    if (!users) {
+      const err = new Error('No users exist.')
+      err.status = 404
+      throw err
+    }
+
+    // console.log(users[3].dataValues.Followers)
+
+    const data = users.map(user => {
+      return {
+        id: user.id,
+        account: user.account,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        cover: user.cover,
+        followerCount: user.Followers.length,
+        isFollowed: user.Followers.some(follower => follower.id === currentUserId)
+      }
+    })
+      .sort((a, b) => b.followerCount - a.followerCount)
+      .slice(0, 10)
+
+    // try another way
+    // const users = await User.findAll({
+    //   attributes: [
+    //     'id',
+    //     [fn('COUNT', col('User.id')), 'followingCount'],
+    //     'eamil',
+    //     'account',
+    //     'avatar',
+    //     'cover'
+    //   ],
+    //   include: [
+    //     {
+    //       model: User,
+    //       as: 'Followers',
+    //       required: false,
+    //       attributes: []
+    //     }
+    //   ],
+    //   where: {
+    //     id: { [Op.not]: [currentUserId] },
+    //     role: 'user'
+    //   },
+    //   group: ['User.id'],
+    //   nest: true,
+    //   raw: true
+    // })
+
+    res.status(200).json({
+      status: 'success',
+      data
+    })
   }
 }
 

@@ -19,7 +19,7 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
           account: 'root',
-          cover: faker.image.urlLoremFlickr({ height: 639, width: 200 })
+          cover: 'https://i.imgur.com/JJozKMp.png'
         },
         {
           email: 'user1@example.com',
@@ -33,7 +33,7 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
           account: 'user1',
-          cover: faker.image.urlLoremFlickr({ height: 639, width: 200 })
+          cover: 'https://i.imgur.com/JJozKMp.png'
         },
         {
           email: 'user2@example.com',
@@ -47,7 +47,7 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
           account: 'user2',
-          cover: faker.image.urlLoremFlickr({ height: 639, width: 200 })
+          cover: 'https://i.imgur.com/JJozKMp.png'
         },
         {
           email: 'user3@example.com',
@@ -61,7 +61,7 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
           account: 'user3',
-          cover: faker.image.urlLoremFlickr({ height: 639, width: 200 })
+          cover: 'https://i.imgur.com/JJozKMp.png'
         },
         {
           email: 'user4@example.com',
@@ -75,7 +75,7 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
           account: 'user4',
-          cover: faker.image.urlLoremFlickr({ height: 639, width: 200 })
+          cover: 'https://i.imgur.com/JJozKMp.png'
         },
         {
           email: 'user5@example.com',
@@ -89,7 +89,7 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
           account: 'user5',
-          cover: faker.image.urlLoremFlickr({ height: 639, width: 200 })
+          cover: 'https://i.imgur.com/JJozKMp.png'
         }
       ],
       {}

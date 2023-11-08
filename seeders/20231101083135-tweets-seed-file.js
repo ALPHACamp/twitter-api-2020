@@ -1,4 +1,5 @@
 'use strict'
+const { faker } = require('@faker-js/faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -16,7 +17,7 @@ module.exports = {
       for (let i = 0; i < 10; i++) {
         const tweetData = {
           UserId: user.id, // 將推文與特定用戶關聯
-          description: `Tweet ${i} by User ${user.id}`, // 預設推文內容
+          description: faker.lorem.paragraph({ min: 1, max: 3 }).substring(0, 140), // 預設推文內容
           createdAt: new Date(),
           updatedAt: new Date()
         }
