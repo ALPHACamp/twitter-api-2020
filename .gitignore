@@ -3,6 +3,7 @@
 
 # multer
 temp/
+upload/
 
 # Logs
 logs

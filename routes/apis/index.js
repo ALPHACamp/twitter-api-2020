@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../../config/passport')
 const admin = require('./modules/admin')
+const upload = require('../../middleware/multer')
 const userController = require('../../controllers/apis/user-controller')
 const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
@@ -10,6 +11,7 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 
 router.get('/users/:id', authenticated, userController.getUser)
 router.post('/users', userController.signUp)
+router.put('/users/:id', authenticated, upload.single('image'), userController.putUser)
 
 router.use('/', apiErrorHandler)
 

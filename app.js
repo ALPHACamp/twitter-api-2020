@@ -1,6 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const passport = require('./config/passport')
@@ -18,6 +19,7 @@ app.use(passport.initialize())
 // use helpers.getUser(req) to replace req.user
 
 app.use(cors())
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use((req, res, next) => {
   //res.locals.success_messages = req.flash('success_messages')
