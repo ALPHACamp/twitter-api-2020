@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like } = require('../models')
 const sequelize = require('sequelize')
+const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -58,10 +59,7 @@ const adminController = {
           ]
         ],
         order: [
-          [sequelize.literal('tweetsAmount'), 'DESC'],
-          [sequelize.literal('likesAmount'), 'DESC'],
-          [sequelize.literal('followingsAmount'), 'DESC'],
-          [sequelize.literal('followersAmount'), 'DESC']
+          [sequelize.literal('tweetsAmount'), 'DESC'] // 按照推文數排序、由多至少
         ],
         nest: true,
         raw: true
@@ -87,7 +85,8 @@ const adminController = {
       })
       const data = tweets.map(tweet => ({
         ...tweet,
-        description: tweet.description.substring(0, 50)
+        description: tweet.description.substring(0, 50),
+        createdAt: relativeTimeFromNow(tweet.createdAt)
       }))
 
       res.status(200).json(data)
