@@ -6,14 +6,19 @@ const adminServices = {
       nest: true,
     })
       .then(tweets => {
-        console.log("測試" + tweets)
-        cb(null, { tweets })
+        //console.log("測試" + tweets)
+        cb(null, tweets)
       })
       .catch(err => cb(err))
   },
   postTweet: (req, cb) => {
     const { UserId, description } = req.body
-    if (!UserId) throw new Error('UserId is required!')
+    if (!UserId) res.status(500).json({
+      status: 'error',
+      data: {
+        'Error Message': 'userId is required'
+      }
+    })
     const { file } = req
     Tweet.create({ UserId, description })
       .then(newTweet => cb(null, { tweet: newTweet }))
@@ -37,11 +42,9 @@ const adminServices = {
       raw: true,
     })
       .then(users => {
-        //console.log("測試"+users)
-        //users = Object.keys(users).map((key) => [key, users[key]])
-        //users = JSON.stringify(users.users)
-        console.log("admin getusers內容", users, "型別是", typeof (users))
-        cb(null, { users })
+
+        cb(null, users)
+
       })
       .catch(err => cb(err))
   },

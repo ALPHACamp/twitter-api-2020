@@ -5,6 +5,7 @@ const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const passport = require('./config/passport')
+const methodOverride = require('method-override')
 //const helpers = require('./_helpers')
 const { getUser } = require('./_helpers')
 const { apis } = require('./routes')
@@ -20,7 +21,7 @@ app.use(passport.initialize())
 
 app.use(cors())
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
-
+app.use(methodOverride('_method'))
 app.use((req, res, next) => {
   //res.locals.success_messages = req.flash('success_messages')
   //res.locals.error_messages = req.flash('error_messages')

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const helpers = require('../../_helpers')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../../models')
 const { Op } = require("sequelize");
 //const { localFileHandler } = require('../../helpers/file-helpers')
@@ -12,10 +13,22 @@ const userController = {
       .then(user => {
         if (user === null) user = []
 
-        if (user.account === req.body.account) throw new Error('account 已重複註冊！')
-        else if (user.email === req.body.email) throw new Error('email 已重複註冊！')
-
-
+        if (user.account === req.body.account) {
+          res.status(500).json({
+            status: 'error',
+            data: {
+              'Error Message': 'account used'
+            }
+          })
+        }
+        else if (user.email === req.body.email) {
+          res.status(500).json({
+            status: 'error',
+            data: {
+              'Error Message': 'email used'
+            }
+          })
+        }
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => User.create({
@@ -26,13 +39,14 @@ const userController = {
         password: hash
       }))
       .then((createdUser) => {
-        createdUser.toJSON()
+        const user = createdUser.toJSON()
         delete createdUser.password
         delete createdUser.checkPassword
         return res.json({
           status: 'success',
-          message: '註冊成功！',
-          ...createdUser
+          data: {
+            ...user
+          }
         })
       })
       .catch(err => next(err))
@@ -58,7 +72,12 @@ const userController = {
 
     User.findByPk(req.params.id, {})
       .then(user => {
-        if (!user) throw new Error("User didn't exist!")
+        if (!user || user.role === 'admin') res.status(500).json({
+          status: 'error',
+          data: {
+            'Error Message': 'user not found'
+          }
+        })
         return user
       })
       .then(user => {
@@ -73,19 +92,20 @@ const userController = {
             const likesCount = Object.keys(likeAll).length
             const followerCount = Object.keys(followerAll).length
             const followingCount = Object.keys(followingAll).length
-            //console.log("===///////==",user,tweetsCount)
+
 
             user = user.toJSON()
             delete user.password
-            //console.log("///////",tweetsCount)
+
             user["followersCount"] = followerCount
             user["followingCount"] = followingCount
             user["likesCount"] = likesCount
             user["tweetsCount"] = tweetsCount
             return res.json({
-              status: 'success',
-              message: '查詢成功！',
+              //status: 'success',
+              //data: {
               ...user
+              //}
             })
           })
         return user
@@ -94,8 +114,14 @@ const userController = {
   },
   putUser: (req, res, next) => {
 
-    if (Number(req.params.id) !== Number(req.user.id)) {
-      throw new Error("只能修改自己的資訊")
+    if (Number(req.params.id) !== Number(helpers.getUser(req).id)) {
+
+      res.status(500).json({
+        status: 'error',
+        data: {
+          'Error Message': '只能修改自己的資訊'
+        }
+      })
     }
 
     //check account or mail exists
@@ -103,27 +129,66 @@ const userController = {
     let { account, name, email, password, checkPassword, introduction } = req.body
     const { file } = req
     let passwordFlag = 0   //判斷是否有更改密碼
-    if (!account) req.body.account = req.user.account
-    if (!email) req.body.email = req.user.email
-    //console.log("iiiii", password, "iiiii", typeof (password))
+    //判斷是否有更改帳號或信箱 , undefined value會使條件搜尋失敗
     if (password !== undefined) {
-      if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
+      if (req.body.password !== req.body.checkPassword) res.status(500).json({
+        status: 'error',
+        data: {
+          'Error Message': 'password not match'
+        }
+      })
       passwordFlag = 1
     } else if (password === undefined) { passwordFlag = 0 }
-    //if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
-    User.findOne({
-      where: {
+
+    let where = {}
+    if (req.body.email !== undefined && req.body.account !== undefined) {
+      where = {
         [Op.or]: [{ email: req.body.email }, { account: req.body.account }],
-        id: { [Op.ne]: req.user.id }
+        id: { [Op.ne]: helpers.getUser(req).id }
       }
+    }
+    else if (req.body.email !== undefined && req.body.account === undefined) {
+      where = {
+        [Op.or]: [{ email: req.body.email }],
+        id: { [Op.ne]: helpers.getUser(req).id }
+      }
+    }
+    else if (req.body.email === undefined && req.body.account !== undefined) {
+      where = {
+        [Op.or]: [{ account: req.body.account }],
+        id: { [Op.ne]: helpers.getUser(req).id }
+      }
+    }
+    else {
+      where = {
+        id: { [Op.ne]: helpers.getUser(req).id }
+      }
+    }
+
+    User.findOne({
+      where
+
     })
       .then(user => {
+
         if (user !== null) {
-          if (user.account === req.body.account) throw new Error('account 已被使用！')
-          else if (user.email === req.body.email) throw new Error('email 已被使用！')
+
+          if (user.account === req.body.account) res.status(500).json({
+            status: 'error',
+            data: {
+              'Error Message': 'account used'
+            }
+          })
+          else if (user.email === req.body.email) res.status(500).json({
+            status: 'error',
+            data: {
+              'Error Message': 'email used'
+            }
+          })
         }
         //console.log("++++", password, "----", typeof (password))
         //有更新密碼就做加密 , 沒有就undefined ,不更改密碼
+
         var hash = (passwordFlag == 1) ? bcrypt.hash(req.body.password, 10) : Promise.resolve()
         return Promise.all([
           User.findByPk(req.params.id),
@@ -132,9 +197,13 @@ const userController = {
 
         ])
           .then(([user, filePath, hash]) => {
-            if (!user) throw new Error("User didn't exist!")
+            if (!user) res.status(500).json({
+              status: 'error',
+              data: {
+                'Error Message': 'user not exist'
+              }
+            })
 
-            //console.log("----", hash, "===", typeof (hash))
             return user.update({
               account: req.body.account,
               name: req.body.name,
@@ -146,13 +215,15 @@ const userController = {
             })
           })
           .then((user) => {
-            user = user.toJSON()
-            delete user.password
+            const user1 = user.toJSON()
+
+            delete user1.password
+            //return user1 -->this will lead to internal errror
             return res.json({
 
               status: 'success',
-              message: '編輯成功！',
-              ...user
+              data: { ...user1 }
+
             })
           })
           .catch(err => next(err))

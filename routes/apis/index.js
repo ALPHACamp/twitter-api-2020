@@ -13,7 +13,7 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 
 router.get('/users/:id', authenticated, userController.getUser)
 router.post('/users', userController.signUp)
-router.put('/users/:id', authenticated, upload.single('image'), userController.putUser)
+router.put('/users/:id', authenticated, userController.putUser)
 
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
