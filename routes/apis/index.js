@@ -16,8 +16,8 @@ router.post('/users', userController.signUp)
 router.put('/users/:id', authenticated, upload.single('image'), userController.putUser)
 
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
-router.get('/tweets', tweetController.getTweets)
-router.post('/tweets', tweetController.postTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
+router.post('/tweets', authenticated, tweetController.postTweet)
 
 router.use('/', apiErrorHandler)
 

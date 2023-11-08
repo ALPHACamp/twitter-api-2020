@@ -102,11 +102,14 @@ const userController = {
     //先檢查account , mail , password 是否在req.body
     let { account, name, email, password, checkPassword, introduction } = req.body
     const { file } = req
+    let passwordFlag = 0   //判斷是否有更改密碼
     if (!account) req.body.account = req.user.account
     if (!email) req.body.email = req.user.email
-    if (password) {
+    //console.log("iiiii", password, "iiiii", typeof (password))
+    if (password !== undefined) {
       if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
-    } else { password = [] }
+      passwordFlag = 1
+    } else if (password === undefined) { passwordFlag = 0 }
     //if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
     User.findOne({
       where: {
@@ -119,24 +122,19 @@ const userController = {
           if (user.account === req.body.account) throw new Error('account 已被使用！')
           else if (user.email === req.body.email) throw new Error('email 已被使用！')
         }
-        console.log("++++", password, "----", typeof (password))
+        //console.log("++++", password, "----", typeof (password))
+        //有更新密碼就做加密 , 沒有就undefined ,不更改密碼
+        var hash = (passwordFlag == 1) ? bcrypt.hash(req.body.password, 10) : Promise.resolve()
         return Promise.all([
           User.findByPk(req.params.id),
           imgurFileHandler(file),
-          bcrypt.hash(req.body.password, 10)
-
+          hash
 
         ])
           .then(([user, filePath, hash]) => {
             if (!user) throw new Error("User didn't exist!")
-            //const password = bcrypt.hash(req.body.password, 10)
-            console.log("----", hash, "===", typeof (hash))
-            if (password) {
-              user.update({
-                password: hash
-              })
-            }
 
+            //console.log("----", hash, "===", typeof (hash))
             return user.update({
               account: req.body.account,
               name: req.body.name,
@@ -144,6 +142,7 @@ const userController = {
               introduction: req.body.introduction,
               avatar: req.body.avatar,
               banner: filePath || req.body.banner,
+              password: hash
             })
           })
           .then((user) => {
