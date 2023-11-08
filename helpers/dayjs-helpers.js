@@ -9,7 +9,20 @@ const calculateRelativeTime = targetDate => {
   return dayjs(targetDate).fromNow()
 }
 
+const formatDate = datetime => {
+  return dayjs(datetime).format('YYYY年MM月DD日')
+}
+
+const formatTime = datetime => {
+  return dayjs(datetime)
+    .format('A h:mm')
+    .replace('AM', '上午')
+    .replace('PM', '下午')
+}
+
 module.exports = {
   currentYear: () => dayjs().year(), // 取得當年年份作為 currentYear 的屬性值
-  relativeTimeFromNow: calculateRelativeTime // 計算與現在時間的相對時間差
+  relativeTimeFromNow: calculateRelativeTime, // 計算與現在時間的相對時間差
+  formatDate,
+  formatTime
 }
