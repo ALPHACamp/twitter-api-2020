@@ -1,24 +1,23 @@
-const { Tweet } = require('../models')
+const { Tweet, User } = require('../models')
 const adminServices = {
   getTweets: (req, cb) => {
     Tweet.findAll({
       raw: true,
       nest: true,
     })
-      .then(tweets => cb(null, { tweets }))
+      .then(tweets => {
+        console.log("測試"+tweets)
+        cb(null, { tweets })
+      })
       .catch(err => cb(err))
   },
   postTweet: (req, cb) => {
     const { UserId, description} = req.body
-    console.log(UserId)
     if (!UserId) throw new Error('UserId is required!')
     const { file } = req
-    imgurFileHandler(file)
-      .then(filePath => Tweet.create({
-        UserId, description
-      }))
-      .then(newTweet => cb(null, { tweet: newTweet }))
-      .catch(err => cb(err))
+      Tweet.create({ UserId, description })
+        .then(newTweet => cb(null, { tweet: newTweet }))
+        .catch(err => cb(err))
   },
   deleteTweet: (req, cb) => {
     Tweet.findByPk(req.params.id)
@@ -32,6 +31,17 @@ const adminServices = {
       })
       .then(deletedTweet => cb(null, { Tweet: deletedTweet }))
       .catch(err => cb(err))
-  }
+  },
+  getUsers: (req, cb) => {
+    User.findAll({
+      raw: true,
+      nest: true,
+    })
+      .then(users => {
+        console.log("測試"+users)
+        cb(null, { users })
+      })
+      .catch(err => cb(err))
+  },
 }
 module.exports = adminServices
