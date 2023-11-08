@@ -300,7 +300,7 @@ const userController = {
       }
 
       const likes = await Like.findAll({
-        where: { UsedId: userId },
+        where: { UserId: userId },
         include: [
           {
             model: Tweet,
@@ -331,7 +331,7 @@ const userController = {
           ...like.toJSON(),
           repliesCount: like.Tweet.Replies.length || 0,
           likedCount: like.Tweet.Likes.length || 0,
-          isLiked: currentUserLikes?.include(like.Tweet.id)
+          isLiked: currentUserLikes?.includes(like.Tweet.id)
         }
       })
 
