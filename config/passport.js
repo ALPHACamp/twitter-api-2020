@@ -7,7 +7,7 @@ const { User } = require('../models')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 
-//localstrategy is supporting POST /api/signin
+
 passport.use(new LocalStrategy(
   // customize user field
   {
