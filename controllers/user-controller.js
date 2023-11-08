@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Followship } = require('../models')
+const { User, Tweet, Reply, Followship, Like } = require('../models')
 const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
@@ -285,6 +285,102 @@ const userController = {
       status: 'success',
       data
     })
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const currentUserId = helpers.getUser(req).id
+
+      const user = await User.findByPk(userId)
+
+      if (!user || user.role === 'adimn') {
+        const err = new Error("User doesn't exist.")
+        err.status = 404
+        throw err
+      }
+
+      const likes = await Like.findAll({
+        where: { UserId: userId },
+        include: [
+          {
+            model: Tweet,
+            include: [
+              { model: User },
+              Reply,
+              Like
+            ]
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      const myLikes = await Like.findAll({
+        where: { UserId: currentUserId },
+        raw: true
+      })
+
+      if (!likes.length) {
+        return res.status(200).json({
+          message: 'There has no likes.'
+        })
+      }
+
+      const currentUserLikes = myLikes.map(like => like.TweetId) || []
+      const data = likes.map(like => {
+        return {
+          ...like.toJSON(),
+          repliesCount: like.Tweet.Replies.length || 0,
+          likedCount: like.Tweet.Likes.length || 0,
+          isLiked: currentUserLikes?.includes(like.Tweet.id)
+        }
+      })
+
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+  gerUserReplies: async (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const user = User.findByPk(userId)
+
+      if (!user || user.role === 'admin') {
+        const err = new Error("User doesn't exist.")
+        err.status = 404
+        throw err
+      }
+
+      const replies = await Reply.findAll({
+        where: { UserId: userId },
+        include: [
+          { model: User },
+          {
+            model: Tweet,
+            include: [
+              { model: User }
+            ]
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+
+      if (!replies.length) {
+        return res.status(200).json({
+          message: 'There has not replies.'
+        })
+      }
+
+      const data = replies.map(reply => {
+        return {
+          ...reply.toJSON()
+        }
+      })
+
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
