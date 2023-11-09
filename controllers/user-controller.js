@@ -56,7 +56,7 @@ const userController = {
 
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
 
-      res.status(200).json({
+      return res.status(200).json({
         status: 'success',
         data: {
           token,
@@ -67,24 +67,26 @@ const userController = {
       next(err)
     }
   },
-  getUser: (req, res, next) => {
-    const id = req.params.id
-    User.findByPk(id)
-      .then(user => {
-        if (!user) throw new Error("User doesn't exist.")
+  getUser: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const user = await User.findByPk(id)
+      if (!user) throw new Error("User doesn't exist.")
 
-        const userData = user.toJSON()
-        delete userData.password
-        return res.status(200).json({ status: 'success', ...userData })
-      })
+      const userData = user.toJSON()
+      delete userData.password
+      return res.status(200).json({ status: 'success', ...userData })
+    } catch (err) {
+      next(err)
+    }
   },
   editUser: async (req, res, next) => {
-    const userId = Number(req.params.id)
-    const currentUserId = helpers.getUser(req).id
-
-    if (userId !== currentUserId) throw new Error('You have no permission to edit.')
-
     try {
+      const userId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+
+      if (userId !== currentUserId) throw new Error('You have no permission to edit.')
+
       const { account, name, email, password, checkPassword, introduction } = req.body
       if (name && name > 50) throw new Error("Name can't over 50 letter")
 
@@ -155,140 +157,152 @@ const userController = {
         }
       })
 
-      res.status(200).json(tweetData)
+      return res.status(200).json(tweetData)
     } catch (err) {
       next(err)
     }
   },
   getUsersFollowings: async (req, res, next) => {
-    const userId = req.params.id
-    const currentUserId = helpers.getUser(req).id
+    try {
+      const userId = req.params.id
+      const currentUserId = helpers.getUser(req).id
 
-    const user = await User.findByPk(userId, {
-      include: [
-        { model: User, as: 'Followings' }
-      ]
-    })
+      const user = await User.findByPk(userId, {
+        include: [
+          { model: User, as: 'Followings' }
+        ]
+      })
 
-    const currenUserFolloings = await Followship.findAll({
-      where: { followerId: currentUserId },
-      nest: true,
-      raw: true
-    })
+      const currenUserFolloings = await Followship.findAll({
+        where: { followerId: currentUserId },
+        nest: true,
+        raw: true
+      })
 
-    const userfollowings = user.toJSON().Followings.map(followingUser => {
-      return {
-        followingId: followingUser.id,
-        account: followingUser.account,
-        name: followingUser.name,
-        email: followingUser.email,
-        avatar: followingUser.avatar,
-        isFollowed: currenUserFolloings.some(f => f.followingId === followingUser.id)
-      }
-    })
+      const userfollowings = user.toJSON().Followings.map(followingUser => {
+        return {
+          followingId: followingUser.id,
+          account: followingUser.account,
+          name: followingUser.name,
+          email: followingUser.email,
+          avatar: followingUser.avatar,
+          isFollowed: currenUserFolloings.some(f => f.followingId === followingUser.id)
+        }
+      })
 
-    res.status(200).json(userfollowings)
+      return res.status(200).json(userfollowings)
+    } catch (err) {
+      next(err)
+    }
   },
   getUsersFollowers: async (req, res, next) => {
-    const userId = req.params.id
-    const currentUserId = helpers.getUser(req).id
+    try {
+      const userId = req.params.id
+      const currentUserId = helpers.getUser(req).id
 
-    const user = await User.findByPk(userId, {
-      include: [
-        { model: User, as: 'Followers' }
-      ]
-    })
+      const user = await User.findByPk(userId, {
+        include: [
+          { model: User, as: 'Followers' }
+        ]
+      })
 
-    const currenUserFolloings = await Followship.findAll({
-      where: { followerId: currentUserId },
-      nest: true,
-      raw: true
-    })
+      const currenUserFolloings = await Followship.findAll({
+        where: { followerId: currentUserId },
+        nest: true,
+        raw: true
+      })
 
-    const userfollowers = user.toJSON().Followers.map(followerUser => {
-      return {
-        followerId: followerUser.id,
-        account: followerUser.account,
-        name: followerUser.name,
-        email: followerUser.email,
-        avatar: followerUser.avatar,
-        isFollowed: currenUserFolloings.some(f => f.followingId === followerUser.id)
-      }
-    })
+      const userfollowers = user.toJSON().Followers.map(followerUser => {
+        return {
+          followerId: followerUser.id,
+          account: followerUser.account,
+          name: followerUser.name,
+          email: followerUser.email,
+          avatar: followerUser.avatar,
+          introduction: followerUser.introduction,
+          isFollowed: currenUserFolloings.some(f => f.followingId === followerUser.id)
+        }
+      })
 
-    res.status(200).json(userfollowers)
+      return res.status(200).json(userfollowers)
+    } catch (err) {
+      next(err)
+    }
   },
   getUserTop10: async (req, res, next) => {
-    const currentUserId = helpers.getUser(req).id
-    console.log('currentUserId: ', currentUserId)
+    try {
+      const currentUserId = helpers.getUser(req).id
+      console.log('currentUserId: ', currentUserId)
 
-    const users = await User.findAll({
-      include: [
-        {
-          model: User,
-          as: 'Followers'
+      const users = await User.findAll({
+        include: [
+          {
+            model: User,
+            as: 'Followers'
+          }
+        ],
+        where: {
+          id: { [Op.not]: [currentUserId] },
+          role: 'user'
         }
-      ],
-      where: {
-        id: { [Op.not]: [currentUserId] },
-        role: 'user'
-      }
-    })
+      })
 
-    if (!users) {
-      const err = new Error('No users exist.')
-      err.status = 404
-      throw err
+      if (!users) {
+        const err = new Error('No users exist.')
+        err.status = 404
+        throw err
+      }
+
+      const data = users.map(user => {
+        return {
+          id: user.id,
+          account: user.account,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          cover: user.cover,
+          followerCount: user.Followers.length,
+          isFollowed: user.Followers.some(follower => follower.id === currentUserId)
+        }
+      })
+        .sort((a, b) => b.followerCount - a.followerCount)
+        .slice(0, 10)
+
+      // TODO
+      // try another way
+      // const users = await User.findAll({
+      //   attributes: [
+      //     'id',
+      //     [fn('COUNT', col('User.id')), 'followingCount'],
+      //     'eamil',
+      //     'account',
+      //     'avatar',
+      //     'cover'
+      //   ],
+      //   include: [
+      //     {
+      //       model: User,
+      //       as: 'Followers',
+      //       required: false,
+      //       attributes: []
+      //     }
+      //   ],
+      //   where: {
+      //     id: { [Op.not]: [currentUserId] },
+      //     role: 'user'
+      //   },
+      //   group: ['User.id'],
+      //   nest: true,
+      //   raw: true
+      // })
+
+      return res.status(200).json({
+        status: 'success',
+        data
+      })
+    } catch (err) {
+      next(err)
     }
-
-    // console.log(users[3].dataValues.Followers)
-
-    const data = users.map(user => {
-      return {
-        id: user.id,
-        account: user.account,
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        cover: user.cover,
-        followerCount: user.Followers.length,
-        isFollowed: user.Followers.some(follower => follower.id === currentUserId)
-      }
-    })
-      .sort((a, b) => b.followerCount - a.followerCount)
-      .slice(0, 10)
-
-    // try another way
-    // const users = await User.findAll({
-    //   attributes: [
-    //     'id',
-    //     [fn('COUNT', col('User.id')), 'followingCount'],
-    //     'eamil',
-    //     'account',
-    //     'avatar',
-    //     'cover'
-    //   ],
-    //   include: [
-    //     {
-    //       model: User,
-    //       as: 'Followers',
-    //       required: false,
-    //       attributes: []
-    //     }
-    //   ],
-    //   where: {
-    //     id: { [Op.not]: [currentUserId] },
-    //     role: 'user'
-    //   },
-    //   group: ['User.id'],
-    //   nest: true,
-    //   raw: true
-    // })
-
-    res.status(200).json({
-      status: 'success',
-      data
-    })
   },
   getUserLikes: async (req, res, next) => {
     try {
