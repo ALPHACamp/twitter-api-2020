@@ -30,6 +30,8 @@ const userController = {
         email,
         password: hash,
         role: 'user',
+        avatar: 'https://i.imgur.com/05zPOOl.png',
+        cover: 'https://i.imgur.com/Obnf9Ky.png',
         createdAt: new Date(),
         updatedAt: new Date()
       }))
