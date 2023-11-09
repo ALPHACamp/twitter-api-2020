@@ -186,6 +186,7 @@ const userController = {
           name: followingUser.name,
           email: followingUser.email,
           avatar: followingUser.avatar,
+          introduction: followingUser.introduction,
           isFollowed: currenUserFolloings.some(f => f.followingId === followingUser.id)
         }
       })
