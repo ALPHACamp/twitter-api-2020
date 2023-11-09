@@ -4,6 +4,7 @@ const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const { relativeTimeFromNow } = require('../helpers/dayjs-helpers')
 
 const userController = {
   signUp: (req, res, next) => {
@@ -145,6 +146,7 @@ const userController = {
       const tweetData = tweets.map(tweet => {
         return {
           ...tweet.toJSON(),
+          createdAt: relativeTimeFromNow(tweet.createdAt),
           likedUsersCount: tweet.LikedUsers.length,
           repliesCount: tweet.Replies.length,
           isLiked: tweet.LikedUsers.some(liked => liked.id === currentUserId)
@@ -329,6 +331,8 @@ const userController = {
       const data = likes.map(like => {
         return {
           ...like.toJSON(),
+          createdAt: relativeTimeFromNow(like.createdAt),
+          tweetCreatedAt: relativeTimeFromNow(like.Tweet.createdAt),
           repliesCount: like.Tweet.Replies.length || 0,
           likedCount: like.Tweet.Likes.length || 0,
           isLiked: currentUserLikes?.includes(like.Tweet.id)
@@ -373,7 +377,8 @@ const userController = {
 
       const data = replies.map(reply => {
         return {
-          ...reply.toJSON()
+          ...reply.toJSON(),
+          createdAt: relativeTimeFromNow(reply.createdAt)
         }
       })
 
