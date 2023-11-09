@@ -20,7 +20,8 @@ const tweetController = {
       const data = tweets.map(tweet => ({
         ...tweet.toJSON(),
         createdAt: relativeTimeFromNow(tweet.createdAt),
-        isLiked: tweet.LikedUsers?.some(like => like.TweetId === tweet.id) || false,
+        isLiked:
+          tweet.LikedUsers?.some(like => like.TweetId === tweet.id) || false,
         repliesAmount: tweet.Replies.length || 0,
         likesAmount: tweet.LikedUsers.length || 0
       }))
@@ -60,32 +61,28 @@ const tweetController = {
         include: [
           { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
           {
-            model: Reply,
-            include: [
-              { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
-            ]
-          },
-          {
             model: User,
             as: 'LikedUsers',
             attributes: ['id', 'account', 'name', 'avatar']
           }
-        ],
-        order: [[{ model: Reply }, 'createdAt', 'DESC']]
+        ]
       })
-      const repliesData = tweet.Replies.map(reply => ({
-        ...reply.toJSON(),
-        createdAt: relativeTimeFromNow(reply.createdAt)
-      }))
+      const reply = await Tweet.findByPk(req.params.id, {
+        include: {
+          model: Reply,
+          include: [
+            { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+          ]
+        }
+      })
       const data = {
         ...tweet.toJSON(),
         createdAt: relativeTimeFromNow(tweet.createdAt),
         createdAtDate: formatDate(tweet.createdAt),
         createdAtTime: formatTime(tweet.createdAt),
-        Replies: repliesData,
         isLiked:
           tweet.LikedUsers?.some(like => like.TweetId === tweet.id) || false,
-        repliesAmount: tweet.Replies.length || 0,
+        repliesAmount: reply.Replies.length || 0,
         likesAmount: tweet.LikedUsers.length || 0
       }
 
@@ -172,20 +169,49 @@ const tweetController = {
 
       const tweet = await Tweet.findByPk(TweetId, {
         include: [
-          { model: User, attributes: ['account'] }
-        ]
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          {
+            model: Reply,
+            include: [
+              { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+            ]
+          },
+          {
+            model: User,
+            as: 'LikedUsers',
+            attributes: ['id', 'account', 'name', 'avatar']
+          }
+        ],
+        order: [[{ model: Reply }, 'createdAt', 'DESC']]
       })
       if (!tweet || !replies) {
         throw new Error(!tweet ? '推文不存在！' : '此篇推文目前沒有回覆。')
       }
 
-      const data = replies.map(reply => ({
-        ...reply.toJSON(),
-        createdAt: relativeTimeFromNow(reply.createdAt),
-        tweet
-      }))
+      const tweetData = {
+        ...tweet.toJSON(),
+        createdAt: relativeTimeFromNow(tweet.createdAt),
+        createdAtDate: formatDate(tweet.createdAt),
+        createdAtTime: formatTime(tweet.createdAt),
+        isLiked:
+          tweet.LikedUsers?.some(like => like.TweetId === tweet.id) || false,
+        repliesAmount: tweet.Replies.length || 0,
+        likesAmount: tweet.LikedUsers.length || 0
+      }
 
-      return res.status(200).json(data)
+      delete tweetData.Replies
+
+      const data = [
+        ...replies.map(reply => ({
+          ...reply.toJSON(),
+          createdAt: relativeTimeFromNow(reply.createdAt)
+        })),
+        tweetData
+      ]
+
+      res.status(200).json(
+        data
+      )
     } catch (err) {
       next(err)
     }
