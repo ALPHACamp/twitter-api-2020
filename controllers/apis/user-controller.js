@@ -233,6 +233,93 @@ const userController = {
 
 
   },
+  getUserTweets: (req, res, next) => {
+    const userId = req.params.id
+    return Tweet.findAll({
+      where: { userId },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    }).then((tweets) => {
+      return res.json(
+        tweets
+      )
+    }).catch(err => next(err))
+  },
+  getUserReplies: (req, res, next) => {
+    const userId = req.params.id
+    return Reply.findAll({
+      where: { userId },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    }).then((replies) => {
+      return res.json(
+        replies
+      )
+    }).catch(err => next(err))
+  },
+  getUserLikes: (req, res, next) => {
+
+    const userId = req.params.id
+    return Like.findAll({
+      where: { userId },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    }).then((likes) => {
+      return Promise.all(
+        likes.map(item => {
+          return Promise.all([
+            Tweet.findOne({
+              where: { id: item.TweetId }, raw: true, nest: true
+            }),
+            User.findOne({
+              where: { id: item.UserId }, raw: true, nest: true
+            }),
+            Like.findAll({
+              where: { TweetId: item.TweetId }, raw: true, nest: true
+            }),
+            Reply.findAll({
+              where: { TweetId: item.TweetId }, raw: true, nest: true
+            }),
+          ])
+            .then(([TweetOne, UserOne, LikeAll, ReplyAll]) => {
+
+              let likesCount = Object.keys(LikeAll).length
+              let repliesCount = Object.keys(ReplyAll).length
+
+              item["likesCount"] = likesCount
+              item["repliesCount"] = repliesCount
+
+              let description = TweetOne.description
+              let name = UserOne.name
+              let account = UserOne.account
+              let avatar = UserOne.avatar
+
+              item["description"] = description
+              item["name"] = name
+              item["account"] = account
+              item["avatar"] = avatar
+
+              return item
+
+            }).catch(err => next(err))
+
+        })
+      )
+
+    }
+    ).then(response => {
+
+      return res.json(
+        response
+      )
+    })
+
+      .catch(err => next(err))
+  },
+
 
 }
 module.exports = userController
