@@ -24,6 +24,7 @@ const userController = {
               'Error Message': 'account used'
             }
           })
+          req.body = []
         }
         else if (user.email === req.body.email) {
           res.status(500).json({
@@ -32,6 +33,7 @@ const userController = {
               'Error Message': 'email used'
             }
           })
+          req.body = []
         }
         return bcrypt.hash(req.body.password, 10)
       })
