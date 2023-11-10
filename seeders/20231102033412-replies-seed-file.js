@@ -13,24 +13,41 @@ module.exports = {
     const replyData = [];
     for (let i = 0; i < tweets.length; i++) {
       let userIdCheck = []
-      for (let j = 0; j < 3; j++) {
+      while (userIdCheck.length <= 3) {
         let userId = users[Math.floor(Math.random() * (users.length - 1)) + 1].id
         if (userIdCheck.indexOf(userId) === -1) {
           userIdCheck.push(userId)
-        } else {
-          --j
-          break
         }
+      }
+      // for (let j = 0; j < 3; j++) {
+      //   let userId = users[Math.floor(Math.random() * (users.length - 1)) + 1].id
+      //   if (userIdCheck.indexOf(userId) === -1) {
+      //     userIdCheck.push(userId)
+      //   } else {
+      //     j--
+      //     break
+      //   }
 
-        const newReply = {
-          UserId: userIdCheck[j],
+      // const newReply = {
+      //   UserId: userIdCheck[j],
+      //   TweetId: tweets[i].id,
+      //   comment: faker.lorem.text().substring(0, 60),
+      //   createdAt: new Date(),
+      //   updatedAt: new Date()
+      // };
+      // }
+
+      for (let k = 0; k < 3; k++) {
+        replyData.push({
+          UserId: userIdCheck[k],
           TweetId: tweets[i].id,
           comment: faker.lorem.text().substring(0, 60),
           createdAt: new Date(),
           updatedAt: new Date()
-        };
-        replyData.push(newReply);
+        }
+        )
       }
+
     }
     await queryInterface.bulkInsert('Replies', replyData);
   },
