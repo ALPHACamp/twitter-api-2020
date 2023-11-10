@@ -65,7 +65,11 @@ const followshipController = {
     },
     getFollowersTop: (req, res, next) => {
         Promise.all([
-            User.findAll(),
+            User.findAll({
+                where: {
+                    role: { [Op.ne]: 'admin' }
+                }
+            }),
             Followship.findAll()
         ]).then(([users, followships]) => {
 
