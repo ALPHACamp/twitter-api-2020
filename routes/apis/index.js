@@ -5,6 +5,7 @@ const admin = require('./modules/admin')
 const upload = require('../../middleware/multer')
 const tweetController = require('../../controllers/apis/tweet-controller')
 const userController = require('../../controllers/apis/user-controller')
+const followshipController = require('../../controllers/apis/followship-controller')
 const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 
@@ -23,6 +24,10 @@ router.put('/users/:id', authenticated, userController.putUser)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
+
+router.post('/followships', authenticated, followshipController.addFollowing)
+router.delete('/followships/:followingId', authenticated, followshipController.removeFollowing)
+router.get('/followships/top', authenticated, followshipController.getFollowersTop)
 
 router.use('/', apiErrorHandler)
 
