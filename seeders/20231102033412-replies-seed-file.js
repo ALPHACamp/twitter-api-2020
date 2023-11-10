@@ -18,7 +18,7 @@ module.exports = {
         if (userIdCheck.indexOf(userId) === -1) {
           userIdCheck.push(userId)
         } else {
-          --j   //not use j-- , data wll not complete
+          --j
           break
         }
 
