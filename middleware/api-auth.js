@@ -9,7 +9,6 @@ const authenticated = (req, res, next) => {
   })(req, res, next)
 }
 const authenticatedAdmin = (req, res, next) => {
-  console.log(helpers.getUser(req))
   if (helpers.getUser(req) && helpers.getUser(req).role === 'admin') return next()
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
