@@ -12,13 +12,13 @@ module.exports = {
     )
     const replyData = [];
     for (let i = 0; i < tweets.length; i++) {
-      const userIdCheck = []
-      for(let j = 0; j < 3; j++) {
-        let userId =  users[Math.floor(Math.random() *users.length)].id
-        if(userIdCheck.indexOf(userId)===-1){
+      let userIdCheck = []
+      for (let j = 0; j < 3; j++) {
+        let userId = users[Math.floor(Math.random() * (users.length - 1)) + 1].id
+        if (userIdCheck.indexOf(userId) === -1) {
           userIdCheck.push(userId)
-        }else {
-          j--
+        } else {
+          --j
           break
         }
 

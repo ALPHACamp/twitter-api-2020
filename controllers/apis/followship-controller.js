@@ -83,6 +83,7 @@ const followshipController = {
                 users
             )
         })
-    }
+    },
+
 }
 module.exports = followshipController
