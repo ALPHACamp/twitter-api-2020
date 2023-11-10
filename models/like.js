@@ -16,7 +16,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER
       },
       UserId: DataTypes.INTEGER,
-      TweetId: DataTypes.INTEGER
+      TweetId: DataTypes.INTEGER,
+      createdAt: DataTypes.DATE,
+      updatedAt: DataTypes.DATE
     },
     {
       sequelize,

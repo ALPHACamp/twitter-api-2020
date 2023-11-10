@@ -1,11 +1,15 @@
 'use strict'
 const { faker } = require('@faker-js/faker')
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     // 找到所有推文
-    const tweets = await queryInterface.sequelize.query('SELECT id FROM Tweets;', {
-      type: Sequelize.QueryTypes.SELECT
-    })
+    const tweets = await queryInterface.sequelize.query(
+      'SELECT id, createdAt FROM Tweets;',
+      {
+        type: Sequelize.QueryTypes.SELECT
+      }
+    )
 
     // 生成留言資料
     const repliesData = []
@@ -18,15 +22,18 @@ module.exports = {
         }
       )
 
-      for (const commentUserId of commentUserIds) {
+      for (let i = 0; i < 3; i++) {
+        const commentUserId = commentUserIds[i]
+        const createdAt = new Date(tweet.createdAt.getTime() + 86400 * 1000 * i)
+
         const replyData = {
-          UserId: commentUserId.id, // 留言者的用戶 ID
-          TweetId: tweet.id, // 推文的 ID
+          UserId: commentUserId.id,
+          TweetId: tweet.id,
           comment: faker.string.alphanumeric({
             length: { min: 1, max: 140 }
           }), // 預設留言內容
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt,
+          updatedAt: createdAt
         }
         repliesData.push(replyData)
       }
