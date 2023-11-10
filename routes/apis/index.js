@@ -14,6 +14,8 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+router.get('/users/:id/followings', authenticated, userController.getFollowings)
+router.get('/users/:id/followers', authenticated, userController.getFollowers)
 router.get('/users/:id', authenticated, userController.getUser)
 router.post('/users', userController.signUp)
 router.put('/users/:id', authenticated, userController.putUser)

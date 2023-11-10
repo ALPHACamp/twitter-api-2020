@@ -1,10 +1,14 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const dayjs = require('dayjs')
+const relativeTime = require('dayjs/plugin/relativeTime');
+dayjs.extend(relativeTime);
 const helpers = require('../../_helpers')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../../models')
 const { Op } = require("sequelize");
 //const { localFileHandler } = require('../../helpers/file-helpers')
-const { imgurFileHandler } = require('../../helpers/file-helpers')
+const { imgurFileHandler } = require('../../helpers/file-helpers');
+const { json } = require('body-parser');
 
 const userController = {
   signUp: (req, res, next) => {
@@ -53,6 +57,7 @@ const userController = {
   },
   signIn: (req, res, next) => {
     try {
+
       const userData = req.user.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -235,16 +240,49 @@ const userController = {
   },
   getUserTweets: (req, res, next) => {
     const userId = req.params.id
-    return Tweet.findAll({
-      where: { userId },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    }).then((tweets) => {
-      return res.json(
-        tweets
-      )
-    }).catch(err => next(err))
+    return Promise.all([
+      Tweet.findAll({
+        where: { userId },
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      }),
+      User.findByPk(userId),//users's info
+      Tweet.findAll({ where: { userId } }),//user's tweets count
+    ])
+      .then(([tweets, user, userTweetsCount]) => {
+        userTweetsCount = Object.keys(userTweetsCount).length
+
+        user = user.toJSON()
+        delete user.password
+        return Promise.all(
+          tweets.map((item, i) => {
+            const createdAtDate = dayjs(item.createdAt);
+            const updatedAtDate = dayjs(item.updatedAt);
+            item.createdAt = createdAtDate.fromNow()
+            item.updatedAt = updatedAtDate.fromNow()
+            item.tweetsCount = userTweetsCount
+            return Promise.all([
+              Like.findAll({ where: { TweetId: item.id } }), //like count of a tweet
+              Reply.findAll({ where: { TweetId: item.id } }),//reply count of a tweet
+            ]).then(([likesCount, repliesCount]) => {
+              likesCount = Object.keys(likesCount).length
+              repliesCount = Object.keys(repliesCount).length
+              item.LikeCount = likesCount
+              item.RepliesCount = repliesCount
+              item.user = user
+
+              return item
+            }).catch(err => next(err))
+          })
+        ).then((response) => {
+          return res.json(
+            response
+          )
+        }).catch(err => next(err))
+
+      }).catch(err => next(err))
+
   },
   getUserReplies: (req, res, next) => {
     const userId = req.params.id
@@ -292,6 +330,11 @@ const userController = {
               item["likesCount"] = likesCount
               item["repliesCount"] = repliesCount
 
+              let createdAtDate = dayjs(TweetOne.createdAt);
+              let updatedAtDate = dayjs(TweetOne.updatedAt);
+              item.createdAt = createdAtDate.fromNow()
+              item.updatedAt = updatedAtDate.fromNow()
+
               let description = TweetOne.description
               let name = UserOne.name
               let account = UserOne.account
@@ -301,6 +344,7 @@ const userController = {
               item["name"] = name
               item["account"] = account
               item["avatar"] = avatar
+
 
               return item
 
@@ -318,6 +362,97 @@ const userController = {
     })
 
       .catch(err => next(err))
+  },
+  getFollowings: (req, res, next) => {
+    const userId = req.params.id
+
+    return Followship.findAll({
+      where: { followerId: userId },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+      //每個following再去找出對應user
+    }).then((followingList) => {
+
+      return Promise.all(
+        followingList.map(item => {
+          return Promise.all([
+            User.findByPk(item.followingId)
+          ]).then(([user]) => {
+            let followingId = user.id
+            let followingName = user.name
+            let followingIntroduction = user.introduction
+            let followingAvatar = user.avatar
+
+            item["followingId"] = followingId
+            item["followingName"] = followingName
+            item["followingIntroduction"] = followingIntroduction
+            item["followingAvatar"] = followingAvatar
+
+            // item = item.toJSON()
+            delete item.id
+            delete item.FollowerId
+            delete item.followerId
+            delete item.followerId
+            delete item.createdAt
+            delete item.updatedAt
+            return item
+
+          }).catch(err => next(err))
+        })
+      )
+    }).then(response => {
+
+      //console.log(response)
+      return res.json(
+        response
+      )
+    }).catch(err => next(err))
+  },
+  getFollowers: (req, res, next) => {
+    const userId = req.params.id
+
+    return Followship.findAll({
+      where: { followingId: userId },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+      //每個following再去找出對應user
+    }).then((followingList) => {
+
+      return Promise.all(
+        followingList.map(item => {
+          return Promise.all([
+            User.findByPk(item.followerId)
+          ]).then(([user]) => {
+            let followerId = user.id
+            let followerName = user.name
+            let followerIntroduction = user.introduction
+            let followerAvatar = user.avatar
+
+            item["followerId"] = followerId
+            item["followerName"] = followerName
+            item["followerIntroduction"] = followerIntroduction
+            item["followerAvatar"] = followerAvatar
+            // item = item.toJSON()
+            delete item.id
+            delete item.FollowingId
+            delete item.followingId
+            delete item.followingId
+            delete item.createdAt
+            delete item.updatedAt
+            return item
+
+          }).catch(err => next(err))
+        })
+      )
+    }).then(response => {
+
+      //console.log(response)
+      return res.json(
+        response
+      )
+    }).catch(err => next(err))
   },
 
 
