@@ -1,16 +1,23 @@
 const { Tweet, User } = require('../models')
+const dayjs = require('dayjs')
+const relativeTime = require('dayjs/plugin/relativeTime'); 
+dayjs.extend(relativeTime)
 const adminServices = {
   getTweets: (req, cb) => {
     Tweet.findAll({
       raw: true,
-      nest: true,
     })
-      .then(tweets => {
-        console.log("測試"+tweets)
-        cb(null, { tweets })
-      })
-      .catch(err => cb(err))
-  },
+    .then(tweets => {
+      for(let i = 0; i < tweets.length; i++) {
+        const createdAtDate = dayjs(tweets[i].createdAt);
+        const updatedAtDate = dayjs(tweets[i].updatedAt);
+        tweets[i].createdAt = createdAtDate.fromNow()
+        tweets[i].updatedAt = updatedAtDate.fromNow()
+      }
+      cb(null, tweets);
+    })
+    .catch(err => cb(err));
+},
   postTweet: (req, cb) => {
     const { UserId, description} = req.body
     if (!UserId) throw new Error('UserId is required!')
@@ -35,11 +42,9 @@ const adminServices = {
   getUsers: (req, cb) => {
     User.findAll({
       raw: true,
-      nest: true,
     })
       .then(users => {
-        console.log("測試"+users)
-        cb(null, { users })
+        cb(null, users )
       })
       .catch(err => cb(err))
   },
