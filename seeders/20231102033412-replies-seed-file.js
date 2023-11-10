@@ -18,14 +18,14 @@ module.exports = {
         if (userIdCheck.indexOf(userId) === -1) {
           userIdCheck.push(userId)
         } else {
-          --j
+          --j   //not use j-- , data wll not complete
           break
         }
 
         const newReply = {
           UserId: userIdCheck[j],
           TweetId: tweets[i].id,
-          comment: faker.lorem.text(),
+          comment: faker.lorem.text().substring(0, 60),
           createdAt: new Date(),
           updatedAt: new Date()
         };

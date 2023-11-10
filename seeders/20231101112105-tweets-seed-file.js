@@ -11,7 +11,7 @@ module.exports = {
       for (let j = 0; j < 10; j++) {
         const newTweet = {
           UserId: users[i].id,
-          description: faker.lorem.text(),
+          description: faker.lorem.text().substring(0, 140),
           createdAt: new Date(),
           updatedAt: new Date()
         };
