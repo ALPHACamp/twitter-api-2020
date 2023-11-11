@@ -31,14 +31,14 @@ passport.use(new LocalStrategy(
 ))
 
 const jwtOptions = {
-    jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-    secretOrKey: process.env.JWT_SECRET
-  }
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET || 'alphacamp'
+}
 
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id)
-      .then(user => cb(null, user))
-      .catch(err => cb(err))
-  }))
+    .then(user => cb(null, user))
+    .catch(err => cb(err))
+}))
 
 module.exports = passport
