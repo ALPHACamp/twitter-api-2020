@@ -73,5 +73,11 @@ const tweetController = {
       .catch(err => next(err))
 
   },
+  addLike: (req, res, next) => {
+    tweetServices.addLike(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  removeLike: (req, res, next) => {
+    tweetServices.removeLike(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
 }
 module.exports = tweetController
