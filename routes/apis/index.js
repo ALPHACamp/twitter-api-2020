@@ -26,6 +26,7 @@ router.post('/tweets/:id/unlike', authenticated, tweetController.removeLike)
 router.get('/tweets/:tweetId/replies', authenticated, tweetController.getTweetReplies)
 router.post('/tweets/:tweetId/replies', authenticated, tweetController.postTweetReply)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
+
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
 
@@ -33,6 +34,7 @@ router.post('/tweets', authenticated, tweetController.postTweet)
 router.post('/followships', authenticated, followshipController.addFollowing)
 router.delete('/followships/:followingId', authenticated, followshipController.removeFollowing)
 router.get('/followships/top', authenticated, followshipController.getFollowersTop)
+
 
 router.use('/', apiErrorHandler)
 

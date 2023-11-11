@@ -1,13 +1,15 @@
 const { Tweet, User } = require('../models')
 const dayjs = require('dayjs')
+
 const relativeTime = require('dayjs/plugin/relativeTime');
+
 dayjs.extend(relativeTime)
 const adminServices = {
   getTweets: (req, cb) => {
     Tweet.findAll({
       raw: true,
-      nest: true,
     })
+
       .then(tweets => {
         for (let i = 0; i < tweets.length; i++) {
           const createdAtDate = dayjs(tweets[i].createdAt);
@@ -19,6 +21,7 @@ const adminServices = {
       })
       .catch(err => cb(err))
   },
+
   postTweet: (req, cb) => {
     const { UserId, description } = req.body
     if (!UserId) res.status(500).json({
@@ -51,7 +54,9 @@ const adminServices = {
     })
       .then(users => {
 
+
         cb(null, users)
+
 
       })
       .catch(err => cb(err))

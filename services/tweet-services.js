@@ -1,3 +1,4 @@
+
 // const { Tweet } = require('../models')
 // const dayjs = require('dayjs')
 // const relativeTime = require('dayjs/plugin/relativeTime');
@@ -13,14 +14,16 @@ const helpers = require('../_helpers')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const { Op } = require("sequelize");
 
+
 const tweetServices = {
   getTweets: (req, cb) => {
     Tweet.findAll({
       raw: true,
-      nest: true,
     })
       .then(tweets => {
+
         for (let i = 0; i < tweets.length; i++) {
+
           const createdAtDate = dayjs(tweets[i].createdAt);
           const updatedAtDate = dayjs(tweets[i].updatedAt);
           tweets[i].createdAt = createdAtDate.fromNow()
@@ -28,6 +31,7 @@ const tweetServices = {
         }
         cb(null, tweets);
       })
+
       .catch(err => cb(err))
   },
   getTweet: (req, cb) => {
@@ -42,6 +46,7 @@ const tweetServices = {
         return cb(null, tweet);
       })
       .catch(err => cb(err))
+
   },
   postTweet: (req, cb) => {
     const UserId = helpers.getUser(req).id
@@ -53,6 +58,7 @@ const tweetServices = {
       }
     })
     const { file } = req
+
     Tweet.create({ UserId, description })
       .then(newTweet => {
 
@@ -106,6 +112,7 @@ const tweetServices = {
       })
       .then(removeLike => cb(null, removeLike))
       .catch(err => cb(err))
+
   }
 }
 module.exports = tweetServices
