@@ -2,16 +2,21 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const dayjs = require('dayjs')
-const relativeTime = require('dayjs/plugin/relativeTime');
-dayjs.extend(relativeTime);
+const relativeTime = require('dayjs/plugin/relativeTime')
+//const updateLocale = require('dayjs/plugin/updateLocale')
+require('dayjs/locale/zh-tw')
+dayjs.locale('zh-tw')
+dayjs.extend(relativeTime)
+//dayjs.extend(updateLocale)
 const helpers = require('../_helpers')
 const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
-const { Op } = require("sequelize");
+const { Op } = require("sequelize")
 
 
 const tweetServices = {
   getTweets: (req, cb) => {
     Tweet.findAll({
+      order: [['createdAt', 'DESC']],
       raw: true,
     })
       .then(tweets => {

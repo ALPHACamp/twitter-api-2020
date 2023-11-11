@@ -3,10 +3,13 @@ const dayjs = require('dayjs')
 
 const relativeTime = require('dayjs/plugin/relativeTime');
 
+require('dayjs/locale/zh-tw')
+dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
 const adminServices = {
   getTweets: (req, cb) => {
     Tweet.findAll({
+      order: [['createdAt', 'DESC']],
       raw: true,
     })
 
