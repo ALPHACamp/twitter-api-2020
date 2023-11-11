@@ -11,7 +11,9 @@ module.exports = (sequelize, DataTypes) => {
     {
       comment: DataTypes.TEXT,
       UserId: DataTypes.INTEGER,
-      TweetId: DataTypes.INTEGER
+      TweetId: DataTypes.INTEGER,
+      createdAt: DataTypes.DATE,
+      updatedAt: DataTypes.DATE
     },
     {
       sequelize,
