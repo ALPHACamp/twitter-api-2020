@@ -1,10 +1,4 @@
 
-// const { Tweet } = require('../models')
-// const dayjs = require('dayjs')
-// const relativeTime = require('dayjs/plugin/relativeTime');
-// dayjs.extend(relativeTime);
-// const helpers = require('../_helpers')
-//const tweetServices = require('../../services/tweet-services')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const dayjs = require('dayjs')
@@ -69,8 +63,7 @@ const tweetServices = {
   addLike: (req, cb) => {
     const tweetId = req.params.id
     const UserId = helpers.getUser(req).id
-    //console.log("------", helpers.getUser(req).id)
-    //console.log("======", req.params)
+
     Promise.all([
       Tweet.findByPk(tweetId),
       Like.findOne({
@@ -81,11 +74,10 @@ const tweetServices = {
       })
     ])
       .then(([tweet, like]) => {
-        //console.log("======")
-        //console.log("======", tweet, "====", like)
+
         if (!tweet) throw new Error("tweet didn't exist!")
         if (like) throw new Error('You have favorited this tweet!')
-        //console.log("======", tweet.id)
+
         return Like.create({
           UserId: UserId,
           TweetId: tweet.id
@@ -97,8 +89,7 @@ const tweetServices = {
   removeLike: (req, cb) => {
     const tweetId = req.params.id
     const UserId = helpers.getUser(req).id
-    //console.log("------", helpers.getUser(req).id)
-    //console.log("======", req.params)
+
     return Like.findOne({
       where: {
         UserId: UserId,

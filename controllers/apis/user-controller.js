@@ -196,7 +196,7 @@ const userController = {
             }
           })
         }
-        //console.log("++++", password, "----", typeof (password))
+
         //有更新密碼就做加密 , 沒有就undefined ,不更改密碼
 
         var hash = (passwordFlag == 1) ? bcrypt.hash(req.body.password, 10) : Promise.resolve()
@@ -408,7 +408,7 @@ const userController = {
       )
     }).then(response => {
 
-      //console.log(response)
+
       return res.json(
         response
       )
@@ -439,7 +439,7 @@ const userController = {
             item["followerName"] = followerName
             item["followerIntroduction"] = followerIntroduction
             item["followerAvatar"] = followerAvatar
-            // item = item.toJSON()
+
             delete item.id
             delete item.FollowingId
             delete item.followingId
@@ -453,7 +453,7 @@ const userController = {
       )
     }).then(response => {
 
-      //console.log(response)
+
       return res.json(
         response
       )
