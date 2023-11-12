@@ -87,19 +87,31 @@ const userController = {
 
       if (userId !== currentUserId) throw new Error('You have no permission to edit.')
 
-      const { account = null, name = null, email = null, password = null, checkPassword = null, introduction } = req.body
+      const { account = '', name = '', email = '', password = null, checkPassword = null, introduction = null } = req.body
+
+      console.log('================================')
+      console.log('account: ', account)
+      console.log('name: ', name)
+      console.log('name.length: ', name.length)
+      console.log('email: ', email)
+      console.log('password: ', password)
+      console.log('checkPassword: ', checkPassword)
+      console.log('introduction: ', introduction)
+      console.log('================================')
 
       if (account || email || name) {
         const existUser = await User.findOne({
           where: { [Op.or]: [{ email }, { account }, { name }] }
         })
+        console.log('=============== test1')
         if (existUser) throw new Error("User's Name, Email, Account has already exist.")
+        console.log('=============== test1-1')
       }
 
-      if (name && name > 50) throw new Error("Name can't over 50 letter")
-
+      if (name && name.length > 50) throw new Error("Name can't over 50 letter")
+      console.log('=============== test2')
       if (password !== checkPassword) throw new Error("Password doesn't match.")
-
+      console.log('=============== test3')
       const avatarLink = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
       const coverLink = req.files?.cover ? await imgurFileHandler(req.files.cover[0]) : null
 
@@ -111,9 +123,9 @@ const userController = {
       }
 
       const userData = {
-        account: account || user.dataValues.account,
-        name: name || user.dataValues.name,
-        email: email || user.dataValues.email,
+        account: account === '' ? user.dataValues.account : account,
+        name: name === '' ? user.dataValues.name : name,
+        email: email === '' ? user.dataValues.email : email,
         password: password ? bcrypt.hashSync(password, 10) : user.dataValues.password,
         introduction: introduction || user.dataValues.introduction,
         avatar: avatarLink || user.dataValues.avatar,
