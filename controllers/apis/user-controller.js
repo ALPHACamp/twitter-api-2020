@@ -103,8 +103,10 @@ const userController = {
             const followerCount = Object.keys(followerAll).length
             const followingCount = Object.keys(followingAll).length
 
+            if (user !== null) {
+              user = user.toJSON()
+            }
 
-            //user = user.toJSON()
             delete user.password
 
             user["followersCount"] = followerCount
