@@ -89,12 +89,12 @@ const userController = {
 
       const { account = '', name = '', email = '', password = null, checkPassword = null, introduction = null } = req.body
 
-      if (account || email || name) {
+      if (account || email) {
         const existUser = await User.findOne({
-          where: { [Op.or]: [{ email }, { account }, { name }] }
+          where: { [Op.or]: [{ email }, { account }] }
         })
 
-        if (existUser) throw new Error("User's Name, Email, Account has already exist.")
+        if (existUser) throw new Error('此account/email已經註冊過')
       }
 
       if (name && name.length > 50) throw new Error("Name can't over 50 letter")
