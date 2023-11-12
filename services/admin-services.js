@@ -91,6 +91,7 @@ const adminServices = {
           }).catch(err => next(err))
         })
       ).then(users => {
+        users.sort((a, b) => b.tweetsCount - a.tweetsCount)
         cb(null, users)
       })
         .catch(err => cb(err))
