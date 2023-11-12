@@ -33,6 +33,7 @@ const adminController = {
           'name',
           'account',
           'avatar',
+          'cover',
           [
             sequelize.literal(
               '(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'
