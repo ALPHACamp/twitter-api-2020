@@ -1,6 +1,10 @@
 .DS_Store
 *.DS_Store
 
+# multer
+temp/
+upload/
+
 # Logs
 logs
 *.log

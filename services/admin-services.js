@@ -1,30 +1,43 @@
-const { Tweet, User } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const dayjs = require('dayjs')
-const relativeTime = require('dayjs/plugin/relativeTime'); 
+
+const relativeTime = require('dayjs/plugin/relativeTime');
+const { getUserLikes } = require('../controllers/apis/user-controller');
+
+require('dayjs/locale/zh-tw')
+dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
 const adminServices = {
   getTweets: (req, cb) => {
     Tweet.findAll({
+      order: [['createdAt', 'DESC']],
       raw: true,
     })
-    .then(tweets => {
-      for(let i = 0; i < tweets.length; i++) {
-        const createdAtDate = dayjs(tweets[i].createdAt);
-        const updatedAtDate = dayjs(tweets[i].updatedAt);
-        tweets[i].createdAt = createdAtDate.fromNow()
-        tweets[i].updatedAt = updatedAtDate.fromNow()
-      }
-      cb(null, tweets);
-    })
-    .catch(err => cb(err));
-},
+
+      .then(tweets => {
+        for (let i = 0; i < tweets.length; i++) {
+          const createdAtDate = dayjs(tweets[i].createdAt);
+          const updatedAtDate = dayjs(tweets[i].updatedAt);
+          tweets[i].createdAt = createdAtDate.fromNow()
+          tweets[i].updatedAt = updatedAtDate.fromNow()
+        }
+        cb(null, tweets);
+      })
+      .catch(err => cb(err))
+  },
+
   postTweet: (req, cb) => {
-    const { UserId, description} = req.body
-    if (!UserId) throw new Error('UserId is required!')
+    const { UserId, description } = req.body
+    if (!UserId) res.status(500).json({
+      status: 'error',
+      data: {
+        'Error Message': 'userId is required'
+      }
+    })
     const { file } = req
-      Tweet.create({ UserId, description })
-        .then(newTweet => cb(null, { tweet: newTweet }))
-        .catch(err => cb(err))
+    Tweet.create({ UserId, description })
+      .then(newTweet => cb(null, { tweet: newTweet }))
+      .catch(err => cb(err))
   },
   deleteTweet: (req, cb) => {
     Tweet.findByPk(req.params.id)
@@ -40,13 +53,49 @@ const adminServices = {
       .catch(err => cb(err))
   },
   getUsers: (req, cb) => {
-    User.findAll({
+    // User.findAll({
+    //   raw: true,
+    // })
+    //   .then(users => {
+    //     cb(null, users)
+    //   })
+    //   .catch(err => cb(err))
+    return User.findAll({
+      order: [['createdAt', 'DESC']],
       raw: true,
-    })
-      .then(users => {
-        cb(null, users )
+
+    }).then((userList) => {
+      //console.log(userList)
+      return Promise.all(
+        userList.map(item => {
+          return Promise.all([
+            User.findByPk(item.id),
+            Tweet.findAll({ where: { UserId: item.id } }),
+            Followship.findAll({ where: { followerId: item.id } }),
+            Followship.findAll({ where: { followingId: item.id } }),
+            Like.findAll({ where: { UserId: item.id } }),
+          ]).then(([user, tweetList, followingList, followerList, likeList]) => {
+            const tweetsCount = Object.keys(tweetList).length
+            const likesCount = Object.keys(likeList).length
+            const followerCount = Object.keys(followerList).length
+            const followingCount = Object.keys(followingList).length
+
+            user = user.toJSON()
+            delete user.password
+            user["followers"] = followerCount
+            user["followings"] = followingCount
+            user["likesCount"] = likesCount
+            user["tweetsCount"] = tweetsCount
+            return user
+
+          }).catch(err => next(err))
+        })
+      ).then(users => {
+        users.sort((a, b) => b.tweetsCount - a.tweetsCount)
+        cb(null, users)
       })
-      .catch(err => cb(err))
+        .catch(err => cb(err))
+    })
   },
 }
 module.exports = adminServices
