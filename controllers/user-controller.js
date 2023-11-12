@@ -87,16 +87,17 @@ const userController = {
 
       if (userId !== currentUserId) throw new Error('You have no permission to edit.')
 
-      const { account = null, name = null, email = null, password = null, checkPassword = null, introduction } = req.body
+      const { account = '', name = '', email = '', password = null, checkPassword = null, introduction = null } = req.body
 
-      if (account || email || name) {
+      if (account || email) {
         const existUser = await User.findOne({
-          where: { [Op.or]: [{ email }, { account }, { name }] }
+          where: { [Op.or]: [{ email }, { account }] }
         })
-        if (existUser) throw new Error("User's Name, Email, Account has already exist.")
+
+        if (existUser) throw new Error('此account/email已經註冊過')
       }
 
-      if (name && name > 50) throw new Error("Name can't over 50 letter")
+      if (name && name.length > 50) throw new Error("Name can't over 50 letter")
 
       if (password !== checkPassword) throw new Error("Password doesn't match.")
 
@@ -111,9 +112,9 @@ const userController = {
       }
 
       const userData = {
-        account: account || user.dataValues.account,
-        name: name || user.dataValues.name,
-        email: email || user.dataValues.email,
+        account: account === '' ? user.dataValues.account : account,
+        name: name === '' ? user.dataValues.name : name,
+        email: email === '' ? user.dataValues.email : email,
         password: password ? bcrypt.hashSync(password, 10) : user.dataValues.password,
         introduction: introduction || user.dataValues.introduction,
         avatar: avatarLink || user.dataValues.avatar,
