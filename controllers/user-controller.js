@@ -87,10 +87,21 @@ const userController = {
 
       if (userId !== currentUserId) throw new Error('You have no permission to edit.')
 
-      const { account, name, email, password, checkPassword, introduction } = req.body
+      const { account = null, name = null, email = null, password = null, checkPassword = null, introduction } = req.body
+
+      if (account || email || name) {
+        const existUser = await User.findOne({
+          where: { [Op.or]: [{ email }, { account }, { name }] }
+        })
+        if (existUser) throw new Error("User's Name, Email, Account has already exist.")
+      }
+
       if (name && name > 50) throw new Error("Name can't over 50 letter")
 
       if (password !== checkPassword) throw new Error("Password doesn't match.")
+
+      const avatarLink = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
+      const coverLink = req.files?.cover ? await imgurFileHandler(req.files.cover[0]) : null
 
       const user = await User.findByPk(userId)
       if (!user) {
@@ -98,11 +109,6 @@ const userController = {
         err.status(404)
         throw err
       }
-
-      const avatarLink = req.files?.avatar ? await imgurFileHandler(req.files.avatar[0]) : null
-      const coverLink = req.files?.cover ? await imgurFileHandler(req.files.cover[0]) : null
-
-      console.log('user: ', user.toJSON())
 
       const userData = {
         account: account || user.dataValues.account,
