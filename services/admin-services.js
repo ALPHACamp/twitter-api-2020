@@ -14,7 +14,7 @@ const adminServices = {
     return Promise.all([
       Like.findAll({ where: { userId: UserId } }),
       Reply.findAll({ where: { userId: UserId } }),
-      Tweet.findAll({ raw: true, include: [User] })
+      Tweet.findAll({ raw: true, include: [User], order: [['createdAt', 'DESC']], })
     ])
       .then(([likes, replies, tweets]) => {
         for (let i = 0; i < tweets.length; i++) {
