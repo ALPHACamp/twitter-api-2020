@@ -15,18 +15,20 @@ const { Op } = require("sequelize")
 
 const tweetServices = {
   getTweets: (req, cb) => {
-    Tweet.findAll({
-      order: [['createdAt', 'DESC']],
-      raw: true,
-    })
-      .then(tweets => {
-
+    const UserId = helpers.getUser(req).id
+    return Promise.all([
+      Like.findAll({ where: { userId: UserId } }),
+      Reply.findAll({ where: { userId: UserId } }),
+      Tweet.findAll({ raw: true, include: [User] })
+    ])
+      .then(([likes, replies, tweets]) => {
         for (let i = 0; i < tweets.length; i++) {
-
           const createdAtDate = dayjs(tweets[i].createdAt);
           const updatedAtDate = dayjs(tweets[i].updatedAt);
           tweets[i].createdAt = createdAtDate.fromNow()
           tweets[i].updatedAt = updatedAtDate.fromNow()
+          tweets[i]["likeCount"] = likes.length
+          tweets[i]["replyCount"] = replies.length
         }
         cb(null, tweets);
       })
@@ -34,14 +36,20 @@ const tweetServices = {
       .catch(err => cb(err))
   },
   getTweet: (req, cb) => {
-    return Tweet.findByPk(req.params.id)
-      .then(tweet => {
+    return Promise.all([
+      Like.findAll({ where: { tweetId: req.params.id } }),
+      Reply.findAll({ where: { tweetId: req.params.id } }),
+      Tweet.findByPk(req.params.id, { include: [User] })
+    ])
+      .then(([likes, replies, tweet]) => {
         if (!tweet) {
           throw new Error("Tweet didn't exist!");
         }
         tweet = tweet.toJSON();
         tweet.createdAt = dayjs(tweet.createdAt).fromNow();
         tweet.updatedAt = dayjs(tweet.updatedAt).fromNow();
+        tweet["likeCount"] = likes.length
+        tweet["replyCount"] = replies.length
         return cb(null, tweet);
       })
       .catch(err => cb(err))

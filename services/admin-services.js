@@ -3,27 +3,31 @@ const dayjs = require('dayjs')
 
 const relativeTime = require('dayjs/plugin/relativeTime');
 const { getUserLikes } = require('../controllers/apis/user-controller');
+const helpers = require('../_helpers')
 
 require('dayjs/locale/zh-tw')
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
 const adminServices = {
   getTweets: (req, cb) => {
-    Tweet.findAll({
-      order: [['createdAt', 'DESC']],
-      raw: true,
-    })
-
-      .then(tweets => {
+    const UserId = helpers.getUser(req).id
+    return Promise.all([
+      Like.findAll({ where: { userId: UserId } }),
+      Reply.findAll({ where: { userId: UserId } }),
+      Tweet.findAll({ raw: true, include: [User] })
+    ])
+      .then(([likes, replies, tweets]) => {
         for (let i = 0; i < tweets.length; i++) {
           const createdAtDate = dayjs(tweets[i].createdAt);
           const updatedAtDate = dayjs(tweets[i].updatedAt);
           tweets[i].createdAt = createdAtDate.fromNow()
           tweets[i].updatedAt = updatedAtDate.fromNow()
+          tweets[i]["likeCount"] = likes.length
+          tweets[i]["replyCount"] = replies.length
         }
         cb(null, tweets);
       })
-      .catch(err => cb(err))
+      .catch(err => cb(err));
   },
 
   postTweet: (req, cb) => {
