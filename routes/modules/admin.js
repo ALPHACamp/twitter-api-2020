@@ -4,7 +4,7 @@ const adminController = require('../../controllers/apis/admin-controller')
 
 const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 // router.post('/login', passport.authenticate('jwt', { session: false }), adminController.signIn)
-
+router.post('/signin', adminController.signIn)
 router.get(
   '/users',
   authenticated,
