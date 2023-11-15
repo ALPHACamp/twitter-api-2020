@@ -1,0 +1,111 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Twitter API",
+    "version": "1.0"
+  },
+  "tags": [
+    {
+      "name": "Admin",
+      "description": "API for admins"
+    },
+    {
+      "name": "User",
+      "description": "API for users"
+    }
+  ],
+  "servers": [{ "url": "https://api.server.test/v1" }],
+
+  "paths": {
+    "/api/admin/users": {
+      "get": {
+        "tags": ["Admin"],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/login": {
+      "post": {
+        "tags": ["Admin"],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/tweets": {
+      "get": {
+        "tags": ["Admin"],
+        "description": "",
+        "parameters": [],
+        "responses": 
+      }
+    },
+    "/api/admin/tweets/{id}": {
+      "delete": {
+        "tags": ["Admin"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "tweetId",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "succes"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successfully delete tweet."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Permission is denied."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
