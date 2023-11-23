@@ -4,7 +4,7 @@
   - 後端成員：[Boxun](https://github.com/boxunw), [Jenny](https://github.com/yanyanyaa)
   - 前端成員：[James](https://github.com/James-Lee-01), [雅云](https://github.com/Ya-Yun-Zheng)
   - [前端 repo](https://github.com/James-Lee-01/simple-twitter)
-  - [網站入口](https://james-lee-01.github.io/simple-twitter)
+  - [網站入口](https://simple-twitter-eight.vercel.app)
 
 # 功能
 - 使用者可以註冊/登入帳號
@@ -52,7 +52,7 @@ npm install
   "logging": false
 },
 ```
-7. 建立資料庫，可在 MyAQLWoerbencg 輸入以下指令
+7. 建立資料庫，可在 MySQL Workbench 輸入以下指令
 ```
 create database ac_twitter_workspace;
 create database ac_twitter_workspace_test;
