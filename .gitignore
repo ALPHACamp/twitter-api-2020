@@ -85,3 +85,12 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# image upload directories
+temp/
+upload/
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
