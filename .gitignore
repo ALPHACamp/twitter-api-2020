@@ -1,5 +1,6 @@
 .DS_Store
 *.DS_Store
+frontend-test.html
 
 # Logs
 logs
@@ -42,6 +43,7 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+temp/*
 
 # TypeScript v1 declaration files
 typings/
