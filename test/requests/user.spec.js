@@ -130,6 +130,7 @@ describe('# user requests', () => {
 
             expect(res.body).to.be.an('array');
             // 有回傳某使用者的推文資料
+            
             res.body[0].description.should.equal('User1 的 Tweet1');
 
             return done();
