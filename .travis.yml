@@ -7,7 +7,7 @@ services:
 
 # 設定參數(Travis CI 會按照參數分別執行)
 env:
-  - NODE_ENV=travis
+  - NODE_ENV=travis PORT=3000 JWT_SECRET=alphacamp IMGUR_CLIENT_ID=88d2af79871a6e5 IMGUR_SECRET=5367ad32eb517421db903c8f51c60f6aa17d010b HOST=localhost:3000
 
 # 在 install 前執行的指令
 before_install:
